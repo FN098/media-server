@@ -11,15 +11,6 @@ services:
     ports:
       - "3307:3306"
 
-  adminer:
-    image: adminer
-    container_name: media-server-adminer
-    restart: unless-stopped
-    ports:
-      - "8081:8080"
-    depends_on:
-      - db
-
   app:
     build:
       context: .
