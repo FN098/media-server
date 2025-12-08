@@ -1,22 +1,23 @@
 # 開発用イメージ（軽量）
 FROM node:20-alpine
 
-WORKDIR /app
+# コンテナ内の作業ディレクトリ
+WORKDIR /app/apps/v1
 
 # Git のインストール
 RUN apk add --no-cache git
 
-# pnpm をグローバルインストール（pnpm を使う想定）
+# pnpm をグローバルインストール
 RUN npm i -g pnpm
 
-# package*.json と lock を先にコピーして依存だけ先にインストール（キャッシュ活用）
-COPY apps/v1/package.json apps/v1/pnpm-lock.yaml ./apps/v1/
+# package*.json と lock を先にコピー
+COPY apps/v1/package.json apps/v1/pnpm-lock.yaml ./
 
 # 依存インストール
 RUN pnpm install --frozen-lockfile || pnpm install
 
 # ソース全体をコピー
-COPY . .
+COPY . /app
 
 # Prisma関連
 RUN pnpm prisma generate || true
