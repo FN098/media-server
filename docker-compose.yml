@@ -1,7 +1,7 @@
 services:
   db:
     image: mysql:8.0
-    container_name: mediaserver_db
+    container_name: media-server-db
     restart: unless-stopped
     env_file:
       - .env
@@ -13,7 +13,7 @@ services:
 
   adminer:
     image: adminer
-    container_name: mediaserver_adminer
+    container_name: media-server-adminer
     restart: unless-stopped
     ports:
       - "8081:8080"
@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/app/Dockerfile
-    container_name: mediaserver_app
+    container_name: media-server-app
     command: sleep infinity
     env_file:
       - .env
