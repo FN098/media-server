@@ -6,9 +6,40 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+}
+
+model User {
+  id        String   @id
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Media {
+  id        String     @id
+  path      String     @unique
+  title     String?
+  createdAt DateTime   @default(now())
+  mediaTags MediaTag[]
+}
+
+model Tag {
+  id        String     @id
+  name      String     @unique
+  mediaTags MediaTag[]
+}
+
+model MediaTag {
+  mediaId String
+  tagId   String
+
+  media Media @relation(fields: [mediaId], references: [id])
+  tag   Tag   @relation(fields: [tagId], references: [id])
+
+  @@id([mediaId, tagId])
 }
