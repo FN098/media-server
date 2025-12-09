@@ -7,14 +7,14 @@ import path from "path";
 
 export async function GET(req: NextRequest) {
   try {
-    const dirParam = req.nextUrl.searchParams.get("dir") ?? "";
-    const targetDir = path.join(MEDIA_ROOT, dirParam);
+    const p = req.nextUrl.searchParams.get("p") ?? "";
+    const targetDir = path.join(MEDIA_ROOT, p);
 
     const dirents = await fs.readdir(targetDir, { withFileTypes: true });
 
     const nodes: MediaFsNode[] = await Promise.all(
       dirents.map(async (item) => {
-        const relativePath = path.join(dirParam, item.name).replace(/\\/g, "/");
+        const relativePath = path.join(p, item.name).replace(/\\/g, "/");
 
         const absolutePath = path.join(targetDir, item.name);
 
@@ -32,11 +32,10 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    const parent =
-      dirParam === "" ? null : dirParam.split("/").slice(0, -1).join("/") || "";
+    const parent = p === "" ? null : p.split("/").slice(0, -1).join("/") || "";
 
     const listing: MediaFsListing = {
-      path: dirParam,
+      path: p,
       entries: nodes,
       parent,
     };

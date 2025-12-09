@@ -1,12 +1,7 @@
 "use client";
 
+import { Breadcrumbs } from "@/app/explorer/ui/breadcrumbs";
 import { MediaFsListing, MediaFsNode } from "@/app/lib/media/types";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/shadcn/components/ui/breadcrumb";
 import { Button } from "@/shadcn/components/ui/button";
 import { Card, CardContent } from "@/shadcn/components/ui/card";
 import { Input } from "@/shadcn/components/ui/input";
@@ -20,9 +15,8 @@ import {
   Music,
   Video,
 } from "lucide-react";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ViewMode = "list" | "grid";
 
@@ -38,10 +32,12 @@ function MediaThumb({ node }: { node: MediaFsNode }) {
   if (node.type === "image") {
     return (
       <div className="relative h-full w-full">
-        <Image
-          src={`/media/${node.path}`}
+        {/* TODO: Image だと画像表示されない */}
+        <img
+          src={`/api/media/${node.path}`}
           alt={node.name}
-          fill
+          width="500"
+          height="500"
           className="object-cover"
           loading="lazy"
         />
@@ -52,8 +48,8 @@ function MediaThumb({ node }: { node: MediaFsNode }) {
   if (node.type === "video") {
     return (
       <video
-        src={`/media/${node.path}`}
-        poster={`/media/.thumbs/${node.path}.jpg`}
+        src={`/api/media/${node.path}`}
+        poster={`/api/media/.thumbs/${node.path}.jpg`}
         className="h-full w-full object-cover"
         muted
         preload="metadata"
@@ -69,16 +65,17 @@ function MediaThumb({ node }: { node: MediaFsNode }) {
 }
 
 function FileIcon(e: MediaFsNode) {
-  if (e.isDirectory) return <Folder className="h-6 w-6 text-blue-600" />;
   switch (e.type) {
+    case "directory":
+      return <Folder className="shrink-0 h-6 w-6 text-blue-600" />;
     case "image":
-      return <ImageIcon className="h-6 w-6 text-purple-600" />;
+      return <ImageIcon className="shrink-0 h-6 w-6 text-purple-600" />;
     case "video":
-      return <Video className="h-6 w-6 text-green-600" />;
+      return <Video className="shrink-0 h-6 w-6 text-green-600" />;
     case "audio":
-      return <Music className="h-6 w-6 text-orange-600" />;
+      return <Music className="shrink-0 h-6 w-6 text-orange-600" />;
     default:
-      return <File className="h-6 w-6 text-gray-600" />;
+      return <File className="shrink-0 h-6 w-6 text-gray-600" />;
   }
 }
 
@@ -91,7 +88,7 @@ function FileRow({
 }) {
   return (
     <div
-      onDoubleClick={() => node.isDirectory && onOpen(node.path)}
+      onClick={() => node.isDirectory && onOpen(node.path)}
       className="grid cursor-pointer grid-cols-4 items-center px-4 py-2 text-sm hover:bg-blue-100"
     >
       <div className="flex items-center gap-2">
@@ -114,7 +111,7 @@ function GridItem({
 }) {
   return (
     <div
-      onDoubleClick={() => node.isDirectory && onOpen(node.path)}
+      onClick={() => node.isDirectory && onOpen(node.path)}
       className="cursor-pointer"
     >
       <div className="aspect-square overflow-hidden rounded-lg border bg-muted">
@@ -122,42 +119,6 @@ function GridItem({
       </div>
       <div className="mt-1 truncate text-center text-xs">{node.name}</div>
     </div>
-  );
-}
-
-function Breadcrumbs({
-  path,
-  onClick,
-}: {
-  path: string;
-  onClick: (path: string) => void;
-}) {
-  const crumbs = path.split("/").filter(Boolean);
-
-  return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <button onClick={() => onClick("")} className="text-blue-600">
-            HOME
-          </button>
-        </BreadcrumbItem>
-
-        {crumbs.map((c, i) => {
-          const p = "/" + crumbs.slice(0, i + 1).join("/");
-          return (
-            <Fragment key={p}>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <button onClick={() => onClick(p)} className="text-blue-600">
-                  {c}
-                </button>
-              </BreadcrumbItem>
-            </Fragment>
-          );
-        })}
-      </BreadcrumbList>
-    </Breadcrumb>
   );
 }
 
@@ -219,31 +180,73 @@ function GoBackButton({
   );
 }
 
+function GridView({
+  data,
+  onOpen,
+}: {
+  data: MediaFsNode[];
+  onOpen: (target: string) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
+      {data.map((node) => (
+        <GridItem key={node.path} node={node} onOpen={onOpen} />
+      ))}
+    </div>
+  );
+}
+
+function ListView({
+  data,
+  onOpen,
+}: {
+  data: MediaFsNode[];
+  onOpen: (target: string) => void;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-0">
+        <div className="grid grid-cols-4 bg-muted px-4 py-2 text-sm font-semibold">
+          <div>Name</div>
+          <div>Type</div>
+          <div>Updated</div>
+          <div>Size</div>
+        </div>
+
+        {data.map((node) => (
+          <FileRow key={node.path} node={node} onOpen={onOpen} />
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Explorer() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const path = searchParams.get("dir") ?? "";
+  const path = searchParams.get("p") ?? "";
 
   const [data, setData] = useState<MediaFsListing | null>(null);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<ViewMode>("list");
 
-  /* ===== URL遷移専用 ===== */
+  // パスを変更
   function load(target: string) {
-    const q = target ? `?dir=${encodeURIComponent(target)}` : "";
-    router.push(`/explorer${q}`);
+    const params = new URLSearchParams();
+    if (target) {
+      params.set("p", target);
+    }
+    router.push(`/explorer?${params.toString()}`);
   }
 
-  /* ===== URL変更に追従してAPI取得 ===== */
+  // パスが変更されたら API コール
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `/api/explorer?dir=${encodeURIComponent(path)}`
-        );
+        const res = await fetch(`/api/explorer?p=${encodeURIComponent(path)}`);
         const json: MediaFsListing = await res.json();
         setData(json);
       } finally {
@@ -270,11 +273,8 @@ export default function Explorer() {
           disabled={data?.parent == null}
           onClick={() => load(data?.parent ?? "")}
         />
-
         <Breadcrumbs path={path} onClick={load} />
-
         <div className="flex-1" />
-
         <Search value={search} setValue={setSearch} />
         <ViewModeSwitch value={view} setValue={setView} />
       </div>
@@ -287,28 +287,11 @@ export default function Explorer() {
       )}
 
       {!loading && view === "list" && (
-        <Card>
-          <CardContent className="p-0">
-            <div className="grid grid-cols-4 bg-muted px-4 py-2 text-sm font-semibold">
-              <div>Name</div>
-              <div>Type</div>
-              <div>Updated</div>
-              <div>Size</div>
-            </div>
-
-            {filtered.map((e) => (
-              <FileRow key={e.path} node={e} onOpen={load} />
-            ))}
-          </CardContent>
-        </Card>
+        <ListView data={filtered} onOpen={load} />
       )}
 
       {!loading && view === "grid" && (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
-          {filtered.map((e) => (
-            <GridItem key={e.path} node={e} onOpen={load} />
-          ))}
-        </div>
+        <GridView data={filtered} onOpen={load} />
       )}
     </div>
   );
