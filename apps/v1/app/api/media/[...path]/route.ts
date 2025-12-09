@@ -1,3 +1,4 @@
+import { MEDIA_ROOT } from "@/app/lib/media-root";
 import { getMimetype } from "@/app/lib/mimetype";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
@@ -11,7 +12,7 @@ export async function GET(
     const { path: p } = await context.params;
 
     const rel = p.join("/");
-    const filePath = path.join(process.env.MEDIA_ROOT!, rel);
+    const filePath = path.join(MEDIA_ROOT, rel);
 
     const data = await fs.readFile(filePath);
 
