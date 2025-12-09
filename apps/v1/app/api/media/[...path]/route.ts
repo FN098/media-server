@@ -1,5 +1,5 @@
-import { MEDIA_ROOT } from "@/app/lib/media-root";
-import { getMimetype } from "@/app/lib/mimetype";
+import { getMimetype } from "@/app/lib/media/mimetype";
+import { MEDIA_ROOT } from "@/app/lib/media/root";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";

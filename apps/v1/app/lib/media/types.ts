@@ -10,6 +10,8 @@ export type MediaFsNode = {
   path: string; // ルートからの相対パス
   type: MediaFsNodeType;
   isDirectory: boolean;
+  size?: number;
+  updatedAt: string;
 };
 
 export type MediaFsListing = {
