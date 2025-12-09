@@ -21,17 +21,10 @@ import {
   Video,
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Fragment, useEffect, useMemo, useState } from "react";
 
-/* =====================
-   Types
-===================== */
-
 type ViewMode = "list" | "grid";
-
-/* =====================
-   MediaThumb
-===================== */
 
 function MediaThumb({ node }: { node: MediaFsNode }) {
   if (node.isDirectory) {
@@ -75,10 +68,6 @@ function MediaThumb({ node }: { node: MediaFsNode }) {
   );
 }
 
-/* =====================
-   Helpers
-===================== */
-
 function FileIcon(e: MediaFsNode) {
   if (e.isDirectory) return <Folder className="h-6 w-6 text-blue-600" />;
   switch (e.type) {
@@ -92,10 +81,6 @@ function FileIcon(e: MediaFsNode) {
       return <File className="h-6 w-6 text-gray-600" />;
   }
 }
-
-/* =====================
-   List Row
-===================== */
 
 function FileRow({
   node,
@@ -120,10 +105,6 @@ function FileRow({
   );
 }
 
-/* =====================
-   Grid Item
-===================== */
-
 function GridItem({
   node,
   onOpen,
@@ -143,10 +124,6 @@ function GridItem({
     </div>
   );
 }
-
-/* =====================
-   Breadcrumbs
-===================== */
 
 function Breadcrumbs({
   path,
@@ -184,10 +161,6 @@ function Breadcrumbs({
   );
 }
 
-/* =====================
-   Search
-===================== */
-
 function Search({
   value,
   setValue,
@@ -204,10 +177,6 @@ function Search({
     />
   );
 }
-
-/* =====================
-   ViewModeSwitch
-===================== */
 
 function ViewModeSwitch({
   value,
@@ -236,10 +205,6 @@ function ViewModeSwitch({
   );
 }
 
-/* =====================
-   GoBackButton
-===================== */
-
 function GoBackButton({
   onClick,
   disabled,
@@ -254,33 +219,42 @@ function GoBackButton({
   );
 }
 
-/* =====================
-   Explorer
-===================== */
-
 export default function Explorer() {
-  const [path, setPath] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const path = searchParams.get("dir") ?? "";
+
   const [data, setData] = useState<MediaFsListing | null>(null);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<ViewMode>("list");
 
-  async function load(target: string) {
-    setLoading(true);
-    const res = await fetch(`/api/explorer?dir=${encodeURIComponent(target)}`);
-    const json: MediaFsListing = await res.json();
-    setData(json);
-    setPath(json.path);
-    setLoading(false);
+  /* ===== URL遷移専用 ===== */
+  function load(target: string) {
+    const q = target ? `?dir=${encodeURIComponent(target)}` : "";
+    router.push(`/explorer${q}`);
   }
 
+  /* ===== URL変更に追従してAPI取得 ===== */
   useEffect(() => {
-    const init = async () => {
-      await load("");
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `/api/explorer?dir=${encodeURIComponent(path)}`
+        );
+        const json: MediaFsListing = await res.json();
+        setData(json);
+      } finally {
+        setLoading(false);
+      }
     };
-    init();
-  }, []);
 
+    fetchData();
+  }, [path]);
+
+  // 検索ロジック
   const filtered = useMemo(() => {
     if (!data) return [];
     return data.entries.filter((e) =>
