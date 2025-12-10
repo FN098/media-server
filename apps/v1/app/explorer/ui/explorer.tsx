@@ -10,7 +10,11 @@ import { MediaFsListing } from "@/app/lib/media/types";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { useMemo, useState } from "react";
 
-export default function Explorer({ data }: { data: MediaFsListing }) {
+type ExplorerProps = {
+  data: MediaFsListing;
+};
+
+export default function Explorer({ data }: ExplorerProps) {
   const [search, setSearch] = useState("");
   const { view, setView } = useViewMode();
 
