@@ -29,8 +29,8 @@ export const GridView = memo(function GridView1({
     const node = data[index];
 
     return (
-      <div style={{ ...style, padding: 4 }}>
-        <MediaLink node={node} />
+      <div style={style} className="overflow-hidden p-1">
+        <ThumbItem node={node} />
         <div className="mt-1 truncate text-center text-xs">{node.name}</div>
       </div>
     );
@@ -48,26 +48,36 @@ export const GridView = memo(function GridView1({
   );
 });
 
-function MediaLink({ node }: { node: MediaFsNode }) {
+function ThumbItem({
+  node,
+  width,
+  height,
+}: {
+  node: MediaFsNode;
+  width?: number;
+  height?: number;
+}) {
+  // DirectoryItem
   if (node.isDirectory) {
+    const href = "/explorer/" + node.path;
     return (
-      <Link
-        href={node.isDirectory ? "/explorer/" + node.path : "#"}
-        className="cursor-pointer"
-      >
+      <Link href={href} className="cursor-pointer">
         <div className="aspect-square overflow-hidden rounded-lg border bg-muted">
-          <MediaThumb node={node} />
+          <MediaThumb node={node} width={width} height={height} />
         </div>
       </Link>
     );
   }
 
+  // MediaItem
   return (
     <MediaThumb
       node={node}
       onOpen={() => {
         // TODO: ファイルの場合はビューア起動して画像、動画、音声を再生＋左右キーで次・前のファイルに移動
       }}
+      width={width}
+      height={height}
     />
   );
 }
