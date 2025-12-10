@@ -53,8 +53,12 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   // スワイプ操作
   // -------------------------
   const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
   const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
   const isPinching = useRef(false);
+
+  const SWIPE_THRESHOLD = 50; // スワイプ判定の最小距離
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length > 1) {
@@ -63,22 +67,31 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
     } else {
       isPinching.current = false;
       touchStartX.current = e.touches[0].screenX;
+      touchStartY.current = e.touches[0].screenY;
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (isPinching.current) return; // ピンチ中は無視
     touchEndX.current = e.touches[0].screenX;
+    touchEndY.current = e.touches[0].screenY;
   };
 
   const handleTouchEnd = () => {
     if (isPinching.current) return; // ピンチ中は無視
-    const delta = touchEndX.current - touchStartX.current;
-    const SWIPE_THRESHOLD = 50; // スワイプ判定の最小距離
-    if (delta > SWIPE_THRESHOLD && hasPrev) {
-      onPrev();
-    } else if (delta < -SWIPE_THRESHOLD && hasNext) {
-      onNext();
+
+    const deltaX = touchEndX.current - touchStartX.current;
+    const deltaY = touchEndY.current - touchStartY.current;
+
+    // 横スワイプ（左右）で前後移動
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > SWIPE_THRESHOLD && hasPrev) onPrev();
+      else if (deltaX < -SWIPE_THRESHOLD && hasNext) onNext();
+    }
+    // 縦スワイプ（上下）で閉じる
+    else {
+      if (deltaY < -SWIPE_THRESHOLD) onClose();
+      else if (deltaY > -SWIPE_THRESHOLD) onClose();
     }
   };
 
