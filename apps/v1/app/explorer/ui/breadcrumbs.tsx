@@ -1,104 +1,26 @@
 "use client";
 
-import {
-  Breadcrumb,
-  BreadcrumbEllipsis,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/shadcn/components/ui/breadcrumb";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shadcn/components/ui/dropdown-menu";
-import { cn } from "@/shadcn/lib/utils";
-import { HomeIcon } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import { BreadcrumbLinkItem, Breadcrumbs } from "@/app/ui/breadcrumbs";
+import { usePathname } from "next/navigation";
 
-export type BreadcrumbLinkItem = {
-  key: string;
-  label: string;
-  href: string;
-};
+export function ExplorerBreadcrumbs() {
+  const pathname = usePathname();
 
-export function Breadcrumbs({
-  items,
-  options,
-}: {
-  items: BreadcrumbLinkItem[];
-  options?: {
-    threshold?: number;
-  };
-}) {
-  if (!items || items.length === 0) return null;
+  // pathParts から Breadcrumb[] を作る
+  const pathParts = pathname
+    .replace(/^\/explorer\/?/, "")
+    .split("/")
+    .filter(Boolean)
+    .map(decodeURIComponent);
 
-  const useEllipsis = items.length >= (options?.threshold ?? 5);
+  const breadcrumbs: BreadcrumbLinkItem[] = [
+    { key: "home", label: "HOME", href: "/explorer" },
+    ...pathParts.map((part, i) => ({
+      key: part,
+      label: part,
+      href: "/explorer/" + pathParts.slice(0, i + 1).join("/"),
+    })),
+  ];
 
-  const first = items[0];
-  const last = items[items.length - 1];
-  const middle = items.slice(1, items.length - 1);
-
-  return (
-    <Breadcrumb>
-      <BreadcrumbList className={cn("flex text-sm")}>
-        {/* First item */}
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link href={first.href}>
-              {first.key === "home" ? (
-                <HomeIcon className="size-5" />
-              ) : (
-                first.label
-              )}
-            </Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-
-        <BreadcrumbSeparator />
-
-        {/* Middle items */}
-        {useEllipsis ? (
-          <>
-            <BreadcrumbItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1">
-                  <BreadcrumbEllipsis className="size-4" />
-                  <span className="sr-only">Toggle breadcrumb menu</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  {middle.map((item) => (
-                    <DropdownMenuItem key={item.key} asChild>
-                      <Link href={item.href}>{item.label}</Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </>
-        ) : (
-          middle.map((item) => (
-            <React.Fragment key={item.key}>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href={item.href}>{item.label}</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-            </React.Fragment>
-          ))
-        )}
-
-        {/* Last item */}
-        <BreadcrumbItem>
-          <BreadcrumbPage>{last.label}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
-  );
+  return <Breadcrumbs items={breadcrumbs} options={{ threshold: 5 }} />;
 }
