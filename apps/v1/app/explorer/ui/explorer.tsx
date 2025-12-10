@@ -22,7 +22,8 @@ export default function Explorer({ data }: ExplorerProps) {
 
   // GridView config
   const containerRef = useRef<HTMLDivElement>(null);
-  const { columnCount, columnWidth, rowHeight } = useGridConfig(containerRef);
+  const { columnCount, columnWidth, rowHeight, isReady } =
+    useGridConfig(containerRef);
 
   // MediaViewer config
   const {
@@ -56,7 +57,10 @@ export default function Explorer({ data }: ExplorerProps) {
         <ViewModeSwitch value={view} setValue={setView} />
       </div>
 
-      <div className={view === "grid" ? "block" : "hidden"} ref={containerRef}>
+      <div
+        className={view === "grid" && isReady ? "block" : "hidden"}
+        ref={containerRef}
+      >
         <GridView
           data={filtered}
           columnCount={columnCount}

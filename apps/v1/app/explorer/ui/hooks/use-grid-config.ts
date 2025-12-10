@@ -5,6 +5,7 @@ export function useGridConfig(ref: React.RefObject<HTMLElement | null>) {
     columnCount: 6,
     columnWidth: 200,
     rowHeight: 220,
+    isReady: false,
   });
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export function useGridConfig(ref: React.RefObject<HTMLElement | null>) {
       const columnWidth = Math.floor(width / columnCount);
       const rowHeight = Math.floor(columnWidth * 1.1);
 
-      setConfig({ columnCount, columnWidth, rowHeight });
+      setConfig({ columnCount, columnWidth, rowHeight, isReady: true });
     });
 
     observer.observe(ref.current);
