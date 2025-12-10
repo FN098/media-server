@@ -1,6 +1,7 @@
 "use client";
 
 import { MediaFsNode } from "@/app/lib/media/types";
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect } from "react";
 
@@ -57,8 +58,8 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         src={filePath}
         alt={mediaNode.name}
         className="max-w-full max-h-full object-contain"
-        width={1000}
-        height={1000}
+        fill
+        style={{ objectFit: "contain" }}
       />
     );
   } else if (mediaNode.type === "video") {
@@ -96,11 +97,11 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         disabled={!hasPrev}
         className="absolute left-4 text-white text-5xl disabled:opacity-30 z-50"
       >
-        &lt;
+        <ChevronLeftIcon />
       </button>
 
       {/* メディアコンテンツ */}
-      <div className="flex-grow flex items-center justify-center h-full w-full p-10">
+      <div className="grow flex items-center justify-center h-full w-full p-0">
         {mediaElement}
       </div>
 
@@ -110,7 +111,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         disabled={!hasNext}
         className="absolute right-4 text-white text-5xl disabled:opacity-30 z-50"
       >
-        &gt;
+        <ChevronRightIcon />
       </button>
 
       {/* 閉じるボタン */}
@@ -118,7 +119,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         onClick={onClose}
         className="absolute top-4 right-4 text-white text-3xl"
       >
-        ✕
+        <XIcon />
       </button>
     </div>
   );
