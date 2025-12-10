@@ -1,5 +1,6 @@
 import { MediaFsNode } from "@/app/lib/media/types";
 import { FileIcon, FolderIcon } from "lucide-react";
+import Image from "next/image";
 
 export function MediaThumb({ node }: { node: MediaFsNode }) {
   if (node.isDirectory) {
@@ -13,8 +14,7 @@ export function MediaThumb({ node }: { node: MediaFsNode }) {
   if (node.type === "image") {
     return (
       <div className="relative h-full w-full">
-        {/* TODO: Image だと画像表示されない */}
-        <img
+        <Image
           src={`/api/media/${node.path}`}
           alt={node.name}
           width="500"
