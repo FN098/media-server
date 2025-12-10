@@ -19,7 +19,9 @@ export default function Explorer({ data }: { data: MediaFsListing }) {
   const pathParts = pathname
     .replace(/^\/explorer\/?/, "")
     .split("/")
-    .filter(Boolean);
+    .filter(Boolean)
+    .map(decodeURIComponent);
+
   const breadcrumbs: BreadcrumbLinkItem[] = [
     { key: "home", label: "HOME", href: "/explorer" },
     ...pathParts.map((part, i) => ({

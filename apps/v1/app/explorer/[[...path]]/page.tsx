@@ -6,7 +6,11 @@ export default async function Page(props: {
   params: Promise<{ path: string[] }>;
 }) {
   const { path: pathParts } = await props.params;
-  const p = pathParts?.join("/") ?? "";
+
+  // 配列の各要素をデコード
+  const decodedParts = pathParts?.map((part) => decodeURIComponent(part)) ?? [];
+  const p = decodedParts.join("/");
+
   const data = await getMediaFsListing(p);
 
   if (!data) notFound();
