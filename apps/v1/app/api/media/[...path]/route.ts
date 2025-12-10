@@ -16,6 +16,10 @@ export async function GET(
 
     const data = await fs.readFile(filePath);
 
+    if (!data) {
+      return new NextResponse("Media Not Found", { status: 404 });
+    }
+
     return new NextResponse(data, {
       headers: {
         "Content-Type": getMimetype(filePath),

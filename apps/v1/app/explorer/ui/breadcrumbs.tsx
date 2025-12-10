@@ -1,137 +1,104 @@
+"use client";
+
 import {
   Breadcrumb,
+  BreadcrumbEllipsis,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/shadcn/components/ui/breadcrumb";
-
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/shadcn/components/ui/tooltip";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shadcn/components/ui/dropdown-menu";
+import { cn } from "@/shadcn/lib/utils";
+import { HomeIcon } from "lucide-react";
+import Link from "next/link";
+import React from "react";
 
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-
-const MAX_VISIBLE = 3;
-
-function TruncateButton({
-  label,
-  fullPath,
-  onClick,
-}: {
+export type BreadcrumbLinkItem = {
+  key: string;
   label: string;
-  fullPath: string;
-  onClick: () => void;
-}) {
-  const ref = useRef<HTMLButtonElement>(null);
-  const [truncated, setTruncated] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    setTruncated(el.scrollWidth > el.clientWidth);
-  }, [label]);
-
-  const btn = (
-    <button
-      ref={ref}
-      onClick={onClick}
-      className="block w-full truncate text-blue-600 hover:underline"
-    >
-      {label}
-    </button>
-  );
-
-  if (!truncated) return btn;
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{btn}</TooltipTrigger>
-      <TooltipContent side="bottom" className="max-w-[400px] break-all">
-        {fullPath}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
+  href: string;
+};
 
 export function Breadcrumbs({
-  path,
-  onClick,
+  items,
+  options,
 }: {
-  path: string;
-  onClick: (path: string) => void;
+  items: BreadcrumbLinkItem[];
+  options?: {
+    threshold?: number;
+  };
 }) {
-  const crumbs = useMemo(() => path.split("/").filter(Boolean), [path]);
+  if (!items || items.length === 0) return null;
 
-  const visibleCrumbs =
-    crumbs.length > MAX_VISIBLE ? crumbs.slice(-MAX_VISIBLE) : crumbs;
+  const useEllipsis = items.length >= (options?.threshold ?? 5);
 
-  const hiddenCrumbs =
-    crumbs.length > MAX_VISIBLE
-      ? crumbs.slice(0, crumbs.length - MAX_VISIBLE)
-      : [];
+  const first = items[0];
+  const last = items[items.length - 1];
+  const middle = items.slice(1, items.length - 1);
 
   return (
-    <TooltipProvider>
-      <Breadcrumb>
-        <BreadcrumbList className="max-w-[60vw] flex-nowrap overflow-hidden">
-          {/* ===== HOME ===== */}
-          <BreadcrumbItem className="shrink-0">
-            <button
-              onClick={() => onClick("")}
-              className="text-blue-600 hover:underline"
-            >
-              HOME
-            </button>
-          </BreadcrumbItem>
+    <Breadcrumb>
+      <BreadcrumbList className={cn("flex text-sm")}>
+        {/* First item */}
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link href={first.href}>
+              {first.key === "home" ? (
+                <HomeIcon className="size-5" />
+              ) : (
+                first.label
+              )}
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
 
-          {/* ===== 省略 (...)：ここは常に Tooltip ===== */}
-          {hiddenCrumbs.length > 0 && (
-            <Fragment>
-              <BreadcrumbSeparator className="shrink-0" />
-              <BreadcrumbItem className="shrink-0">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-default px-1 text-muted-foreground">
-                      …
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="bottom"
-                    className="max-w-[400px] break-all"
-                  >
-                    {hiddenCrumbs.join("/")}
-                  </TooltipContent>
-                </Tooltip>
+        <BreadcrumbSeparator />
+
+        {/* Middle items */}
+        {useEllipsis ? (
+          <>
+            <BreadcrumbItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1">
+                  <BreadcrumbEllipsis className="size-4" />
+                  <span className="sr-only">Toggle breadcrumb menu</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {middle.map((item) => (
+                    <DropdownMenuItem key={item.key} asChild>
+                      <Link href={item.href}>{item.label}</Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        ) : (
+          middle.map((item) => (
+            <React.Fragment key={item.key}>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={item.href}>{item.label}</Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
-            </Fragment>
-          )}
+              <BreadcrumbSeparator />
+            </React.Fragment>
+          ))
+        )}
 
-          {/* ===== 表示中の末尾階層（truncate時のみTooltip） ===== */}
-          {visibleCrumbs.map((c, i) => {
-            const fullIndex = crumbs.length - visibleCrumbs.length + i;
-
-            const p = "/" + crumbs.slice(0, fullIndex + 1).join("/");
-
-            return (
-              <Fragment key={p}>
-                <BreadcrumbSeparator className="shrink-0" />
-
-                <BreadcrumbItem className="min-w-0 max-w-[160px]">
-                  <TruncateButton
-                    label={c}
-                    fullPath={p}
-                    onClick={() => onClick(p)}
-                  />
-                </BreadcrumbItem>
-              </Fragment>
-            );
-          })}
-        </BreadcrumbList>
-      </Breadcrumb>
-    </TooltipProvider>
+        {/* Last item */}
+        <BreadcrumbItem>
+          <BreadcrumbPage>{last.label}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
   );
 }

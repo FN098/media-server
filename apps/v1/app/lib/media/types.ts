@@ -16,6 +16,6 @@ export type MediaFsNode = {
 
 export type MediaFsListing = {
   path: string; // 今見ているディレクトリ
-  entries: MediaFsNode[];
+  nodes: MediaFsNode[];
   parent: string | null;
 };
