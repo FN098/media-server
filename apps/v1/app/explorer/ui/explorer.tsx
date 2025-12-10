@@ -50,8 +50,9 @@ export default function Explorer({ data }: ExplorerProps) {
 
   return (
     <div className="space-y-4 p-4">
+      <ExplorerBreadcrumbs />
+
       <div className="flex items-center gap-2">
-        <ExplorerBreadcrumbs />
         <div className="flex-1" />
         <Search value={search} setValue={setSearch} />
         <ViewModeSwitch value={view} setValue={setView} />
