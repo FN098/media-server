@@ -115,8 +115,8 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         src={filePath}
         alt={mediaNode.name}
         className="max-w-full max-h-full object-contain"
-        width={10000}
-        height={10000}
+        width={1920}
+        height={1920}
       />
     );
   } else if (mediaNode.type === "video") {
