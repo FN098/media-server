@@ -13,6 +13,7 @@ interface MediaViewerProps {
   onPrev: () => void;
   hasNext: boolean;
   hasPrev: boolean;
+  swipeEnabled: boolean;
 }
 
 export const MediaViewer: React.FC<MediaViewerProps> = ({
@@ -23,6 +24,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   onPrev,
   hasNext,
   hasPrev,
+  swipeEnabled,
 }) => {
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
@@ -58,6 +60,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   // スワイプ操作
   // -------------------------
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (!swipeEnabled) return; // スワイプ無効なら無視
     if (e.touches.length > 1) {
       // 複数指 → ピンチ開始
       isPinching.current = true;
@@ -69,12 +72,14 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (!swipeEnabled) return; // スワイプ無効なら無視
     if (isPinching.current) return; // ピンチ中は無視
     touchEndX.current = e.touches[0].screenX;
     touchEndY.current = e.touches[0].screenY;
   };
 
   const handleTouchEnd = () => {
+    if (!swipeEnabled) return; // スワイプ無効なら無視
     if (isPinching.current) return; // ピンチ中は無視
 
     const deltaX = touchEndX.current - touchStartX.current;
@@ -102,8 +107,8 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         src={filePath}
         alt={mediaNode.name}
         className="max-w-full max-h-full object-contain"
-        fill
-        style={{ objectFit: "contain" }}
+        width={10000}
+        height={10000}
       />
     );
   } else if (mediaNode.type === "video") {
