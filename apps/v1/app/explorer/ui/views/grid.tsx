@@ -30,7 +30,9 @@ export const GridView = memo(function GridView1({
 
     return (
       <div style={style} className="overflow-hidden p-1">
-        <ThumbItem node={node} />
+        <div className="aspect-square w-full overflow-hidden rounded-lg border bg-muted">
+          <ThumbItem node={node} width={columnWidth} height={rowHeight - 20} />
+        </div>
         <div className="mt-1 truncate text-center text-xs">{node.name}</div>
       </div>
     );
