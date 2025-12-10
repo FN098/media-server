@@ -5,7 +5,6 @@
       "name": "Next.js: debug server-side",
       "type": "node-terminal",
       "request": "launch",
-      "cwd": "${workspaceFolder}/apps/v1",
       "command": "pnpm dev"
     },
     {
@@ -18,7 +17,6 @@
       "name": "Next.js: debug full stack",
       "type": "node-terminal",
       "request": "launch",
-      "cwd": "${workspaceFolder}/apps/v1",
       "command": "pnpm dev",
       "serverReadyAction": {
         "pattern": "Local:\\s+(https?://\\S+)",
