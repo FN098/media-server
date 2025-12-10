@@ -24,7 +24,12 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   hasNext,
   hasPrev,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+  const isPinching = useRef(false);
+  const SWIPE_THRESHOLD = 50; // スワイプ判定の最小距離
 
   // ----------------------------------------------------
   // キーボード操作
@@ -52,14 +57,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   // -------------------------
   // スワイプ操作
   // -------------------------
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
-  const touchEndY = useRef(0);
-  const isPinching = useRef(false);
-
-  const SWIPE_THRESHOLD = 50; // スワイプ判定の最小距離
-
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length > 1) {
       // 複数指 → ピンチ開始
@@ -152,7 +149,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   return (
     // ビューアの背景 (モーダル)
     <div
-      ref={containerRef}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
