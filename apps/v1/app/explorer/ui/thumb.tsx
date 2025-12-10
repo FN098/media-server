@@ -1,6 +1,7 @@
 import { MediaFsNode } from "@/app/lib/media/types";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { FileIcon, FolderIcon } from "lucide-react";
+import { FileIcon } from "lucide-react";
 import Image from "next/image";
 import { memo } from "react";
 
@@ -23,6 +24,8 @@ export const MediaThumb = memo(function MediaThumb1({
     onOpen?.(node);
   };
 
+  const isMobile = useIsMobile();
+
   if (node.isDirectory) {
     return (
       <div
@@ -32,7 +35,9 @@ export const MediaThumb = memo(function MediaThumb1({
         )}
         onClick={handleClick}
       >
-        <FolderIcon className="h-12 w-12 text-blue-600" />
+        <FileIcon
+          className={cn("h-12 w-12 text-blue-600", isMobile && "h-6 w-6")}
+        />
       </div>
     );
   }
@@ -67,8 +72,15 @@ export const MediaThumb = memo(function MediaThumb1({
   }
 
   return (
-    <div className="flex h-full w-full items-center justify-center bg-muted">
-      <FileIcon className={cn("h-10 w-10 text-gray-600", className)} />
+    <div
+      className={cn(
+        "flex h-full w-full items-center justify-center bg-muted",
+        className
+      )}
+    >
+      <FileIcon
+        className={cn("h-12 w-12 text-gray-600", isMobile && "h-6 w-6")}
+      />
     </div>
   );
 });
