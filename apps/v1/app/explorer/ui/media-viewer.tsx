@@ -5,10 +5,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MaximizeIcon,
+  MinimizeIcon,
   XIcon,
 } from "lucide-react";
 import Image from "next/image";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface MediaViewerProps {
   filePath: string;
@@ -32,12 +33,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   swipeEnabled,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
-  const touchEndY = useRef(0);
-  const isPinching = useRef(false);
-  const SWIPE_THRESHOLD = 50; // スワイプ判定の最小距離
 
   // ----------------------------------------------------
   // キーボード操作
@@ -65,6 +60,13 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   // -------------------------
   // スワイプ操作
   // -------------------------
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+  const isPinching = useRef(false);
+  const SWIPE_THRESHOLD = 50; // スワイプ判定の最小距離
+
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!swipeEnabled) return; // スワイプ無効なら無視
     if (e.touches.length > 1) {
@@ -144,24 +146,35 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   // スクロール無効化
   // ----------------------------------------------------
   useEffect(() => {
-    // モーダル表示中は body のスクロール禁止
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = "hidden";
+    const container = containerRef.current;
+    if (!container) return;
+
+    const preventScroll = (e: Event) => e.preventDefault();
+
+    // モーダル内はスクロール禁止
+    container.addEventListener("wheel", preventScroll, { passive: false });
+    container.addEventListener("touchmove", preventScroll, { passive: false });
 
     return () => {
-      // モーダル閉じたら元に戻す
-      document.body.style.overflow = originalStyle;
+      container.removeEventListener("wheel", preventScroll);
+      container.removeEventListener("touchmove", preventScroll);
     };
   }, []);
 
   // ----------------------------------------------------
   // フルスクリーン
   // ----------------------------------------------------
-  const enterFullscreen = () => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const toggleFullscreen = () => {
     const el = containerRef.current;
     if (!el) return;
-    if (el.requestFullscreen) {
-      el.requestFullscreen();
+
+    if (!document.fullscreenElement) {
+      // 全画面にする
+      el.requestFullscreen?.().then(() => setIsFullscreen(true));
+    } else {
+      // 全画面解除
+      document.exitFullscreen?.().then(() => setIsFullscreen(false));
     }
   };
 
@@ -213,11 +226,11 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
 
       {/* 全画面ボタン */}
       <button
-        onClick={enterFullscreen}
+        onClick={toggleFullscreen}
         className="absolute top-4 right-16 text-white text-3xl"
         tabIndex={-1}
       >
-        <MaximizeIcon />
+        {isFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
       </button>
     </div>
   );
