@@ -3,7 +3,7 @@
 import { MediaFsNode } from "@/app/lib/media/types";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "lucide-react";
 import Image from "next/image";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 interface MediaViewerProps {
   filePath: string;
@@ -24,8 +24,10 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   hasNext,
   hasPrev,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   // ----------------------------------------------------
-  // キーボード操作のフック
+  // キーボード操作
   // ----------------------------------------------------
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -47,11 +49,43 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
     };
   }, [handleKeyDown]);
 
+  // -------------------------
+  // スワイプ操作
+  // -------------------------
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const isPinching = useRef(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length > 1) {
+      // 複数指 → ピンチ開始
+      isPinching.current = true;
+    } else {
+      isPinching.current = false;
+      touchStartX.current = e.touches[0].screenX;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isPinching.current) return; // ピンチ中は無視
+    touchEndX.current = e.touches[0].screenX;
+  };
+
+  const handleTouchEnd = () => {
+    if (isPinching.current) return; // ピンチ中は無視
+    const delta = touchEndX.current - touchStartX.current;
+    const SWIPE_THRESHOLD = 50; // スワイプ判定の最小距離
+    if (delta > SWIPE_THRESHOLD && hasPrev) {
+      onPrev();
+    } else if (delta < -SWIPE_THRESHOLD && hasNext) {
+      onNext();
+    }
+  };
+
   // ----------------------------------------------------
-  // メディアの表示
+  // メディア要素
   // ----------------------------------------------------
   let mediaElement;
-
   if (mediaNode.type === "image") {
     mediaElement = (
       <Image
@@ -86,11 +120,31 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   }
 
   // ----------------------------------------------------
-  // UIのレンダリング
+  // スクロール制御
+  // ----------------------------------------------------
+  useEffect(() => {
+    // モーダル表示中は body のスクロール禁止
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      // モーダル閉じたら元に戻す
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
+  // ----------------------------------------------------
+  // レンダリング
   // ----------------------------------------------------
   return (
     // ビューアの背景 (モーダル)
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90">
+    <div
+      ref={containerRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
+    >
       {/* 前へボタン */}
       <button
         onClick={onPrev}
