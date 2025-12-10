@@ -20,11 +20,11 @@ export const MediaThumb = memo(function MediaThumb1({
   height = 200,
   className,
 }: MediaThumbProps) {
+  const isMobile = useIsMobile();
+
   const handleClick = () => {
     onOpen?.(node);
   };
-
-  const isMobile = useIsMobile();
 
   if (node.isDirectory) {
     return (
