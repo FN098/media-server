@@ -18,7 +18,7 @@ interface MediaViewerProps {
   onPrev: () => void;
   hasNext: boolean;
   hasPrev: boolean;
-  swipeEnabled: boolean;
+  swipeEnabled?: boolean;
 }
 
 export const MediaViewer: React.FC<MediaViewerProps> = ({
