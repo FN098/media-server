@@ -51,7 +51,7 @@ export const MediaThumb = memo(function MediaThumb1({
         alt={node.name}
         width={width}
         height={height}
-        className={cn("object-cover", className)}
+        className={className}
         loading="lazy"
         onClick={handleClick}
       />
@@ -65,7 +65,7 @@ export const MediaThumb = memo(function MediaThumb1({
         alt={node.name}
         width={width}
         height={height}
-        className={cn("object-cover cursor-pointer", className)}
+        className={className}
         onClick={handleClick}
       />
     );
