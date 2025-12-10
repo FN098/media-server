@@ -20,7 +20,7 @@ export default function Explorer({ data }: { data: MediaFsListing }) {
     const nodes = data.nodes;
     if (!lowerSearch) return nodes;
 
-    return data.nodes.filter((e) => e.name.toLowerCase().includes(lowerSearch));
+    return nodes.filter((e) => e.name.toLowerCase().includes(lowerSearch));
   }, [data.nodes, lowerSearch]);
 
   return (
