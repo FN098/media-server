@@ -31,7 +31,12 @@ export const GridView = memo(function GridView1({
     return (
       <div style={style} className="overflow-hidden p-1">
         <div className="aspect-square w-full overflow-hidden rounded-lg border bg-muted">
-          <ThumbItem node={node} width={columnWidth} height={rowHeight - 20} />
+          <ThumbItem
+            node={node}
+            width={columnWidth}
+            height={rowHeight - 20}
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="mt-1 truncate text-center text-xs">{node.name}</div>
       </div>
@@ -54,19 +59,19 @@ function ThumbItem({
   node,
   width,
   height,
+  className,
 }: {
   node: MediaFsNode;
   width?: number;
   height?: number;
+  className?: string;
 }) {
   // DirectoryItem
   if (node.isDirectory) {
     const href = "/explorer/" + node.path;
     return (
       <Link href={href} className="cursor-pointer">
-        <div className="aspect-square overflow-hidden rounded-lg border bg-muted">
-          <MediaThumb node={node} width={width} height={height} />
-        </div>
+        <MediaThumb node={node} width={width} height={height} />
       </Link>
     );
   }
@@ -80,6 +85,7 @@ function ThumbItem({
       }}
       width={width}
       height={height}
+      className={className}
     />
   );
 }

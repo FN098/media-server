@@ -1,4 +1,5 @@
 import { MediaFsNode } from "@/app/lib/media/types";
+import { cn } from "@/shadcn/lib/utils";
 import { FileIcon, FolderIcon } from "lucide-react";
 import Image from "next/image";
 import { memo } from "react";
@@ -8,6 +9,7 @@ type MediaThumbProps = {
   onOpen?: (node: MediaFsNode) => void;
   width?: number;
   height?: number;
+  className?: string;
 };
 
 export const MediaThumb = memo(function MediaThumb1({
@@ -15,6 +17,7 @@ export const MediaThumb = memo(function MediaThumb1({
   onOpen,
   width = 200,
   height = 200,
+  className,
 }: MediaThumbProps) {
   const handleClick = () => {
     onOpen?.(node);
@@ -23,7 +26,10 @@ export const MediaThumb = memo(function MediaThumb1({
   if (node.isDirectory) {
     return (
       <div
-        className="flex h-full w-full items-center justify-center bg-muted"
+        className={cn(
+          "flex h-full w-full items-center justify-center bg-muted",
+          className
+        )}
         onClick={handleClick}
       >
         <FolderIcon className="h-12 w-12 text-blue-600" />
@@ -40,7 +46,7 @@ export const MediaThumb = memo(function MediaThumb1({
         alt={node.name}
         width={width}
         height={height}
-        className="object-cover"
+        className={cn("object-cover", className)}
         loading="lazy"
         onClick={handleClick}
       />
@@ -49,36 +55,20 @@ export const MediaThumb = memo(function MediaThumb1({
 
   if (node.type === "video") {
     return (
-      <div className="relative w-full h-full">
-        <Image
-          src={`/api/media/.thumbs/${node.path}.jpg`}
-          alt={node.name}
-          width={width}
-          height={height}
-          className="object-cover cursor-pointer"
-          onClick={handleClick}
-          // TODO: 動画再生は親でやる
-          // onClick={() => {
-          //   const video = document.createElement("video");
-          //   video.src = `/api/media/${node.path}`;
-          //   video.controls = true;
-          //   video.autoplay = true;
-          //   video.muted = true;
-          //   video.style.width = "100%";
-          //   video.style.height = "100%";
-          //   const container = document.getElementById(`video-${node.path}`);
-          //   if (container) container.innerHTML = "";
-          //   container?.appendChild(video);
-          // }}
-        />
-        <div id={`video-${node.path}`} className="absolute inset-0" />
-      </div>
+      <Image
+        src={`/api/media/.thumbs/${node.path}.jpg`}
+        alt={node.name}
+        width={width}
+        height={height}
+        className={cn("object-cover cursor-pointer", className)}
+        onClick={handleClick}
+      />
     );
   }
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-muted">
-      <FileIcon className="h-10 w-10 text-gray-600" />
+      <FileIcon className={cn("h-10 w-10 text-gray-600", className)} />
     </div>
   );
 });
