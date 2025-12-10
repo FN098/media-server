@@ -1,4 +1,5 @@
 import Explorer from "@/app/explorer/ui/explorer";
+import { ViewModeProvider } from "@/app/explorer/ui/providers/view-mode-provider";
 import { getMediaFsListing } from "@/app/lib/media/explorer";
 import { notFound } from "next/navigation";
 
@@ -17,7 +18,9 @@ export default async function Page(props: {
 
   return (
     <main>
-      <Explorer data={data} />
+      <ViewModeProvider>
+        <Explorer data={data} />
+      </ViewModeProvider>
     </main>
   );
 }
