@@ -10,7 +10,7 @@ import {
   VideoIcon,
 } from "lucide-react";
 
-function GridItem({
+export function GridItem({
   node,
   onOpen,
 }: {
@@ -30,7 +30,7 @@ function GridItem({
   );
 }
 
-function FileRow({
+export function FileRow({
   node,
   onOpen,
 }: {
@@ -43,7 +43,7 @@ function FileRow({
       className="grid cursor-pointer grid-cols-4 items-center px-4 py-2 text-sm hover:bg-blue-100"
     >
       <div className="flex items-center gap-2">
-        {ThumbIcon(node)}
+        <ThumbIcon node={node} />
         {node.name}
       </div>
       <div>{node.isDirectory ? "Folder" : node.type}</div>
@@ -53,7 +53,7 @@ function FileRow({
   );
 }
 
-function GoBackButton({
+export function GoBackButton({
   onClick,
   disabled,
 }: {
@@ -67,8 +67,8 @@ function GoBackButton({
   );
 }
 
-function ThumbIcon(e: MediaFsNode) {
-  switch (e.type) {
+export function ThumbIcon({ node }: { node: MediaFsNode }) {
+  switch (node.type) {
     case "directory":
       return <FolderIcon className="shrink-0 h-6 w-6 text-blue-600" />;
     case "image":
