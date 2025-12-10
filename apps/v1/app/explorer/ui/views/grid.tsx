@@ -10,7 +10,7 @@ type GridViewProps = {
   rowHeight?: number;
 };
 
-function _GridView({
+export const GridView = memo(function GridView1({
   data,
   minColumnWidth = 220,
   rowHeight = 240,
@@ -45,7 +45,7 @@ function _GridView({
       cellProps={{}}
     />
   );
-}
+});
 
 function MediaLink({ node }: { node: MediaFsNode }) {
   if (!node.isDirectory) {
@@ -70,5 +70,3 @@ function MediaLink({ node }: { node: MediaFsNode }) {
     </Link>
   );
 }
-
-export const GridView = memo(_GridView);

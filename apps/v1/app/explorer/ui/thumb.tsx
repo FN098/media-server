@@ -8,7 +8,10 @@ type MediaThumbProps = {
   onOpen?: (node: MediaFsNode) => void;
 };
 
-function _MediaThumb({ node, onOpen }: MediaThumbProps) {
+export const MediaThumb = memo(function MediaThumb1({
+  node,
+  onOpen,
+}: MediaThumbProps) {
   const handleClick = () => {
     if (node.isDirectory) {
       onOpen?.(node);
@@ -73,6 +76,4 @@ function _MediaThumb({ node, onOpen }: MediaThumbProps) {
       <FileIcon className="h-10 w-10 text-gray-600" />
     </div>
   );
-}
-
-export const MediaThumb = memo(_MediaThumb);
+});
