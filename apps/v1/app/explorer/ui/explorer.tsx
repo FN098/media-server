@@ -1,6 +1,7 @@
 "use client";
 
 import { ExplorerBreadcrumbs } from "@/app/explorer/ui/breadcrumbs";
+import { useGridConfig } from "@/app/explorer/ui/hooks/use-grid-config";
 import { useMediaViewer } from "@/app/explorer/ui/hooks/use-media-viewer";
 import { MediaViewer } from "@/app/explorer/ui/media-viewer";
 import { useViewMode } from "@/app/explorer/ui/providers/view-mode-provider";
@@ -9,8 +10,7 @@ import { ViewModeSwitch } from "@/app/explorer/ui/view-mode-switch";
 import { GridView } from "@/app/explorer/ui/views/grid";
 import { ListView } from "@/app/explorer/ui/views/list";
 import { MediaFsListing } from "@/app/lib/media/types";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 type ExplorerProps = {
   data: MediaFsListing;
@@ -21,10 +21,8 @@ export default function Explorer({ data }: ExplorerProps) {
   const { view, setView } = useViewMode();
 
   // GridView config
-  const isMobile = useIsMobile();
-  const columnCount = isMobile ? 3 : 6;
-  const columnWidth = isMobile ? 100 : 200;
-  const rowHeight = isMobile ? 120 : 220;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { columnCount, columnWidth, rowHeight } = useGridConfig(containerRef);
 
   // MediaViewer config
   const {
@@ -58,7 +56,7 @@ export default function Explorer({ data }: ExplorerProps) {
         <ViewModeSwitch value={view} setValue={setView} />
       </div>
 
-      <div className={view === "grid" ? "block" : "hidden"}>
+      <div className={view === "grid" ? "block" : "hidden"} ref={containerRef}>
         <GridView
           data={filtered}
           columnCount={columnCount}
