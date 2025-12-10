@@ -6,11 +6,15 @@ import { memo } from "react";
 type MediaThumbProps = {
   node: MediaFsNode;
   onOpen?: (node: MediaFsNode) => void;
+  width?: number;
+  height?: number;
 };
 
 export const MediaThumb = memo(function MediaThumb1({
   node,
   onOpen,
+  width = 200,
+  height = 200,
 }: MediaThumbProps) {
   const handleClick = () => {
     onOpen?.(node);
@@ -34,8 +38,8 @@ export const MediaThumb = memo(function MediaThumb1({
         // TODO: サムネイルの自動生成
         // src={`/api/media/.thumbs/${node.path}.jpg`}
         alt={node.name}
-        width="500"
-        height="500"
+        width={width}
+        height={height}
         className="object-cover"
         loading="lazy"
         onClick={handleClick}
@@ -49,8 +53,8 @@ export const MediaThumb = memo(function MediaThumb1({
         <Image
           src={`/api/media/.thumbs/${node.path}.jpg`}
           alt={node.name}
-          width={200}
-          height={200}
+          width={width}
+          height={height}
           className="object-cover cursor-pointer"
           onClick={handleClick}
           // TODO: 動画再生は親でやる
