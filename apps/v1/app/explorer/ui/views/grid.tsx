@@ -6,16 +6,17 @@ import { CellComponentProps, Grid } from "react-window";
 
 type GridViewProps = {
   data: MediaFsNode[];
-  minColumnWidth?: number;
+  columnCount?: number;
+  columnWidth?: number;
   rowHeight?: number;
 };
 
 export const GridView = memo(function GridView1({
   data,
-  minColumnWidth = 220,
+  columnCount = 6,
+  columnWidth = 220,
   rowHeight = 240,
 }: GridViewProps) {
-  const columnCount = 6;
   const rowCount = Math.ceil(data.length / columnCount);
 
   const Cell = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
@@ -39,7 +40,7 @@ export const GridView = memo(function GridView1({
     <Grid
       columnCount={columnCount}
       rowCount={rowCount}
-      columnWidth={minColumnWidth}
+      columnWidth={columnWidth}
       rowHeight={rowHeight}
       cellComponent={Cell}
       cellProps={{}}

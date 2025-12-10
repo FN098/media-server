@@ -1,6 +1,12 @@
-import { ThumbIcon } from "@/app/explorer/ui/deprecated";
 import { MediaFsNode } from "@/app/lib/media/types";
 import { Card, CardContent } from "@/shadcn/components/ui/card";
+import {
+  FileIcon,
+  FolderIcon,
+  ImageIcon,
+  MusicIcon,
+  VideoIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 export function ListView({
@@ -36,4 +42,19 @@ export function ListView({
       </CardContent>
     </Card>
   );
+}
+
+function ThumbIcon({ node }: { node: MediaFsNode }) {
+  switch (node.type) {
+    case "directory":
+      return <FolderIcon className="shrink-0 h-6 w-6 text-blue-600" />;
+    case "image":
+      return <ImageIcon className="shrink-0 h-6 w-6 text-purple-600" />;
+    case "video":
+      return <VideoIcon className="shrink-0 h-6 w-6 text-green-600" />;
+    case "audio":
+      return <MusicIcon className="shrink-0 h-6 w-6 text-orange-600" />;
+    default:
+      return <FileIcon className="shrink-0 h-6 w-6 text-gray-600" />;
+  }
 }
