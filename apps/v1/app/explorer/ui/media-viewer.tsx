@@ -96,6 +96,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         onClick={onPrev}
         disabled={!hasPrev}
         className="absolute left-4 text-white text-5xl disabled:opacity-30 z-50"
+        tabIndex={-1}
       >
         <ChevronLeftIcon />
       </button>
@@ -110,6 +111,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         onClick={onNext}
         disabled={!hasNext}
         className="absolute right-4 text-white text-5xl disabled:opacity-30 z-50"
+        tabIndex={-1}
       >
         <ChevronRightIcon />
       </button>
@@ -118,6 +120,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
       <button
         onClick={onClose}
         className="absolute top-4 right-4 text-white text-3xl"
+        tabIndex={-1}
       >
         <XIcon />
       </button>
