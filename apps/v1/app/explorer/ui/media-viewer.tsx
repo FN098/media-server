@@ -1,7 +1,12 @@
 "use client";
 
 import { MediaFsNode } from "@/app/lib/media/types";
-import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "lucide-react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MaximizeIcon,
+  XIcon,
+} from "lucide-react";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef } from "react";
 
@@ -26,6 +31,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   hasPrev,
   swipeEnabled,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const touchEndX = useRef(0);
@@ -135,7 +141,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   }
 
   // ----------------------------------------------------
-  // スクロール制御
+  // スクロール無効化
   // ----------------------------------------------------
   useEffect(() => {
     // モーダル表示中は body のスクロール禁止
@@ -149,11 +155,23 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   }, []);
 
   // ----------------------------------------------------
+  // フルスクリーン
+  // ----------------------------------------------------
+  const enterFullscreen = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (el.requestFullscreen) {
+      el.requestFullscreen();
+    }
+  };
+
+  // ----------------------------------------------------
   // レンダリング
   // ----------------------------------------------------
   return (
     // ビューアの背景 (モーダル)
     <div
+      ref={containerRef}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -191,6 +209,15 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         tabIndex={-1}
       >
         <XIcon />
+      </button>
+
+      {/* 全画面ボタン */}
+      <button
+        onClick={enterFullscreen}
+        className="absolute top-4 right-16 text-white text-3xl"
+        tabIndex={-1}
+      >
+        <MaximizeIcon />
       </button>
     </div>
   );
