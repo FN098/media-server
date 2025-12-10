@@ -7,11 +7,17 @@ import { ViewModeSwitch } from "@/app/explorer/ui/view-mode-switch";
 import { GridView } from "@/app/explorer/ui/views/grid";
 import { ListView } from "@/app/explorer/ui/views/list";
 import { MediaFsListing } from "@/app/lib/media/types";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { useMemo, useState } from "react";
 
 export default function Explorer({ data }: { data: MediaFsListing }) {
   const [search, setSearch] = useState("");
   const { view, setView } = useViewMode();
+
+  const isMobile = useIsMobile();
+  const columnCount = isMobile ? 3 : 6;
+  const columnWidth = isMobile ? 100 : 200;
+  const rowHeight = isMobile ? 120 : 220;
 
   const lowerSearch = useMemo(() => search.toLowerCase(), [search]);
 
@@ -33,7 +39,12 @@ export default function Explorer({ data }: { data: MediaFsListing }) {
       </div>
 
       <div className={view === "grid" ? "block" : "hidden"}>
-        <GridView data={filtered} />
+        <GridView
+          data={filtered}
+          columnCount={columnCount}
+          columnWidth={columnWidth}
+          rowHeight={rowHeight}
+        />
       </div>
 
       <div className={view === "list" ? "block" : "hidden"}>
