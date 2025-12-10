@@ -9,6 +9,7 @@ type GridViewProps = {
   columnCount?: number;
   columnWidth?: number;
   rowHeight?: number;
+  onFileOpen?: (node: MediaFsNode) => void;
 };
 
 export const GridView = memo(function GridView1({
@@ -16,6 +17,7 @@ export const GridView = memo(function GridView1({
   columnCount = 6,
   columnWidth = 220,
   rowHeight = 240,
+  onFileOpen,
 }: GridViewProps) {
   const rowCount = Math.ceil(data.length / columnCount);
 
@@ -35,7 +37,12 @@ export const GridView = memo(function GridView1({
             node={node}
             width={columnWidth}
             height={rowHeight - 20}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover cursor-pointer"
+            onOpen={
+              !node.isDirectory && onFileOpen
+                ? () => onFileOpen(node)
+                : undefined
+            }
           />
         </div>
         <div className="mt-1 truncate text-center text-xs">{node.name}</div>
@@ -60,11 +67,13 @@ function ThumbItem({
   width,
   height,
   className,
+  onOpen,
 }: {
   node: MediaFsNode;
   width?: number;
   height?: number;
   className?: string;
+  onOpen?: () => void;
 }) {
   // DirectoryItem
   if (node.isDirectory) {
@@ -80,9 +89,7 @@ function ThumbItem({
   return (
     <MediaThumb
       node={node}
-      onOpen={() => {
-        // TODO: ファイルの場合はビューア起動して画像、動画、音声を再生＋左右キーで次・前のファイルに移動
-      }}
+      onOpen={onOpen}
       width={width}
       height={height}
       className={className}

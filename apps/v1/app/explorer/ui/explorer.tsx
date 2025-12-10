@@ -1,6 +1,8 @@
 "use client";
 
 import { ExplorerBreadcrumbs } from "@/app/explorer/ui/breadcrumbs";
+import { useMediaViewer } from "@/app/explorer/ui/hooks/use-media-viewer";
+import { MediaViewer } from "@/app/explorer/ui/media-viewer";
 import { useViewMode } from "@/app/explorer/ui/providers/view-mode-provider";
 import { Search } from "@/app/explorer/ui/search";
 import { ViewModeSwitch } from "@/app/explorer/ui/view-mode-switch";
@@ -18,14 +20,27 @@ export default function Explorer({ data }: ExplorerProps) {
   const [search, setSearch] = useState("");
   const { view, setView } = useViewMode();
 
+  // GridView config
   const isMobile = useIsMobile();
   const columnCount = isMobile ? 3 : 6;
   const columnWidth = isMobile ? 100 : 200;
   const rowHeight = isMobile ? 120 : 220;
 
-  const lowerSearch = useMemo(() => search.toLowerCase(), [search]);
+  // MediaViewer config
+  const {
+    viewerOpen,
+    currentFilePath,
+    currentMediaNode,
+    hasNext,
+    hasPrev,
+    openViewer,
+    closeViewer,
+    goToNext,
+    goToPrev,
+  } = useMediaViewer(data.nodes);
 
   // Search filter
+  const lowerSearch = useMemo(() => search.toLowerCase(), [search]);
   const filtered = useMemo(() => {
     const nodes = data.nodes;
     if (!lowerSearch) return nodes;
@@ -48,12 +63,25 @@ export default function Explorer({ data }: ExplorerProps) {
           columnCount={columnCount}
           columnWidth={columnWidth}
           rowHeight={rowHeight}
+          onFileOpen={openViewer}
         />
       </div>
 
       <div className={view === "list" ? "block" : "hidden"}>
         <ListView data={filtered} />
       </div>
+
+      {viewerOpen && currentFilePath && currentMediaNode && (
+        <MediaViewer
+          filePath={currentFilePath}
+          mediaNode={currentMediaNode}
+          onClose={closeViewer}
+          onNext={goToNext}
+          onPrev={goToPrev}
+          hasNext={hasNext}
+          hasPrev={hasPrev}
+        />
+      )}
     </div>
   );
 }
