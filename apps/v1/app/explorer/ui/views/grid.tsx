@@ -49,25 +49,25 @@ export const GridView = memo(function GridView1({
 });
 
 function MediaLink({ node }: { node: MediaFsNode }) {
-  if (!node.isDirectory) {
+  if (node.isDirectory) {
     return (
-      <MediaThumb
-        node={node}
-        onOpen={() => {
-          // TODO: ファイルの場合はビューア起動して画像、動画、音声を再生＋左右キーで次・前のファイルに移動
-        }}
-      />
+      <Link
+        href={node.isDirectory ? "/explorer/" + node.path : "#"}
+        className="cursor-pointer"
+      >
+        <div className="aspect-square overflow-hidden rounded-lg border bg-muted">
+          <MediaThumb node={node} />
+        </div>
+      </Link>
     );
   }
 
   return (
-    <Link
-      href={node.isDirectory ? "/explorer/" + node.path : "#"}
-      className="cursor-pointer"
-    >
-      <div className="aspect-square overflow-hidden rounded-lg border bg-muted">
-        <MediaThumb node={node} />
-      </div>
-    </Link>
+    <MediaThumb
+      node={node}
+      onOpen={() => {
+        // TODO: ファイルの場合はビューア起動して画像、動画、音声を再生＋左右キーで次・前のファイルに移動
+      }}
+    />
   );
 }
