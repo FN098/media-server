@@ -67,6 +67,7 @@ export function MediaViewer({
       {/* 前のメディア */}
       <button
         className={cn(
+          "focus:outline-none",
           "absolute left-0 top-0 h-full w-24 flex items-center justify-center",
           "bg-black/20 opacity-0 transition-opacity duration-200",
           "hover:opacity-100 active:opacity-100"
@@ -76,6 +77,7 @@ export function MediaViewer({
           onPrev();
         }}
         disabled={!hasPrev}
+        tabIndex={-1}
       >
         <ChevronLeftIcon
           className={cn("text-white text-4xl", !hasPrev && "text-gray-500")}
@@ -85,6 +87,7 @@ export function MediaViewer({
       {/* 次のメディア */}
       <button
         className={cn(
+          "focus:outline-none",
           "absolute right-0 top-0 h-full w-24 flex items-center justify-center",
           "bg-black/20 opacity-0 transition-opacity duration-200",
           "hover:opacity-100 active:opacity-100"
@@ -94,6 +97,7 @@ export function MediaViewer({
           onNext();
         }}
         disabled={!hasNext}
+        tabIndex={-1}
       >
         <ChevronRightIcon
           className={cn("text-white text-4xl", !hasNext && "text-gray-500")}
