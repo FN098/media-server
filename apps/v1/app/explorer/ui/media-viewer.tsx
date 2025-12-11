@@ -1,10 +1,10 @@
 "use client";
 
 import { MediaFsNode } from "@/app/lib/media/types";
-import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer from "@mux/mux-player-react";
-import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import Image from "next/image";
+import { useEffect } from "react";
 
 interface MediaViewerProps {
   filePath: string;
@@ -28,10 +28,27 @@ export function MediaViewer({
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const videoSrc = `${origin}/${filePath}`;
 
+  // ESC で閉じる
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+      onClick={onClose} // 外部クリックで閉じる
+    >
       {/* メディア表示 */}
-      <div className="flex items-center justify-center max-w-[90vw] max-h-[90vh]">
+      <div
+        className="flex items-center justify-center max-w-[90vw] max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()} // クリックしても閉じない
+      >
         {mediaNode.type === "image" && (
           <Image
             src={filePath}
@@ -55,29 +72,31 @@ export function MediaViewer({
 
       {/* ナビゲーションボタン */}
       {hasPrev && (
-        <button
-          onClick={onPrev}
-          className={cn(
-            "absolute left-8 top-1/2 -translate-y-1/2",
-            "p-3 rounded-full",
-            "text-white text-4xl"
-          )}
+        <div
+          className="absolute left-0 top-0 h-full w-24 
+               flex items-center justify-center 
+               bg-linear-to-r from-black/20 to-transparent"
+          onClick={(e) => {
+            e.stopPropagation();
+            onPrev();
+          }}
         >
-          <ChevronLeftIcon />
-        </button>
+          {/* <ChevronLeftIcon className="text-white text-4xl" /> */}
+        </div>
       )}
 
       {hasNext && (
-        <button
-          onClick={onNext}
-          className={cn(
-            "absolute right-8 top-1/2 -translate-y-1/2",
-            "p-3 rounded-full",
-            "text-white text-4xl"
-          )}
+        <div
+          className="absolute right-0 top-0 h-full w-24 
+               flex items-center justify-center 
+               bg-linear-to-l from-black/20 to-transparent"
+          onClick={(e) => {
+            e.stopPropagation();
+            onNext();
+          }}
         >
-          <ChevronRightIcon />
-        </button>
+          {/* <ChevronRightIcon className="text-white text-4xl" /> */}
+        </div>
       )}
 
       {/* 閉じる */}
