@@ -47,9 +47,9 @@ export function MediaViewer({
           <Image
             src={filePath}
             alt={mediaNode.name}
-            width={1920}
-            height={1920}
-            className="w-auto h-auto max-w-[90vw] max-h-[90vh] object-contain"
+            width={2560}
+            height={2560}
+            className="w-auto h-auto max-w-[100vw] max-h-screen object-contain"
           />
         )}
 
