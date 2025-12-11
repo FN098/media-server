@@ -1,7 +1,7 @@
 import { MediaFsNode } from "@/app/lib/media/types";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { FileIcon } from "lucide-react";
+import { FileIcon, FolderIcon } from "lucide-react";
 import Image from "next/image";
 import { memo } from "react";
 
@@ -35,7 +35,7 @@ export const MediaThumb = memo(function MediaThumb1({
         )}
         onClick={handleClick}
       >
-        <FileIcon
+        <FolderIcon
           className={cn("h-12 w-12 text-blue-600", isMobile && "h-6 w-6")}
         />
       </div>
