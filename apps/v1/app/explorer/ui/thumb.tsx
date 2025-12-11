@@ -1,7 +1,12 @@
 import { MediaFsNode } from "@/app/lib/media/types";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { FileIcon, FolderIcon } from "lucide-react";
+import {
+  AudioWaveformIcon,
+  FileIcon,
+  FilmIcon,
+  FolderIcon,
+} from "lucide-react";
 import Image from "next/image";
 import { memo } from "react";
 
@@ -46,8 +51,6 @@ export const MediaThumb = memo(function MediaThumb1({
     return (
       <Image
         src={`/api/media/${node.path}`}
-        // TODO: サムネイルの自動生成
-        // src={`/api/media/.thumbs/${node.path}.jpg`}
         alt={node.name}
         width={width}
         height={height}
@@ -60,14 +63,42 @@ export const MediaThumb = memo(function MediaThumb1({
 
   if (node.type === "video") {
     return (
-      <Image
-        src={`/api/media/.thumbs/${node.path}.jpg`}
-        alt={node.name}
-        width={width}
-        height={height}
-        className={className}
+      // TODO: サムネイルの自動生成
+      // <Image
+      //   src={`/api/media/.thumbs/${node.path}.jpg`}
+      //   alt={node.name}
+      //   width={width}
+      //   height={height}
+      //   className={className}
+      //   onClick={handleClick}
+      // />
+      <div
+        className={cn(
+          "flex h-full w-full items-center justify-center bg-muted",
+          className
+        )}
         onClick={handleClick}
-      />
+      >
+        <FilmIcon
+          className={cn("h-12 w-12 text-gray-600", isMobile && "h-6 w-6")}
+        />
+      </div>
+    );
+  }
+
+  if (node.type === "audio") {
+    return (
+      <div
+        className={cn(
+          "flex h-full w-full items-center justify-center bg-muted",
+          className
+        )}
+        onClick={handleClick}
+      >
+        <AudioWaveformIcon
+          className={cn("h-12 w-12 text-gray-600", isMobile && "h-6 w-6")}
+        />
+      </div>
     );
   }
 
