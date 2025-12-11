@@ -40,7 +40,7 @@ export function MediaViewer({
     >
       {/* メディア */}
       <div
-        className="flex items-center justify-center max-w-[90vw] max-h-[90vh]"
+        className="flex items-center justify-center max-w-full max-h-full"
         onClick={(e) => e.stopPropagation()} // クリックしても閉じない
       >
         {mediaNode.type === "image" && (
@@ -54,13 +54,15 @@ export function MediaViewer({
         )}
 
         {mediaNode.type === "video" && (
-          <MuxPlayer
-            src={getAbsoluteUrl(filePath)}
-            autoPlay
-            streamType="on-demand"
-            className="max-w-[90vw] max-h-[90vh] object-contain"
-            accentColor="#ffffff"
-          />
+          <div className="aspect-video w-full max-h-[90vh]">
+            <MuxPlayer
+              src={getAbsoluteUrl(filePath)}
+              autoPlay
+              streamType="on-demand"
+              className="w-full h-full"
+              accentColor="#ffffff"
+            />
+          </div>
         )}
 
         {mediaNode.type === "audio" && (
