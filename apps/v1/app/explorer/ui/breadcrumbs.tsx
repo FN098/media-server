@@ -22,5 +22,5 @@ export function ExplorerBreadcrumbs() {
     })),
   ];
 
-  return <Breadcrumbs items={breadcrumbs} options={{ threshold: 5 }} />;
+  return <Breadcrumbs items={breadcrumbs} options={{ threshold: 20 }} />;
 }
