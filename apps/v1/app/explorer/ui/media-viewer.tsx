@@ -2,6 +2,7 @@
 
 import { MediaFsNode } from "@/app/lib/media/types";
 import { getAbsoluteUrl } from "@/app/lib/media/url";
+import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer from "@mux/mux-player-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
@@ -69,34 +70,40 @@ export function MediaViewer({
       </div>
 
       {/* 前のメディア */}
-      {hasPrev && (
-        <div
-          className="absolute left-0 top-0 h-full w-24 flex items-center justify-center
-             bg-black/20 opacity-0 transition-opacity duration-200
-             hover:opacity-100 active:opacity-100"
-          onClick={(e) => {
-            e.stopPropagation(); // クリックしても閉じない
-            onPrev();
-          }}
-        >
-          <ChevronLeftIcon className="text-white text-4xl" />
-        </div>
-      )}
+      <button
+        className={cn(
+          "absolute left-0 top-0 h-full w-24 flex items-center justify-center",
+          "bg-black/20 opacity-0 transition-opacity duration-200",
+          "hover:opacity-100 active:opacity-100"
+        )}
+        onClick={(e) => {
+          e.stopPropagation(); // クリックしても閉じない
+          onPrev();
+        }}
+        disabled={!hasPrev}
+      >
+        <ChevronLeftIcon
+          className={cn("text-white text-4xl", !hasPrev && "text-gray-500")}
+        />
+      </button>
 
       {/* 次のメディア */}
-      {hasNext && (
-        <div
-          className="absolute right-0 top-0 h-full w-24 flex items-center justify-center
-             bg-black/20 opacity-0 transition-opacity duration-200
-             hover:opacity-100 active:opacity-100"
-          onClick={(e) => {
-            e.stopPropagation(); // クリックしても閉じない
-            onNext();
-          }}
-        >
-          <ChevronRightIcon className="text-white text-4xl" />
-        </div>
-      )}
+      <button
+        className={cn(
+          "absolute right-0 top-0 h-full w-24 flex items-center justify-center",
+          "bg-black/20 opacity-0 transition-opacity duration-200",
+          "hover:opacity-100 active:opacity-100"
+        )}
+        onClick={(e) => {
+          e.stopPropagation(); // クリックしても閉じない
+          onNext();
+        }}
+        disabled={!hasNext}
+      >
+        <ChevronRightIcon
+          className={cn("text-white text-4xl", !hasNext && "text-gray-500")}
+        />
+      </button>
     </div>
   );
 }
