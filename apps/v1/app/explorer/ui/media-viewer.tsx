@@ -62,6 +62,16 @@ export function MediaViewer({
             accentColor="#ffffff"
           />
         )}
+
+        {mediaNode.type === "audio" && (
+          <MuxPlayer
+            src={getAbsoluteUrl(filePath)}
+            autoPlay
+            streamType="on-demand"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+            accentColor="#ffffff"
+          />
+        )}
       </div>
 
       {/* 前のメディア */}
