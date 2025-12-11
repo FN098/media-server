@@ -3,7 +3,7 @@
 import { ExplorerBreadcrumbs } from "@/app/explorer/ui/breadcrumbs";
 import { useGridConfig } from "@/app/explorer/ui/hooks/use-grid-config";
 import { useMediaViewer } from "@/app/explorer/ui/hooks/use-media-viewer";
-import { MediaViewer } from "@/app/explorer/ui/media-viewer";
+import { MediaViewer } from "@/app/explorer/ui/media-viewers/media-viewer-original";
 import { useViewMode } from "@/app/explorer/ui/providers/view-mode-provider";
 import { Search } from "@/app/explorer/ui/search";
 import { ViewModeSwitch } from "@/app/explorer/ui/view-mode-switch";
