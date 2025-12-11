@@ -1,11 +1,11 @@
 "use client";
 
 import { MediaFsNode } from "@/app/lib/media/types";
+import { cn } from "@/shadcn/lib/utils";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MaximizeIcon,
-  MinimizeIcon,
   XIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -129,56 +129,95 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   };
 
   // ----------------------------------------------------
+  // フェード
+  // ----------------------------------------------------
+  const [showUI, setShowUI] = useState(true);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    const onMove = () => {
+      setShowUI(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setShowUI(false), 1000);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchstart", onMove);
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchstart", onMove);
+    };
+  }, []);
+
+  // ----------------------------------------------------
   // レンダリング
   // ----------------------------------------------------
   return (
-    // ビューアの背景 (モーダル)
     <div
       ref={containerRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
     >
-      {/* 前へボタン */}
-      <button
-        onClick={onPrev}
-        disabled={!hasPrev}
-        className="absolute left-4 text-white text-5xl disabled:opacity-30 z-50"
-        tabIndex={-1}
-      >
-        <ChevronLeftIcon />
-      </button>
-
       {/* メディアコンテンツ */}
       <div className="grow flex items-center justify-center h-full w-full p-0">
         {mediaElement}
       </div>
 
-      {/* 次へボタン */}
-      <button
-        onClick={onNext}
-        disabled={!hasNext}
-        className="absolute right-4 text-white text-5xl disabled:opacity-30 z-50"
-        tabIndex={-1}
-      >
-        <ChevronRightIcon />
-      </button>
+      {hasPrev && (
+        <button
+          onClick={onPrev}
+          className={cn(
+            "absolute left-8 top-1/2 -translate-y-1/2",
+            "p-3 rounded-full",
+            "bg-black/50 hover:bg-black/70",
+            "text-white text-4xl",
+            "backdrop-blur-sm",
+            "transition-opacity duration-300",
+            showUI ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}
+        >
+          <ChevronLeftIcon />
+        </button>
+      )}
 
-      {/* 閉じるボタン */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 text-white text-3xl"
-        tabIndex={-1}
-      >
-        <XIcon />
-      </button>
+      {hasNext && (
+        <button
+          onClick={onNext}
+          className={cn(
+            "absolute right-8 top-1/2 -translate-y-1/2",
+            "p-3 rounded-full",
+            "bg-black/50 hover:bg-black/70",
+            "text-white text-4xl",
+            "backdrop-blur-sm",
+            "transition-opacity duration-300",
+            showUI ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}
+        >
+          <ChevronRightIcon />
+        </button>
+      )}
 
-      {/* 全画面ボタン */}
-      <button
-        onClick={toggleFullscreen}
-        className="absolute top-4 right-16 text-white text-3xl"
-        tabIndex={-1}
+      <div
+        className={cn(
+          "absolute top-0 left-0 right-0",
+          "flex justify-end items-center",
+          "p-4 z-50 gap-2",
+          "bg-lenear-to-b from-white/60 to-transparent",
+          "transition-opacity duration-300",
+          showUI ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
       >
-        {isFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
-      </button>
+        {/* 全画面 */}
+        <button onClick={toggleFullscreen} className="text-white text-3xl">
+          <MaximizeIcon />
+        </button>
+
+        {/* 閉じる */}
+        <button onClick={onClose} className="text-white text-3xl mr-4">
+          <XIcon />
+        </button>
+      </div>
     </div>
   );
 };
