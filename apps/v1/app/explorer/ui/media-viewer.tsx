@@ -72,9 +72,10 @@ export function MediaViewer({
       {hasPrev && (
         <div
           className="absolute left-0 top-0 h-full w-24 flex items-center justify-center
-             bg-black/20 opacity-0 transition-opacity duration-200 hover:opacity-100"
+             bg-black/20 opacity-0 transition-opacity duration-200
+             hover:opacity-100 active:opacity-100"
           onClick={(e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // クリックしても閉じない
             onPrev();
           }}
         >
@@ -86,9 +87,10 @@ export function MediaViewer({
       {hasNext && (
         <div
           className="absolute right-0 top-0 h-full w-24 flex items-center justify-center
-             bg-black/20 opacity-0 transition-opacity duration-200 hover:opacity-100"
+             bg-black/20 opacity-0 transition-opacity duration-200
+             hover:opacity-100 active:opacity-100"
           onClick={(e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // クリックしても閉じない
             onNext();
           }}
         >
