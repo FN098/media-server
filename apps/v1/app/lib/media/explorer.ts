@@ -1,5 +1,5 @@
+import { detectMediaType } from "@/app/lib/media/mimetype";
 import { MEDIA_ROOT } from "@/app/lib/media/root";
-import { detectMediaType } from "@/app/lib/media/type-detector";
 import { MediaFsListing, MediaFsNode } from "@/app/lib/media/types";
 import fs from "fs/promises";
 import path from "path";
