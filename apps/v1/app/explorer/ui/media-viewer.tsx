@@ -1,13 +1,12 @@
 "use client";
 
-import { useKeyPress } from "@/app/explorer/ui/hooks/use-key-press";
+import { useShortcutKeys } from "@/app/explorer/ui/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/app/lib/media/types";
 import { getAbsoluteUrl } from "@/app/lib/media/url";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer from "@mux/mux-player-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect } from "react";
 
 interface MediaViewerProps {
   filePath: string;
@@ -28,29 +27,11 @@ export function MediaViewer({
   hasNext,
   hasPrev,
 }: MediaViewerProps) {
-  // ESC で閉じる
-  useKeyPress("Escape", onClose);
-
-  // キーボード操作
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === "ArrowRight" && hasNext) {
-        onNext();
-      } else if (event.key === "ArrowLeft" && hasPrev) {
-        onPrev();
-      } else if (event.key === "Escape") {
-        onClose();
-      }
-    },
-    [onNext, onPrev, onClose, hasNext, hasPrev]
-  );
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleKeyDown]);
+  useShortcutKeys([
+    { key: "ArrowRight", callback: onNext, condition: hasNext },
+    { key: "ArrowLeft", callback: onPrev, condition: hasPrev },
+    { key: "Escape", callback: onClose },
+  ]);
 
   return (
     <div
