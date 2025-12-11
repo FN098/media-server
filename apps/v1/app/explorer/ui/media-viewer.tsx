@@ -1,8 +1,8 @@
 "use client";
 
 import { MediaFsNode } from "@/app/lib/media/types";
+import { getAbsoluteUrl } from "@/app/lib/media/url";
 import MuxPlayer from "@mux/mux-player-react";
-import { XIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect } from "react";
 
@@ -25,9 +25,6 @@ export function MediaViewer({
   hasNext,
   hasPrev,
 }: MediaViewerProps) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const videoSrc = `${origin}/${filePath}`;
-
   // ESC で閉じる
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -44,7 +41,7 @@ export function MediaViewer({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
       onClick={onClose} // 外部クリックで閉じる
     >
-      {/* メディア表示 */}
+      {/* メディア */}
       <div
         className="flex items-center justify-center max-w-[90vw] max-h-[90vh]"
         onClick={(e) => e.stopPropagation()} // クリックしても閉じない
@@ -61,7 +58,7 @@ export function MediaViewer({
 
         {mediaNode.type === "video" && (
           <MuxPlayer
-            src={videoSrc}
+            src={getAbsoluteUrl(filePath)}
             autoPlay
             streamType="on-demand"
             className="max-h-full max-w-full"
@@ -70,7 +67,7 @@ export function MediaViewer({
         )}
       </div>
 
-      {/* ナビゲーションボタン */}
+      {/* 前のメディア */}
       {hasPrev && (
         <div
           className="absolute left-0 top-0 h-full w-24 
@@ -85,6 +82,7 @@ export function MediaViewer({
         </div>
       )}
 
+      {/* 次のメディア */}
       {hasNext && (
         <div
           className="absolute right-0 top-0 h-full w-24 
@@ -98,14 +96,6 @@ export function MediaViewer({
           {/* <ChevronRightIcon className="text-white text-4xl" /> */}
         </div>
       )}
-
-      {/* 閉じる */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 text-white text-3xl"
-      >
-        <XIcon />
-      </button>
     </div>
   );
 }
