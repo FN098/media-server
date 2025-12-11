@@ -1,4 +1,5 @@
 import { MediaFsNode } from "@/app/lib/media/types";
+import FallbackImage from "@/app/ui/fallback-image";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import {
@@ -63,26 +64,27 @@ export const MediaThumb = memo(function MediaThumb1({
 
   if (node.type === "video") {
     return (
-      // TODO: サムネイルの自動生成
-      // <Image
-      //   src={`/api/media/.thumbs/${node.path}.jpg`}
-      //   alt={node.name}
-      //   width={width}
-      //   height={height}
-      //   className={className}
-      //   onClick={handleClick}
-      // />
-      <div
-        className={cn(
-          "flex h-full w-full items-center justify-center bg-muted",
-          className
-        )}
+      <FallbackImage
+        src={`/api/media/.thumbs/${node.path}.jpg`}
+        alt={node.name}
+        width={width}
+        height={height}
+        className={className}
         onClick={handleClick}
-      >
-        <FilmIcon
-          className={cn("h-12 w-12 text-gray-600", isMobile && "h-6 w-6")}
-        />
-      </div>
+        fallback={
+          <div
+            className={cn(
+              "flex h-full w-full items-center justify-center bg-muted",
+              className
+            )}
+            onClick={handleClick}
+          >
+            <FilmIcon
+              className={cn("h-12 w-12 text-gray-600", isMobile && "h-6 w-6")}
+            />
+          </div>
+        }
+      />
     );
   }
 
