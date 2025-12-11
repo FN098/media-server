@@ -22,8 +22,8 @@ type MediaThumbProps = {
 export const MediaThumb = memo(function MediaThumb1({
   node,
   onOpen,
-  width = 200,
-  height = 200,
+  width,
+  height,
   className,
 }: MediaThumbProps) {
   const isMobile = useIsMobile();

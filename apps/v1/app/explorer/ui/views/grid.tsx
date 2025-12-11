@@ -85,7 +85,7 @@ function ThumbItem({
     );
   }
 
-  // MediaItem
+  // FileItem
   return (
     <MediaThumb
       node={node}
