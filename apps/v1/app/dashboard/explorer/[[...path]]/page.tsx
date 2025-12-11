@@ -1,4 +1,4 @@
-import Explorer from "@/app/explorer/ui/explorer";
+import Explorer from "@/app/dashboard/explorer/ui/explorer";
 import { getMediaFsListing } from "@/app/lib/media/explorer";
 import { notFound } from "next/navigation";
 

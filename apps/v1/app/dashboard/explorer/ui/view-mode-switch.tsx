@@ -1,4 +1,4 @@
-import { ViewMode } from "@/app/explorer/ui/types";
+import { ViewMode } from "@/app/dashboard/explorer/ui/types";
 import { Button } from "@/shadcn/components/ui/button";
 import { GridIcon, ListIcon } from "lucide-react";
 

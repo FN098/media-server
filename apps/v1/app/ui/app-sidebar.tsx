@@ -18,17 +18,17 @@ import Link from "next/link";
 const items = [
   {
     title: "Home",
-    url: "/",
+    url: "/dashboard",
     icon: Home,
   },
   {
     title: "Explorer",
-    url: "/explorer",
+    url: "/dashboard/explorer",
     icon: Search,
   },
   {
     title: "Sample",
-    url: "/sample",
+    url: "/dashboard/sample",
     icon: Check,
   },
   {
@@ -47,7 +47,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex justify-end">
+        <div className="flex justify-end items-center">
           <SidebarMenuButton asChild tooltip="Menu" className="w-auto">
             <SidebarTrigger />
           </SidebarMenuButton>
@@ -55,7 +55,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Media Server</SidebarGroupLabel>
+          <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

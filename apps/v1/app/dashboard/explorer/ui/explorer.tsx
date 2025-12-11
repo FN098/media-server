@@ -1,14 +1,14 @@
 "use client";
 
-import { ExplorerBreadcrumbs } from "@/app/explorer/ui/breadcrumbs";
-import { useGridConfig } from "@/app/explorer/ui/hooks/use-grid-config";
-import { useMediaViewer } from "@/app/explorer/ui/hooks/use-media-viewer";
-import { MediaViewer } from "@/app/explorer/ui/media-viewer";
-import { useViewMode } from "@/app/explorer/ui/providers/view-mode-provider";
-import { Search } from "@/app/explorer/ui/search";
-import { ViewModeSwitch } from "@/app/explorer/ui/view-mode-switch";
-import { GridView } from "@/app/explorer/ui/views/grid";
-import { ListView } from "@/app/explorer/ui/views/list";
+import { ExplorerBreadcrumbs } from "@/app/dashboard/explorer/ui/breadcrumbs";
+import { useGridConfig } from "@/app/dashboard/explorer/ui/hooks/use-grid-config";
+import { useMediaViewer } from "@/app/dashboard/explorer/ui/hooks/use-media-viewer";
+import { MediaViewer } from "@/app/dashboard/explorer/ui/media-viewer";
+import { useViewMode } from "@/app/dashboard/explorer/ui/providers/view-mode-provider";
+import { Search } from "@/app/dashboard/explorer/ui/search";
+import { ViewModeSwitch } from "@/app/dashboard/explorer/ui/view-mode-switch";
+import { GridView } from "@/app/dashboard/explorer/ui/views/grid";
+import { ListView } from "@/app/dashboard/explorer/ui/views/list";
 import { MediaFsListing } from "@/app/lib/media/types";
 import { SidebarTrigger } from "@/shadcn/components/ui/sidebar";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";

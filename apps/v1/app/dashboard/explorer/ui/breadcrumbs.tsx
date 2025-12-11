@@ -8,17 +8,17 @@ export function ExplorerBreadcrumbs() {
 
   // pathParts から Breadcrumb[] を作る
   const pathParts = pathname
-    .replace(/^\/explorer\/?/, "")
+    .replace(/^\/dashboard\/explorer\/?/, "")
     .split("/")
     .filter(Boolean)
     .map(decodeURIComponent);
 
   const breadcrumbs: BreadcrumbLinkItem[] = [
-    { key: "home", label: "HOME", href: "/explorer" },
+    { key: "home", label: "HOME", href: "/dashboard/explorer" },
     ...pathParts.map((part, i) => ({
       key: part,
       label: part,
-      href: "/explorer/" + pathParts.slice(0, i + 1).join("/"),
+      href: "/dashboard/explorer/" + pathParts.slice(0, i + 1).join("/"),
     })),
   ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useShortcutKeys } from "@/app/explorer/ui/hooks/use-shortcut-keys";
+import { useShortcutKeys } from "@/app/dashboard/explorer/ui/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/app/lib/media/types";
 import { getAbsoluteUrl } from "@/app/lib/media/url";
 import { cn } from "@/shadcn/lib/utils";
