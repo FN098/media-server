@@ -10,6 +10,8 @@ import { ViewModeSwitch } from "@/app/explorer/ui/view-mode-switch";
 import { GridView } from "@/app/explorer/ui/views/grid";
 import { ListView } from "@/app/explorer/ui/views/list";
 import { MediaFsListing } from "@/app/lib/media/types";
+import { SidebarTrigger } from "@/shadcn/components/ui/sidebar";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { useMemo, useRef, useState } from "react";
 
 type ExplorerProps = {
@@ -19,6 +21,7 @@ type ExplorerProps = {
 export default function Explorer({ data }: ExplorerProps) {
   const [search, setSearch] = useState("");
   const { view, setView } = useViewMode();
+  const isMobile = useIsMobile();
 
   // GridView config
   const gridContainerRef = useRef<HTMLDivElement>(null);
@@ -49,9 +52,10 @@ export default function Explorer({ data }: ExplorerProps) {
 
   return (
     <div className="space-y-4 p-4">
-      <ExplorerBreadcrumbs />
-
+      {/* Header */}
       <div className="flex items-center gap-2">
+        {isMobile && <SidebarTrigger />}
+        <ExplorerBreadcrumbs />
         <div className="flex-1" />
         <Search value={search} setValue={setSearch} />
         <ViewModeSwitch value={view} setValue={setView} />
