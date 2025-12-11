@@ -6,7 +6,7 @@ import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer from "@mux/mux-player-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 interface MediaViewerProps {
   filePath: string;
@@ -37,6 +37,27 @@ export function MediaViewer({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
+
+  // キーボード操作
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "ArrowRight" && hasNext) {
+        onNext();
+      } else if (event.key === "ArrowLeft" && hasPrev) {
+        onPrev();
+      } else if (event.key === "Escape") {
+        onClose();
+      }
+    },
+    [onNext, onPrev, onClose, hasNext, hasPrev]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   return (
     <div
