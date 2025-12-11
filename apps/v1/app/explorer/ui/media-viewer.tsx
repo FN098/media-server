@@ -19,7 +19,6 @@ interface MediaViewerProps {
   onPrev: () => void;
   hasNext: boolean;
   hasPrev: boolean;
-  swipeEnabled?: boolean;
 }
 
 export const MediaViewer: React.FC<MediaViewerProps> = ({
@@ -30,7 +29,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   onPrev,
   hasNext,
   hasPrev,
-  swipeEnabled,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -56,54 +54,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleKeyDown]);
-
-  // -------------------------
-  // スワイプ操作
-  // -------------------------
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchEndX = useRef(0);
-  const touchEndY = useRef(0);
-  const isPinching = useRef(false);
-  const SWIPE_THRESHOLD = 50; // スワイプ判定の最小距離
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!swipeEnabled) return; // スワイプ無効なら無視
-    if (e.touches.length > 1) {
-      // 複数指 → ピンチ開始
-      isPinching.current = true;
-    } else {
-      isPinching.current = false;
-      touchStartX.current = e.touches[0].screenX;
-      touchStartY.current = e.touches[0].screenY;
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!swipeEnabled) return; // スワイプ無効なら無視
-    if (isPinching.current) return; // ピンチ中は無視
-    touchEndX.current = e.touches[0].screenX;
-    touchEndY.current = e.touches[0].screenY;
-  };
-
-  const handleTouchEnd = () => {
-    if (!swipeEnabled) return; // スワイプ無効なら無視
-    if (isPinching.current) return; // ピンチ中は無視
-
-    const deltaX = touchEndX.current - touchStartX.current;
-    const deltaY = touchEndY.current - touchStartY.current;
-
-    // 横スワイプ（左右）で前後移動
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > SWIPE_THRESHOLD && hasPrev) onPrev();
-      else if (deltaX < -SWIPE_THRESHOLD && hasNext) onNext();
-    }
-    // 縦スワイプ（上下）で閉じる
-    else {
-      if (deltaY < -SWIPE_THRESHOLD) onClose();
-      else if (deltaY > -SWIPE_THRESHOLD) onClose();
-    }
-  };
 
   // ----------------------------------------------------
   // メディア要素
@@ -185,9 +135,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
     // ビューアの背景 (モーダル)
     <div
       ref={containerRef}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
     >
       {/* 前へボタン */}
