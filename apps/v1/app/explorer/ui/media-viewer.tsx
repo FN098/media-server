@@ -64,12 +64,11 @@ export function MediaViewer({
         )}
 
         {mediaNode.type === "audio" && (
-          <MuxPlayer
+          <audio
             src={getAbsoluteUrl(filePath)}
+            controls
             autoPlay
-            streamType="on-demand"
-            className="max-w-[90vw] max-h-[90vh] object-contain"
-            accentColor="#ffffff"
+            className="max-w-[90vw] max-h-[90vh]"
           />
         )}
       </div>
