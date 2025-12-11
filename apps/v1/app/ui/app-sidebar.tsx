@@ -1,4 +1,4 @@
-import { Home, Search } from "lucide-react";
+import { Check, Home, Search, Settings, Star } from "lucide-react";
 
 import {
   Sidebar,
@@ -26,6 +26,21 @@ const items = [
     url: "/explorer",
     icon: Search,
   },
+  {
+    title: "Sample",
+    url: "/sample",
+    icon: Check,
+  },
+  {
+    title: "Favorites",
+    url: "#",
+    icon: Star,
+  },
+  {
+    title: "Settings",
+    url: "#",
+    icon: Settings,
+  },
 ];
 
 export function AppSidebar() {
@@ -40,7 +55,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Media Server</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
