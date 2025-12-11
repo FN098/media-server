@@ -1,5 +1,6 @@
 "use client";
 
+import { useKeyPress } from "@/app/explorer/ui/hooks/use-key-press";
 import { MediaFsNode } from "@/app/lib/media/types";
 import { getAbsoluteUrl } from "@/app/lib/media/url";
 import { cn } from "@/shadcn/lib/utils";
@@ -28,15 +29,7 @@ export function MediaViewer({
   hasPrev,
 }: MediaViewerProps) {
   // ESC で閉じる
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  useKeyPress("Escape", onClose);
 
   // キーボード操作
   const handleKeyDown = useCallback(
