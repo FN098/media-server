@@ -9,7 +9,7 @@ import {
   XIcon,
 } from "lucide-react";
 import Image from "next/image";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 interface MediaViewerProps {
   filePath: string;
@@ -114,42 +114,18 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
   // ----------------------------------------------------
   // フルスクリーン
   // ----------------------------------------------------
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const toggleFullscreen = () => {
     const el = containerRef.current;
     if (!el) return;
 
     if (!document.fullscreenElement) {
       // 全画面にする
-      el.requestFullscreen?.().then(() => setIsFullscreen(true));
+      el.requestFullscreen?.();
     } else {
       // 全画面解除
-      document.exitFullscreen?.().then(() => setIsFullscreen(false));
+      document.exitFullscreen?.();
     }
   };
-
-  // ----------------------------------------------------
-  // フェード
-  // ----------------------------------------------------
-  const [showUI, setShowUI] = useState(true);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    const onMove = () => {
-      setShowUI(true);
-      clearTimeout(timer);
-      timer = setTimeout(() => setShowUI(false), 1000);
-    };
-
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("touchstart", onMove);
-
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("touchstart", onMove);
-    };
-  }, []);
 
   // ----------------------------------------------------
   // レンダリング
@@ -173,8 +149,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
             "bg-black/50 hover:bg-black/70",
             "text-white text-4xl",
             "backdrop-blur-sm",
-            "transition-opacity duration-300",
-            showUI ? "opacity-100" : "opacity-0 pointer-events-none"
+            "transition-opacity duration-300"
           )}
         >
           <ChevronLeftIcon />
@@ -190,8 +165,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
             "bg-black/50 hover:bg-black/70",
             "text-white text-4xl",
             "backdrop-blur-sm",
-            "transition-opacity duration-300",
-            showUI ? "opacity-100" : "opacity-0 pointer-events-none"
+            "transition-opacity duration-300"
           )}
         >
           <ChevronRightIcon />
@@ -202,10 +176,9 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
         className={cn(
           "absolute top-0 left-0 right-0",
           "flex justify-end items-center",
-          "p-4 z-50 gap-2",
+          "p-4 z-50 gap-4",
           "bg-lenear-to-b from-white/60 to-transparent",
-          "transition-opacity duration-300",
-          showUI ? "opacity-100" : "opacity-0 pointer-events-none"
+          "transition-opacity duration-300"
         )}
       >
         {/* 全画面 */}
