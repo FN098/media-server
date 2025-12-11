@@ -53,7 +53,7 @@ export function MediaViewer({
             alt={mediaNode.name}
             width={1920}
             height={1920}
-            className="max-h-full max-w-full object-contain"
+            className="w-auto h-auto max-w-[90vw] max-h-[90vh] object-contain"
           />
         )}
 
@@ -62,7 +62,7 @@ export function MediaViewer({
             src={getAbsoluteUrl(filePath)}
             autoPlay
             streamType="on-demand"
-            className="max-h-full max-w-full"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
             accentColor="#ffffff"
           />
         )}
