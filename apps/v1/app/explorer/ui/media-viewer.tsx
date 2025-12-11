@@ -3,6 +3,7 @@
 import { MediaFsNode } from "@/app/lib/media/types";
 import { getAbsoluteUrl } from "@/app/lib/media/url";
 import MuxPlayer from "@mux/mux-player-react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect } from "react";
 
@@ -70,30 +71,28 @@ export function MediaViewer({
       {/* 前のメディア */}
       {hasPrev && (
         <div
-          className="absolute left-0 top-0 h-full w-24 
-               flex items-center justify-center 
-               bg-linear-to-r from-black/20 to-transparent"
+          className="absolute left-0 top-0 h-full w-24 flex items-center justify-center
+             bg-black/20 opacity-0 transition-opacity duration-200 hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
             onPrev();
           }}
         >
-          {/* <ChevronLeftIcon className="text-white text-4xl" /> */}
+          <ChevronLeftIcon className="text-white text-4xl" />
         </div>
       )}
 
       {/* 次のメディア */}
       {hasNext && (
         <div
-          className="absolute right-0 top-0 h-full w-24 
-               flex items-center justify-center 
-               bg-linear-to-l from-black/20 to-transparent"
+          className="absolute right-0 top-0 h-full w-24 flex items-center justify-center
+             bg-black/20 opacity-0 transition-opacity duration-200 hover:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
             onNext();
           }}
         >
-          {/* <ChevronRightIcon className="text-white text-4xl" /> */}
+          <ChevronRightIcon className="text-white text-4xl" />
         </div>
       )}
     </div>
