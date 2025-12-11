@@ -25,6 +25,9 @@ export function MediaViewer({
   hasNext,
   hasPrev,
 }: MediaViewerProps) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const videoSrc = `${origin}/${filePath}`;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
       {/* メディア表示 */}
@@ -41,7 +44,7 @@ export function MediaViewer({
 
         {mediaNode.type === "video" && (
           <MuxPlayer
-            src={filePath}
+            src={videoSrc}
             autoPlay
             streamType="on-demand"
             className="max-h-full max-w-full"
