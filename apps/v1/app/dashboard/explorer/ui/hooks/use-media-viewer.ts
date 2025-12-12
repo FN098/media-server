@@ -21,11 +21,20 @@ export const useMediaViewer = (currentNodeList: MediaFsNode[]) => {
     [currentNodeList]
   );
 
+  // path → index のマップを作成（O(1) lookup 用）
+  const pathIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    mediaNodes.forEach((node, idx) => {
+      map.set(node.path, idx);
+    });
+    return map;
+  }, [mediaNodes]);
+
   // 現在開いているファイルのインデックスを取得
   const currentIndex = useMemo(() => {
     if (!currentPath) return -1;
-    return mediaNodes.findIndex((node) => node.path === currentPath); // TODO: これは遅いので Set を使う
-  }, [currentPath, mediaNodes]);
+    return pathIndexMap.get(currentPath) ?? -1;
+  }, [currentPath, pathIndexMap]);
 
   // ----------------------------------------------------
   // アクション関数
@@ -45,18 +54,16 @@ export const useMediaViewer = (currentNodeList: MediaFsNode[]) => {
 
   // 次のファイルへ移動
   const goToNext = useCallback(() => {
+    if (currentIndex >= mediaNodes.length - 1) return;
     const nextIndex = currentIndex + 1;
-    if (nextIndex < mediaNodes.length) {
-      setCurrentPath(mediaNodes[nextIndex].path);
-    }
+    setCurrentPath(mediaNodes[nextIndex].path);
   }, [currentIndex, mediaNodes]);
 
   // 前のファイルへ移動
   const goToPrev = useCallback(() => {
+    if (currentIndex <= 0) return;
     const prevIndex = currentIndex - 1;
-    if (prevIndex >= 0) {
-      setCurrentPath(mediaNodes[prevIndex].path);
-    }
+    setCurrentPath(mediaNodes[prevIndex].path);
   }, [currentIndex, mediaNodes]);
 
   // 現在のメディアノード情報とパス、ナビゲーションの可否
