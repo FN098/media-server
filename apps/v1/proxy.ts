@@ -42,7 +42,7 @@ export function proxy(req: Request) {
 
 export const config = {
   matcher: [
-    // _next と api/public を“除外して”、それ以外すべてに認証をかける
-    "/((?!_next|api/public).*)",
+    // _next と api を“除外して”、それ以外すべてに認証をかける
+    "/((?!_next|api).*)",
   ],
 };
