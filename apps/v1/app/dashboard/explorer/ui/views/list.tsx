@@ -1,4 +1,5 @@
 import { MediaFsNode } from "@/app/lib/media/types";
+import { EXPLORER_PATH } from "@/app/lib/path";
 import { Card, CardContent } from "@/shadcn/components/ui/card";
 import {
   FileIcon,
@@ -27,7 +28,7 @@ export function ListView({
         {data.map((node) => (
           <Link
             key={node.path}
-            href={node.isDirectory ? "/dashboard/explorer/" + node.path : "#"}
+            href={node.isDirectory ? EXPLORER_PATH + node.path : "#"}
             className="grid grid-cols-4 px-4 py-2 items-center hover:bg-blue-100"
           >
             <div className="flex gap-2">

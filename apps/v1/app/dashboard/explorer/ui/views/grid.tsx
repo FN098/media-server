@@ -1,22 +1,23 @@
 import { MediaThumb } from "@/app/dashboard/explorer/ui/thumb";
 import { MediaFsNode } from "@/app/lib/media/types";
+import { EXPLORER_PATH } from "@/app/lib/path";
 import Link from "next/link";
 import { memo } from "react";
 import { CellComponentProps, Grid } from "react-window";
 
 type GridViewProps = {
   data: MediaFsNode[];
-  columnCount?: number;
-  columnWidth?: number;
-  rowHeight?: number;
+  columnCount: number;
+  columnWidth: number;
+  rowHeight: number;
   onFileOpen?: (node: MediaFsNode) => void;
 };
 
 export const GridView = memo(function GridView1({
   data,
-  columnCount = 6,
-  columnWidth = 220,
-  rowHeight = 240,
+  columnCount,
+  columnWidth,
+  rowHeight,
   onFileOpen,
 }: GridViewProps) {
   const rowCount = Math.ceil(data.length / columnCount);
@@ -30,6 +31,9 @@ export const GridView = memo(function GridView1({
 
     const node = data[index];
 
+    const handleOpen =
+      !node.isDirectory && onFileOpen ? () => onFileOpen(node) : undefined;
+
     return (
       <div style={style} className="overflow-hidden p-1">
         <div className="aspect-square w-full overflow-hidden rounded-lg border bg-muted">
@@ -38,11 +42,7 @@ export const GridView = memo(function GridView1({
             width={columnWidth}
             height={rowHeight - 20}
             className="w-full h-full object-cover cursor-pointer"
-            onOpen={
-              !node.isDirectory && onFileOpen
-                ? () => onFileOpen(node)
-                : undefined
-            }
+            onOpen={handleOpen}
           />
         </div>
         <div className="mt-1 truncate text-center text-xs">{node.name}</div>
@@ -77,7 +77,7 @@ function ThumbItem({
 }) {
   // DirectoryItem
   if (node.isDirectory) {
-    const href = "/dashboard/explorer/" + node.path;
+    const href = EXPLORER_PATH + node.path;
     return (
       <Link href={href} className="cursor-pointer">
         <MediaThumb node={node} width={width} height={height} />

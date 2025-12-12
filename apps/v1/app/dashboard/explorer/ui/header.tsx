@@ -1,7 +1,7 @@
 "use client";
 
 import { ExplorerBreadcrumbs } from "@/app/dashboard/explorer/ui/breadcrumbs";
-import { useSearch } from "@/app/dashboard/explorer/ui/providers/use-search";
+import { useSearch } from "@/app/dashboard/explorer/ui/providers/search-provider";
 import { useViewMode } from "@/app/dashboard/explorer/ui/providers/view-mode-provider";
 import { Search } from "@/app/dashboard/explorer/ui/search";
 import { ViewModeSwitch } from "@/app/dashboard/explorer/ui/view-mode-switch";

@@ -1,5 +1,6 @@
 "use client";
 
+import { EXPLORER_PATH } from "@/app/lib/path";
 import { BreadcrumbLinkItem, Breadcrumbs } from "@/app/ui/breadcrumbs";
 import { usePathname } from "next/navigation";
 
@@ -19,7 +20,7 @@ export function ExplorerBreadcrumbs({ className }: { className?: string }) {
     ...pathParts.map((part, i) => ({
       key: part,
       label: part,
-      href: "/dashboard/explorer/" + pathParts.slice(0, i + 1).join("/"),
+      href: EXPLORER_PATH + pathParts.slice(0, i + 1).join("/"),
     })),
   ];
 

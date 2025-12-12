@@ -3,7 +3,7 @@
 import { useGridConfig } from "@/app/dashboard/explorer/ui/hooks/use-grid-config";
 import { useMediaViewer } from "@/app/dashboard/explorer/ui/hooks/use-media-viewer";
 import { MediaViewer } from "@/app/dashboard/explorer/ui/media-viewer";
-import { useSearch } from "@/app/dashboard/explorer/ui/providers/use-search";
+import { useSearch } from "@/app/dashboard/explorer/ui/providers/search-provider";
 import { useViewMode } from "@/app/dashboard/explorer/ui/providers/view-mode-provider";
 import { GridView } from "@/app/dashboard/explorer/ui/views/grid";
 import { ListView } from "@/app/dashboard/explorer/ui/views/list";
@@ -11,10 +11,10 @@ import { MediaFsListing } from "@/app/lib/media/types";
 import { useMemo, useRef } from "react";
 
 type ExplorerProps = {
-  data: MediaFsListing;
+  listing: MediaFsListing;
 };
 
-export default function Explorer({ data }: ExplorerProps) {
+export default function Explorer({ listing }: ExplorerProps) {
   const { search } = useSearch();
   const { view } = useViewMode();
 
@@ -34,16 +34,16 @@ export default function Explorer({ data }: ExplorerProps) {
     closeViewer,
     goToNext,
     goToPrev,
-  } = useMediaViewer(data.nodes);
+  } = useMediaViewer(listing.nodes);
 
   // Search filter
   const lowerSearch = useMemo(() => search.toLowerCase(), [search]);
   const filtered = useMemo(() => {
-    const nodes = data.nodes;
+    const nodes = listing.nodes;
     if (!lowerSearch) return nodes;
 
     return nodes.filter((e) => e.name.toLowerCase().includes(lowerSearch));
-  }, [data.nodes, lowerSearch]);
+  }, [listing.nodes, lowerSearch]);
 
   return (
     <div className="space-y-4 p-4">

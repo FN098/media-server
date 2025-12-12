@@ -1,6 +1,6 @@
 import { detectMediaType } from "@/app/lib/media/mimetype";
-import { MEDIA_ROOT } from "@/app/lib/media/root";
 import { MediaFsListing, MediaFsNode } from "@/app/lib/media/types";
+import { MEDIA_ROOT_PATH } from "@/app/lib/path";
 import fs from "fs/promises";
 import path from "path";
 
@@ -8,7 +8,7 @@ export async function getMediaFsListing(
   targetPath: string
 ): Promise<MediaFsListing | null> {
   try {
-    const targetDir = path.join(MEDIA_ROOT, targetPath);
+    const targetDir = path.join(MEDIA_ROOT_PATH, targetPath);
     const dirents = await fs.readdir(targetDir, { withFileTypes: true });
 
     const nodes: MediaFsNode[] = await Promise.all(
