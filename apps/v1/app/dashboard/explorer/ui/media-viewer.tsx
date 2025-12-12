@@ -66,12 +66,17 @@ export function MediaViewer({
         )}
 
         {mediaNode.type === "audio" && (
-          <audio
-            src={getAbsoluteUrl(filePath)}
-            controls
-            autoPlay
-            className="max-w-[90vw] max-h-[90vh]"
-          />
+          <div>
+            <h1 className="fixed top-10 left-1/2 transform -translate-x-1/2 text-white text-3xl">
+              {mediaNode.name}
+            </h1>
+            <audio
+              src={getAbsoluteUrl(filePath)}
+              controls
+              autoPlay
+              className="max-w-[90vw] max-h-[90vh] mt-12"
+            />
+          </div>
         )}
       </div>
 
