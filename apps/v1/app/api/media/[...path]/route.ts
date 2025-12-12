@@ -1,9 +1,8 @@
 import { getMimetype } from "@/app/lib/media/mimetype";
-import { PATHS } from "@/app/lib/paths";
+import { getMediaPath } from "@/app/lib/media/path-helpers";
 import fsSync from "fs";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
 import { Readable } from "stream";
 
 export async function GET(
@@ -13,7 +12,7 @@ export async function GET(
   try {
     const { path: p } = await context.params;
     const rel = p.join("/");
-    const filePath = path.join(PATHS.server.mediaRoot, rel);
+    const filePath = getMediaPath(rel);
 
     const stat = await fs.stat(filePath);
     const fileSize = stat.size;

@@ -1,8 +1,7 @@
 import { MediaThumb } from "@/app/dashboard/explorer/ui/thumb";
+import { getClientExplorerPath } from "@/app/lib/media/path-helpers";
 import { MediaFsNode } from "@/app/lib/media/types";
-import { PATHS } from "@/app/lib/paths";
 import Link from "next/link";
-import path from "path";
 import { memo } from "react";
 import { CellComponentProps, Grid } from "react-window";
 
@@ -78,7 +77,7 @@ function ThumbItem({
 }) {
   // DirectoryItem
   if (node.isDirectory) {
-    const href = path.join(PATHS.client.explorer, node.path);
+    const href = getClientExplorerPath(node.path);
     return (
       <Link href={href} className="cursor-pointer">
         <MediaThumb node={node} width={width} height={height} />

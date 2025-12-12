@@ -7,6 +7,9 @@ WORKDIR /app/apps/v1
 # Git のインストール
 RUN apk add --no-cache git
 
+# ffmpeg のインストール
+RUN apk add --no-cache ffmpeg
+
 # pnpm をグローバルインストール
 RUN npm i -g pnpm
 
