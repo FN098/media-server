@@ -23,7 +23,9 @@ export async function createVideoThumb(
   videoPath: string,
   thumbPath: string
 ): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
+  // 一旦 ffmpeg でサムネ生成（元サイズ）
+  const tempThumb = thumbPath + ".tmp.jpg";
+  await new Promise<void>((resolve, reject) => {
     const ff = spawn("ffmpeg", [
       "-y",
       "-v",
@@ -34,7 +36,7 @@ export async function createVideoThumb(
       "1",
       "-q:v",
       "80",
-      thumbPath,
+      tempThumb,
     ]);
 
     ff.on("close", (code) => {
@@ -47,9 +49,17 @@ export async function createVideoThumb(
         );
     });
   });
+
+  // sharp でリサイズして最終出力
+  await sharp(tempThumb)
+    .resize({ width: APP_CONFIG.thumb.width }) // 高さは自動
+    .toFile(thumbPath);
+
+  // 一時ファイル削除
+  await fs.unlink(tempThumb);
 }
 
-async function createImageThumb(
+export async function createImageThumb(
   imagePath: string,
   thumbPath: string
 ): Promise<void> {
