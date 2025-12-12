@@ -1,6 +1,6 @@
 export default async function Page() {
   return (
-    <div className="flex justify-center items-center w-full h-full">
+    <div className="flex items-center justify-center h-screen">
       Welcome Page
     </div>
   );
