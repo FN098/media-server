@@ -14,14 +14,23 @@ export function ExplorerHeader() {
   const isMobile = useIsMobile();
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {isMobile && <SidebarTrigger />}
-      <ExplorerBreadcrumbs className="shrink-0" />
-      <div className="flex-1 min-w-[150px]" />
-      <div className="flex ml-auto">
-        <Search value={search} setValue={setSearch} className="shrink-0" />
-        <ViewModeSwitch value={view} setValue={setView} className="shrink-0" />
-      </div>
-    </div>
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 flex flex-wrap items-center gap-2 bg-white dark:bg-gray-900 p-2 shadow">
+        {isMobile && <SidebarTrigger />}
+        <ExplorerBreadcrumbs className="shrink-0" />
+        <div className="flex-1 min-w-[150px]" />
+        <div className="flex ml-auto gap-2">
+          <Search value={search} setValue={setSearch} className="shrink-0" />
+          <ViewModeSwitch
+            value={view}
+            setValue={setView}
+            className="shrink-0"
+          />
+        </div>
+      </header>
+
+      {/* 下のコンテンツにはヘッダー分の余白を */}
+      <div className="pt-12">{/* メインコンテンツ */}</div>
+    </>
   );
 }
