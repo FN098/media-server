@@ -1,4 +1,4 @@
-import { getThumbUrl } from "@/app/lib/media/path-helpers";
+import { getMediaUrl, getThumbUrl } from "@/app/lib/media/path-helpers";
 import { MediaFsNode } from "@/app/lib/media/types";
 import { FallbackImage } from "@/app/ui/fallback-image";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
@@ -52,7 +52,7 @@ export const MediaThumb = memo(function MediaThumb1({
   if (node.type === "image") {
     return (
       <Image
-        src={getThumbUrl(node.path)}
+        src={getMediaUrl(node.path)}
         alt={node.name}
         width={width}
         height={height}

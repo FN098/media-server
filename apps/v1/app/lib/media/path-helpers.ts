@@ -2,6 +2,10 @@ import { APP_CONFIG } from "@/app.config";
 import { PATHS } from "@/app/lib/media/paths";
 import path from "path";
 
+export function getMediaUrl(nodePath: string) {
+  return path.join(PATHS.api.mediaRoot, nodePath);
+}
+
 export function getThumbUrl(nodePath: string) {
   return path.join(PATHS.api.thumbRoot, nodePath + APP_CONFIG.thumb.extension);
 }
