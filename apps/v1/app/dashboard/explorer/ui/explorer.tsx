@@ -1,27 +1,23 @@
 "use client";
 
-import { ExplorerBreadcrumbs } from "@/app/dashboard/explorer/ui/breadcrumbs";
+import { ExplorerHeader } from "@/app/dashboard/explorer/ui/header";
 import { useGridConfig } from "@/app/dashboard/explorer/ui/hooks/use-grid-config";
 import { useMediaViewer } from "@/app/dashboard/explorer/ui/hooks/use-media-viewer";
 import { MediaViewer } from "@/app/dashboard/explorer/ui/media-viewer";
+import { useSearch } from "@/app/dashboard/explorer/ui/providers/use-search";
 import { useViewMode } from "@/app/dashboard/explorer/ui/providers/view-mode-provider";
-import { Search } from "@/app/dashboard/explorer/ui/search";
-import { ViewModeSwitch } from "@/app/dashboard/explorer/ui/view-mode-switch";
 import { GridView } from "@/app/dashboard/explorer/ui/views/grid";
 import { ListView } from "@/app/dashboard/explorer/ui/views/list";
 import { MediaFsListing } from "@/app/lib/media/types";
-import { SidebarTrigger } from "@/shadcn/components/ui/sidebar";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 
 type ExplorerProps = {
   data: MediaFsListing;
 };
 
 export default function Explorer({ data }: ExplorerProps) {
-  const [search, setSearch] = useState("");
-  const { view, setView } = useViewMode();
-  const isMobile = useIsMobile();
+  const { search } = useSearch();
+  const { view } = useViewMode();
 
   // GridView config
   const gridContainerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +49,7 @@ export default function Explorer({ data }: ExplorerProps) {
   return (
     <div className="space-y-4 p-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* <div className="flex flex-wrap items-center gap-2">
         {isMobile && <SidebarTrigger />}
         <ExplorerBreadcrumbs className="shrink-0" />
         <div className="flex-1 min-w-[150px]" />
@@ -65,7 +61,8 @@ export default function Explorer({ data }: ExplorerProps) {
             className="shrink-0"
           />
         </div>
-      </div>
+      </div> */}
+      <ExplorerHeader />
 
       <div
         className={view === "grid" ? "block" : "hidden"}

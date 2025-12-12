@@ -1,4 +1,5 @@
 import Explorer from "@/app/dashboard/explorer/ui/explorer";
+import { SearchProvider } from "@/app/dashboard/explorer/ui/providers/use-search";
 import { getMediaFsListing } from "@/app/lib/media/explorer";
 import { notFound } from "next/navigation";
 
@@ -11,5 +12,9 @@ export default async function Page(props: {
   const data = await getMediaFsListing(decodedPath);
   if (!data) notFound();
 
-  return <Explorer data={data} />;
+  return (
+    <SearchProvider>
+      <Explorer data={data} />
+    </SearchProvider>
+  );
 }
