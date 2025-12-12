@@ -2,11 +2,13 @@
 // サムネイル
 // =====================
 
+import { APP_CONFIG } from "@/app.config";
 import { getMediaPath, getMediaThumbPath } from "@/app/lib/media/path-helpers";
 import { MediaFsNode } from "@/app/lib/media/types";
 import { spawn } from "child_process";
 import fs, { mkdir } from "fs/promises";
 import { dirname } from "path";
+import sharp from "sharp";
 
 export async function existsThumb(thumbPath: string): Promise<boolean> {
   try {
@@ -44,31 +46,44 @@ export async function createVideoThumb(
           )
         );
     });
-
-    ff.stderr.on("data", (data) => console.error(data.toString()));
   });
 }
 
-export async function createVideoThumbs(nodes: MediaFsNode[]): Promise<void> {
-  // ビデオファイルを取得
-  const videos = nodes.filter((n) => n.type === "video");
-  if (videos.length === 0) return;
+async function createImageThumb(
+  imagePath: string,
+  thumbPath: string
+): Promise<void> {
+  await sharp(imagePath)
+    .resize({ width: APP_CONFIG.thumb.width }) // 高さは自動
+    .toFile(thumbPath);
+}
 
-  // 必要なディレクトリを一括で作成
+export async function createThumbs(nodes: MediaFsNode[]): Promise<void> {
+  if (nodes.length === 0) return;
+
+  // ビデオファイルを取得
+  const filtered = nodes.filter(
+    (n) => n.type === "video" || n.type === "image"
+  );
+  if (filtered.length === 0) return;
+
+  // サムネイルのディレクトリを一括作成
   const thumbDirs = Array.from(
-    new Set(videos.map((v) => dirname(getMediaThumbPath(v.path))))
+    new Set(filtered.map((n) => dirname(getMediaThumbPath(n.path))))
   );
   await Promise.all(thumbDirs.map((dir) => mkdir(dir, { recursive: true })));
 
-  // サムネイル生成
+  // サムネイルがまだ存在しない場合のみ生成
   await Promise.all(
-    videos.map(async (v) => {
-      const thumb = getMediaThumbPath(v.path);
+    filtered.map(async (n) => {
+      const thumb = getMediaThumbPath(n.path);
+      if (await existsThumb(thumb)) return;
 
-      // サムネイルがまだ存在しない場合のみ生成
-      if (!(await existsThumb(thumb))) {
-        const video = getMediaPath(v.path);
-        await createVideoThumb(video, thumb);
+      const media = getMediaPath(n.path);
+      if (n.type === "video") {
+        await createVideoThumb(media, thumb);
+      } else if (n.type === "image") {
+        await createImageThumb(media, thumb);
       }
     })
   );
