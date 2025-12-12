@@ -1,5 +1,5 @@
 import { MediaFsNode } from "@/app/lib/media/types";
-import FallbackImage from "@/app/ui/fallback-image";
+import { FallbackImage } from "@/app/ui/fallback-image";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import {

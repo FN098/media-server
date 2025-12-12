@@ -5,7 +5,7 @@ interface FallbackImageProps extends ImageProps {
   fallback?: React.ReactNode;
 }
 
-export default function FallbackImage({
+export function FallbackImage({
   fallback,
   alt = "",
   ...props
