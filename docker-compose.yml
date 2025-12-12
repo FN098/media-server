@@ -16,6 +16,7 @@ services:
       context: .
       dockerfile: ./docker/app/Dockerfile
     container_name: media-server-app
+    restart: unless-stopped
     command: sleep infinity
     env_file:
       - .env
