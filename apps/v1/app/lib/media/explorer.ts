@@ -47,7 +47,7 @@ export async function getMediaFsListing(
 
     return listing;
   } catch (e) {
-    console.error(`Error in ${getMediaFsListing}:`, e);
+    console.error(`Error in ${getMediaFsListing.name}:`, e);
     return null;
   }
 }
