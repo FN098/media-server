@@ -3,7 +3,7 @@
 import { BreadcrumbLinkItem, Breadcrumbs } from "@/app/ui/breadcrumbs";
 import { usePathname } from "next/navigation";
 
-export function ExplorerBreadcrumbs() {
+export function ExplorerBreadcrumbs({ className }: { className?: string }) {
   const pathname = usePathname();
 
   // pathParts から Breadcrumb[] を作る
@@ -14,7 +14,8 @@ export function ExplorerBreadcrumbs() {
     .map(decodeURIComponent);
 
   const breadcrumbs: BreadcrumbLinkItem[] = [
-    { key: "home", label: "HOME", href: "/dashboard/explorer" },
+    { key: "home", label: "Home", href: "/dashboard" },
+    { key: "explorer", label: "Explorer", href: "/dashboard/explorer" },
     ...pathParts.map((part, i) => ({
       key: part,
       label: part,
@@ -22,5 +23,11 @@ export function ExplorerBreadcrumbs() {
     })),
   ];
 
-  return <Breadcrumbs items={breadcrumbs} options={{ threshold: 20 }} />;
+  return (
+    <Breadcrumbs
+      items={breadcrumbs}
+      options={{ threshold: 20 }}
+      className={className}
+    />
+  );
 }

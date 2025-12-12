@@ -53,12 +53,18 @@ export default function Explorer({ data }: ExplorerProps) {
   return (
     <div className="space-y-4 p-4">
       {/* Header */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {isMobile && <SidebarTrigger />}
-        <ExplorerBreadcrumbs />
-        <div className="flex-1" />
-        <Search value={search} setValue={setSearch} />
-        <ViewModeSwitch value={view} setValue={setView} />
+        <ExplorerBreadcrumbs className="shrink-0" />
+        <div className="flex-1 min-w-[150px]" />
+        <div className="flex ml-auto">
+          <Search value={search} setValue={setSearch} className="shrink-0" />
+          <ViewModeSwitch
+            value={view}
+            setValue={setView}
+            className="shrink-0"
+          />
+        </div>
       </div>
 
       <div

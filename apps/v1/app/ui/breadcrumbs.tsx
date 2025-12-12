@@ -29,11 +29,13 @@ export type BreadcrumbLinkItem = {
 export function Breadcrumbs({
   items,
   options,
+  className,
 }: {
   items: BreadcrumbLinkItem[];
   options?: {
     threshold?: number;
   };
+  className?: string;
 }) {
   if (!items || items.length === 0) return null;
 
@@ -44,7 +46,7 @@ export function Breadcrumbs({
   const middle = items.slice(1, items.length - 1);
 
   return (
-    <Breadcrumb>
+    <Breadcrumb className={className}>
       <BreadcrumbList className={cn("flex text-sm")}>
         {/* First item */}
         <BreadcrumbItem>
