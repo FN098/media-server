@@ -5,16 +5,16 @@ import fs from "fs/promises";
 import path from "path";
 
 export async function getMediaFsListing(
-  mediaPath: string
+  targetPath: string
 ): Promise<MediaFsListing | null> {
   try {
-    const targetDir = path.join(MEDIA_ROOT, mediaPath);
+    const targetDir = path.join(MEDIA_ROOT, targetPath);
     const dirents = await fs.readdir(targetDir, { withFileTypes: true });
 
     const nodes: MediaFsNode[] = await Promise.all(
       dirents.map(async (item) => {
         const relativePath = path
-          .join(mediaPath, item.name)
+          .join(targetPath, item.name)
           .replace(/\\/g, "/");
         const absolutePath = path.join(targetDir, item.name);
         const stat = await fs.stat(absolutePath);
@@ -31,12 +31,12 @@ export async function getMediaFsListing(
     );
 
     const parent =
-      mediaPath === ""
+      targetPath === ""
         ? null
-        : mediaPath.split("/").slice(0, -1).join("/") || "";
+        : targetPath.split("/").slice(0, -1).join("/") || "";
 
     const listing: MediaFsListing = {
-      path: mediaPath,
+      path: targetPath,
       nodes,
       parent,
     };

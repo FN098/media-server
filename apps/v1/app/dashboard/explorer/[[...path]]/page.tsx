@@ -13,6 +13,17 @@ export default async function Page(props: {
   const data = await getMediaFsListing(decodedPath);
   if (!data) notFound();
 
+  // 一つ上の階層のフォルダを先頭に追加
+  if (data?.parent !== null) {
+    data.nodes.unshift({
+      name: "..",
+      path: data.parent,
+      isDirectory: true,
+      type: "directory",
+      updatedAt: "",
+    });
+  }
+
   return (
     <SearchProvider>
       <ExplorerHeader />
