@@ -1,5 +1,5 @@
 import { MediaFsNode } from "@/app/lib/media/types";
-import { EXPLORER_PATH } from "@/app/lib/path";
+import { PATHS } from "@/app/lib/paths";
 import { Card, CardContent } from "@/shadcn/components/ui/card";
 import {
   FileIcon,
@@ -9,6 +9,7 @@ import {
   VideoIcon,
 } from "lucide-react";
 import Link from "next/link";
+import path from "path";
 
 export function ListView({
   data,
@@ -28,7 +29,11 @@ export function ListView({
         {data.map((node) => (
           <Link
             key={node.path}
-            href={node.isDirectory ? EXPLORER_PATH + node.path : "#"}
+            href={
+              node.isDirectory
+                ? path.join(PATHS.client.explorer, node.path)
+                : "#"
+            }
             className="grid grid-cols-4 px-4 py-2 items-center hover:bg-blue-100"
           >
             <div className="flex gap-2">
