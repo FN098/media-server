@@ -59,22 +59,11 @@ export async function createVideoThumb(
   await fs.unlink(tempThumb);
 }
 
-export async function createImageThumb(
-  imagePath: string,
-  thumbPath: string
-): Promise<void> {
-  await sharp(imagePath)
-    .resize({ width: APP_CONFIG.thumb.width }) // 高さは自動
-    .toFile(thumbPath);
-}
-
 export async function createThumbs(nodes: MediaFsNode[]): Promise<void> {
   if (nodes.length === 0) return;
 
   // ビデオファイルを取得
-  const filtered = nodes.filter(
-    (n) => n.type === "video" || n.type === "image"
-  );
+  const filtered = nodes.filter((n) => n.type === "video");
   if (filtered.length === 0) return;
 
   // サムネイルのディレクトリを一括作成
@@ -92,8 +81,6 @@ export async function createThumbs(nodes: MediaFsNode[]): Promise<void> {
       const media = getMediaPath(n.path);
       if (n.type === "video") {
         await createVideoThumb(media, thumb);
-      } else if (n.type === "image") {
-        await createImageThumb(media, thumb);
       }
     })
   );
