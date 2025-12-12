@@ -1,6 +1,5 @@
 "use client";
 
-import { ExplorerHeader } from "@/app/dashboard/explorer/ui/header";
 import { useGridConfig } from "@/app/dashboard/explorer/ui/hooks/use-grid-config";
 import { useMediaViewer } from "@/app/dashboard/explorer/ui/hooks/use-media-viewer";
 import { MediaViewer } from "@/app/dashboard/explorer/ui/media-viewer";
@@ -48,22 +47,6 @@ export default function Explorer({ data }: ExplorerProps) {
 
   return (
     <div className="space-y-4 p-4">
-      {/* Header */}
-      {/* <div className="flex flex-wrap items-center gap-2">
-        {isMobile && <SidebarTrigger />}
-        <ExplorerBreadcrumbs className="shrink-0" />
-        <div className="flex-1 min-w-[150px]" />
-        <div className="flex ml-auto">
-          <Search value={search} setValue={setSearch} className="shrink-0" />
-          <ViewModeSwitch
-            value={view}
-            setValue={setView}
-            className="shrink-0"
-          />
-        </div>
-      </div> */}
-      <ExplorerHeader />
-
       <div
         className={view === "grid" ? "block" : "hidden"}
         ref={gridContainerRef}

@@ -1,4 +1,5 @@
 import Explorer from "@/app/dashboard/explorer/ui/explorer";
+import { ExplorerHeader } from "@/app/dashboard/explorer/ui/header";
 import { SearchProvider } from "@/app/dashboard/explorer/ui/providers/use-search";
 import { getMediaFsListing } from "@/app/lib/media/explorer";
 import { notFound } from "next/navigation";
@@ -14,6 +15,7 @@ export default async function Page(props: {
 
   return (
     <SearchProvider>
+      <ExplorerHeader />
       <Explorer data={data} />
     </SearchProvider>
   );

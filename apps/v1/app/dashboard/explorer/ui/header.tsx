@@ -15,7 +15,7 @@ export function ExplorerHeader() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 flex flex-wrap items-center gap-2 bg-white dark:bg-gray-900 p-2 shadow">
+      <header className="sticky top-0 left-0 right-0 z-5 flex flex-wrap items-center gap-2 bg-white dark:bg-gray-900 p-2 shadow">
         {isMobile && <SidebarTrigger />}
         <ExplorerBreadcrumbs className="shrink-0" />
         <div className="flex-1 min-w-[150px]" />
