@@ -6,8 +6,8 @@ import { Search } from "@/app/components/ui/search";
 import { ViewModeSwitch } from "@/app/components/ui/view-mode-switch";
 import { useBreadcrumbs } from "@/app/hooks/use-breadcrumbs";
 import { useMounted } from "@/app/hooks/use-mounted";
-import { useSearch } from "@/app/providers/search-provider";
-import { useViewMode } from "@/app/providers/view-mode-provider";
+import { useSearchOptional } from "@/app/providers/search-provider";
+import { useViewModeOptional } from "@/app/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -17,8 +17,8 @@ type HeaderProps = {
 };
 
 export function Header({ basePath }: HeaderProps) {
-  const { search, setSearch } = useSearch();
-  const { view, setView } = useViewMode();
+  const searchCtx = useSearchOptional();
+  const viewCtx = useViewModeOptional();
   const isMobile = useIsMobile();
   const breadcrumbs = useBreadcrumbs(basePath);
   const mounted = useMounted();
@@ -53,16 +53,21 @@ export function Header({ basePath }: HeaderProps) {
               {current?.label ?? ""}
             </div>
 
-            <Search
-              value={search}
-              setValue={setSearch}
-              className="w-22 shrink-0"
-            />
-            <ViewModeSwitch
-              value={view}
-              setValue={setView}
-              className="shrink-0"
-            />
+            {searchCtx && (
+              <Search
+                value={searchCtx.search}
+                setValue={searchCtx.setSearch}
+                className="w-[100px] shrink-0"
+              />
+            )}
+
+            {viewCtx && (
+              <ViewModeSwitch
+                value={viewCtx.view}
+                setValue={viewCtx.setView}
+                className="shrink-0"
+              />
+            )}
           </div>
         </header>
 
@@ -83,16 +88,20 @@ export function Header({ basePath }: HeaderProps) {
           />
 
           <div className="ml-auto flex items-center gap-2">
-            <Search
-              value={search}
-              setValue={setSearch}
-              className="w-[180px] shrink-0"
-            />
-            <ViewModeSwitch
-              value={view}
-              setValue={setView}
-              className="shrink-0"
-            />
+            {searchCtx && (
+              <Search
+                value={searchCtx.search}
+                setValue={searchCtx.setSearch}
+                className="w-[180px] shrink-0"
+              />
+            )}
+            {viewCtx && (
+              <ViewModeSwitch
+                value={viewCtx.view}
+                setValue={viewCtx.setView}
+                className="shrink-0"
+              />
+            )}
           </div>
         </div>
       </header>

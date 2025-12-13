@@ -25,3 +25,8 @@ export function useViewMode() {
   if (!ctx) throw new Error("useViewMode must be used within ViewModeProvider");
   return ctx;
 }
+
+export function useViewModeOptional() {
+  const ctx = useContext(ViewModeContext);
+  return ctx;
+}

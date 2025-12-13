@@ -24,3 +24,8 @@ export function useSearch() {
   if (!ctx) throw new Error("useSearch must be used within SearchProvider");
   return ctx;
 }
+
+export function useSearchOptional() {
+  const ctx = useContext(SearchContext);
+  return ctx;
+}
