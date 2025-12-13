@@ -1,3 +1,4 @@
+import { TextWithTooltip } from "@/app/components/ui/text-with-tooltip";
 import { MediaThumb } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/types";
 import Link from "next/link";
@@ -47,7 +48,10 @@ export const GridView = memo(function GridView1({
             onOpen={handleOpen}
           />
         </div>
-        <div className="mt-1 truncate text-center text-xs">{node.name}</div>
+        <TextWithTooltip
+          text={node.name}
+          className="truncate text-center text-xs"
+        />
       </div>
     );
   };
