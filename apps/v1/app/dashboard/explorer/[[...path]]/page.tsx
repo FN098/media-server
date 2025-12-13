@@ -1,5 +1,6 @@
 import { Explorer } from "@/app/components/ui/explorer";
 import { getMediaFsListing } from "@/app/lib/explorer";
+import { withSortedNodes } from "@/app/lib/sort";
 import { createThumbs } from "@/app/lib/thumb";
 import { notFound } from "next/navigation";
 
@@ -12,8 +13,10 @@ export default async function Page(props: {
   const listing = await getMediaFsListing(decodedPath);
   if (!listing) notFound();
 
+  const sortedListing = withSortedNodes(listing);
+
   // サムネイルを自動生成
   await createThumbs(listing.nodes);
 
-  return <Explorer listing={listing} />;
+  return <Explorer listing={sortedListing} />;
 }
