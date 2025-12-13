@@ -1,6 +1,5 @@
 import { Header } from "@/app/components/ui/header";
 import { SearchProvider } from "@/app/providers/search-provider";
-import { ViewModeProvider } from "@/app/providers/view-mode-provider";
 
 export default function DashboardLayout({
   children,
@@ -8,11 +7,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ViewModeProvider>
-      <SearchProvider>
-        <Header basePath="/dashboard/explorer" />
-        {children}
-      </SearchProvider>
-    </ViewModeProvider>
+    // 検索キーワードはページ遷移後に破棄
+    <SearchProvider>
+      <Header basePath="/dashboard/explorer" />
+      {children}
+    </SearchProvider>
   );
 }
