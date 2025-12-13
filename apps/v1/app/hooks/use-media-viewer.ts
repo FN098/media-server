@@ -1,5 +1,6 @@
 "use client";
 
+import { isMedia } from "@/app/lib/media";
 import { MediaFsNode } from "@/app/lib/types";
 import { useCallback, useMemo, useState } from "react";
 
@@ -15,9 +16,10 @@ export const useMediaViewer = (currentNodeList: MediaFsNode[]) => {
   // ----------------------------------------------------
   // ナビゲーション用ファイルリストの準備
   // ----------------------------------------------------
+
   // ディレクトリを除外し、メディアファイルのみのリストを作成
   const mediaNodes = useMemo(
-    () => currentNodeList.filter((node) => !node.isDirectory),
+    () => currentNodeList.filter((node) => isMedia(node)),
     [currentNodeList]
   );
 
