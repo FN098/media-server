@@ -25,21 +25,21 @@ export function ListView({ nodes, getNodeHref, onFileOpen }: ListViewProps) {
           <div>Updated</div>
           <div>Size</div>
         </div>
-        {nodes.map((node) => (
-          <Link
-            key={node.path}
-            href={node.isDirectory ? getNodeHref(node) : "#"}
-            className="grid grid-cols-4 px-4 py-2 items-center hover:bg-blue-100"
-          >
-            <div className="flex gap-2">
-              <ThumbIcon node={node} />
-              <span className="truncate">{node.name}</span>
-            </div>
-            <div>{node.isDirectory ? "Folder" : node.type}</div>
-            <div>{node.updatedAt ?? "-"}</div>
-            <div>{node.size ? `${Math.round(node.size / 1024)} KB` : "-"}</div>
-          </Link>
-        ))}
+        {nodes.map((node) => {
+          const handleOpen =
+            !node.isDirectory && onFileOpen
+              ? () => onFileOpen(node)
+              : undefined;
+
+          return (
+            <RowItem
+              key={node.path}
+              node={node}
+              getNodeHref={getNodeHref}
+              onOpen={handleOpen}
+            />
+          );
+        })}
       </CardContent>
     </Card>
   );
@@ -58,4 +58,39 @@ function ThumbIcon({ node }: { node: MediaFsNode }) {
     default:
       return <FileIcon className="shrink-0 h-6 w-6 text-gray-600" />;
   }
+}
+
+function RowItem({
+  node,
+  getNodeHref,
+  onOpen,
+}: {
+  node: MediaFsNode;
+  getNodeHref: (node: MediaFsNode) => string;
+  onOpen?: () => void;
+}) {
+  const row = (
+    <div className="grid grid-cols-4 px-4 py-2 items-center hover:bg-blue-100">
+      <div className="flex gap-2">
+        <ThumbIcon node={node} />
+        <span className="truncate">{node.name}</span>
+      </div>
+      <div>{node.isDirectory ? "Folder" : node.type}</div>
+      <div>{node.updatedAt ?? "-"}</div>
+      <div>{node.size ? `${Math.round(node.size / 1024)} KB` : "-"}</div>
+    </div>
+  );
+
+  // DirectoryItem
+  if (node.isDirectory) {
+    const href = getNodeHref(node);
+    return (
+      <Link key={node.path} href={href}>
+        {row}
+      </Link>
+    );
+  }
+
+  // FileItem
+  return <div onDoubleClick={onOpen}>{row}</div>;
 }
