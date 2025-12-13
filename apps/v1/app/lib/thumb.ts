@@ -2,13 +2,11 @@
 // サムネイル
 // =====================
 
-import { APP_CONFIG } from "@/app.config";
 import { getMediaPath, getMediaThumbPath } from "@/app/lib/path-helpers";
 import { MediaFsNode } from "@/app/lib/types";
 import { spawn } from "child_process";
 import fs, { mkdir } from "fs/promises";
 import { dirname } from "path";
-import sharp from "sharp";
 
 export async function existsThumb(thumbPath: string): Promise<boolean> {
   try {
@@ -23,8 +21,6 @@ export async function createVideoThumb(
   videoPath: string,
   thumbPath: string
 ): Promise<void> {
-  // 一旦 ffmpeg でサムネ生成（元サイズ）
-  const tempThumb = thumbPath + ".tmp.jpg";
   await new Promise<void>((resolve, reject) => {
     const ff = spawn("ffmpeg", [
       "-y",
@@ -36,7 +32,7 @@ export async function createVideoThumb(
       "1",
       "-q:v",
       "80",
-      tempThumb,
+      thumbPath,
     ]);
 
     ff.on("close", (code) => {
@@ -49,14 +45,6 @@ export async function createVideoThumb(
         );
     });
   });
-
-  // sharp でリサイズして最終出力
-  await sharp(tempThumb)
-    .resize({ width: APP_CONFIG.thumb.width }) // 高さは自動
-    .toFile(thumbPath);
-
-  // 一時ファイル削除
-  await fs.unlink(tempThumb);
 }
 
 export async function createThumbs(nodes: MediaFsNode[]): Promise<void> {
