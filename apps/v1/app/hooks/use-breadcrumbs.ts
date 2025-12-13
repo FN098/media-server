@@ -12,12 +12,9 @@ type BreadcrumbFormatContext = {
 
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const defaultFormatLabel = ({ part }: BreadcrumbFormatContext) =>
-  part.replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
-
 export function useBreadcrumbs(
-  basePath: string = "/dashboard",
-  formatLabel: (ctx: BreadcrumbFormatContext) => string = defaultFormatLabel
+  basePath: string,
+  formatLabel?: (ctx: BreadcrumbFormatContext) => string
 ) {
   const pathname = usePathname();
 
@@ -34,13 +31,15 @@ export function useBreadcrumbs(
         const href = `${basePath}/${parts.slice(0, index + 1).join("/")}`;
         return {
           key: href,
-          label: formatLabel({
-            part,
-            index,
-            parts,
-            href,
-            isLast: index === parts.length - 1,
-          }),
+          label: formatLabel
+            ? formatLabel({
+                part,
+                index,
+                parts,
+                href,
+                isLast: index === parts.length - 1,
+              })
+            : part,
           href,
         };
       }),

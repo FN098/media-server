@@ -12,9 +12,11 @@ import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-const basePath = "/dashboard/explorer";
+type HeaderProps = {
+  basePath: string;
+};
 
-export function Header() {
+export function Header({ basePath }: HeaderProps) {
   const { search, setSearch } = useSearch();
   const { view, setView } = useViewMode();
   const isMobile = useIsMobile();

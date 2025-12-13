@@ -1,4 +1,4 @@
-import { Check, Home, Search, Settings, Star } from "lucide-react";
+import { Check, LayoutDashboard, Search, Settings, Star } from "lucide-react";
 
 import { AppSidebarCloseButton } from "@/app/components/ui/app-sidebar-buttons";
 import {
@@ -17,9 +17,9 @@ import Link from "next/link";
 // Menu items.
 const items = [
   {
-    title: "Home",
+    title: "Dashboard",
     url: "/dashboard",
-    icon: Home,
+    icon: LayoutDashboard,
   },
   {
     title: "Explorer",
