@@ -1,4 +1,4 @@
-import Explorer from "@/app/components/ui/explorer";
+import { Explorer } from "@/app/components/ui/explorer";
 import { getMediaFsListing } from "@/app/lib/explorer";
 import { createThumbs } from "@/app/lib/thumb";
 import { notFound } from "next/navigation";

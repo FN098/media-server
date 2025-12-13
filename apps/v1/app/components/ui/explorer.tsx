@@ -15,7 +15,7 @@ type ExplorerProps = {
   listing: MediaFsListing;
 };
 
-export default function Explorer({ listing }: ExplorerProps) {
+export function Explorer({ listing }: ExplorerProps) {
   const { search } = useSearch();
   const { view } = useViewMode();
 

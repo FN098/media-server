@@ -1,5 +1,6 @@
 import { Check, Home, Search, Settings, Star } from "lucide-react";
 
+import { AppSidebarCloseButton } from "@/app/components/ui/app-sidebar-buttons";
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +11,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/shadcn/components/ui/sidebar";
 import Link from "next/link";
 
@@ -49,7 +49,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex justify-end items-center">
           <SidebarMenuButton asChild tooltip="Menu" className="w-auto">
-            <SidebarTrigger />
+            <AppSidebarCloseButton />
           </SidebarMenuButton>
         </div>
       </SidebarHeader>
