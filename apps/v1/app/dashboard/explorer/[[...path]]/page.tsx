@@ -1,8 +1,6 @@
-import Explorer from "@/app/dashboard/explorer/ui/explorer";
-import { ExplorerHeader } from "@/app/dashboard/explorer/ui/header";
-import { SearchProvider } from "@/app/dashboard/explorer/ui/providers/search-provider";
-import { getMediaFsListing } from "@/app/lib/media/explorer";
-import { createThumbs } from "@/app/lib/media/thumb";
+import Explorer from "@/app/components/ui/explorer";
+import { getMediaFsListing } from "@/app/lib/explorer";
+import { createThumbs } from "@/app/lib/thumb";
 import { notFound } from "next/navigation";
 
 export default async function Page(props: {
@@ -28,10 +26,5 @@ export default async function Page(props: {
     });
   }
 
-  return (
-    <SearchProvider>
-      <ExplorerHeader />
-      <Explorer listing={listing} />
-    </SearchProvider>
-  );
+  return <Explorer listing={listing} />;
 }

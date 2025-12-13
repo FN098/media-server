@@ -2,7 +2,7 @@
 // MIMETYPE/拡張子
 // =====================
 
-import { MediaFsNodeType } from "@/app/lib/media/types";
+import { MediaFsNodeType } from "@/app/lib/types";
 
 export const imageExtensions = [
   ".jpg",

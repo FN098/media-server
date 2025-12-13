@@ -1,6 +1,6 @@
 "use client";
 
-import { MediaFsNode } from "@/app/lib/media/types";
+import { MediaFsNode } from "@/app/lib/types";
 import { useCallback, useMemo, useState } from "react";
 
 /**

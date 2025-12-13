@@ -1,5 +1,5 @@
-import { getMimetype } from "@/app/lib/media/mimetype";
-import { getMediaPath } from "@/app/lib/media/path-helpers";
+import { getMimetype } from "@/app/lib/mimetype";
+import { getMediaPath } from "@/app/lib/path-helpers";
 import fsSync from "fs";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";

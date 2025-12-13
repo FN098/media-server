@@ -1,13 +1,13 @@
 "use client";
 
-import { useGridConfig } from "@/app/dashboard/explorer/ui/hooks/use-grid-config";
-import { useMediaViewer } from "@/app/dashboard/explorer/ui/hooks/use-media-viewer";
-import { MediaViewer } from "@/app/dashboard/explorer/ui/media-viewer";
-import { useSearch } from "@/app/dashboard/explorer/ui/providers/search-provider";
-import { useViewMode } from "@/app/dashboard/explorer/ui/providers/view-mode-provider";
-import { GridView } from "@/app/dashboard/explorer/ui/views/grid";
-import { ListView } from "@/app/dashboard/explorer/ui/views/list";
-import { MediaFsListing } from "@/app/lib/media/types";
+import { GridView } from "@/app/components/ui/explorer/grid-view";
+import { ListView } from "@/app/components/ui/explorer/list-view";
+import { MediaViewer } from "@/app/components/ui/media-viewer";
+import { useGridConfig } from "@/app/hooks/use-grid-config";
+import { useMediaViewer } from "@/app/hooks/use-media-viewer";
+import { MediaFsListing } from "@/app/lib/types";
+import { useSearch } from "@/app/providers/search-provider";
+import { useViewMode } from "@/app/providers/view-mode-provider";
 import { useMemo, useRef } from "react";
 
 type ExplorerProps = {
@@ -52,7 +52,7 @@ export default function Explorer({ listing }: ExplorerProps) {
         ref={gridContainerRef}
       >
         <GridView
-          data={filtered}
+          nodes={filtered}
           columnCount={columnCount}
           columnWidth={columnWidth}
           rowHeight={rowHeight}

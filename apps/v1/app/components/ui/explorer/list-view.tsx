@@ -1,5 +1,5 @@
-import { getClientExplorerPath } from "@/app/lib/media/path-helpers";
-import { MediaFsNode } from "@/app/lib/media/types";
+import { getClientExplorerPath } from "@/app/lib/path-helpers";
+import { MediaFsNode } from "@/app/lib/types";
 import { Card, CardContent } from "@/shadcn/components/ui/card";
 import {
   FileIcon,

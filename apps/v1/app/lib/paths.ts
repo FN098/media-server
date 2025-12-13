@@ -6,7 +6,8 @@ export const PATHS = {
     thumbRoot: `${MEDIA_ROOT}/.thumb/`,
   },
   client: {
-    explorer: "/dashboard/explorer/",
+    dashboardRoot: "/dashboard/",
+    explorerRoot: "/dashboard/explorer/",
   },
   api: {
     mediaRoot: `/api/media/`,

@@ -1,12 +1,12 @@
-import { MediaThumb } from "@/app/dashboard/explorer/ui/thumb";
-import { getClientExplorerPath } from "@/app/lib/media/path-helpers";
-import { MediaFsNode } from "@/app/lib/media/types";
+import { MediaThumb } from "@/app/components/ui/thumb";
+import { getClientExplorerPath } from "@/app/lib/path-helpers";
+import { MediaFsNode } from "@/app/lib/types";
 import Link from "next/link";
 import { memo } from "react";
 import { CellComponentProps, Grid } from "react-window";
 
 type GridViewProps = {
-  data: MediaFsNode[];
+  nodes: MediaFsNode[];
   columnCount: number;
   columnWidth: number;
   rowHeight: number;
@@ -14,22 +14,22 @@ type GridViewProps = {
 };
 
 export const GridView = memo(function GridView1({
-  data,
+  nodes,
   columnCount,
   columnWidth,
   rowHeight,
   onFileOpen,
 }: GridViewProps) {
-  const rowCount = Math.ceil(data.length / columnCount);
+  const rowCount = Math.ceil(nodes.length / columnCount);
 
   const Cell = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
 
-    if (index >= data.length) {
+    if (index >= nodes.length) {
       return <div style={style} />;
     }
 
-    const node = data[index];
+    const node = nodes[index];
 
     const handleOpen =
       !node.isDirectory && onFileOpen ? () => onFileOpen(node) : undefined;

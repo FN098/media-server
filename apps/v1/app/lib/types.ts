@@ -19,3 +19,5 @@ export type MediaFsListing = {
   nodes: MediaFsNode[];
   parent: string | null;
 };
+
+export type ViewMode = "list" | "grid";

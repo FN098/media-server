@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { PATHS } from "@/app/lib/media/paths";
+import { PATHS } from "@/app/lib/paths";
 import path from "path";
 
 export function getMediaUrl(nodePath: string) {
@@ -22,5 +22,5 @@ export function getMediaThumbPath(nodePath: string): string {
 }
 
 export function getClientExplorerPath(nodePath: string): string {
-  return path.join(PATHS.client.explorer, nodePath);
+  return path.join(PATHS.client.explorerRoot, nodePath);
 }

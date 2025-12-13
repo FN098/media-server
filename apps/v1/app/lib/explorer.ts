@@ -2,9 +2,9 @@
 // ファイルエクスプローラー
 // =====================
 
-import { detectMediaType } from "@/app/lib/media/mimetype";
-import { getMediaPath } from "@/app/lib/media/path-helpers";
-import { MediaFsListing, MediaFsNode } from "@/app/lib/media/types";
+import { detectMediaType } from "@/app/lib/mimetype";
+import { getMediaPath } from "@/app/lib/path-helpers";
+import { MediaFsListing, MediaFsNode } from "@/app/lib/types";
 import fs from "fs/promises";
 import path from "path";
 

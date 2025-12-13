@@ -1,6 +1,6 @@
-import { getMediaUrl, getThumbUrl } from "@/app/lib/media/path-helpers";
-import { MediaFsNode } from "@/app/lib/media/types";
-import { FallbackImage } from "@/app/ui/fallback-image";
+import { FallbackImage } from "@/app/components/ui/fallback-image";
+import { getMediaUrl, getThumbUrl } from "@/app/lib/path-helpers";
+import { MediaFsNode } from "@/app/lib/types";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import {

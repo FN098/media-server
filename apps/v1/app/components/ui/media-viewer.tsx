@@ -1,8 +1,8 @@
 "use client";
 
-import { useShortcutKeys } from "@/app/dashboard/explorer/ui/hooks/use-shortcut-keys";
-import { MediaFsNode } from "@/app/lib/media/types";
-import { getAbsoluteUrl } from "@/app/lib/media/url";
+import { useShortcutKeys } from "@/app/hooks/use-shortcut-keys";
+import { MediaFsNode } from "@/app/lib/types";
+import { getAbsoluteUrl } from "@/app/lib/url";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer from "@mux/mux-player-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";

@@ -3,8 +3,8 @@
 // =====================
 
 import { APP_CONFIG } from "@/app.config";
-import { getMediaPath, getMediaThumbPath } from "@/app/lib/media/path-helpers";
-import { MediaFsNode } from "@/app/lib/media/types";
+import { getMediaPath, getMediaThumbPath } from "@/app/lib/path-helpers";
+import { MediaFsNode } from "@/app/lib/types";
 import { spawn } from "child_process";
 import fs, { mkdir } from "fs/promises";
 import { dirname } from "path";
