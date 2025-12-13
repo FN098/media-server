@@ -11,7 +11,7 @@ export function useGridConfig(ref: React.RefObject<HTMLElement | null>) {
     if (!ref.current) return;
 
     const update = () => {
-      const width = ref.current!.offsetWidth - 30;
+      const width = ref.current!.offsetWidth;
       const columnCount =
         width < 480 ? 2 : width < 768 ? 3 : width < 1024 ? 4 : 6;
       const columnWidth = Math.floor(width / columnCount);
