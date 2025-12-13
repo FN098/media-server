@@ -31,7 +31,7 @@ export function Header({ basePath }: HeaderProps) {
 
     return (
       <>
-        <header className="sticky top-0 z-10 h-12 border-b bg-white dark:bg-gray-900">
+        <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
           <div className="flex h-full items-center gap-2 px-2">
             <AppSidebarOpenButton />
 
