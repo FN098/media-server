@@ -30,54 +30,52 @@ export function Header({ basePath }: HeaderProps) {
     const backHref = breadcrumbs.at(-2)?.href ?? null;
 
     return (
-      <>
-        <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
-          <div className="flex h-full items-center gap-2 px-2">
-            <AppSidebarOpenButton />
+      <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
+        <div className="flex h-full items-center gap-2 px-2">
+          <AppSidebarOpenButton />
 
-            {/* 戻る */}
-            {backHref ? (
-              <Link
-                href={backHref}
-                className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            ) : (
-              <div className="flex h-8 w-8 items-center justify-center opacity-40">
-                <ArrowLeft className="h-5 w-5" />
-              </div>
-            )}
-
-            <div className="min-w-0 flex-1 text-sm font-medium truncate">
-              {current?.label ?? ""}
+          {/* 戻る */}
+          {backHref ? (
+            <Link
+              href={backHref}
+              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center opacity-40">
+              <ArrowLeft className="h-5 w-5" />
             </div>
+          )}
 
-            {searchCtx && (
-              <Search
-                value={searchCtx.search}
-                setValue={searchCtx.setSearch}
-                className="w-[100px] shrink-0"
-              />
-            )}
-
-            {viewCtx && (
-              <ViewModeSwitch
-                value={viewCtx.view}
-                setValue={viewCtx.setView}
-                className="shrink-0"
-              />
-            )}
+          <div className="min-w-0 flex-1 text-sm font-medium truncate">
+            {current?.label ?? ""}
           </div>
-        </header>
-      </>
+
+          {searchCtx && (
+            <Search
+              value={searchCtx.search}
+              setValue={searchCtx.setSearch}
+              className="w-[100px] shrink-0"
+            />
+          )}
+
+          {viewCtx && (
+            <ViewModeSwitch
+              value={viewCtx.view}
+              setValue={viewCtx.setView}
+              className="shrink-0"
+            />
+          )}
+        </div>
+      </header>
     );
   }
 
   // Desktop
   return (
     <>
-      <header className="sticky top-0 z-10 h-12 border-b bg-white dark:bg-gray-900">
+      <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
         <div className="flex h-full items-center gap-2 px-3">
           <Breadcrumbs
             items={breadcrumbs}
