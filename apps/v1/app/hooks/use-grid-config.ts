@@ -10,20 +10,27 @@ export function useGridConfig(ref: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
     if (!ref.current) return;
 
-    const update = () => {
-      const width = ref.current!.offsetWidth;
-      const columnCount =
-        width < 480 ? 2 : width < 768 ? 3 : width < 1024 ? 4 : 6;
-      const columnWidth = Math.floor(width / columnCount);
-      const rowHeight = Math.floor(columnWidth * 1.1);
+    const el = ref.current;
 
-      setConfig({ columnCount, columnWidth, rowHeight });
+    const update = () => {
+      const width = el.offsetWidth;
+
+      const columnWidth = 200;
+      const columnCount = Math.max(1, Math.floor(width / columnWidth));
+
+      setConfig({
+        columnCount,
+        columnWidth,
+        rowHeight: 220,
+      });
     };
 
-    update(); // 初回呼び出しでマウント時に正しい値を反映
-
     const observer = new ResizeObserver(update);
-    observer.observe(ref.current);
+    observer.observe(el);
+
+    // 初回計算
+    update();
+
     return () => observer.disconnect();
   }, [ref]);
 
