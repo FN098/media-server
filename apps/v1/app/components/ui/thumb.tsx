@@ -29,9 +29,7 @@ export const MediaThumb = memo(function MediaThumb1({
 }: MediaThumbProps) {
   const isMobile = useIsMobile();
 
-  const handleClick = () => {
-    onOpen?.(node);
-  };
+  const handleClick = onOpen ? () => onOpen(node) : undefined;
 
   if (node.isDirectory) {
     return (
