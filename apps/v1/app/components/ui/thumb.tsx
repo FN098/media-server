@@ -1,7 +1,6 @@
 import { FallbackImage } from "@/app/components/ui/fallback-image";
 import { getMediaUrl, getThumbUrl } from "@/app/lib/path-helpers";
 import { MediaFsNode } from "@/app/lib/types";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import {
   AudioWaveformIcon,
@@ -27,9 +26,9 @@ export const MediaThumb = memo(function MediaThumb1({
   height,
   className,
 }: MediaThumbProps) {
-  const isMobile = useIsMobile();
-
   const handleClick = onOpen ? () => onOpen(node) : undefined;
+
+  const iconSize = "h-6 w-6 md:h-12 md:w-12";
 
   if (node.isDirectory) {
     return (
@@ -40,9 +39,7 @@ export const MediaThumb = memo(function MediaThumb1({
         )}
         onClick={handleClick}
       >
-        <FolderIcon
-          className={cn("h-12 w-12 text-blue-600", isMobile && "h-6 w-6")}
-        />
+        <FolderIcon className={cn("text-blue-600", iconSize)} />
       </div>
     );
   }
@@ -78,9 +75,7 @@ export const MediaThumb = memo(function MediaThumb1({
             )}
             onClick={handleClick}
           >
-            <FilmIcon
-              className={cn("h-12 w-12 text-gray-600", isMobile && "h-6 w-6")}
-            />
+            <FilmIcon className={cn("text-gray-600", iconSize)} />
           </div>
         }
       />
@@ -96,9 +91,7 @@ export const MediaThumb = memo(function MediaThumb1({
         )}
         onClick={handleClick}
       >
-        <AudioWaveformIcon
-          className={cn("h-12 w-12 text-gray-600", isMobile && "h-6 w-6")}
-        />
+        <AudioWaveformIcon className={cn("text-gray-600", iconSize)} />
       </div>
     );
   }
@@ -110,9 +103,7 @@ export const MediaThumb = memo(function MediaThumb1({
         className
       )}
     >
-      <FileIcon
-        className={cn("h-12 w-12 text-gray-600", isMobile && "h-6 w-6")}
-      />
+      <FileIcon className={cn("text-gray-600", iconSize)} />
     </div>
   );
 });
