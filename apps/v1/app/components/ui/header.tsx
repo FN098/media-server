@@ -70,8 +70,6 @@ export function Header({ basePath }: HeaderProps) {
             )}
           </div>
         </header>
-
-        <div className="pt-12" />
       </>
     );
   }
@@ -105,8 +103,6 @@ export function Header({ basePath }: HeaderProps) {
           </div>
         </div>
       </header>
-
-      <div className="pt-12" />
     </>
   );
 }
