@@ -1,5 +1,4 @@
 import { MediaThumb } from "@/app/components/ui/thumb";
-import { getClientExplorerPath } from "@/app/lib/path-helpers";
 import { MediaFsNode } from "@/app/lib/types";
 import Link from "next/link";
 import { memo } from "react";
@@ -10,6 +9,7 @@ type GridViewProps = {
   columnCount: number;
   columnWidth: number;
   rowHeight: number;
+  getNodeHref: (node: MediaFsNode) => string;
   onFileOpen?: (node: MediaFsNode) => void;
 };
 
@@ -18,6 +18,7 @@ export const GridView = memo(function GridView1({
   columnCount,
   columnWidth,
   rowHeight,
+  getNodeHref,
   onFileOpen,
 }: GridViewProps) {
   const rowCount = Math.ceil(nodes.length / columnCount);
@@ -42,6 +43,7 @@ export const GridView = memo(function GridView1({
             width={columnWidth}
             height={rowHeight - 20}
             className="w-full h-full object-cover cursor-pointer"
+            getNodeHref={getNodeHref}
             onOpen={handleOpen}
           />
         </div>
@@ -62,22 +64,26 @@ export const GridView = memo(function GridView1({
   );
 });
 
+type ThumbItemProps = {
+  node: MediaFsNode;
+  width?: number;
+  height?: number;
+  className?: string;
+  getNodeHref: (node: MediaFsNode) => string;
+  onOpen?: () => void;
+};
+
 function ThumbItem({
   node,
   width,
   height,
   className,
+  getNodeHref,
   onOpen,
-}: {
-  node: MediaFsNode;
-  width?: number;
-  height?: number;
-  className?: string;
-  onOpen?: () => void;
-}) {
+}: ThumbItemProps) {
   // DirectoryItem
   if (node.isDirectory) {
-    const href = getClientExplorerPath(node.path);
+    const href = getNodeHref(node);
     return (
       <Link href={href} className="cursor-pointer">
         <MediaThumb node={node} width={width} height={height} />

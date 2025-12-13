@@ -1,10 +1,11 @@
 "use client";
 
-import { GridView } from "@/app/components/ui/explorer/grid-view";
-import { ListView } from "@/app/components/ui/explorer/list-view";
+import { GridView } from "@/app/components/ui/grid-view";
+import { ListView } from "@/app/components/ui/list-view";
 import { MediaViewer } from "@/app/components/ui/media-viewer";
 import { useGridConfig } from "@/app/hooks/use-grid-config";
 import { useMediaViewer } from "@/app/hooks/use-media-viewer";
+import { getClientExplorerPath } from "@/app/lib/path-helpers";
 import { MediaFsListing } from "@/app/lib/types";
 import { useSearch } from "@/app/providers/search-provider";
 import { useViewMode } from "@/app/providers/view-mode-provider";
@@ -56,12 +57,17 @@ export default function Explorer({ listing }: ExplorerProps) {
           columnCount={columnCount}
           columnWidth={columnWidth}
           rowHeight={rowHeight}
+          getNodeHref={(node) => getClientExplorerPath(node.path)}
           onFileOpen={openViewer}
         />
       </div>
 
       <div className={view === "list" ? "block" : "hidden"}>
-        <ListView data={filtered} />
+        <ListView
+          nodes={filtered}
+          getNodeHref={(node) => getClientExplorerPath(node.path)}
+          onFileOpen={openViewer}
+        />
       </div>
 
       {viewerOpen && currentFilePath && currentMediaNode && (

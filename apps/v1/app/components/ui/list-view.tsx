@@ -1,4 +1,3 @@
-import { getClientExplorerPath } from "@/app/lib/path-helpers";
 import { MediaFsNode } from "@/app/lib/types";
 import { Card, CardContent } from "@/shadcn/components/ui/card";
 import {
@@ -10,12 +9,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export function ListView({
-  data,
-}: {
-  data: MediaFsNode[];
-  onOpen?: (target: MediaFsNode) => void;
-}) {
+type ListViewProps = {
+  nodes: MediaFsNode[];
+  getNodeHref: (node: MediaFsNode) => string;
+  onFileOpen?: (target: MediaFsNode) => void;
+};
+
+export function ListView({ nodes, getNodeHref, onFileOpen }: ListViewProps) {
   return (
     <Card>
       <CardContent className="p-0">
@@ -25,10 +25,10 @@ export function ListView({
           <div>Updated</div>
           <div>Size</div>
         </div>
-        {data.map((node) => (
+        {nodes.map((node) => (
           <Link
             key={node.path}
-            href={node.isDirectory ? getClientExplorerPath(node.path) : "#"}
+            href={node.isDirectory ? getNodeHref(node) : "#"}
             className="grid grid-cols-4 px-4 py-2 items-center hover:bg-blue-100"
           >
             <div className="flex gap-2">
