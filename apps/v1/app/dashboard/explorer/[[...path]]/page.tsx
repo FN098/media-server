@@ -15,16 +15,5 @@ export default async function Page(props: {
   // サムネイルを自動生成
   await createThumbs(listing.nodes);
 
-  // 一つ上の階層のフォルダを先頭に追加
-  if (listing?.parent !== null) {
-    listing.nodes.unshift({
-      name: "..",
-      path: listing.parent,
-      isDirectory: true,
-      type: "directory",
-      updatedAt: "",
-    });
-  }
-
   return <Explorer listing={listing} />;
 }
