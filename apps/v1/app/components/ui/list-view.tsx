@@ -8,44 +8,80 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/components/ui/table";
+import { useEffect, useRef, useState } from "react";
 
 type ListViewProps = {
   nodes: MediaFsNode[];
   onOpen?: (target: MediaFsNode) => void;
 };
 
+// TODO: memo化
 export function ListView({ nodes, onOpen }: ListViewProps) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 外部クリックで選択解除
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setSelectedIndex(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Updated</TableHead>
-          <TableHead>Size</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {nodes.map((node) => {
-          return <RowItem key={node.path} node={node} onOpen={onOpen} />;
-        })}
-      </TableBody>
-    </Table>
+    <div ref={containerRef} className="w-full h-full">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Updated</TableHead>
+            <TableHead>Size</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {nodes.map((node, index) => (
+            <RowItem
+              key={node.path}
+              node={node}
+              isSelected={selectedIndex === index}
+              onClick={() => setSelectedIndex(index)}
+              onOpen={onOpen}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
 function RowItem({
   node,
+  isSelected,
+  onClick,
   onOpen,
 }: {
   node: MediaFsNode;
+  isSelected: boolean;
+  onClick: () => void;
   onOpen?: (target: MediaFsNode) => void;
 }) {
-  const handleDoubleClick = onOpen ? () => onOpen(node) : undefined;
+  const handleDoubleClick = () => {
+    onOpen?.(node);
+  };
 
   return (
     <TableRow
-      className="hover:bg-blue-100 cursor-pointer"
+      className={`hover:bg-blue-100 ${isSelected ? "bg-blue-200" : ""}`}
+      onClick={onClick}
       onDoubleClick={handleDoubleClick}
     >
       <TableCell>

@@ -41,7 +41,7 @@ export const MediaThumb = memo(function MediaThumb1({
         fallback={
           <div
             className={cn(
-              "flex h-full w-full items-center justify-center bg-muted",
+              "flex h-full w-full items-center justify-center",
               className
             )}
           >
@@ -54,7 +54,7 @@ export const MediaThumb = memo(function MediaThumb1({
     return (
       <div
         className={cn(
-          "flex h-full w-full items-center justify-center bg-muted",
+          "flex h-full w-full items-center justify-center",
           className
         )}
       >
