@@ -9,6 +9,7 @@ import { getClientExplorerPath } from "@/app/lib/path-helpers";
 import { MediaFsListing, MediaFsNode } from "@/app/lib/types";
 import { useSearch } from "@/app/providers/search-provider";
 import { useViewMode } from "@/app/providers/view-mode-provider";
+import { cn } from "@/shadcn/lib/utils";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef } from "react";
 
@@ -58,7 +59,13 @@ export function Explorer({ listing }: ExplorerProps) {
   };
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div
+      className={cn(
+        "flex-1 overflow-auto",
+        view === "grid" && "p-4",
+        view === "list" && "px-4"
+      )}
+    >
       <div
         className={view === "grid" ? "block" : "hidden"}
         ref={gridContainerRef}

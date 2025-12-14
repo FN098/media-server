@@ -1,3 +1,4 @@
+import { MediaThumbIcon } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/types";
 import {
   Table,
@@ -7,13 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/components/ui/table";
-import {
-  FileIcon,
-  FolderIcon,
-  ImageIcon,
-  MusicIcon,
-  VideoIcon,
-} from "lucide-react";
 
 type ListViewProps = {
   nodes: MediaFsNode[];
@@ -56,7 +50,7 @@ function RowItem({
     >
       <TableCell>
         <div className="flex items-center gap-2">
-          <ThumbIcon node={node} />
+          <MediaThumbIcon node={node} className="w-6 h-6" />
           <span className="truncate">{node.name}</span>
         </div>
       </TableCell>
@@ -67,19 +61,4 @@ function RowItem({
       </TableCell>
     </TableRow>
   );
-}
-
-function ThumbIcon({ node }: { node: MediaFsNode }) {
-  switch (node.type) {
-    case "directory":
-      return <FolderIcon className="h-6 w-6 text-blue-600" />;
-    case "image":
-      return <ImageIcon className="h-6 w-6 text-purple-600" />;
-    case "video":
-      return <VideoIcon className="h-6 w-6 text-green-600" />;
-    case "audio":
-      return <MusicIcon className="h-6 w-6 text-orange-600" />;
-    default:
-      return <FileIcon className="h-6 w-6 text-gray-600" />;
-  }
 }

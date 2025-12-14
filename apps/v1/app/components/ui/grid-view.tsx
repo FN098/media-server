@@ -1,7 +1,6 @@
 import { TextWithTooltip } from "@/app/components/ui/text-with-tooltip";
 import { MediaThumb } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/types";
-import { cn } from "@/shadcn/lib/utils";
 import { memo } from "react";
 import { CellComponentProps, Grid, useGridRef } from "react-window";
 
@@ -37,10 +36,10 @@ export const GridView = memo(function GridView1({
     return (
       <div style={style} className="p-1">
         <div
-          className="aspect-square w-full overflow-hidden rounded-lg border bg-muted"
+          className="aspect-square w-full overflow-hidden rounded-lg border bg-muted select-none"
           onDoubleClick={handleDoubleClick}
         >
-          <ThumbItem
+          <MediaThumb
             node={node}
             width={columnWidth}
             height={rowHeight - 20}
@@ -67,21 +66,3 @@ export const GridView = memo(function GridView1({
     />
   );
 });
-
-type ThumbItemProps = {
-  node: MediaFsNode;
-  width?: number;
-  height?: number;
-  className?: string;
-};
-
-function ThumbItem({ node, width, height, className }: ThumbItemProps) {
-  return (
-    <MediaThumb
-      node={node}
-      width={width}
-      height={height}
-      className={cn("cursor-pointer", className)}
-    />
-  );
-}

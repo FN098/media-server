@@ -1,16 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 import { FallbackImage } from "@/app/components/ui/fallback-image";
 import { getMediaUrl, getThumbUrl } from "@/app/lib/path-helpers";
-import { MediaFsNode } from "@/app/lib/types";
+import { MediaFsNode, MediaFsNodeType } from "@/app/lib/types";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  FileIcon,
-  FolderIcon,
-  ImageIcon,
-  MusicIcon,
-  VideoIcon,
-} from "lucide-react";
 import Image from "next/image";
-import { memo } from "react";
+import { memo, ReactNode } from "react";
 
 type MediaThumbProps = {
   node: MediaFsNode;
@@ -25,19 +19,6 @@ export const MediaThumb = memo(function MediaThumb1({
   height,
   className,
 }: MediaThumbProps) {
-  if (node.isDirectory) {
-    return (
-      <div
-        className={cn(
-          "flex h-full w-full items-center justify-center bg-muted",
-          className
-        )}
-      >
-        <ThumbIcon node={node} />
-      </div>
-    );
-  }
-
   if (node.type === "image") {
     return (
       <Image
@@ -49,9 +30,7 @@ export const MediaThumb = memo(function MediaThumb1({
         loading="lazy"
       />
     );
-  }
-
-  if (node.type === "video") {
+  } else if (node.type === "video") {
     return (
       <FallbackImage
         src={getThumbUrl(node.path)}
@@ -66,14 +45,12 @@ export const MediaThumb = memo(function MediaThumb1({
               className
             )}
           >
-            <ThumbIcon node={node} />
+            <MediaThumbIcon node={node} />
           </div>
         }
       />
     );
-  }
-
-  if (node.type === "audio") {
+  } else {
     return (
       <div
         className={cn(
@@ -81,34 +58,62 @@ export const MediaThumb = memo(function MediaThumb1({
           className
         )}
       >
-        <ThumbIcon node={node} />
+        <MediaThumbIcon node={node} />
       </div>
     );
   }
-
-  return (
-    <div
-      className={cn(
-        "flex h-full w-full items-center justify-center bg-muted",
-        className
-      )}
-    >
-      <ThumbIcon node={node} />
-    </div>
-  );
 });
 
-function ThumbIcon({ node }: { node: MediaFsNode }) {
-  switch (node.type) {
-    case "directory":
-      return <FolderIcon className="h-6 w-6 md:h-12 md:w-12 text-blue-600" />;
-    case "image":
-      return <ImageIcon className="h-6 w-6 md:h-12 md:w-12 text-purple-600" />;
-    case "video":
-      return <VideoIcon className="h-6 w-6 md:h-12 md:w-12 text-green-600" />;
-    case "audio":
-      return <MusicIcon className="h-6 w-6 md:h-12 md:w-12 text-orange-600" />;
-    default:
-      return <FileIcon className="h-6 w-6 md:h-12 md:w-12 text-gray-600" />;
-  }
+export const mediaThumbIcons: Record<MediaFsNodeType, ReactNode> = {
+  audio: (
+    <img
+      width="64"
+      height="64"
+      src="https://img.icons8.com/flat-round/64/audio-wave.png"
+      alt="audio-wave"
+    />
+  ),
+  directory: (
+    <img
+      width="48"
+      height="48"
+      src="https://img.icons8.com/fluency/48/folder-invoices--v2.png"
+      alt="folder-invoices--v2"
+    />
+  ),
+  file: (
+    <img
+      width="50"
+      height="50"
+      src="https://img.icons8.com/ios/50/file--v1.png"
+      alt="file--v1"
+    />
+  ),
+  image: (
+    <img
+      width="80"
+      height="80"
+      src="https://img.icons8.com/officel/80/picture.png"
+      alt="picture"
+    />
+  ),
+  video: (
+    <img
+      width="48"
+      height="48"
+      src="https://img.icons8.com/color/48/video.png"
+      alt="video"
+    />
+  ),
+};
+
+export function MediaThumbIcon({
+  node,
+  className,
+}: {
+  node: MediaFsNode;
+  className?: string;
+}) {
+  const img = mediaThumbIcons[node.type];
+  return <div className={className}>{img}</div>;
 }
