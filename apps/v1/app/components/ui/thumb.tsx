@@ -3,10 +3,11 @@ import { getMediaUrl, getThumbUrl } from "@/app/lib/path-helpers";
 import { MediaFsNode } from "@/app/lib/types";
 import { cn } from "@/shadcn/lib/utils";
 import {
-  AudioWaveformIcon,
   FileIcon,
-  FilmIcon,
   FolderIcon,
+  ImageIcon,
+  MusicIcon,
+  VideoIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { memo } from "react";
@@ -24,8 +25,6 @@ export const MediaThumb = memo(function MediaThumb1({
   height,
   className,
 }: MediaThumbProps) {
-  const iconSize = "h-6 w-6 md:h-12 md:w-12";
-
   if (node.isDirectory) {
     return (
       <div
@@ -34,7 +33,7 @@ export const MediaThumb = memo(function MediaThumb1({
           className
         )}
       >
-        <FolderIcon className={cn("text-blue-600", iconSize)} />
+        <ThumbIcon node={node} />
       </div>
     );
   }
@@ -67,7 +66,7 @@ export const MediaThumb = memo(function MediaThumb1({
               className
             )}
           >
-            <FilmIcon className={cn("text-gray-600", iconSize)} />
+            <ThumbIcon node={node} />
           </div>
         }
       />
@@ -82,7 +81,7 @@ export const MediaThumb = memo(function MediaThumb1({
           className
         )}
       >
-        <AudioWaveformIcon className={cn("text-gray-600", iconSize)} />
+        <ThumbIcon node={node} />
       </div>
     );
   }
@@ -94,7 +93,22 @@ export const MediaThumb = memo(function MediaThumb1({
         className
       )}
     >
-      <FileIcon className={cn("text-gray-600", iconSize)} />
+      <ThumbIcon node={node} />
     </div>
   );
 });
+
+function ThumbIcon({ node }: { node: MediaFsNode }) {
+  switch (node.type) {
+    case "directory":
+      return <FolderIcon className="h-6 w-6 md:h-12 md:w-12 text-blue-600" />;
+    case "image":
+      return <ImageIcon className="h-6 w-6 md:h-12 md:w-12 text-purple-600" />;
+    case "video":
+      return <VideoIcon className="h-6 w-6 md:h-12 md:w-12 text-green-600" />;
+    case "audio":
+      return <MusicIcon className="h-6 w-6 md:h-12 md:w-12 text-orange-600" />;
+    default:
+      return <FileIcon className="h-6 w-6 md:h-12 md:w-12 text-gray-600" />;
+  }
+}
