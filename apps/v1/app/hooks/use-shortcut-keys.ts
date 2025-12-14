@@ -1,23 +1,44 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 type KeyAction = {
   key: string;
   callback: () => void;
-  condition?: boolean; // 条件付き
+  condition?: boolean | (() => boolean);
 };
 
 export function useShortcutKeys(actions: KeyAction[]) {
+  // キーを Map に変換して O(1) でアクセスできるようにする
+  const actionMap = useMemo(() => {
+    const map = new Map<string, KeyAction[]>();
+    actions.forEach((action) => {
+      if (!map.has(action.key)) map.set(action.key, []);
+      map.get(action.key)!.push(action);
+    });
+    return map;
+  }, [actions]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      actions.forEach(({ key, callback, condition = true }) => {
-        if (e.key === key && condition) {
+      const matchedActions = actionMap.get(e.key);
+      if (!matchedActions) return;
+
+      matchedActions.forEach(({ callback, condition = true }) => {
+        const isActive =
+          typeof condition === "function" ? condition() : condition;
+        if (isActive) {
+          e.preventDefault();
           callback();
         }
       });
     };
+
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [actions]);
+  }, [actionMap]);
+}
+
+export function useShortcutKey(action: KeyAction) {
+  useShortcutKeys([action]);
 }
