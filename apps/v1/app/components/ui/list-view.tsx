@@ -1,5 +1,12 @@
 import { MediaFsNode } from "@/app/lib/types";
-import { Card, CardContent } from "@/shadcn/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shadcn/components/ui/table";
 import {
   FileIcon,
   FolderIcon,
@@ -17,14 +24,16 @@ type ListViewProps = {
 
 export function ListView({ nodes, getNodeHref, onFileOpen }: ListViewProps) {
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div className="grid grid-cols-4 px-4 py-2 bg-muted font-semibold text-sm">
-          <div>Name</div>
-          <div>Type</div>
-          <div>Updated</div>
-          <div>Size</div>
-        </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Updated</TableHead>
+          <TableHead>Size</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {nodes.map((node) => {
           const handleOpen =
             !node.isDirectory && onFileOpen
@@ -40,24 +49,9 @@ export function ListView({ nodes, getNodeHref, onFileOpen }: ListViewProps) {
             />
           );
         })}
-      </CardContent>
-    </Card>
+      </TableBody>
+    </Table>
   );
-}
-
-function ThumbIcon({ node }: { node: MediaFsNode }) {
-  switch (node.type) {
-    case "directory":
-      return <FolderIcon className="shrink-0 h-6 w-6 text-blue-600" />;
-    case "image":
-      return <ImageIcon className="shrink-0 h-6 w-6 text-purple-600" />;
-    case "video":
-      return <VideoIcon className="shrink-0 h-6 w-6 text-green-600" />;
-    case "audio":
-      return <MusicIcon className="shrink-0 h-6 w-6 text-orange-600" />;
-    default:
-      return <FileIcon className="shrink-0 h-6 w-6 text-gray-600" />;
-  }
 }
 
 function RowItem({
@@ -69,28 +63,46 @@ function RowItem({
   getNodeHref: (node: MediaFsNode) => string;
   onOpen?: () => void;
 }) {
-  const row = (
-    <div className="grid grid-cols-4 px-4 py-2 items-center hover:bg-blue-100">
-      <div className="flex gap-2">
-        <ThumbIcon node={node} />
-        <span className="truncate">{node.name}</span>
-      </div>
-      <div>{node.isDirectory ? "Folder" : node.type}</div>
-      <div>{node.updatedAt ?? "-"}</div>
-      <div>{node.size ? `${Math.round(node.size / 1024)} KB` : "-"}</div>
-    </div>
+  const href = node.isDirectory ? getNodeHref(node) : undefined;
+
+  return (
+    <TableRow
+      className="hover:bg-blue-100 cursor-pointer"
+      onDoubleClick={onOpen}
+    >
+      <TableCell>
+        {href ? (
+          <Link href={href} className="flex items-center gap-2">
+            <ThumbIcon node={node} />
+            <span className="truncate">{node.name}</span>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-2">
+            <ThumbIcon node={node} />
+            <span className="truncate">{node.name}</span>
+          </div>
+        )}
+      </TableCell>
+      <TableCell>{node.isDirectory ? "Folder" : node.type}</TableCell>
+      <TableCell>{node.updatedAt ?? "-"}</TableCell>
+      <TableCell>
+        {node.size ? `${Math.round(node.size / 1024)} KB` : "-"}
+      </TableCell>
+    </TableRow>
   );
+}
 
-  // DirectoryItem
-  if (node.isDirectory) {
-    const href = getNodeHref(node);
-    return (
-      <Link key={node.path} href={href}>
-        {row}
-      </Link>
-    );
+function ThumbIcon({ node }: { node: MediaFsNode }) {
+  switch (node.type) {
+    case "directory":
+      return <FolderIcon className="h-6 w-6 text-blue-600" />;
+    case "image":
+      return <ImageIcon className="h-6 w-6 text-purple-600" />;
+    case "video":
+      return <VideoIcon className="h-6 w-6 text-green-600" />;
+    case "audio":
+      return <MusicIcon className="h-6 w-6 text-orange-600" />;
+    default:
+      return <FileIcon className="h-6 w-6 text-gray-600" />;
   }
-
-  // FileItem
-  return <div onDoubleClick={onOpen}>{row}</div>;
 }
