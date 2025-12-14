@@ -2,7 +2,7 @@ import { TextWithTooltip } from "@/app/components/ui/text-with-tooltip";
 import { MediaThumb } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/types";
 import Link from "next/link";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef } from "react";
 import { CellComponentProps, Grid, useGridRef } from "react-window";
 
 type GridViewProps = {
@@ -24,7 +24,7 @@ export const GridView = memo(function GridView1({
 }: GridViewProps) {
   const rowCount = Math.ceil(nodes.length / columnCount);
   const gridRef = useGridRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const currentIndex = useRef(0);
 
   // Grid 内部スクロール監視
   const onScroll = () => {
@@ -34,12 +34,12 @@ export const GridView = memo(function GridView1({
     const rowIndex = Math.floor(target.scrollTop / rowHeight);
     const columnIndex = Math.floor(target.scrollLeft / columnWidth);
     const index = rowIndex * columnCount + columnIndex;
-    setCurrentIndex(index);
+    currentIndex.current = index;
   };
 
   // 列数変更時に現在のノード位置を復元
   useEffect(() => {
-    const index = currentIndex;
+    const index = currentIndex.current;
     const rowIndex = Math.floor(index / columnCount);
     const columnIndex = index % columnCount;
 
@@ -50,7 +50,7 @@ export const GridView = memo(function GridView1({
       columnAlign: "start",
       behavior: "auto",
     });
-  }, [columnCount, currentIndex, gridRef]);
+  }, [columnCount, gridRef]);
 
   const Cell = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
