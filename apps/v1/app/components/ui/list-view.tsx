@@ -80,7 +80,7 @@ function RowItem({
 
   return (
     <TableRow
-      className={`hover:bg-blue-100 ${isSelected ? "bg-blue-200" : ""}`}
+      className={`hover:bg-blue-100 ${isSelected ? "bg-blue-100" : ""}`}
       onClick={onClick}
       onDoubleClick={handleDoubleClick}
     >

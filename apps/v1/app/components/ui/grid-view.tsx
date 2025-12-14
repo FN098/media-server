@@ -68,7 +68,7 @@ export const GridView = memo(function GridView1({
           className={cn(
             "aspect-square w-full overflow-hidden rounded-lg border bg-muted select-none",
             "hover:bg-blue-100",
-            isSelected && "border-blue-500 ring-2 ring-blue-300"
+            isSelected && "border-blue-500 ring-2 ring-blue-300 bg-blue-100"
           )}
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
