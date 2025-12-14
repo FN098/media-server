@@ -1,5 +1,6 @@
 import { MediaThumbIcon } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/types";
+import { useMediaFsNodeSelection } from "@/app/providers/selection-provider";
 import {
   Table,
   TableBody,
@@ -8,7 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/components/ui/table";
-import { memo, useEffect, useRef, useState } from "react";
+import { cn } from "@/shadcn/lib/utils";
+import { memo, useEffect, useRef } from "react";
 
 type ListViewProps = {
   nodes: MediaFsNode[];
@@ -19,8 +21,9 @@ export const ListView = memo(function ListView1({
   nodes,
   onOpen,
 }: ListViewProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const { select, clear, isSelected } = useMediaFsNodeSelection();
 
   // 外部クリックで選択解除
   useEffect(() => {
@@ -29,14 +32,14 @@ export const ListView = memo(function ListView1({
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
-        setSelectedIndex(null);
+        clear();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [clear]);
 
   return (
     <div ref={containerRef} className="w-full h-full">
@@ -50,13 +53,16 @@ export const ListView = memo(function ListView1({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {nodes.map((node, index) => (
+          {nodes.map((node) => (
             <RowItem
               key={node.path}
               node={node}
-              isSelected={selectedIndex === index}
-              onClick={() => setSelectedIndex(index)}
-              onOpen={onOpen}
+              className={cn(
+                "hover:bg-blue-100",
+                isSelected(node) && "bg-blue-100"
+              )}
+              onClick={() => select(node)}
+              onDoubleClick={() => onOpen?.(node)}
             />
           ))}
         </TableBody>
@@ -67,28 +73,24 @@ export const ListView = memo(function ListView1({
 
 function RowItem({
   node,
-  isSelected,
   onClick,
-  onOpen,
+  onDoubleClick,
+  className,
 }: {
   node: MediaFsNode;
-  isSelected: boolean;
-  onClick: () => void;
-  onOpen?: (target: MediaFsNode) => void;
+  onClick?: () => void;
+  onDoubleClick?: () => void;
+  className?: string;
 }) {
-  const handleDoubleClick = () => {
-    onOpen?.(node);
-  };
-
   return (
     <TableRow
-      className={`hover:bg-blue-100 ${isSelected ? "bg-blue-100" : ""}`}
       onClick={onClick}
-      onDoubleClick={handleDoubleClick}
+      onDoubleClick={onDoubleClick}
+      className={className}
     >
       <TableCell>
         <div className="flex items-center gap-2">
-          <MediaThumbIcon node={node} className="w-6 h-6" />
+          <MediaThumbIcon type={node.type} className="w-6 h-6" />
           <span className="truncate">{node.name}</span>
         </div>
       </TableCell>

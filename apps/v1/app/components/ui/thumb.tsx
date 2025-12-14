@@ -45,7 +45,7 @@ export const MediaThumb = memo(function MediaThumb1({
               className
             )}
           >
-            <MediaThumbIcon node={node} />
+            <MediaThumbIcon type={node.type} />
           </div>
         }
       />
@@ -58,7 +58,7 @@ export const MediaThumb = memo(function MediaThumb1({
           className
         )}
       >
-        <MediaThumbIcon node={node} />
+        <MediaThumbIcon type={node.type} />
       </div>
     );
   }
@@ -108,12 +108,12 @@ export const mediaThumbIcons: Record<MediaFsNodeType, ReactNode> = {
 };
 
 export function MediaThumbIcon({
-  node,
+  type,
   className,
 }: {
-  node: MediaFsNode;
+  type: MediaFsNodeType;
   className?: string;
 }) {
-  const img = mediaThumbIcons[node.type];
+  const img = mediaThumbIcons[type];
   return <div className={className}>{img}</div>;
 }
