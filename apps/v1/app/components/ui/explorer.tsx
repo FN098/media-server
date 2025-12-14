@@ -6,9 +6,10 @@ import { MediaViewer } from "@/app/components/ui/media-viewer";
 import { useGridView } from "@/app/hooks/use-grid-view";
 import { useMediaViewer } from "@/app/hooks/use-media-viewer";
 import { getClientExplorerPath } from "@/app/lib/path-helpers";
-import { MediaFsListing } from "@/app/lib/types";
+import { MediaFsListing, MediaFsNode } from "@/app/lib/types";
 import { useSearch } from "@/app/providers/search-provider";
 import { useViewMode } from "@/app/providers/view-mode-provider";
+import { useRouter } from "next/navigation";
 import { useMemo, useRef } from "react";
 
 type ExplorerProps = {
@@ -18,6 +19,7 @@ type ExplorerProps = {
 export function Explorer({ listing }: ExplorerProps) {
   const { search } = useSearch();
   const { view } = useViewMode();
+  const router = useRouter();
 
   // GridView config
   const gridContainerRef = useRef<HTMLDivElement>(null);
@@ -45,6 +47,16 @@ export function Explorer({ listing }: ExplorerProps) {
     return nodes.filter((e) => e.name.toLowerCase().includes(lowerSearch));
   }, [listing.nodes, lowerSearch]);
 
+  // Open File/Folder
+  const handleOpen = (node: MediaFsNode) => {
+    if (node.isDirectory) {
+      const href = getClientExplorerPath(node.path);
+      router.push(href);
+    } else {
+      openViewer(node);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-auto">
       <div
@@ -56,17 +68,12 @@ export function Explorer({ listing }: ExplorerProps) {
           columnCount={columnCount}
           columnWidth={columnWidth}
           rowHeight={rowHeight}
-          getNodeHref={(node) => getClientExplorerPath(node.path)}
-          onFileOpen={openViewer}
+          onOpen={handleOpen}
         />
       </div>
 
       <div className={view === "list" ? "block" : "hidden"}>
-        <ListView
-          nodes={filtered}
-          getNodeHref={(node) => getClientExplorerPath(node.path)}
-          onFileOpen={openViewer}
-        />
+        <ListView nodes={filtered} onOpen={handleOpen} />
       </div>
 
       {viewerOpen && currentFilePath && currentMediaNode && (

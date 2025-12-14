@@ -14,15 +14,13 @@ import {
   MusicIcon,
   VideoIcon,
 } from "lucide-react";
-import Link from "next/link";
 
 type ListViewProps = {
   nodes: MediaFsNode[];
-  getNodeHref: (node: MediaFsNode) => string;
-  onFileOpen?: (target: MediaFsNode) => void;
+  onOpen?: (target: MediaFsNode) => void;
 };
 
-export function ListView({ nodes, getNodeHref, onFileOpen }: ListViewProps) {
+export function ListView({ nodes, onOpen }: ListViewProps) {
   return (
     <Table>
       <TableHeader>
@@ -35,19 +33,7 @@ export function ListView({ nodes, getNodeHref, onFileOpen }: ListViewProps) {
       </TableHeader>
       <TableBody>
         {nodes.map((node) => {
-          const handleOpen =
-            !node.isDirectory && onFileOpen
-              ? () => onFileOpen(node)
-              : undefined;
-
-          return (
-            <RowItem
-              key={node.path}
-              node={node}
-              getNodeHref={getNodeHref}
-              onOpen={handleOpen}
-            />
-          );
+          return <RowItem key={node.path} node={node} onOpen={onOpen} />;
         })}
       </TableBody>
     </Table>
@@ -56,32 +42,23 @@ export function ListView({ nodes, getNodeHref, onFileOpen }: ListViewProps) {
 
 function RowItem({
   node,
-  getNodeHref,
   onOpen,
 }: {
   node: MediaFsNode;
-  getNodeHref: (node: MediaFsNode) => string;
-  onOpen?: () => void;
+  onOpen?: (target: MediaFsNode) => void;
 }) {
-  const href = node.isDirectory ? getNodeHref(node) : undefined;
+  const handleDoubleClick = onOpen ? () => onOpen(node) : undefined;
 
   return (
     <TableRow
       className="hover:bg-blue-100 cursor-pointer"
-      onDoubleClick={onOpen}
+      onDoubleClick={handleDoubleClick}
     >
       <TableCell>
-        {href ? (
-          <Link href={href} className="flex items-center gap-2">
-            <ThumbIcon node={node} />
-            <span className="truncate">{node.name}</span>
-          </Link>
-        ) : (
-          <div className="flex items-center gap-2">
-            <ThumbIcon node={node} />
-            <span className="truncate">{node.name}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <ThumbIcon node={node} />
+          <span className="truncate">{node.name}</span>
+        </div>
       </TableCell>
       <TableCell>{node.isDirectory ? "Folder" : node.type}</TableCell>
       <TableCell>{node.updatedAt ?? "-"}</TableCell>

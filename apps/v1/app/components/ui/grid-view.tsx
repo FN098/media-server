@@ -1,7 +1,7 @@
 import { TextWithTooltip } from "@/app/components/ui/text-with-tooltip";
 import { MediaThumb } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/types";
-import Link from "next/link";
+import { cn } from "@/shadcn/lib/utils";
 import { memo } from "react";
 import { CellComponentProps, Grid, useGridRef } from "react-window";
 
@@ -10,8 +10,7 @@ type GridViewProps = {
   columnCount: number;
   columnWidth: number;
   rowHeight: number;
-  getNodeHref: (node: MediaFsNode) => string;
-  onFileOpen?: (node: MediaFsNode) => void;
+  onOpen?: (node: MediaFsNode) => void;
 };
 
 export const GridView = memo(function GridView1({
@@ -19,8 +18,7 @@ export const GridView = memo(function GridView1({
   columnCount,
   columnWidth,
   rowHeight,
-  getNodeHref,
-  onFileOpen,
+  onOpen,
 }: GridViewProps) {
   const rowCount = Math.ceil(nodes.length / columnCount);
   const gridRef = useGridRef(null);
@@ -34,19 +32,19 @@ export const GridView = memo(function GridView1({
 
     const node = nodes[index];
 
-    const handleOpen =
-      !node.isDirectory && onFileOpen ? () => onFileOpen(node) : undefined;
+    const handleDoubleClick = onOpen ? () => onOpen(node) : undefined;
 
     return (
       <div style={style} className="p-1">
-        <div className="aspect-square w-full overflow-hidden rounded-lg border bg-muted">
+        <div
+          className="aspect-square w-full overflow-hidden rounded-lg border bg-muted"
+          onDoubleClick={handleDoubleClick}
+        >
           <ThumbItem
             node={node}
             width={columnWidth}
             height={rowHeight - 20}
             className="w-full h-full object-cover cursor-pointer"
-            getNodeHref={getNodeHref}
-            onOpen={handleOpen}
           />
         </div>
         <TextWithTooltip
@@ -75,36 +73,15 @@ type ThumbItemProps = {
   width?: number;
   height?: number;
   className?: string;
-  getNodeHref: (node: MediaFsNode) => string;
-  onOpen?: () => void;
 };
 
-function ThumbItem({
-  node,
-  width,
-  height,
-  className,
-  getNodeHref,
-  onOpen,
-}: ThumbItemProps) {
-  // DirectoryItem
-  if (node.isDirectory) {
-    const href = getNodeHref(node);
-    return (
-      <Link href={href} className="cursor-pointer">
-        <MediaThumb node={node} width={width} height={height} />
-      </Link>
-    );
-  }
-
-  // FileItem
+function ThumbItem({ node, width, height, className }: ThumbItemProps) {
   return (
     <MediaThumb
       node={node}
-      onOpen={onOpen}
       width={width}
       height={height}
-      className={className}
+      className={cn("cursor-pointer", className)}
     />
   );
 }
