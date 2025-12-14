@@ -1,3 +1,5 @@
+"use client";
+
 import { Check, LayoutDashboard, Search, Settings, Star } from "lucide-react";
 
 import { AppSidebarCloseButton } from "@/app/components/ui/app-sidebar-buttons";
@@ -11,7 +13,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/shadcn/components/ui/sidebar";
+} from "@/shadcn/components/ui/overrides/sidebar";
 import Link from "next/link";
 
 // Menu items.
@@ -45,10 +47,10 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar forceMobile>
       <SidebarHeader>
         <div className="flex justify-end items-center">
-          <SidebarMenuButton asChild tooltip="Menu" className="w-auto">
+          <SidebarMenuButton asChild className="w-auto">
             <AppSidebarCloseButton />
           </SidebarMenuButton>
         </div>

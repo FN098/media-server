@@ -77,6 +77,8 @@ export function Header({ basePath }: HeaderProps) {
     <>
       <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
         <div className="flex h-full items-center gap-2 px-3">
+          <AppSidebarOpenButton />
+
           <Breadcrumbs
             items={breadcrumbs}
             options={{ threshold: 10 }}

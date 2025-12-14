@@ -1,6 +1,6 @@
 "use client";
 
-import { LucideIcon, Menu, PanelLeft, X } from "lucide-react";
+import { LucideIcon, Menu, X } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/shadcn/components/ui/button";
@@ -9,15 +9,17 @@ import { cn } from "@/shadcn/lib/utils";
 
 type SidebarTriggerProps = React.ComponentProps<typeof Button> & {
   icon: LucideIcon;
+  open: boolean;
 };
 
 function SidebarTrigger({
   className,
   onClick,
+  open,
   icon: Icon,
   ...props
 }: SidebarTriggerProps) {
-  const { toggleSidebar } = useSidebar();
+  const { setOpen, setOpenMobile } = useSidebar();
 
   return (
     <Button
@@ -28,7 +30,8 @@ function SidebarTrigger({
       className={cn("size-7", className)}
       onClick={(event) => {
         onClick?.(event);
-        toggleSidebar();
+        setOpen(open);
+        setOpenMobile(open);
       }}
       {...props}
     >
@@ -41,15 +44,11 @@ function SidebarTrigger({
 export function AppSidebarOpenButton(
   props: React.ComponentProps<typeof Button>
 ) {
-  const { isMobile } = useSidebar();
-
-  return <SidebarTrigger icon={isMobile ? Menu : PanelLeft} {...props} />;
+  return <SidebarTrigger icon={Menu} {...props} open={true} />;
 }
 
 export function AppSidebarCloseButton(
   props: React.ComponentProps<typeof Button>
 ) {
-  const { isMobile } = useSidebar();
-
-  return <SidebarTrigger icon={isMobile ? X : PanelLeft} {...props} />;
+  return <SidebarTrigger icon={X} {...props} open={false} />;
 }
