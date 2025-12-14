@@ -1,7 +1,17 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
-export function useGridConfig(ref: React.RefObject<HTMLElement | null>) {
-  const [config, setConfig] = useState({
+type GridViewConfig = {
+  columnCount: number;
+  columnWidth: number;
+  rowHeight: number;
+};
+
+export function useGridView(
+  ref: React.RefObject<HTMLElement | null>
+): GridViewConfig {
+  const [config, setConfig] = useState<GridViewConfig>({
     columnCount: 6,
     columnWidth: 200,
     rowHeight: 220,
@@ -10,18 +20,14 @@ export function useGridConfig(ref: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
     if (!ref.current) return;
 
+    const el = ref.current;
+
     const update = () => {
-      const width = ref.current!.offsetWidth;
+      const width = el.offsetWidth;
       const columnCount =
         width < 480 ? 2 : width < 768 ? 3 : width < 1024 ? 4 : 6;
       const columnWidth = Math.floor(width / columnCount);
       const rowHeight = Math.floor(columnWidth * 1.1);
-
-      if (
-        config.columnCount === columnCount &&
-        Math.abs(config.columnWidth - columnWidth) < 100
-      )
-        return;
 
       setConfig({ columnCount, columnWidth, rowHeight });
     };

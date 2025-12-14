@@ -65,7 +65,7 @@ export const GridView = memo(function GridView1({
       !node.isDirectory && onFileOpen ? () => onFileOpen(node) : undefined;
 
     return (
-      <div style={style} className="overflow-hidden p-1">
+      <div style={style} className="p-1">
         <div className="aspect-square w-full overflow-hidden rounded-lg border bg-muted">
           <ThumbItem
             node={node}
@@ -85,18 +85,16 @@ export const GridView = memo(function GridView1({
   };
 
   return (
-    <div className="overflow-hidden w-full h-full">
-      <Grid
-        gridRef={gridRef}
-        columnCount={columnCount}
-        rowCount={rowCount}
-        columnWidth={columnWidth}
-        rowHeight={rowHeight}
-        cellComponent={Cell}
-        cellProps={{}}
-        onScroll={onScroll}
-      />
-    </div>
+    <Grid
+      gridRef={gridRef}
+      columnCount={columnCount}
+      rowCount={rowCount}
+      columnWidth={columnWidth}
+      rowHeight={rowHeight}
+      cellComponent={Cell}
+      cellProps={{}}
+      onScroll={onScroll}
+    />
   );
 });
 
