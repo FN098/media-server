@@ -8,15 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/components/ui/table";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 type ListViewProps = {
   nodes: MediaFsNode[];
   onOpen?: (target: MediaFsNode) => void;
 };
 
-// TODO: memo化
-export function ListView({ nodes, onOpen }: ListViewProps) {
+export const ListView = memo(function ListView1({
+  nodes,
+  onOpen,
+}: ListViewProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +63,7 @@ export function ListView({ nodes, onOpen }: ListViewProps) {
       </Table>
     </div>
   );
-}
+});
 
 function RowItem({
   node,
