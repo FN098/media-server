@@ -10,6 +10,7 @@ export const imageExtensions = [
   ".png",
   ".webp",
   ".gif",
+  ".avif",
 ] as const;
 
 export const videoExtensions = [
@@ -49,6 +50,7 @@ export const MIME_MAP: Record<MediaExt, string> = {
   ".png": "image/png",
   ".webp": "image/webp",
   ".gif": "image/gif",
+  ".avif": "image/avif",
 
   // videos
   ".mp4": "video/mp4",
