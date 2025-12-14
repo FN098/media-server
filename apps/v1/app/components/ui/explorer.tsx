@@ -47,7 +47,7 @@ export function Explorer({ listing }: ExplorerProps) {
   }, [listing.nodes, lowerSearch]);
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="flex-1 overflow-auto p-2">
       <div
         className={view === "grid" ? "block" : "hidden"}
         ref={gridContainerRef}
