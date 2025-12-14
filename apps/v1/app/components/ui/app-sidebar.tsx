@@ -1,8 +1,6 @@
 "use client";
 
-import { Check, LayoutDashboard, Search, Settings, Star } from "lucide-react";
-
-import { AppSidebarCloseButton } from "@/app/components/ui/app-sidebar-buttons";
+import { Button } from "@/shadcn/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +12,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shadcn/components/ui/overrides/sidebar";
+import { useSidebar } from "@/shadcn/components/ui/sidebar";
+import { cn } from "@/shadcn/lib/utils";
+import {
+  Check,
+  LayoutDashboard,
+  LucideIcon,
+  Menu,
+  Search,
+  Settings,
+  Star,
+  X,
+} from "lucide-react";
 import Link from "next/link";
+import * as React from "react";
 
 // Menu items.
 const items = [
@@ -76,4 +87,54 @@ export function AppSidebar() {
       </SidebarContent>
     </Sidebar>
   );
+}
+
+type SidebarTriggerProps = React.ComponentProps<typeof Button> & {
+  icon: LucideIcon;
+  open: boolean;
+};
+
+/**
+ * Shadcn UI カスタム
+ * @see \@/shadcn/components/ui/sidebar > SidebarTrigger
+ */
+function SidebarTrigger({
+  className,
+  onClick,
+  open,
+  icon: Icon,
+  ...props
+}: SidebarTriggerProps) {
+  const { setOpen, setOpenMobile } = useSidebar();
+
+  return (
+    <Button
+      data-sidebar="trigger"
+      data-slot="sidebar-trigger"
+      variant="ghost"
+      size="icon"
+      className={cn("size-7", className)}
+      onClick={(event) => {
+        onClick?.(event);
+        setOpen(open);
+        setOpenMobile(open);
+      }}
+      {...props}
+    >
+      <Icon className="h-5 w-5" />
+      <span className="sr-only">Toggle Sidebar</span>
+    </Button>
+  );
+}
+
+export function AppSidebarOpenButton(
+  props: React.ComponentProps<typeof Button>
+) {
+  return <SidebarTrigger icon={Menu} {...props} open={true} />;
+}
+
+export function AppSidebarCloseButton(
+  props: React.ComponentProps<typeof Button>
+) {
+  return <SidebarTrigger icon={X} {...props} open={false} />;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { AppSidebarOpenButton } from "@/app/components/ui/app-sidebar-buttons";
+import { AppSidebarOpenButton } from "@/app/components/ui/app-sidebar";
 import { Breadcrumbs } from "@/app/components/ui/breadcrumbs";
 import { Search } from "@/app/components/ui/search";
 import { ViewModeSwitch } from "@/app/components/ui/view-mode-switch";
