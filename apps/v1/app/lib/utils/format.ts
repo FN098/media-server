@@ -1,3 +1,7 @@
+// =====================
+// 表示フォーマット
+// =====================
+
 export function formatLocalDate(
   value: string | Date | null | undefined,
   fallback = "-"

@@ -2,8 +2,8 @@
 
 import { LocalDateValue } from "@/app/components/ui/local-date";
 import { MediaThumbIcon } from "@/app/components/ui/thumb";
-import { formatBytes } from "@/app/lib/explorer/format";
 import { MediaFsNode } from "@/app/lib/media/types";
+import { formatBytes } from "@/app/lib/utils/format";
 import {
   Table,
   TableBody,

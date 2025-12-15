@@ -1,5 +1,5 @@
 // =====================
-// ファイルエクスプローラー
+// ファイル/フォルダ一覧取得
 // =====================
 
 import { detectMediaType } from "@/app/lib/media/mimetype";

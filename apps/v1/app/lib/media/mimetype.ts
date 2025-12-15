@@ -1,5 +1,5 @@
 // =====================
-// MIMETYPE/拡張子
+// MIMETYPE/ファイル拡張子
 // =====================
 
 import { MediaFsNodeType } from "@/app/lib/media/types";
