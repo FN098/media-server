@@ -5,6 +5,7 @@ import { ListView } from "@/app/components/ui/list-view";
 import { MediaViewer } from "@/app/components/ui/media-viewer";
 import { useGridView } from "@/app/hooks/use-grid-view";
 import { useMediaViewer } from "@/app/hooks/use-media-viewer";
+import { isMedia } from "@/app/lib/media";
 import { getClientExplorerPath } from "@/app/lib/path-helpers";
 import { MediaFsListing, MediaFsNode } from "@/app/lib/types";
 import { useSearch } from "@/app/providers/search-provider";
@@ -54,7 +55,11 @@ export function Explorer({ listing }: ExplorerProps) {
       const href = getClientExplorerPath(node.path);
       router.push(href);
     } else {
-      openViewer(node);
+      if (isMedia(node)) {
+        openViewer(node);
+      } else {
+        window.alert("このファイル形式は対応していません");
+      }
     }
   };
 
