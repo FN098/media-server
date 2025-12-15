@@ -1,9 +1,9 @@
 import { TextWithTooltip } from "@/app/components/ui/text-with-tooltip";
 import { MediaThumb } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/types";
-import { useMediaFsNodeSelection } from "@/app/providers/selection-provider";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { memo, useEffect, useRef } from "react";
+import { memo, useRef } from "react";
 import { CellComponentProps, Grid, useGridRef } from "react-window";
 
 type GridViewProps = {
@@ -25,42 +25,23 @@ export const GridView = memo(function GridView1({
   const gridRef = useGridRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { select, clear, isSelected } = useMediaFsNodeSelection();
-
-  // 外側クリックで選択解除
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        clear();
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [clear]);
-
   const Cell = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
+    const isMobile = useIsMobile();
+
     const index = rowIndex * columnCount + columnIndex;
     if (index >= nodes.length) return <div style={style} />;
 
     const node = nodes[index];
-    console.log(node);
 
     return (
       <div style={style} className="p-1">
         <div
           className={cn(
             "aspect-square w-full overflow-hidden rounded-lg border bg-muted select-none",
-            "hover:bg-blue-100",
-            isSelected(node) &&
-              "border-blue-500 ring-2 ring-blue-300 bg-blue-100"
+            "hover:bg-blue-100"
           )}
-          onClick={() => select(node)}
-          onDoubleClick={() => onOpen?.(node)}
+          onClick={() => isMobile && onOpen?.(node)}
+          onDoubleClick={() => !isMobile && onOpen?.(node)}
         >
           <MediaThumb
             node={node}

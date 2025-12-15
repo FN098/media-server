@@ -8,7 +8,6 @@ import { useMediaViewer } from "@/app/hooks/use-media-viewer";
 import { getClientExplorerPath } from "@/app/lib/path-helpers";
 import { MediaFsListing, MediaFsNode } from "@/app/lib/types";
 import { useSearch } from "@/app/providers/search-provider";
-import { MediaFsNodeSelectionProvider } from "@/app/providers/selection-provider";
 import { useViewMode } from "@/app/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
 import { useRouter } from "next/navigation";
@@ -71,21 +70,17 @@ export function Explorer({ listing }: ExplorerProps) {
         className={view === "grid" ? "block" : "hidden"}
         ref={gridContainerRef}
       >
-        <MediaFsNodeSelectionProvider>
-          <GridView
-            nodes={filtered}
-            columnCount={columnCount}
-            columnWidth={columnWidth}
-            rowHeight={rowHeight}
-            onOpen={handleOpen}
-          />
-        </MediaFsNodeSelectionProvider>
+        <GridView
+          nodes={filtered}
+          columnCount={columnCount}
+          columnWidth={columnWidth}
+          rowHeight={rowHeight}
+          onOpen={handleOpen}
+        />
       </div>
 
       <div className={view === "list" ? "block" : "hidden"}>
-        <MediaFsNodeSelectionProvider>
-          <ListView nodes={filtered} onOpen={handleOpen} />
-        </MediaFsNodeSelectionProvider>
+        <ListView nodes={filtered} onOpen={handleOpen} />
       </div>
 
       {viewerOpen && currentFilePath && currentMediaNode && (

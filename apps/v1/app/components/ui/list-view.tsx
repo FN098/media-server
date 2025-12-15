@@ -1,6 +1,5 @@
 import { MediaThumbIcon } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/types";
-import { useMediaFsNodeSelection } from "@/app/providers/selection-provider";
 import {
   Table,
   TableBody,
@@ -9,8 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/components/ui/table";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { memo, useEffect, useRef } from "react";
+import { memo, useRef } from "react";
 
 type ListViewProps = {
   nodes: MediaFsNode[];
@@ -22,24 +22,7 @@ export const ListView = memo(function ListView1({
   onOpen,
 }: ListViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const { select, clear, isSelected } = useMediaFsNodeSelection();
-
-  // 外部クリックで選択解除
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        clear();
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [clear]);
+  const isMobile = useIsMobile();
 
   return (
     <div ref={containerRef} className="w-full h-full">
@@ -57,12 +40,9 @@ export const ListView = memo(function ListView1({
             <RowItem
               key={node.path}
               node={node}
-              className={cn(
-                "hover:bg-blue-100",
-                isSelected(node) && "bg-blue-100"
-              )}
-              onClick={() => select(node)}
-              onDoubleClick={() => onOpen?.(node)}
+              className={cn("hover:bg-blue-100")}
+              onClick={() => isMobile && onOpen?.(node)}
+              onDoubleClick={() => !isMobile && onOpen?.(node)}
             />
           ))}
         </TableBody>
