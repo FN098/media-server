@@ -40,7 +40,7 @@ export const ListView = memo(function ListView1({
             <RowItem
               key={node.path}
               node={node}
-              className={cn("hover:bg-blue-100")}
+              className={cn("hover:bg-blue-100 active:bg-blue-200")}
               onClick={() => isMobile && onOpen?.(node)}
               onDoubleClick={() => !isMobile && onOpen?.(node)}
             />

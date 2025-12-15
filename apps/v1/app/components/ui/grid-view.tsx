@@ -38,7 +38,7 @@ export const GridView = memo(function GridView1({
         <div
           className={cn(
             "aspect-square w-full overflow-hidden rounded-lg border bg-muted select-none",
-            "hover:bg-blue-100"
+            "hover:bg-blue-100 active:bg-blue-200"
           )}
           onClick={() => isMobile && onOpen?.(node)}
           onDoubleClick={() => !isMobile && onOpen?.(node)}
