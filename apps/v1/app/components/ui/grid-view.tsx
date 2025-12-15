@@ -1,3 +1,5 @@
+"use client";
+
 import { TextWithTooltip } from "@/app/components/ui/text-with-tooltip";
 import { MediaThumb } from "@/app/components/ui/thumb";
 import { MediaFsNode } from "@/app/lib/media/types";

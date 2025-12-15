@@ -1,5 +1,8 @@
+"use client";
+
+import { LocalDateValue } from "@/app/components/ui/local-date";
 import { MediaThumbIcon } from "@/app/components/ui/thumb";
-import { formatBytes, formatLocalDate } from "@/app/lib/explorer/format";
+import { formatBytes } from "@/app/lib/explorer/format";
 import { MediaFsNode } from "@/app/lib/media/types";
 import {
   Table,
@@ -76,7 +79,9 @@ function RowItem({
         </div>
       </TableCell>
       <TableCell>{node.isDirectory ? "Folder" : node.type}</TableCell>
-      <TableCell>{formatLocalDate(node.updatedAt)}</TableCell>
+      <TableCell>
+        <LocalDateValue value={node.updatedAt} />
+      </TableCell>
       <TableCell>{formatBytes(node.size)}</TableCell>
     </TableRow>
   );
