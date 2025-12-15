@@ -1,4 +1,5 @@
 import { MediaThumbIcon } from "@/app/components/ui/thumb";
+import { formatBytes, formatLocalDate } from "@/app/lib/format";
 import { MediaFsNode } from "@/app/lib/types";
 import {
   Table,
@@ -75,10 +76,8 @@ function RowItem({
         </div>
       </TableCell>
       <TableCell>{node.isDirectory ? "Folder" : node.type}</TableCell>
-      <TableCell>{node.updatedAt ?? "-"}</TableCell>
-      <TableCell>
-        {node.size ? `${Math.round(node.size / 1024)} KB` : "-"}
-      </TableCell>
+      <TableCell>{formatLocalDate(node.updatedAt)}</TableCell>
+      <TableCell>{formatBytes(node.size)}</TableCell>
     </TableRow>
   );
 }
