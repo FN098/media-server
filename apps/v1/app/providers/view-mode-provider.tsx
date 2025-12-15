@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { ViewMode } from "../lib/types";
+import { ViewMode } from "../lib/explorer/types";
 
 type ViewModeContextValue = {
   view: ViewMode;
