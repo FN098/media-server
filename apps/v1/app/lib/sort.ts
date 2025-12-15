@@ -8,7 +8,7 @@ export function sortMediaFsNodes(nodes: MediaFsNode[]): MediaFsNode[] {
   const collator = new Intl.Collator("ja-JP", {
     numeric: true, // 10 を 2 の後ろにする
     sensitivity: "base", // 大文字小文字・記号差を無視（Explorer寄り）
-    ignorePunctuation: true,
+    ignorePunctuation: true, // 記号を無視
   });
 
   return [...nodes].sort((a, b) => {

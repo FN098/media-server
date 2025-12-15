@@ -7,7 +7,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    // 検索キーワードはページ遷移後に破棄
+    // 検索キーワードはページ遷移後にリセット
     <SearchProvider>
       <Header basePath="/dashboard/explorer" />
       {children}
