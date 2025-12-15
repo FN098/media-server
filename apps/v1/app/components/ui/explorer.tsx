@@ -13,6 +13,7 @@ import { useViewMode } from "@/app/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef } from "react";
+import { toast } from "sonner";
 
 type ExplorerProps = {
   listing: MediaFsListing;
@@ -58,7 +59,7 @@ export function Explorer({ listing }: ExplorerProps) {
       if (isMedia(node)) {
         openViewer(node);
       } else {
-        window.alert("このファイル形式は対応していません");
+        toast.warning("このファイル形式は対応していません");
       }
     }
   };
