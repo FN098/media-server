@@ -15,7 +15,7 @@ import {
 import { useSidebar } from "@/shadcn/components/ui/sidebar";
 import { cn } from "@/shadcn/lib/utils";
 import {
-  Check,
+  Flame,
   LayoutDashboard,
   LucideIcon,
   Menu,
@@ -40,9 +40,9 @@ const items = [
     icon: Search,
   },
   {
-    title: "Sample",
-    url: "/dashboard/sample",
-    icon: Check,
+    title: "Experiment",
+    url: "/dashboard/experiment",
+    icon: Flame,
   },
   {
     title: "Favorites",
