@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { FallbackImage } from "@/app/components/ui/fallback-image";
+import { MediaFsNode, MediaFsNodeType } from "@/app/lib/media/types";
 import { getMediaUrl, getThumbUrl } from "@/app/lib/path-helpers";
-import { MediaFsNode, MediaFsNodeType } from "@/app/lib/types";
 import { cn } from "@/shadcn/lib/utils";
 import Image from "next/image";
 import { memo, ReactNode } from "react";

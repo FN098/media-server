@@ -1,6 +1,6 @@
 import { TextWithTooltip } from "@/app/components/ui/text-with-tooltip";
 import { MediaThumb } from "@/app/components/ui/thumb";
-import { MediaFsNode } from "@/app/lib/types";
+import { MediaFsNode } from "@/app/lib/media/types";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, useRef } from "react";

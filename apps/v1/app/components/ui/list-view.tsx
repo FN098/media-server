@@ -1,6 +1,6 @@
 import { MediaThumbIcon } from "@/app/components/ui/thumb";
 import { formatBytes, formatLocalDate } from "@/app/lib/explorer/format";
-import { MediaFsNode } from "@/app/lib/types";
+import { MediaFsNode } from "@/app/lib/media/types";
 import {
   Table,
   TableBody,

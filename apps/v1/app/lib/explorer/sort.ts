@@ -2,7 +2,7 @@
 // ファイル/フォルダ一覧ソート
 // =====================
 
-import { MediaFsListing, MediaFsNode } from "@/app/lib/types";
+import { MediaFsListing, MediaFsNode } from "@/app/lib/media/types";
 
 export function sortMediaFsNodes(nodes: MediaFsNode[]): MediaFsNode[] {
   const collator = new Intl.Collator("ja-JP", {

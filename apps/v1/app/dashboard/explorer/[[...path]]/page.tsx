@@ -1,7 +1,7 @@
 import { Explorer } from "@/app/components/ui/explorer";
 import { getMediaFsListing } from "@/app/lib/explorer/listing";
 import { withSortedNodes } from "@/app/lib/explorer/sort";
-import { createThumbs } from "@/app/lib/thumb";
+import { createThumbs } from "@/app/lib/explorer/thumb";
 import { notFound } from "next/navigation";
 
 export default async function Page(props: {

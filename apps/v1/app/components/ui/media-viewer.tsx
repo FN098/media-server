@@ -1,7 +1,7 @@
 "use client";
 
 import { useShortcutKeys } from "@/app/hooks/use-shortcut-keys";
-import { MediaFsNode } from "@/app/lib/types";
+import { MediaFsNode } from "@/app/lib/media/types";
 import { getAbsoluteUrl } from "@/app/lib/url";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer from "@mux/mux-player-react";
