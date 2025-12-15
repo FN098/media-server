@@ -1,5 +1,6 @@
 "use client";
 
+import { PATHS } from "@/app/lib/paths";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Sidebar,
@@ -31,17 +32,17 @@ import * as React from "react";
 const items = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: PATHS.client.dashboard.root,
     icon: LayoutDashboard,
   },
   {
     title: "Explorer",
-    url: "/dashboard/explorer",
+    url: PATHS.client.explorer.root,
     icon: Search,
   },
   {
     title: "Experiment",
-    url: "/dashboard/experiment",
+    url: PATHS.client.experiment.root,
     icon: Flame,
   },
   {

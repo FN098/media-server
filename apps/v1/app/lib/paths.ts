@@ -2,15 +2,31 @@ const MEDIA_ROOT = process.env.MEDIA_ROOT!;
 
 export const PATHS = {
   server: {
-    mediaRoot: MEDIA_ROOT,
-    thumbRoot: `${MEDIA_ROOT}/.thumb/`,
+    media: {
+      root: MEDIA_ROOT,
+      thumb: {
+        root: `${MEDIA_ROOT}/.thumb/`,
+      },
+    },
   },
   client: {
-    dashboardRoot: "/dashboard/",
-    explorerRoot: "/dashboard/explorer/",
+    dashboard: {
+      root: "/",
+    },
+    explorer: {
+      root: "/explorer/",
+    },
+    experiment: {
+      root: "/experiment/",
+    },
   },
   api: {
-    mediaRoot: `/api/media/`,
-    thumbRoot: `/api/media/.thumb/`,
+    root: "/api/",
+    media: {
+      root: "/api/media/",
+      thumb: {
+        root: "/api/media/.thumb",
+      },
+    },
   },
 } as const;
