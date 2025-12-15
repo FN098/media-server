@@ -1,3 +1,4 @@
+import { TextWithTooltip } from "@/app/components/ui/text-with-tooltip";
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -13,7 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
-import { cn } from "@/shadcn/lib/utils";
 import { HomeIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -26,26 +26,24 @@ export type BreadcrumbLinkItem = {
 
 export function Breadcrumbs({
   items,
-  options,
+  threshold,
   className,
 }: {
   items: BreadcrumbLinkItem[];
-  options?: {
-    threshold?: number;
-  };
+  threshold?: number;
   className?: string;
 }) {
   if (!items || items.length === 0) return null;
 
-  const useEllipsis = items.length >= (options?.threshold ?? 5);
+  const useEllipsis = items.length >= (threshold ?? 5);
 
   const first = items[0];
-  const last = items[items.length - 1];
+  const last = items.length >= 2 ? items[items.length - 1] : null;
   const middle = items.slice(1, items.length - 1);
 
   return (
     <Breadcrumb className={className}>
-      <BreadcrumbList className={cn("flex text-sm")}>
+      <BreadcrumbList className="flex-nowrap">
         {/* First item */}
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
@@ -53,12 +51,14 @@ export function Breadcrumbs({
               {first.key === "home" ? (
                 <HomeIcon className="size-5" />
               ) : (
-                first.label
+                <TextWithTooltip
+                  text={first.label}
+                  className="max-w-10 text-center"
+                />
               )}
             </Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
-
         <BreadcrumbSeparator />
 
         {/* Middle items */}
@@ -86,7 +86,12 @@ export function Breadcrumbs({
             <React.Fragment key={item.key}>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href={item.href}>{item.label}</Link>
+                  <Link href={item.href}>
+                    <TextWithTooltip
+                      text={item.label}
+                      className="max-w-10 text-center"
+                    />
+                  </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -95,9 +100,13 @@ export function Breadcrumbs({
         )}
 
         {/* Last item */}
-        <BreadcrumbItem>
-          <BreadcrumbPage>{last.label}</BreadcrumbPage>
-        </BreadcrumbItem>
+        {last && (
+          <BreadcrumbItem className="min-w-0 flex-1">
+            <BreadcrumbPage className="block truncate">
+              <TextWithTooltip text={last.label} />
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        )}
       </BreadcrumbList>
     </Breadcrumb>
   );

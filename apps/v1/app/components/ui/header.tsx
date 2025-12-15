@@ -8,15 +8,17 @@ import { useBreadcrumbs } from "@/app/hooks/use-breadcrumbs";
 import { useMounted } from "@/app/hooks/use-mounted";
 import { useSearchOptional } from "@/app/providers/search-provider";
 import { useViewModeOptional } from "@/app/providers/view-mode-provider";
+import { Separator } from "@/shadcn/components/ui/separator";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 type HeaderProps = {
+  title: string;
   basePath: string;
 };
 
-export function Header({ basePath }: HeaderProps) {
+export function Header({ title, basePath }: HeaderProps) {
   const searchCtx = useSearchOptional();
   const viewCtx = useViewModeOptional();
   const isMobile = useIsMobile();
@@ -25,6 +27,7 @@ export function Header({ basePath }: HeaderProps) {
 
   if (!mounted) return null;
 
+  // Mobile
   if (isMobile) {
     const current = breadcrumbs.at(-1);
     const backHref = breadcrumbs.at(-2)?.href ?? null;
@@ -33,6 +36,10 @@ export function Header({ basePath }: HeaderProps) {
       <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
         <div className="flex h-full items-center gap-2 px-2">
           <AppSidebarOpenButton />
+
+          <div className="text-lg font-semibold mx-2 hidden sm:block">
+            {title}
+          </div>
 
           {/* 戻る */}
           {backHref ? (
@@ -72,17 +79,18 @@ export function Header({ basePath }: HeaderProps) {
     );
   }
 
-  // Desktop
+  // PC
   return (
     <>
       <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
         <div className="flex h-full items-center gap-2 px-3">
           <AppSidebarOpenButton />
 
+          <div className="text-lg font-semibold mx-2">{title}</div>
+
           <Breadcrumbs
             items={breadcrumbs}
-            options={{ threshold: 10 }}
-            className="min-w-0 whitespace-nowrap overflow-hidden text-ellipsis"
+            className="min-w-0 overflow-hidden"
           />
 
           <div className="ml-auto flex items-center gap-2">
@@ -93,6 +101,9 @@ export function Header({ basePath }: HeaderProps) {
                 className="w-[180px] shrink-0"
               />
             )}
+
+            <Separator orientation="vertical" className="h-6" />
+
             {viewCtx && (
               <ViewModeSwitch
                 value={viewCtx.view}

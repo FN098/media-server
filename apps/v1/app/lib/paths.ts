@@ -14,16 +14,16 @@ export const PATHS = {
       root: "/",
     },
     explorer: {
-      root: "/explorer/",
+      root: "/explorer",
     },
-    experiment: {
-      root: "/experiment/",
+    experimental: {
+      root: "/experimental",
     },
   },
   api: {
-    root: "/api/",
+    root: "/api",
     media: {
-      root: "/api/media/",
+      root: "/api/media",
       thumb: {
         root: "/api/media/.thumb",
       },

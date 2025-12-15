@@ -3,6 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/shadcn/components/ui/tooltip";
+import { cn } from "@/shadcn/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 type TextWithTooltipProps = {
@@ -22,7 +23,7 @@ export function TextWithTooltip({ text, className }: TextWithTooltipProps) {
   }, [text]);
 
   const content = (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={cn("truncate", className)}>
       {text}
     </div>
   );

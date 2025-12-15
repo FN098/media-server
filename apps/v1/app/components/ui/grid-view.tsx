@@ -52,10 +52,7 @@ export const GridView = memo(function GridView1({
             className="w-full h-full object-cover"
           />
         </div>
-        <TextWithTooltip
-          text={node.name}
-          className="truncate text-center text-xs"
-        />
+        <TextWithTooltip text={node.name} className="text-center text-xs" />
       </div>
     );
   };

@@ -41,8 +41,8 @@ const items = [
     icon: Search,
   },
   {
-    title: "Experiment",
-    url: PATHS.client.experiment.root,
+    title: "Experimental",
+    url: PATHS.client.experimental.root,
     icon: Flame,
   },
   {
