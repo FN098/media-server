@@ -15,11 +15,7 @@ export function Search({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useShortcutKey({
-    key: "k",
-    modifiers: [
-      { ctrl: true }, // Windows / Linux
-      { meta: true }, // Mac
-    ],
+    key: "Ctrl+k",
     callback: () => inputRef.current?.focus(),
   });
 
