@@ -1,15 +1,12 @@
 "use client";
 
-import { LoadingSpinner } from "@/components/ui/spinners";
+import { AudioPlayer } from "@/components/ui/audio-player";
+import { ImageViewer } from "@/components/ui/image-viewer";
+import { VideoPlayer } from "@/components/ui/video-player";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
 import { MediaFsNode } from "@/lib/media/types";
-import {
-  getAbsoluteMediaUrl,
-  getMediaUrl,
-  getThumbUrl,
-} from "@/lib/path-helpers";
-import MuxPlayer from "@mux/mux-player-react";
+import { getThumbUrl } from "@/lib/path-helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -72,20 +69,43 @@ export function MediaViewer({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center overflow-hidden touch-none"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden touch-none bg-black"
       onMouseMove={handleInteraction}
       onPointerDown={handleInteraction}
     >
-      {/* header */}
+      {/* 背景 */}
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={`bg-${items[current].path}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0 z-0 pointer-events-none"
+        >
+          {/* メディアのサムネイルを背景に全画面表示 */}
+          <Image
+            src={getThumbUrl(items[current].path)}
+            alt=""
+            fill
+            className="object-cover scale-110 blur-[100px] saturate-[1.8] opacity-60"
+            unoptimized
+          />
+          {/* 黒のグラデーションで暗さを調整 */}
+          <div className="absolute inset-0 bg-black/40 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]" />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* ヘッダー */}
       <AnimatePresence>
         {showHeader && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: -10 }}
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-0 left-0 right-0 z-60 px-2 py-4 md:p-6 flex items-start justify-between bg-linear-to-b from-black/60 to-transparent"
           >
-            <div className="flex flex-col gap-1 ml-4">
+            <div className="flex flex-col gap-1 ml-4 mr-1">
               <span className="text-white md:text-lg font-medium drop-shadow-md">
                 {items[current].name}
               </span>
@@ -105,7 +125,7 @@ export function MediaViewer({
         )}
       </AnimatePresence>
 
-      {/* body */}
+      {/* メディアコンテンツ */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={index}
@@ -154,84 +174,18 @@ function Media({
   media: MediaFsNode;
   isCurrent?: boolean;
 }) {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  if (media.type === "image") {
-    return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        {/* 背景にサムネイル（軽い画像）を表示しておく */}
-        {!isLoaded && (
-          <Image
-            src={getThumbUrl(media.path)}
-            alt={media.name}
-            fill
-            className="absolute inset-0 w-full h-full object-contain blur-lg opacity-50"
-          />
-        )}
-
-        <Image
-          src={getMediaUrl(media.path)}
-          alt={media.name}
-          fill
-          className={`object-contain transition-opacity duration-500 ${
-            isLoaded ? "opacity-100" : "opacity-0"
-          }`}
-          onLoadingComplete={() => setIsLoaded(true)}
-          draggable={false}
-          priority
-          unoptimized={true}
-        />
-
-        {/* さらに重い場合はスピナーも重ねる */}
-        {!isLoaded && <LoadingSpinner />}
-      </div>
-    );
-  }
-
-  if (media.type === "video") {
-    if (isCurrent) {
+  switch (media.type) {
+    case "image":
+      return <ImageViewer media={media} />;
+    case "video":
+      return <VideoPlayer media={media} isCurrent={isCurrent} />;
+    case "audio":
+      return isCurrent ? <AudioPlayer media={media} /> : null;
+    default:
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
-          {!isLoaded && <LoadingSpinner />}
-
-          <div
-            className="relative max-w-full max-h-full"
-            onPointerDownCapture={(e) => e.stopPropagation()}
-          >
-            <MuxPlayer
-              src={getAbsoluteMediaUrl(media.path)}
-              autoPlay
-              streamType="on-demand"
-              style={{ objectFit: "contain", width: "100%", height: "100%" }}
-              className="max-w-full max-h-full"
-              onLoadedData={() => setIsLoaded(true)}
-            />
-          </div>
+        <div className="text-white/50 text-sm">
+          Unsupported file type: {media.type}
         </div>
       );
-    } else {
-      return (
-        <div className="relative">
-          {!isLoaded && <LoadingSpinner />}
-
-          <Image
-            src={getThumbUrl(media.path)}
-            alt={media.name}
-            fill
-            className="max-w-[100vw] max-h-screen object-contain select-none"
-            draggable={false}
-            onLoadingComplete={() => setIsLoaded(true)}
-          />
-        </div>
-      );
-    }
   }
-
-  if (media.type === "audio") {
-    if (isCurrent) {
-      return <audio src={getMediaUrl(media.path)} controls autoPlay />;
-    }
-  }
-
-  return null;
 }

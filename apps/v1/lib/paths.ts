@@ -24,8 +24,11 @@ export const PATHS = {
     root: "/api",
     media: {
       root: "/api/media",
-      thumb: {
-        root: "/api/media/.thumb",
+      file: {
+        root: "/api/media/file",
+        thumb: {
+          root: "/api/media/file/.thumb",
+        },
       },
     },
   },

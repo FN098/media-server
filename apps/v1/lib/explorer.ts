@@ -4,18 +4,27 @@ import fs from "fs/promises";
 import path from "path";
 import { detectMediaType } from "./media/detector";
 
+export async function existsDir(dirPath: string): Promise<boolean> {
+  try {
+    await fs.access(dirPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function getMediaFsListing(
-  targetPath: string
+  dirPath: string
 ): Promise<MediaFsListing | null> {
   try {
-    const targetDir = getMediaPath(targetPath);
+    const targetDir = getMediaPath(dirPath);
+    if (!(await existsDir(targetDir))) return null;
+
     const dirents = await fs.readdir(targetDir, { withFileTypes: true });
 
     const nodes: MediaFsNode[] = await Promise.all(
       dirents.map(async (item) => {
-        const relativePath = path
-          .join(targetPath, item.name)
-          .replace(/\\/g, "/");
+        const relativePath = path.join(dirPath, item.name).replace(/\\/g, "/");
         const absolutePath = path.join(targetDir, item.name);
         const stat = await fs.stat(absolutePath);
 
@@ -31,19 +40,17 @@ export async function getMediaFsListing(
     );
 
     const parent =
-      targetPath === ""
-        ? null
-        : targetPath.split("/").slice(0, -1).join("/") || "";
+      dirPath === "" ? null : dirPath.split("/").slice(0, -1).join("/") || "";
 
     const listing: MediaFsListing = {
-      path: targetPath,
+      path: dirPath,
       nodes,
       parent,
     };
 
     return listing;
   } catch (e) {
-    console.error(`Error in ${getMediaFsListing.name}:`, e);
+    console.error(e);
     return null;
   }
 }

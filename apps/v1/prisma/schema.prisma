@@ -14,20 +14,23 @@ datasource db {
 }
 
 model User {
-  id        String   @id
-  email     String   @unique
+  id        String     @id
+  email     String     @unique
   password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  favorites Favorite[]
 }
 
 model Media {
   id        String     @id
   path      String     @unique
+  dirPath   String
   title     String?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   mediaTags MediaTag[]
+  favorites Favorite[]
 }
 
 model Tag {
@@ -44,4 +47,17 @@ model MediaTag {
   tag   Tag   @relation(fields: [tagId], references: [id])
 
   @@id([mediaId, tagId])
+}
+
+model Favorite {
+  userId    String
+  mediaId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  media Media @relation(fields: [mediaId], references: [id])
+
+  @@id([userId, mediaId])
+  @@index([userId])
+  @@index([mediaId])
 }

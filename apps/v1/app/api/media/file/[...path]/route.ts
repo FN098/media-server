@@ -53,7 +53,7 @@ export async function GET(
       },
     });
   } catch (e) {
-    console.error("Internal Server Error:", e);
+    console.error(e);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

@@ -8,12 +8,12 @@ export function getAbsoluteMediaUrl(mediaPath: string) {
 }
 
 export function getMediaUrl(mediaPath: string) {
-  return path.join(PATHS.api.media.root, mediaPath);
+  return path.join(PATHS.api.media.file.root, mediaPath);
 }
 
 export function getThumbUrl(mediaPath: string) {
   return path.join(
-    PATHS.api.media.thumb.root,
+    PATHS.api.media.file.thumb.root,
     mediaPath + APP_CONFIG.thumb.extension
   );
 }
