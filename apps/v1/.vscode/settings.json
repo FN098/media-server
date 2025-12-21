@@ -2,18 +2,14 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
+    "source.addMissingImports": "explicit",
     "source.organizeImports": "explicit",
     "source.fixAll": "explicit"
   },
   "prettier.prettierPath": "/app/apps/v1/node_modules/prettier",
-  "eslint.validate": [
-    "javascript",
-    "typescript",
-    "javascriptreact",
-    "typescriptreact"
-  ],
   "eslint.format.enable": false,
   "files.eol": "\n",
+  "files.insertFinalNewline": true,
   "jest.runMode": "on-demand",
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.preferences.importModuleSpecifierEnding": "minimal",

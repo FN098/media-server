@@ -1,6 +1,6 @@
 ## ⚠️注意
 
-このフォルダ内のファイルは直接編集しないこと。(override 以下のファイルを除く)
+このフォルダ内のファイルは直接編集しないこと。
 
 また、フォルダ名の変更も禁止とする。
 
@@ -22,9 +22,9 @@ pnpm dlx shadcn@latest add --all --overwrite
 
 コンポーネントのカスタマイズが必要な場合、以下のフォルダに元ファイルと同じ名前で作成する
 
-shadcn/components/ui/override
+shadcn-overrides/components/ui
 
-例. shadcn/components/ui/override/form.tsx
+例. shadcn-overrides/components/ui/form.tsx
 
 ```tsx
 // 必要に応じてインポート
@@ -43,7 +43,7 @@ function FormMessage({
 // 元ファイルで定義されているコンポーネントをすべてエクスポート
 export * from "@/shadcn/components/ui/form";
 
-// 再定義したコンポーネントをエクスポート（必ず最後にエクスポートすること）
+// 再定義したコンポーネントをエクスポート（必ず最後に書く）
 export { FormMessage };
 ```
 
@@ -58,6 +58,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/shadcn/components/ui/override/form";
-// ↑ 間違って "@/shadcn/components/ui/form" としないように注意すること
+} from "@/shadcn-overrides/components/ui/form";
+// ↑ 間違って "@/shadcn/components/ui/form" としないように注意
 ```
