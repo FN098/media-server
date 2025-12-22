@@ -123,3 +123,14 @@
     @apply cursor-pointer;
   }
 }
+
+@theme {
+  @keyframes marquee-once {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(var(--scroll-distance));
+    }
+  }
+}

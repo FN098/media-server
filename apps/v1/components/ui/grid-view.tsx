@@ -1,8 +1,8 @@
 "use client";
 
 import { GridViewFavoriteButton } from "@/components/ui/favorite-button";
+import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
-import { TextWithTooltip } from "@/components/ui/text-with-tooltip";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
@@ -59,10 +59,9 @@ export const GridView = memo(function GridView1({
 
           {/* テキストオーバーレイ */}
           <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
-            <TextWithTooltip
+            <MarqueeText
               text={node.name}
               className="text-center text-[10px] leading-tight text-white"
-              tooltipSide="bottom"
             />
           </div>
 
