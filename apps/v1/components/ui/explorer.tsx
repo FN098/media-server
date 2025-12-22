@@ -13,7 +13,7 @@ import { useSearch } from "@/providers/search-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type ExplorerProps = {
@@ -24,6 +24,7 @@ export function Explorer({ listing }: ExplorerProps) {
   const { search } = useSearch();
   const { view } = useViewMode();
   const router = useRouter();
+  const [initialIndex, setInitialIndex] = useState(-1);
 
   // Search filter
   const lowerSearch = useMemo(() => search.toLowerCase(), [search]);
@@ -39,17 +40,11 @@ export function Explorer({ listing }: ExplorerProps) {
   const { columnCount, columnWidth, rowHeight } = useGridView(gridContainerRef);
 
   // MediaViewer config
-  const {
-    viewerOpen,
-    mediaNodes,
-    currentIndex,
-    setIndex,
-    openViewerAt,
-    closeViewer,
-  } = useMediaViewer(filtered);
+  const { viewerOpen, mediaNodes, openViewer, closeViewer } =
+    useMediaViewer(filtered);
 
   // Open file/folder
-  const handleOpen = (node: MediaNode) => {
+  const handleOpen = (node: MediaNode, index: number) => {
     if (node.isDirectory) {
       const href = getClientExplorerPath(node.path);
       router.push(href);
@@ -57,7 +52,8 @@ export function Explorer({ listing }: ExplorerProps) {
     }
 
     if (isMedia(node.type)) {
-      openViewerAt(node);
+      openViewer();
+      setInitialIndex(index);
       return;
     }
 
@@ -99,8 +95,7 @@ export function Explorer({ listing }: ExplorerProps) {
         {viewerOpen && (
           <MediaViewer
             items={mediaNodes}
-            index={currentIndex}
-            setIndex={setIndex}
+            initialIndex={initialIndex}
             onClose={closeViewer}
           />
         )}

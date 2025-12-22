@@ -17,7 +17,7 @@ type GridViewProps = {
   columnCount: number;
   columnWidth: number;
   rowHeight: number;
-  onOpen?: (target: MediaNode) => void;
+  onOpen?: (target: MediaNode, index: number) => void;
 };
 
 export const GridView = memo(function GridView1({
@@ -47,8 +47,8 @@ export const GridView = memo(function GridView1({
             "relative aspect-square w-full overflow-hidden rounded-lg border bg-muted select-none",
             "hover:bg-blue-100 active:bg-blue-200 group"
           )}
-          onClick={() => onOpen?.(node)}
-          onDoubleClick={() => !isMobile && onOpen?.(node)}
+          onClick={() => onOpen?.(node, index)}
+          onDoubleClick={() => !isMobile && onOpen?.(node, index)}
         >
           <MediaThumb
             node={node}

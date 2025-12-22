@@ -18,7 +18,7 @@ import { memo, useRef } from "react";
 
 type ListViewProps = {
   nodes: MediaNode[];
-  onOpen?: (target: MediaNode) => void;
+  onOpen?: (target: MediaNode, index: number) => void;
 };
 
 export const ListView = memo(function ListView1({
@@ -40,13 +40,13 @@ export const ListView = memo(function ListView1({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {nodes.map((node) => (
+          {nodes.map((node, index) => (
             <RowItem
               key={node.path}
               node={node}
               className={cn("hover:bg-blue-100 active:bg-blue-200")}
-              onClick={() => onOpen?.(node)}
-              onDoubleClick={() => !isMobile && onOpen?.(node)}
+              onClick={() => onOpen?.(node, index)}
+              onDoubleClick={() => !isMobile && onOpen?.(node, index)}
             />
           ))}
         </TableBody>

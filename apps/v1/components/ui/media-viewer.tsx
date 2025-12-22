@@ -16,24 +16,25 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { Keyboard, Navigation, Virtual } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+
 import "swiper/css";
 import "swiper/css/virtual";
+import { memo, useState } from "react";
 
 interface MediaViewerProps {
   items: MediaNode[];
-  index: number;
-  setIndex: (index: number) => void;
+  initialIndex: number;
   onClose: () => void;
 }
 
 export function MediaViewer({
   items,
-  index,
-  setIndex,
+  initialIndex,
   onClose,
 }: MediaViewerProps) {
   const favoriteCtx = useFavorite();
   const { showUI: showHeader, handleInteraction } = useShowUI({ delay: 2000 });
+  const [index, setIndex] = useState(initialIndex);
 
   // 左右キーは Swiper の keyboard オプションで有効化
   useShortcutKeys([{ key: "Escape", callback: onClose }]);
@@ -47,6 +48,7 @@ export function MediaViewer({
       {/* 背景 */}
       <AnimatePresence mode="popLayout">
         <motion.div
+          key={`bg-${items[index]?.path}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -114,15 +116,27 @@ export function MediaViewer({
       {/* メディアコンテンツ */}
       <Swiper
         modules={[Virtual, Navigation, Keyboard]}
-        virtual // これを有効にするだけで仮想化される
         initialSlide={index}
-        keyboard={{ enabled: true }}
+        // スライドが切り替わった時に親のステートを更新
         onSlideChange={(swiper) => setIndex(swiper.activeIndex)}
+        virtual={{
+          enabled: true,
+          slides: items,
+          addSlidesBefore: 1, // 前後の予備枚数
+          addSlidesAfter: 1,
+        }}
+        keyboard={{ enabled: true }}
         className="h-full w-full"
       >
         {items.map((item, i) => (
-          <SwiperSlide key={item.path} virtualIndex={i}>
-            <Media media={item} isCurrent={index === i} />
+          <SwiperSlide
+            key={item.path}
+            virtualIndex={i}
+            className="flex items-center justify-center"
+          >
+            <div className="w-full h-full flex items-center justify-center">
+              <Media media={item} isCurrent={index === i} />
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>
@@ -130,12 +144,12 @@ export function MediaViewer({
   );
 }
 
-function Media({
+const Media = memo(function Media1({
   media,
   isCurrent,
 }: {
   media: MediaNode;
-  isCurrent?: boolean;
+  isCurrent: boolean;
 }) {
   switch (media.type) {
     case "image":
@@ -151,4 +165,4 @@ function Media({
         </div>
       );
   }
-}
+});
