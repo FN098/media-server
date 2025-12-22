@@ -11,13 +11,12 @@ import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { toast } from "sonner";
-import { Keyboard, Navigation, Virtual } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
-
 import { memo, useState } from "react";
+import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
+import { Keyboard, Navigation, Virtual } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 interface MediaViewerProps {
   items: MediaNode[];
