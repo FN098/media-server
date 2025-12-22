@@ -1,5 +1,6 @@
 "use client";
 
+import { FavoriteButton } from "@/components/ui/favorite-button";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { TextWithTooltip } from "@/components/ui/text-with-tooltip";
 import { useFavorite } from "@/hooks/use-favorite";
@@ -31,7 +32,7 @@ export const GridView = memo(function GridView1({
 
   const Cell = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
     const isMobile = useIsMobile();
-    const { toggleFavorite, isFavorite } = useFavorite();
+    const { toggleFavorite, isFavorite } = useFavorite(nodes);
 
     const index = rowIndex * columnCount + columnIndex;
     if (index >= nodes.length) return <div style={style} />;
@@ -55,17 +56,16 @@ export const GridView = memo(function GridView1({
             className="w-full h-full object-cover"
           />
 
-          <button
-            className="absolute top-1 right-1 z-10 text-yellow-400 text-lg"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite(node).catch(() => {
-                toast.error("お気に入りの更新に失敗しました");
-              });
-            }}
-          >
-            {isFavorite(node) ? "★" : "☆"}
-          </button>
+          {!node.isDirectory && (
+            <FavoriteButton
+              active={isFavorite(node)}
+              onToggle={() => {
+                toggleFavorite(node).catch(() => {
+                  toast.error("お気に入りの更新に失敗しました");
+                });
+              }}
+            />
+          )}
         </div>
         <TextWithTooltip
           text={node.name}
