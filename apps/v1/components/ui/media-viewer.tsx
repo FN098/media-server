@@ -8,18 +8,16 @@ import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
-import { getThumbUrl } from "@/lib/path-helpers";
 import { useFavorite } from "@/providers/favorite-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import Image from "next/image";
 import { toast } from "sonner";
 import { Keyboard, Navigation, Virtual } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
+import { memo, useState } from "react";
 import "swiper/css";
 import "swiper/css/virtual";
-import { memo, useState } from "react";
 
 interface MediaViewerProps {
   items: MediaNode[];
@@ -45,31 +43,6 @@ export function MediaViewer({
       onMouseMove={handleInteraction}
       onPointerDown={handleInteraction}
     >
-      {/* 背景 */}
-      <AnimatePresence mode="popLayout">
-        <motion.div
-          key={`bg-${items[index]?.path}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          className="absolute inset-0 z-0 pointer-events-none"
-        >
-          {/* メディアのサムネイルを背景に全画面表示 */}
-          {["image", "video"].includes(items[index].type) && (
-            <Image
-              src={getThumbUrl(items[index].path)}
-              alt=""
-              fill
-              className="object-cover scale-110 blur-[100px] saturate-[1.8] opacity-60"
-              unoptimized
-            />
-          )}
-          {/* 黒のグラデーションで暗さを調整 */}
-          <div className="absolute inset-0 bg-black/40 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]" />
-        </motion.div>
-      </AnimatePresence>
-
       {/* ヘッダー */}
       <AnimatePresence>
         {showHeader && (
