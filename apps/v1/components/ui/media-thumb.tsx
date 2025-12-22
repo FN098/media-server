@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { FallbackImage } from "@/components/ui/fallback-image";
 import { MediaFsNode, MediaFsNodeType } from "@/lib/media/types";
-import { getThumbUrl } from "@/lib/path-helpers";
+import { getMediaUrl, getThumbUrl } from "@/lib/path-helpers";
 import { cn } from "@/shadcn/lib/utils";
 import Image from "next/image";
 import { memo, ReactNode } from "react";
@@ -22,7 +22,7 @@ export const MediaThumb = memo(function MediaThumb1({
   if (node.type === "image") {
     return (
       <Image
-        src={getThumbUrl(node.path)}
+        src={getMediaUrl(node.path)}
         alt={node.name}
         width={width}
         height={height}
@@ -38,7 +38,6 @@ export const MediaThumb = memo(function MediaThumb1({
         width={width}
         height={height}
         className={className}
-        loading="lazy"
         fallback={
           <div
             className={cn(
