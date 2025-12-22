@@ -15,92 +15,7 @@ import {
   RotateCcw,
   RotateCw,
 } from "lucide-react";
-import dynamic from "next/dynamic";
-import "plyr/dist/plyr.css";
 import React, { useRef, useState } from "react";
-
-const Plyr = dynamic(() => import("plyr-react").then((mod) => mod.Plyr), {
-  ssr: false,
-});
-
-export function AudioPlayerV1({ src, type }: { src: string; type?: string }) {
-  return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white/5 rounded-2xl backdrop-blur-md border border-white/10">
-      <Plyr
-        source={{
-          type: "audio",
-          sources: [{ src, type }],
-        }}
-        autoPlay={true}
-        options={{
-          controls: ["play", "progress", "current-time", "mute", "volume"],
-        }}
-      />
-    </div>
-  );
-}
-
-export function AudioPlayerV2({ media }: { media: MediaFsNode }) {
-  const audioRef = React.useRef<HTMLAudioElement>(null);
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-
-    if (audioRef.current.paused) {
-      audioRef.current.play().catch((e) => console.error(e));
-    } else {
-      audioRef.current.pause();
-    }
-  };
-
-  const seek = (amount: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime += amount;
-    }
-  };
-
-  // キーボードショートカットの登録 (J/Lキーや矢印キーなど)
-  useShortcutKeys([
-    { key: "Ctrl+ArrowRight", callback: () => seek(10) },
-    { key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
-    { key: " ", callback: () => togglePlay() },
-  ]);
-
-  return (
-    <div
-      className="flex flex-col items-center gap-6 p-8 bg-white/5 rounded-2xl backdrop-blur-md"
-      onPointerDownCapture={(e) => e.stopPropagation()}
-    >
-      {/* オーディオビジュアル（オプション） */}
-      <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
-        <span className="text-4xl">🎵</span>
-      </div>
-
-      <audio
-        ref={audioRef}
-        src={getAbsoluteMediaUrl(media.path)}
-        controls
-        autoPlay
-      />
-
-      {/* カスタムボタン */}
-      <div className="flex gap-4">
-        <button
-          onClick={() => seek(-10)}
-          className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors"
-        >
-          -10s
-        </button>
-        <button
-          onClick={() => seek(10)}
-          className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors"
-        >
-          +10s
-        </button>
-      </div>
-    </div>
-  );
-}
 
 interface PlayerButtonProps {
   onClick: () => void;
@@ -137,7 +52,7 @@ function PlayerButton({
   );
 }
 
-export function AudioPlayerV3({ media }: { media: MediaFsNode }) {
+export function AudioPlayer({ media }: { media: MediaFsNode }) {
   const playerRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isRepeating, setIsRepeating] = useState(false);
@@ -324,5 +239,3 @@ export function AudioPlayerV3({ media }: { media: MediaFsNode }) {
     </div>
   );
 }
-
-export { AudioPlayerV3 as AudioPlayer };
