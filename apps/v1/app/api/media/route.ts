@@ -2,12 +2,15 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+// TODO: ユーザー認証を正式に実装後に差し替える
+const USER_ID = process.env.BASIC_USER!;
+
 const QuerySchema = z.object({
   dir: z
     .string()
-    .startsWith("/", "絶対パスを指定してください")
-    .transform((val) => val.replace(/\/$/, "")) // 末尾のスラッシュを削除して正規化
-    .optional(),
+    .transform((val) => val.replace(/^\/|\/$/g, "")) // 前後のスラッシュ削除
+    .optional()
+    .default(""),
 });
 
 export async function GET(req: Request) {
@@ -21,16 +24,29 @@ export async function GET(req: Request) {
       return Response.json({ error: "invalid query" }, { status: 400 });
     }
 
-    const dirPath = parsed.data.dir ?? "";
+    const dirPath = parsed.data.dir;
 
     const media = await prisma.media.findMany({
-      where: {
-        dirPath,
-      },
+      where: { dirPath },
       orderBy: { path: "asc" },
+      include: {
+        favorites: {
+          where: { userId: USER_ID },
+          select: { mediaId: true },
+        },
+      },
     });
 
-    return Response.json(media);
+    const result = media.map((m) => ({
+      id: m.id,
+      path: m.path,
+      title: m.title,
+      fileMtime: m.fileMtime,
+      fileSize: m.fileSize?.toString(),
+      isFavorite: m.favorites.length > 0,
+    }));
+
+    return Response.json(result);
   } catch (e) {
     console.error(e);
     return new NextResponse("Internal Server Error", { status: 500 });

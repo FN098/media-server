@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+// TODO: BASIC認証以外を実装
 const USER = process.env.BASIC_USER!;
 const PASS = process.env.BASIC_PASS!;
 

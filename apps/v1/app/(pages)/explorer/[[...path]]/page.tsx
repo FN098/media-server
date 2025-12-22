@@ -1,5 +1,6 @@
 import { Explorer } from "@/components/ui/explorer";
-import { getMediaFsListing } from "@/lib/media/listing";
+import { getDbMedia, getMediaFsListing } from "@/lib/media/listing";
+import { mergeFsWithDb } from "@/lib/media/merge";
 import { withSortedNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { createThumbsIfNotExists } from "@/lib/media/thumb";
@@ -9,17 +10,22 @@ export default async function Page(props: {
   params: Promise<{ path?: string[] }>;
 }) {
   const { path: pathParts = [] } = await props.params;
-  const decodedPath = pathParts.map(decodeURIComponent).join("/");
+  const dirPath = pathParts.map(decodeURIComponent).join("/");
 
-  const listing = await getMediaFsListing(decodedPath);
+  const listing = await getMediaFsListing(dirPath);
   if (!listing) notFound();
 
-  await syncMediaDir(decodedPath, listing.nodes);
+  const dbMedia = await getDbMedia(dirPath);
 
+  // 並列で副作用系を実行
+  await Promise.all([
+    syncMediaDir(dirPath, listing.nodes),
+    createThumbsIfNotExists(listing.nodes),
+  ]);
+
+  // ソート + マージ
   const sortedListing = withSortedNodes(listing);
+  const mediaListing = mergeFsWithDb(sortedListing, dbMedia);
 
-  // サムネイルを自動生成
-  await createThumbsIfNotExists(listing.nodes);
-
-  return <Explorer listing={sortedListing} />;
+  return <Explorer listing={mediaListing} />;
 }

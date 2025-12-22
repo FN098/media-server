@@ -6,7 +6,7 @@ import { MediaViewer } from "@/components/ui/media-viewer";
 import { useGridView } from "@/hooks/use-grid-view";
 import { useMediaViewer } from "@/hooks/use-media-viewer";
 import { isMedia } from "@/lib/media/detector";
-import { MediaFsListing, MediaFsNode } from "@/lib/media/types";
+import { MediaFsNode, MediaListing } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
 import { useSearch } from "@/providers/search-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
@@ -16,7 +16,7 @@ import { useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 type ExplorerProps = {
-  listing: MediaFsListing;
+  listing: MediaListing;
 };
 
 export function Explorer({ listing }: ExplorerProps) {
