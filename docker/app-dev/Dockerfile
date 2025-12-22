@@ -1,5 +1,5 @@
 # 開発用イメージ（軽量）
-FROM node:20-alpine
+FROM node:25-alpine
 
 # コンテナ内の作業ディレクトリ
 WORKDIR /app/apps/v1
@@ -23,7 +23,7 @@ RUN pnpm install --frozen-lockfile || pnpm install
 COPY . /app
 
 # Prisma関連
-RUN pnpm prisma generate || true
+RUN pnpm prisma generate
 
 EXPOSE 3000
 

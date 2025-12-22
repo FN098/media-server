@@ -9,13 +9,13 @@ services:
       - db_data:/var/lib/mysql
       - ./docker/mysql-init:/docker-entrypoint-initdb.d
     ports:
-      - "3307:3306"
+      - "13306:3306"
 
-  app:
+  app-dev:
     build:
       context: .
-      dockerfile: ./docker/app/Dockerfile
-    container_name: media-server-app
+      dockerfile: ./docker/app-dev/Dockerfile
+    container_name: media-server-app-dev
     restart: unless-stopped
     command: sleep infinity
     env_file:
@@ -23,9 +23,29 @@ services:
     volumes:
       - D:\media:/media:rw
     ports:
-      - "3001:3000"
+      - "13000:3000"
     depends_on:
       - db
+    profiles:
+      - dev
+
+  app-prod:
+    build:
+      context: .
+      dockerfile: ./docker/app-prod/Dockerfile
+      target: runner
+    container_name: media-server-app-prod
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - D:\media:/media:rw
+    ports:
+      - "13001:3000"
+    depends_on:
+      - db
+    profiles:
+      - prod
 
 volumes:
   db_data:
