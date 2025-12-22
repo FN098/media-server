@@ -6,7 +6,7 @@ import { MediaViewer } from "@/components/ui/media-viewer";
 import { useGridView } from "@/hooks/use-grid-view";
 import { useMediaViewer } from "@/hooks/use-media-viewer";
 import { isMedia } from "@/lib/media/detector";
-import { MediaFsNode, MediaListing } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
 import { useSearch } from "@/providers/search-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
@@ -48,7 +48,7 @@ export function Explorer({ listing }: ExplorerProps) {
   }, [listing.nodes, lowerSearch]);
 
   // Open file/folder
-  const handleOpen = (node: MediaFsNode) => {
+  const handleOpen = (node: MediaNode) => {
     if (node.isDirectory) {
       const href = getClientExplorerPath(node.path);
       router.push(href);

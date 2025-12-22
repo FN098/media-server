@@ -2,18 +2,18 @@
 
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { TextWithTooltip } from "@/components/ui/text-with-tooltip";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, useRef } from "react";
 import { CellComponentProps, Grid, useGridRef } from "react-window";
 
 type GridViewProps = {
-  nodes: MediaFsNode[];
+  nodes: MediaNode[];
   columnCount: number;
   columnWidth: number;
   rowHeight: number;
-  onOpen?: (target: MediaFsNode) => void;
+  onOpen?: (target: MediaNode) => void;
 };
 
 export const GridView = memo(function GridView1({

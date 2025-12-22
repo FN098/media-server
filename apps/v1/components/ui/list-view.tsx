@@ -2,7 +2,7 @@
 
 import { LocalDateValue } from "@/components/ui/local-date";
 import { MediaThumbIcon } from "@/components/ui/media-thumb";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/formatter";
 import {
   Table,
@@ -17,8 +17,8 @@ import { cn } from "@/shadcn/lib/utils";
 import { memo, useRef } from "react";
 
 type ListViewProps = {
-  nodes: MediaFsNode[];
-  onOpen?: (target: MediaFsNode) => void;
+  nodes: MediaNode[];
+  onOpen?: (target: MediaNode) => void;
 };
 
 export const ListView = memo(function ListView1({
@@ -56,7 +56,7 @@ export const ListView = memo(function ListView1({
 });
 
 type RowItemProps = {
-  node: MediaFsNode;
+  node: MediaNode;
   onClick?: () => void;
   onDoubleClick?: () => void;
   className?: string;

@@ -18,10 +18,12 @@ export default async function Page(props: {
   const dbMedia = await getDbMedia(dirPath);
 
   // 並列で副作用系を実行
-  await Promise.all([
+  Promise.all([
     syncMediaDir(dirPath, listing.nodes),
     createThumbsIfNotExists(listing.nodes),
-  ]);
+  ]).catch((e) => {
+    console.error(e);
+  });
 
   // ソート + マージ
   const sortedListing = withSortedNodes(listing);

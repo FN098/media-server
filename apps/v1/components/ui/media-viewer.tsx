@@ -5,7 +5,7 @@ import { ImageViewer } from "@/components/ui/image-viewer";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { getThumbUrl } from "@/lib/path-helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -13,7 +13,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 interface MediaViewerProps {
-  items: MediaFsNode[];
+  items: MediaNode[];
   index: number;
   onClose: () => void;
   onChangeIndex: (nextIndex: number) => void;
@@ -84,13 +84,15 @@ export function MediaViewer({
           className="absolute inset-0 z-0 pointer-events-none"
         >
           {/* メディアのサムネイルを背景に全画面表示 */}
-          <Image
-            src={getThumbUrl(items[current].path)}
-            alt=""
-            fill
-            className="object-cover scale-110 blur-[100px] saturate-[1.8] opacity-60"
-            unoptimized
-          />
+          {["image", "video"].includes(items[current].type) && (
+            <Image
+              src={getThumbUrl(items[current].path)}
+              alt=""
+              fill
+              className="object-cover scale-110 blur-[100px] saturate-[1.8] opacity-60"
+              unoptimized
+            />
+          )}
           {/* 黒のグラデーションで暗さを調整 */}
           <div className="absolute inset-0 bg-black/40 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]" />
         </motion.div>
@@ -171,7 +173,7 @@ function Media({
   media,
   isCurrent,
 }: {
-  media: MediaFsNode;
+  media: MediaNode;
   isCurrent?: boolean;
 }) {
   switch (media.type) {
