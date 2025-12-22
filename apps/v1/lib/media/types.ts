@@ -11,7 +11,7 @@ export type MediaFsNode = {
   type: MediaFsNodeType;
   isDirectory: boolean;
   size?: number;
-  updatedAt: string;
+  mtime: string;
 };
 
 export type MediaFsListing = {

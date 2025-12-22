@@ -27,10 +27,15 @@ model Media {
   path      String     @unique
   dirPath   String
   title     String?
+  fileMtime DateTime
+  fileSize  BigInt?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   mediaTags MediaTag[]
   favorites Favorite[]
+
+  @@index([dirPath])
+  @@index([fileMtime])
 }
 
 model Tag {

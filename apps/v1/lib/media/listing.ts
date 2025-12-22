@@ -1,17 +1,9 @@
+import { existsDir } from "@/lib/fs";
 import { MediaFsListing, MediaFsNode } from "@/lib/media/types";
 import { getMediaPath } from "@/lib/path-helpers";
 import fs from "fs/promises";
 import path from "path";
-import { detectMediaType } from "./media/detector";
-
-export async function existsDir(dirPath: string): Promise<boolean> {
-  try {
-    await fs.access(dirPath);
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { detectMediaType } from "./detector";
 
 export async function getMediaFsListing(
   dirPath: string
@@ -34,7 +26,7 @@ export async function getMediaFsListing(
           isDirectory: item.isDirectory(),
           type: item.isDirectory() ? "directory" : detectMediaType(item.name),
           size: item.isDirectory() ? undefined : stat.size,
-          updatedAt: stat.mtime.toISOString(),
+          mtime: stat.mtime.toISOString(),
         };
       })
     );

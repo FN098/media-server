@@ -1,4 +1,4 @@
-import { getMediaFsListing } from "@/lib/explorer";
+import { getMediaFsListing } from "@/lib/media/listing";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {

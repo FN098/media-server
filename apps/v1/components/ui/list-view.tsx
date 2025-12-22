@@ -77,7 +77,7 @@ function RowItem({ node, onClick, onDoubleClick, className }: RowItemProps) {
       </TableCell>
       <TableCell>{node.isDirectory ? "Folder" : node.type}</TableCell>
       <TableCell>
-        <LocalDateValue value={node.updatedAt} />
+        <LocalDateValue value={node.mtime} />
       </TableCell>
       <TableCell>{formatBytes(node.size)}</TableCell>
     </TableRow>
