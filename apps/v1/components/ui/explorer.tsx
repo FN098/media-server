@@ -30,7 +30,7 @@ export function Explorer({ listing }: ExplorerProps) {
   const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
   const filtered = useMemo(() => {
     return listing.nodes
-      .filter((e) => isMedia(e.type))
+      .filter((e) => e.isDirectory || isMedia(e.type))
       .filter((e) => e.name.toLowerCase().includes(lowerQuery));
   }, [listing.nodes, lowerQuery]);
 
