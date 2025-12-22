@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // TODO: BASIC認証以外を実装
 const USER = process.env.BASIC_USER!;
 const PASS = process.env.BASIC_PASS!;
 
-export function proxy(req: Request) {
+export function proxy(req: NextRequest) {
   const auth = req.headers.get("authorization");
 
   if (!auth) {
     // ブラウザに BASIC 認証を要求
-    return new Response("Auth required", {
+    return new NextResponse("Auth required", {
       status: 401,
       headers: {
         "WWW-Authenticate": 'Basic realm="Secure Area"',
@@ -22,7 +22,7 @@ export function proxy(req: Request) {
 
   if (scheme !== "Basic") {
     // BASIC 認証以外はサポートしない
-    return new Response("Invalid auth scheme", { status: 400 });
+    return new NextResponse("Invalid auth scheme", { status: 400 });
   }
 
   // BASE64 文字列をデコード => USER:PASS
@@ -31,7 +31,7 @@ export function proxy(req: Request) {
 
   if (user !== USER || pass !== PASS) {
     // ユーザーとパスワードが一致しない場合は再入力
-    return new Response("Unauthorized", {
+    return new NextResponse("Unauthorized", {
       status: 401,
       headers: { "WWW-Authenticate": 'Basic realm="Secure Area"' },
     });

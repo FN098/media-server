@@ -1,19 +1,16 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { PathSchema } from "@/lib/schemas";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-// TODO: ユーザー認証を正式に実装後に差し替える
+// TODO: ユーザー認証機能実装後に差し替える
 const USER_ID = "dev_user";
 
 const QuerySchema = z.object({
-  dir: z
-    .string()
-    .transform((val) => val.replace(/^\/|\/$/g, "")) // 前後のスラッシュ削除
-    .optional()
-    .default(""),
+  dir: PathSchema.optional().default(""),
 });
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const parsed = QuerySchema.safeParse({
@@ -21,7 +18,7 @@ export async function GET(req: Request) {
     });
 
     if (!parsed.success) {
-      return Response.json({ error: "invalid query" }, { status: 400 });
+      return NextResponse.json(z.treeifyError(parsed.error), { status: 400 });
     }
 
     const dirPath = parsed.data.dir;
@@ -46,7 +43,7 @@ export async function GET(req: Request) {
       isFavorite: m.favorites.length > 0,
     }));
 
-    return Response.json(result);
+    return NextResponse.json(result);
   } catch (e) {
     console.error(e);
     return new NextResponse("Internal Server Error", { status: 500 });

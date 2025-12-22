@@ -5,7 +5,7 @@ import { findUserById } from "@/lib/users/repository";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-// TODO: ユーザー認証を正式に実装後に差し替える
+// TODO: ユーザー認証機能実装後に差し替える
 const USER_ID = "dev_user";
 
 const BodySchema = z.object({
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     const parsed = BodySchema.safeParse(json);
     if (!parsed.success)
-      return new NextResponse("Invalid Json", { status: 400 });
+      return NextResponse.json(z.treeifyError(parsed.error), { status: 400 });
 
     const { path } = parsed.data;
 
@@ -50,7 +50,7 @@ export async function DELETE(req: NextRequest) {
 
     const parsed = BodySchema.safeParse(json);
     if (!parsed.success)
-      return new NextResponse("Invalid Json", { status: 400 });
+      return NextResponse.json(z.treeifyError(parsed.error), { status: 400 });
 
     const { path } = parsed.data;
 
