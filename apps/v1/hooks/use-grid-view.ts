@@ -14,7 +14,7 @@ export function useGridView(
   const [config, setConfig] = useState<GridViewConfig>({
     columnCount: 6,
     columnWidth: 200,
-    rowHeight: 220,
+    rowHeight: 200,
   });
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function useGridView(
       const columnCount =
         width < 480 ? 2 : width < 768 ? 3 : width < 1024 ? 4 : 6;
       const columnWidth = Math.floor(width / columnCount);
-      const rowHeight = Math.floor(columnWidth * 1.1);
+      const rowHeight = columnWidth;
 
       setConfig({ columnCount, columnWidth, rowHeight });
     };
