@@ -21,27 +21,25 @@ type ExplorerProps = {
 };
 
 export function Explorer({ listing }: ExplorerProps) {
-  const { search } = useSearch();
+  const { query } = useSearch();
   const { view } = useViewMode();
   const router = useRouter();
-  const [initialIndex, setInitialIndex] = useState(-1);
+  const [initialIndex, setInitialIndex] = useState(0);
 
-  // Search filter
-  const lowerSearch = useMemo(() => search.toLowerCase(), [search]);
+  // Media filter
+  const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
   const filtered = useMemo(() => {
-    const nodes = listing.nodes;
-    if (!lowerSearch) return nodes;
-
-    return nodes.filter((e) => e.name.toLowerCase().includes(lowerSearch));
-  }, [listing.nodes, lowerSearch]);
+    return listing.nodes
+      .filter((e) => isMedia(e.type))
+      .filter((e) => e.name.toLowerCase().includes(lowerQuery));
+  }, [listing.nodes, lowerQuery]);
 
   // GridView config
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const { columnCount, columnWidth, rowHeight } = useGridView(gridContainerRef);
 
   // MediaViewer config
-  const { viewerOpen, mediaNodes, openViewer, closeViewer } =
-    useMediaViewer(filtered);
+  const { viewerOpen, openViewer, closeViewer } = useMediaViewer();
 
   // Open file/folder
   const handleOpen = (node: MediaNode, index: number) => {
@@ -62,8 +60,8 @@ export function Explorer({ listing }: ExplorerProps) {
 
   // Favorites
   const initialFavorites = useMemo(
-    () => Object.fromEntries(listing.nodes.map((n) => [n.path, n.isFavorite])),
-    [listing.nodes]
+    () => Object.fromEntries(filtered.map((n) => [n.path, n.isFavorite])),
+    [filtered]
   );
 
   return (
@@ -94,7 +92,7 @@ export function Explorer({ listing }: ExplorerProps) {
 
         {viewerOpen && (
           <MediaViewer
-            items={mediaNodes}
+            items={filtered}
             initialIndex={initialIndex}
             onClose={closeViewer}
           />

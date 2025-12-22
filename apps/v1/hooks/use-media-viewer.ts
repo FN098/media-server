@@ -1,17 +1,9 @@
 "use client";
 
-import { isMedia } from "@/lib/media/detector";
-import { MediaNode } from "@/lib/media/types";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
-export const useMediaViewer = (mediaList: MediaNode[]) => {
+export const useMediaViewer = () => {
   const [viewerOpen, setViewerOpen] = useState(false);
-
-  // メディアのみ抽出
-  const mediaNodes = useMemo(
-    () => mediaList.filter((node) => isMedia(node.type)),
-    [mediaList]
-  );
 
   const openViewer = useCallback(() => {
     setViewerOpen(true);
@@ -23,7 +15,6 @@ export const useMediaViewer = (mediaList: MediaNode[]) => {
 
   return {
     viewerOpen,
-    mediaNodes,
     openViewer,
     closeViewer,
   };

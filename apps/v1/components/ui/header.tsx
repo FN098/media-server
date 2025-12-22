@@ -61,8 +61,8 @@ export function Header({ title, basePath }: HeaderProps) {
 
           {searchCtx && (
             <Search
-              value={searchCtx.search}
-              setValue={searchCtx.setSearch}
+              value={searchCtx.query}
+              setValue={searchCtx.setQuery}
               className="w-[100px] shrink-0"
             />
           )}
@@ -96,8 +96,8 @@ export function Header({ title, basePath }: HeaderProps) {
           <div className="ml-auto flex items-center gap-2">
             {searchCtx && (
               <Search
-                value={searchCtx.search}
-                setValue={searchCtx.setSearch}
+                value={searchCtx.query}
+                setValue={searchCtx.setQuery}
                 className="w-[180px] shrink-0"
               />
             )}
