@@ -3,6 +3,7 @@
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { TextWithTooltip } from "@/components/ui/text-with-tooltip";
+import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
@@ -56,7 +57,7 @@ export const GridView = memo(function GridView1({
             className="w-full h-full object-cover"
           />
 
-          {!node.isDirectory && (
+          {isMedia(node.type) && (
             <FavoriteButton
               active={favoriteCtx.isFavorite(node.path)}
               onToggle={() => {

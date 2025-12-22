@@ -56,7 +56,7 @@ export function Explorer({ listing }: ExplorerProps) {
       return;
     }
 
-    if (isMedia(node)) {
+    if (isMedia(node.type)) {
       openViewerAt(node);
       return;
     }

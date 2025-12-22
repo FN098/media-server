@@ -3,11 +3,11 @@ import {
   imageExtensions,
   videoExtensions,
 } from "@/lib/media/extensions";
-import { MediaFsNode, MediaFsNodeType } from "@/lib/media/types";
+import { MediaFsNodeType } from "@/lib/media/types";
 
 export const mediaTypes = ["audio", "image", "video"] as MediaFsNodeType[];
 
-export const isMedia = (node: MediaFsNode) => mediaTypes.includes(node.type);
+export const isMedia = (type: MediaFsNodeType) => mediaTypes.includes(type);
 
 export function detectMediaType(fileName: string): MediaFsNodeType {
   const lowerName = fileName.toLowerCase();

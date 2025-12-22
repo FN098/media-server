@@ -10,7 +10,7 @@ export const useMediaViewer = (mediaList: MediaNode[]) => {
 
   // メディアのみ抽出
   const mediaNodes = useMemo(
-    () => mediaList.filter((node) => isMedia(node)),
+    () => mediaList.filter((node) => isMedia(node.type)),
     [mediaList]
   );
 
