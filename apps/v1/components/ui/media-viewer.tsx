@@ -1,16 +1,20 @@
 "use client";
 
 import { AudioPlayer } from "@/components/ui/audio-player";
+import { MediaViewerFavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
+import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { getThumbUrl } from "@/lib/path-helpers";
+import { useFavorite } from "@/providers/favorite-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface MediaViewerProps {
   items: MediaNode[];
@@ -28,6 +32,7 @@ export function MediaViewer({
   onClose,
   onChangeIndex,
 }: MediaViewerProps) {
+  const favoriteCtx = useFavorite();
   const [current, setCurrent] = useState(index);
   const [direction, setDirection] = useState(0);
   const { showUI: showHeader, handleInteraction } = useShowUI(2000);
@@ -116,13 +121,29 @@ export function MediaViewer({
               </span>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full mr-4"
-              aria-label="Close viewer"
-            >
-              <X size={28} />
-            </button>
+            <div className="flex items-center gap-4">
+              {isMedia(items[current].type) && (
+                <MediaViewerFavoriteButton
+                  active={favoriteCtx.isFavorite(items[current].path)}
+                  onToggle={() => {
+                    favoriteCtx
+                      .toggleFavorite(items[current].path)
+                      .catch((e) => {
+                        console.error(e);
+                        toast.error("お気に入りの更新に失敗しました");
+                      });
+                  }}
+                />
+              )}
+
+              <button
+                onClick={onClose}
+                className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full mr-4"
+                aria-label="Close viewer"
+              >
+                <X size={28} />
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

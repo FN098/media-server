@@ -1,6 +1,6 @@
 "use client";
 
-import { FavoriteButton } from "@/components/ui/favorite-button";
+import { GridViewFavoriteButton } from "@/components/ui/favorite-button";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { TextWithTooltip } from "@/components/ui/text-with-tooltip";
 import { isMedia } from "@/lib/media/detector";
@@ -58,7 +58,7 @@ export const GridView = memo(function GridView1({
           />
 
           {isMedia(node.type) && (
-            <FavoriteButton
+            <GridViewFavoriteButton
               active={favoriteCtx.isFavorite(node.path)}
               onToggle={() => {
                 favoriteCtx.toggleFavorite(node.path).catch((e) => {
