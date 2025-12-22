@@ -1,10 +1,10 @@
 "use client";
 
 import { isMedia } from "@/lib/media/detector";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { useCallback, useMemo, useState } from "react";
 
-export const useMediaViewer = (mediaList: MediaFsNode[]) => {
+export const useMediaViewer = (mediaList: MediaNode[]) => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
 
@@ -14,9 +14,9 @@ export const useMediaViewer = (mediaList: MediaFsNode[]) => {
     [mediaList]
   );
 
-  // viewer を開く（MediaFsNode を渡す）
+  // viewer を開く（MediaNode を渡す）
   const openViewerAt = useCallback(
-    (media: MediaFsNode) => {
+    (media: MediaNode) => {
       const index = mediaNodes.findIndex((node) => node.path === media.path);
       if (index === -1) return;
 
