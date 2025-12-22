@@ -25,6 +25,15 @@ export function Explorer({ listing }: ExplorerProps) {
   const { view } = useViewMode();
   const router = useRouter();
 
+  // Search filter
+  const lowerSearch = useMemo(() => search.toLowerCase(), [search]);
+  const filtered = useMemo(() => {
+    const nodes = listing.nodes;
+    if (!lowerSearch) return nodes;
+
+    return nodes.filter((e) => e.name.toLowerCase().includes(lowerSearch));
+  }, [listing.nodes, lowerSearch]);
+
   // GridView config
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const { columnCount, columnWidth, rowHeight } = useGridView(gridContainerRef);
@@ -37,16 +46,7 @@ export function Explorer({ listing }: ExplorerProps) {
     openViewerAt,
     closeViewer,
     setIndex,
-  } = useMediaViewer(listing.nodes);
-
-  // Search filter
-  const lowerSearch = useMemo(() => search.toLowerCase(), [search]);
-  const filtered = useMemo(() => {
-    const nodes = listing.nodes;
-    if (!lowerSearch) return nodes;
-
-    return nodes.filter((e) => e.name.toLowerCase().includes(lowerSearch));
-  }, [listing.nodes, lowerSearch]);
+  } = useMediaViewer(filtered);
 
   // Open file/folder
   const handleOpen = (node: MediaNode) => {
