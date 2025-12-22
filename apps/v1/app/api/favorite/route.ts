@@ -12,6 +12,9 @@ const BodySchema = z.object({
   path: z.string(),
 });
 
+// TODO: GET実装
+// const res = await fetch(`/api/favorite?path=${encodeURIComponent(path)}`);
+
 export async function POST(req: NextRequest) {
   try {
     // TODO: ユーザー認証機能実装後に差し替える

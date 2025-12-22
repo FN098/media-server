@@ -10,24 +10,21 @@ import {
   useState,
 } from "react";
 
-type FavoriteContextValue = {
-  isFavorite(path: string): boolean;
-  toggleFavorite(path: string): Promise<void>;
-};
-
-const FavoriteContext = createContext<FavoriteContextValue | null>(null);
-
 // お気に入り状態管理
 function useFavorites(initialFavorites?: Record<string, boolean>) {
   const [favorites, setFavorites] = useState<Map<string, boolean>>(
     () => new Map(Object.entries(initialFavorites ?? {}))
   );
 
-  const setFavorite = (path: string, value: boolean) =>
-    setFavorites((m) => new Map(m).set(path, value));
+  const setFavorite = useCallback((path: string, value: boolean) => {
+    setFavorites((m) => {
+      if (m.get(path) === value) return m; // 参照を変えないことで再レンダリング抑制
+      return new Map(m).set(path, value);
+    });
+  }, []);
 
   const isFavorite = useCallback(
-    (path: string) => favorites.get(path) ?? false,
+    (path: string): boolean => favorites.get(path) ?? false,
     [favorites]
   );
 
@@ -38,12 +35,11 @@ function useFavorites(initialFavorites?: Record<string, boolean>) {
 function useFavoriteChannel(onMessage: (path: string, value: boolean) => void) {
   const channelRef = useRef<BroadcastChannel | null>(null);
 
-  if (channelRef.current === null) {
-    channelRef.current = new BroadcastChannel("favorite");
-  }
-
   useEffect(() => {
-    const channel = channelRef.current!;
+    // クライアントサイドでのみ初期化
+    const channel = new BroadcastChannel("favorite_sync");
+    channelRef.current = channel;
+
     const handler = (e: MessageEvent) => {
       const { path, value } = e.data as { path: string; value: boolean };
       onMessage(path, value);
@@ -67,36 +63,55 @@ function useFavoriteChannel(onMessage: (path: string, value: boolean) => void) {
 function useInFlight() {
   const [inFlight, setInFlight] = useState<Set<string>>(() => new Set());
 
-  const startFlight = (path: string) =>
-    setInFlight((s) => new Set(s).add(path));
+  const startFlight = useCallback(
+    (path: string) => setInFlight((s) => new Set(s).add(path)),
+    []
+  );
 
-  const finishFlight = (path: string) =>
-    setInFlight((s) => {
-      const n = new Set(s);
-      n.delete(path);
-      return n;
-    });
+  const finishFlight = useCallback(
+    (path: string) =>
+      setInFlight((s) => {
+        const n = new Set(s);
+        n.delete(path);
+        return n;
+      }),
+    []
+  );
 
-  const isInFlight = (path: string) => inFlight.has(path);
+  const isInFlight = useCallback(
+    (path: string) => inFlight.has(path),
+    [inFlight]
+  );
 
   return { startFlight, finishFlight, isInFlight };
 }
 
-// API失敗時の再同期（revalidate）
-async function revalidate(path: string): Promise<boolean> {
-  const res = await fetch(`/api/favorite?path=${encodeURIComponent(path)}`);
-  const { isFavorite } = (await res.json()) as { isFavorite: boolean };
-  return isFavorite;
+// API
+function useFavoriteApi() {
+  const revalidate = async (path: string): Promise<boolean> => {
+    const res = await fetch(`/api/favorite?path=${encodeURIComponent(path)}`);
+    const data = (await res.json()) as { isFavorite: boolean };
+    return data.isFavorite;
+  };
+
+  const update = async (path: string, value: boolean): Promise<boolean> => {
+    const res = await fetch("/api/favorite", {
+      method: value ? "POST" : "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path }),
+    });
+    return res.ok;
+  };
+
+  return { revalidate, update };
 }
 
-// お気に入り更新
-async function update(path: string, value: boolean) {
-  const res = await fetch("/api/favorite", {
-    method: value === false ? "DELETE" : "POST",
-    body: JSON.stringify({ path }),
-  });
-  return res.ok;
-}
+type FavoriteContextValue = {
+  isFavorite(path: string): boolean;
+  toggleFavorite(path: string): Promise<void>;
+};
+
+const FavoriteContext = createContext<FavoriteContextValue | null>(null);
 
 type FavoriteProviderProps = {
   initialFavorites?: Record<string, boolean>;
@@ -109,9 +124,8 @@ export function FavoriteProvider({
 }: FavoriteProviderProps) {
   const { setFavorite, isFavorite } = useFavorites(initialFavorites);
   const { startFlight, finishFlight, isInFlight } = useInFlight();
-  const { broadcast } = useFavoriteChannel((path, value) => {
-    setFavorite(path, value);
-  });
+  const { broadcast } = useFavoriteChannel(setFavorite);
+  const { revalidate, update } = useFavoriteApi();
 
   const toggleFavorite = useCallback(
     async (path: string) => {
@@ -120,21 +134,35 @@ export function FavoriteProvider({
       const prev = isFavorite(path);
       const current = !prev;
 
+      // 1. 楽観的アップデート
       startFlight(path);
       setFavorite(path, current);
       broadcast(path, current);
 
       try {
-        await update(path, current);
+        // 2. サーバー更新
+        const ok = await update(path, current);
+        if (!ok) throw new Error("Failed to update");
       } catch (e) {
+        // 3. 失敗時のロールバック（再同期）
+        console.error("Favorite sync failed, revalidating...", e);
         const actual = await revalidate(path);
         setFavorite(path, actual);
-        throw e;
+        broadcast(path, actual); // 他のタブも正しい状態に戻す
       } finally {
         finishFlight(path);
       }
     },
-    [broadcast, finishFlight, isFavorite, isInFlight, setFavorite, startFlight]
+    [
+      broadcast,
+      finishFlight,
+      isFavorite,
+      isInFlight,
+      revalidate,
+      setFavorite,
+      startFlight,
+      update,
+    ]
   );
 
   const value = useMemo(

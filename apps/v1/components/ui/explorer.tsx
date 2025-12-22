@@ -8,6 +8,7 @@ import { useMediaViewer } from "@/hooks/use-media-viewer";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
+import { FavoriteProvider } from "@/providers/favorite-provider";
 import { useSearch } from "@/providers/search-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
@@ -63,6 +64,12 @@ export function Explorer({ listing }: ExplorerProps) {
     toast.warning("このファイル形式は対応していません");
   };
 
+  // Favorites
+  const initialFavorites = useMemo(
+    () => Object.fromEntries(listing.nodes.map((n) => [n.path, n.isFavorite])),
+    [listing.nodes]
+  );
+
   return (
     <div
       className={cn(
@@ -71,31 +78,33 @@ export function Explorer({ listing }: ExplorerProps) {
         view === "list" && "px-4"
       )}
     >
-      <div
-        className={view === "grid" ? "block" : "hidden"}
-        ref={gridContainerRef}
-      >
-        <GridView
-          nodes={filtered}
-          columnCount={columnCount}
-          columnWidth={columnWidth}
-          rowHeight={rowHeight}
-          onOpen={handleOpen}
-        />
-      </div>
+      <FavoriteProvider initialFavorites={initialFavorites}>
+        <div
+          className={view === "grid" ? "block" : "hidden"}
+          ref={gridContainerRef}
+        >
+          <GridView
+            nodes={filtered}
+            columnCount={columnCount}
+            columnWidth={columnWidth}
+            rowHeight={rowHeight}
+            onOpen={handleOpen}
+          />
+        </div>
 
-      <div className={view === "list" ? "block" : "hidden"}>
-        <ListView nodes={filtered} onOpen={handleOpen} />
-      </div>
+        <div className={view === "list" ? "block" : "hidden"}>
+          <ListView nodes={filtered} onOpen={handleOpen} />
+        </div>
 
-      {viewerOpen && currentIndex !== -1 && (
-        <MediaViewer
-          items={mediaNodes}
-          index={currentIndex}
-          onClose={closeViewer}
-          onChangeIndex={setIndex}
-        />
-      )}
+        {viewerOpen && currentIndex !== -1 && (
+          <MediaViewer
+            items={mediaNodes}
+            index={currentIndex}
+            onClose={closeViewer}
+            onChangeIndex={setIndex}
+          />
+        )}
+      </FavoriteProvider>
     </div>
   );
 }

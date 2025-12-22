@@ -36,7 +36,7 @@ export function ImageViewerV1({
         className={`object-contain transition-opacity duration-500 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
-        onLoadingComplete={() => setIsLoaded(true)}
+        onLoad={() => setIsLoaded(true)}
         draggable={false}
         priority
         unoptimized
@@ -69,10 +69,11 @@ export function ImageViewerV2({ media }: { media: MediaFsNode }) {
         className={`object-contain transition-opacity duration-500 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
-        onLoadingComplete={() => setIsLoaded(true)}
+        onLoad={() => setIsLoaded(true)}
         draggable={false}
         priority
         unoptimized
+        loading="eager"
       />
     </div>
   );

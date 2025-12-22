@@ -3,8 +3,8 @@
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { TextWithTooltip } from "@/components/ui/text-with-tooltip";
-import { useFavorite } from "@/hooks/use-favorite";
 import { MediaNode } from "@/lib/media/types";
+import { useFavorite } from "@/providers/favorite-provider";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, useRef } from "react";
@@ -26,13 +26,13 @@ export const GridView = memo(function GridView1({
   rowHeight,
   onOpen,
 }: GridViewProps) {
+  const favoriteCtx = useFavorite();
   const rowCount = Math.ceil(nodes.length / columnCount);
   const gridRef = useGridRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const Cell = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
     const isMobile = useIsMobile();
-    const { toggleFavorite, isFavorite } = useFavorite(nodes);
 
     const index = rowIndex * columnCount + columnIndex;
     if (index >= nodes.length) return <div style={style} />;
@@ -58,9 +58,10 @@ export const GridView = memo(function GridView1({
 
           {!node.isDirectory && (
             <FavoriteButton
-              active={isFavorite(node)}
+              active={favoriteCtx.isFavorite(node.path)}
               onToggle={() => {
-                toggleFavorite(node).catch(() => {
+                favoriteCtx.toggleFavorite(node.path).catch((e) => {
+                  console.error(e);
                   toast.error("お気に入りの更新に失敗しました");
                 });
               }}
