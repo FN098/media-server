@@ -45,7 +45,7 @@ export const GridView = memo(function GridView1({
         <div
           className={cn(
             "relative aspect-square w-full overflow-hidden rounded-lg border bg-muted select-none",
-            "hover:bg-blue-100 active:bg-blue-200"
+            "hover:bg-blue-100 active:bg-blue-200 group"
           )}
           onClick={() => onOpen?.(node)}
           onDoubleClick={() => !isMobile && onOpen?.(node)}
@@ -53,9 +53,18 @@ export const GridView = memo(function GridView1({
           <MediaThumb
             node={node}
             width={columnWidth}
-            height={rowHeight - 20}
+            height={rowHeight}
             className="w-full h-full object-cover"
           />
+
+          {/* テキストオーバーレイ */}
+          <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+            <TextWithTooltip
+              text={node.name}
+              className="text-center text-[10px] leading-tight text-white"
+              tooltipSide="bottom"
+            />
+          </div>
 
           {isMedia(node.type) && (
             <GridViewFavoriteButton
@@ -69,11 +78,6 @@ export const GridView = memo(function GridView1({
             />
           )}
         </div>
-        <TextWithTooltip
-          text={node.name}
-          className="text-center text-xs"
-          tooltipSide="bottom"
-        />
       </div>
     );
   };
