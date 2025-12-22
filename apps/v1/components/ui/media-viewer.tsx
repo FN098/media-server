@@ -35,7 +35,7 @@ export function MediaViewer({
   const favoriteCtx = useFavorite();
   const [current, setCurrent] = useState(index);
   const [direction, setDirection] = useState(0);
-  const { showUI: showHeader, handleInteraction } = useShowUI(2000);
+  const { showUI: showHeader, handleInteraction } = useShowUI({ delay: 2000 });
 
   if (index !== current) {
     setCurrent(index);

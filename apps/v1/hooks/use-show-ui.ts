@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-export function useShowUI(delay = 3000) {
+type Option = {
+  delay?: number;
+};
+
+export function useShowUI({ delay = 3000 }: Option) {
   const [showUI, setShowUI] = useState(true);
 
   const debouncedHideUI = useDebouncedCallback(() => {
