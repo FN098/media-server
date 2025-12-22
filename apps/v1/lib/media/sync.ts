@@ -11,7 +11,7 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
       f.path,
       {
         title: f.name,
-        fileMtime: new Date(f.mtime),
+        fileMtime: f.mtime,
         fileSize: f.size,
       },
     ])
