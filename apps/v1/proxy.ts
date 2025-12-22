@@ -1,9 +1,7 @@
+import { PASS, USER } from "@/basic-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 // TODO: BASIC認証以外を実装
-const USER = process.env.BASIC_USER!;
-const PASS = process.env.BASIC_PASS!;
-
 export function proxy(req: NextRequest) {
   const auth = req.headers.get("authorization");
 

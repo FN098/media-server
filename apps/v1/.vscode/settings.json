@@ -6,7 +6,7 @@
     "source.organizeImports": "explicit",
     "source.fixAll": "explicit"
   },
-  "prettier.prettierPath": "/app/apps/v1/node_modules/prettier",
+  "prettier.prettierPath": "node_modules/prettier",
   "eslint.format.enable": false,
   "files.eol": "\n",
   "files.insertFinalNewline": true,
