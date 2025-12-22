@@ -75,7 +75,7 @@ export const mediaThumbIcons: Record<MediaFsNodeType, ReactNode> = {
     <img
       width="64"
       height="64"
-      src="https://img.icons8.com/flat-round/64/audio-wave.png"
+      src="https://img.icons8.com/?size=100&id=eZkFHHHAXhtt&format=png&color=000000"
       alt="audio-wave"
     />
   ),
