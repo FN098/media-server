@@ -18,7 +18,7 @@ export function ImageViewer({ media }: { media: MediaFsNode }) {
           src={getThumbUrl(media.path)}
           alt={media.name}
           fill
-          className="absolute inset-0 object-contain blur-lg opacity-50"
+          className="absolute inset-0 object-contain opacity-50"
           onLoad={() => setIsPreloaded(true)}
         />
       )}
