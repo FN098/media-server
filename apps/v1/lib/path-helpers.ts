@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { PATHS } from "@/lib/paths";
+import { PATHS } from "@/lib/path";
 import { getAbsoluteUrl } from "@/lib/utils/url";
 import path from "path";
 

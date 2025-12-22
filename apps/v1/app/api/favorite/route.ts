@@ -1,7 +1,7 @@
-import { createFavorite, deleteFavorite } from "@/lib/favorites/repository";
+import { createFavorite, deleteFavorite } from "@/lib/favorite/repository";
 import { findMediaByPath } from "@/lib/media/repository";
 import { safeParseRequestJson } from "@/lib/request";
-import { findUserById } from "@/lib/users/repository";
+import { findUserById } from "@/lib/user/repository";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 

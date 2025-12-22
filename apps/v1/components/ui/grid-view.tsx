@@ -2,11 +2,13 @@
 
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { TextWithTooltip } from "@/components/ui/text-with-tooltip";
+import { useFavorite } from "@/hooks/use-favorite";
 import { MediaNode } from "@/lib/media/types";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, useRef } from "react";
 import { CellComponentProps, Grid, useGridRef } from "react-window";
+import { toast } from "sonner";
 
 type GridViewProps = {
   nodes: MediaNode[];
@@ -29,6 +31,7 @@ export const GridView = memo(function GridView1({
 
   const Cell = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
     const isMobile = useIsMobile();
+    const { toggleFavorite, isFavorite } = useFavorite();
 
     const index = rowIndex * columnCount + columnIndex;
     if (index >= nodes.length) return <div style={style} />;
@@ -39,7 +42,7 @@ export const GridView = memo(function GridView1({
       <div style={style} className="p-1">
         <div
           className={cn(
-            "aspect-square w-full overflow-hidden rounded-lg border bg-muted select-none",
+            "relative aspect-square w-full overflow-hidden rounded-lg border bg-muted select-none",
             "hover:bg-blue-100 active:bg-blue-200"
           )}
           onClick={() => onOpen?.(node)}
@@ -51,6 +54,18 @@ export const GridView = memo(function GridView1({
             height={rowHeight - 20}
             className="w-full h-full object-cover"
           />
+
+          <button
+            className="absolute top-1 right-1 z-10 text-yellow-400 text-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(node).catch(() => {
+                toast.error("お気に入りの更新に失敗しました");
+              });
+            }}
+          >
+            {isFavorite(node) ? "★" : "☆"}
+          </button>
         </div>
         <TextWithTooltip
           text={node.name}

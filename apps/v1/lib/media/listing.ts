@@ -67,7 +67,7 @@ export async function getDbMedia(dirPath: string): Promise<DbMedia[]> {
 
     return dbMedia.map((m) => ({
       fileMtime: m.fileMtime,
-      isFavorite: m.favorites != null,
+      isFavorite: m.favorites.length > 0,
       path: m.path,
       fileSize: Number(m.fileSize),
       title: m.title ?? undefined,

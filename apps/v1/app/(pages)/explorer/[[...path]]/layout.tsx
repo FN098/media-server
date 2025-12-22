@@ -1,5 +1,5 @@
 import { Header } from "@/components/ui/header";
-import { PATHS } from "@/lib/paths";
+import { PATHS } from "@/lib/path";
 import { SearchProvider } from "@/providers/search-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
