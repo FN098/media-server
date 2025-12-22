@@ -139,7 +139,7 @@ export function AudioPlayer({ media, play }: AudioPlayerProps) {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <div
-        className="flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] backdrop-blur-xl border border-white/10 shadow-2xl"
+        className="flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] border border-white/10 shadow-2xl"
         onPointerDownCapture={(e) => e.stopPropagation()}
       >
         {/* リピートバッジ */}
