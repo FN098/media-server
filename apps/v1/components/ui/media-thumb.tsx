@@ -26,7 +26,10 @@ export const MediaThumb = memo(function MediaThumb1({
         alt={node.name}
         width={width}
         height={height}
-        className={className}
+        className={cn(
+          "transition-transform duration-500 hover:scale-110",
+          className
+        )}
         loading="lazy"
       />
     );
@@ -37,7 +40,10 @@ export const MediaThumb = memo(function MediaThumb1({
         alt={node.name}
         width={width}
         height={height}
-        className={className}
+        className={cn(
+          "transition-transform duration-500 hover:scale-110",
+          className
+        )}
         fallback={
           <div
             className={cn(
