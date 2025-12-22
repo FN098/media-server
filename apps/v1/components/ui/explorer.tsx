@@ -43,9 +43,9 @@ export function Explorer({ listing }: ExplorerProps) {
     viewerOpen,
     mediaNodes,
     currentIndex,
+    setIndex,
     openViewerAt,
     closeViewer,
-    setIndex,
   } = useMediaViewer(filtered);
 
   // Open file/folder
@@ -96,12 +96,12 @@ export function Explorer({ listing }: ExplorerProps) {
           <ListView nodes={filtered} onOpen={handleOpen} />
         </div>
 
-        {viewerOpen && currentIndex !== -1 && (
+        {viewerOpen && (
           <MediaViewer
             items={mediaNodes}
             index={currentIndex}
+            setIndex={setIndex}
             onClose={closeViewer}
-            onChangeIndex={setIndex}
           />
         )}
       </FavoriteProvider>

@@ -8,10 +8,10 @@ import { useRef, useState } from "react";
 
 export function VideoPlayer({
   media,
-  isCurrent,
+  play,
 }: {
   media: MediaFsNode;
-  isCurrent?: boolean;
+  play?: boolean;
 }) {
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -40,7 +40,7 @@ export function VideoPlayer({
     { key: " ", callback: () => togglePlay() },
   ]);
 
-  if (!isCurrent) {
+  if (!play) {
     return (
       <div className="relative w-full h-full flex items-center justify-center">
         <Image

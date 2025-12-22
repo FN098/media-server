@@ -13,64 +13,30 @@ import { useFavorite } from "@/providers/favorite-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 import { toast } from "sonner";
+import { Keyboard, Navigation, Virtual } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/virtual";
 
 interface MediaViewerProps {
   items: MediaNode[];
   index: number;
+  setIndex: (index: number) => void;
   onClose: () => void;
-  onChangeIndex: (nextIndex: number) => void;
 }
-
-const SWIPE_DISTANCE = 120;
-const SWIPE_VELOCITY = 300;
 
 export function MediaViewer({
   items,
   index,
+  setIndex,
   onClose,
-  onChangeIndex,
 }: MediaViewerProps) {
   const favoriteCtx = useFavorite();
-  const [current, setCurrent] = useState(index);
-  const [direction, setDirection] = useState(0);
   const { showUI: showHeader, handleInteraction } = useShowUI({ delay: 2000 });
 
-  if (index !== current) {
-    setCurrent(index);
-    setDirection(index > current ? 1 : -1);
-  }
-
-  const paginate = (newDirection: number) => {
-    const nextIndex = index + newDirection;
-    if (nextIndex >= 0 && nextIndex < items.length) {
-      onChangeIndex(nextIndex);
-    }
-  };
-
-  const variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? "100%" : "-100%",
-      opacity: 0.5,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? "100%" : "-100%",
-      opacity: 0.5,
-    }),
-  };
-
-  useShortcutKeys([
-    { key: "ArrowRight", callback: () => paginate(1) },
-    { key: "ArrowLeft", callback: () => paginate(-1) },
-    { key: "Escape", callback: onClose },
-  ]);
+  // 左右キーは Swiper の keyboard オプションで有効化
+  useShortcutKeys([{ key: "Escape", callback: onClose }]);
 
   return (
     <div
@@ -81,7 +47,6 @@ export function MediaViewer({
       {/* 背景 */}
       <AnimatePresence mode="popLayout">
         <motion.div
-          key={`bg-${items[current].path}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -89,9 +54,9 @@ export function MediaViewer({
           className="absolute inset-0 z-0 pointer-events-none"
         >
           {/* メディアのサムネイルを背景に全画面表示 */}
-          {["image", "video"].includes(items[current].type) && (
+          {["image", "video"].includes(items[index].type) && (
             <Image
-              src={getThumbUrl(items[current].path)}
+              src={getThumbUrl(items[index].path)}
               alt=""
               fill
               className="object-cover scale-110 blur-[100px] saturate-[1.8] opacity-60"
@@ -114,24 +79,22 @@ export function MediaViewer({
           >
             <div className="flex flex-col gap-1 ml-4 mr-1">
               <span className="text-white md:text-lg font-medium drop-shadow-md">
-                {items[current].name}
+                {items[index].name}
               </span>
               <span className="text-white/60 text-sm">
-                {current + 1} / {items.length}
+                {index + 1} / {items.length}
               </span>
             </div>
 
             <div className="flex items-center gap-4">
-              {isMedia(items[current].type) && (
+              {isMedia(items[index].type) && (
                 <MediaViewerFavoriteButton
-                  active={favoriteCtx.isFavorite(items[current].path)}
+                  active={favoriteCtx.isFavorite(items[index].path)}
                   onToggle={() => {
-                    favoriteCtx
-                      .toggleFavorite(items[current].path)
-                      .catch((e) => {
-                        console.error(e);
-                        toast.error("お気に入りの更新に失敗しました");
-                      });
+                    favoriteCtx.toggleFavorite(items[index].path).catch((e) => {
+                      console.error(e);
+                      toast.error("お気に入りの更新に失敗しました");
+                    });
                   }}
                 />
               )}
@@ -149,43 +112,20 @@ export function MediaViewer({
       </AnimatePresence>
 
       {/* メディアコンテンツ */}
-      <AnimatePresence initial={false} custom={direction}>
-        <motion.div
-          key={index}
-          custom={direction}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{
-            x: {
-              type: "spring",
-              bounce: 0,
-              duration: 0.4,
-            },
-            opacity: { duration: 0.1 },
-          }}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={1}
-          onDragEnd={(_, info) => {
-            // スワイプで次・前のファイルを開く
-            const offset = info.offset.x;
-            const velocity = info.velocity.x;
-
-            if (offset < -SWIPE_DISTANCE || velocity < -SWIPE_VELOCITY) {
-              paginate(1);
-            } else if (offset > SWIPE_DISTANCE || velocity > SWIPE_VELOCITY) {
-              paginate(-1);
-            }
-          }}
-          className="absolute w-full h-full flex items-center justify-center"
-        >
-          <div className="relative w-full h-full flex items-center justify-center">
-            <Media media={items[current]} isCurrent />
-          </div>
-        </motion.div>
-      </AnimatePresence>
+      <Swiper
+        modules={[Virtual, Navigation, Keyboard]}
+        virtual // これを有効にするだけで仮想化される
+        initialSlide={index}
+        keyboard={{ enabled: true }}
+        onSlideChange={(swiper) => setIndex(swiper.activeIndex)}
+        className="h-full w-full"
+      >
+        {items.map((item, i) => (
+          <SwiperSlide key={item.path} virtualIndex={i}>
+            <Media media={item} isCurrent={index === i} />
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </div>
   );
 }
@@ -201,9 +141,9 @@ function Media({
     case "image":
       return <ImageViewer media={media} />;
     case "video":
-      return <VideoPlayer media={media} isCurrent={isCurrent} />;
+      return <VideoPlayer media={media} play={isCurrent} />;
     case "audio":
-      return isCurrent ? <AudioPlayer media={media} /> : null;
+      return <AudioPlayer media={media} play={isCurrent} />;
     default:
       return (
         <div className="text-white/50 text-sm">

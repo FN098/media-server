@@ -2,8 +2,8 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.addMissingImports": "explicit",
-    "source.organizeImports": "explicit",
+    // "source.addMissingImports": "explicit",
+    // "source.organizeImports": "explicit",
     "source.fixAll": "explicit"
   },
   "prettier.prettierPath": "node_modules/prettier",

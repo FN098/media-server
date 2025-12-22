@@ -52,7 +52,12 @@ function PlayerButton({
   );
 }
 
-export function AudioPlayer({ media }: { media: MediaFsNode }) {
+type AudioPlayerProps = {
+  media: MediaFsNode;
+  play?: boolean;
+};
+
+export function AudioPlayer({ media, play }: AudioPlayerProps) {
   const playerRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isRepeating, setIsRepeating] = useState(false);
@@ -132,110 +137,114 @@ export function AudioPlayer({ media }: { media: MediaFsNode }) {
   ]);
 
   return (
-    <div
-      className="flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] backdrop-blur-xl border border-white/10 shadow-2xl"
-      onPointerDownCapture={(e) => e.stopPropagation()}
-    >
-      {/* リピートバッジ */}
-      <PlayerButton
-        onClick={toggleRepeat}
-        className={`absolute top-8 right-8 p-2 rounded-full transition-all ${
-          isRepeating
-            ? "bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]"
-            : "text-white/30 hover:text-white/60"
-        }`}
-        label="Repeat"
-        shortcut="R"
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div
+        className="flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] backdrop-blur-xl border border-white/10 shadow-2xl"
+        onPointerDownCapture={(e) => e.stopPropagation()}
       >
-        {isRepeating ? <Repeat1 size={20} /> : <Repeat size={20} />}
-      </PlayerButton>
+        {/* リピートバッジ */}
+        <PlayerButton
+          onClick={toggleRepeat}
+          className={`absolute top-8 right-8 p-2 rounded-full transition-all ${
+            isRepeating
+              ? "bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)]"
+              : "text-white/30 hover:text-white/60"
+          }`}
+          label="Repeat"
+          shortcut="R"
+        >
+          {isRepeating ? <Repeat1 size={20} /> : <Repeat size={20} />}
+        </PlayerButton>
 
-      {/* オーディオビジュアル */}
-      <div className="w-40 h-40 bg-linear-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
-        <Music size={64} className="text-white" />
-      </div>
-
-      {/* メタデータ */}
-      <div className="text-center w-full">
-        <h3 className="text-white text-lg font-semibold truncate px-4">
-          {media.name}
-        </h3>
-        <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase mt-1">
-          Audio Track
-        </p>
-      </div>
-
-      {/* カスタムシークバー */}
-      <div className="w-full px-2">
-        <input
-          type="range"
-          min="0"
-          max={duration || 0}
-          value={currentTime}
-          onChange={handleSeekChange}
-          className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
-          style={{
-            background: `linear-gradient(to right, #6366f1 ${progress}%, rgba(255, 255, 255, 0.1) ${progress}%)`,
-          }}
-        />
-        <div className="flex justify-between mt-2 px-1">
-          <span className="text-[10px] text-white/40 font-mono">
-            {formatTime(currentTime)}
-          </span>
-          <span className="text-[10px] text-white/40 font-mono">
-            {formatTime(duration)}
-          </span>
+        {/* オーディオビジュアル */}
+        <div className="w-40 h-40 bg-linear-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+          <Music size={64} className="text-white" />
         </div>
+
+        {/* メタデータ */}
+        <div className="text-center w-full">
+          <h3 className="text-white text-lg font-semibold truncate px-4">
+            {media.name}
+          </h3>
+          <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase mt-1">
+            Audio Track
+          </p>
+        </div>
+
+        {/* カスタムシークバー */}
+        <div className="w-full px-2">
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={handleSeekChange}
+            className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
+            style={{
+              background: `linear-gradient(to right, #6366f1 ${progress}%, rgba(255, 255, 255, 0.1) ${progress}%)`,
+            }}
+          />
+          <div className="flex justify-between mt-2 px-1">
+            <span className="text-[10px] text-white/40 font-mono">
+              {formatTime(currentTime)}
+            </span>
+            <span className="text-[10px] text-white/40 font-mono">
+              {formatTime(duration)}
+            </span>
+          </div>
+        </div>
+
+        {/* メイン操作系 */}
+        <div className="flex items-center gap-10">
+          {/* 10秒戻る */}
+          <PlayerButton
+            onClick={() => seek(-10)}
+            label="Back 10s"
+            shortcut="Ctrl + ←"
+            className="text-white/60 hover:text-white transition-all active:scale-90"
+          >
+            <RotateCcw size={28} />
+          </PlayerButton>
+
+          {/* 再生 / 一時停止 */}
+          <PlayerButton
+            onClick={togglePlay}
+            label={isPlaying ? "Pause" : "Play"}
+            shortcut="Space"
+            className="w-20 h-20 flex items-center justify-center bg-white rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+          >
+            {isPlaying ? (
+              <Pause className="text-black fill-black" size={32} />
+            ) : (
+              <Play className="text-black fill-black ml-1" size={32} />
+            )}
+          </PlayerButton>
+
+          {/* 10秒進む */}
+          <PlayerButton
+            onClick={() => seek(10)}
+            label="Forward 10s"
+            shortcut="Ctrl + →"
+            className="text-white/60 hover:text-white transition-all active:scale-90"
+          >
+            <RotateCw size={28} />
+          </PlayerButton>
+        </div>
+
+        {play && (
+          <audio
+            ref={playerRef}
+            src={getAbsoluteMediaUrl(media.path)}
+            autoPlay
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
+            onEnded={handleEnded}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            className="hidden"
+          />
+        )}
       </div>
-
-      {/* メイン操作系 */}
-      <div className="flex items-center gap-10">
-        {/* 10秒戻る */}
-        <PlayerButton
-          onClick={() => seek(-10)}
-          label="Back 10s"
-          shortcut="Ctrl + ←"
-          className="text-white/60 hover:text-white transition-all active:scale-90"
-        >
-          <RotateCcw size={28} />
-        </PlayerButton>
-
-        {/* 再生 / 一時停止 */}
-        <PlayerButton
-          onClick={togglePlay}
-          label={isPlaying ? "Pause" : "Play"}
-          shortcut="Space"
-          className="w-20 h-20 flex items-center justify-center bg-white rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-        >
-          {isPlaying ? (
-            <Pause className="text-black fill-black" size={32} />
-          ) : (
-            <Play className="text-black fill-black ml-1" size={32} />
-          )}
-        </PlayerButton>
-
-        {/* 10秒進む */}
-        <PlayerButton
-          onClick={() => seek(10)}
-          label="Forward 10s"
-          shortcut="Ctrl + →"
-          className="text-white/60 hover:text-white transition-all active:scale-90"
-        >
-          <RotateCw size={28} />
-        </PlayerButton>
-      </div>
-
-      <audio
-        ref={playerRef}
-        src={getAbsoluteMediaUrl(media.path)}
-        autoPlay
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={handleEnded}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        className="hidden"
-      />
     </div>
   );
 }
