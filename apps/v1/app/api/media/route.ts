@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 // TODO: ユーザー認証を正式に実装後に差し替える
-const USER_ID = process.env.BASIC_USER!;
+const USER_ID = "dev_user";
 
 const QuerySchema = z.object({
   dir: z
