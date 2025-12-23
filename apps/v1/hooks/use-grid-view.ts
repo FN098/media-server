@@ -15,19 +15,29 @@ export function useGridView(
     rowHeight: 200,
   }
 ): GridViewConfig {
-  const [columnCount, setColumnCount] = useState(1);
+  const [config, setConfig] = useState<GridViewConfig>({
+    columnCount: 1,
+    columnWidth: options.columnWidth,
+    rowHeight: options.rowHeight,
+  });
 
   const update = useCallback(() => {
     if (!ref.current) return;
 
     const containerWidth = ref.current.offsetWidth;
-    const newCount = Math.max(
+    const columnCount = Math.max(
       1,
-      Math.floor(containerWidth / options.columnWidth)
+      Math.ceil(containerWidth / options.columnWidth)
     );
 
-    setColumnCount(newCount);
-  }, [ref, options.columnWidth]);
+    const actualColumnWidth = containerWidth / columnCount;
+
+    setConfig({
+      columnCount,
+      columnWidth: actualColumnWidth,
+      rowHeight: options.rowHeight,
+    });
+  }, [ref, options.columnWidth, options.rowHeight]);
 
   useEffect(() => {
     const node = ref.current;
@@ -44,9 +54,5 @@ export function useGridView(
     return () => observer.disconnect();
   }, [ref, update]);
 
-  return {
-    columnCount,
-    columnWidth: options.columnWidth,
-    rowHeight: options.rowHeight,
-  };
+  return config;
 }
