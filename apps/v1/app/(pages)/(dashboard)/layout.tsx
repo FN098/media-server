@@ -7,8 +7,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ViewModeProvider>
       <SearchProvider>
-        <Header title="Dashboard" basePath={PATHS.client.dashboard.root} />
-        {children}
+        <div className="flex flex-col min-h-screen">
+          <Header title="Dashboard" basePath={PATHS.client.dashboard.root} />
+          <main className="flex-1 flex items-center justify-center">
+            {children}
+          </main>
+        </div>
       </SearchProvider>
     </ViewModeProvider>
   );
