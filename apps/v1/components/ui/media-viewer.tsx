@@ -17,7 +17,7 @@ import { memo, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
-import { Keyboard, Navigation, Virtual } from "swiper/modules";
+import { Keyboard, Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 interface MediaViewerProps {
@@ -98,7 +98,7 @@ export function MediaViewer({
 
       {/* メディアコンテンツ */}
       <Swiper
-        modules={[Virtual, Navigation, Keyboard]}
+        modules={[Virtual, Navigation, Keyboard, Zoom]}
         initialSlide={index}
         onSlideChange={(swiper) => setIndex(swiper.activeIndex)}
         virtual={{
@@ -108,6 +108,7 @@ export function MediaViewer({
           addSlidesAfter: 3,
         }}
         keyboard={{ enabled: true }}
+        zoom={true}
         className="h-full w-full"
       >
         {items.map((item, i) => (

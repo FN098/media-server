@@ -9,7 +9,7 @@ export const ImageViewer = memo(
     const [isLoaded, setIsLoaded] = useState(false);
 
     return (
-      <div className="relative w-full h-full flex items-center justify-center">
+      <div className="swiper-zoom-container relative w-full h-full flex items-center justify-center">
         {!isLoaded && <LoadingSpinner />}
 
         {/* サムネイル */}
@@ -30,6 +30,8 @@ export const ImageViewer = memo(
             isLoaded ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => setIsLoaded(true)}
+          priority
+          unoptimized
         />
       </div>
     );
