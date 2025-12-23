@@ -1,11 +1,12 @@
 import { cn } from "@/shadcn/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type MarqueeTextProps = {
   text: string;
   className?: string;
   speed?: number;
   delay?: number;
+  autoplay?: boolean;
 };
 
 export function MarqueeText({
@@ -13,18 +14,16 @@ export function MarqueeText({
   className,
   speed = 40,
   delay = 0.5,
+  autoplay = false,
 }: MarqueeTextProps) {
-  const startDelay = delay;
-  const endDelay = delay * 2;
-
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
 
   const [scrollDistance, setScrollDistance] = useState(0);
   const [playing, setPlaying] = useState(false);
 
-  const hoverRef = useRef(false);
-  const timerRef = useRef<number | null>(null);
+  const isInteracting = useRef(false); // マウスホバー状態
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 移動量計算
   useEffect(() => {
@@ -34,46 +33,51 @@ export function MarqueeText({
     const resizeObserver = new ResizeObserver(() => {
       const textEl = textRef.current;
       if (!textEl) return;
-
       const diff = textEl.scrollWidth - container.clientWidth;
       setScrollDistance(diff > 0 ? diff : 0);
     });
 
     resizeObserver.observe(container);
-
     return () => resizeObserver.disconnect();
   }, []);
 
-  const start = () => {
-    if (!hoverRef.current || scrollDistance <= 0) return;
+  // アニメーション開始
+  const startAnimation = useCallback(() => {
+    if (scrollDistance <= 0) return;
 
-    timerRef.current = window.setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setPlaying(true);
     }, delay * 1000);
-  };
+  }, [scrollDistance, delay]);
+
+  // 初回起動（autoplay用）
+  useEffect(() => {
+    if (autoplay && scrollDistance > 0) {
+      startAnimation();
+    }
+  }, [autoplay, scrollDistance, startAnimation]);
 
   const stop = () => {
-    hoverRef.current = false;
-    setPlaying(false);
-    if (timerRef.current) clearTimeout(timerRef.current);
+    isInteracting.current = false;
+    if (!autoplay) {
+      setPlaying(false);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    }
   };
 
   const onAnimationEnd = () => {
-    // 終端待機 → リセット → 再スタート
-    timerRef.current = window.setTimeout(() => {
-      if (!hoverRef.current) return;
-
+    // 終了時の待機
+    timerRef.current = setTimeout(() => {
+      // 一旦リセット（CSSのanimationを再適用させるため）
       setPlaying(false);
-      if (textRef.current) {
-        textRef.current.style.transform = "translateX(0)";
-      }
 
-      // さらに少し待ってから再開
-      timerRef.current = window.setTimeout(() => {
-        if (!hoverRef.current) return;
-        start();
-      }, startDelay * 1000);
-    }, endDelay * 1000);
+      // autoplay中、またはマウスホバー中なら再開
+      if (autoplay || isInteracting.current) {
+        timerRef.current = setTimeout(() => {
+          startAnimation();
+        }, delay * 1000);
+      }
+    }, delay * 1000);
   };
 
   return (
@@ -84,8 +88,8 @@ export function MarqueeText({
         className
       )}
       onMouseEnter={() => {
-        hoverRef.current = true;
-        start();
+        isInteracting.current = true;
+        if (!playing) startAnimation();
       }}
       onMouseLeave={stop}
     >
