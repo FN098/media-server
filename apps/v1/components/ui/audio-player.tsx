@@ -51,10 +51,10 @@ function PlayerButton({
 
 type AudioPlayerProps = {
   media: MediaFsNode;
-  play?: boolean;
+  isCurrent?: boolean;
 };
 
-export function AudioPlayer({ media, play }: AudioPlayerProps) {
+export function AudioPlayer({ media, isCurrent }: AudioPlayerProps) {
   const playerRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isRepeating, setIsRepeating] = useState(false);
@@ -232,7 +232,7 @@ export function AudioPlayer({ media, play }: AudioPlayerProps) {
           </PlayerButton>
         </div>
 
-        {play && (
+        {isCurrent && (
           <audio
             ref={playerRef}
             src={getAbsoluteMediaUrl(media.path)}

@@ -102,8 +102,8 @@ export function MediaViewer({
         virtual={{
           enabled: true,
           slides: items,
-          addSlidesBefore: 1,
-          addSlidesAfter: 1,
+          addSlidesBefore: 3,
+          addSlidesAfter: 3,
         }}
         keyboard={{ enabled: true }}
         className="h-full w-full"
@@ -133,11 +133,11 @@ const Media = memo(function Media1({
 }) {
   switch (media.type) {
     case "image":
-      return <ImageViewer media={media} />;
+      return <ImageViewer media={media} isCurrent={isCurrent} />;
     case "video":
-      return <VideoPlayer media={media} play={isCurrent} />;
+      return <VideoPlayer media={media} isCurrent={isCurrent} />;
     case "audio":
-      return <AudioPlayer media={media} play={isCurrent} />;
+      return <AudioPlayer media={media} isCurrent={isCurrent} />;
     default:
       return (
         <div className="text-white/50 text-sm">
