@@ -18,6 +18,30 @@ export const VideoPlayer = memo(function VideoPlayer({
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const storageKey = `video-progress:${media.path}`;
+
+  // 再生位置を保存
+  const handleTimeUpdate = (e: Event) => {
+    const video = e.target as HTMLVideoElement;
+    if (video.currentTime > 0) {
+      localStorage.setItem(storageKey, video.currentTime.toString());
+    }
+  };
+
+  // メディアが読み込まれた時に保存された位置から復元する
+  const handleLoadedData = () => {
+    setIsLoaded(true);
+    const savedTime = localStorage.getItem(storageKey);
+    if (savedTime && playerRef.current) {
+      playerRef.current.currentTime = parseFloat(savedTime);
+    }
+  };
+
+  // 再生が終わったらストレージから削除する
+  const handleEnded = () => {
+    localStorage.removeItem(storageKey);
+  };
+
   const togglePlay = () => {
     const video = playerRef.current;
     if (!video) return;
@@ -69,7 +93,9 @@ export const VideoPlayer = memo(function VideoPlayer({
           src={getAbsoluteMediaUrl(media.path)}
           autoPlay
           streamType="on-demand"
-          onLoadedData={() => setIsLoaded(true)}
+          onLoadedData={handleLoadedData}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={handleEnded}
         />
       </div>
     </div>
