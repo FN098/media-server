@@ -16,7 +16,7 @@ export const VideoPlayer = memo(function VideoPlayer({
   isCurrent,
 }: VideoPlayerProps) {
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   const storageKey = `video-progress:${media.path}`;
 
@@ -30,11 +30,11 @@ export const VideoPlayer = memo(function VideoPlayer({
 
   // メディアが読み込まれた時に保存された位置から復元する
   const handleLoadedData = () => {
-    setIsLoaded(true);
     const savedTime = localStorage.getItem(storageKey);
     if (savedTime && playerRef.current) {
       playerRef.current.currentTime = parseFloat(savedTime);
     }
+    setIsVideoReady(true);
   };
 
   // 再生が終わったらストレージから削除する
@@ -66,38 +66,43 @@ export const VideoPlayer = memo(function VideoPlayer({
     { key: " ", callback: () => togglePlay() },
   ]);
 
-  if (!isCurrent) {
-    return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        <Image
-          src={getThumbUrl(media.path)}
-          alt={media.name}
-          fill
-          className="object-contain select-none"
-          draggable={false}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {!isLoaded && <LoadingSpinner />}
+      {(!isCurrent || !isVideoReady) && (
+        <div className="absolute inset-0 z-10">
+          <Image
+            src={getThumbUrl(media.path)}
+            alt={media.name}
+            fill
+            className="object-contain select-none"
+            priority // カレントの可能性があるものは優先的にロード
+            draggable={false}
+          />
+          {/* ロード中のみスピナーを表示 */}
+          {isCurrent && !isVideoReady && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <LoadingSpinner />
+            </div>
+          )}
+        </div>
+      )}
 
-      <div
-        className="relative max-w-full max-h-full aspect-video"
-        onPointerDownCapture={(e) => e.stopPropagation()}
-      >
-        <MuxPlayer
-          ref={playerRef}
-          src={getAbsoluteMediaUrl(media.path)}
-          autoPlay
-          streamType="on-demand"
-          onLoadedData={handleLoadedData}
-          onTimeUpdate={handleTimeUpdate}
-          onEnded={handleEnded}
-        />
-      </div>
+      {isCurrent && (
+        <div
+          className="relative max-w-full max-h-full aspect-video"
+          onPointerDownCapture={(e) => e.stopPropagation()}
+        >
+          <MuxPlayer
+            ref={playerRef}
+            src={getAbsoluteMediaUrl(media.path)}
+            autoPlay
+            streamType="on-demand"
+            onLoadedData={handleLoadedData}
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={handleEnded}
+          />
+        </div>
+      )}
     </div>
   );
 });
