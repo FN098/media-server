@@ -1,31 +1,26 @@
 /* eslint-disable @next/next/no-img-element */
 import { FallbackImage } from "@/components/ui/fallback-image";
 import { MediaFsNode, MediaFsNodeType } from "@/lib/media/types";
-import { getMediaUrl, getThumbUrl } from "@/lib/path-helpers";
+import { getThumbUrl } from "@/lib/path-helpers";
 import { cn } from "@/shadcn/lib/utils";
 import Image from "next/image";
 import { memo, ReactNode } from "react";
 
 type MediaThumbProps = {
   node: MediaFsNode;
-  width?: number;
-  height?: number;
   className?: string;
 };
 
 export const MediaThumb = memo(function MediaThumb1({
   node,
-  width,
-  height,
   className,
 }: MediaThumbProps) {
   if (node.type === "image") {
     return (
       <Image
-        src={getMediaUrl(node.path)}
+        src={getThumbUrl(node.path)}
         alt={node.name}
-        width={width}
-        height={height}
+        fill
         className={cn(
           "transition-transform duration-500 hover:scale-110",
           className
@@ -38,8 +33,7 @@ export const MediaThumb = memo(function MediaThumb1({
       <FallbackImage
         src={getThumbUrl(node.path)}
         alt={node.name}
-        width={width}
-        height={height}
+        fill
         className={cn(
           "transition-transform duration-500 hover:scale-110",
           className

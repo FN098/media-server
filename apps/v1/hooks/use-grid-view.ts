@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type GridViewConfig = {
   columnCount: number;
@@ -9,35 +9,44 @@ type GridViewConfig = {
 };
 
 export function useGridView(
-  ref: React.RefObject<HTMLElement | null>
-): GridViewConfig {
-  const [config, setConfig] = useState<GridViewConfig>({
-    columnCount: 6,
+  ref: React.RefObject<HTMLElement | null>,
+  options: Omit<GridViewConfig, "columnCount"> = {
     columnWidth: 200,
     rowHeight: 200,
-  });
+  }
+): GridViewConfig {
+  const [columnCount, setColumnCount] = useState(1);
 
-  useEffect(() => {
+  const update = useCallback(() => {
     if (!ref.current) return;
 
-    const el = ref.current;
+    const containerWidth = ref.current.offsetWidth;
+    const newCount = Math.max(
+      1,
+      Math.floor(containerWidth / options.columnWidth)
+    );
 
-    const update = () => {
-      const width = el.offsetWidth;
-      const columnCount =
-        width < 480 ? 2 : width < 768 ? 3 : width < 1024 ? 4 : 6;
-      const columnWidth = Math.floor(width / columnCount);
-      const rowHeight = columnWidth;
+    setColumnCount(newCount);
+  }, [ref, options.columnWidth]);
 
-      setConfig({ columnCount, columnWidth, rowHeight });
-    };
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
 
-    update(); // 初回呼び出しでマウント時に正しい値を反映
+    // 初期実行
+    update();
 
-    const observer = new ResizeObserver(update);
-    observer.observe(ref.current);
+    const observer = new ResizeObserver(() => {
+      requestAnimationFrame(update);
+    });
+
+    observer.observe(node);
     return () => observer.disconnect();
-  }, [ref]);
+  }, [ref, update]);
 
-  return config;
+  return {
+    columnCount,
+    columnWidth: options.columnWidth,
+    rowHeight: options.rowHeight,
+  };
 }

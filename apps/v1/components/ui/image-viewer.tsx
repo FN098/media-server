@@ -5,12 +5,11 @@ import Image from "next/image";
 import { useState } from "react";
 
 export function ImageViewer({ media }: { media: MediaFsNode }) {
-  const [isPreloaded, setIsPreloaded] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {!isPreloaded && <LoadingSpinner />}
+      {!isLoaded && <LoadingSpinner />}
 
       {/* サムネイル */}
       {!isLoaded && (
@@ -19,7 +18,6 @@ export function ImageViewer({ media }: { media: MediaFsNode }) {
           alt={media.name}
           fill
           className="absolute inset-0 object-contain opacity-50"
-          onLoad={() => setIsPreloaded(true)}
         />
       )}
 

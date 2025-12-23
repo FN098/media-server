@@ -1,9 +1,8 @@
 "use client";
 
-import { GridView } from "@/components/ui/grid-view";
+import { GridView } from "@/components/ui/grid-view-v2";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { useGridView } from "@/hooks/use-grid-view";
 import { useMediaViewer } from "@/hooks/use-media-viewer";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
@@ -13,7 +12,7 @@ import { useSearch } from "@/providers/search-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type ExplorerProps = {
@@ -33,10 +32,6 @@ export function Explorer({ listing }: ExplorerProps) {
       .filter((e) => e.isDirectory || isMedia(e.type))
       .filter((e) => e.name.toLowerCase().includes(lowerQuery));
   }, [listing.nodes, lowerQuery]);
-
-  // GridView config
-  const gridContainerRef = useRef<HTMLDivElement>(null);
-  const { columnCount, columnWidth, rowHeight } = useGridView(gridContainerRef);
 
   // MediaViewer config
   const { viewerOpen, openViewer, closeViewer } = useMediaViewer();
@@ -73,20 +68,13 @@ export function Explorer({ listing }: ExplorerProps) {
       )}
     >
       <FavoriteProvider initialFavorites={initialFavorites}>
-        <div
-          className={view === "grid" ? "block" : "hidden"}
-          ref={gridContainerRef}
-        >
-          <GridView
-            nodes={filtered}
-            columnCount={columnCount}
-            columnWidth={columnWidth}
-            rowHeight={rowHeight}
-            onOpen={handleOpen}
-          />
+        <div className={cn(view === "grid" ? "block" : "hidden")}>
+          <GridView nodes={filtered} onOpen={handleOpen} />
         </div>
 
-        <div className={view === "list" ? "block" : "hidden"}>
+        <div
+          className={cn(view === "list" ? "block" : "hidden", "w-full h-full")}
+        >
           <ListView nodes={filtered} onOpen={handleOpen} />
         </div>
 
