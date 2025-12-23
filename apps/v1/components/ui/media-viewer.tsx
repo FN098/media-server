@@ -3,6 +3,7 @@
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { MediaViewerFavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
+import { MarqueeText } from "@/components/ui/marquee-text";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
@@ -51,9 +52,15 @@ export function MediaViewer({
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-0 left-0 right-0 z-60 px-2 py-4 md:p-6 flex items-start justify-between bg-linear-to-b from-black/60 to-transparent"
           >
-            <div className="flex flex-col gap-1 ml-4 mr-1">
+            {/* ファイル情報 */}
+            <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0">
               <span className="text-white md:text-lg font-medium drop-shadow-md">
-                {items[index].name}
+                <MarqueeText
+                  key={index}
+                  text={items[index].name}
+                  autoplay
+                  speed={120}
+                />
               </span>
               <span className="text-white/60 text-sm">
                 {index + 1} / {items.length}
@@ -61,6 +68,7 @@ export function MediaViewer({
             </div>
 
             <div className="flex items-center gap-4">
+              {/* お気に入りボタン */}
               {isMedia(items[index].type) && (
                 <MediaViewerFavoriteButton
                   active={favoriteCtx.isFavorite(items[index].path)}
@@ -73,6 +81,7 @@ export function MediaViewer({
                 />
               )}
 
+              {/* 閉じるボタン */}
               <button
                 onClick={onClose}
                 className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full mr-4"
@@ -89,12 +98,11 @@ export function MediaViewer({
       <Swiper
         modules={[Virtual, Navigation, Keyboard]}
         initialSlide={index}
-        // スライドが切り替わった時に親のステートを更新
         onSlideChange={(swiper) => setIndex(swiper.activeIndex)}
         virtual={{
           enabled: true,
           slides: items,
-          addSlidesBefore: 1, // 前後の予備枚数
+          addSlidesBefore: 1,
           addSlidesAfter: 1,
         }}
         keyboard={{ enabled: true }}
