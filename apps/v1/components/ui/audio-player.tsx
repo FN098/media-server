@@ -17,12 +17,9 @@ import {
 } from "lucide-react";
 import React, { useRef, useState } from "react";
 
-interface PlayerButtonProps {
-  onClick: () => void;
-  children: React.ReactNode;
+interface PlayerButtonProps extends React.ComponentProps<"button"> {
   label: string;
   shortcut?: string;
-  className?: string;
 }
 
 function PlayerButton({
@@ -137,11 +134,8 @@ export function AudioPlayer({ media, play }: AudioPlayerProps) {
   ]);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      <div
-        className="flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] border border-white/10 shadow-2xl"
-        onPointerDownCapture={(e) => e.stopPropagation()}
-      >
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="relative flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] border border-white/10 shadow-2xl">
         {/* リピートバッジ */}
         <PlayerButton
           onClick={toggleRepeat}
@@ -152,6 +146,7 @@ export function AudioPlayer({ media, play }: AudioPlayerProps) {
           }`}
           label="Repeat"
           shortcut="R"
+          onPointerDownCapture={(e) => e.stopPropagation()}
         >
           {isRepeating ? <Repeat1 size={20} /> : <Repeat size={20} />}
         </PlayerButton>
@@ -172,7 +167,10 @@ export function AudioPlayer({ media, play }: AudioPlayerProps) {
         </div>
 
         {/* カスタムシークバー */}
-        <div className="w-full px-2">
+        <div
+          className="w-full px-2"
+          onPointerDownCapture={(e) => e.stopPropagation()}
+        >
           <input
             type="range"
             min="0"
@@ -195,7 +193,10 @@ export function AudioPlayer({ media, play }: AudioPlayerProps) {
         </div>
 
         {/* メイン操作系 */}
-        <div className="flex items-center gap-10">
+        <div
+          className="flex items-center gap-10"
+          onPointerDownCapture={(e) => e.stopPropagation()}
+        >
           {/* 10秒戻る */}
           <PlayerButton
             onClick={() => seek(-10)}
