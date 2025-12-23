@@ -4,15 +4,17 @@ import { MediaFsNode } from "@/lib/media/types";
 import { getAbsoluteMediaUrl, getThumbUrl } from "@/lib/path-helpers";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 
-export function VideoPlayer({
+type VideoPlayerProps = {
+  media: MediaFsNode;
+  isCurrent: boolean;
+};
+
+export const VideoPlayer = memo(function VideoPlayer({
   media,
   isCurrent,
-}: {
-  media: MediaFsNode;
-  isCurrent?: boolean;
-}) {
+}: VideoPlayerProps) {
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -74,4 +76,4 @@ export function VideoPlayer({
       </div>
     </div>
   );
-}
+});

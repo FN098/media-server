@@ -15,7 +15,7 @@ import {
   RotateCcw,
   RotateCw,
 } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 
 interface PlayerButtonProps extends React.ComponentProps<"button"> {
   label: string;
@@ -54,7 +54,10 @@ type AudioPlayerProps = {
   isCurrent?: boolean;
 };
 
-export function AudioPlayer({ media, isCurrent }: AudioPlayerProps) {
+export const AudioPlayer = memo(function AudioPlayer({
+  media,
+  isCurrent,
+}: AudioPlayerProps) {
   const playerRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isRepeating, setIsRepeating] = useState(false);
@@ -248,4 +251,4 @@ export function AudioPlayer({ media, isCurrent }: AudioPlayerProps) {
       </div>
     </div>
   );
-}
+});

@@ -4,8 +4,13 @@ import { getMediaUrl, getThumbUrl } from "@/lib/path-helpers";
 import Image from "next/image";
 import { memo, useState } from "react";
 
+type ImageViewerProps = {
+  media: MediaFsNode;
+  isCurrent: boolean;
+};
+
 export const ImageViewer = memo(
-  function ImageViewer({ media }: { media: MediaFsNode; isCurrent: boolean }) {
+  function ImageViewer({ media }: ImageViewerProps) {
     const [isLoaded, setIsLoaded] = useState(false);
 
     return (
