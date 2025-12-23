@@ -10,6 +10,7 @@ import { useShowUI } from "@/hooks/use-show-ui";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { memo, useState } from "react";
@@ -33,6 +34,7 @@ export function MediaViewer({
   const favoriteCtx = useFavorite();
   const { showUI: showHeader, handleInteraction } = useShowUI({ delay: 2000 });
   const [index, setIndex] = useState(initialIndex);
+  const isMobile = useIsMobile();
 
   // 左右キーは Swiper の keyboard オプションで有効化
   useShortcutKeys([{ key: "Escape", callback: onClose }]);
@@ -58,7 +60,7 @@ export function MediaViewer({
                 <MarqueeText
                   key={index}
                   text={items[index].name}
-                  autoplay
+                  autoplay={isMobile}
                   speed={120}
                 />
               </span>
