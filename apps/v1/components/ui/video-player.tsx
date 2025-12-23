@@ -61,7 +61,7 @@ export const VideoPlayer = memo(function VideoPlayer({
       {!isLoaded && <LoadingSpinner />}
 
       <div
-        className="relative max-w-full max-h-full"
+        className="relative max-w-full max-h-full aspect-video"
         onPointerDownCapture={(e) => e.stopPropagation()}
       >
         <MuxPlayer
@@ -69,8 +69,6 @@ export const VideoPlayer = memo(function VideoPlayer({
           src={getAbsoluteMediaUrl(media.path)}
           autoPlay
           streamType="on-demand"
-          style={{ objectFit: "contain", width: "100%", height: "100%" }}
-          className="max-w-full max-h-full"
           onLoadedData={() => setIsLoaded(true)}
         />
       </div>
