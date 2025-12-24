@@ -1,5 +1,10 @@
 import { existsDir } from "@/lib/fs";
-import { DbMedia, MediaFsListing, MediaFsNode } from "@/lib/media/types";
+import {
+  DbMedia,
+  MediaFsListing,
+  MediaFsNode,
+  MediaNode,
+} from "@/lib/media/types";
 import { getMediaPath } from "@/lib/path-helpers";
 import { prisma } from "@/lib/prisma";
 import fs from "fs/promises";
@@ -48,7 +53,10 @@ export async function getMediaFsListing(
   }
 }
 
-export async function getDbMedia(dirPath: string): Promise<DbMedia[]> {
+export async function getDbMedia(
+  dirPath: string,
+  userId: string
+): Promise<DbMedia[]> {
   try {
     const dbMedia = await prisma.media.findMany({
       where: { dirPath },
@@ -58,9 +66,8 @@ export async function getDbMedia(dirPath: string): Promise<DbMedia[]> {
         fileMtime: true,
         fileSize: true,
         favorites: {
-          select: {
-            mediaId: true,
-          },
+          where: { userId },
+          select: { mediaId: true },
         },
       },
     });
@@ -71,6 +78,40 @@ export async function getDbMedia(dirPath: string): Promise<DbMedia[]> {
       path: m.path,
       fileSize: Number(m.fileSize),
       title: m.title ?? undefined,
+    }));
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+}
+
+export async function getFavoriteMediaNodes(
+  userId: string
+): Promise<MediaNode[]> {
+  try {
+    const favorites = await prisma.favorite.findMany({
+      where: { userId },
+      select: {
+        media: {
+          select: {
+            path: true,
+            title: true,
+            fileMtime: true,
+            fileSize: true,
+          },
+        },
+      },
+    });
+
+    return favorites.map((f) => ({
+      name: path.basename(f.media.path),
+      path: f.media.path,
+      type: detectMediaType(f.media.path),
+      isDirectory: false,
+      size: Number(f.media.fileSize),
+      mtime: f.media.fileMtime,
+      title: f.media.title ?? undefined,
+      isFavorite: true,
     }));
   } catch (e) {
     console.error(e);

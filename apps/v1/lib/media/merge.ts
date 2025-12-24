@@ -1,28 +1,24 @@
-import { DbMedia, MediaFsListing, MediaListing } from "@/lib/media/types";
+import { DbMedia, MediaFsNode, MediaNode } from "@/lib/media/types";
 
 export function mergeFsWithDb(
-  listing: MediaFsListing,
+  fsMedia: MediaFsNode[],
   dbMedia: DbMedia[]
-): MediaListing {
+): MediaNode[] {
   const dbMap = new Map(dbMedia.map((m) => [m.path, m]));
 
-  const mediaNodes = listing.nodes.map((node) => {
-    if (node.isDirectory) {
-      return { ...node, isFavorite: false };
+  const result = fsMedia.map((fsNode) => {
+    if (fsNode.isDirectory) {
+      return { ...fsNode, isFavorite: false };
     }
 
-    const db = dbMap.get(node.path);
+    const dbNode = dbMap.get(fsNode.path);
 
     return {
-      ...node,
-      title: db?.title ?? node.name,
-      isFavorite: db?.isFavorite ?? false,
+      ...fsNode,
+      title: dbNode?.title ?? fsNode.name,
+      isFavorite: dbNode?.isFavorite ?? false,
     };
   });
 
-  return {
-    nodes: mediaNodes,
-    parent: listing.parent,
-    path: listing.path,
-  };
+  return result;
 }

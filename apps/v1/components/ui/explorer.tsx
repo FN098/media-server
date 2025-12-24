@@ -5,7 +5,7 @@ import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { useMediaViewer } from "@/hooks/use-media-viewer";
 import { isMedia } from "@/lib/media/detector";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
 import { FavoriteProvider } from "@/providers/favorite-provider";
 import { useSearch } from "@/providers/search-provider";
@@ -16,10 +16,10 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type ExplorerProps = {
-  listing: MediaListing;
+  nodes: MediaNode[];
 };
 
-export function Explorer({ listing }: ExplorerProps) {
+export function Explorer({ nodes }: ExplorerProps) {
   const { query } = useSearch();
   const { view } = useViewMode();
   const router = useRouter();
@@ -28,10 +28,10 @@ export function Explorer({ listing }: ExplorerProps) {
   // Media filter
   const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
   const filtered = useMemo(() => {
-    return listing.nodes
+    return nodes
       .filter((e) => e.isDirectory || isMedia(e.type))
       .filter((e) => e.name.toLowerCase().includes(lowerQuery));
-  }, [listing.nodes, lowerQuery]);
+  }, [nodes, lowerQuery]);
 
   // MediaViewer config
   const { viewerOpen, openViewer, closeViewer } = useMediaViewer();

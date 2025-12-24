@@ -46,12 +46,12 @@ const items = [
   },
   {
     title: "Favorites",
-    url: "#",
+    url: PATHS.client.favorites.root,
     icon: Star,
   },
   {
     title: "Settings",
-    url: "#",
+    url: PATHS.client.settings.root,
     icon: Settings,
   },
 ];

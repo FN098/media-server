@@ -1,7 +1,8 @@
+import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
 import { getDbMedia, getMediaFsListing } from "@/lib/media/listing";
 import { mergeFsWithDb } from "@/lib/media/merge";
-import { withSortedNodes } from "@/lib/media/sort";
+import { sortMediaFsNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { createThumbsIfNotExists } from "@/lib/media/thumb";
 import { notFound } from "next/navigation";
@@ -15,7 +16,8 @@ export default async function Page(props: {
   const listing = await getMediaFsListing(dirPath);
   if (!listing) notFound();
 
-  const dbMedia = await getDbMedia(dirPath);
+  // TODO: ユーザー認証機能実装後に差し替える
+  const dbMedia = await getDbMedia(dirPath, USER);
 
   // 並列で副作用系を実行
   Promise.all([
@@ -26,8 +28,8 @@ export default async function Page(props: {
   });
 
   // ソート + マージ
-  const sortedListing = withSortedNodes(listing);
-  const mediaListing = mergeFsWithDb(sortedListing, dbMedia);
+  const sorted = sortMediaFsNodes(listing.nodes);
+  const merged = mergeFsWithDb(sorted, dbMedia);
 
-  return <Explorer listing={mediaListing} />;
+  return <Explorer nodes={merged} />;
 }

@@ -1,6 +1,11 @@
-import { MediaFsListing, MediaFsNode } from "@/lib/media/types";
+import { MediaFsNode, MediaNode } from "@/lib/media/types";
 
-export function sortMediaFsNodes(nodes: MediaFsNode[]): MediaFsNode[] {
+type SortableNode = {
+  isDirectory: boolean;
+  name: string;
+};
+
+function sorted<T extends SortableNode>(nodes: T[]): T[] {
   const collator = new Intl.Collator("ja-JP", {
     numeric: true, // 10 を 2 の後ろにする
     sensitivity: "base", // 大文字小文字・記号差を無視（Explorer寄り）
@@ -18,9 +23,10 @@ export function sortMediaFsNodes(nodes: MediaFsNode[]): MediaFsNode[] {
   });
 }
 
-export function withSortedNodes(listing: MediaFsListing): MediaFsListing {
-  return {
-    ...listing,
-    nodes: sortMediaFsNodes(listing.nodes),
-  };
+export function sortMediaFsNodes(nodes: MediaFsNode[]): MediaFsNode[] {
+  return sorted(nodes);
+}
+
+export function sortMediaNodes(nodes: MediaNode[]): MediaNode[] {
+  return sorted(nodes);
 }

@@ -1,12 +1,10 @@
+import { USER } from "@/basic-auth";
 import { createFavorite, deleteFavorite } from "@/lib/favorite/repository";
 import { findMediaByPath } from "@/lib/media/repository";
 import { safeParseRequestJson } from "@/lib/request";
 import { findUserById } from "@/lib/user/repository";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-
-// TODO: ユーザー認証機能実装後に差し替える
-const USER_ID = "dev_user";
 
 const BodySchema = z.object({
   path: z.string(),
@@ -18,7 +16,7 @@ const BodySchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // TODO: ユーザー認証機能実装後に差し替える
-    const user = await findUserById(USER_ID);
+    const user = await findUserById(USER);
     if (!user) return new NextResponse("Unauthorized", { status: 401 });
 
     const json = await safeParseRequestJson(req);
@@ -45,7 +43,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     // TODO: ユーザー認証機能実装後に差し替える
-    const user = await findUserById(USER_ID);
+    const user = await findUserById(USER);
     if (!user) return new NextResponse("Unauthorized", { status: 401 });
 
     const json = await safeParseRequestJson(req);

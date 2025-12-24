@@ -19,6 +19,12 @@ export const PATHS = {
     experimental: {
       root: "/experimental",
     },
+    favorites: {
+      root: "/favorites",
+    },
+    settings: {
+      root: "/settings",
+    },
   },
   api: {
     root: "/api",
