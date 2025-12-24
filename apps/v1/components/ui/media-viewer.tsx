@@ -10,10 +10,19 @@ import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
+import { getClientExplorerPath } from "@/lib/path-helpers";
 import { useFavorite } from "@/providers/favorite-provider";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shadcn/components/ui/dropdown-menu";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
+import { ArrowLeft, Folder, MoreVertical } from "lucide-react";
+import Link from "next/link";
+import path from "path";
 import { memo, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
@@ -55,8 +64,17 @@ export function MediaViewer({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: -10 }}
             exit={{ opacity: 0, y: -20 }}
-            className="absolute top-0 left-0 right-0 z-60 px-2 py-4 md:p-6 flex items-start justify-between bg-linear-to-b from-black/60 to-transparent"
+            className="absolute top-0 left-0 right-0 z-60 px-2 py-4 md:p-6 flex items-center justify-between bg-linear-to-b from-black/60 to-transparent"
           >
+            {/* 閉じるボタン */}
+            <button
+              onClick={onClose}
+              className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full mr-4"
+              aria-label="Close viewer"
+            >
+              <ArrowLeft size={28} />
+            </button>
+
             {/* ファイル情報 */}
             <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0">
               <span className="text-white md:text-lg font-medium drop-shadow-md">
@@ -87,14 +105,30 @@ export function MediaViewer({
                 />
               )}
 
-              {/* 閉じるボタン */}
-              <button
-                onClick={onClose}
-                className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full mr-4"
-                aria-label="Close viewer"
-              >
-                <X size={28} />
-              </button>
+              {/* メニューボタン */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
+                    aria-label="Open menu"
+                  >
+                    <MoreVertical size={28} />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={getClientExplorerPath(
+                        path.dirname(items[index].path)
+                      )}
+                    >
+                      <Folder />
+                      <span>フォルダを開く</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </motion.div>
         )}
