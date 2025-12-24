@@ -3,6 +3,7 @@ import { createFavorite, deleteFavorite } from "@/lib/favorite/repository";
 import { findMediaByPath } from "@/lib/media/repository";
 import { safeParseRequestJson } from "@/lib/request";
 import { findUserById } from "@/lib/user/repository";
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -33,6 +34,9 @@ export async function POST(req: NextRequest) {
 
     await createFavorite(user.id, media.id);
 
+    // お気に入りページのキャッシュ削除
+    revalidatePath("/favorites");
+
     return new NextResponse(null, { status: 204 });
   } catch (e) {
     console.error(e);
@@ -59,6 +63,9 @@ export async function DELETE(req: NextRequest) {
     if (!media) return new NextResponse("Media not found", { status: 404 });
 
     await deleteFavorite(user.id, media.id);
+
+    // お気に入りページのキャッシュ削除
+    revalidatePath("/favorites");
 
     return new NextResponse(null, { status: 204 });
   } catch (e) {
