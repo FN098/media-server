@@ -101,6 +101,9 @@ export async function getFavoriteMediaNodes(
           },
         },
       },
+      orderBy: {
+        media: { path: "asc" },
+      },
     });
 
     return favorites.map((f) => ({
