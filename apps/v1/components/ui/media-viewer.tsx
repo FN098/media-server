@@ -34,12 +34,18 @@ interface MediaViewerProps {
   items: MediaNode[];
   initialIndex: number;
   onClose: () => void;
+  options?: {
+    openFolder: boolean;
+  };
 }
 
 export function MediaViewer({
   items,
   initialIndex,
   onClose,
+  options = {
+    openFolder: true,
+  },
 }: MediaViewerProps) {
   const favoriteCtx = useFavorite();
   const { showUI: showHeader, handleInteraction } = useShowUI({ delay: 2000 });
@@ -123,16 +129,18 @@ export function MediaViewer({
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={getClientExplorerPath(
-                        path.dirname(items[index].path)
-                      )}
-                    >
-                      <Folder />
-                      <span>フォルダを開く</span>
-                    </Link>
-                  </DropdownMenuItem>
+                  {options.openFolder && (
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={getClientExplorerPath(
+                          path.dirname(items[index].path)
+                        )}
+                      >
+                        <Folder />
+                        <span>フォルダを開く</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

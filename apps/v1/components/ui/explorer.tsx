@@ -83,6 +83,7 @@ export function Explorer({ nodes }: ExplorerProps) {
             items={filtered}
             initialIndex={initialIndex}
             onClose={closeViewer}
+            options={{ openFolder: false }}
           />
         )}
       </FavoriteProvider>
