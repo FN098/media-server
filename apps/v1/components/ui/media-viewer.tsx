@@ -23,7 +23,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Folder, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import path from "path";
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -46,8 +46,19 @@ export function MediaViewer({
   const [index, setIndex] = useState(initialIndex);
   const isMobile = useIsMobile();
 
+  const handleFavorite = useCallback(() => {
+    favoriteCtx.toggleFavorite(items[index].path).catch((e) => {
+      console.error(e);
+      toast.error("お気に入りの更新に失敗しました");
+    });
+    handleInteraction();
+  }, [favoriteCtx, handleInteraction, index, items]);
+
   // 左右キーは Swiper の keyboard オプションで有効化
-  useShortcutKeys([{ key: "Escape", callback: onClose }]);
+  useShortcutKeys([
+    { key: "Escape", callback: onClose },
+    { key: "f", callback: handleFavorite },
+  ]);
 
   useBackHandler(onClose);
 
@@ -96,12 +107,7 @@ export function MediaViewer({
               {isMedia(items[index].type) && (
                 <MediaViewerFavoriteButton
                   active={favoriteCtx.isFavorite(items[index].path)}
-                  onToggle={() => {
-                    favoriteCtx.toggleFavorite(items[index].path).catch((e) => {
-                      console.error(e);
-                      toast.error("お気に入りの更新に失敗しました");
-                    });
-                  }}
+                  onToggle={handleFavorite}
                 />
               )}
 
