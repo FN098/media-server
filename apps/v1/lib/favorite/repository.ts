@@ -32,3 +32,16 @@ export async function deleteFavorite(
     },
   });
 }
+
+export async function isFavorite(
+  userId: string,
+  mediaId: string
+): Promise<boolean> {
+  const count = await prisma.favorite.count({
+    where: {
+      userId,
+      mediaId,
+    },
+  });
+  return count > 0;
+}

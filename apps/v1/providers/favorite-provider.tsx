@@ -1,5 +1,6 @@
 "use client";
 
+import { revalidateFavorite, updateFavorite } from "@/lib/favorite/actions";
 import {
   createContext,
   useCallback,
@@ -86,26 +87,6 @@ function useInFlight() {
   return { startFlight, finishFlight, isInFlight };
 }
 
-// API
-function useFavoriteApi() {
-  const revalidate = async (path: string): Promise<boolean> => {
-    const res = await fetch(`/api/favorite?path=${encodeURIComponent(path)}`);
-    const data = (await res.json()) as { isFavorite: boolean };
-    return data.isFavorite;
-  };
-
-  const update = async (path: string, value: boolean): Promise<boolean> => {
-    const res = await fetch("/api/favorite", {
-      method: value ? "POST" : "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path }),
-    });
-    return res.ok;
-  };
-
-  return { revalidate, update };
-}
-
 type FavoriteContextValue = {
   isFavorite(path: string): boolean;
   toggleFavorite(path: string): Promise<void>;
@@ -125,7 +106,6 @@ export function FavoriteProvider({
   const { setFavorite, isFavorite } = useFavorites(initialFavorites);
   const { startFlight, finishFlight, isInFlight } = useInFlight();
   const { broadcast } = useFavoriteChannel(setFavorite);
-  const { revalidate, update } = useFavoriteApi();
 
   const toggleFavorite = useCallback(
     async (path: string) => {
@@ -141,28 +121,22 @@ export function FavoriteProvider({
 
       try {
         // 2. サーバー更新
-        const ok = await update(path, current);
+        const { ok } = await updateFavorite(path);
         if (!ok) throw new Error("Failed to update");
       } catch (e) {
         // 3. 失敗時のロールバック（再同期）
         console.error("Favorite sync failed, revalidating...", e);
-        const actual = await revalidate(path);
-        setFavorite(path, actual);
-        broadcast(path, actual); // 他のタブも正しい状態に戻す
+        const revalidated = await revalidateFavorite(path);
+        if (revalidated.ok) {
+          const { value: actual } = revalidated;
+          setFavorite(path, actual);
+          broadcast(path, actual); // 他のタブも正しい状態に戻す
+        }
       } finally {
         finishFlight(path);
       }
     },
-    [
-      broadcast,
-      finishFlight,
-      isFavorite,
-      isInFlight,
-      revalidate,
-      setFavorite,
-      startFlight,
-      update,
-    ]
+    [broadcast, finishFlight, isFavorite, isInFlight, setFavorite, startFlight]
   );
 
   const value = useMemo(
