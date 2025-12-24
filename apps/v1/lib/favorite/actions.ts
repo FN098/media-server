@@ -8,7 +8,6 @@ import {
 } from "@/lib/favorite/repository";
 import { findMediaByPath } from "@/lib/media/repository";
 import { findUserById } from "@/lib/user/repository";
-import { revalidatePath } from "next/cache";
 
 type UpdateFavoriteResult = {
   message: string;
@@ -32,9 +31,6 @@ export async function updateFavorite(
     } else {
       await createFavorite(user.id, media.id);
     }
-
-    // お気に入りページのキャッシュ削除
-    revalidatePath("/favorites");
 
     return { message: "success", ok: true };
   } catch (e) {
