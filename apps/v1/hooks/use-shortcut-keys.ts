@@ -1,5 +1,3 @@
-"use client";
-
 import { castArray } from "@/lib/utils/cast-array";
 import { useEffect, useMemo } from "react";
 
