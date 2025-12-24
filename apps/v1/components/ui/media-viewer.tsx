@@ -5,6 +5,7 @@ import { MediaViewerFavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { VideoPlayer } from "@/components/ui/video-player";
+import { useBackHandler } from "@/hooks/use-back-handler";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
 import { isMedia } from "@/lib/media/detector";
@@ -39,6 +40,8 @@ export function MediaViewer({
   // 左右キーは Swiper の keyboard オプションで有効化
   useShortcutKeys([{ key: "Escape", callback: onClose }]);
 
+  useBackHandler(onClose);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden touch-none bg-black"
@@ -61,7 +64,8 @@ export function MediaViewer({
                   key={index}
                   text={items[index].name}
                   autoplay={isMobile}
-                  speed={120}
+                  speed={40}
+                  delay={1}
                 />
               </span>
               <span className="text-white/60 text-sm">
