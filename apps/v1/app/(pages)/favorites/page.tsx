@@ -7,7 +7,7 @@ export default async function Page() {
   // TODO: ユーザー認証機能実装後に差し替える
   const nodes = await getFavoriteMediaNodes(USER);
 
-  const sorted = sortMediaNodes(nodes);
+  const sorted = sortMediaNodes(nodes, { key: "path" });
 
   return <Explorer nodes={sorted} />;
 }
