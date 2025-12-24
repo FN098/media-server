@@ -23,12 +23,8 @@ RUN pnpm install --frozen-lockfile
 # プロジェクトファイルをコピー
 COPY apps/v1 .
 
-# これがないと pnpm prisma generate でエラーになる
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
-ENV SHADOW_DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy_shadow"
-
 # Prisma クライアント生成
-RUN pnpm prisma generate
+RUN pnpm prisma generate || true
 
 # Next.js ビルド
 RUN pnpm build

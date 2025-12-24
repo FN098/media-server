@@ -29,6 +29,24 @@ services:
     profiles:
       - dev
 
+  app-dev-runner:
+    build:
+      context: .
+      dockerfile: ./docker/app-dev/Dockerfile
+    container_name: media-server-app-dev-runner
+    restart: unless-stopped
+    command: sh -c "pnpm build && pnpm start"
+    env_file:
+      - .env
+    volumes:
+      - D:\media:/media:rw
+    ports:
+      - "13002:3000"
+    depends_on:
+      - db
+    profiles:
+      - dev-runner
+
   app-prod:
     build:
       context: .

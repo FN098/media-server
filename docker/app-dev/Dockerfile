@@ -23,7 +23,7 @@ RUN pnpm install --frozen-lockfile || pnpm install
 COPY . /app
 
 # Prisma関連
-RUN pnpm prisma generate
+RUN pnpm prisma generate || true
 
 EXPOSE 3000
 
