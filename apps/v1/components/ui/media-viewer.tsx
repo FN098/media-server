@@ -5,7 +5,6 @@ import { MediaViewerFavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { VideoPlayer } from "@/components/ui/video-player";
-import { useBackHandler } from "@/hooks/use-back-handler";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
 import { isMedia } from "@/lib/media/detector";
@@ -65,8 +64,6 @@ export function MediaViewer({
     { key: "Escape", callback: onClose },
     { key: "f", callback: handleFavorite },
   ]);
-
-  useBackHandler(onClose);
 
   return (
     <div

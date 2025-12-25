@@ -3,7 +3,7 @@
 import { GridView } from "@/components/ui/grid-view-v2";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { useMediaViewer } from "@/hooks/use-media-viewer";
+import { useModalNavigation } from "@/hooks/use-modal-navigation";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -33,8 +33,8 @@ export function Explorer({ nodes }: ExplorerProps) {
       .filter((e) => e.name.toLowerCase().includes(lowerQuery));
   }, [nodes, lowerQuery]);
 
-  // MediaViewer config
-  const { viewerOpen, openViewer, closeViewer } = useMediaViewer();
+  // Modal config
+  const { isOpen, openModal, closeModal } = useModalNavigation();
 
   // Open file/folder
   const handleOpen = (node: MediaNode, index: number) => {
@@ -45,7 +45,7 @@ export function Explorer({ nodes }: ExplorerProps) {
     }
 
     if (isMedia(node.type)) {
-      openViewer();
+      openModal();
       setInitialIndex(index);
       return;
     }
@@ -78,11 +78,11 @@ export function Explorer({ nodes }: ExplorerProps) {
           <ListView nodes={filtered} onOpen={handleOpen} />
         </div>
 
-        {viewerOpen && (
+        {isOpen && (
           <MediaViewer
             items={filtered}
             initialIndex={initialIndex}
-            onClose={closeViewer}
+            onClose={closeModal}
             options={{ openFolder: false }}
           />
         )}
