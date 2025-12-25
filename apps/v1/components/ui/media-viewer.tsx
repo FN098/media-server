@@ -49,7 +49,9 @@ export function MediaViewer({
   },
 }: MediaViewerProps) {
   const favoriteCtx = useFavorite();
-  const { showUI: showHeader, handleInteraction } = useShowUI({ delay: 2000 });
+  const { showUI, onMouseEnter, onMouseLeave, handleInteraction } = useShowUI({
+    delay: 2000,
+  });
   const [index, setIndex] = useState(initialIndex);
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
@@ -77,11 +79,13 @@ export function MediaViewer({
     >
       {/* ヘッダー */}
       <AnimatePresence>
-        {showHeader && (
+        {showUI && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: -10 }}
             exit={{ opacity: 0, y: -20 }}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
             className="absolute top-0 left-0 right-0 z-60 px-2 py-4 md:p-6 flex items-center justify-between bg-linear-to-b from-black/60 to-transparent"
           >
             {/* 閉じるボタン */}

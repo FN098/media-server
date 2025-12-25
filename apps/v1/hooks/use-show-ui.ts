@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 type Option = {
@@ -7,9 +7,13 @@ type Option = {
 
 export function useShowUI({ delay = 3000 }: Option) {
   const [showUI, setShowUI] = useState(true);
+  const isHoveringRef = useRef(false); // ホバー状態を保持（レンダリングをトリガーしない）
 
   const debouncedHideUI = useDebouncedCallback(() => {
-    setShowUI(false);
+    // ホバー中でなければ非表示にする
+    if (!isHoveringRef.current) {
+      setShowUI(false);
+    }
   }, delay);
 
   const handleInteraction = useCallback(() => {
@@ -17,11 +21,29 @@ export function useShowUI({ delay = 3000 }: Option) {
     debouncedHideUI();
   }, [debouncedHideUI]);
 
-  // 初回レンダリング時
+  // マウスが入った時：表示を維持し、タイマーをキャンセル
+  const onMouseEnter = useCallback(() => {
+    isHoveringRef.current = true;
+    setShowUI(true);
+    debouncedHideUI.cancel();
+  }, [debouncedHideUI]);
+
+  // マウスが離れた時：タイマーを再開
+  const onMouseLeave = useCallback(() => {
+    isHoveringRef.current = false;
+    debouncedHideUI();
+  }, [debouncedHideUI]);
+
   useEffect(() => {
     debouncedHideUI();
-    return () => debouncedHideUI.cancel(); // アンマウント時の掃除
-  }, [debouncedHideUI, showUI]);
+    return () => debouncedHideUI.cancel();
+  }, [debouncedHideUI]);
 
-  return { showUI, setShowUI, handleInteraction };
+  return {
+    showUI,
+    setShowUI,
+    handleInteraction,
+    onMouseEnter,
+    onMouseLeave,
+  };
 }
