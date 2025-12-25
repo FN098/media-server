@@ -5,6 +5,7 @@ import { MediaViewerFavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { VideoPlayer } from "@/components/ui/video-player";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
 import { isMedia } from "@/lib/media/detector";
@@ -50,6 +51,7 @@ export function MediaViewer({
   const { showUI: showHeader, handleInteraction } = useShowUI({ delay: 2000 });
   const [index, setIndex] = useState(initialIndex);
   const isMobile = useIsMobile();
+  useScrollLock();
 
   const handleFavorite = useCallback(() => {
     favoriteCtx.toggleFavorite(items[index].path).catch((e) => {
