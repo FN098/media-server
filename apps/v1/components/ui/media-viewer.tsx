@@ -58,13 +58,24 @@ export function MediaViewer({
   const [index, setIndex] = useState(initialIndex);
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
+
   useScrollLock();
 
   const handleFavorite = useCallback(() => {
-    favoriteCtx.toggleFavorite(items[index].path).catch((e) => {
-      console.error(e);
-      toast.error("お気に入りの更新に失敗しました");
-    });
+    favoriteCtx
+      .toggleFavorite(items[index].path)
+      .then((nextIsFavorite) => {
+        if (nextIsFavorite === undefined) return;
+
+        const message = nextIsFavorite
+          ? "お気に入りに登録しました"
+          : "お気に入りを解除しました";
+        toast.info(message);
+      })
+      .catch((e) => {
+        console.error(e);
+        toast.error("お気に入りの更新に失敗しました");
+      });
     handleInteraction();
   }, [favoriteCtx, handleInteraction, index, items]);
 

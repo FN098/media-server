@@ -89,7 +89,7 @@ function useInFlight() {
 
 type FavoriteContextValue = {
   isFavorite(path: string): boolean;
-  toggleFavorite(path: string): Promise<void>;
+  toggleFavorite(path: string): Promise<boolean | undefined>;
 };
 
 const FavoriteContext = createContext<FavoriteContextValue | null>(null);
@@ -108,7 +108,7 @@ export function FavoriteProvider({
   const { broadcast } = useFavoriteChannel(setFavorite);
 
   const toggleFavorite = useCallback(
-    async (path: string) => {
+    async (path: string): Promise<boolean | undefined> => {
       if (isInFlight(path)) return;
 
       const prev = isFavorite(path);
@@ -123,15 +123,15 @@ export function FavoriteProvider({
         // 2. サーバー更新
         const { ok } = await updateFavorite(path);
         if (!ok) throw new Error("Failed to update");
+        return current; // 成功時の状態を返す
       } catch (e) {
         // 3. 失敗時のロールバック（再同期）
         console.error("Favorite sync failed, revalidating...", e);
         const revalidated = await revalidateFavorite(path);
-        if (revalidated.ok) {
-          const { value: actual } = revalidated;
-          setFavorite(path, actual);
-          broadcast(path, actual); // 他のタブも正しい状態に戻す
-        }
+        const actual = revalidated.ok ? revalidated.value : prev;
+        setFavorite(path, actual);
+        broadcast(path, actual);
+        return actual; // 最終的な状態を返す
       } finally {
         finishFlight(path);
       }
