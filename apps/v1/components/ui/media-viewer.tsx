@@ -5,6 +5,7 @@ import { MediaViewerFavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { VideoPlayer } from "@/components/ui/video-player";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
@@ -20,7 +21,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Folder, MoreVertical } from "lucide-react";
+import { ArrowLeft, Folder, Maximize, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import path from "path";
 import { memo, useCallback, useState } from "react";
@@ -51,6 +52,7 @@ export function MediaViewer({
   const { showUI: showHeader, handleInteraction } = useShowUI({ delay: 2000 });
   const [index, setIndex] = useState(initialIndex);
   const isMobile = useIsMobile();
+  const { toggleFullscreen } = useFullscreen();
   useScrollLock();
 
   const handleFavorite = useCallback(() => {
@@ -135,11 +137,16 @@ export function MediaViewer({
                           path.dirname(items[index].path)
                         )}
                       >
-                        <Folder />
+                        <Folder className="mr-2 h-4 w-4" />
                         <span>フォルダを開く</span>
                       </Link>
                     </DropdownMenuItem>
                   )}
+
+                  <DropdownMenuItem onClick={toggleFullscreen}>
+                    <Maximize className="mr-2 h-4 w-4" />
+                    <span>全画面表示</span>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
