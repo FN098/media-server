@@ -49,8 +49,11 @@ export function MediaViewer({
   },
 }: MediaViewerProps) {
   const favoriteCtx = useFavorite();
-  const { showUI, onMouseEnter, onMouseLeave, handleInteraction } = useShowUI({
+  const [isHovered, setIsHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { showUI, handleInteraction } = useShowUI({
     delay: 2000,
+    disabled: isHovered || isMenuOpen,
   });
   const [index, setIndex] = useState(initialIndex);
   const isMobile = useIsMobile();
@@ -84,8 +87,8 @@ export function MediaViewer({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: -10 }}
             exit={{ opacity: 0, y: -20 }}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             className="absolute top-0 left-0 right-0 z-60 px-2 py-4 md:p-6 flex items-center justify-between bg-linear-to-b from-black/60 to-transparent"
           >
             {/* 閉じるボタン */}
@@ -123,7 +126,7 @@ export function MediaViewer({
               )}
 
               {/* メニューボタン */}
-              <DropdownMenu>
+              <DropdownMenu onOpenChange={setIsMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <button
                     className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
