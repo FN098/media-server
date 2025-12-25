@@ -35,7 +35,7 @@ services:
       dockerfile: ./docker/app-dev/Dockerfile
     container_name: media-server-app-dev-runner
     restart: unless-stopped
-    command: sh -c "pnpm build && pnpm start"
+    command: sh -c "pnpm prisma generate && pnpm build && pnpm start"
     env_file:
       - .env
     volumes:
