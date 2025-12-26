@@ -9,8 +9,8 @@ export default async function Page() {
   const folders = await getRecentFolders(USER);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <Button asChild>
+    <div className="flex flex-col items-center">
+      <Button asChild className="mb-10">
         <Link href="/explorer">Start Exploring</Link>
       </Button>
 
