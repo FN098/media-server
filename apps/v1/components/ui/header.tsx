@@ -1,7 +1,7 @@
 "use client";
 
 import { AppSidebarOpenButton } from "@/components/ui/app-sidebar";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs";
 import { Search } from "@/components/ui/search";
 import { ViewModeSwitch } from "@/components/ui/view-mode-switch";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
@@ -102,9 +102,9 @@ export function Header({ title, basePath }: HeaderProps) {
             </div>
           )}
 
-          <Breadcrumbs
+          <DynamicBreadcrumbs
             items={breadcrumbs}
-            className="min-w-0 overflow-hidden"
+            // className="min-w-0 overflow-hidden"
           />
 
           <div className="ml-auto flex items-center gap-2">
