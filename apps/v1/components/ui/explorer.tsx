@@ -11,7 +11,9 @@ import { getClientExplorerPath } from "@/lib/path-helpers";
 import { FavoriteProvider } from "@/providers/favorite-provider";
 import { useSearch } from "@/providers/search-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
+import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -66,10 +68,18 @@ export function Explorer({ listing }: ExplorerProps) {
 
   // Open next/prev folder
   const handleFolderNavigation = useCallback(
-    (targetPath: string, mode: "first" | "last") => {
-      console.log(targetPath);
+    (targetPath: string, mode?: "first" | "last") => {
       void visitFolder(targetPath);
-      const href = `${getClientExplorerPath(targetPath)}?auto=${mode}`;
+
+      const baseUrl = getClientExplorerPath(targetPath);
+      const params = new URLSearchParams();
+
+      if (mode) {
+        params.append("auto", mode);
+      }
+
+      const queryString = params.toString();
+      const href = queryString ? `${baseUrl}?${queryString}` : baseUrl;
       router.push(href);
     },
     [router]
@@ -143,6 +153,46 @@ export function Explorer({ listing }: ExplorerProps) {
             }
           />
         )}
+
+        {/* フォルダナビゲーション */}
+        <div className="flex items-center justify-between gap-6 py-12 mt-10 border-t border-border/30">
+          <div className="flex-1">
+            {listing.prev && (
+              <Button
+                variant="outline"
+                // h-auto と py-4 でボタンの縦幅を広げ、押しやすくしています
+                className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full max-w-[280px] hover:bg-accent transition-all"
+                onClick={() => handleFolderNavigation(listing.prev!)}
+              >
+                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                  <ArrowLeft className="mr-1 h-3 w-3" />
+                  Previous
+                </div>
+                <span className="text-base font-medium truncate w-full text-left">
+                  {listing.prev.split("/").filter(Boolean).pop()}
+                </span>
+              </Button>
+            )}
+          </div>
+
+          <div className="flex-1 flex justify-end">
+            {listing.next && (
+              <Button
+                variant="outline"
+                className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full max-w-[280px] hover:bg-accent transition-all"
+                onClick={() => handleFolderNavigation(listing.next!)}
+              >
+                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                  Next
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </div>
+                <span className="text-base font-medium truncate w-full text-right">
+                  {listing.next.split("/").filter(Boolean).pop()}
+                </span>
+              </Button>
+            )}
+          </div>
+        </div>
       </FavoriteProvider>
     </div>
   );
