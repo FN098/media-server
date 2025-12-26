@@ -1,5 +1,6 @@
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
+import { visitFolder } from "@/lib/folder/visit";
 import { getMediaFsListing } from "@/lib/media/listing";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getDbMedia } from "@/lib/media/repository";
@@ -31,6 +32,8 @@ export default async function Page(props: {
   // ソート + マージ
   const sorted = sortMediaFsNodes(listing.nodes);
   const merged = mergeFsWithDb(sorted, dbMedia);
+
+  await visitFolder(dirPath, USER);
 
   return (
     <Explorer

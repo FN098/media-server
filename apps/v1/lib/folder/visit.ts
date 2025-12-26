@@ -1,21 +1,11 @@
-"use server";
-
-import { USER } from "@/basic-auth";
 import { prisma } from "@/lib/prisma";
-import { findUserById } from "@/lib/user/repository";
 
 const MAX_RECENTS = 20;
 
-type VisitFolderResult = {
-  message: string;
-  ok: boolean;
-};
-
-export async function visitFolder(dirPath: string): Promise<VisitFolderResult> {
-  // TODO: ユーザー認証機能実装後に差し替える
-  const user = await findUserById(USER);
-  if (!user) return { message: "unauthorized", ok: false };
-
+export async function visitFolder(
+  dirPath: string,
+  userId: string
+): Promise<void> {
   const normalizedDirPath = dirPath.replace(/\/+$/, "");
 
   // 最近訪れたフォルダを更新
@@ -23,7 +13,7 @@ export async function visitFolder(dirPath: string): Promise<VisitFolderResult> {
     await tx.recentFolder.upsert({
       where: {
         userId_dirPath: {
-          userId: user.id,
+          userId,
           dirPath: normalizedDirPath,
         },
       },
@@ -31,13 +21,13 @@ export async function visitFolder(dirPath: string): Promise<VisitFolderResult> {
         lastViewedAt: new Date(),
       },
       create: {
-        userId: user.id,
+        userId,
         dirPath: normalizedDirPath,
       },
     });
 
     const recents = await tx.recentFolder.findMany({
-      where: { userId: user.id },
+      where: { userId },
       orderBy: { lastViewedAt: "desc" },
       skip: MAX_RECENTS,
       select: {
@@ -57,9 +47,4 @@ export async function visitFolder(dirPath: string): Promise<VisitFolderResult> {
       });
     }
   });
-
-  return {
-    message: "success",
-    ok: true,
-  };
 }

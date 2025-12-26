@@ -4,7 +4,6 @@ import { GridView } from "@/components/ui/grid-view-v2";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
-import { visitFolder } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -14,6 +13,7 @@ import { useViewMode } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -43,7 +43,6 @@ export function Explorer({ listing }: ExplorerProps) {
   const handleOpen = useCallback(
     (node: MediaNode, index: number) => {
       if (node.isDirectory) {
-        void visitFolder(node.path);
         const href = getClientExplorerPath(node.path);
         router.push(href);
         return;
@@ -69,8 +68,6 @@ export function Explorer({ listing }: ExplorerProps) {
   // Open next/prev folder
   const handleFolderNavigation = useCallback(
     (targetPath: string, mode?: "first" | "last") => {
-      void visitFolder(targetPath);
-
       const baseUrl = getClientExplorerPath(targetPath);
       const params = new URLSearchParams();
 
@@ -164,13 +161,15 @@ export function Explorer({ listing }: ExplorerProps) {
                 className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full max-w-[280px] hover:bg-accent transition-all"
                 onClick={() => handleFolderNavigation(listing.prev!)}
               >
-                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
-                  <ArrowLeft className="mr-1 h-3 w-3" />
-                  Previous
-                </div>
-                <span className="text-base font-medium truncate w-full text-left">
-                  {listing.prev.split("/").filter(Boolean).pop()}
-                </span>
+                <Link href={getClientExplorerPath(listing.prev)}>
+                  <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                    <ArrowLeft className="mr-1 h-3 w-3" />
+                    Previous
+                  </div>
+                  <span className="text-base font-medium truncate w-full text-left">
+                    {listing.prev.split("/").filter(Boolean).pop()}
+                  </span>
+                </Link>
               </Button>
             )}
           </div>
@@ -180,15 +179,17 @@ export function Explorer({ listing }: ExplorerProps) {
               <Button
                 variant="outline"
                 className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full max-w-[280px] hover:bg-accent transition-all"
-                onClick={() => handleFolderNavigation(listing.next!)}
+                asChild
               >
-                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
-                  Next
-                  <ArrowRight className="ml-1 h-3 w-3" />
-                </div>
-                <span className="text-base font-medium truncate w-full text-right">
-                  {listing.next.split("/").filter(Boolean).pop()}
-                </span>
+                <Link href={getClientExplorerPath(listing.next)}>
+                  <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                    Next
+                    <ArrowRight className="ml-1 h-3 w-3" />
+                  </div>
+                  <span className="text-base font-medium truncate w-full text-right">
+                    {listing.next.split("/").filter(Boolean).pop()}
+                  </span>
+                </Link>
               </Button>
             )}
           </div>
