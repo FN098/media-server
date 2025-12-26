@@ -49,7 +49,7 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
               </div>
 
               {/* テキスト部分 */}
-              <div className="flex flex-col items-start overflow-hidden text-left mr-5">
+              <div className="flex flex-col items-start overflow-hidden text-left">
                 <span className="font-medium text-sm truncate w-full">
                   {folderName}
                 </span>
