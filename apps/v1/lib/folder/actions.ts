@@ -27,7 +27,9 @@ export async function visitFolder(dirPath: string): Promise<VisitFolderResult> {
           dirPath: normalizedDirPath,
         },
       },
-      update: {},
+      update: {
+        lastViewedAt: new Date(),
+      },
       create: {
         userId: user.id,
         dirPath: normalizedDirPath,
