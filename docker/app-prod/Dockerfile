@@ -23,8 +23,11 @@ RUN pnpm install --frozen-lockfile
 # プロジェクトファイルをコピー
 COPY apps/v1 .
 
+ENV DATABASE_URL dummy
+ENV SHADOW_DATABASE_URL dummy
+
 # Prisma クライアント生成
-RUN pnpm prisma generate || true
+RUN pnpm prisma generate
 
 # Next.js ビルド
 RUN pnpm build
