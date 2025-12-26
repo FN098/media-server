@@ -20,7 +20,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  favorites Favorite[]
+  favorites     Favorite[]
+  recentFolders RecentFolder[]
 }
 
 model Media {
@@ -68,4 +69,15 @@ model Favorite {
   @@id([userId, mediaId])
   @@index([userId])
   @@index([mediaId])
+}
+
+model RecentFolder {
+  userId       String
+  dirPath      String
+  lastViewedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId, dirPath])
+  @@index([userId, lastViewedAt])
 }

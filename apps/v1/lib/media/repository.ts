@@ -1,4 +1,4 @@
-import { Media } from "@/generated/prisma/client";
+import type { Media } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function findMediaByPath(path: string): Promise<Media | null> {

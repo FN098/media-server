@@ -4,6 +4,7 @@ import { GridView } from "@/components/ui/grid-view-v2";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
+import { visitFolder } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -37,8 +38,10 @@ export function Explorer({ nodes }: ExplorerProps) {
   const { isOpen, openModal, closeModal } = useModalNavigation();
 
   // Open file/folder
-  const handleOpen = (node: MediaNode, index: number) => {
+  const handleOpen = async (node: MediaNode, index: number) => {
     if (node.isDirectory) {
+      await visitFolder(node.path);
+
       const href = getClientExplorerPath(node.path);
       router.push(href);
       return;
@@ -69,13 +72,16 @@ export function Explorer({ nodes }: ExplorerProps) {
     >
       <FavoriteProvider initialFavorites={initialFavorites}>
         <div className={cn(view === "grid" ? "block" : "hidden")}>
-          <GridView nodes={filtered} onOpen={handleOpen} />
+          <GridView
+            nodes={filtered}
+            onOpen={(node, index) => void handleOpen(node, index)}
+          />
         </div>
 
         <div
           className={cn(view === "list" ? "block" : "hidden", "w-full h-full")}
         >
-          <ListView nodes={filtered} onOpen={handleOpen} />
+          <ListView nodes={filtered} onOpen={void handleOpen} />
         </div>
 
         {isOpen && (

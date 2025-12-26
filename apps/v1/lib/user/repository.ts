@@ -1,4 +1,4 @@
-import { User } from "@/generated/prisma/client";
+import type { User } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function findUserById(id: string): Promise<User | null> {
