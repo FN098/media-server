@@ -3,6 +3,7 @@
 import type { RecentFolder } from "@/generated/prisma/client";
 import { getClientExplorerPath } from "@/lib/path-helpers";
 import { formatRecentDate } from "@/lib/utils/formatter";
+import { splitDirPath } from "@/lib/utils/path";
 import { Button } from "@/shadcn/components/ui/button";
 import { Clock, Folder, History } from "lucide-react"; // アイコンを追加
 import Link from "next/link";
@@ -24,13 +25,9 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
   }
 
   return (
-    <div className="grid gap-2 w-full max-w-md">
+    <div className="w-full max-w-md h-80 overflow-y-auto">
       {folders.map((folder) => {
-        // パスからフォルダ名と親パスを分解（ユーティリティ関数に切り出すと◎）
-        const folderName =
-          folder.dirPath.split(/[/\\]/).pop() || folder.dirPath;
-        const parentPath =
-          folder.dirPath.split(/[/\\]/).slice(0, -1).join("/") || "/";
+        const { folderName, parentPath } = splitDirPath(folder.dirPath);
 
         return (
           <Button
