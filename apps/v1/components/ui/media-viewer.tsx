@@ -21,10 +21,16 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Folder, Maximize, MoreVertical } from "lucide-react";
+import {
+  ArrowLeft,
+  Folder,
+  Loader2,
+  Maximize,
+  MoreVertical,
+} from "lucide-react";
 import Link from "next/link";
 import path from "path";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -35,18 +41,18 @@ interface MediaViewerProps {
   items: MediaNode[];
   initialIndex: number;
   onClose: () => void;
-  options?: {
-    openFolder: boolean;
-  };
+  openFolderMenu?: boolean;
+  onNextFolder?: () => void;
+  onPrevFolder?: () => void;
 }
 
 export function MediaViewer({
   items,
   initialIndex,
   onClose,
-  options = {
-    openFolder: true,
-  },
+  openFolderMenu = true,
+  onNextFolder,
+  onPrevFolder,
 }: MediaViewerProps) {
   const favoriteCtx = useFavorite();
   const [isHovered, setIsHovered] = useState(false);
@@ -85,6 +91,21 @@ export function MediaViewer({
     { key: "f", callback: handleFavorite },
   ]);
 
+  // 仮想スライドを含めたリストを作成
+  const slides = useMemo(
+    () => [
+      { type: "nav_prev", id: "prev" },
+      ...items,
+      { type: "nav_next", id: "next" },
+    ],
+    [items]
+  );
+
+  const [vindex, setVIndex] = useState(initialIndex + 1);
+
+  const isPrev = slides[vindex].type === "nav_prev";
+  const isNext = slides[vindex].type === "nav_next";
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden touch-none bg-black"
@@ -93,7 +114,7 @@ export function MediaViewer({
     >
       {/* ヘッダー */}
       <AnimatePresence>
-        {showUI && (
+        {!isPrev && !isNext && showUI && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: -10 }}
@@ -148,7 +169,7 @@ export function MediaViewer({
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-48">
-                  {options.openFolder && (
+                  {openFolderMenu && (
                     <DropdownMenuItem asChild>
                       <Link
                         href={getClientExplorerPath(
@@ -175,8 +196,21 @@ export function MediaViewer({
       {/* メディアコンテンツ */}
       <Swiper
         modules={[Virtual, Navigation, Keyboard, Zoom]}
-        initialSlide={index}
-        onSlideChange={(swiper) => setIndex(swiper.activeIndex)}
+        initialSlide={vindex}
+        onSlideChange={(swiper) => {
+          const activeIdx = swiper.activeIndex;
+          setIndex(activeIdx - 1);
+          setVIndex(activeIdx);
+
+          // 最初のスライド（前へ移動）に到達した瞬間
+          if (activeIdx === 0 && onPrevFolder) {
+            onPrevFolder();
+          }
+          // 最後のスライド（次へ移動）に到達した瞬間
+          if (activeIdx === slides.length - 1 && onNextFolder) {
+            onNextFolder();
+          }
+        }}
         virtual={{
           enabled: true,
           slides: items,
@@ -187,17 +221,40 @@ export function MediaViewer({
         zoom={true}
         className="h-full w-full"
       >
-        {items.map((item, i) => (
-          <SwiperSlide
-            key={item.path}
-            virtualIndex={i}
-            className="flex items-center justify-center"
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              <Media media={item} isCurrent={index === i} />
-            </div>
-          </SwiperSlide>
-        ))}
+        {slides.map((item, i) => {
+          if (item.type === "nav_prev" || item.type === "nav_next") {
+            return (
+              <SwiperSlide
+                key={item.id}
+                virtualIndex={i}
+                className="flex items-center justify-center"
+              >
+                <div className="flex flex-col items-center justify-center text-white/50 w-full h-full">
+                  <Loader2 className="animate-spin mb-4" size={48} />
+                  <p>
+                    {item.type === "nav_prev"
+                      ? "前のフォルダへ移動中..."
+                      : "次のフォルダへ移動中..."}
+                  </p>
+                </div>
+              </SwiperSlide>
+            );
+          }
+
+          if ("path" in item) {
+            return (
+              <SwiperSlide
+                key={item.path}
+                virtualIndex={i}
+                className="flex items-center justify-center"
+              >
+                <div className="w-full h-full flex items-center justify-center">
+                  <Media media={item} isCurrent={index === i} />
+                </div>
+              </SwiperSlide>
+            );
+          }
+        })}
       </Swiper>
     </div>
   );

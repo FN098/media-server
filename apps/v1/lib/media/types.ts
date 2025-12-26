@@ -18,6 +18,8 @@ export type MediaFsListing = {
   path: string; // 今見ているディレクトリ
   nodes: MediaFsNode[];
   parent: string | null;
+  prev: string | null;
+  next: string | null;
 };
 
 export type MediaNode = MediaFsNode & {
@@ -29,6 +31,8 @@ export type MediaListing = {
   path: string; // 今見ているディレクトリ
   nodes: MediaNode[];
   parent: string | null;
+  prev: string | null;
+  next: string | null;
 };
 
 export type DbMedia = {

@@ -31,5 +31,12 @@ export default async function Page(props: {
   const sorted = sortMediaFsNodes(listing.nodes);
   const merged = mergeFsWithDb(sorted, dbMedia);
 
-  return <Explorer nodes={merged} />;
+  return (
+    <Explorer
+      listing={{
+        ...listing,
+        nodes: merged,
+      }}
+    />
+  );
 }
