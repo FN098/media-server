@@ -74,6 +74,44 @@ async function findAdjacentMediaFolder(
   return null;
 }
 
+// 指定されたフォルダの「次」または「前」にある、メディアを持つフォルダを
+// 階層を遡りながら（親の兄弟、そのまた親の兄弟...）再帰的に探す
+async function findGlobalAdjacentFolder(
+  currentPath: string,
+  direction: "prev" | "next"
+): Promise<string | null> {
+  if (currentPath === "") return null; // ルートまで到達したら終了
+
+  const parentPath = currentPath.split("/").slice(0, -1).join("/") || "";
+  const parentTargetDir = getMediaPath(parentPath);
+
+  if (!(await existsDir(parentTargetDir))) return null;
+
+  const parentDirents = await fs.readdir(parentTargetDir, {
+    withFileTypes: true,
+  });
+  const siblingDirs = parentDirents
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+    .sort();
+
+  const currentDirName = currentPath.split("/").pop();
+  const currentIndex = siblingDirs.indexOf(currentDirName!);
+
+  // 1. まず同じ階層の兄弟から探す
+  const foundInSiblings = await findAdjacentMediaFolder(
+    parentPath,
+    currentIndex,
+    siblingDirs,
+    direction
+  );
+
+  if (foundInSiblings) return foundInSiblings;
+
+  // 2. 兄弟に見つからなければ、さらに上の階層（親の隣）を探しに行く
+  return findGlobalAdjacentFolder(parentPath, direction);
+}
+
 export async function getMediaFsListing(
   dirPath: string
 ): Promise<MediaFsListing | null> {
@@ -105,35 +143,8 @@ export async function getMediaFsListing(
     let next: string | null = null;
 
     if (dirPath !== "") {
-      const parentPath = dirPath.split("/").slice(0, -1).join("/") || "";
-      const parentTargetDir = getMediaPath(parentPath);
-      const parentDirents = await fs.readdir(parentTargetDir, {
-        withFileTypes: true,
-      });
-
-      const siblingDirs = parentDirents
-        .filter((d) => d.isDirectory())
-        .map((d) => d.name)
-        .sort(); // ここはUIのソート順と一致させる
-
-      const currentDirName = dirPath.split("/").pop();
-      const currentIndex = siblingDirs.indexOf(currentDirName!);
-
-      if (currentIndex !== -1) {
-        // 再帰的にメディアがある隣接フォルダを探す
-        prev = await findAdjacentMediaFolder(
-          parentPath,
-          currentIndex,
-          siblingDirs,
-          "prev"
-        );
-        next = await findAdjacentMediaFolder(
-          parentPath,
-          currentIndex,
-          siblingDirs,
-          "next"
-        );
-      }
+      prev = await findGlobalAdjacentFolder(dirPath, "prev");
+      next = await findGlobalAdjacentFolder(dirPath, "next");
     }
 
     const parent =
