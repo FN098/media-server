@@ -1,7 +1,8 @@
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
-import { getDbMedia, getMediaFsListing } from "@/lib/media/listing";
+import { getMediaFsListing } from "@/lib/media/listing";
 import { mergeFsWithDb } from "@/lib/media/merge";
+import { getDbMedia } from "@/lib/media/repository";
 import { sortMediaFsNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { createThumbsIfNotExists } from "@/lib/media/thumb";

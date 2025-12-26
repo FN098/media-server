@@ -1,6 +1,6 @@
 import { USER } from "@/basic-auth";
 import { Favorites } from "@/components/ui/favorites";
-import { getFavoriteMediaNodes } from "@/lib/media/listing";
+import { getFavoriteMediaNodes } from "@/lib/media/repository";
 
 // お気に入りページは動的ページとしてレンダリングする
 export const dynamic = "force-dynamic";
