@@ -68,7 +68,7 @@ export function MediaViewer({
         if (nextIsFavorite === undefined) return;
 
         const message = nextIsFavorite
-          ? "お気に入りに登録しました"
+          ? "⭐お気に入りに登録しました"
           : "お気に入りを解除しました";
         toast.info(message);
       })
