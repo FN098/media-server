@@ -47,7 +47,7 @@ export const VideoPlayer = memo(function VideoPlayer({
     if (!video) return;
 
     if (video.paused) {
-      video.play().catch(() => {});
+      video.play().catch((e) => console.error(e));
     } else {
       video.pause();
     }

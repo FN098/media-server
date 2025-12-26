@@ -34,6 +34,15 @@ export const GridView = memo(function GridView1({
     overscan: 1, // 画面外に何行予備を持っておくか
   });
 
+  const handleToggleFavorite = async (node: MediaNode) => {
+    try {
+      await favoriteCtx.toggleFavorite(node.path);
+    } catch (e) {
+      console.error(e);
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  };
+
   return (
     <div ref={parentRef} className="w-full h-full">
       {/* 2. 合計の高さを持つコンテナ（スクロールバーの長さを決める） */}
@@ -89,12 +98,7 @@ export const GridView = memo(function GridView1({
                     {isMedia(node.type) && (
                       <GridViewFavoriteButton
                         active={favoriteCtx.isFavorite(node.path)}
-                        onToggle={() => {
-                          favoriteCtx.toggleFavorite(node.path).catch((e) => {
-                            console.error(e);
-                            toast.error("お気に入りの更新に失敗しました");
-                          });
-                        }}
+                        onToggle={() => void handleToggleFavorite(node)}
                       />
                     )}
                   </div>

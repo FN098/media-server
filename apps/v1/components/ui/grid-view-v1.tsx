@@ -27,6 +27,15 @@ export const GridView = memo(function GridView1({
   const { columnCount, columnWidth, rowHeight } = useGridView(parentRef);
   const rowCount = Math.ceil(nodes.length / columnCount);
 
+  const handleToggleFavorite = async (node: MediaNode) => {
+    try {
+      await favoriteCtx.toggleFavorite(node.path);
+    } catch (e) {
+      console.error(e);
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  };
+
   const Cell = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
     const index = rowIndex * columnCount + columnIndex;
     const node = nodes[index];
@@ -56,12 +65,7 @@ export const GridView = memo(function GridView1({
           {isMedia(node.type) && (
             <GridViewFavoriteButton
               active={favoriteCtx.isFavorite(node.path)}
-              onToggle={() => {
-                favoriteCtx.toggleFavorite(node.path).catch((e) => {
-                  console.error(e);
-                  toast.error("お気に入りの更新に失敗しました");
-                });
-              }}
+              onToggle={() => void handleToggleFavorite(node)}
             />
           )}
         </div>
