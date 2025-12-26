@@ -13,7 +13,6 @@ export const useScrollLock = (lock: boolean = true) => {
     // クリーンアップ関数で元に戻す
     return () => {
       document.body.style.overflow = originalStyle;
-      console.log("clean");
     };
   }, [lock]);
 };
