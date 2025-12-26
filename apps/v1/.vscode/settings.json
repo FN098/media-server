@@ -17,5 +17,6 @@
   "javascript.preferences.importModuleSpecifierEnding": "minimal",
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
-  }
+  },
+  "prisma.pinToPrisma6": true
 }
