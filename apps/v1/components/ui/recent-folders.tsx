@@ -4,7 +4,7 @@ import type { RecentFolder } from "@/generated/prisma/client";
 import { getClientExplorerPath } from "@/lib/path-helpers";
 import { formatRecentDate } from "@/lib/utils/formatter";
 import { Button } from "@/shadcn/components/ui/button";
-import { Clock, Folder } from "lucide-react"; // アイコンを追加
+import { Clock, Folder, History } from "lucide-react"; // アイコンを追加
 import Link from "next/link";
 
 type RecentFoldersProps = {
@@ -14,9 +14,11 @@ type RecentFoldersProps = {
 export function RecentFolders({ folders }: RecentFoldersProps) {
   if (folders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed rounded-lg text-muted-foreground">
-        <Folder className="w-8 h-8 mb-2 opacity-20" />
-        <p className="text-sm">最近開いたフォルダはありません</p>
+      <div className="py-12 flex flex-col items-center justify-center text-center">
+        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+          <History className="w-6 h-6 text-muted-foreground/40" />
+        </div>
+        <p className="text-sm text-muted-foreground/60">履歴がまだありません</p>
       </div>
     );
   }
