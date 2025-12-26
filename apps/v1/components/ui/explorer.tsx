@@ -152,33 +152,34 @@ export function Explorer({ listing }: ExplorerProps) {
         )}
 
         {/* フォルダナビゲーション */}
-        <div className="flex items-center justify-between gap-6 py-12 mt-10 border-t border-border/30">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
+          {/* Previous Button Container */}
+          <div className="w-full sm:flex-1">
             {listing.prev && (
               <Button
                 variant="outline"
-                // h-auto と py-4 でボタンの縦幅を広げ、押しやすくしています
-                className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full max-w-[280px] hover:bg-accent transition-all"
-                onClick={() => handleFolderNavigation(listing.prev!)}
+                className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
+                asChild
               >
                 <Link href={getClientExplorerPath(listing.prev)}>
                   <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                     <ArrowLeft className="mr-1 h-3 w-3" />
                     Previous
                   </div>
-                  <span className="text-base font-medium truncate w-full text-left">
+                  <div className="text-base font-medium truncate w-full text-left">
                     {listing.prev.split("/").filter(Boolean).pop()}
-                  </span>
+                  </div>
                 </Link>
               </Button>
             )}
           </div>
 
-          <div className="flex-1 flex justify-end">
+          {/* Next Button Container */}
+          <div className="w-full sm:flex-1 flex justify-end">
             {listing.next && (
               <Button
                 variant="outline"
-                className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full max-w-[280px] hover:bg-accent transition-all"
+                className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
                 asChild
               >
                 <Link href={getClientExplorerPath(listing.next)}>
@@ -186,9 +187,9 @@ export function Explorer({ listing }: ExplorerProps) {
                     Next
                     <ArrowRight className="ml-1 h-3 w-3" />
                   </div>
-                  <span className="text-base font-medium truncate w-full text-right">
+                  <div className="text-base font-medium truncate w-full text-right">
                     {listing.next.split("/").filter(Boolean).pop()}
-                  </span>
+                  </div>
                 </Link>
               </Button>
             )}
