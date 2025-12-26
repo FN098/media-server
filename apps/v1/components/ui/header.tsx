@@ -25,13 +25,13 @@ export function Header({ title, basePath }: HeaderProps) {
   const breadcrumbs = useBreadcrumbs(basePath);
   const mounted = useMounted();
 
+  const current = breadcrumbs.at(-1);
+  const backHref = breadcrumbs.at(-2)?.href ?? null;
+
   if (!mounted) return null;
 
   // Mobile
   if (isMobile) {
-    const current = breadcrumbs.at(-1);
-    const backHref = breadcrumbs.at(-2)?.href ?? null;
-
     return (
       <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
         <div className="flex h-full items-center gap-2 px-2">
@@ -87,6 +87,20 @@ export function Header({ title, basePath }: HeaderProps) {
           <AppSidebarOpenButton />
 
           <div className="text-lg font-semibold mx-2">{title}</div>
+
+          {/* 戻る */}
+          {backHref ? (
+            <Link
+              href={backHref}
+              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center opacity-40">
+              <ArrowLeft className="h-5 w-5" />
+            </div>
+          )}
 
           <Breadcrumbs
             items={breadcrumbs}
