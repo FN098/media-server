@@ -39,9 +39,9 @@ export function Explorer({ listing }: ExplorerProps) {
 
   // Open file/folder
   const handleOpen = useCallback(
-    async (node: MediaNode, index: number) => {
+    (node: MediaNode, index: number) => {
       if (node.isDirectory) {
-        await visitFolder(node.path);
+        void visitFolder(node.path);
         const href = getClientExplorerPath(node.path);
         router.push(href);
         return;
@@ -65,13 +65,15 @@ export function Explorer({ listing }: ExplorerProps) {
   );
 
   // Open next/prev folder
-  const handleFolderNavigation = (
-    targetPath: string,
-    mode: "first" | "last"
-  ) => {
-    const href = `${getClientExplorerPath(targetPath)}?auto=${mode}`;
-    router.push(href);
-  };
+  const handleFolderNavigation = useCallback(
+    (targetPath: string, mode: "first" | "last") => {
+      console.log(targetPath);
+      void visitFolder(targetPath);
+      const href = `${getClientExplorerPath(targetPath)}?auto=${mode}`;
+      router.push(href);
+    },
+    [router]
+  );
 
   const searchParams = useSearchParams();
   const autoMode = searchParams.get("auto");
