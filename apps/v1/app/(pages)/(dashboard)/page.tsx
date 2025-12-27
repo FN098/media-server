@@ -20,7 +20,7 @@ export default async function Page() {
         {/* ヒーローセクション */}
         <section className="text-center mb-20">
           <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
-            Welcome back
+            Media Server
           </h1>
 
           <p className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto leading-relaxed break-keep">
