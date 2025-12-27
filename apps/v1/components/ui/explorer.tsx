@@ -3,6 +3,7 @@
 import { GridView } from "@/components/ui/grid-view-v2";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
+import { useCallOnceWhenChanged } from "@/hooks/use-call-once";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
 import { visitFolderAction } from "@/lib/folder/actions";
 import { syncMediaDirActions } from "@/lib/media/actions";
@@ -113,13 +114,15 @@ export function Explorer({ listing }: ExplorerProps) {
   }, [autoMode, filtered, handleOpen, listing.path, openModal, router]);
 
   // フォルダー訪問履歴更新
-  useEffect(() => {
+  useCallOnceWhenChanged(() => {
     void visitFolderAction(listing.path);
+    console.log("フォルダー訪問履歴更新");
   }, [listing.path]);
 
   // FS <=> DB 同期
-  useEffect(() => {
+  useCallOnceWhenChanged(() => {
     void syncMediaDirActions(listing.path);
+    console.log("FS<=>DB 同期");
   }, [listing.path]);
 
   return (
