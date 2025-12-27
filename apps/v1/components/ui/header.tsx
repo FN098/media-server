@@ -13,20 +13,39 @@ import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-type HeaderProps = {
-  title: string;
-  basePath: string;
+type HeaderFeatures = {
+  navigation?: boolean;
+  search?: boolean;
+  viewMode?: boolean;
 };
 
-export function Header({ title, basePath }: HeaderProps) {
+type HeaderProps = {
+  title: string;
+  basePath?: string;
+  features?: HeaderFeatures;
+};
+
+const DEFAULT_FEATURES: Required<HeaderFeatures> = {
+  navigation: true,
+  search: true,
+  viewMode: true,
+};
+
+export function Header({ title, basePath, features }: HeaderProps) {
+  const mergedFeatures = {
+    ...DEFAULT_FEATURES,
+    ...features,
+  };
   const searchCtx = useSearchOptional();
   const viewCtx = useViewModeOptional();
   const isMobile = useIsMobile();
-  const breadcrumbs = useBreadcrumbs(basePath);
+  const breadcrumbs = useBreadcrumbs(basePath ?? "");
   const mounted = useMounted();
 
   const current = breadcrumbs.at(-1);
   const backHref = breadcrumbs.at(-2)?.href ?? null;
+
+  const { navigation, search, viewMode } = mergedFeatures;
 
   if (!mounted) return null;
 
@@ -41,25 +60,29 @@ export function Header({ title, basePath }: HeaderProps) {
             {title}
           </div>
 
-          {/* 戻る */}
-          {backHref ? (
-            <Link
-              href={backHref}
-              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          ) : (
-            <div className="flex h-8 w-8 items-center justify-center opacity-40">
-              <ArrowLeft className="h-5 w-5" />
-            </div>
+          {/* ナビゲーション */}
+          {navigation && (
+            <>
+              {backHref ? (
+                <Link
+                  href={backHref}
+                  className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center opacity-40">
+                  <ArrowLeft className="h-5 w-5" />
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1 text-sm font-medium truncate">
+                {current?.label ?? ""}
+              </div>
+            </>
           )}
 
-          <div className="min-w-0 flex-1 text-sm font-medium truncate">
-            {current?.label ?? ""}
-          </div>
-
-          {searchCtx && (
+          {search && searchCtx && (
             <Search
               value={searchCtx.query}
               setValue={searchCtx.setQuery}
@@ -67,7 +90,7 @@ export function Header({ title, basePath }: HeaderProps) {
             />
           )}
 
-          {viewCtx && (
+          {viewMode && viewCtx && (
             <ViewModeSwitch
               value={viewCtx.view}
               setValue={viewCtx.setView}
@@ -88,27 +111,28 @@ export function Header({ title, basePath }: HeaderProps) {
 
           <div className="text-lg font-semibold mx-2">{title}</div>
 
-          {/* 戻る */}
-          {backHref ? (
-            <Link
-              href={backHref}
-              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          ) : (
-            <div className="flex h-8 w-8 items-center justify-center opacity-40">
-              <ArrowLeft className="h-5 w-5" />
-            </div>
+          {/* ナビゲーション */}
+          {navigation && (
+            <>
+              {backHref ? (
+                <Link
+                  href={backHref}
+                  className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center opacity-40">
+                  <ArrowLeft className="h-5 w-5" />
+                </div>
+              )}
+
+              <DynamicBreadcrumbs items={breadcrumbs} />
+            </>
           )}
 
-          <DynamicBreadcrumbs
-            items={breadcrumbs}
-            // className="min-w-0 overflow-hidden"
-          />
-
           <div className="ml-auto flex items-center gap-2">
-            {searchCtx && (
+            {search && searchCtx && (
               <Search
                 value={searchCtx.query}
                 setValue={searchCtx.setQuery}
@@ -118,7 +142,7 @@ export function Header({ title, basePath }: HeaderProps) {
 
             <Separator orientation="vertical" className="h-6" />
 
-            {viewCtx && (
+            {viewMode && viewCtx && (
               <ViewModeSwitch
                 value={viewCtx.view}
                 setValue={viewCtx.setView}

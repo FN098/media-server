@@ -8,7 +8,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <ViewModeProvider>
       <SearchProvider>
         <div className="flex flex-col min-h-screen">
-          <Header title="Dashboard" basePath={PATHS.client.dashboard.root} />
+          <Header
+            title="Dashboard"
+            basePath={PATHS.client.dashboard.root}
+            features={{ navigation: false, search: false, viewMode: false }}
+          />
           <main className="flex-1 flex items-center justify-center">
             {children}
           </main>
