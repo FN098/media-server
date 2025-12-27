@@ -129,8 +129,12 @@ export function MediaViewer({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: -10 }}
             exit={{ opacity: 0, y: -20 }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onPointerEnter={(e) => {
+              if (e.pointerType === "mouse") setIsHovered(true);
+            }}
+            onPointerLeave={(e) => {
+              if (e.pointerType === "mouse") setIsHovered(false);
+            }}
             className="absolute top-0 left-0 right-0 z-60 px-2 py-4 md:p-6 flex items-center justify-between bg-linear-to-b from-black/60 to-transparent"
           >
             {/* 閉じるボタン */}
