@@ -1,22 +1,23 @@
+import { DbFolder } from "@/lib/folder/types";
 import { DbMedia, MediaFsNode, MediaNode } from "@/lib/media/types";
 
 export function mergeFsWithDb(
   fsMedia: MediaFsNode[],
-  dbMedia: DbMedia[]
+  dbMedia: DbMedia[],
+  dbFolders: DbFolder[]
 ): MediaNode[] {
-  const dbMap = new Map(dbMedia.map((m) => [m.path, m]));
+  const dbMediaMap = new Map(dbMedia.map((e) => [e.path, e]));
+  const dbFolderMap = new Map(dbFolders.map((e) => [e.path, e]));
 
   const result = fsMedia.map((fsNode) => {
-    if (fsNode.isDirectory) {
-      return { ...fsNode, isFavorite: false };
-    }
-
-    const dbNode = dbMap.get(fsNode.path);
+    const dbMedia = dbMediaMap.get(fsNode.path);
+    const dbFolder = dbFolderMap.get(fsNode.path);
 
     return {
       ...fsNode,
-      title: dbNode?.title ?? fsNode.name,
-      isFavorite: dbNode?.isFavorite ?? false,
+      title: dbMedia?.title ?? fsNode.name,
+      isFavorite: dbMedia?.isFavorite ?? false,
+      lastViewedAt: dbFolder?.lastViewedAt,
     };
   });
 

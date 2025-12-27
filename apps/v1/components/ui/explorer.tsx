@@ -8,6 +8,7 @@ import {
   useFolderNavigation,
 } from "@/hooks/use-auto-open-viewer";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
+import { visitFolderAction } from "@/lib/folder/actions";
 import { syncMediaDirAction } from "@/lib/media/actions";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
@@ -99,6 +100,11 @@ export function Explorer({ listing }: ExplorerProps) {
   // Sync FS <=> DB
   useEffect(() => {
     void syncMediaDirAction(listing.path);
+  }, [listing.path]);
+
+  // Update visited folder
+  useEffect(() => {
+    void visitFolderAction(listing.path);
   }, [listing.path]);
 
   return (

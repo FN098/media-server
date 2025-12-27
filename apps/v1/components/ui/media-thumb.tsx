@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { FallbackImage } from "@/components/ui/fallback-image";
-import { MediaFsNode, MediaFsNodeType } from "@/lib/media/types";
+import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
 import { getThumbUrl } from "@/lib/path-helpers";
 import { cn } from "@/shadcn/lib/utils";
 import Image from "next/image";
 import { memo, ReactNode } from "react";
 
 type MediaThumbProps = {
-  node: MediaFsNode;
+  node: MediaNode;
   className?: string;
 };
 

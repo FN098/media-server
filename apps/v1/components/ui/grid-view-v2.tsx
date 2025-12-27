@@ -1,6 +1,7 @@
 "use client";
 
 import { GridViewFavoriteButton } from "@/components/ui/favorite-button";
+import { FolderStatusBadge } from "@/components/ui/last-viewed-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { useGridView } from "@/hooks/use-grid-view";
@@ -100,6 +101,10 @@ export const GridView = memo(function GridView1({
                         active={favoriteCtx.isFavorite(node.path)}
                         onToggle={() => void handleToggleFavorite(node)}
                       />
+                    )}
+
+                    {node.isDirectory && (
+                      <FolderStatusBadge date={node.lastViewedAt} />
                     )}
                   </div>
                 </div>

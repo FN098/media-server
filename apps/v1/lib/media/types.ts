@@ -25,6 +25,7 @@ export type MediaFsListing = {
 export type MediaNode = MediaFsNode & {
   title?: string;
   isFavorite: boolean;
+  lastViewedAt?: Date;
 };
 
 export type MediaListing = {
