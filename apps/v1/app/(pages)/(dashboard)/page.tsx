@@ -7,9 +7,11 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+const RECENT_FOLDERS_LIMIT = 10;
+
 export default async function Page() {
   // TODO: ユーザー認証機能実装後に差し替える
-  const folders = await getRecentFolders(USER);
+  const folders = await getRecentFolders(USER, RECENT_FOLDERS_LIMIT);
   const hasHistory = folders.length > 0;
 
   return (

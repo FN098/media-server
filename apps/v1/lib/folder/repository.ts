@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function getRecentFolders(
   userId: string,
-  length?: number
+  length: number
 ): Promise<RecentFolder[]> {
   return await prisma.recentFolder.findMany({
     where: { userId },
