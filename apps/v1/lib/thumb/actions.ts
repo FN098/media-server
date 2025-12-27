@@ -6,6 +6,10 @@ export async function enqueueThumbJob(dirPath: string) {
   await thumbQueue.add(
     "create-thumbs",
     { dirPath },
-    { jobId: `thumb-${dirPath}` }
+    {
+      jobId: `thumb-${dirPath}`,
+      removeOnComplete: true,
+      removeOnFail: { count: 1000 },
+    }
   );
 }
