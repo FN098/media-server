@@ -1,6 +1,7 @@
 services:
   db:
     image: mysql:8.0
+    command: --wait_timeout=60 --interactive_timeout=60
     container_name: media-server-db
     restart: unless-stopped
     env_file:
