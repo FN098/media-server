@@ -86,7 +86,8 @@ export function Explorer({ listing }: ExplorerProps) {
 
   // Auto open viewer
   useAutoOpenViewer(mediaOnly.length, (index) => {
-    handleOpen(mediaOnly[index]);
+    openModal();
+    setInitialIndex(index);
   });
 
   // Create thumbnails on background job
