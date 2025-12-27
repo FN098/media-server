@@ -37,7 +37,7 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
             className="w-full h-auto py-3 px-4 justify-start hover:bg-accent group transition-all"
           >
             <Link
-              href={getClientExplorerPath(folder.dirPath)}
+              href={encodeURI(getClientExplorerPath(folder.dirPath))}
               className="flex items-center gap-3"
             >
               {/* アイコン部分 */}

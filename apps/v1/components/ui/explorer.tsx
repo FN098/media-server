@@ -176,7 +176,7 @@ export function Explorer({ listing }: ExplorerProps) {
                 className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
                 asChild
               >
-                <Link href={getClientExplorerPath(listing.prev)}>
+                <Link href={encodeURI(getClientExplorerPath(listing.prev))}>
                   <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                     <ArrowLeft className="mr-1 h-3 w-3" />
                     Previous
@@ -197,7 +197,7 @@ export function Explorer({ listing }: ExplorerProps) {
                 className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
                 asChild
               >
-                <Link href={getClientExplorerPath(listing.next)}>
+                <Link href={encodeURI(getClientExplorerPath(listing.next))}>
                   <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                     Next
                     <ArrowRight className="ml-1 h-3 w-3" />
