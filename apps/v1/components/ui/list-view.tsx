@@ -1,5 +1,6 @@
 "use client";
 
+import { FolderStatusBadge } from "@/components/ui/last-viewed-badge";
 import { LocalDateValue } from "@/components/ui/local-date";
 import { MediaThumbIcon } from "@/components/ui/media-thumb";
 import { MediaNode } from "@/lib/media/types";
@@ -37,6 +38,7 @@ export const ListView = memo(function ListView1({
             <TableHead>Type</TableHead>
             <TableHead>Updated</TableHead>
             <TableHead>Size</TableHead>
+            <TableHead>Last Viewed</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -80,6 +82,11 @@ function RowItem({ node, onClick, onDoubleClick, className }: RowItemProps) {
         <LocalDateValue value={node.mtime} />
       </TableCell>
       <TableCell>{formatBytes(node.size)}</TableCell>
+      <TableCell>
+        {node.isDirectory && (
+          <FolderStatusBadge date={node.lastViewedAt} className="border-none" />
+        )}
+      </TableCell>
     </TableRow>
   );
 }

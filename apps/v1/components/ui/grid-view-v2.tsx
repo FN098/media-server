@@ -103,8 +103,12 @@ export const GridView = memo(function GridView1({
                       />
                     )}
 
+                    {/* ステータスバッジ */}
                     {node.isDirectory && (
-                      <FolderStatusBadge date={node.lastViewedAt} />
+                      <FolderStatusBadge
+                        date={node.lastViewedAt}
+                        className="absolute top-1 right-1"
+                      />
                     )}
                   </div>
                 </div>
