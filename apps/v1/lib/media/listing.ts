@@ -112,55 +112,58 @@ async function findGlobalAdjacentFolder(
   return findGlobalAdjacentFolder(parentPath, direction);
 }
 
+export async function getMediaFsNodes(dirPath: string): Promise<MediaFsNode[]> {
+  const targetDir = getMediaPath(dirPath);
+  const dirents = await fs.readdir(targetDir, { withFileTypes: true });
+
+  const nodes: MediaFsNode[] = await Promise.all(
+    dirents.map(async (item) => {
+      const relativePath = path.join(dirPath, item.name).replace(/\\/g, "/");
+      const absolutePath = path.join(targetDir, item.name);
+      const stat = await fs.stat(absolutePath);
+
+      return {
+        name: item.name,
+        path: relativePath,
+        isDirectory: item.isDirectory(),
+        type: item.isDirectory() ? "directory" : detectMediaType(item.name),
+        size: item.isDirectory() ? undefined : stat.size,
+        mtime: stat.mtime,
+      };
+    })
+  );
+
+  return nodes;
+}
+
 export async function getMediaFsListing(
   dirPath: string
 ): Promise<MediaFsListing | null> {
-  try {
-    const targetDir = getMediaPath(dirPath);
-    if (!(await existsDir(targetDir))) return null;
+  const targetDir = getMediaPath(dirPath);
+  if (!(await existsDir(targetDir))) return null;
 
-    // --- 現在のディレクトリのノード取得 ---
-    const dirents = await fs.readdir(targetDir, { withFileTypes: true });
-    const nodes: MediaFsNode[] = await Promise.all(
-      dirents.map(async (item) => {
-        const relativePath = path.join(dirPath, item.name).replace(/\\/g, "/");
-        const absolutePath = path.join(targetDir, item.name);
-        const stat = await fs.stat(absolutePath);
+  // --- 現在のディレクトリのノード取得 ---
+  const nodes = await getMediaFsNodes(dirPath);
 
-        return {
-          name: item.name,
-          path: relativePath,
-          isDirectory: item.isDirectory(),
-          type: item.isDirectory() ? "directory" : detectMediaType(item.name),
-          size: item.isDirectory() ? undefined : stat.size,
-          mtime: stat.mtime,
-        };
-      })
-    );
+  // --- 前後のディレクトリパスを取得 ---
+  let prev: string | null = null;
+  let next: string | null = null;
 
-    // --- 前後のディレクトリパスを取得 ---
-    let prev: string | null = null;
-    let next: string | null = null;
-
-    if (dirPath !== "") {
-      prev = await findGlobalAdjacentFolder(dirPath, "prev");
-      next = await findGlobalAdjacentFolder(dirPath, "next");
-    }
-
-    const parent =
-      dirPath === "" ? null : dirPath.split("/").slice(0, -1).join("/") || "";
-
-    const listing: MediaFsListing = {
-      path: dirPath,
-      nodes,
-      parent,
-      prev,
-      next,
-    };
-
-    return listing;
-  } catch (e) {
-    console.error(e);
-    return null;
+  if (dirPath !== "") {
+    prev = await findGlobalAdjacentFolder(dirPath, "prev");
+    next = await findGlobalAdjacentFolder(dirPath, "next");
   }
+
+  const parent =
+    dirPath === "" ? null : dirPath.split("/").slice(0, -1).join("/") || "";
+
+  const listing: MediaFsListing = {
+    path: dirPath,
+    nodes,
+    parent,
+    prev,
+    next,
+  };
+
+  return listing;
 }

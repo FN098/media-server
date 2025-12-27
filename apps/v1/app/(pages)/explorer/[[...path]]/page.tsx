@@ -4,7 +4,6 @@ import { getMediaFsListing } from "@/lib/media/listing";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getDbMedia } from "@/lib/media/repository";
 import { sortMediaFsNodes } from "@/lib/media/sort";
-import { syncMediaDir } from "@/lib/media/sync";
 import { createThumbsIfNotExists } from "@/lib/media/thumb";
 import { notFound } from "next/navigation";
 
@@ -21,10 +20,7 @@ export default async function Page(props: {
   const dbMedia = await getDbMedia(dirPath, USER);
 
   // 並列で副作用系を実行
-  Promise.all([
-    syncMediaDir(dirPath, listing.nodes),
-    createThumbsIfNotExists(listing.nodes),
-  ]).catch((e) => {
+  Promise.all([createThumbsIfNotExists(listing.nodes)]).catch((e) => {
     console.error(e);
   });
 

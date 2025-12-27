@@ -5,6 +5,7 @@ import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
 import { visitFolderAction } from "@/lib/folder/actions";
+import { syncMediaDirActions } from "@/lib/media/actions";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -114,6 +115,11 @@ export function Explorer({ listing }: ExplorerProps) {
   // フォルダー訪問履歴更新
   useEffect(() => {
     void visitFolderAction(listing.path);
+  }, [listing.path]);
+
+  // FS <=> DB 同期
+  useEffect(() => {
+    void syncMediaDirActions(listing.path);
   }, [listing.path]);
 
   return (
