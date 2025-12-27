@@ -8,7 +8,7 @@ export async function visitFolder(
 
   // 最近訪れたフォルダを更新
   await prisma.$transaction(async (tx) => {
-    await tx.recentFolder.upsert({
+    await tx.visitedFolder.upsert({
       where: {
         userId_dirPath: {
           userId,

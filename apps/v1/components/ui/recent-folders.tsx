@@ -1,6 +1,6 @@
 "use client";
 
-import type { RecentFolder } from "@/generated/prisma/client";
+import type { VisitedFolder } from "@/generated/prisma/client";
 import { getClientExplorerPath } from "@/lib/path-helpers";
 import { formatRecentDate } from "@/lib/utils/formatter";
 import { splitDirPath } from "@/lib/utils/path";
@@ -9,7 +9,7 @@ import { Clock, Folder, History } from "lucide-react"; // アイコンを追加
 import Link from "next/link";
 
 type RecentFoldersProps = {
-  folders: RecentFolder[];
+  folders: VisitedFolder[];
 };
 
 export function RecentFolders({ folders }: RecentFoldersProps) {

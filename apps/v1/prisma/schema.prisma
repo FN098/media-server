@@ -22,8 +22,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  favorites     Favorite[]
-  recentFolders RecentFolder[]
+  favorites      Favorite[]
+  visitedFolders VisitedFolder[]
 }
 
 model Media {
@@ -73,7 +73,7 @@ model Favorite {
   @@index([mediaId])
 }
 
-model RecentFolder {
+model VisitedFolder {
   userId       String
   dirPath      String
   lastViewedAt DateTime @updatedAt
