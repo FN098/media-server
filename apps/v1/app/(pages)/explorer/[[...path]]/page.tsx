@@ -4,7 +4,6 @@ import { getMediaFsListing } from "@/lib/media/listing";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getDbMedia } from "@/lib/media/repository";
 import { sortMediaFsNodes } from "@/lib/media/sort";
-import { createThumbsIfNotExists } from "@/lib/thumb/create";
 import { notFound } from "next/navigation";
 
 export default async function Page(props: {
@@ -18,11 +17,6 @@ export default async function Page(props: {
 
   // TODO: ユーザー認証機能実装後に差し替える
   const dbMedia = await getDbMedia(dirPath, USER);
-
-  // 並列で副作用系を実行
-  Promise.all([createThumbsIfNotExists(listing.nodes)]).catch((e) => {
-    console.error(e);
-  });
 
   // ソート + マージ
   const sorted = sortMediaFsNodes(listing.nodes);

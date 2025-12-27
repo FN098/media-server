@@ -14,8 +14,8 @@ RUN npm install -g pnpm
 # ===============================
 FROM base AS builder
 
-# package.json と lockfile をコピー
-COPY apps/v1/package.json apps/v1/pnpm-lock.yaml .
+# package.json と lockfile と workspace をコピー
+COPY apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml .
 
 # devDeps 含めて一度インストール
 RUN pnpm install --frozen-lockfile
@@ -40,8 +40,8 @@ FROM base AS runner
 # ffmpeg のインストール
 RUN apk add --no-cache ffmpeg
 
-# package.json と lockfile をコピー
-COPY apps/v1/package.json apps/v1/pnpm-lock.yaml .
+# package.json と lockfile と workspace をコピー
+COPY apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml .
 
 # builder から node_modules をコピー
 COPY --from=builder /app/node_modules ./node_modules
@@ -57,3 +57,25 @@ COPY --from=builder /app/generated ./generated
 EXPOSE 3000
 
 CMD ["pnpm", "start"]
+
+# ===============================
+# 3. Worker Stage
+# ===============================
+
+FROM base AS worker
+
+# ffmpeg のインストール
+RUN apk add --no-cache ffmpeg
+
+# package.json と lockfile と workspace をコピー
+COPY apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml .
+
+# builder から node_modules をコピー
+COPY --from=builder /app/node_modules ./node_modules
+
+# プロジェクトファイルをコピー
+COPY apps/v1 .
+
+EXPOSE 3000
+
+CMD ["pnpm", "thumb-ps"]

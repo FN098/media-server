@@ -40,12 +40,12 @@ services:
     profiles:
       - dev
 
-  app-prod:
+  app:
     build:
       context: .
-      dockerfile: ./docker/app-prod/Dockerfile
+      dockerfile: ./docker/app/Dockerfile
       target: runner
-    container_name: media-server-app-prod
+    container_name: media-server-app
     restart: unless-stopped
     env_file:
       - .env
@@ -56,8 +56,20 @@ services:
     depends_on:
       - db
       - redis
-    profiles:
-      - prod
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+      target: worker
+    container_name: media-server-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ${HOST_MEDIA_ROOT}:/media:rw
+    depends_on:
+      - redis
 
 volumes:
   db_data:

@@ -13,17 +13,17 @@ RUN apk add --no-cache ffmpeg
 # pnpm をグローバルインストール
 RUN npm i -g pnpm
 
-# package*.json と lock を先にコピー
-COPY apps/v1/package.json apps/v1/pnpm-lock.yaml ./
+# package*.json と lock と workspace を先にコピー
+COPY apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml ./
 
 # 依存インストール
-RUN pnpm install --frozen-lockfile || pnpm install
+RUN pnpm install --frozen-lockfile
 
 # ソース全体をコピー
 COPY . /app
 
 # Prisma関連
-RUN pnpm prisma generate || true
+RUN pnpm prisma generate 
 
 EXPOSE 3000
 

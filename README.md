@@ -17,6 +17,5 @@ cp .env.example .env
 # 必要に応じて .env を編集 (ローカルのメディアフォルダの指定など)
 
 # コンテナ起動
-docker compose --profile prod up -d --build
+docker compose up -d --build
 ```
-

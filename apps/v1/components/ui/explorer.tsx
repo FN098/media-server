@@ -11,6 +11,7 @@ import { useModalNavigation } from "@/hooks/use-modal-navigation";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
+import { enqueueThumbJob } from "@/lib/thumb/actions";
 import { FavoriteProvider } from "@/providers/favorite-provider";
 import { useSearch } from "@/providers/search-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
@@ -19,7 +20,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type ExplorerProps = {
@@ -87,6 +88,11 @@ export function Explorer({ listing }: ExplorerProps) {
   useAutoOpenViewer(mediaOnly.length, (index) => {
     handleOpen(mediaOnly[index]);
   });
+
+  // Create thumbnails on background job
+  useEffect(() => {
+    void enqueueThumbJob(listing.path);
+  }, [listing.path]);
 
   return (
     <div
