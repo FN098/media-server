@@ -14,17 +14,13 @@ const adapter = new PrismaMariaDb({
   connectionLimit: 5,
 });
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
 export const prisma =
-  globalForPrisma.prisma ??
+  globalThis.prisma ??
   new PrismaClient({
     adapter,
     log: ["error"], // optional
   });
 
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  globalThis.prisma = prisma;
 }
