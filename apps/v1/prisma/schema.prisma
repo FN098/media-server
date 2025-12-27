@@ -54,8 +54,8 @@ model MediaTag {
   mediaId String
   tagId   String
 
-  media Media @relation(fields: [mediaId], references: [id])
-  tag   Tag   @relation(fields: [tagId], references: [id])
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([mediaId, tagId])
 }
@@ -65,8 +65,8 @@ model Favorite {
   mediaId   String
   createdAt DateTime @default(now())
 
-  user  User  @relation(fields: [userId], references: [id])
-  media Media @relation(fields: [mediaId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 
   @@id([userId, mediaId])
   @@index([userId])
@@ -78,7 +78,7 @@ model VisitedFolder {
   dirPath      String
   lastViewedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, dirPath])
   @@index([userId, lastViewedAt])
