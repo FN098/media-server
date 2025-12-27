@@ -4,6 +4,7 @@ import { GridView } from "@/components/ui/grid-view-v2";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
+import { visitFolderAction } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -85,7 +86,7 @@ export function Explorer({ listing }: ExplorerProps) {
   const searchParams = useSearchParams();
   const autoMode = searchParams.get("auto");
 
-  // 自動起動ロジック
+  // 自動ビューア起動
   useEffect(() => {
     if (!autoMode) return;
 
@@ -109,6 +110,11 @@ export function Explorer({ listing }: ExplorerProps) {
       }
     }, 0);
   }, [autoMode, filtered, handleOpen, listing.path, openModal, router]);
+
+  // フォルダー訪問履歴更新
+  useEffect(() => {
+    void visitFolderAction(listing.path);
+  }, [listing.path]);
 
   return (
     <div
