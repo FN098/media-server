@@ -3,10 +3,11 @@
 import { GridView } from "@/components/ui/grid-view-v2";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { useCallOnceWhenChanged } from "@/hooks/use-call-once";
+import {
+  useAutoOpenViewer,
+  useFolderNavigation,
+} from "@/hooks/use-auto-open-viewer";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
-import { visitFolderAction } from "@/lib/folder/actions";
-import { syncMediaDirActions } from "@/lib/media/actions";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -17,8 +18,8 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type ExplorerProps = {
@@ -54,7 +55,7 @@ export function Explorer({ listing }: ExplorerProps) {
 
   // Open file/folder
   const handleOpen = useCallback(
-    (node: MediaNode, index: number) => {
+    (node: MediaNode) => {
       if (node.isDirectory) {
         const href = getClientExplorerPath(node.path);
         router.push(href);
@@ -62,7 +63,7 @@ export function Explorer({ listing }: ExplorerProps) {
       }
 
       if (isMedia(node.type)) {
-        const mediaIndex = mediaOnlyIndexMap.get(node) ?? index;
+        const mediaIndex = mediaOnlyIndexMap.get(node) ?? 0;
         openModal();
         setInitialIndex(mediaIndex);
         return;
@@ -80,60 +81,12 @@ export function Explorer({ listing }: ExplorerProps) {
   );
 
   // Open next/prev folder
-  const handleFolderNavigation = useCallback(
-    (targetPath: string, mode?: "first" | "last") => {
-      const baseUrl = getClientExplorerPath(targetPath);
-      const params = new URLSearchParams();
+  const { handleFolderNavigation } = useFolderNavigation();
 
-      if (mode) {
-        params.append("auto", mode);
-      }
-
-      const queryString = params.toString();
-      const href = queryString ? `${baseUrl}?${queryString}` : baseUrl;
-      router.push(href);
-    },
-    [router]
-  );
-
-  const searchParams = useSearchParams();
-  const autoMode = searchParams.get("auto");
-
-  // 自動ビューア起動
-  useEffect(() => {
-    if (!autoMode) return;
-    if (mediaOnly.length === 0) return;
-
-    const targetIndex =
-      autoMode === "first"
-        ? mediaOnlyIndexMap.get(mediaOnly[0])
-        : mediaOnlyIndexMap.get(mediaOnly[mediaOnly.length - 1]);
-
-    setTimeout(() => {
-      console.log("自動ビューア起動");
-      openModal();
-      setInitialIndex(targetIndex ?? 0);
-
-      // クエリを消す（リロード対策）
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("auto")) {
-        url.searchParams.delete("auto");
-        window.history.replaceState(null, "", url.pathname + url.search);
-      }
-    }, 0);
-  }, [autoMode, mediaOnlyIndexMap, mediaOnly, openModal]);
-
-  // フォルダー訪問履歴更新
-  useCallOnceWhenChanged(() => {
-    void visitFolderAction(listing.path);
-    console.log("フォルダー訪問履歴更新");
-  }, [listing.path]);
-
-  // FS <=> DB 同期
-  useCallOnceWhenChanged(() => {
-    void syncMediaDirActions(listing.path);
-    console.log("FS<=>DB 同期");
-  }, [listing.path]);
+  // Auto open viewer
+  useAutoOpenViewer(mediaOnly.length, (index) => {
+    handleOpen(mediaOnly[index]);
+  });
 
   return (
     <div
@@ -145,16 +98,11 @@ export function Explorer({ listing }: ExplorerProps) {
     >
       <FavoriteProvider initialFavorites={initialFavorites}>
         <div className={cn(view === "grid" ? "block" : "hidden")}>
-          <GridView
-            nodes={filtered}
-            onOpen={(node, index) => void handleOpen(node, index)}
-          />
+          <GridView nodes={filtered} onOpen={(node) => void handleOpen(node)} />
         </div>
 
-        <div
-          className={cn(view === "list" ? "block" : "hidden", "w-full h-full")}
-        >
-          <ListView nodes={filtered} onOpen={void handleOpen} />
+        <div className={cn(view === "list" ? "block" : "hidden")}>
+          <ListView nodes={filtered} onOpen={(node) => void handleOpen(node)} />
         </div>
 
         {isOpen && (
