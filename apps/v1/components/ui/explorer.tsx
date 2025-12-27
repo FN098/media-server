@@ -8,6 +8,7 @@ import {
   useFolderNavigation,
 } from "@/hooks/use-auto-open-viewer";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
+import { syncMediaDirAction } from "@/lib/media/actions";
 import { isMedia } from "@/lib/media/detector";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -93,6 +94,11 @@ export function Explorer({ listing }: ExplorerProps) {
   // Create thumbnails on background job
   useEffect(() => {
     void enqueueThumbJob(listing.path);
+  }, [listing.path]);
+
+  // Sync FS <=> DB
+  useEffect(() => {
+    void syncMediaDirAction(listing.path);
   }, [listing.path]);
 
   return (

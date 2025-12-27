@@ -80,4 +80,6 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
       where: { path: { in: toDelete } },
     });
   }
+
+  console.log("sync completed");
 }

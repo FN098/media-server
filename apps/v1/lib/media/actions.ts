@@ -3,7 +3,7 @@
 import { getMediaFsNodes } from "@/lib/media/listing";
 import { syncMediaDir } from "@/lib/media/sync";
 
-export async function syncMediaDirActions(dirPath: string) {
+export async function syncMediaDirAction(dirPath: string) {
   const nodes = await getMediaFsNodes(dirPath);
   await syncMediaDir(dirPath, nodes);
 }
