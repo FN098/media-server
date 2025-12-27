@@ -1,18 +1,10 @@
 import { MediaFsNode } from "@/lib/media/types";
 import { getMediaPath, getMediaThumbPath } from "@/lib/path-helpers";
+import { existsFile } from "@/lib/utils/fs";
 import { spawn } from "child_process";
-import fs, { mkdir } from "fs/promises";
+import { mkdir } from "fs/promises";
 import { dirname } from "path";
 import sharp from "sharp";
-
-export async function existsThumb(thumbPath: string): Promise<boolean> {
-  try {
-    await fs.access(thumbPath);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 export async function createImageThumb(
   imagePath: string,
@@ -75,7 +67,7 @@ export async function createThumbsIfNotExists(
   await Promise.all(
     filtered.map(async (n) => {
       const thumb = getMediaThumbPath(n.path);
-      if (await existsThumb(thumb)) return;
+      if (await existsFile(thumb)) return;
 
       const media = getMediaPath(n.path);
 

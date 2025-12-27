@@ -4,7 +4,7 @@ import { getMediaFsListing } from "@/lib/media/listing";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getDbMedia } from "@/lib/media/repository";
 import { sortMediaFsNodes } from "@/lib/media/sort";
-import { createThumbsIfNotExists } from "@/lib/media/thumb";
+import { createThumbsIfNotExists } from "@/lib/thumb/create";
 import { notFound } from "next/navigation";
 
 export default async function Page(props: {
