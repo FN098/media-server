@@ -39,6 +39,16 @@ export function Explorer({ listing }: ExplorerProps) {
       .filter((e) => e.name.toLowerCase().includes(lowerQuery));
   }, [listing.nodes, lowerQuery]);
 
+  const mediaOnly = useMemo(
+    () => filtered.filter((e) => isMedia(e.type)),
+    [filtered]
+  );
+
+  const mediaOnlyIndexMap = useMemo(
+    () => new Map(mediaOnly.map((e, index) => [e, index])),
+    [mediaOnly]
+  );
+
   // Modal config
   const { isOpen, openModal, closeModal } = useModalNavigation();
 
@@ -52,14 +62,15 @@ export function Explorer({ listing }: ExplorerProps) {
       }
 
       if (isMedia(node.type)) {
+        const mediaIndex = mediaOnlyIndexMap.get(node) ?? index;
         openModal();
-        setInitialIndex(index);
+        setInitialIndex(mediaIndex);
         return;
       }
 
       toast.warning("このファイル形式は対応していません");
     },
-    [openModal, router]
+    [mediaOnlyIndexMap, openModal, router]
   );
 
   // Favorites
@@ -91,18 +102,17 @@ export function Explorer({ listing }: ExplorerProps) {
   // 自動ビューア起動
   useEffect(() => {
     if (!autoMode) return;
-
-    const mediaNodes = filtered.filter((n) => isMedia(n.type));
-    if (mediaNodes.length === 0) return;
+    if (mediaOnly.length === 0) return;
 
     const targetIndex =
       autoMode === "first"
-        ? filtered.indexOf(mediaNodes[0])
-        : filtered.indexOf(mediaNodes[mediaNodes.length - 1]);
+        ? mediaOnlyIndexMap.get(mediaOnly[0])
+        : mediaOnlyIndexMap.get(mediaOnly[mediaOnly.length - 1]);
 
     setTimeout(() => {
+      console.log("自動ビューア起動");
       openModal();
-      setInitialIndex(targetIndex);
+      setInitialIndex(targetIndex ?? 0);
 
       // クエリを消す（リロード対策）
       const url = new URL(window.location.href);
@@ -111,7 +121,7 @@ export function Explorer({ listing }: ExplorerProps) {
         window.history.replaceState(null, "", url.pathname + url.search);
       }
     }, 0);
-  }, [autoMode, filtered, handleOpen, listing.path, openModal, router]);
+  }, [autoMode, mediaOnlyIndexMap, mediaOnly, openModal]);
 
   // フォルダー訪問履歴更新
   useCallOnceWhenChanged(() => {
@@ -149,7 +159,7 @@ export function Explorer({ listing }: ExplorerProps) {
 
         {isOpen && (
           <MediaViewer
-            items={filtered}
+            items={mediaOnly}
             initialIndex={initialIndex}
             onClose={closeModal}
             openFolderMenu={false}
