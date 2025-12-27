@@ -5,6 +5,8 @@ import { Button } from "@/shadcn/components/ui/button";
 import { ArrowRight, ArrowUpRight, FolderPlus, History } from "lucide-react"; // アイコン追加
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   // TODO: ユーザー認証機能実装後に差し替える
   const folders = await getRecentFolders(USER);
