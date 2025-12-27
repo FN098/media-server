@@ -1,6 +1,6 @@
-import { existsDir } from "@/lib/fs";
 import { MediaFsListing, MediaFsNode } from "@/lib/media/types";
 import { getMediaPath } from "@/lib/path-helpers";
+import { existsDir } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
 import { detectMediaType, isMedia } from "./detector";
