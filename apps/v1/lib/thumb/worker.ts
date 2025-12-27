@@ -24,4 +24,14 @@ export const startThumbWorker = () => {
   worker.on("failed", (job, err) => {
     console.error(`[Job ${job?.id}] Failed: ${err.message}`);
   });
+
+  // プロセス終了信号を受け取った時の処理
+  const gracefulShutdown = async (signal: string) => {
+    console.log(`Received ${signal}, closing worker...`);
+    await worker.close(); // 新規ジョブの受付を停止し、実行中のジョブを待つ
+    process.exit(0);
+  };
+
+  process.on("SIGTERM", () => void gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => void gracefulShutdown("SIGINT"));
 };
