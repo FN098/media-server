@@ -1,3 +1,4 @@
 export interface ThumbJobData {
-  dirPath: string;
+  dirPath?: string;
+  filePath?: string;
 }

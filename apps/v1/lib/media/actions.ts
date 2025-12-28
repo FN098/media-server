@@ -1,6 +1,6 @@
 "use server";
 
-import { getMediaFsNodes } from "@/lib/media/listing";
+import { getMediaFsNodes } from "@/lib/media/fs";
 import { syncMediaDir } from "@/lib/media/sync";
 
 export async function syncMediaDirAction(dirPath: string) {

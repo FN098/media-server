@@ -1,7 +1,7 @@
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
 import { getDbFolders } from "@/lib/folder/repository";
-import { getMediaFsListing } from "@/lib/media/listing";
+import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getDbMedia } from "@/lib/media/repository";
 import { sortMediaFsNodes } from "@/lib/media/sort";

@@ -136,6 +136,22 @@ export async function getMediaFsNodes(dirPath: string): Promise<MediaFsNode[]> {
   return nodes;
 }
 
+export async function getMediaFsNode(filePath: string): Promise<MediaFsNode> {
+  const absolutePath = getMediaPath(filePath);
+  const stat = await fs.stat(absolutePath);
+  const isDirectory = stat.isDirectory();
+  const fileName = path.basename(filePath);
+
+  return {
+    name: fileName,
+    path: filePath.replace(/\\/g, "/"),
+    isDirectory: isDirectory,
+    type: isDirectory ? "directory" : detectMediaType(fileName),
+    size: isDirectory ? undefined : stat.size,
+    mtime: stat.mtime,
+  };
+}
+
 export async function getMediaFsListing(
   dirPath: string
 ): Promise<MediaFsListing | null> {

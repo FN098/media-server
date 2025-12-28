@@ -1,4 +1,4 @@
-import { getMediaFsNodes } from "@/lib/media/listing";
+import { getMediaFsNode, getMediaFsNodes } from "@/lib/media/fs";
 import { createThumbsIfNotExists } from "@/lib/thumb/create";
 import { ThumbJobData } from "@/lib/thumb/types";
 import { Worker } from "bullmq";
@@ -10,13 +10,33 @@ export const startThumbWorker = () => {
   const worker = new Worker<ThumbJobData>(
     "thumbs",
     async (job) => {
-      const { dirPath } = job.data;
-      console.log(`[Job ${job.id}] Processing: ${dirPath}`);
+      // ジョブ名で分岐
+      switch (job.name) {
+        case "create-thumbs": {
+          const { dirPath } = job.data;
+          if (!dirPath)
+            throw new Error("dirPath is required for create-thumbs");
 
-      const nodes = await getMediaFsNodes(dirPath);
-      await createThumbsIfNotExists(nodes);
+          console.log(`[Job ${job.id}] Batch Processing: ${dirPath}`);
+          const nodes = await getMediaFsNodes(dirPath);
+          await createThumbsIfNotExists(nodes);
+          break;
+        }
 
-      console.log(`[Job ${job.id}] Completed`);
+        case "create-thumb-single": {
+          const { filePath } = job.data;
+          if (!filePath)
+            throw new Error("filePath is required for create-thumb-single");
+
+          console.log(`[Job ${job.id}] Single Processing: ${filePath}`);
+          const node = await getMediaFsNode(filePath);
+          await createThumbsIfNotExists([node]);
+          break;
+        }
+
+        default:
+          console.warn(`Unknown job name: ${job.name}`);
+      }
     },
     { connection }
   );

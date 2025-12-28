@@ -8,6 +8,7 @@ interface FallbackImageProps extends ImageProps {
 export function FallbackImage({
   fallback,
   alt = "",
+  onError,
   ...props
 }: FallbackImageProps) {
   const [error, setError] = useState(false);
@@ -16,5 +17,14 @@ export function FallbackImage({
     return fallback;
   }
 
-  return <Image {...props} alt={alt} onError={() => setError(true)} />;
+  return (
+    <Image
+      {...props}
+      alt={alt}
+      onError={(e) => {
+        setError(true);
+        onError?.(e);
+      }}
+    />
+  );
 }
