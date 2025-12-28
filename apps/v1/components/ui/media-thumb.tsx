@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { FallbackImage } from "@/components/ui/fallback-image";
 import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
-import { getParentDirPath, getThumbUrl } from "@/lib/path-helpers";
-import { enqueueThumbJob } from "@/lib/thumb/actions";
+import { getThumbUrl } from "@/lib/path-helpers";
+import { enqueueThumbJobByFilePath } from "@/lib/thumb/actions";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, ReactNode, useRef } from "react";
 
@@ -46,9 +46,8 @@ export function MediaThumbImage({
     requested.current = true;
 
     try {
-      const parentDirPath = getParentDirPath(node.path);
-      await enqueueThumbJob(parentDirPath);
-      console.log(`Job enqueued for: ${parentDirPath}`);
+      await enqueueThumbJobByFilePath(node.path);
+      console.log(`Job enqueued for: ${node.path}`);
     } catch (err) {
       console.error("Failed to enqueue thumb job", err);
     }

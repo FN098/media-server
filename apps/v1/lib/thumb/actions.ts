@@ -1,5 +1,6 @@
 "use server";
 
+import { getParentDirPath } from "@/lib/path-helpers";
 import { thumbQueue } from "@/lib/thumb/queue";
 
 export async function enqueueThumbJob(dirPath: string) {
@@ -24,4 +25,9 @@ export async function enqueueSingleThumbJob(filePath: string) {
       removeOnFail: { count: 100 },
     }
   );
+}
+
+export async function enqueueThumbJobByFilePath(filePath: string) {
+  const parentDir = getParentDirPath(filePath);
+  return await enqueueThumbJob(parentDir);
 }
