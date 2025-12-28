@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderStatusBadge } from "@/components/ui/last-viewed-badge";
+import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { LocalDateValue } from "@/components/ui/local-date";
 import { MediaThumbIcon } from "@/components/ui/media-thumb";
 import { MediaNode } from "@/lib/media/types";

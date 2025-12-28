@@ -1,5 +1,5 @@
 import type { VisitedFolder } from "@/generated/prisma/client";
-import { DbFolder } from "@/lib/folder/types";
+import { DbFavoriteInfo, DbVisitedInfo } from "@/lib/folder/types";
 import { prisma } from "@/lib/prisma";
 
 export async function getRecentFolders(
@@ -13,11 +13,15 @@ export async function getRecentFolders(
   });
 }
 
-export async function getDbFolders(
+export async function getDbVisitedInfo(
   dirPaths: string[],
   userId: string
-): Promise<DbFolder[]> {
+): Promise<DbVisitedInfo[]> {
   const folders = await prisma.visitedFolder.findMany({
+    select: {
+      dirPath: true,
+      lastViewedAt: true,
+    },
     where: {
       userId,
       dirPath: { in: dirPaths },
@@ -28,4 +32,25 @@ export async function getDbFolders(
     path: e.dirPath,
     lastViewedAt: e.lastViewedAt,
   }));
+}
+
+export async function getDbFavoriteCount(
+  dirPaths: string[],
+  userId: string
+): Promise<DbFavoriteInfo[]> {
+  return await Promise.all(
+    dirPaths.map(async (d) => {
+      const count = await prisma.favorite.count({
+        where: {
+          media: { path: { startsWith: d + "/" } },
+          userId,
+        },
+      });
+
+      return {
+        path: d,
+        favoriteCountInFolder: count,
+      } satisfies DbFavoriteInfo;
+    })
+  );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { GridViewFavoriteButton } from "@/components/ui/favorite-button";
-import { FolderStatusBadge } from "@/components/ui/last-viewed-badge";
+import { FavoriteCountBadge } from "@/components/ui/favorite-count-badge";
+import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { useGridViewConfig } from "@/hooks/use-grid-view";
@@ -108,6 +109,14 @@ export const GridView = memo(function GridView1({
                       <FolderStatusBadge
                         date={node.lastViewedAt}
                         className="absolute top-1 right-1"
+                      />
+                    )}
+
+                    {/* ★ お気に入り数バッジ */}
+                    {node.isDirectory && (
+                      <FavoriteCountBadge
+                        count={node.favoriteCount ?? 0}
+                        className="absolute top-1 left-1"
                       />
                     )}
                   </div>

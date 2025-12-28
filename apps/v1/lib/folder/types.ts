@@ -1,5 +1,9 @@
-export type DbFolder = {
+export type DbVisitedInfo = {
   path: string;
-  title?: string;
   lastViewedAt: Date;
+};
+
+export type DbFavoriteInfo = {
+  path: string;
+  favoriteCountInFolder: number;
 };

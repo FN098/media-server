@@ -1,6 +1,6 @@
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
-import { getDbFolders } from "@/lib/folder/repository";
+import { getDbFavoriteCount, getDbVisitedInfo } from "@/lib/folder/repository";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getDbMedia } from "@/lib/media/repository";
@@ -35,15 +35,19 @@ export default async function Page(props: {
     order: sortOrder,
   });
 
+  // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
   const dbMedia = await getDbMedia(dirPath, USER);
+
   const dirPaths = listing.nodes
     .filter((e) => e.isDirectory)
     .map((e) => e.path);
-  const dbFolders = await getDbFolders(dirPaths, USER);
+
+  const dbVisited = await getDbVisitedInfo(dirPaths, USER);
+  const dbFavorites = await getDbFavoriteCount(dirPaths, USER);
 
   // マージ
-  const merged = mergeFsWithDb(sorted, dbMedia, dbFolders);
+  const merged = mergeFsWithDb(sorted, dbMedia, dbVisited, dbFavorites);
 
   return (
     <Explorer
