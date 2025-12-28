@@ -5,7 +5,7 @@ import { getParentDirPath, getThumbUrl } from "@/lib/path-helpers";
 import { enqueueThumbJobByFilePath } from "@/lib/thumb/actions";
 import { useThumbEventObserver } from "@/providers/thumb-event-provider";
 import { cn } from "@/shadcn/lib/utils";
-import { memo, ReactNode, useCallback, useRef, useState } from "react";
+import { memo, ReactNode, useCallback, useState } from "react";
 
 type MediaThumbProps = {
   node: MediaNode;
@@ -44,31 +44,52 @@ function MediaThumbImage({
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [version, setVersion] = useState(0);
-  const requestSent = useRef(false);
+  const [requested, setRequested] = useState(false);
 
   // サムネイル作成完了イベントの監視
   useThumbEventObserver((event) => {
-    const parentDir = getParentDirPath(node.path);
-    if (event.dirPath === parentDir || event.filePath === node.path) {
-      setVersion(Date.now());
-      setIsProcessing(false);
+    console.log("Event received:", event, "Node path:", node.path);
+
+    const { filePath, dirPath } = event;
+    if (
+      (dirPath && dirPath === getParentDirPath(node.path)) ||
+      (filePath && filePath === node.path)
+    ) {
+      // 完了イベントを受け取ったら、少しだけ遅延させてから version を更新する
+      // (サーバー側のファイル書き込み完了との競合を避けるため)
+      setTimeout(() => {
+        setVersion(Date.now());
+        setIsProcessing(false);
+        setRequested(false);
+      }, 200);
     }
   });
 
   // サムネイル作成依頼イベントを発行
   const handleError = useCallback(async () => {
-    if (requestSent.current) return;
-    requestSent.current = true;
+    if (requested) return;
+    setRequested(true);
     setIsProcessing(true);
-    await enqueueThumbJobByFilePath(node.path);
-  }, [node.path]);
+
+    try {
+      await enqueueThumbJobByFilePath(node.path);
+    } catch (e) {
+      console.error("Failed to enqueue thumb job", e);
+      setIsProcessing(false);
+      setRequested(false); // 失敗時は再試行可能にする
+    }
+  }, [node.path, requested]);
 
   const thumbSrc = getThumbUrl(node.path);
-  const key = `${thumbSrc}?v=${version}`;
+
+  // version が 0（初期状態）のときはクエリなし、
+  // 更新イベントを受け取った後はクエリありにする
+  const finalSrc = version > 0 ? `${thumbSrc}?v=${version}` : thumbSrc;
 
   return (
     <FallbackImage
-      src={key}
+      key={`${node.path}-${version}`}
+      src={finalSrc}
       alt={node.name}
       fill
       className={cn(
