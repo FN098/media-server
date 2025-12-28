@@ -125,10 +125,6 @@ type SidebarTriggerProps = React.ComponentProps<typeof Button> & {
   open: boolean;
 };
 
-/**
- * Shadcn UI カスタム
- * @see \@/shadcn/components/ui/sidebar > SidebarTrigger
- */
 function SidebarTrigger({
   className,
   onClick,
