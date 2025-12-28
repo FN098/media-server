@@ -1,3 +1,4 @@
+import { sortNames } from "@/lib/media/sort";
 import { MediaFsListing, MediaFsNode } from "@/lib/media/types";
 import { getMediaPath } from "@/lib/path-helpers";
 import { existsDir } from "@/lib/utils/fs";
@@ -30,10 +31,11 @@ async function findDeepestMediaFolder(
   // 2. 直下にないなら、子フォルダを探索
   const absolutePath = getMediaPath(dirPath);
   const dirents = await fs.readdir(absolutePath, { withFileTypes: true });
-  const subDirs = dirents
-    .filter((e) => e.isDirectory())
-    .map((e) => e.name)
-    .sort(); // 名前順
+
+  // フォルダのみ抽出し、自然順でソート
+  const subDirs = sortNames(
+    dirents.filter((e) => e.isDirectory()).map((e) => e.name)
+  );
 
   // 前に戻る時は「最後の子」から、次に進む時は「最初の子」から探す
   const targetDirs = priority === "last" ? subDirs.reverse() : subDirs;
@@ -90,10 +92,11 @@ async function findGlobalAdjacentFolder(
   const parentDirents = await fs.readdir(parentTargetDir, {
     withFileTypes: true,
   });
-  const siblingDirs = parentDirents
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name)
-    .sort();
+
+  // 兄弟フォルダを自然順でソート
+  const siblingDirs = sortNames(
+    parentDirents.filter((d) => d.isDirectory()).map((d) => d.name)
+  );
 
   const currentDirName = currentPath.split("/").pop();
   const currentIndex = siblingDirs.indexOf(currentDirName!);
