@@ -20,11 +20,15 @@ export function useShowUI({ delay = 3000, disabled = false }: Option) {
     debouncedHideUI();
   }, [debouncedHideUI]);
 
+  const toggleShowUI = useCallback(() => {
+    setShowUI((prev) => !prev);
+  }, []);
+
   // 初回レンダリング時
   useEffect(() => {
     debouncedHideUI();
     return () => debouncedHideUI.cancel(); // アンマウント時の掃除
   }, [debouncedHideUI, showUI]);
 
-  return { showUI, setShowUI, handleInteraction };
+  return { showUI, toggleShowUI, handleInteraction };
 }

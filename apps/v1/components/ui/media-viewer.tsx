@@ -69,7 +69,7 @@ export function MediaViewer({
   const [index, setIndex] = useState(initialIndex);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { showUI, handleInteraction } = useShowUI({
+  const { showUI, toggleShowUI, handleInteraction } = useShowUI({
     delay: 2000,
     disabled: isHovered || isMenuOpen,
   });
@@ -101,6 +101,7 @@ export function MediaViewer({
   useShortcutKeys([
     { key: "Escape", callback: onClose },
     { key: "f", callback: () => void handleToggleFavorite() },
+    { key: "Enter", callback: toggleShowUI },
   ]);
 
   const hasPrev = !!onPrevFolder;
