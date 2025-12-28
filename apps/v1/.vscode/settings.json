@@ -18,5 +18,12 @@
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
-  "prisma.pinToPrisma6": true
+  "prisma.pinToPrisma6": true,
+  "launch": {
+    "outFiles": [],
+    "resolveSourceMapLocations": [
+      "!**/node_modules/**",
+      "!**/generated/prisma/**"
+    ]
+  }
 }
