@@ -4,16 +4,25 @@ import { ThumbJobData } from "@/lib/thumb/types";
 import { Worker } from "bullmq";
 import { connection } from "./queue";
 
+const EXPIRE_MS = 1000 * 60 * 10; // 10分
+
 export const startThumbWorker = () => {
   console.log("🚀 Worker process started");
 
   const worker = new Worker<ThumbJobData>(
     "thumbs",
     async (job) => {
+      const { dirPath, filePath, createdAt } = job.data;
+
+      // 発行から時間が経ちすぎたジョブは処理せず破棄
+      if (Date.now() - createdAt > EXPIRE_MS) {
+        console.log("Job expired, skipping...");
+        return;
+      }
+
       switch (job.name) {
         // フォルダ単位でサムネイル作成
         case "create-thumbs": {
-          const { dirPath } = job.data;
           if (!dirPath)
             throw new Error("dirPath is required for create-thumbs");
 
@@ -33,7 +42,6 @@ export const startThumbWorker = () => {
 
         // ファイル単位でサムネイル作成
         case "create-thumb-single": {
-          const { filePath } = job.data;
           if (!filePath)
             throw new Error("filePath is required for create-thumb-single");
 
