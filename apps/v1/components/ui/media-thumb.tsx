@@ -48,20 +48,27 @@ function MediaThumbImage({
 
   // サムネイル作成完了イベントの監視
   useThumbEventObserver((event) => {
+    if (!isProcessing) return; // イベント発行していない場合は無視
+
     console.log("Event received:", event, "Node path:", node.path);
 
     const { filePath, dirPath } = event;
-    if (
-      (dirPath && dirPath === getParentDirPath(node.path)) ||
-      (filePath && filePath === node.path)
-    ) {
-      // 完了イベントを受け取ったら、少しだけ遅延させてから version を更新する
-      // (サーバー側のファイル書き込み完了との競合を避けるため)
-      setTimeout(() => {
-        setVersion(Date.now());
-        setIsProcessing(false);
-        setRequested(false);
-      }, 200);
+
+    const update = () => {
+      setVersion(Date.now());
+      setIsProcessing(false);
+      setRequested(false);
+    };
+
+    if (filePath && filePath === node.path) {
+      // ファイル一致なら即時
+      update();
+      return; // 処理完了したので抜ける
+    }
+
+    if (dirPath && dirPath === getParentDirPath(node.path)) {
+      // ディレクトリ一致なら少し待つ
+      setTimeout(update, 300); // 念のため少し長めに
     }
   });
 

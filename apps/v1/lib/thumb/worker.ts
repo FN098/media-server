@@ -1,6 +1,8 @@
 import { getMediaFsNode, getMediaFsNodes } from "@/lib/media/fs";
+import { sortMediaFsNodes } from "@/lib/media/sort";
 import { createThumbsIfNotExists } from "@/lib/thumb/create";
 import { ThumbJobData } from "@/lib/thumb/types";
+import { chunk } from "@/lib/utils/chunk";
 import { Worker } from "bullmq";
 import { connection } from "./queue";
 
@@ -28,9 +30,34 @@ export const startThumbWorker = () => {
 
           console.log(`[Job ${job.id}] Batch Processing: ${dirPath}`);
           const nodes = await getMediaFsNodes(dirPath);
-          await createThumbsIfNotExists(nodes);
 
-          // 完了通知イベントを発行
+          // 名前順（表示順）に処理するためにソート
+          const sorted = sortMediaFsNodes(nodes);
+
+          // 1. チャンク分けして処理（例: 10枚ずつ）
+          const chunks = chunk(sorted, 10);
+          let completed = 0;
+          for (const chunk of chunks) {
+            // サムネイル作成（このチャンク分が完了するまで待つ）
+            await createThumbsIfNotExists(chunk);
+
+            // 2. 通知は「待たずに」実行。ただしエラーハンドリングはしておく
+            Promise.all(
+              chunk.map((node) =>
+                connection.publish(
+                  "thumb-completed",
+                  JSON.stringify({ filePath: node.path })
+                )
+              )
+            ).catch((err) => console.error("Publish error:", err));
+
+            completed += chunk.length;
+            console.log(
+              `[Job ${job.id}] Progress: ${completed}/${nodes.length}`
+            );
+          }
+
+          // 3. 最後にディレクトリ単位での完了通知を発行（念のためのバックアップ）
           await connection.publish(
             "thumb-completed",
             JSON.stringify({ dirPath })
