@@ -105,6 +105,7 @@ export function MediaViewer({
     { key: "Escape", callback: onClose },
     { key: "f", callback: () => void handleToggleFavorite() },
     { key: "Enter", callback: toggleShowUI },
+    { key: " ", callback: toggleShowUI },
     { key: "a", callback: () => swiperInstance?.slidePrev() },
     { key: "d", callback: () => swiperInstance?.slideNext() },
   ]);
