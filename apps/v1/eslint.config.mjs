@@ -21,6 +21,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "generated/**",
+    "shadcn/**",
+    "eslint.config.mjs", // このファイル自身
+    "postcss.config.mjs",
+    "prisma/**",
+    "public/**",
+    ".vscode/**",
   ]),
 ]);
 
