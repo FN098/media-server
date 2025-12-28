@@ -3,10 +3,8 @@
 import { GridView } from "@/components/ui/grid-view-v2";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import {
-  useAutoOpenViewer,
-  useFolderNavigation,
-} from "@/hooks/use-auto-open-viewer";
+import { useAutoOpenViewer } from "@/hooks/use-auto-open-viewer";
+import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useModalNavigation } from "@/hooks/use-modal-navigation";
 import { visitFolderAction } from "@/lib/folder/actions";
 import { syncMediaDirAction } from "@/lib/media/actions";
@@ -32,8 +30,8 @@ type ExplorerProps = {
 export function Explorer({ listing }: ExplorerProps) {
   const { query } = useSearch();
   const { view } = useViewMode();
-  const router = useRouter();
   const [initialIndex, setInitialIndex] = useState(0);
+  const router = useRouter();
 
   // Media filter
   const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
@@ -84,7 +82,7 @@ export function Explorer({ listing }: ExplorerProps) {
   );
 
   // Open next/prev folder
-  const { handleFolderNavigation } = useFolderNavigation();
+  const { navigateToFolder } = useFolderNavigation();
 
   // Auto open viewer
   useAutoOpenViewer(mediaOnly.length, (index) => {
@@ -132,12 +130,12 @@ export function Explorer({ listing }: ExplorerProps) {
             openFolderMenu={false}
             onPrevFolder={
               listing.prev
-                ? () => handleFolderNavigation(listing.prev!, "last")
+                ? () => navigateToFolder(listing.prev!, "last")
                 : undefined
             }
             onNextFolder={
               listing.next
-                ? () => handleFolderNavigation(listing.next!, "first")
+                ? () => navigateToFolder(listing.next!, "first")
                 : undefined
             }
           />
