@@ -1,6 +1,6 @@
 "use client";
 
-import { GridView } from "@/components/ui/grid-view-v2";
+import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { useAutoOpenViewer } from "@/hooks/use-auto-open-viewer";
