@@ -63,12 +63,12 @@ function MediaThumbImage({
     await enqueueThumbJobByFilePath(node.path);
   }, [node.path]);
 
-  // src に query を付けて再読み込みを強制
-  const thumbSrc = `${getThumbUrl(node.path)}?v=${version}`;
+  const thumbSrc = getThumbUrl(node.path);
+  const key = `${thumbSrc}?v=${version}`;
 
   return (
     <FallbackImage
-      src={thumbSrc}
+      src={key}
       alt={node.name}
       fill
       className={cn(
