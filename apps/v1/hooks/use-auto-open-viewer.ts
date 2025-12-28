@@ -6,18 +6,17 @@ export function useAutoOpenViewer(
   onOpen: (index: number) => void
 ) {
   const searchParams = useSearchParams();
-  const autoMode = searchParams.get("auto");
-
+  const auto = searchParams.get("auto");
   const consumedRef = useRef(false);
 
   useLayoutEffect(() => {
-    if (!autoMode) return;
+    if (!auto) return;
     if (mediaCount === 0) return;
     if (consumedRef.current) return;
 
     consumedRef.current = true;
 
-    const targetIndex = autoMode === "last" ? mediaCount - 1 : 0;
+    const targetIndex = auto === "last" ? mediaCount - 1 : 0;
     onOpen(targetIndex);
-  }, [autoMode, mediaCount, onOpen]);
+  }, [auto, mediaCount, onOpen]);
 }
