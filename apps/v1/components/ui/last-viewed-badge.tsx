@@ -1,3 +1,5 @@
+import { useMounted } from "@/hooks/use-mounted";
+import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -10,6 +12,9 @@ export const FolderStatusBadge = ({
   date?: Date | string | null;
   className?: string;
 }) => {
+  const mounted = useMounted();
+  if (!mounted) return <Skeleton />;
+
   if (!date) {
     return (
       <div
