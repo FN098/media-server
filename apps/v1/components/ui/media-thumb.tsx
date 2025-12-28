@@ -4,7 +4,7 @@ import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
 import { getThumbUrl } from "@/lib/path-helpers";
 import { enqueueThumbJobByFilePath } from "@/lib/thumb/actions";
 import { cn } from "@/shadcn/lib/utils";
-import { memo, ReactNode, useRef } from "react";
+import { memo, ReactNode, useRef, useState } from "react";
 
 type MediaThumbProps = {
   node: MediaNode;
@@ -39,23 +39,32 @@ export function MediaThumbImage({
   className?: string;
 }) {
   const requested = useRef(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   const handleError = async () => {
     if (requested.current) return;
+    requested.current = true;
+    setIsProcessing(true);
 
     requested.current = true;
 
-    try {
-      await enqueueThumbJobByFilePath(node.path);
-      console.log(`Job enqueued for: ${node.path}`);
-    } catch (err) {
-      console.error("Failed to enqueue thumb job", err);
-    }
+    await enqueueThumbJobByFilePath(node.path);
+
+    // 3秒後と6秒後に再試行（Workerの処理時間を待つ）
+    setTimeout(() => setRetryCount(1), 3000);
+    setTimeout(() => {
+      setRetryCount(2);
+      setIsProcessing(false); // 2回試してダメなら一旦停止
+    }, 6000);
   };
+
+  // src に query を付けて再読み込みを強制
+  const thumbSrc = `${getThumbUrl(node.path)}?v=${retryCount}`;
 
   return (
     <FallbackImage
-      src={getThumbUrl(node.path)}
+      src={thumbSrc}
       alt={node.name}
       fill
       className={cn(
@@ -70,7 +79,7 @@ export function MediaThumbImage({
             className
           )}
         >
-          {requested ? (
+          {isProcessing ? (
             <span className="animate-pulse">Processing...</span>
           ) : (
             <MediaThumbIcon type={node.type} />
