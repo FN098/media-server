@@ -1,10 +1,13 @@
 "use client";
 
+import { ListViewFavoriteButton } from "@/components/ui/favorite-button";
+import { FavoriteCountBadge } from "@/components/ui/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { LocalDateValue } from "@/components/ui/local-date";
 import { MediaThumbIcon } from "@/components/ui/media-thumb";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/formatter";
+import { useFavorite } from "@/providers/favorite-provider";
 import {
   Table,
   TableBody,
@@ -16,6 +19,7 @@ import {
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, useRef } from "react";
+import { toast } from "sonner";
 
 type ListViewProps = {
   nodes: MediaNode[];
@@ -39,6 +43,7 @@ export const ListView = memo(function ListView1({
             <TableHead>Updated</TableHead>
             <TableHead>Size</TableHead>
             <TableHead>Last Viewed</TableHead>
+            <TableHead>Favorite</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -65,6 +70,17 @@ type RowItemProps = {
 };
 
 function RowItem({ node, onClick, onDoubleClick, className }: RowItemProps) {
+  const favoriteCtx = useFavorite();
+
+  const handleToggleFavorite = async (node: MediaNode) => {
+    try {
+      await favoriteCtx.toggleFavorite(node.path);
+    } catch (e) {
+      console.error(e);
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  };
+
   return (
     <TableRow
       onClick={onClick}
@@ -85,6 +101,19 @@ function RowItem({ node, onClick, onDoubleClick, className }: RowItemProps) {
       <TableCell>
         {node.isDirectory && (
           <FolderStatusBadge date={node.lastViewedAt} className="border-none" />
+        )}
+      </TableCell>
+      <TableCell>
+        {node.isDirectory ? (
+          <FavoriteCountBadge
+            count={node.favoriteCount ?? 0}
+            className="border-none"
+          />
+        ) : (
+          <ListViewFavoriteButton
+            active={favoriteCtx.isFavorite(node.path)}
+            onToggle={() => void handleToggleFavorite(node)}
+          />
         )}
       </TableCell>
     </TableRow>

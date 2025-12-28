@@ -39,6 +39,37 @@ export function GridViewFavoriteButton({
   );
 }
 
+export function ListViewFavoriteButton({
+  active,
+  onToggle,
+  className,
+}: FavoriteButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle();
+      }}
+      className={cn(
+        "relative flex items-center justify-center rounded-md p-1 transition-colors",
+        "hover:bg-muted focus-visible:outline-none",
+        className
+      )}
+      aria-label="お気に入り"
+    >
+      <Star
+        className={cn(
+          "h-4 w-4 transition-all",
+          active
+            ? "fill-yellow-400 text-yellow-400 scale-110"
+            : "text-muted-foreground/50 hover:text-muted-foreground"
+        )}
+      />
+    </button>
+  );
+}
+
 export function MediaViewerFavoriteButton({
   active,
   onToggle,
