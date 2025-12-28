@@ -4,7 +4,7 @@ import { GridViewFavoriteButton } from "@/components/ui/favorite-button";
 import { FolderStatusBadge } from "@/components/ui/last-viewed-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
-import { useGridView } from "@/hooks/use-grid-view";
+import { useGridViewConfig } from "@/hooks/use-grid-view";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
@@ -23,7 +23,7 @@ export const GridView = memo(function GridView1({
 }: GridViewProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const favoriteCtx = useFavorite();
-  const { columnCount, rowHeight } = useGridView(parentRef);
+  const { columnCount, rowHeight } = useGridViewConfig(parentRef);
   const rowCount = Math.ceil(nodes.length / columnCount);
 
   // 1. バーチャライザーの設定

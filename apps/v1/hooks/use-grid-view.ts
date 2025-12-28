@@ -6,7 +6,7 @@ type GridViewConfig = {
   rowHeight: number;
 };
 
-export function useGridView(
+export function useGridViewConfig(
   ref: React.RefObject<HTMLElement | null>,
   options: Omit<GridViewConfig, "columnCount"> = {
     columnWidth: 200,
