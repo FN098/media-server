@@ -1,10 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import { FallbackImage } from "@/components/ui/fallback-image";
 import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
-import { getThumbUrl } from "@/lib/path-helpers";
+import { getParentDirPath, getThumbUrl } from "@/lib/path-helpers";
 import { enqueueThumbJobByFilePath } from "@/lib/thumb/actions";
+import { useThumbEventObserver } from "@/providers/thumb-event-provider";
 import { cn } from "@/shadcn/lib/utils";
-import { memo, ReactNode, useRef, useState } from "react";
+import { memo, ReactNode, useCallback, useRef, useState } from "react";
 
 type MediaThumbProps = {
   node: MediaNode;
@@ -15,52 +16,55 @@ export const MediaThumb = memo(function MediaThumb1({
   node,
   className,
 }: MediaThumbProps) {
-  if (node.type === "image" || node.type === "video") {
-    return <MediaThumbImage node={node} className={className} />;
-  } else {
-    return (
-      <div
-        className={cn(
-          "flex h-full w-full items-center justify-center",
-          className
-        )}
-      >
-        <MediaThumbIcon type={node.type} />
-      </div>
-    );
+  switch (node.type) {
+    case "image":
+    case "video":
+      return <MediaThumbImage node={node} className={className} />;
+
+    default:
+      return (
+        <div
+          className={cn(
+            "flex h-full w-full items-center justify-center",
+            className
+          )}
+        >
+          <MediaThumbIcon type={node.type} />
+        </div>
+      );
   }
 });
 
-export function MediaThumbImage({
+function MediaThumbImage({
   node,
   className,
 }: {
   node: MediaNode;
   className?: string;
 }) {
-  const requested = useRef(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
+  const [version, setVersion] = useState(0);
+  const requestSent = useRef(false);
 
-  const handleError = async () => {
-    if (requested.current) return;
-    requested.current = true;
+  // サムネイル作成完了イベントの監視
+  useThumbEventObserver((event) => {
+    const parentDir = getParentDirPath(node.path);
+    if (event.dirPath === parentDir || event.filePath === node.path) {
+      setVersion(Date.now());
+      setIsProcessing(false);
+    }
+  });
+
+  // サムネイル作成依頼イベントを発行
+  const handleError = useCallback(async () => {
+    if (requestSent.current) return;
+    requestSent.current = true;
     setIsProcessing(true);
-
-    requested.current = true;
-
     await enqueueThumbJobByFilePath(node.path);
-
-    // 3秒後と6秒後に再試行（Workerの処理時間を待つ）
-    setTimeout(() => setRetryCount(1), 3000);
-    setTimeout(() => {
-      setRetryCount(2);
-      setIsProcessing(false); // 2回試してダメなら一旦停止
-    }, 6000);
-  };
+  }, [node.path]);
 
   // src に query を付けて再読み込みを強制
-  const thumbSrc = `${getThumbUrl(node.path)}?v=${retryCount}`;
+  const thumbSrc = `${getThumbUrl(node.path)}?v=${version}`;
 
   return (
     <FallbackImage
@@ -90,7 +94,7 @@ export function MediaThumbImage({
   );
 }
 
-export const mediaThumbIcons: Record<MediaFsNodeType, ReactNode> = {
+const mediaThumbIcons: Record<MediaFsNodeType, ReactNode> = {
   audio: (
     <img
       width="64"

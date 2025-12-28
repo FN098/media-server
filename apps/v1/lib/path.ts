@@ -37,5 +37,11 @@ export const PATHS = {
         },
       },
     },
+    thumb: {
+      root: "/api/thumb",
+      events: {
+        root: "/api/thumb/events",
+      },
+    },
   },
 } as const;

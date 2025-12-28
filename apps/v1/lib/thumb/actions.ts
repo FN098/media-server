@@ -9,8 +9,8 @@ export async function enqueueThumbJob(dirPath: string) {
     { dirPath },
     {
       jobId: `thumb-dir-${dirPath}`,
-      removeOnComplete: true,
-      removeOnFail: { count: 1000 },
+      removeOnComplete: true, // 完了したら ID を解放して次を許可
+      removeOnFail: false, // 失敗した場合は ID を残して連続再試行を抑制
     }
   );
 }
@@ -21,8 +21,8 @@ export async function enqueueSingleThumbJob(filePath: string) {
     { filePath },
     {
       jobId: `thumb-file-${filePath}`,
-      removeOnComplete: true,
-      removeOnFail: { count: 100 },
+      removeOnComplete: true, // 完了したら ID を解放して次を許可
+      removeOnFail: false, // 失敗した場合は ID を残して連続再試行を抑制
     }
   );
 }

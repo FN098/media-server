@@ -20,6 +20,14 @@ export const startThumbWorker = () => {
           console.log(`[Job ${job.id}] Batch Processing: ${dirPath}`);
           const nodes = await getMediaFsNodes(dirPath);
           await createThumbsIfNotExists(nodes);
+
+          // サムネイル生成が終わったことを通知
+          await connection.publish(
+            "thumb-completed",
+            JSON.stringify({ dirPath })
+          );
+
+          console.log(`[Job ${job.id}] Notified completion for: ${dirPath}`);
           break;
         }
 
@@ -31,6 +39,14 @@ export const startThumbWorker = () => {
           console.log(`[Job ${job.id}] Single Processing: ${filePath}`);
           const node = await getMediaFsNode(filePath);
           await createThumbsIfNotExists([node]);
+
+          // サムネイル生成が終わったことを通知
+          await connection.publish(
+            "thumb-completed",
+            JSON.stringify({ filePath })
+          );
+
+          console.log(`[Job ${job.id}] Notified completion for: ${filePath}`);
           break;
         }
 

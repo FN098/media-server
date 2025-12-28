@@ -40,3 +40,7 @@ export function getParentDirPath(filePath: string): string {
   // アプリケーションの仕様に合わせて調整（空文字にする等）
   return dir === "." ? "" : dir.replace(/\\/g, "/");
 }
+
+export function getThumbEventsUrl() {
+  return PATHS.api.thumb.events.root;
+}
