@@ -94,7 +94,9 @@ function MediaThumbImage({
       key={`${node.path}-${version}`}
       src={thumbSrc}
       alt={node.name}
-      fill
+      // fill
+      width={200}
+      height={200}
       className={cn(
         "transition-transform duration-500 hover:scale-110",
         className
