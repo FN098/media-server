@@ -10,8 +10,8 @@ export const startThumbWorker = () => {
   const worker = new Worker<ThumbJobData>(
     "thumbs",
     async (job) => {
-      // ジョブ名で分岐
       switch (job.name) {
+        // フォルダ単位でサムネイル作成
         case "create-thumbs": {
           const { dirPath } = job.data;
           if (!dirPath)
@@ -21,7 +21,7 @@ export const startThumbWorker = () => {
           const nodes = await getMediaFsNodes(dirPath);
           await createThumbsIfNotExists(nodes);
 
-          // サムネイル生成が終わったことを通知
+          // 完了通知イベントを発行
           await connection.publish(
             "thumb-completed",
             JSON.stringify({ dirPath })
@@ -31,6 +31,7 @@ export const startThumbWorker = () => {
           break;
         }
 
+        // ファイル単位でサムネイル作成
         case "create-thumb-single": {
           const { filePath } = job.data;
           if (!filePath)
@@ -40,7 +41,7 @@ export const startThumbWorker = () => {
           const node = await getMediaFsNode(filePath);
           await createThumbsIfNotExists([node]);
 
-          // サムネイル生成が終わったことを通知
+          // 完了通知イベントを発行
           await connection.publish(
             "thumb-completed",
             JSON.stringify({ filePath })
