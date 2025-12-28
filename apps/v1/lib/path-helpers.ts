@@ -32,3 +32,11 @@ export function getMediaThumbPath(mediaPath: string): string {
 export function getClientExplorerPath(mediaPath: string): string {
   return path.join(PATHS.client.explorer.root, mediaPath);
 }
+
+export function getParentDirPath(filePath: string): string {
+  const dir = path.dirname(filePath);
+
+  // path.dirname はルート付近で "." を返すことがあるため、
+  // アプリケーションの仕様に合わせて調整（空文字にする等）
+  return dir === "." ? "" : dir.replace(/\\/g, "/");
+}

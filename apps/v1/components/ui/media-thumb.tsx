@@ -1,9 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { FallbackImage } from "@/components/ui/fallback-image";
 import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
-import { getThumbUrl } from "@/lib/path-helpers";
+import { getParentDirPath, getThumbUrl } from "@/lib/path-helpers";
 import { enqueueThumbJob } from "@/lib/thumb/actions";
-import { getParentDirPath } from "@/lib/utils/path";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, ReactNode, useRef } from "react";
 
