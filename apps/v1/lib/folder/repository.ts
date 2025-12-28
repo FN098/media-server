@@ -38,19 +38,22 @@ export async function getDbFavoriteCount(
   dirPaths: string[],
   userId: string
 ): Promise<DbFavoriteInfo[]> {
-  return await Promise.all(
-    dirPaths.map(async (d) => {
-      const count = await prisma.favorite.count({
-        where: {
-          media: { path: { startsWith: d + "/" } },
-          userId,
-        },
-      });
-
-      return {
-        path: d,
-        favoriteCountInFolder: count,
-      } satisfies DbFavoriteInfo;
+  // 1. クエリの「準備」だけを行う（まだ実行しない）
+  const tasks = dirPaths.map((d) =>
+    prisma.favorite.count({
+      where: {
+        userId,
+        media: { path: { startsWith: d + "/" } },
+      },
     })
   );
+
+  // 2. 100個のクエリを一括で DB に送信
+  const counts = await prisma.$transaction(tasks);
+
+  // 3. 結果をマッピング
+  return dirPaths.map((d, index) => ({
+    path: d,
+    favoriteCountInFolder: counts[index],
+  }));
 }
