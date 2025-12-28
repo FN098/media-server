@@ -1,6 +1,6 @@
 "use client";
 
-import { ListViewFavoriteButton } from "@/components/ui/favorite-button";
+import { FavoriteButton } from "@/components/ui/favorite-button";
 import { FavoriteCountBadge } from "@/components/ui/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { LocalDateValue } from "@/components/ui/local-date";
@@ -110,7 +110,8 @@ function RowItem({ node, onClick, onDoubleClick, className }: RowItemProps) {
             className="border-none"
           />
         ) : (
-          <ListViewFavoriteButton
+          <FavoriteButton
+            variant="list"
             active={favoriteCtx.isFavorite(node.path)}
             onToggle={() => void handleToggleFavorite(node)}
           />

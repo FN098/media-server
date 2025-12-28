@@ -1,6 +1,6 @@
 "use client";
 
-import { GridViewFavoriteButton } from "@/components/ui/favorite-button";
+import { FavoriteButton } from "@/components/ui/favorite-button";
 import { FavoriteCountBadge } from "@/components/ui/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
@@ -98,7 +98,8 @@ export const GridView = memo(function GridView1({
 
                     {/* お気に入りボタン */}
                     {isMedia(node.type) && (
-                      <GridViewFavoriteButton
+                      <FavoriteButton
+                        variant="grid"
                         active={favoriteCtx.isFavorite(node.path)}
                         onToggle={() => void handleToggleFavorite(node)}
                       />

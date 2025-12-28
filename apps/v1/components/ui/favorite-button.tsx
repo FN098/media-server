@@ -3,78 +3,49 @@
 import { cn } from "@/shadcn/lib/utils";
 import { Star } from "lucide-react";
 
+type FavoriteButtonVariant = "grid" | "list" | "viewer";
+
 type FavoriteButtonProps = {
   active: boolean;
   onToggle: () => void;
+  variant: FavoriteButtonVariant;
   className?: string;
 };
 
-export function GridViewFavoriteButton({
+export function FavoriteButton({
   active,
   onToggle,
+  variant,
   className,
 }: FavoriteButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onToggle();
-      }}
-      className={cn(
-        "z-10 rounded-full p-1",
-        "bg-black/40 hover:bg-black/60 transition",
-        "absolute top-1 right-1",
-        className
-      )}
-      aria-label="お気に入り"
-    >
-      <Star
-        className={cn(
-          "h-5 w-5 transition",
-          active ? "fill-yellow-400 text-yellow-400" : "text-white"
-        )}
-      />
-    </button>
-  );
-}
+  // 1. ボタン全体のスタイル定義
+  const containerStyles = {
+    grid: "z-10 rounded-full p-1 bg-black/40 hover:bg-black/60 absolute top-1 right-1",
+    list: "relative flex items-center justify-center rounded-md p-1 hover:bg-muted focus-visible:outline-none",
+    viewer:
+      "p-2 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20",
+  };
 
-export function ListViewFavoriteButton({
-  active,
-  onToggle,
-  className,
-}: FavoriteButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onToggle();
-      }}
-      className={cn(
-        "relative flex items-center justify-center rounded-md p-1 transition-colors",
-        "hover:bg-muted focus-visible:outline-none",
-        className
-      )}
-      aria-label="お気に入り"
-    >
-      <Star
-        className={cn(
-          "h-4 w-4 transition-all",
-          active
-            ? "fill-yellow-400 text-yellow-400 scale-110"
-            : "text-muted-foreground/50 hover:text-muted-foreground"
-        )}
-      />
-    </button>
-  );
-}
+  // 2. アイコンのスタイル定義
+  const iconStyles = {
+    grid: cn(
+      "h-5 w-5",
+      active ? "fill-yellow-400 text-yellow-400" : "text-white"
+    ),
+    list: cn(
+      "h-4 w-4",
+      active
+        ? "fill-yellow-400 text-yellow-400 scale-110"
+        : "text-muted-foreground/50 hover:text-muted-foreground"
+    ),
+    viewer: cn(
+      "h-[28px] w-[28px]", // size={28} に相当
+      active
+        ? "fill-yellow-400 text-yellow-400 scale-110"
+        : "text-white/70 hover:text-white"
+    ),
+  };
 
-export function MediaViewerFavoriteButton({
-  active,
-  onToggle,
-  className,
-}: FavoriteButtonProps) {
   return (
     <button
       type="button"
@@ -82,22 +53,10 @@ export function MediaViewerFavoriteButton({
         e.stopPropagation();
         onToggle();
       }}
-      className={cn(
-        "p-2 transition-colors rounded-full flex items-center justify-center",
-        "bg-white/10 hover:bg-white/20",
-        className
-      )}
+      className={cn("transition-all", containerStyles[variant], className)}
       aria-label="お気に入り"
     >
-      <Star
-        size={28}
-        className={cn(
-          "transition-all",
-          active
-            ? "fill-yellow-400 text-yellow-400 scale-110"
-            : "text-white/70 hover:text-white"
-        )}
-      />
+      <Star className={cn("transition-all", iconStyles[variant])} />
     </button>
   );
 }

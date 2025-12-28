@@ -1,7 +1,7 @@
 "use client";
 
 import { AudioPlayer } from "@/components/ui/audio-player";
-import { MediaViewerFavoriteButton } from "@/components/ui/favorite-button";
+import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { VideoPlayer } from "@/components/ui/video-player";
@@ -166,7 +166,8 @@ export function MediaViewer({
             <div className="flex items-center gap-4">
               {/* お気に入りボタン */}
               {isMedia(items[index].type) && (
-                <MediaViewerFavoriteButton
+                <FavoriteButton
+                  variant="viewer"
                   active={favoriteCtx.isFavorite(items[index].path)}
                   onToggle={() => void handleToggleFavorite()}
                 />
