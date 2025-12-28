@@ -1,12 +1,10 @@
-import { MediaFsNode, MediaNode } from "@/lib/media/types";
+import { MediaFsNode } from "@/lib/media/types";
 
-type SortableNode = {
-  isDirectory: boolean;
-  name: string;
-};
+export type SortOrder = "asc" | "desc";
 
-type SortOptions<T> = {
+export type SortOptions<T> = {
   key: keyof T;
+  order?: SortOrder;
 };
 
 const collator = new Intl.Collator("ja-JP", {
@@ -15,39 +13,34 @@ const collator = new Intl.Collator("ja-JP", {
   ignorePunctuation: true, // 記号を無視
 });
 
-function sortLikeWindows<T extends SortableNode>(
-  nodes: T[],
-  options: SortOptions<T> = { key: "name" }
-): T[] {
-  return [...nodes].sort((a, b) => {
-    // フォルダ → ファイル
-    if (a.isDirectory !== b.isDirectory) {
-      return a.isDirectory ? -1 : 1;
-    }
-
-    const key = options.key;
-    const valueA = a[key];
-    const valueB = b[key];
-
-    // 名前を Windows Explorer 風に自然順ソート
-    return collator.compare(String(valueA), String(valueB));
-  });
-}
-
 export function sortNames(names: string[]): string[] {
   return [...names].sort((a, b) => collator.compare(a, b));
 }
 
 export function sortMediaFsNodes(
   nodes: MediaFsNode[],
-  options?: SortOptions<MediaFsNode>
+  options: SortOptions<MediaFsNode> = { key: "name", order: "asc" }
 ): MediaFsNode[] {
-  return sortLikeWindows(nodes, options);
-}
+  const { key = "name", order = "asc" } = options;
+  const modifier = order === "asc" ? 1 : -1;
 
-export function sortMediaNodes(
-  nodes: MediaNode[],
-  options?: SortOptions<MediaNode>
-): MediaNode[] {
-  return sortLikeWindows(nodes, options);
+  return [...nodes].sort((a, b) => {
+    // 1. フォルダ優先
+    if (a.isDirectory !== b.isDirectory) {
+      return a.isDirectory ? -1 : 1;
+    }
+
+    // 2. 指定されたキーで比較
+    if (key === "name") {
+      return collator.compare(a.name, b.name) * modifier;
+    }
+
+    const valA = a[key] ?? 0;
+    const valB = b[key] ?? 0;
+
+    if (valA < valB) return -1 * modifier;
+    if (valA > valB) return 1 * modifier;
+
+    return 0;
+  });
 }
