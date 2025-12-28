@@ -35,7 +35,7 @@ import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
 import { Keyboard, Navigation, Virtual, Zoom } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
 interface MediaViewerProps {
   items: MediaNode[];
@@ -75,6 +75,9 @@ export function MediaViewer({
   });
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
+  const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(
+    null
+  );
 
   useScrollLock();
 
@@ -102,6 +105,8 @@ export function MediaViewer({
     { key: "Escape", callback: onClose },
     { key: "f", callback: () => void handleToggleFavorite() },
     { key: "Enter", callback: toggleShowUI },
+    { key: "a", callback: () => swiperInstance?.slidePrev() },
+    { key: "d", callback: () => swiperInstance?.slideNext() },
   ]);
 
   const hasPrev = !!onPrevFolder;
@@ -211,6 +216,7 @@ export function MediaViewer({
 
       {/* メディアコンテンツ */}
       <Swiper
+        onSwiper={setSwiperInstance}
         modules={[Virtual, Navigation, Keyboard, Zoom]}
         initialSlide={vindex}
         onSlideChange={(swiper) => {
