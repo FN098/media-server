@@ -42,7 +42,7 @@ export const FolderStatusBadge = ({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] w-fit",
+        "flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] w-fit",
         colorClass,
         className
       )}
