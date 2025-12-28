@@ -23,10 +23,10 @@ export default async function Page(props: {
     order: sortOrder = "asc",
   } = await props.params;
 
-  const dirPath = pathParts.map(decodeURIComponent).join("/");
+  const currentDirPath = pathParts.map(decodeURIComponent).join("/");
 
   // 取得
-  const listing = await getMediaFsListing(dirPath);
+  const listing = await getMediaFsListing(currentDirPath);
   if (!listing) notFound();
 
   // ソート
@@ -37,7 +37,7 @@ export default async function Page(props: {
 
   // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
-  const dbMedia = await getDbMedia(dirPath, USER);
+  const dbMedia = await getDbMedia(currentDirPath, USER);
 
   const dirPaths = listing.nodes
     .filter((e) => e.isDirectory)
