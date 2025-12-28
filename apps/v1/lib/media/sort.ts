@@ -31,8 +31,8 @@ export function sortMediaFsNodes(
     }
 
     // 2. 指定されたキーで比較
-    if (key === "name") {
-      return collator.compare(a.name, b.name) * modifier;
+    if (key === "name" || key === "path") {
+      return collator.compare(a[key], b[key]) * modifier;
     }
 
     const valA = a[key] ?? 0;
