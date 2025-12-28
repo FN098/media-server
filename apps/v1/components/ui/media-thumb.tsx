@@ -82,14 +82,10 @@ function MediaThumbImage({
 
   const thumbSrc = getThumbUrl(node.path);
 
-  // version が 0（初期状態）のときはクエリなし、
-  // 更新イベントを受け取った後はクエリありにする
-  const finalSrc = version > 0 ? `${thumbSrc}?v=${version}` : thumbSrc;
-
   return (
     <FallbackImage
       key={`${node.path}-${version}`}
-      src={finalSrc}
+      src={thumbSrc}
       alt={node.name}
       fill
       className={cn(
