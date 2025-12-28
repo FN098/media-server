@@ -67,29 +67,38 @@ export const VideoPlayer = memo(function VideoPlayer({
   ]);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="relative max-w-full max-h-full flex items-center justify-center">
       {(!isCurrent || !isVideoReady) && (
-        <div className="absolute inset-0 z-10">
-          <Image
-            src={getThumbUrl(media.path)}
-            alt={media.name}
-            fill
-            className="object-contain select-none"
-            priority // カレントの可能性があるものは優先的にロード
-            draggable={false}
-          />
-          {/* ロード中のみスピナーを表示 */}
-          {isCurrent && !isVideoReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-              <LoadingSpinner />
-            </div>
-          )}
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div
+            className="relative w-full"
+            style={{
+              aspectRatio: "16 / 9",
+              maxWidth: "100%",
+              maxHeight: "100%",
+            }}
+          >
+            <Image
+              src={getThumbUrl(media.path)}
+              alt={media.name}
+              fill
+              className="object-contain select-none"
+              priority // カレントの可能性があるものは優先的にロード
+              draggable={false}
+            />
+            {/* ロード中のみスピナーを表示 */}
+            {isCurrent && !isVideoReady && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                <LoadingSpinner />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {isCurrent && (
         <div
-          className="relative max-w-full max-h-full aspect-video"
+          className="relative max-w-full max-h-full flex items-center justify-center"
           onPointerDownCapture={(e) => e.stopPropagation()}
         >
           <MuxPlayer
@@ -100,6 +109,12 @@ export const VideoPlayer = memo(function VideoPlayer({
             onLoadedData={handleLoadedData}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              aspectRatio: "16 / 9", // 必要に応じて
+              display: "block",
+            }}
           />
         </div>
       )}
