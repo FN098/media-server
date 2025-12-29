@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "thumb-ps": "tsx lib/thumb/processor.ts"
+    "thumb": "tsx lib/thumb/processor.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
