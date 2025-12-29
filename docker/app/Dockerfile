@@ -94,17 +94,17 @@ CMD ["node", "server.js"]
 # ===============================
 FROM base AS worker
 
+# コンテナ内の作業ディレクトリ
+WORKDIR /app
+
 # ffmpeg のインストール
 RUN apk add --no-cache ffmpeg
 
-# セキュリティのため非ルートユーザーを作成
-RUN addgroup --system --gid 1001 nodejs && \
-  adduser --system --uid 1001 nextjs
+# 依存ファイルをコピー
+COPY --from=deps /app/node_modules ./node_modules
 
-# builder からソースファイルをコピー
-COPY --from=builder /app ./
-
-USER nextjs
+# ソースコードのコピー
+COPY apps/v1 ./
 
 # サムネイル作成ワーカープロセスを起動
 CMD ["pnpm", "tsx", "lib/thumb/processor.ts"]
@@ -114,10 +114,14 @@ CMD ["pnpm", "tsx", "lib/thumb/processor.ts"]
 # ===============================
 FROM base AS migration
 
-# builder から最小限のファイルをコピー
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/prisma ./prisma
-# COPY --from=builder /app/prisma.config.ts ./ # v7 以上の場合
+# コンテナ内の作業ディレクトリ
+WORKDIR /app
+
+# 依存ファイルをコピー
+COPY --from=deps /app/node_modules ./node_modules
+
+# prisma 関連ファイルをコピー
+COPY apps/v1/prisma ./prisma
+# COPY apps/v1/prisma.config.ts ./ # v7 以上の場合
 
 CMD ["pnpm", "prisma", "migrate", "deploy"]
