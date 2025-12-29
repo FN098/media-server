@@ -3,9 +3,7 @@
 import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { useAutoOpenViewer } from "@/hooks/use-auto-open-viewer";
-import { useFolderNavigation } from "@/hooks/use-folder-navigation";
-import { useModalNavigation } from "@/hooks/use-modal-navigation";
+import { useExplorerNavigation } from "@/hooks/use-explorer-navigation";
 import { visitFolderAction } from "@/lib/folder/actions";
 import { syncMediaDirAction } from "@/lib/media/actions";
 import { isMedia } from "@/lib/media/detector";
@@ -20,7 +18,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 type ExplorerProps = {
@@ -28,10 +26,9 @@ type ExplorerProps = {
 };
 
 export function Explorer({ listing }: ExplorerProps) {
+  const router = useRouter();
   const { query } = useSearch();
   const { view } = useViewMode();
-  const [initialIndex, setInitialIndex] = useState(0);
-  const router = useRouter();
 
   // Media filter
   const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
@@ -51,28 +48,29 @@ export function Explorer({ listing }: ExplorerProps) {
     [mediaOnly]
   );
 
-  // Modal config
-  const { isOpen, openModal, closeModal } = useModalNavigation();
+  // Navigation
+  const { index, modal, setIndex, openMedia, closeMedia, moveFolder } =
+    useExplorerNavigation(mediaOnly.length);
 
-  // Open file/folder
   const handleOpen = useCallback(
     (node: MediaNode) => {
+      // directory
       if (node.isDirectory) {
         const href = getClientExplorerPath(node.path);
         router.push(href);
         return;
       }
 
+      // media file
       if (isMedia(node.type)) {
         const mediaIndex = mediaOnlyIndexMap.get(node) ?? 0;
-        openModal();
-        setInitialIndex(mediaIndex);
+        openMedia(mediaIndex);
         return;
       }
 
       toast.warning("このファイル形式は対応していません");
     },
-    [mediaOnlyIndexMap, openModal, router]
+    [mediaOnlyIndexMap, openMedia, router]
   );
 
   // Favorites
@@ -80,15 +78,6 @@ export function Explorer({ listing }: ExplorerProps) {
     () => Object.fromEntries(filtered.map((n) => [n.path, n.isFavorite])),
     [filtered]
   );
-
-  // Open next/prev folder
-  const { navigateToFolder } = useFolderNavigation();
-
-  // Auto open viewer
-  useAutoOpenViewer(mediaOnly.length, (index) => {
-    openModal();
-    setInitialIndex(index);
-  });
 
   // Create thumbnails on background job
   useEffect(() => {
@@ -122,20 +111,18 @@ export function Explorer({ listing }: ExplorerProps) {
           <ListView nodes={filtered} onOpen={(node) => void handleOpen(node)} />
         </div>
 
-        {isOpen && (
+        {modal && index != null && (
           <MediaViewer
             items={mediaOnly}
-            initialIndex={initialIndex}
-            onClose={closeModal}
+            initialIndex={index}
+            onClose={closeMedia}
             openFolderMenu={false}
             onPrevFolder={
-              listing.prev
-                ? () => navigateToFolder(listing.prev!, "last")
-                : undefined
+              listing.prev ? () => moveFolder(listing.prev!, "last") : undefined
             }
             onNextFolder={
               listing.next
-                ? () => navigateToFolder(listing.next!, "first")
+                ? () => moveFolder(listing.next!, "first")
                 : undefined
             }
           />
@@ -143,6 +130,8 @@ export function Explorer({ listing }: ExplorerProps) {
 
         {/* フォルダナビゲーション */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
+          <Button onClick={() => setIndex(2)}>aaa</Button>
+
           {/* Previous Button Container */}
           <div className="w-full sm:flex-1">
             {listing.prev && (
