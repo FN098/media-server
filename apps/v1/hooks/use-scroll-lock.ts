@@ -1,18 +1,28 @@
-import { useEffect } from "react";
+import { useCallback, useRef } from "react";
 
-export const useScrollLock = (lock: boolean = true) => {
-  useEffect(() => {
-    if (!lock) return;
+export const useScrollLockControl = () => {
+  // 元のスタイルを保存しておくためのRef
+  const originalStyle = useRef<string>("");
 
-    // 元のスタイルを保存
-    const originalStyle = window.getComputedStyle(document.body).overflow;
+  // ロックする関数
+  const lock = useCallback(() => {
+    if (typeof window === "undefined") return;
 
-    // スクロールを禁止
+    // すでにロックされている場合は二重に保存しない
+    if (document.body.style.overflow === "hidden") return;
+
+    // 現在のスタイルを保存して、hiddenにする
+    originalStyle.current = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = "hidden";
+  }, []);
 
-    // クリーンアップ関数で元に戻す
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
-  }, [lock]);
+  // 解除する関数
+  const unlock = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    // 保存していたスタイルに戻す
+    document.body.style.overflow = originalStyle.current || "unset";
+  }, []);
+
+  return { lock, unlock };
 };

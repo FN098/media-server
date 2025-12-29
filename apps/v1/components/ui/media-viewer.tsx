@@ -6,7 +6,7 @@ import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useScrollLockControl } from "@/hooks/use-scroll-lock";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
 import { useTitleControl } from "@/hooks/use-title";
@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import path from "path";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -80,18 +80,21 @@ export function MediaViewer({
     null
   );
   const { setTitle, resetTitle } = useTitleControl();
+  const { lock: lockScroll, unlock: unlockScroll } = useScrollLockControl();
 
-  const target = items[index];
+  // スクロールロックとタイトル設定
+  useEffect(() => {
+    lockScroll();
+    const { title, name } = items[index];
+    setTitle(title ?? name);
 
-  // TODO: fix
-  useScrollLock();
+    return () => {
+      unlockScroll();
+      resetTitle();
+    };
+  }, [index, items, lockScroll, resetTitle, setTitle, unlockScroll]);
 
-  if (showUI) {
-    setTitle(target.title ?? target.name);
-  } else {
-    resetTitle();
-  }
-
+  // お気に入りボタンクリック時の処理
   const handleToggleFavorite = useCallback(async () => {
     try {
       const nextIsFavorite = await favoriteCtx.toggleFavorite(
@@ -125,6 +128,7 @@ export function MediaViewer({
   const hasNext = !!onNextFolder;
   const offsetPrev = hasPrev ? 1 : 0;
 
+  // 前のフォルダ、次のフォルダを仮想スライドに追加
   const allSlides = useMemo(() => {
     const slides: Slide[] = [...items];
     if (hasPrev) slides.unshift({ type: "nav_prev", path: "prev-loader" });
@@ -132,6 +136,7 @@ export function MediaViewer({
     return slides;
   }, [items, hasPrev, hasNext]);
 
+  // 仮想スライド中のコンテンツ専用インデックス
   const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
 
   return (
