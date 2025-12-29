@@ -1,5 +1,5 @@
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { getAbsoluteMediaUrl } from "@/lib/path-helpers";
 import {
   Tooltip,
@@ -50,7 +50,7 @@ function PlayerButton({
 }
 
 type AudioPlayerProps = {
-  media: MediaFsNode;
+  media: MediaNode;
   isCurrent?: boolean;
 };
 
@@ -162,7 +162,7 @@ export const AudioPlayer = memo(function AudioPlayer({
         {/* メタデータ */}
         <div className="text-center w-full">
           <h3 className="text-white text-lg font-semibold truncate px-4">
-            {media.name}
+            {media.title ?? media.name}
           </h3>
           <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase mt-1">
             Audio Track
