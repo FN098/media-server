@@ -2,6 +2,7 @@ import { LoadingSpinner } from "@/components/ui/spinners";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/lib/media/types";
 import { getAbsoluteMediaUrl, getThumbUrl } from "@/lib/path-helpers";
+import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
 import { memo, useRef, useState } from "react";
@@ -67,40 +68,32 @@ export const VideoPlayer = memo(function VideoPlayer({
   ]);
 
   return (
-    <div className="relative max-w-full max-h-full flex items-center justify-center">
-      {(!isCurrent || !isVideoReady) && (
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div
-            className="relative w-full"
-            style={{
-              aspectRatio: "16 / 9",
-              maxWidth: "100%",
-              maxHeight: "100%",
-            }}
-          >
-            <Image
-              src={getThumbUrl(media.path)}
-              alt={media.name}
-              fill
-              className="object-contain select-none"
-              priority // カレントの可能性があるものは優先的にロード
-              draggable={false}
-            />
-            {/* ロード中のみスピナーを表示 */}
-            {isCurrent && !isVideoReady && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <LoadingSpinner />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+    <div className="relative group overflow-hidden bg-black aspect-video w-full max-w-4xl mx-auto shadow-lg">
+      {/* サムネイル */}
+      <div
+        className={cn(
+          "absolute inset-0 z-10 transition-opacity duration-500",
+          isCurrent ? "opacity-0 pointer-events-none" : "opacity-100"
+        )}
+      >
+        <Image
+          src={getThumbUrl(media.path)}
+          alt={media.name}
+          fill
+          className="object-contain select-none"
+          priority
+          draggable={false}
+        />
+        {/* ロード中のみスピナーを表示 */}
+        {!isVideoReady && <LoadingSpinner />}
+      </div>
 
-      {isCurrent && (
-        <div
-          className="relative max-w-full max-h-full flex items-center justify-center"
-          onPointerDownCapture={(e) => e.stopPropagation()}
-        >
+      {/* 動画本体 */}
+      <div
+        className={cn("absolute inset-0 w-full h-full")}
+        onPointerDownCapture={(e) => e.stopPropagation()}
+      >
+        {isCurrent && (
           <MuxPlayer
             ref={playerRef}
             src={getAbsoluteMediaUrl(media.path)}
@@ -109,15 +102,10 @@ export const VideoPlayer = memo(function VideoPlayer({
             onLoadedData={handleLoadedData}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}
-            style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
-              aspectRatio: "16 / 9", // 必要に応じて
-              display: "block",
-            }}
+            className="w-full h-full object-contain"
           />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 });
