@@ -23,6 +23,7 @@ export type MediaFsListing = {
 };
 
 export type MediaNode = MediaFsNode & {
+  id?: string;
   title?: string;
   isFavorite: boolean;
   lastViewedAt?: Date;
@@ -39,6 +40,7 @@ export type MediaListing = {
 };
 
 export type DbMedia = {
+  id: string;
   path: string;
   title?: string;
   isFavorite: boolean;

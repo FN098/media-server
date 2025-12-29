@@ -18,6 +18,7 @@ export function mergeFsWithDb(
 
     return {
       ...fsNode,
+      id: dbMedia?.id,
       title: dbMedia?.title ?? fsNode.name,
       isFavorite: dbMedia?.isFavorite ?? false,
       lastViewedAt: dbVisited?.lastViewedAt,
