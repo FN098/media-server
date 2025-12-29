@@ -6,9 +6,13 @@ import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { useGridViewConfig } from "@/hooks/use-grid-view";
+import { useSelection } from "@/hooks/use-selection";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
+import { Button } from "@/shadcn/components/ui/button";
+import { Checkbox } from "@/shadcn/components/ui/checkbox";
+import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useRef } from "react";
 import { toast } from "sonner";
@@ -27,7 +31,7 @@ export const GridView = memo(function GridView1({
   const { columnCount, rowHeight } = useGridViewConfig(parentRef);
   const rowCount = Math.ceil(nodes.length / columnCount);
 
-  // 1. バーチャライザーの設定
+  // 仮想化グリッドの設定
   // eslint-disable-next-line react-hooks/incompatible-library -- メモ化すると正しく動作しないという警告を無効化。無視しても実害はない
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
@@ -36,7 +40,7 @@ export const GridView = memo(function GridView1({
     overscan: 1, // 画面外に何行予備を持っておくか
   });
 
-  const handleToggleFavorite = async (node: MediaNode) => {
+  const toggleFavorite = async (node: MediaNode) => {
     try {
       await favoriteCtx.toggleFavorite(node.path);
     } catch (e) {
@@ -45,9 +49,35 @@ export const GridView = memo(function GridView1({
     }
   };
 
+  // 選択機能
+  const {
+    isSelectionMode,
+    isSelected,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+  } = useSelection(nodes);
+
   return (
-    <div ref={parentRef} className="w-full h-full">
-      {/* 2. 合計の高さを持つコンテナ（スクロールバーの長さを決める） */}
+    <div ref={parentRef} className="w-full h-full flex flex-col">
+      {/* 選択モード用ツールバー */}
+      {isSelectionMode && (
+        <div className="flex items-center justify-between p-2 bg-muted/50 border-b">
+          <span className="text-sm font-medium">
+            {isSelected.length} 個選択中
+          </span>
+          <div className="space-x-2">
+            <Button size="sm" variant="outline" onClick={selectAll}>
+              すべて選択
+            </Button>
+            <Button size="sm" variant="ghost" onClick={clearSelection}>
+              解除
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* グリッド */}
       <div
         style={{
           height: `${rowVirtualizer.getTotalSize()}px`,
@@ -55,7 +85,7 @@ export const GridView = memo(function GridView1({
           position: "relative",
         }}
       >
-        {/* 3. 現在見えている行だけをマッピング */}
+        {/* 行 */}
         {rowVirtualizer.getVirtualItems().map((virtualRow) => (
           <div
             key={virtualRow.key}
@@ -70,23 +100,52 @@ export const GridView = memo(function GridView1({
               gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
             }}
           >
-            {/* 4. その行の中にあるカラム（セル）を描画 */}
+            {/* セル */}
             {Array.from({ length: columnCount }).map((_, colIndex) => {
               const index = virtualRow.index * columnCount + colIndex;
               const node = nodes[index];
               if (!node) return null;
 
+              const selected = isSelected(node.path);
+
               return (
                 <div key={node.path} className="p-1">
                   <div
-                    className="relative aspect-square w-full overflow-hidden rounded-lg border bg-muted cursor-pointer"
-                    onClick={() => onOpen?.(node, index)}
+                    className={cn(
+                      "relative group aspect-square w-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
+                      selected
+                        ? "ring-2 ring-primary border-transparent"
+                        : "hover:border-primary/50"
+                    )}
+                    onClick={() => {
+                      if (isSelectionMode) {
+                        toggleSelection(node.path);
+                      } else {
+                        onOpen?.(node, index);
+                      }
+                    }}
                   >
                     {/* サムネイル */}
                     <MediaThumb
                       node={node}
                       className="w-full h-full object-cover"
                     />
+
+                    {/* 選択チェックボックス */}
+                    <div
+                      className={cn(
+                        "absolute top-2 left-2 transition-opacity",
+                        isSelectionMode
+                          ? "opacity-100"
+                          : "opacity-0 group-hover:opacity-100"
+                      )}
+                    >
+                      <Checkbox
+                        checked={selected}
+                        onCheckedChange={() => toggleSelection(node.path)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
 
                     {/* テキストオーバーレイ */}
                     <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
@@ -97,11 +156,11 @@ export const GridView = memo(function GridView1({
                     </div>
 
                     {/* お気に入りボタン */}
-                    {isMedia(node.type) && (
+                    {!isSelectionMode && isMedia(node.type) && (
                       <FavoriteButton
                         variant="grid"
                         active={favoriteCtx.isFavorite(node.path)}
-                        onToggle={() => void handleToggleFavorite(node)}
+                        onToggle={() => void toggleFavorite(node)}
                       />
                     )}
 
