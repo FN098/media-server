@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export function useFullscreen() {
   const [isFullscreen, setIsFullscreen] = useState(
-    !!document.fullscreenElement
+    typeof document == "object" && !!document.fullscreenElement
   );
 
   // 状態を同期するためのイベントリスナー
