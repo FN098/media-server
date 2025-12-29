@@ -1,3 +1,4 @@
+import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
 import { getDbFavoriteCount, getDbVisitedInfo } from "@/lib/folder/repository";
@@ -6,17 +7,31 @@ import { mergeFsWithDb } from "@/lib/media/merge";
 import { getDbMedia } from "@/lib/media/repository";
 import { sortMediaFsNodes, SortOptions } from "@/lib/media/sort";
 import { MediaFsNode } from "@/lib/media/types";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page(props: {
+type Props = {
   params: Promise<{
     path?: string[];
     sort?: SortOptions<MediaFsNode>["key"];
     order?: SortOptions<MediaFsNode>["order"];
   }>;
-}) {
+};
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const { path: pathParts = [] } = await props.params;
+
+  const last = pathParts[pathParts.length - 1];
+  const decoded = decodeURIComponent(last);
+
+  return {
+    title: `${decoded} | ${APP_CONFIG.meta.title}`,
+  };
+}
+
+export default async function Page(props: Props) {
   const {
     path: pathParts = [],
     sort: sortKey = "name",

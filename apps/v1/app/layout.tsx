@@ -1,3 +1,4 @@
+import { APP_CONFIG } from "@/app.config";
 import { ThumbEventProvider } from "@/providers/thumb-event-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
 import { TooltipProvider } from "@/shadcn/components/ui/tooltip";
@@ -16,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Media Server",
-  description: "Media Server is a service of hosting local media files.",
+  title: `${APP_CONFIG.meta.title}`,
+  description: `${APP_CONFIG.meta.description}`,
 };
 
 export default function RootLayout({

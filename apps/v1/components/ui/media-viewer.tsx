@@ -9,6 +9,7 @@ import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useShowUI } from "@/hooks/use-show-ui";
+import { useTitleControl } from "@/hooks/use-title";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -78,8 +79,18 @@ export function MediaViewer({
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(
     null
   );
+  const { setTitle, resetTitle } = useTitleControl();
 
+  const target = items[index];
+
+  // TODO: fix
   useScrollLock();
+
+  if (showUI) {
+    setTitle(target.title ?? target.name);
+  } else {
+    resetTitle();
+  }
 
   const handleToggleFavorite = useCallback(async () => {
     try {
