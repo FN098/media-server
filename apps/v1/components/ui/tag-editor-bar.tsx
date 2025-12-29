@@ -84,7 +84,7 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
           ))}
 
           {/* 新規タグ入力 */}
-          <div className="flex items-center ml-2 border rounded-md px-2 bg-muted/50 focus-within:ring-1 ring-primary">
+          <div className="flex items-center ml-2 border rounded-md px-2 bg-muted/50 transition-all duration-300 focus-within:ring-1 focus-within:ring-primary focus-within:border-primary">
             <Plus className="h-3 w-3 text-muted-foreground" />
             <input
               className="bg-transparent border-none outline-none p-1 text-sm w-24 focus:w-40 transition-all"
