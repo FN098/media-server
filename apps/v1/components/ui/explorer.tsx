@@ -29,10 +29,10 @@ type ExplorerProps = {
 
 export function Explorer({ listing }: ExplorerProps) {
   const router = useRouter();
-  const { query } = useSearch();
   const { view } = useViewMode();
 
-  // Media filter
+  // 検索フィルター機能
+  const { query } = useSearch();
   const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
   const filtered = useMemo(() => {
     return listing.nodes
@@ -45,53 +45,47 @@ export function Explorer({ listing }: ExplorerProps) {
     [filtered]
   );
 
-  const mediaOnlyIndexMap = useMemo(
-    () => new Map(mediaOnly.map((e, index) => [e, index])),
-    [mediaOnly]
-  );
-
-  // Navigation
+  // ナビゲーション機能
   const { index, modal, openMedia, closeMedia, moveFolder } =
     useExplorerNavigation(mediaOnly.length);
 
   const handleOpen = useCallback(
-    (node: MediaNode) => {
-      // directory
+    (node: MediaNode, index: number) => {
+      // フォルダ
       if (node.isDirectory) {
         const href = getClientExplorerPath(node.path);
         router.push(href);
         return;
       }
 
-      // media file
+      // ファイル
       if (isMedia(node.type)) {
-        const mediaIndex = mediaOnlyIndexMap.get(node) ?? 0;
-        openMedia(mediaIndex);
+        openMedia(index);
         return;
       }
 
       toast.warning("このファイル形式は対応していません");
     },
-    [mediaOnlyIndexMap, openMedia, router]
+    [openMedia, router]
   );
 
-  // Favorites
+  // お気に入り設定
   const initialFavorites = useMemo(
-    () => Object.fromEntries(filtered.map((n) => [n.path, n.isFavorite])),
-    [filtered]
+    () => Object.fromEntries(mediaOnly.map((n) => [n.path, n.isFavorite])),
+    [mediaOnly]
   );
 
-  // Create thumbnails on background job
+  // サムネイル作成リクエスト送信
   useEffect(() => {
     void enqueueThumbJob(listing.path);
   }, [listing.path]);
 
-  // Sync FS <=> DB
+  // FS <=> DB 同期リクエスト送信
   useEffect(() => {
     void syncMediaDirAction(listing.path);
   }, [listing.path]);
 
-  // Update visited folder
+  // 訪問済みフォルダ更新リクエスト送信
   useEffect(() => {
     void visitFolderAction(listing.path);
   }, [listing.path]);
@@ -110,7 +104,7 @@ export function Explorer({ listing }: ExplorerProps) {
           <div className={cn(view === "grid" ? "block" : "hidden")}>
             <GridView
               nodes={filtered}
-              onOpen={(node) => void handleOpen(node)}
+              onOpen={(node, index) => void handleOpen(node, index)}
             />
           </div>
 
@@ -118,7 +112,7 @@ export function Explorer({ listing }: ExplorerProps) {
           <div className={cn(view === "list" ? "block" : "hidden")}>
             <ListView
               nodes={filtered}
-              onOpen={(node) => void handleOpen(node)}
+              onOpen={(node, index) => void handleOpen(node, index)}
             />
           </div>
 
@@ -151,7 +145,7 @@ export function Explorer({ listing }: ExplorerProps) {
 
       {/* フォルダナビゲーション */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
-        {/* Previous Button Container */}
+        {/* 前のフォルダ */}
         <div className="w-full sm:flex-1">
           {listing.prev && (
             <Button
@@ -172,7 +166,7 @@ export function Explorer({ listing }: ExplorerProps) {
           )}
         </div>
 
-        {/* Next Button Container */}
+        {/* 次のフォルダ */}
         <div className="w-full sm:flex-1 flex justify-end">
           {listing.next && (
             <Button

@@ -3,16 +3,18 @@
 import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
+import { TagEditorBar } from "@/components/ui/tag-editor-bar";
 import { useExplorerNavigation } from "@/hooks/use-explorer-navigation";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
 import { FavoriteProvider } from "@/providers/favorite-provider";
 import { useSearch } from "@/providers/search-provider";
+import { SelectionProvider } from "@/providers/selection-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 
 type FavoritesProps = {
@@ -20,11 +22,11 @@ type FavoritesProps = {
 };
 
 export function Favorites({ nodes }: FavoritesProps) {
-  const { query } = useSearch();
-  const { view } = useViewMode();
   const router = useRouter();
+  const { view } = useViewMode();
 
-  // Media filter
+  // 検索フィルター機能
+  const { query } = useSearch();
   const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
   const filtered = useMemo(() => {
     return nodes
@@ -32,28 +34,37 @@ export function Favorites({ nodes }: FavoritesProps) {
       .filter((e) => e.name.toLowerCase().includes(lowerQuery));
   }, [nodes, lowerQuery]);
 
-  // Modal config
+  const mediaOnly = useMemo(
+    () => filtered.filter((e) => isMedia(e.type)),
+    [filtered]
+  );
+
+  // ナビゲーション機能
   const { index, modal, openMedia, closeMedia } = useExplorerNavigation(
     filtered.length
   );
 
-  // Open file/folder
-  const handleOpen = (node: MediaNode, index: number) => {
-    if (node.isDirectory) {
-      const href = getClientExplorerPath(node.path);
-      router.push(href);
-      return;
-    }
+  const handleOpen = useCallback(
+    (node: MediaNode, index: number) => {
+      // フォルダ
+      if (node.isDirectory) {
+        const href = getClientExplorerPath(node.path);
+        router.push(href);
+        return;
+      }
 
-    if (isMedia(node.type)) {
-      openMedia(index);
-      return;
-    }
+      // ファイル
+      if (isMedia(node.type)) {
+        openMedia(index);
+        return;
+      }
 
-    toast.warning("このファイル形式は対応していません");
-  };
+      toast.warning("このファイル形式は対応していません");
+    },
+    [openMedia, router]
+  );
 
-  // Favorites
+  // お気に入り設定
   const initialFavorites = useMemo(
     () => Object.fromEntries(filtered.map((n) => [n.path, n.isFavorite])),
     [filtered]
@@ -68,23 +79,34 @@ export function Favorites({ nodes }: FavoritesProps) {
       )}
     >
       <FavoriteProvider initialFavorites={initialFavorites}>
-        <div className={cn(view === "grid" ? "block" : "hidden")}>
-          <GridView nodes={filtered} onOpen={handleOpen} />
-        </div>
+        <SelectionProvider>
+          {/* グリッドビュー */}
+          <div className={cn(view === "grid" ? "block" : "hidden")}>
+            <GridView nodes={filtered} onOpen={handleOpen} />
+          </div>
 
-        <div
-          className={cn(view === "list" ? "block" : "hidden", "w-full h-full")}
-        >
-          <ListView nodes={filtered} onOpen={handleOpen} />
-        </div>
+          {/* リストビュー */}
+          <div
+            className={cn(
+              view === "list" ? "block" : "hidden",
+              "w-full h-full"
+            )}
+          >
+            <ListView nodes={filtered} onOpen={handleOpen} />
+          </div>
 
-        {modal && index != null && (
-          <MediaViewer
-            items={filtered}
-            initialIndex={index}
-            onClose={closeMedia}
-          />
-        )}
+          {/* ビューワ */}
+          {modal && index != null && (
+            <MediaViewer
+              items={mediaOnly}
+              initialIndex={index}
+              onClose={closeMedia}
+            />
+          )}
+
+          {/* タグ編集バー */}
+          <TagEditorBar allNodes={filtered} />
+        </SelectionProvider>
       </FavoriteProvider>
     </div>
   );

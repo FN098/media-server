@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 type GridViewProps = {
   nodes: MediaNode[];
-  onOpen?: (target: MediaNode) => void;
+  onOpen?: (target: MediaNode, index: number) => void;
 };
 
 export const GridView = memo(function GridView1({
@@ -68,7 +68,13 @@ export const GridView = memo(function GridView1({
               const index = virtualRow.index * columnCount + colIndex;
               const node = nodes[index];
               return (
-                node && <Cell key={node.path} node={node} onOpen={onOpen} />
+                node && (
+                  <Cell
+                    key={node.path}
+                    node={node}
+                    onOpen={onOpen ? () => onOpen?.(node, index) : undefined}
+                  />
+                )
               );
             })}
           </div>
@@ -80,7 +86,7 @@ export const GridView = memo(function GridView1({
 
 type CellProps = {
   node: MediaNode;
-  onOpen?: (target: MediaNode) => void;
+  onOpen?: () => void;
 };
 
 function Cell({ node, onOpen }: CellProps) {
@@ -110,7 +116,7 @@ function Cell({ node, onOpen }: CellProps) {
           if (isSelectionMode) {
             toggleSelection(node.path);
           } else {
-            onOpen?.(node);
+            onOpen?.();
           }
         }}
       >

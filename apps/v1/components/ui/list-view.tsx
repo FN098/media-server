@@ -17,7 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/components/ui/table";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, useRef } from "react";
 import { toast } from "sonner";
@@ -32,7 +31,6 @@ export const ListView = memo(function ListView1({
   onOpen,
 }: ListViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
 
   return (
     <div ref={containerRef} className="w-full h-full">
@@ -54,7 +52,6 @@ export const ListView = memo(function ListView1({
               node={node}
               className={cn("hover:bg-blue-100 active:bg-blue-200")}
               onClick={() => onOpen?.(node, index)}
-              onDoubleClick={() => !isMobile && onOpen?.(node, index)}
             />
           ))}
         </TableBody>
