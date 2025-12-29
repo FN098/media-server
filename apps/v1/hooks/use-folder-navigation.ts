@@ -4,16 +4,16 @@ import { useCallback } from "react";
 
 type AutoMode = "first" | "last";
 
-export function useFolderNavigation() {
+export function useFolderNavigation(key: string = "auto") {
   const router = useRouter();
 
   const navigateToFolder = useCallback(
-    (path: string, auto?: AutoMode) => {
+    (path: string, value?: AutoMode) => {
       const baseUrl = getClientExplorerPath(path);
-      const url = auto ? `${baseUrl}?auto=${auto}` : baseUrl;
+      const url = value ? `${baseUrl}?${key}=${value}` : baseUrl;
       router.push(url);
     },
-    [router]
+    [key, router]
   );
 
   return { navigateToFolder };
