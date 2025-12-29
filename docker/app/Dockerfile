@@ -1,30 +1,47 @@
-# ===============================
-# 0. Base Stage
-# ===============================
+# https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
+
 FROM node:25-alpine AS base
+
+# pnpm と libc6-compat をインストール
+RUN npm install -g pnpm && \
+    apk add --no-cache libc6-compat
+
+# ===============================
+# 0. Deps Stage
+# ===============================
+
+FROM base AS deps
 
 # コンテナ内の作業ディレクトリ
 WORKDIR /app
 
-# pnpm をグローバルインストール
-RUN npm install -g pnpm
+# 依存関係のインストール（lockファイルを先にコピーしてキャッシュを効かせる）
+COPY apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml ./
+
+# devDeps 含めて一度インストール
+RUN pnpm i --frozen-lockfile
 
 # ===============================
 # 1. Builder Stage
 # ===============================
+
 FROM base AS builder
 
-# package.json と lockfile と workspace をコピー
-COPY apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml .
+# コンテナ内の作業ディレクトリ
+WORKDIR /app
 
-# devDeps 含めて一度インストール
-RUN pnpm install --frozen-lockfile
+# deps から依存パッケージをコピー
+COPY --from=deps /app/node_modules ./node_modules
 
-# プロジェクトファイルをコピー
-COPY apps/v1 .
+# ソースコードのコピー
+COPY apps/v1 ./
 
+# ダミー用の接続文字列を環境変数に設定（これがないと prisma generate に失敗する）
 ENV DATABASE_URL dummy
 ENV SHADOW_DATABASE_URL dummy
+
+# Next.js のテレメトリ（Vercelへの匿名データ送信）を無効化
+ENV NEXT_TELEMETRY_DISABLED 1
 
 # Prisma クライアント生成
 RUN pnpm prisma generate
@@ -35,47 +52,68 @@ RUN pnpm build
 # ===============================
 # 2. Runner Stage
 # ===============================
+
 FROM base AS runner
+
+# コンテナ内の作業ディレクトリ
+WORKDIR /app
+
+# 念のために NODE_ENV をセット
+ENV NODE_ENV production
+
+# Next.js のテレメトリ（Vercelへの匿名データ送信）を無効化
+ENV NEXT_TELEMETRY_DISABLED 1
 
 # ffmpeg のインストール
 RUN apk add --no-cache ffmpeg
 
-# package.json と lockfile と workspace をコピー
-COPY apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml .
-
-# builder から node_modules をコピー
-COPY --from=builder /app/node_modules ./node_modules
-
-# devDeps を削除して production のみ残す
-RUN pnpm prune --prod
+# セキュリティのため非ルートユーザーを作成
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
 # build 成果物と必要ファイルをコピー
-COPY --from=builder /app/.next ./.next
+# ※ next.config.js で output: 'standalone' を設定している前提
+# ※ standalone では実行に必要なファイルのみを .next/standalone にまとめて出力する
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/generated ./generated
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+ENV PORT=3000
+
+ENV HOSTNAME="0.0.0.0"
+
+# Standaloneモードの場合は node server.js で起動
+CMD ["node", "server.js"]
 
 # ===============================
 # 3. Worker Stage
 # ===============================
-
 FROM base AS worker
 
 # ffmpeg のインストール
 RUN apk add --no-cache ffmpeg
 
-# package.json と lockfile と workspace をコピー
-COPY apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml .
+# builder からソースファイルをコピー
+COPY --from=builder /app ./
 
-# builder から node_modules をコピー
+USER nextjs
+
+# サムネイル作成ワーカープロセスを起動
+CMD ["pnpm", "tsx", "lib/thumb/processor.ts"]
+
+# ===============================
+# 4. Migration Stage
+# ===============================
+FROM base AS migration
+
+# builder から最小限のファイルをコピー
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/prisma ./prisma
+# COPY --from=builder /app/prisma.config.ts ./ # v7 以上の場合
 
-# プロジェクトファイルをコピー
-COPY apps/v1 .
-
-EXPOSE 3000
-
-CMD ["pnpm", "thumb-ps"]
+CMD ["pnpm", "prisma", "migrate", "deploy"]

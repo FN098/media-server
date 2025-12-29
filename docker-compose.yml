@@ -50,7 +50,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ${HOST_MEDIA_ROOT}:/media:rw
+      - ${HOST_MEDIA_ROOT}:/media:ro # アップロード等で書き込みが必要な場合は rw にする
     ports:
       - "13001:3000"
     depends_on:
@@ -70,6 +70,18 @@ services:
       - ${HOST_MEDIA_ROOT}:/media:rw
     depends_on:
       - redis
+
+  migration:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+      target: migration
+    container_name: media-server-migration
+    restart: no
+    env_file:
+      - .env
+    depends_on:
+      - db
 
 volumes:
   db_data:
