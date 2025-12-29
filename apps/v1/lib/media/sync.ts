@@ -1,7 +1,6 @@
 import { Media } from "@/generated/prisma";
 import { MediaFsNode } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
-import { randomUUID } from "crypto";
 
 export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
   const files = nodes.filter((n) => !n.isDirectory);
@@ -26,11 +25,10 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
   const dbMap = new Map(dbMedia.map((m) => [m.path, m]));
 
   // --- 差分計算 ---
-  const toInsert: Omit<Media, "createdAt" | "updatedAt">[] = [];
+  const toInsert: Omit<Media, "id" | "createdAt" | "updatedAt">[] = [];
   for (const [path, meta] of fsMap) {
     if (!dbMap.has(path)) {
       toInsert.push({
-        id: randomUUID(),
         path,
         dirPath,
         title: meta.title,
