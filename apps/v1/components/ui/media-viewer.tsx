@@ -5,10 +5,10 @@ import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { VideoPlayer } from "@/components/ui/video-player";
+import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useScrollLockControl } from "@/hooks/use-scroll-lock";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { useShowUI } from "@/hooks/use-show-ui";
 import { useTitleControl } from "@/hooks/use-title";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
@@ -70,8 +70,12 @@ export function MediaViewer({
   const [index, setIndex] = useState(initialIndex);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { showUI, toggleShowUI, handleInteraction } = useShowUI({
-    delay: 2000,
+  const {
+    isVisible: isHeaderVisible,
+    toggle: toggleHeaderVisibility,
+    interact: interactHeader,
+  } = useAutoHidingUI({
+    duration: 2000,
     disabled: isHovered || isMenuOpen,
   });
   const isMobile = useIsMobile();
@@ -107,19 +111,19 @@ export function MediaViewer({
         : "お気に入りを解除しました";
       toast.info(message);
 
-      handleInteraction();
+      interactHeader();
     } catch (e) {
       console.error(e);
       toast.error("お気に入りの更新に失敗しました");
     }
-  }, [favoriteCtx, handleInteraction, index, items]);
+  }, [favoriteCtx, interactHeader, index, items]);
 
   // 左右キーは Swiper の keyboard オプションで有効化
   useShortcutKeys([
     { key: "Escape", callback: onClose },
     { key: "f", callback: () => void handleToggleFavorite() },
-    { key: "Enter", callback: toggleShowUI },
-    { key: " ", callback: toggleShowUI },
+    { key: "Enter", callback: toggleHeaderVisibility },
+    { key: " ", callback: toggleHeaderVisibility },
     { key: "a", callback: () => swiperInstance?.slidePrev() },
     { key: "d", callback: () => swiperInstance?.slideNext() },
   ]);
@@ -142,12 +146,12 @@ export function MediaViewer({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden touch-none bg-black"
-      onMouseMove={handleInteraction}
-      onPointerDown={handleInteraction}
+      onMouseMove={interactHeader}
+      onPointerDown={interactHeader}
     >
       {/* ヘッダー */}
       <AnimatePresence>
-        {showUI && (
+        {isHeaderVisible && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: -10 }}
