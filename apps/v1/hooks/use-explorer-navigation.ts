@@ -36,8 +36,8 @@ export function useExplorerNavigation(itemsCount: number) {
   const openMedia = useCallback(
     (index: number) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set("at", String(index));
       params.set("modal", "true");
+      params.set("at", String(index));
       router.push(`${pathname}?${params.toString()}`);
     },
     [pathname, router, searchParams]
