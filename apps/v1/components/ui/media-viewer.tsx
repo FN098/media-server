@@ -192,7 +192,7 @@ export function MediaViewer({
               <span className="text-white md:text-lg font-medium drop-shadow-md">
                 <MarqueeText
                   key={index}
-                  text={items[index].name}
+                  text={items[index].title ?? items[index].name}
                   autoplay={isMobile}
                   speed={40}
                   delay={1}

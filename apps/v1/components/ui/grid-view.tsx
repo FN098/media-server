@@ -91,7 +91,7 @@ export const GridView = memo(function GridView1({
                     {/* テキストオーバーレイ */}
                     <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
                       <MarqueeText
-                        text={node.name}
+                        text={node.title ?? node.name}
                         className="text-center text-[10px] leading-tight text-white"
                       />
                     </div>

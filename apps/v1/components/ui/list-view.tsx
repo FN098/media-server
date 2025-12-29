@@ -6,6 +6,7 @@ import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { LocalDateValue } from "@/components/ui/local-date";
 import { MediaThumbIcon } from "@/components/ui/media-thumb";
 import { MediaNode } from "@/lib/media/types";
+import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
 import { useFavorite } from "@/providers/favorite-provider";
 import {
@@ -90,10 +91,14 @@ function RowItem({ node, onClick, onDoubleClick, className }: RowItemProps) {
       <TableCell>
         <div className="flex items-center gap-2">
           <MediaThumbIcon type={node.type} className="w-6 h-6" />
-          <span className="truncate">{node.name}</span>
+          <span className="truncate">{node.title ?? node.name}</span>
         </div>
       </TableCell>
-      <TableCell>{node.isDirectory ? "Folder" : node.type}</TableCell>
+      <TableCell>
+        {node.isDirectory
+          ? "folder"
+          : getExtension(node.name, { withDot: false, case: "lower" })}
+      </TableCell>
       <TableCell>
         <LocalDateValue value={node.mtime} />
       </TableCell>
