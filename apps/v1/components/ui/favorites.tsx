@@ -3,7 +3,7 @@
 import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { useModalNavigation } from "@/hooks/use-modal-navigation";
+import { useExplorerNavigation } from "@/hooks/use-explorer-navigation";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
@@ -12,7 +12,7 @@ import { useSearch } from "@/providers/search-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 
 type FavoritesProps = {
@@ -23,7 +23,6 @@ export function Favorites({ nodes }: FavoritesProps) {
   const { query } = useSearch();
   const { view } = useViewMode();
   const router = useRouter();
-  const [initialIndex, setInitialIndex] = useState(0);
 
   // Media filter
   const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
@@ -34,7 +33,9 @@ export function Favorites({ nodes }: FavoritesProps) {
   }, [nodes, lowerQuery]);
 
   // Modal config
-  const { isOpen, openModal, closeModal } = useModalNavigation();
+  const { index, modal, openMedia, closeMedia } = useExplorerNavigation(
+    filtered.length
+  );
 
   // Open file/folder
   const handleOpen = (node: MediaNode, index: number) => {
@@ -45,8 +46,7 @@ export function Favorites({ nodes }: FavoritesProps) {
     }
 
     if (isMedia(node.type)) {
-      openModal();
-      setInitialIndex(index);
+      openMedia(index);
       return;
     }
 
@@ -78,11 +78,11 @@ export function Favorites({ nodes }: FavoritesProps) {
           <ListView nodes={filtered} onOpen={handleOpen} />
         </div>
 
-        {isOpen && (
+        {modal && index != null && (
           <MediaViewer
             items={filtered}
-            initialIndex={initialIndex}
-            onClose={closeModal}
+            initialIndex={index}
+            onClose={closeMedia}
           />
         )}
       </FavoriteProvider>
