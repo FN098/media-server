@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 type GridViewProps = {
   nodes: MediaNode[];
-  onOpen?: (target: MediaNode, index: number) => void;
+  onOpen?: (target: MediaNode) => void;
 };
 
 export const GridView = memo(function GridView1({
@@ -26,11 +26,10 @@ export const GridView = memo(function GridView1({
   onOpen,
 }: GridViewProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const favoriteCtx = useFavorite();
   const { columnCount, rowHeight } = useGridViewConfig(parentRef);
   const rowCount = Math.ceil(nodes.length / columnCount);
 
-  // 仮想化グリッドの設定
+  // 仮想グリッドの設定
   // eslint-disable-next-line react-hooks/incompatible-library -- メモ化すると正しく動作しないという警告を無効化。無視しても実害はない
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
@@ -38,17 +37,6 @@ export const GridView = memo(function GridView1({
     estimateSize: () => rowHeight, // 各行の高さ
     overscan: 1, // 画面外に何行予備を持っておくか
   });
-
-  const toggleFavorite = async (node: MediaNode) => {
-    try {
-      await favoriteCtx.toggleFavorite(node.path);
-    } catch (e) {
-      console.error(e);
-      toast.error("お気に入りの更新に失敗しました");
-    }
-  };
-
-  const { isSelected, isSelectionMode, toggleSelection } = useSelection();
 
   return (
     <div ref={parentRef} className="w-full h-full flex flex-col">
@@ -79,83 +67,8 @@ export const GridView = memo(function GridView1({
             {Array.from({ length: columnCount }).map((_, colIndex) => {
               const index = virtualRow.index * columnCount + colIndex;
               const node = nodes[index];
-              if (!node) return null;
-
-              const selected = isSelected(node.path);
-
               return (
-                <div key={node.path} className="p-1">
-                  <div
-                    className={cn(
-                      "relative group aspect-square w-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
-                      selected
-                        ? "ring-2 ring-primary border-transparent"
-                        : "hover:border-primary/50"
-                    )}
-                    onClick={() => {
-                      if (isSelectionMode) {
-                        toggleSelection(node.path);
-                      } else {
-                        onOpen?.(node, index);
-                      }
-                    }}
-                  >
-                    {/* サムネイル */}
-                    <MediaThumb
-                      node={node}
-                      className="w-full h-full object-cover"
-                    />
-
-                    {/* 選択チェックボックス */}
-                    <div
-                      className={cn(
-                        "absolute top-2 left-2 transition-opacity",
-                        isSelectionMode
-                          ? "opacity-100"
-                          : "opacity-0 group-hover:opacity-100"
-                      )}
-                    >
-                      <Checkbox
-                        checked={selected}
-                        onCheckedChange={() => toggleSelection(node.path)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-
-                    {/* テキストオーバーレイ */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
-                      <MarqueeText
-                        text={node.title ?? node.name}
-                        className="text-center text-[10px] leading-tight text-white"
-                      />
-                    </div>
-
-                    {/* お気に入りボタン */}
-                    {!isSelectionMode && isMedia(node.type) && (
-                      <FavoriteButton
-                        variant="grid"
-                        active={favoriteCtx.isFavorite(node.path)}
-                        onToggle={() => void toggleFavorite(node)}
-                      />
-                    )}
-
-                    {/* ステータスバッジ */}
-                    {node.isDirectory && (
-                      <FolderStatusBadge
-                        date={node.lastViewedAt}
-                        className="absolute top-1 right-1"
-                      />
-                    )}
-
-                    {/* ★ お気に入り数バッジ */}
-                    {node.isDirectory && (
-                      <FavoriteCountBadge
-                        count={node.favoriteCount ?? 0}
-                        className="absolute top-1 left-1"
-                      />
-                    )}
-                  </div>
-                </div>
+                node && <Cell key={node.path} node={node} onOpen={onOpen} />
               );
             })}
           </div>
@@ -164,3 +77,95 @@ export const GridView = memo(function GridView1({
     </div>
   );
 });
+
+type CellProps = {
+  node: MediaNode;
+  onOpen?: (target: MediaNode) => void;
+};
+
+function Cell({ node, onOpen }: CellProps) {
+  const favoriteCtx = useFavorite();
+  const toggleFavorite = async (node: MediaNode) => {
+    try {
+      await favoriteCtx.toggleFavorite(node.path);
+    } catch (e) {
+      console.error(e);
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  };
+
+  const { isSelected, isSelectionMode, toggleSelection } = useSelection();
+  const selected = isSelected(node.path);
+
+  return (
+    <div className="p-1">
+      <div
+        className={cn(
+          "relative group aspect-square w-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
+          selected
+            ? "ring-2 ring-primary border-transparent"
+            : "hover:border-primary/50"
+        )}
+        onClick={() => {
+          if (isSelectionMode) {
+            toggleSelection(node.path);
+          } else {
+            onOpen?.(node);
+          }
+        }}
+      >
+        {/* サムネイル */}
+        <MediaThumb node={node} className="w-full h-full object-cover" />
+
+        {/* 選択チェックボックス */}
+        <div
+          className={cn(
+            "absolute top-2 left-2 transition-opacity",
+            isSelectionMode
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <Checkbox
+            checked={selected}
+            onCheckedChange={() => toggleSelection(node.path)}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+
+        {/* テキストオーバーレイ */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+          <MarqueeText
+            text={node.title ?? node.name}
+            className="text-center text-[10px] leading-tight text-white"
+          />
+        </div>
+
+        {/* お気に入りボタン */}
+        {!isSelectionMode && isMedia(node.type) && (
+          <FavoriteButton
+            variant="grid"
+            active={favoriteCtx.isFavorite(node.path)}
+            onToggle={() => void toggleFavorite(node)}
+          />
+        )}
+
+        {/* ステータスバッジ */}
+        {node.isDirectory && (
+          <FolderStatusBadge
+            date={node.lastViewedAt}
+            className="absolute top-1 right-1"
+          />
+        )}
+
+        {/* ★ お気に入り数バッジ */}
+        {node.isDirectory && (
+          <FavoriteCountBadge
+            count={node.favoriteCount ?? 0}
+            className="absolute top-1 left-1"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
