@@ -2,15 +2,15 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export function useModalNavigation() {
+export function useModalNavigation(key: string = "modal") {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isOpen = searchParams.get("modal") === "true";
+  const isOpen = searchParams.get(key) === "true";
 
   const openModal = () => {
     // 履歴を 1 つ進めてモーダルを表示
-    router.push(`${pathname}?modal=true`);
+    router.push(`${pathname}?${key}=true`);
   };
 
   const closeModal = () => {
