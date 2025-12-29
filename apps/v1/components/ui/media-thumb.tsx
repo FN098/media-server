@@ -94,13 +94,13 @@ function MediaThumbImage({
       key={`${node.path}-${version}`}
       src={thumbSrc}
       alt={node.name}
-      // fill
       width={200}
       height={200}
       className={cn(
         "transition-transform duration-500 hover:scale-110",
         className
       )}
+      draggable={false}
       onError={() => void handleError()} // 画像がなかったら発火
       fallback={
         <div
