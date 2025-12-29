@@ -3,6 +3,7 @@
 import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
+import { TagEditorBar } from "@/components/ui/tag-editor-bar";
 import { useExplorerNavigation } from "@/hooks/use-explorer-navigation";
 import { visitFolderAction } from "@/lib/folder/actions";
 import { syncMediaDirAction } from "@/lib/media/actions";
@@ -105,6 +106,7 @@ export function Explorer({ listing }: ExplorerProps) {
     >
       <FavoriteProvider initialFavorites={initialFavorites}>
         <SelectionProvider>
+          {/* グリッドビュー */}
           <div className={cn(view === "grid" ? "block" : "hidden")}>
             <GridView
               nodes={filtered}
@@ -112,78 +114,85 @@ export function Explorer({ listing }: ExplorerProps) {
             />
           </div>
 
+          {/* リストビュー */}
           <div className={cn(view === "list" ? "block" : "hidden")}>
             <ListView
               nodes={filtered}
               onOpen={(node) => void handleOpen(node)}
             />
           </div>
+
+          {/* ビューワ */}
+          {modal && index != null && (
+            <MediaViewer
+              items={mediaOnly}
+              initialIndex={index}
+              onClose={closeMedia}
+              features={{
+                openFolder: false,
+              }}
+              onPrevFolder={
+                listing.prev
+                  ? () => moveFolder(listing.prev!, "last")
+                  : undefined
+              }
+              onNextFolder={
+                listing.next
+                  ? () => moveFolder(listing.next!, "first")
+                  : undefined
+              }
+            />
+          )}
+
+          {/* タグ編集バー */}
+          <TagEditorBar allNodes={filtered} />
         </SelectionProvider>
-
-        {modal && index != null && (
-          <MediaViewer
-            items={mediaOnly}
-            initialIndex={index}
-            onClose={closeMedia}
-            features={{
-              openFolder: false,
-            }}
-            onPrevFolder={
-              listing.prev ? () => moveFolder(listing.prev!, "last") : undefined
-            }
-            onNextFolder={
-              listing.next
-                ? () => moveFolder(listing.next!, "first")
-                : undefined
-            }
-          />
-        )}
-
-        {/* フォルダナビゲーション */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
-          {/* Previous Button Container */}
-          <div className="w-full sm:flex-1">
-            {listing.prev && (
-              <Button
-                variant="outline"
-                className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
-                asChild
-              >
-                <Link href={encodeURI(getClientExplorerPath(listing.prev))}>
-                  <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
-                    <ArrowLeft className="mr-1 h-3 w-3" />
-                    Previous
-                  </div>
-                  <div className="text-base font-medium truncate w-full text-left">
-                    {listing.prev.split("/").filter(Boolean).pop()}
-                  </div>
-                </Link>
-              </Button>
-            )}
-          </div>
-
-          {/* Next Button Container */}
-          <div className="w-full sm:flex-1 flex justify-end">
-            {listing.next && (
-              <Button
-                variant="outline"
-                className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
-                asChild
-              >
-                <Link href={encodeURI(getClientExplorerPath(listing.next))}>
-                  <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
-                    Next
-                    <ArrowRight className="ml-1 h-3 w-3" />
-                  </div>
-                  <div className="text-base font-medium truncate w-full text-right">
-                    {listing.next.split("/").filter(Boolean).pop()}
-                  </div>
-                </Link>
-              </Button>
-            )}
-          </div>
-        </div>
       </FavoriteProvider>
+
+      {/* フォルダナビゲーション */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
+        {/* Previous Button Container */}
+        <div className="w-full sm:flex-1">
+          {listing.prev && (
+            <Button
+              variant="outline"
+              className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
+              asChild
+            >
+              <Link href={encodeURI(getClientExplorerPath(listing.prev))}>
+                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                  <ArrowLeft className="mr-1 h-3 w-3" />
+                  Previous
+                </div>
+                <div className="text-base font-medium truncate w-full text-left">
+                  {listing.prev.split("/").filter(Boolean).pop()}
+                </div>
+              </Link>
+            </Button>
+          )}
+        </div>
+
+        {/* Next Button Container */}
+        <div className="w-full sm:flex-1 flex justify-end">
+          {listing.next && (
+            <Button
+              variant="outline"
+              className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
+              asChild
+            >
+              <Link href={encodeURI(getClientExplorerPath(listing.next))}>
+                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                  Next
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </div>
+                <div className="text-base font-medium truncate w-full text-right">
+                  {listing.next.split("/").filter(Boolean).pop()}
+                </div>
+              </Link>
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

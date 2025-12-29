@@ -22,6 +22,10 @@ export type MediaFsListing = {
   next: string | null;
 };
 
+export type MediaTag = {
+  name: string;
+};
+
 export type MediaNode = MediaFsNode & {
   id?: string;
   title?: string;
@@ -29,6 +33,7 @@ export type MediaNode = MediaFsNode & {
   lastViewedAt?: Date;
   favoriteCount?: number;
   extension?: string;
+  tags?: MediaTag[];
 };
 
 export type MediaListing = {

@@ -10,7 +10,6 @@ import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
 import { useSelection } from "@/providers/selection-provider";
-import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -49,40 +48,10 @@ export const GridView = memo(function GridView1({
     }
   };
 
-  // 選択機能
-  const {
-    isSelected,
-    isSelectionMode,
-    selectedIds,
-    toggleSelection,
-    selectIds: selectItems,
-    clearSelection,
-  } = useSelection();
-
-  const selectAll = () => {
-    const all = nodes.map((n) => n.path);
-    selectItems(all);
-  };
+  const { isSelected, isSelectionMode, toggleSelection } = useSelection();
 
   return (
     <div ref={parentRef} className="w-full h-full flex flex-col">
-      {/* 選択モード用ツールバー */}
-      {isSelectionMode && (
-        <div className="flex items-center justify-between p-2 bg-muted/50 border-b">
-          <span className="text-sm font-medium">
-            {selectedIds.size} 個選択中
-          </span>
-          <div className="space-x-2">
-            <Button size="sm" variant="outline" onClick={selectAll}>
-              すべて選択
-            </Button>
-            <Button size="sm" variant="ghost" onClick={clearSelection}>
-              解除
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* グリッド */}
       <div
         style={{
