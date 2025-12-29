@@ -7,14 +7,17 @@ import { hashPath } from "@/lib/utils/path";
 export async function enqueueThumbJob(dirPath: string) {
   await thumbQueue.add(
     "create-thumbs",
-    { dirPath, createdAt: Date.now() },
+    {
+      dirPath,
+      createdAt: Date.now(),
+    },
     {
       jobId: `thumb-dir-${hashPath(dirPath)}`,
       removeOnComplete: {
-        age: 60, // 完了後 1 分で削除
+        age: 60,
       },
-      removeOnFail: false, // 失敗した場合は ID を残して連続再試行を抑制
-      lifo: true, // 後から入ったジョブ（最新の要求）を先に処理する
+      removeOnFail: true,
+      lifo: true,
     }
   );
 }
@@ -22,14 +25,17 @@ export async function enqueueThumbJob(dirPath: string) {
 export async function enqueueSingleThumbJob(filePath: string) {
   await thumbQueue.add(
     "create-thumb-single",
-    { filePath, createdAt: Date.now() },
+    {
+      filePath,
+      createdAt: Date.now(),
+    },
     {
       jobId: `thumb-file-${hashPath(filePath)}`,
       removeOnComplete: {
-        age: 10, // 完了後 10 秒で削除
+        age: 10,
       },
-      removeOnFail: false, // 失敗した場合は ID を残して連続再試行を抑制
-      lifo: true, // 後から入ったジョブ（最新の要求）を先に処理する
+      removeOnFail: true,
+      lifo: true,
     }
   );
 }
