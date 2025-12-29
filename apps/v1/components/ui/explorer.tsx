@@ -12,6 +12,7 @@ import { getClientExplorerPath } from "@/lib/path-helpers";
 import { enqueueThumbJob } from "@/lib/thumb/actions";
 import { FavoriteProvider } from "@/providers/favorite-provider";
 import { useSearch } from "@/providers/search-provider";
+import { SelectionProvider } from "@/providers/selection-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -103,13 +104,21 @@ export function Explorer({ listing }: ExplorerProps) {
       )}
     >
       <FavoriteProvider initialFavorites={initialFavorites}>
-        <div className={cn(view === "grid" ? "block" : "hidden")}>
-          <GridView nodes={filtered} onOpen={(node) => void handleOpen(node)} />
-        </div>
+        <SelectionProvider>
+          <div className={cn(view === "grid" ? "block" : "hidden")}>
+            <GridView
+              nodes={filtered}
+              onOpen={(node) => void handleOpen(node)}
+            />
+          </div>
 
-        <div className={cn(view === "list" ? "block" : "hidden")}>
-          <ListView nodes={filtered} onOpen={(node) => void handleOpen(node)} />
-        </div>
+          <div className={cn(view === "list" ? "block" : "hidden")}>
+            <ListView
+              nodes={filtered}
+              onOpen={(node) => void handleOpen(node)}
+            />
+          </div>
+        </SelectionProvider>
 
         {modal && index != null && (
           <MediaViewer

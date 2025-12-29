@@ -6,10 +6,10 @@ import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { useGridViewConfig } from "@/hooks/use-grid-view";
-import { useSelection } from "@/hooks/use-selection";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
+import { useSelection } from "@/providers/selection-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
@@ -51,12 +51,18 @@ export const GridView = memo(function GridView1({
 
   // 選択機能
   const {
-    isSelectionMode,
     isSelected,
+    isSelectionMode,
+    selectedIds,
     toggleSelection,
-    selectAll,
+    selectIds: selectItems,
     clearSelection,
-  } = useSelection(nodes);
+  } = useSelection();
+
+  const selectAll = () => {
+    const all = nodes.map((n) => n.path);
+    selectItems(all);
+  };
 
   return (
     <div ref={parentRef} className="w-full h-full flex flex-col">
@@ -64,7 +70,7 @@ export const GridView = memo(function GridView1({
       {isSelectionMode && (
         <div className="flex items-center justify-between p-2 bg-muted/50 border-b">
           <span className="text-sm font-medium">
-            {isSelected.length} 個選択中
+            {selectedIds.size} 個選択中
           </span>
           <div className="space-x-2">
             <Button size="sm" variant="outline" onClick={selectAll}>
