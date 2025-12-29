@@ -38,11 +38,15 @@ import "swiper/css/virtual";
 import { Keyboard, Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
+type MediaViewerFeatures = {
+  openFolder?: boolean;
+};
+
 interface MediaViewerProps {
   items: MediaNode[];
   initialIndex: number;
   onClose: () => void;
-  openFolderMenu?: boolean;
+  features?: MediaViewerFeatures;
   onNextFolder?: () => void;
   onPrevFolder?: () => void;
 }
@@ -58,14 +62,22 @@ type Slide =
       path: "next-loader";
     };
 
+const DEFAULT_FEATURES: Required<MediaViewerFeatures> = {
+  openFolder: true,
+};
+
 export function MediaViewer({
   items,
   initialIndex,
   onClose,
-  openFolderMenu = true,
+  features,
   onNextFolder,
   onPrevFolder,
 }: MediaViewerProps) {
+  const mergedFeatures = {
+    ...DEFAULT_FEATURES,
+    ...features,
+  };
   const favoriteCtx = useFavorite();
   const [index, setIndex] = useState(initialIndex);
   const [isHovered, setIsHovered] = useState(false);
@@ -85,6 +97,8 @@ export function MediaViewer({
   );
   const { setTitle, resetTitle } = useTitleControl();
   const { lock: lockScroll, unlock: unlockScroll } = useScrollLockControl();
+
+  const { openFolder } = mergedFeatures;
 
   // スクロールロックとタイトル設定
   useEffect(() => {
@@ -199,7 +213,7 @@ export function MediaViewer({
                 />
               )}
 
-              {/* メニューボタン */}
+              {/* メニュー */}
               <DropdownMenu onOpenChange={setIsMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -211,7 +225,7 @@ export function MediaViewer({
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-48">
-                  {openFolderMenu && (
+                  {openFolder && (
                     <DropdownMenuItem asChild>
                       <Link
                         href={getClientExplorerPath(

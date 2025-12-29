@@ -116,7 +116,9 @@ export function Explorer({ listing }: ExplorerProps) {
             items={mediaOnly}
             initialIndex={index}
             onClose={closeMedia}
-            openFolderMenu={false}
+            features={{
+              openFolder: false,
+            }}
             onPrevFolder={
               listing.prev ? () => moveFolder(listing.prev!, "last") : undefined
             }
