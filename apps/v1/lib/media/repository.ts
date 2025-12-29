@@ -84,3 +84,17 @@ export async function getFavoriteMediaNodes(
     isFavorite: true,
   }));
 }
+
+export async function getMediaByTags(tagNames: string[]) {
+  return await prisma.media.findMany({
+    where: {
+      mediaTags: {
+        every: {
+          tag: {
+            name: { in: tagNames },
+          },
+        },
+      },
+    },
+  });
+}
