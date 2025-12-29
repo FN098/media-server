@@ -68,8 +68,8 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN apk add --no-cache ffmpeg
 
 # セキュリティのため非ルートユーザーを作成
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs && \
+  adduser --system --uid 1001 nextjs
 
 # build 成果物と必要ファイルをコピー
 # ※ next.config.js で output: 'standalone' を設定している前提
@@ -96,6 +96,10 @@ FROM base AS worker
 
 # ffmpeg のインストール
 RUN apk add --no-cache ffmpeg
+
+# セキュリティのため非ルートユーザーを作成
+RUN addgroup --system --gid 1001 nodejs && \
+  adduser --system --uid 1001 nextjs
 
 # builder からソースファイルをコピー
 COPY --from=builder /app ./
