@@ -1,5 +1,6 @@
 "use client";
 
+import { APP_CONFIG } from "@/app.config";
 import { AudioPlayer } from "@/components/ui/audio-player";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
@@ -100,17 +101,24 @@ export function MediaViewer({
 
   const { openFolder } = mergedFeatures;
 
-  // スクロールロックとタイトル設定
+  // スクロールロック
   useEffect(() => {
     lockScroll();
-    const { title, name } = items[index];
-    setTitle(title ?? name);
 
     return () => {
       unlockScroll();
+    };
+  }, [lockScroll, unlockScroll]);
+
+  // タイトル設定
+  useEffect(() => {
+    const { title, name } = items[index];
+    setTitle(`${title ?? name} | ${APP_CONFIG.meta.title}`);
+
+    return () => {
       resetTitle();
     };
-  }, [index, items, lockScroll, resetTitle, setTitle, unlockScroll]);
+  }, [index, items, resetTitle, setTitle]);
 
   // お気に入りボタンクリック時の処理
   const handleToggleFavorite = useCallback(async () => {
