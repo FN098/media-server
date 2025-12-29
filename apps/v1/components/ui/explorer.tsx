@@ -49,7 +49,7 @@ export function Explorer({ listing }: ExplorerProps) {
   );
 
   // Navigation
-  const { index, modal, setIndex, openMedia, closeMedia, moveFolder } =
+  const { index, modal, openMedia, closeMedia, moveFolder } =
     useExplorerNavigation(mediaOnly.length);
 
   const handleOpen = useCallback(
@@ -132,8 +132,6 @@ export function Explorer({ listing }: ExplorerProps) {
 
         {/* フォルダナビゲーション */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
-          <Button onClick={() => setIndex(2)}>aaa</Button>
-
           {/* Previous Button Container */}
           <div className="w-full sm:flex-1">
             {listing.prev && (
