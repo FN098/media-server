@@ -1,5 +1,3 @@
-"use client";
-
 import { APP_CONFIG } from "@/app.config";
 import { CarouselDemo } from "@/shadcn-demos/caroucel-demo";
 import { Metadata } from "next";
