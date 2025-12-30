@@ -11,7 +11,6 @@ import {
   useMemo,
 } from "react";
 
-// 型定義
 interface ExplorerContextType {
   listing: MediaListing;
   index: number | null;
@@ -40,15 +39,15 @@ export function ExplorerProvider({
   const atRaw = searchParams.get("at");
   const modal = searchParams.get("modal") === "true";
 
-  const itemsCount = listing.nodes.length;
+  const totalCount = listing.nodes.length;
 
   // インデックスの計算
   const index = useMemo(() => {
-    if (atRaw === "last") return itemsCount > 0 ? itemsCount - 1 : 0;
+    if (atRaw === "last") return totalCount > 0 ? totalCount - 1 : 0;
     if (atRaw === "first") return 0;
     if (atRaw != null) return parseInt(atRaw, 10);
     return null;
-  }, [atRaw, itemsCount]);
+  }, [atRaw, totalCount]);
 
   const setIndex = useCallback(
     (newIndex: number | "first" | "last") => {
