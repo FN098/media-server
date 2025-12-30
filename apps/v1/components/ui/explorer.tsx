@@ -46,7 +46,10 @@ export function Explorer() {
 
   // フォルダ/ファイルオープン
   const handleOpen = useCallback(
-    (node: MediaNode, index: number) => {
+    (nodes: MediaNode[], index: number) => {
+      if (index < 0 || index > nodes.length) return;
+      const node = nodes[index];
+
       // フォルダ
       if (node.isDirectory) {
         const href = getClientExplorerPath(node.path);
@@ -107,7 +110,7 @@ export function Explorer() {
             <div>
               <GridView
                 nodes={filtered}
-                onOpen={(node, index) => void handleOpen(node, index)}
+                onOpen={(index) => void handleOpen(filtered, index)}
               />
             </div>
           )}
@@ -117,7 +120,7 @@ export function Explorer() {
             <div>
               <ListView
                 nodes={filtered}
-                onOpen={(node, index) => void handleOpen(node, index)}
+                onOpen={(index) => void handleOpen(filtered, index)}
               />
             </div>
           )}
@@ -131,12 +134,13 @@ export function Explorer() {
         {/* ビューワ */}
         {modal && index != null && (
           <MediaViewer
-            items={mediaOnly}
+            items={filtered}
             initialIndex={index}
             onClose={closeMedia}
             features={{
               openFolder: false,
             }}
+            onFolder={moveFolder}
             onPrevFolder={movePrevFolder}
             onNextFolder={moveNextFolder}
           />

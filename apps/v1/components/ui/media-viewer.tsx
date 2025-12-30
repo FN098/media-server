@@ -53,8 +53,9 @@ interface MediaViewerProps {
   initialIndex: number;
   onClose: () => void;
   features?: MediaViewerFeatures;
-  onNextFolder?: (at: "first" | "last") => void;
-  onPrevFolder?: (at: "first" | "last") => void;
+  onFolder?: (path: string, at?: "first" | "last") => void;
+  onNextFolder?: (at?: "first" | "last") => void;
+  onPrevFolder?: (at?: "first" | "last") => void;
 }
 
 type Slide =
@@ -77,6 +78,7 @@ export function MediaViewer({
   initialIndex,
   onClose,
   features,
+  onFolder,
   onNextFolder,
   onPrevFolder,
 }: MediaViewerProps) {
@@ -159,8 +161,8 @@ export function MediaViewer({
     { key: "d", callback: () => swiperInstance?.slideNext() },
     { key: "f", callback: toggleFullscreen },
     { key: "t", callback: () => setIsTagEditing((prev) => !prev) },
-    { key: "q", callback: () => onPrevFolder?.("first") }, // ショートカットで戻る場合は最初のファイルを開く
-    { key: "e", callback: () => onNextFolder?.("first") },
+    { key: "q", callback: () => onPrevFolder?.() },
+    { key: "e", callback: () => onNextFolder?.() },
     { key: "o", callback: handleOpenFolder },
   ]);
 

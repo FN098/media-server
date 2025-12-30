@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 type GridViewProps = {
   nodes: MediaNode[];
-  onOpen?: (target: MediaNode, index: number) => void;
+  onOpen?: (index: number) => void;
 };
 
 export const GridView = memo(function GridView1({
@@ -82,15 +82,15 @@ export const GridView = memo(function GridView1({
             {/* セル */}
             {Array.from({ length: columnCount }).map((_, colIndex) => {
               const index = virtualRow.index * columnCount + colIndex;
+              if (index < 0 || index >= nodes.length) return;
+
               const node = nodes[index];
               return (
-                node && (
-                  <Cell
-                    key={node.path}
-                    node={node}
-                    onOpen={onOpen ? () => onOpen?.(node, index) : undefined}
-                  />
-                )
+                <Cell
+                  key={node.path}
+                  node={node}
+                  onOpen={onOpen ? () => onOpen?.(index) : undefined}
+                />
               );
             })}
           </div>

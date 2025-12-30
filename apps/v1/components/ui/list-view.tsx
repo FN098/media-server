@@ -26,7 +26,7 @@ import { toast } from "sonner";
 
 type ListViewProps = {
   nodes: MediaNode[];
-  onOpen?: (target: MediaNode, index: number) => void;
+  onOpen?: (index: number) => void;
 };
 
 export const ListView = memo(function ListView1({
@@ -67,7 +67,7 @@ export const ListView = memo(function ListView1({
               key={node.path}
               node={node}
               className={cn("hover:bg-blue-100 active:bg-blue-200")}
-              onOpen={() => onOpen?.(node, index)}
+              onOpen={() => onOpen?.(index)}
             />
           ))}
         </TableBody>
