@@ -253,7 +253,10 @@ export function MediaViewer({
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent
+                  align="end"
+                  className="flex flex-col w-48 gap-2"
+                >
                   {openFolder && (
                     <DropdownMenuItem asChild>
                       <Link
