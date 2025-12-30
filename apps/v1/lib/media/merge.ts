@@ -21,7 +21,7 @@ export function mergeFsWithDb(
       id: dbMedia?.id,
       title: dbMedia?.title ?? fsNode.name,
       isFavorite: dbMedia?.isFavorite ?? false,
-      lastViewedAt: dbVisited?.lastViewedAt,
+      lastViewedAt: dbVisited?.lastViewedAt ?? undefined,
       favoriteCount: dbFavorite?.favoriteCountInFolder,
     } satisfies MediaNode;
   });

@@ -1,6 +1,6 @@
 export type DbVisitedInfo = {
   path: string;
-  lastViewedAt: Date;
+  lastViewedAt: Date | null;
 };
 
 export type DbFavoriteInfo = {

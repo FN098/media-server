@@ -61,7 +61,7 @@ export default async function Page(props: Props) {
   // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
   const dbMedia = await getDbMedia(currentDirPath, USER);
-  const dbVisited = await getDbVisitedInfoDeeply(currentDirPath, USER);
+  const dbVisited = await getDbVisitedInfoDeeply(dirPaths, USER);
   const dbFavorites = await getDbFavoriteCount(dirPaths, USER);
 
   // マージ
