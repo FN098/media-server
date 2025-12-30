@@ -38,38 +38,45 @@ export async function getDbVisitedInfoDeeply(
   dirPaths: string[],
   userId: string
 ): Promise<DbVisitedInfo[]> {
-  // 対象のフォルダの子孫を含めすべて取得
-  return Promise.all(
-    dirPaths.map(async (d) => {
-      const folders = await prisma.visitedFolder.findMany({
-        select: {
-          dirPath: true,
-          lastViewedAt: true,
-        },
-        where: {
-          userId,
-          dirPath: { startsWith: d },
-        },
-      });
-
-      if (folders.length === 0)
-        return {
-          path: d,
-          lastViewedAt: null,
-        };
-
-      const latestViewedAt = folders
-        .map((f) => f.lastViewedAt)
-        .reduce((a, b) => {
-          return a > b ? a : b;
-        });
-
-      return {
-        path: d,
-        lastViewedAt: latestViewedAt,
-      } satisfies DbVisitedInfo;
+  // 1. 各パスに対するクエリ（Promise）の配列を作成
+  const tasks = dirPaths.map((d) =>
+    prisma.visitedFolder.findMany({
+      select: {
+        lastViewedAt: true,
+      },
+      where: {
+        userId,
+        dirPath: { startsWith: d },
+      },
     })
   );
+
+  // 2. $transaction で一括実行
+  // results はフォルダオブジェクトの配列の配列になります: VisitFolder[][]
+  const results = await prisma.$transaction(tasks);
+
+  // 3. 結果を元のパスと紐付けて加工
+  return dirPaths.map((path, index) => {
+    const folders = results[index];
+
+    if (folders.length === 0) {
+      return {
+        path,
+        lastViewedAt: null,
+      };
+    }
+
+    // 取得したレコードの中から最新の時刻を算出
+    const latestViewedAt = folders
+      .map((f) => f.lastViewedAt)
+      .filter((date): date is Date => date !== null) // null除外（DB設計による）
+      .reduce((a, b) => (a > b ? a : b), new Date(0));
+
+    return {
+      path,
+      lastViewedAt: latestViewedAt.getTime() === 0 ? null : latestViewedAt,
+    } satisfies DbVisitedInfo;
+  });
 }
 
 export async function getDbFavoriteCount(
