@@ -10,7 +10,7 @@ import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle, Plus, TagIcon } from "lucide-react";
+import { CheckCircle, Edit2, Plus, TagIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -65,6 +65,12 @@ export function TagEditorBar({
     [pendingChanges]
   );
   const hasChanges = changesCount > 0;
+
+  // 閲覧モード
+  const [isEditing, setIsEditing] = useState(mode !== "single");
+  const viewTags = useMemo(() => {
+    return masterTags.filter((tag) => tagStates[tag.name] === "all");
+  }, [masterTags, tagStates]);
 
   const selectAll = useCallback(() => {
     const allPaths = allNodes.map((n) => n.path);
@@ -173,111 +179,156 @@ export function TagEditorBar({
           )}
         >
           <div className="flex flex-col gap-3">
+            {/* ヘッダーセクション */}
             <div className="flex items-center justify-between border-b pb-2">
-              <span className="text-xs font-bold flex items-center gap-2">
-                {mode === "single" && (
-                  <>
-                    <TagIcon size={14} />
-                    {`タグを編集`}
-                  </>
+              <div className="flex items-center gap-2">
+                <TagIcon size={14} className="text-muted-foreground" />
+                <span className="text-xs font-bold">
+                  {mode === "single"
+                    ? isEditing
+                      ? "タグを編集"
+                      : "タグ"
+                    : "一括編集"}
+                </span>
+                {mode === "single" ? (
+                  <></>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      if (isAllSelected) {
+                        clearSelection();
+                      } else {
+                        selectAll();
+                      }
+                    }}
+                    disabled={isLoading}
+                  >
+                    <CheckCircle
+                      className={cn(
+                        isAllSelected &&
+                          "text-xs text-green-600 hover:text-green-700"
+                      )}
+                    />
+                    <span className="text-xs">
+                      {`${selectedPaths.size} / ${allNodes.length} 件`}
+                    </span>
+                  </Button>
                 )}
-                {mode === "default" && (
+              </div>
+
+              <div className="flex gap-2">
+                {mode === "single" && !isEditing ? (
+                  /* 閲覧モード時の編集開始ボタン */
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsEditing(true)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit2 size={14} />
+                  </Button>
+                ) : (
+                  /* 編集モード時のアクション */
                   <>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => {
-                        if (isAllSelected) {
-                          clearSelection();
+                        if (mode === "single") {
+                          setIsEditing(false);
+                          setPendingChanges({});
                         } else {
-                          selectAll();
+                          handleCancel();
                         }
                       }}
-                      disabled={isLoading}
+                      className="h-8 text-xs"
                     >
-                      <CheckCircle
-                        className={cn(
-                          isAllSelected &&
-                            "text-xs text-green-600 hover:text-green-700"
-                        )}
-                      />
-                      <span className="text-xs">
-                        {`${selectedPaths.size} / ${allNodes.length} 件を選択中`}
-                      </span>
+                      {mode === "single" ? "キャンセル" : "リセット"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => void applyChanges()}
+                      disabled={!hasChanges || isLoading}
+                      className="h-8 text-xs px-4"
+                    >
+                      {isLoading ? "保存中..." : "保存"}
                     </Button>
                   </>
                 )}
-              </span>
-              <div className="flex gap-2">
-                {hasChanges && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleCancel}
-                    className="h-8 text-xs"
-                  >
-                    リセット
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  onClick={() => void applyChanges()}
-                  disabled={!hasChanges || isLoading}
-                  className="h-8 text-xs px-4"
-                >
-                  {isLoading ? "保存中..." : "変更を保存"}
-                </Button>
               </div>
             </div>
 
+            {/* コンテンツセクション */}
             <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
-              {/* タグバッジ一覧 */}
-              {displayMasterTags.map((tag) => {
-                const op = pendingChanges[tag.id];
-                const isCurrentlyOn = tagStates[tag.name] === "all";
-                const willBeOn =
-                  op === "add" ? true : op === "remove" ? false : isCurrentlyOn;
+              {!isEditing ? (
+                /* --- 閲覧モード: 選択中タグのみ --- */
+                viewTags.length > 0 ? (
+                  viewTags.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="secondary"
+                      className="py-1 px-3 text-[10px] pointer-events-none"
+                    >
+                      {tag.name}
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="text-[10px] text-muted-foreground py-1">
+                    タグが設定されていません
+                  </span>
+                )
+              ) : (
+                /* --- 編集モード: 全タグ表示 + 新規追加 --- */
+                <>
+                  {displayMasterTags.map((tag) => {
+                    const op = pendingChanges[tag.id];
+                    const isCurrentlyOn = tagStates[tag.name] === "all";
+                    const willBeOn =
+                      op === "add"
+                        ? true
+                        : op === "remove"
+                          ? false
+                          : isCurrentlyOn;
 
-                return (
-                  <Badge
-                    key={tag.id}
-                    variant={willBeOn ? "default" : "outline"}
-                    className={cn(
-                      "cursor-pointer py-1 px-3 text-[10px] transition-all select-none relative",
-                      op === "add" && "ring-2 ring-yellow-400 ring-offset-1",
-                      op === "remove" && "opacity-50 grayscale",
-                      !willBeOn && "text-muted-foreground"
-                    )}
-                    onClick={() => toggleTag(tag)}
-                  >
-                    {tag.name}
-                    {op && (
-                      <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-yellow-400" />
-                    )}
-                  </Badge>
-                );
-              })}
+                    return (
+                      <Badge
+                        key={tag.id}
+                        variant={willBeOn ? "default" : "outline"}
+                        className={cn(
+                          "cursor-pointer py-1 px-3 text-[10px] transition-all select-none relative",
+                          op === "add" &&
+                            "ring-2 ring-yellow-400 ring-offset-1",
+                          op === "remove" && "opacity-50 grayscale",
+                          !willBeOn && "text-muted-foreground"
+                        )}
+                        onClick={() => toggleTag(tag)}
+                      >
+                        {tag.name}
+                        {op && (
+                          <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-yellow-400" />
+                        )}
+                      </Badge>
+                    );
+                  })}
 
-              {/* 新規タグ入力 */}
-              <div className="flex items-center ml-2 px-2 rounded-md border bg-muted/30 focus-within:bg-background">
-                <Plus className="h-3 w-3 text-muted-foreground" />
-                <input
-                  className="bg-transparent border-none outline-none p-1 text-xs w-24 focus:w-40 transition-all"
-                  placeholder="タグを追加..."
-                  value={newTagName}
-                  onChange={(e) => setNewTagName(e.target.value)}
-                  onKeyDown={(e) => {
-                    e.stopPropagation();
-                    if (e.key === "Enter") {
-                      void addTag();
-                    }
-                  }}
-                  onFocus={() => {
-                    // 入力中は親のキーボードイベントを止めたい
-                  }}
-                  disabled={isLoading}
-                />
-              </div>
+                  <div className="flex items-center ml-2 px-2 rounded-md border bg-muted/30 focus-within:bg-background">
+                    <Plus className="h-3 w-3 text-muted-foreground" />
+                    <input
+                      className="bg-transparent border-none outline-none p-1 text-xs w-24 focus:w-40 transition-all"
+                      placeholder="追加..."
+                      value={newTagName}
+                      onChange={(e) => setNewTagName(e.target.value)}
+                      onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") void addTag();
+                      }}
+                      disabled={isLoading}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </motion.div>
