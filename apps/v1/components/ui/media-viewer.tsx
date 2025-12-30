@@ -36,7 +36,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
-import { Keyboard, Navigation, Virtual, Zoom } from "swiper/modules";
+import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
 type MediaViewerFeatures = {
@@ -140,12 +140,13 @@ export function MediaViewer({
     }
   }, [favoriteCtx, interactHeader, index, items]);
 
-  // 左右キーは Swiper の keyboard オプションで有効化
   useShortcutKeys([
     { key: "Escape", callback: onClose },
     { key: "f", callback: () => void handleToggleFavorite() },
     { key: "Enter", callback: toggleHeaderVisibility },
     { key: " ", callback: toggleHeaderVisibility },
+    { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
+    { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
     { key: "a", callback: () => swiperInstance?.slidePrev() },
     { key: "d", callback: () => swiperInstance?.slideNext() },
   ]);
@@ -260,7 +261,7 @@ export function MediaViewer({
       {/* メディアコンテンツ */}
       <Swiper
         onSwiper={setSwiperInstance}
-        modules={[Virtual, Navigation, Keyboard, Zoom]}
+        modules={[Virtual, Navigation, Zoom]}
         initialSlide={vindex}
         onSlideChange={(swiper) => {
           const activeIdx = swiper.activeIndex;
