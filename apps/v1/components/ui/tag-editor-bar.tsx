@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { cn } from "@/shadcn/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
@@ -152,93 +153,106 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
     clearSelection();
   }, [clearSelection]);
 
-  if (!isSelectionMode) return null;
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg animate-in slide-in-from-bottom duration-300">
-      <div className="max-w-screen-xl mx-auto p-4 flex flex-col gap-4">
-        {/* ヘッダー: 選択件数と操作ボタン */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="text-[10px]">{selectedPaths.size} 件を選択中</span>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={selectAll}
-              disabled={isLoading}
-            >
-              すべて選択
-            </Button>
-          </div>
+    <AnimatePresence>
+      {isSelectionMode && (
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 25, stiffness: 200 }}
+          className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg"
+        >
+          <div className="max-w-screen-xl mx-auto p-4 flex flex-col gap-4">
+            {/* ヘッダー: 選択件数と操作ボタン */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="text-[10px]">
+                  {selectedPaths.size} 件を選択中
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={selectAll}
+                  disabled={isLoading}
+                >
+                  すべて選択
+                </Button>
+              </div>
 
-          <div className="flex items-center gap-4">
-            <CancelButton onConfirm={handleCancel} hasChanges={hasChanges} />
-            <Button
-              size="sm"
-              onClick={() => void applyChanges()}
-              disabled={!hasChanges || isLoading}
-            >
-              {isLoading
-                ? "更新中..."
-                : changesCount > 0
-                  ? `変更を適用 (${changesCount})`
-                  : "変更を適用"}{" "}
-            </Button>
-          </div>
-        </div>
+              <div className="flex items-center gap-4">
+                <CancelButton
+                  onConfirm={handleCancel}
+                  hasChanges={hasChanges}
+                />
+                <Button
+                  size="sm"
+                  onClick={() => void applyChanges()}
+                  disabled={!hasChanges || isLoading}
+                >
+                  {isLoading
+                    ? "更新中..."
+                    : changesCount > 0
+                      ? `変更を適用 (${changesCount})`
+                      : "変更を適用"}{" "}
+                </Button>
+              </div>
+            </div>
 
-        <div className="flex flex-wrap gap-2 items-center">
-          {/* タグバッジ一覧 */}
-          {displayMasterTags.map((tag) => {
-            const op = pendingChanges[tag.id];
-            const isCurrentlyOn = tagStates[tag.name] === "all";
-            const willBeOn =
-              op === "add" ? true : op === "remove" ? false : isCurrentlyOn;
+            <div className="flex flex-wrap gap-2 items-center">
+              {/* タグバッジ一覧 */}
+              {displayMasterTags.map((tag) => {
+                const op = pendingChanges[tag.id];
+                const isCurrentlyOn = tagStates[tag.name] === "all";
+                const willBeOn =
+                  op === "add" ? true : op === "remove" ? false : isCurrentlyOn;
 
-            return (
-              <Badge
-                key={tag.id}
-                variant={willBeOn ? "default" : "outline"}
+                return (
+                  <Badge
+                    key={tag.id}
+                    variant={willBeOn ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer py-1 px-3 text-[10px] transition-all select-none relative",
+                      op === "add" && "ring-2 ring-yellow-400 ring-offset-1",
+                      op === "remove" && "opacity-50 grayscale",
+                      !willBeOn && "text-muted-foreground"
+                    )}
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag.name}
+                    {op && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-yellow-400" />
+                    )}
+                  </Badge>
+                );
+              })}
+
+              {/* 新規タグ入力 */}
+              <div
                 className={cn(
-                  "cursor-pointer py-1 px-3 text-[10px] transition-all select-none relative",
-                  op === "add" && "ring-2 ring-yellow-400 ring-offset-1",
-                  op === "remove" && "opacity-50 grayscale",
-                  !willBeOn && "text-muted-foreground"
+                  "flex items-center ml-2 px-2 rounded-md border bg-muted/50 transition-all duration-300",
+                  "focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary focus-within:bg-background"
                 )}
-                onClick={() => toggleTag(tag)}
               >
-                {tag.name}
-                {op && (
-                  <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-yellow-400" />
-                )}
-              </Badge>
-            );
-          })}
-
-          {/* 新規タグ入力 */}
-          <div
-            className={cn(
-              "flex items-center ml-2 px-2 rounded-md border bg-muted/50 transition-all duration-300",
-              "focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary focus-within:bg-background"
-            )}
-          >
-            <Plus className="h-3 w-3 text-muted-foreground" />
-            <input
-              className="bg-transparent border-none outline-none p-1 text-xs w-24 focus:w-40 transition-all"
-              placeholder="タグを追加..."
-              value={newTagName}
-              onChange={(e) => setNewTagName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  void addTag();
-                }
-              }}
-              disabled={isLoading}
-            />
+                <Plus className="h-3 w-3 text-muted-foreground" />
+                <input
+                  className="bg-transparent border-none outline-none p-1 text-xs w-24 focus:w-40 transition-all"
+                  placeholder="タグを追加..."
+                  value={newTagName}
+                  onChange={(e) => setNewTagName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      void addTag();
+                    }
+                  }}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
