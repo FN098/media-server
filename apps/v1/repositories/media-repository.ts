@@ -22,6 +22,12 @@ export async function findMediaByPathOrThrow(
   });
 }
 
+export async function getDbMediaCount(dirPath: string): Promise<number> {
+  return await prisma.media.count({
+    where: { dirPath },
+  });
+}
+
 export async function getDbMedia(
   dirPath: string,
   userId: string

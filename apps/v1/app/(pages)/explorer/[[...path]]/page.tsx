@@ -12,7 +12,7 @@ import {
   getDbFavoriteCount,
   getDbVisitedInfoDeeply,
 } from "@/repositories/folder-repository";
-import { getDbMedia } from "@/repositories/media-repository";
+import { getDbMedia, getDbMediaCount } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -52,9 +52,6 @@ export default async function Page(props: Props) {
 
   const rawNodes = listing.nodes;
 
-  // FS <=> DB 同期 (先にクエリを投げておき、後で待機)
-  const syncTask = syncMediaDir(currentDirPath, rawNodes);
-
   // ソート
   const sorted = sortMediaFsNodes(rawNodes, {
     key: sortKey,
@@ -63,8 +60,11 @@ export default async function Page(props: Props) {
 
   const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
 
-  // FS <=> DB 同期完了を待機
-  await syncTask;
+  // DB の件数を先に取得し、一致しなければ同期
+  const dbCount = await getDbMediaCount(currentDirPath);
+  if (dbCount !== rawNodes.length) {
+    await syncMediaDir(currentDirPath, rawNodes);
+  }
 
   // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
