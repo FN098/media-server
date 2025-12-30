@@ -1,7 +1,10 @@
 import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
-import { getDbFavoriteCount, getDbVisitedInfo } from "@/lib/folder/repository";
+import {
+  getDbFavoriteCount,
+  getDbVisitedInfoDeeply,
+} from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
@@ -58,7 +61,7 @@ export default async function Page(props: Props) {
   // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
   const dbMedia = await getDbMedia(currentDirPath, USER);
-  const dbVisited = await getDbVisitedInfo(dirPaths, USER);
+  const dbVisited = await getDbVisitedInfoDeeply(currentDirPath, USER);
   const dbFavorites = await getDbFavoriteCount(dirPaths, USER);
 
   // マージ
