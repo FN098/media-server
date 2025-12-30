@@ -9,6 +9,7 @@ import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { useExplorer } from "@/providers/explorer-provider";
 import { FavoriteProvider } from "@/providers/favorite-provider";
+import { QueryProvider } from "@/providers/query-provider";
 import { useSearch } from "@/providers/search-provider";
 import { SelectionProvider } from "@/providers/selection-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
@@ -36,6 +37,7 @@ export function Favorites() {
     [filtered]
   );
 
+  // フォルダ/ファイルオープン
   const handleOpen = useCallback(
     (node: MediaNode, index: number) => {
       // フォルダ
@@ -97,7 +99,9 @@ export function Favorites() {
           )}
 
           {/* タグ編集バー */}
-          <TagEditorBar allNodes={filtered} />
+          <QueryProvider>
+            <TagEditorBar allNodes={filtered} />
+          </QueryProvider>
         </SelectionProvider>
       </FavoriteProvider>
     </div>

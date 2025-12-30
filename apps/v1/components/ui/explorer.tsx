@@ -43,6 +43,7 @@ export function Explorer() {
     [filtered]
   );
 
+  // フォルダ/ファイルオープン
   const handleOpen = useCallback(
     (node: MediaNode, index: number) => {
       // フォルダ
