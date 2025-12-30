@@ -18,14 +18,15 @@ export function mergeFsWithDb(
 
   const result = fsMedia.map((fsNode) => {
     const dbMedia = dbMediaMap.get(fsNode.path);
+    if (!dbMedia) throw new Error(`Media not found for path: ${fsNode.path}`);
     const dbVisited = dbVisitedMap.get(fsNode.path);
     const dbFavorite = dbFavoriteMap.get(fsNode.path);
 
     return {
       ...fsNode,
-      id: dbMedia?.id,
-      title: dbMedia?.title ?? fsNode.name,
-      isFavorite: dbMedia?.isFavorite ?? false,
+      id: dbMedia.id,
+      title: dbMedia.title ?? fsNode.name,
+      isFavorite: dbMedia.isFavorite ?? false,
       lastViewedAt: dbVisited?.lastViewedAt ?? undefined,
       favoriteCount: dbFavorite?.favoriteCountInFolder,
     } satisfies MediaNode;

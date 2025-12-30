@@ -27,7 +27,7 @@ export type MediaTag = {
 };
 
 export type MediaNode = MediaFsNode & {
-  id?: string;
+  id: string;
   title?: string;
   isFavorite: boolean;
   lastViewedAt?: Date;
