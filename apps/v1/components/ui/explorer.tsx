@@ -91,20 +91,24 @@ export function Explorer() {
       <FavoriteProvider initialFavorites={initialFavorites}>
         <SelectionProvider>
           {/* グリッドビュー */}
-          <div className={cn(view === "grid" ? "block" : "hidden")}>
-            <GridView
-              nodes={filtered}
-              onOpen={(node, index) => void handleOpen(node, index)}
-            />
-          </div>
+          {view === "grid" && (
+            <div>
+              <GridView
+                nodes={filtered}
+                onOpen={(node, index) => void handleOpen(node, index)}
+              />
+            </div>
+          )}
 
           {/* リストビュー */}
-          <div className={cn(view === "list" ? "block" : "hidden")}>
-            <ListView
-              nodes={filtered}
-              onOpen={(node, index) => void handleOpen(node, index)}
-            />
-          </div>
+          {view === "list" && (
+            <div>
+              <ListView
+                nodes={filtered}
+                onOpen={(node, index) => void handleOpen(node, index)}
+              />
+            </div>
+          )}
 
           {/* タグエディター */}
           <QueryProvider>

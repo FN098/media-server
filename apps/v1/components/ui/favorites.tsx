@@ -75,19 +75,24 @@ export function Favorites() {
       <FavoriteProvider initialFavorites={initialFavorites}>
         <SelectionProvider>
           {/* グリッドビュー */}
-          <div className={cn(view === "grid" ? "block" : "hidden")}>
-            <GridView nodes={filtered} onOpen={handleOpen} />
-          </div>
+          {view === "grid" && (
+            <div>
+              <GridView
+                nodes={filtered}
+                onOpen={(node, index) => void handleOpen(node, index)}
+              />
+            </div>
+          )}
 
           {/* リストビュー */}
-          <div
-            className={cn(
-              view === "list" ? "block" : "hidden",
-              "w-full h-full"
-            )}
-          >
-            <ListView nodes={filtered} onOpen={handleOpen} />
-          </div>
+          {view === "list" && (
+            <div>
+              <ListView
+                nodes={filtered}
+                onOpen={(node, index) => void handleOpen(node, index)}
+              />
+            </div>
+          )}
 
           {/* タグエディター */}
           <QueryProvider>
