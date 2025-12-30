@@ -107,7 +107,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/v1 ./
 
 # サムネイル作成ワーカープロセスを起動
-CMD ["pnpm", "tsx", "lib/thumb/processor.ts"]
+CMD ["pnpm", "thumb"]
 
 # ===============================
 # 4. Migration Stage
