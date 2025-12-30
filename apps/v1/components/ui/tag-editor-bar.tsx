@@ -17,10 +17,10 @@ import { toast } from "sonner";
 
 export function TagEditorBar({
   allNodes,
-  mode = "bulk",
+  mode = "default",
 }: {
   allNodes: MediaNode[];
-  mode?: "single" | "bulk";
+  mode?: "default" | "single" | "none";
 }) {
   const {
     selectedValues: selectedPaths,
@@ -162,7 +162,7 @@ export function TagEditorBar({
 
   return (
     <AnimatePresence>
-      {isSelectionMode && (
+      {isSelectionMode && mode !== "none" && (
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -181,7 +181,7 @@ export function TagEditorBar({
                     {`タグを編集`}
                   </>
                 )}
-                {mode === "bulk" && (
+                {mode === "default" && (
                   <>
                     <Button
                       size="sm"

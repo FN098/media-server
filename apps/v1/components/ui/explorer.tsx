@@ -126,12 +126,10 @@ export function Explorer() {
               openFolder: false,
             }}
             onPrevFolder={
-              listing.prev ? () => moveFolder(listing.prev!, "last") : undefined
+              listing.prev ? (at) => moveFolder(listing.prev!, at) : undefined
             }
             onNextFolder={
-              listing.next
-                ? () => moveFolder(listing.next!, "first")
-                : undefined
+              listing.next ? (at) => moveFolder(listing.next!, at) : undefined
             }
           />
         )}

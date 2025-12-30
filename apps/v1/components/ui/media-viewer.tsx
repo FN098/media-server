@@ -53,8 +53,8 @@ interface MediaViewerProps {
   initialIndex: number;
   onClose: () => void;
   features?: MediaViewerFeatures;
-  onNextFolder?: () => void;
-  onPrevFolder?: () => void;
+  onNextFolder?: (at: "first" | "last") => void;
+  onPrevFolder?: (at: "first" | "last") => void;
 }
 
 type Slide =
@@ -159,8 +159,8 @@ export function MediaViewer({
     { key: "d", callback: () => swiperInstance?.slideNext() },
     { key: "f", callback: toggleFullscreen },
     { key: "t", callback: () => setIsTagEditing((prev) => !prev) },
-    { key: "q", callback: () => onPrevFolder?.() },
-    { key: "e", callback: () => onNextFolder?.() },
+    { key: "q", callback: () => onPrevFolder?.("first") }, // ショートカットで戻る場合は最初のファイルを開く
+    { key: "e", callback: () => onNextFolder?.("first") },
     { key: "o", callback: handleOpenFolder },
   ]);
 
@@ -191,10 +191,10 @@ export function MediaViewer({
     setIndex(itemIdx);
 
     if (hasPrev && activeIdx === 0) {
-      onPrevFolder();
+      onPrevFolder("last");
     }
     if (hasNext && activeIdx === allSlides.length - 1) {
-      onNextFolder();
+      onNextFolder("first");
     }
   };
 
@@ -360,13 +360,14 @@ export function MediaViewer({
       </Swiper>
 
       {/* タグエディター */}
-      {isTagEditing && (
-        <SelectionProvider>
-          <QueryProvider>
-            <TagEditorBar allNodes={[items[index]]} mode="single" />
-          </QueryProvider>
-        </SelectionProvider>
-      )}
+      <SelectionProvider>
+        <QueryProvider>
+          <TagEditorBar
+            allNodes={[items[index]]}
+            mode={isTagEditing ? "single" : "none"}
+          />
+        </QueryProvider>
+      </SelectionProvider>
     </div>
   );
 }
