@@ -7,64 +7,41 @@ import {
   isFavorite,
 } from "@/repositories/favorite-repository";
 import { findMediaByPath } from "@/repositories/media-repository";
-import { findUserById } from "@/repositories/user-repository";
 
-type UpdateFavoriteResult = {
-  message: string;
-  ok: boolean;
-};
-
-export async function updateFavorite(
-  path: string
-): Promise<UpdateFavoriteResult> {
+export async function updateFavorite(path: string) {
   try {
     // TODO: ユーザー認証機能実装後に差し替える
-    const user = await findUserById(USER);
-    if (!user) return { message: "unauthorized", ok: false };
+    const userId = USER;
 
     const media = await findMediaByPath(path);
-    if (!media) return { message: "not found", ok: false };
+    if (!media) return { success: false, error: "メディアがありません" };
 
-    const favorite = await isFavorite(user.id, media.id);
+    const favorite = await isFavorite(userId, media.id);
     if (favorite) {
-      await deleteFavorite(user.id, media.id);
+      await deleteFavorite(userId, media.id);
     } else {
-      await createFavorite(user.id, media.id);
+      await createFavorite(userId, media.id);
     }
 
-    return { message: "success", ok: true };
-  } catch (e) {
-    console.error(e);
-    return { message: "failed", ok: false };
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update favorite:", error);
+    return { success: false, error: "お気に入りの更新に失敗しました" };
   }
 }
 
-type RevalidateFavoriteResult =
-  | {
-      message: string;
-      ok: false;
-    }
-  | {
-      value: boolean;
-      ok: true;
-    };
-
-export async function revalidateFavorite(
-  path: string
-): Promise<RevalidateFavoriteResult> {
+export async function revalidateFavorite(path: string) {
   try {
     // TODO: ユーザー認証機能実装後に差し替える
-    const user = await findUserById(USER);
-    if (!user) return { message: "unauthorized", ok: false };
+    const userId = USER;
 
     const media = await findMediaByPath(path);
-    if (!media) return { message: "not found", ok: false };
+    if (!media) return { success: false, error: "メディアがありません" };
 
-    const favorite = await isFavorite(user.id, media.id);
-
-    return { value: favorite, ok: true };
-  } catch (e) {
-    console.error(e);
-    return { message: "failed", ok: false };
+    const favorite = await isFavorite(userId, media.id);
+    return { favorite, success: true };
+  } catch (error) {
+    console.error("Failed to revalidate favorite:", error);
+    return { success: false, error: "お気に入りの再検証に失敗しました" };
   }
 }

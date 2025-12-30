@@ -121,17 +121,19 @@ export function FavoriteProvider({
 
       try {
         // 2. サーバー更新
-        const { ok } = await updateFavorite(path);
-        if (!ok) throw new Error("Failed to update");
-        return current; // 成功時の状態を返す
-      } catch (e) {
+        const { success } = await updateFavorite(path);
+        if (success) {
+          return current; // 成功時の状態を返す
+        }
+
         // 3. 失敗時のロールバック（再同期）
-        console.error("Favorite sync failed, revalidating...", e);
         const revalidated = await revalidateFavorite(path);
-        const actual = revalidated.ok ? revalidated.value : prev;
-        setFavorite(path, actual);
-        broadcast(path, actual);
-        return actual; // 最終的な状態を返す
+        if (revalidated.success) {
+          const actual = revalidated.favorite!;
+          setFavorite(path, actual);
+          broadcast(path, actual);
+          return actual; // 最終的な状態を返す
+        }
       } finally {
         finishFlight(path);
       }
