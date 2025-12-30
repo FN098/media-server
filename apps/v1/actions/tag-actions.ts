@@ -19,9 +19,8 @@ export async function updateMediaTagsAction(payload: {
     .map(([id]) => id);
 
   try {
-    // トランザクションで一括処理
     await prisma.$transaction(async (tx) => {
-      // 1. 削除処理: 選択されたメディアIDのいずれかに紐付く、対象タグIDを一括削除
+      // 1. 紐付けの解除
       if (tagIdsToRemove.length > 0) {
         await tx.mediaTag.deleteMany({
           where: {
@@ -31,9 +30,7 @@ export async function updateMediaTagsAction(payload: {
         });
       }
 
-      // 2. 追加処理: 既存のレコードと重複しないように追加
-      // MySQL等で効率的な「無視して挿入」が難しいため、
-      // 愚直に全組み合わせを作成し、createMany の skipDuplicates を使用
+      // 2. 紐付けの追加
       if (tagIdsToAdd.length > 0) {
         const data = mediaIds.flatMap((mediaId) =>
           tagIdsToAdd.map((tagId) => ({
@@ -44,7 +41,19 @@ export async function updateMediaTagsAction(payload: {
 
         await tx.mediaTag.createMany({
           data,
-          skipDuplicates: true, // すでに存在する紐付けはスキップ
+          skipDuplicates: true,
+        });
+      }
+
+      // 3. 孤立したタグの削除 (クリーンアップ)
+      if (tagIdsToRemove.length > 0) {
+        await tx.tag.deleteMany({
+          where: {
+            id: { in: tagIdsToRemove },
+            mediaTags: {
+              none: {}, // どの MediaTag からも参照されていない
+            },
+          },
         });
       }
     });
