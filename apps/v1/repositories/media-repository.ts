@@ -46,7 +46,11 @@ export async function getDbMedia(
       },
       mediaTags: {
         select: {
-          tag: { select: { name: true } },
+          tag: {
+            select: {
+              name: true,
+            },
+          },
         },
       },
     },
@@ -59,7 +63,9 @@ export async function getDbMedia(
     path: m.path,
     fileSize: Number(m.fileSize),
     title: m.title ?? undefined,
-    tags: m.mediaTags.map((t) => ({ name: t.tag.name })),
+    tags: m.mediaTags.map((t) => ({
+      name: t.tag.name,
+    })),
   }));
 }
 
@@ -76,6 +82,15 @@ export async function getFavoriteMediaNodes(
           title: true,
           fileMtime: true,
           fileSize: true,
+          mediaTags: {
+            select: {
+              tag: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -94,6 +109,9 @@ export async function getFavoriteMediaNodes(
     mtime: f.media.fileMtime,
     title: f.media.title ?? undefined,
     isFavorite: true,
+    tags: f.media.mediaTags.map((t) => ({
+      name: t.tag.name,
+    })),
   }));
 }
 

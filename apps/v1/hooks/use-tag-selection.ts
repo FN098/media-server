@@ -1,5 +1,6 @@
 import { Tag } from "@/generated/prisma";
 import { MediaNode } from "@/lib/media/types";
+import { uniqueBy } from "@/lib/utils/unique";
 import { useMemo } from "react";
 
 export type TagState = "all" | "some" | "none";
@@ -18,12 +19,14 @@ export function useTagSelection(selectedNodes: MediaNode[], allTags: Tag[]) {
     const tagCounts: Record<string, number> = {};
 
     // 選択ノードのタグを集計
-    selectedNodes.forEach((node) => {
-      const uniqueTags = new Set(node.tags);
-      uniqueTags.forEach((tag) => {
-        tagCounts[tag.name] = (tagCounts[tag.name] || 0) + 1;
+    selectedNodes
+      .filter((node) => !!node.tags)
+      .forEach((node) => {
+        const uniqueTags = uniqueBy(node.tags!, "name");
+        uniqueTags.forEach((tag) => {
+          tagCounts[tag.name] = (tagCounts[tag.name] || 0) + 1;
+        });
       });
-    });
 
     // タグごとの状態を決定
     // - all: すべての選択ノードにタグが含まれる
