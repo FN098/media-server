@@ -52,7 +52,7 @@ export function TagEditorBar({
   const { tagStates } = useTagSelection(selectedNodes, masterTags);
 
   const displayMasterTags = useMemo(() => {
-    return uniqueBy([...masterTags, ...createdTags], "id").sort();
+    return uniqueBy([...createdTags, ...masterTags], "id").sort();
   }, [masterTags, createdTags]);
 
   // 未保存の変更を管理 { [tagId]: "add" | "remove" }
