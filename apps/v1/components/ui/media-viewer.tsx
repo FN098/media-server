@@ -303,9 +303,7 @@ export function MediaViewer({
                     onClick={() => setIsTagEditing(!isTagEditing)}
                   >
                     <TagIcon className="mr-2 h-4 w-4" />
-                    <span>
-                      {isTagEditing ? "タグ編集を終了" : "タグを編集"}
-                    </span>
+                    <span>タグを表示</span>
                     {!isMobile && (
                       <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
                         <kbd className="rounded border px-1.5 py-0.5">T</kbd>
