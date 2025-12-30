@@ -198,9 +198,8 @@ export function TagEditorBar({
                       : "タグ"
                     : "一括編集"}
                 </span>
-                {mode === "single" ? (
-                  <></>
-                ) : (
+
+                {isEditing && mode === "default" && (
                   /* 一括編集モード時の全選択ボタン */
                   <Button
                     size="sm"
@@ -220,6 +219,24 @@ export function TagEditorBar({
                       {`${selectedPaths.size} / ${allNodes.length} 件`}
                     </span>
                   </Button>
+                )}
+
+                {/* タグ追加 */}
+                {isEditing && (
+                  <div className="flex items-center ml-2 px-2 rounded-md border bg-muted/30 focus-within:bg-background">
+                    <Plus className="h-3 w-3 text-muted-foreground" />
+                    <input
+                      className="bg-transparent border-none outline-none p-1 text-xs w-24 focus:w-40 transition-all"
+                      placeholder="追加..."
+                      value={newTagName}
+                      onChange={(e) => setNewTagName(e.target.value)}
+                      onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") void addTag();
+                      }}
+                      disabled={isLoading}
+                    />
+                  </div>
                 )}
               </div>
 
@@ -285,7 +302,7 @@ export function TagEditorBar({
                   </span>
                 )
               ) : (
-                /* --- 編集モード: 全タグ表示 + 新規追加 --- */
+                /* --- 編集モード: 全タグ表示 --- */
                 <>
                   {displayMasterTags.map((tag) => {
                     const op = pendingChanges[tag.id];
@@ -317,21 +334,6 @@ export function TagEditorBar({
                       </Badge>
                     );
                   })}
-
-                  <div className="flex items-center ml-2 px-2 rounded-md border bg-muted/30 focus-within:bg-background">
-                    <Plus className="h-3 w-3 text-muted-foreground" />
-                    <input
-                      className="bg-transparent border-none outline-none p-1 text-xs w-24 focus:w-40 transition-all"
-                      placeholder="追加..."
-                      value={newTagName}
-                      onChange={(e) => setNewTagName(e.target.value)}
-                      onKeyDown={(e) => {
-                        e.stopPropagation();
-                        if (e.key === "Enter") void addTag();
-                      }}
-                      disabled={isLoading}
-                    />
-                  </div>
                 </>
               )}
             </div>
