@@ -1,43 +1,68 @@
-import { prisma } from "@/lib/prisma";
+import { Tag } from "@/generated/prisma";
+import { getPopularTags, getRelatedTags } from "@/repositories/tag-repository";
+import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
-const PathsSchema = z.array(z.string());
+const MAX_RETURN_TAGS_COUNT = 100;
+const MAX_PATHS_TO_PROCESS = 500;
 
-export async function GET(request: Request) {
-  // const { searchParams } = new URL(request.url);
-  // const parsed = PathsSchema.safeParse(
-  //   JSON.parse(searchParams.get("paths") || "[]")
-  // );
-  // if (!parsed.success) {
-  //   return new Response("Invalid paths", { status: 400 });
-  // }
+const RequestSchema = z.object({
+  paths: z.array(z.string()).optional().default([]),
+});
 
-  // const paths = parsed.data;
+async function getTags(paths: string[]): Promise<Tag[]> {
+  // 1. 関連タグの取得
+  const relatedTags = await getRelatedTags(paths, MAX_RETURN_TAGS_COUNT);
 
-  const tags = await prisma.tag.findMany({
-    // where: {
-    //   OR: [
-    //     // 1. 現在表示中のディレクトリ内のメディアが既に使用しているタグ
-    //     {
-    //       mediaTags: {
-    //         some: {
-    //           media: { path: { in: paths } },
-    //         },
-    //       },
-    //     },
-    //     // 2. あるいは、全メディアの中でよく使われているタグ（上位30件など）
-    //     {
-    //       mediaTags: {
-    //         _count: { gte: 1 }, // 何かしら紐付いているもの
-    //       },
-    //     },
-    //   ],
-    // },
-    take: 100, // 取得件数を制限
-    orderBy: {
-      name: "asc",
-    },
-  });
+  // 2. その他（人気）タグの取得
+  const excludeIds = relatedTags.map((t) => t.id);
+  const popularTags = await getPopularTags(excludeIds, MAX_RETURN_TAGS_COUNT);
 
-  return Response.json(tags);
+  // 3. マージ
+  const result = [...relatedTags, ...popularTags];
+
+  return result;
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = request.nextUrl;
+    const rawPaths = searchParams.get("paths");
+    const parsed = RequestSchema.safeParse(
+      rawPaths ? JSON.parse(rawPaths) : []
+    );
+
+    if (!parsed.success) {
+      return new NextResponse("Invalid paths format", { status: 400 });
+    }
+
+    // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
+    const paths = parsed.data.paths.slice(0, MAX_PATHS_TO_PROCESS);
+    const result = await getTags(paths);
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Tag Fetch Error:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = (await request.json()) as unknown;
+    const parsed = RequestSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return new NextResponse("Invalid request body", { status: 400 });
+    }
+
+    // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
+    const paths = parsed.data.paths.slice(0, MAX_PATHS_TO_PROCESS);
+    const result = await getTags(paths);
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Tag Fetch Error:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
 }

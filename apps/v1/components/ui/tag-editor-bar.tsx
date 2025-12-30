@@ -3,6 +3,7 @@ import type { Tag } from "@/generated/prisma";
 import { useTagSelection } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
+import { TagOperation, TagOperator } from "@/lib/tag/types";
 import { useSelection } from "@/providers/selection-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
@@ -20,21 +21,43 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-type TagOp = "add" | "remove";
-
 export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
-  const { selectedIds, selectIds, clearSelection, isSelectionMode } =
-    useSelection();
+  const {
+    selectedValues: selectedPaths,
+    selectValues: selectPaths,
+    clearSelection,
+    isSelectionMode,
+  } = useSelection();
+
+  const router = useRouter();
+  const [newTagName, setNewTagName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [createdTags, setCreatedTags] = useState<Tag[]>([]);
 
   const selectedNodes = useMemo(
-    () => allNodes.filter((n) => selectedIds.has(n.id)),
-    [allNodes, selectedIds]
+    () => allNodes.filter((n) => selectedPaths.has(n.path)),
+    [allNodes, selectedPaths]
   );
 
-  const [newTagName, setNewTagName] = useState("");
-  const [pendingChanges, setPendingChanges] = useState<Record<string, TagOp>>(
-    {}
-  );
+  const { tags: masterTags } = useTags(Array.from(selectedPaths));
+  const { tagStates } = useTagSelection(selectedNodes, masterTags);
+
+  console.log({ tagStates });
+
+  const displayMasterTags = useMemo(() => {
+    const combined = [...masterTags, ...createdTags];
+
+    // IDの重複を排除
+    const map = new Map<string, Tag>();
+    combined.forEach((t) => map.set(t.id, t));
+
+    return Array.from(map.values());
+  }, [masterTags, createdTags]);
+
+  // 未保存の変更を管理 { [tagId]: "add" | "remove" }
+  const [pendingChanges, setPendingChanges] = useState<
+    Record<string, TagOperator>
+  >({});
 
   const changesCount = useMemo(
     () => Object.keys(pendingChanges).length,
@@ -42,35 +65,23 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
   );
   const hasChanges = changesCount > 0;
 
-  const { tags: masterTags } = useTags();
-  const { tagStates } = useTagSelection(selectedNodes, masterTags);
-
-  console.log("selectedIds.size", selectedIds.size);
-  console.log("selectedNodes.length", selectedNodes.length);
-
-  const router = useRouter();
-
-  const [isLoading, setIsLoading] = useState(false);
-
   const selectAll = useCallback(() => {
-    const allIds = allNodes.map((n) => n.id);
-    selectIds(allIds);
-  }, [allNodes, selectIds]);
+    const allPaths = allNodes.map((n) => n.path);
+    selectPaths(allPaths);
+  }, [allNodes, selectPaths]);
 
   const toggleTag = useCallback(
     (tag: Tag) => {
-      const isCurrentlyAll = tagStates[tag.name] === "all";
+      const dbState = tagStates[tag.name] || "none";
 
       setPendingChanges((prev) => {
         const next = { ...prev };
-        const currentOp = prev[tag.id];
-
-        if (currentOp) {
-          // すでに変更リストにある場合は、変更をキャンセル（元に戻す）
+        if (prev[tag.id]) {
+          // 変更取り消し
           delete next[tag.id];
         } else {
-          // 元が ON なら「削除予約」、OFF なら「追加予約」
-          next[tag.id] = isCurrentlyAll ? "remove" : "add";
+          // 変更予約
+          next[tag.id] = dbState === "all" ? "remove" : "add";
         }
         return next;
       });
@@ -78,66 +89,75 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
     [tagStates]
   );
 
-  const applyChanges = useCallback(async () => {
-    if (isLoading) return;
-
-    setIsLoading(true); // ローディング状態を追加
-
-    const result = await updateMediaTagsAction({
-      mediaIds: Array.from(selectedIds) as string[],
-      changes: pendingChanges,
-    });
-
-    if (result.success) {
-      toast.success("タグを更新しました");
-
-      // 状態のクリーンアップ
-      setPendingChanges({});
-      clearSelection();
-
-      // 画面のデータを最新にする
-      router.refresh();
-    } else {
-      toast.error("更新に失敗しました");
-    }
-
-    setIsLoading(false);
-  }, [clearSelection, isLoading, pendingChanges, router, selectedIds]);
-
   const addTag = useCallback(async () => {
     const name = newTagName.trim();
     if (!name) return;
 
-    // すでにマスタにあるか確認
-    const existingTag = masterTags.find((t) => t.name === name);
+    // TODO: Map で O(1)
+    const existingTag = displayMasterTags.find((t) => t.name === name);
 
     if (existingTag) {
-      // すでに存在する場合、そのタグを ON にする（add予約）
-      toggleTag(existingTag);
+      setPendingChanges((prev) => ({
+        ...prev,
+        [existingTag.id]: "add",
+      }));
       setNewTagName("");
       return;
     }
 
-    const result = await createTagAction(name);
-    if (result.success && result.tag) {
-      // 1. マスタリストを更新（SWRや独自の状態管理、または revalidatePath）
-      // ここでは masterTags が再取得される想定
+    setIsLoading(true);
+    try {
+      const result = await createTagAction(name);
+      if (result.success && result.tag) {
+        // 作成したタグをローカルステートに追加
+        setCreatedTags((prev) => [...prev, result.tag]);
 
-      // 2. 作成したタグを選択中の全ファイルに対して "add" 予約
-      setPendingChanges((prev) => ({
-        ...prev,
-        [result.tag.id]: "add",
-      }));
+        // そのタグを選択状態（add予約）にする
+        setPendingChanges((prev) => ({
+          ...prev,
+          [result.tag.id]: "add",
+        }));
 
-      setNewTagName("");
-      toast.success(`タグ "${name}" を作成しました`);
-    } else {
-      toast.error("タグの作成に失敗しました");
+        setNewTagName("");
+        toast.success(`タグ "${name}" を作成しました`);
+      } else {
+        toast.error("タグの作成に失敗しました");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }, [masterTags, newTagName, toggleTag]);
+  }, [displayMasterTags, newTagName]);
+
+  const applyChanges = useCallback(async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      // Record を TagOperation[] 型に変換
+      const operations: TagOperation[] = Object.entries(pendingChanges).map(
+        ([tagId, operator]) => ({ tagId, operator })
+      );
+
+      const result = await updateMediaTagsAction({
+        mediaPaths: Array.from(selectedPaths),
+        operations,
+      });
+
+      if (result.success) {
+        toast.success("タグを更新しました");
+        setPendingChanges({});
+        clearSelection();
+        router.refresh();
+      } else {
+        toast.error("更新に失敗しました");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [clearSelection, isLoading, pendingChanges, router, selectedPaths]);
 
   const handleCancel = useCallback(() => {
     setPendingChanges({});
+    setCreatedTags([]);
     clearSelection();
   }, [clearSelection]);
 
@@ -149,8 +169,13 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
         {/* ヘッダー: 選択件数と操作ボタン */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-[10px]">{selectedIds.size} 件を選択中</span>
-            <Button size="sm" variant="outline" onClick={selectAll}>
+            <span className="text-[10px]">{selectedPaths.size} 件を選択中</span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={selectAll}
+              disabled={isLoading}
+            >
               すべて選択
             </Button>
           </div>
@@ -162,30 +187,32 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
               onClick={() => void applyChanges()}
               disabled={!hasChanges || isLoading}
             >
-              {changesCount > 0 ? `変更を適用 (${changesCount})` : "変更を適用"}
+              {isLoading
+                ? "更新中..."
+                : changesCount > 0
+                  ? `変更を適用 (${changesCount})`
+                  : "変更を適用"}{" "}
             </Button>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
           {/* タグバッジ一覧 */}
-          {masterTags.map((tag) => {
+          {displayMasterTags.map((tag) => {
             const op = pendingChanges[tag.id];
-            const displayState =
-              op === "add"
-                ? "all"
-                : op === "remove"
-                  ? "none"
-                  : tagStates[tag.name];
+            const isCurrentlyOn = tagStates[tag.name] === "all";
+            const willBeOn =
+              op === "add" ? true : op === "remove" ? false : isCurrentlyOn;
 
             return (
               <Badge
                 key={tag.id}
-                variant={displayState === "none" ? "outline" : "default"}
+                variant={willBeOn ? "default" : "outline"}
                 className={cn(
-                  "cursor-pointer py-1 px-3 text-[10px] transition-all select-none",
-                  tagStates[tag.name] === "all" &&
-                    "bg-primary text-primary-foreground"
+                  "cursor-pointer py-1 px-3 text-[10px] transition-all select-none relative",
+                  op === "add" && "ring-2 ring-yellow-400 ring-offset-1",
+                  op === "remove" && "opacity-50 grayscale",
+                  !willBeOn && "text-muted-foreground"
                 )}
                 onClick={() => toggleTag(tag)}
               >
@@ -215,6 +242,7 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
                   void addTag();
                 }
               }}
+              disabled={isLoading}
             />
           </div>
         </div>

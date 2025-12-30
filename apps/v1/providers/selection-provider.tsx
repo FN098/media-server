@@ -7,11 +7,11 @@ import React, {
 } from "react";
 
 interface SelectionContextType {
-  selectedIds: Set<string | number>;
+  selectedValues: Set<string>;
   isSelectionMode: boolean;
-  isSelected: (id: string | number) => boolean;
-  toggleSelection: (id: string | number) => void;
-  selectIds: (ids: (string | number)[]) => void;
+  isSelected: (value: string) => boolean;
+  toggleSelection: (value: string) => void;
+  selectValues: (values: string[]) => void;
   clearSelection: () => void;
 }
 
@@ -20,19 +20,17 @@ const SelectionContext = createContext<SelectionContextType | undefined>(
 );
 
 export function SelectionProvider({ children }: { children: React.ReactNode }) {
-  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(
-    new Set()
-  );
+  const [selectedValues, setSelectedValues] = useState<Set<string>>(new Set());
 
-  const isSelectionMode = selectedIds.size > 0;
+  const isSelectionMode = selectedValues.size > 0;
 
   const isSelected = useCallback(
-    (id: string | number) => selectedIds.has(id),
-    [selectedIds]
+    (value: string) => selectedValues.has(value),
+    [selectedValues]
   );
 
-  const toggleSelection = useCallback((id: string | number) => {
-    setSelectedIds((prev) => {
+  const toggleSelection = useCallback((id: string) => {
+    setSelectedValues((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -40,29 +38,29 @@ export function SelectionProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const selectIds = useCallback((ids: (string | number)[]) => {
-    setSelectedIds(new Set(ids));
+  const selectValues = useCallback((ids: string[]) => {
+    setSelectedValues(new Set(ids));
   }, []);
 
   const clearSelection = useCallback(() => {
-    setSelectedIds(new Set());
+    setSelectedValues(new Set());
   }, []);
 
   const value = useMemo(
     () => ({
-      selectedIds,
+      selectedValues,
       isSelectionMode,
       isSelected,
       toggleSelection,
-      selectIds,
+      selectValues,
       clearSelection,
     }),
     [
-      selectedIds,
+      selectedValues,
       isSelectionMode,
       isSelected,
       toggleSelection,
-      selectIds,
+      selectValues,
       clearSelection,
     ]
   );

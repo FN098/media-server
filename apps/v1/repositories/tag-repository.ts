@@ -8,7 +8,7 @@ export async function removeTag(tagId: string) {
   });
 }
 
-export async function searchTags(query: string) {
+export async function searchTags(query: string, limit = 10) {
   return await prisma.tag.findMany({
     where: {
       name: { contains: query },
@@ -18,7 +18,7 @@ export async function searchTags(query: string) {
         _count: "desc", // 多く紐づけされたタグを優先
       },
     },
-    take: 10, // パフォーマンスのため制限
+    take: limit,
   });
 }
 
@@ -48,5 +48,35 @@ export async function removeTagFromMedia(mediaId: string, tagId: string) {
         tagId: tagId,
       },
     },
+  });
+}
+
+export async function getRelatedTags(paths: string[], limit = 100) {
+  if (paths.length > 0) {
+    return await prisma.tag.findMany({
+      where: {
+        mediaTags: {
+          some: { media: { path: { in: paths } } },
+        },
+      },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+      take: limit,
+    });
+  }
+
+  return [];
+}
+
+export async function getPopularTags(excludeIds: string[], limit = 100) {
+  return await prisma.tag.findMany({
+    where: {
+      id: { notIn: excludeIds },
+      mediaTags: { some: {} }, // 最低1つは紐付いているもの
+    },
+    orderBy: {
+      mediaTags: { _count: "desc" },
+    },
+    take: Math.max(0, limit - excludeIds.length),
   });
 }

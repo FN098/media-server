@@ -1,26 +1,38 @@
 "use server";
 
 import { prisma } from "@/lib/prisma"; // Prismaクライアントのパス
+import { TagOperation } from "@/lib/tag/types";
 
 export async function updateMediaTagsAction(payload: {
-  mediaIds: string[];
-  changes: Record<string, "add" | "remove">;
+  mediaPaths: string[];
+  operations: TagOperation[];
 }) {
-  const { mediaIds, changes } = payload;
+  const { mediaPaths, operations } = payload;
 
-  if (mediaIds.length === 0) return { success: true };
+  if (mediaPaths.length === 0 || operations.length === 0) {
+    return { success: true };
+  }
 
-  const tagIdsToAdd = Object.entries(changes)
-    .filter(([, op]) => op === "add")
-    .map(([id]) => id);
+  const tagIdsToAdd = operations
+    .filter((op) => op.operator === "add")
+    .map((op) => op.tagId);
 
-  const tagIdsToRemove = Object.entries(changes)
-    .filter(([, op]) => op === "remove")
-    .map(([id]) => id);
+  const tagIdsToRemove = operations
+    .filter((op) => op.operator === "remove")
+    .map((op) => op.tagId);
 
   try {
     await prisma.$transaction(async (tx) => {
-      // 1. 紐付けの解除
+      // 1. mediaPaths から mediaId のリストを取得
+      const mediaList = await tx.media.findMany({
+        where: { path: { in: mediaPaths } },
+        select: { id: true },
+      });
+      const mediaIds = mediaList.map((m) => m.id);
+
+      if (mediaIds.length === 0) return;
+
+      // 2. 紐付けの解除
       if (tagIdsToRemove.length > 0) {
         await tx.mediaTag.deleteMany({
           where: {
@@ -30,8 +42,9 @@ export async function updateMediaTagsAction(payload: {
         });
       }
 
-      // 2. 紐付けの追加
+      // 3. 紐付けの追加
       if (tagIdsToAdd.length > 0) {
+        // 全組み合わせを作成
         const data = mediaIds.flatMap((mediaId) =>
           tagIdsToAdd.map((tagId) => ({
             mediaId,
@@ -41,11 +54,11 @@ export async function updateMediaTagsAction(payload: {
 
         await tx.mediaTag.createMany({
           data,
-          skipDuplicates: true,
+          skipDuplicates: true, // 既に存在するペアは無視
         });
       }
 
-      // 3. 孤立したタグの削除 (クリーンアップ)
+      // 4. 孤立したタグの削除 (クリーンアップ)
       if (tagIdsToRemove.length > 0) {
         await tx.tag.deleteMany({
           where: {
@@ -67,13 +80,14 @@ export async function updateMediaTagsAction(payload: {
 
 export async function createTagAction(name: string) {
   try {
+    const trimmedName = name.trim();
+    if (!trimmedName) return { success: false, error: "タグ名が空です" };
+
     // 同じ名前のタグが既にあるか確認、なければ作成
     const tag = await prisma.tag.upsert({
-      where: { name },
+      where: { name: trimmedName },
       update: {}, // 存在すれば何もしない
-      create: {
-        name,
-      },
+      create: { name: trimmedName },
     });
     return { success: true, tag };
   } catch (error) {

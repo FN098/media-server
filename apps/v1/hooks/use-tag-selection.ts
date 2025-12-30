@@ -2,7 +2,7 @@ import { Tag } from "@/generated/prisma";
 import { MediaNode } from "@/lib/media/types";
 import { useMemo } from "react";
 
-export type TagState = "all" | "none";
+export type TagState = "all" | "some" | "none";
 
 export function useTagSelection(selectedNodes: MediaNode[], allTags: Tag[]) {
   return useMemo(() => {
@@ -17,19 +17,24 @@ export function useTagSelection(selectedNodes: MediaNode[], allTags: Tag[]) {
 
     const tagCounts: Record<string, number> = {};
 
+    // 選択ノードのタグを集計
     selectedNodes.forEach((node) => {
-      // 重複カウントを防ぐため、1つのノード内でタグはユニークである前提
-      node.tags?.forEach((tag) => {
+      const uniqueTags = new Set(node.tags);
+      uniqueTags.forEach((tag) => {
         tagCounts[tag.name] = (tagCounts[tag.name] || 0) + 1;
       });
     });
 
+    // タグごとの状態を決定
+    // - all: すべての選択ノードにタグが含まれる
+    // - some: 一部の選択ノードにタグが含まれる
+    // - none: 選択ノードにタグが含まれていない
     const tagStates: Record<string, TagState> = {};
     allTags.forEach((tag) => {
       const count = tagCounts[tag.name] || 0;
-      // 方針：選択した「すべて」のファイルに設定されている場合のみ "all" (ON)
-      // それ以外（一部、またはゼロ）は "none" (OFF)
-      tagStates[tag.name] = count === totalSelected ? "all" : "none";
+      if (count === 0) tagStates[tag.name] = "none";
+      else if (count === totalSelected) tagStates[tag.name] = "all";
+      else tagStates[tag.name] = "some";
     });
 
     return { tagStates };
