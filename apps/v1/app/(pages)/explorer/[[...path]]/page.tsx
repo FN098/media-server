@@ -11,6 +11,7 @@ import { mergeFsWithDb } from "@/lib/media/merge";
 import { getDbMedia } from "@/lib/media/repository";
 import { sortMediaFsNodes, SortOptions } from "@/lib/media/sort";
 import { MediaFsNode } from "@/lib/media/types";
+import { ExplorerProvider } from "@/providers/explorer-provider";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -71,11 +72,13 @@ export default async function Page(props: Props) {
   const formatted = formatNodes(merged);
 
   return (
-    <Explorer
+    <ExplorerProvider
       listing={{
         ...listing,
         nodes: formatted,
       }}
-    />
+    >
+      <Explorer />
+    </ExplorerProvider>
   );
 }

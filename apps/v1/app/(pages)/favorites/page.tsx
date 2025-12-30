@@ -3,6 +3,7 @@ import { USER } from "@/basic-auth";
 import { Favorites } from "@/components/ui/favorites";
 import { formatNodes } from "@/lib/media/format";
 import { getFavoriteMediaNodes } from "@/lib/media/repository";
+import { ExplorerProvider } from "@/providers/explorer-provider";
 import { Metadata } from "next";
 
 // お気に入りページは動的ページとしてレンダリングする
@@ -18,5 +19,17 @@ export default async function Page() {
 
   const formatted = formatNodes(nodes);
 
-  return <Favorites nodes={formatted} />;
+  return (
+    <ExplorerProvider
+      listing={{
+        nodes: formatted,
+        path: "",
+        parent: null,
+        prev: null,
+        next: null,
+      }}
+    >
+      <Favorites />
+    </ExplorerProvider>
+  );
 }

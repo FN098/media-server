@@ -4,10 +4,10 @@ import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { TagEditorBar } from "@/components/ui/tag-editor-bar";
-import { useExplorerNavigation } from "@/hooks/use-explorer-navigation";
 import { isMedia } from "@/lib/media/detector";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path-helpers";
+import { useExplorer } from "@/providers/explorer-provider";
 import { FavoriteProvider } from "@/providers/favorite-provider";
 import { useSearch } from "@/providers/search-provider";
 import { SelectionProvider } from "@/providers/selection-provider";
@@ -17,11 +17,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 
-type FavoritesProps = {
-  nodes: MediaNode[];
-};
-
-export function Favorites({ nodes }: FavoritesProps) {
+export function Favorites() {
+  const { listing, index, modal, openMedia, closeMedia } = useExplorer();
   const router = useRouter();
   const { view } = useViewMode();
 
@@ -29,19 +26,14 @@ export function Favorites({ nodes }: FavoritesProps) {
   const { query } = useSearch();
   const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
   const filtered = useMemo(() => {
-    return nodes
+    return listing.nodes
       .filter((e) => e.isDirectory || isMedia(e.type))
       .filter((e) => e.name.toLowerCase().includes(lowerQuery));
-  }, [nodes, lowerQuery]);
+  }, [listing.nodes, lowerQuery]);
 
   const mediaOnly = useMemo(
     () => filtered.filter((e) => isMedia(e.type)),
     [filtered]
-  );
-
-  // ナビゲーション機能
-  const { index, modal, openMedia, closeMedia } = useExplorerNavigation(
-    filtered.length
   );
 
   const handleOpen = useCallback(
