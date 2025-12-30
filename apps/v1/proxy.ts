@@ -1,8 +1,11 @@
 import { PASS, USER } from "@/basic-auth";
+import { blackListPrefixes } from "@/lib/blacklist";
 import { NextRequest, NextResponse } from "next/server";
 
 // TODO: BASIC認証以外を実装
 export function proxy(req: NextRequest) {
+  // ====== 認証 =======
+
   const auth = req.headers.get("authorization");
 
   if (!auth) {
@@ -33,6 +36,20 @@ export function proxy(req: NextRequest) {
       status: 401,
       headers: { "WWW-Authenticate": 'Basic realm="Secure Area"' },
     });
+  }
+
+  // ====== 認可 =======
+
+  const pathname = req.nextUrl.pathname;
+
+  // ブラックリスト判定
+  const isBlocked = blackListPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
+  );
+
+  if (isBlocked) {
+    // 404 に見せる
+    return NextResponse.rewrite(new URL("/404", req.url));
   }
 
   // OK

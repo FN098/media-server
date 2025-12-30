@@ -45,20 +45,19 @@ export default async function Page(props: Props) {
   const listing = await getMediaFsListing(currentDirPath);
   if (!listing) notFound();
 
+  const rawNodes = listing.nodes;
+
   // ソート
-  const sorted = sortMediaFsNodes(listing.nodes, {
+  const sorted = sortMediaFsNodes(rawNodes, {
     key: sortKey,
     order: sortOrder,
   });
 
+  const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
+
   // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
   const dbMedia = await getDbMedia(currentDirPath, USER);
-
-  const dirPaths = listing.nodes
-    .filter((e) => e.isDirectory)
-    .map((e) => e.path);
-
   const dbVisited = await getDbVisitedInfo(dirPaths, USER);
   const dbFavorites = await getDbFavoriteCount(dirPaths, USER);
 
