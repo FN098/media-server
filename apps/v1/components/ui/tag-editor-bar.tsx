@@ -1,3 +1,4 @@
+import { createTagAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import type { Tag } from "@/generated/prisma";
 import { useTagSelection } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
@@ -5,9 +6,19 @@ import { MediaNode } from "@/lib/media/types";
 import { useSelection } from "@/providers/selection-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shadcn/components/ui/dialog";
 import { cn } from "@/shadcn/lib/utils";
 import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 type TagOp = "add" | "remove";
 
@@ -16,60 +27,119 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
     useSelection();
 
   const selectedNodes = useMemo(
-    () => allNodes.filter((n) => selectedIds.has(n.path)),
+    () => allNodes.filter((n) => selectedIds.has(n.id)),
     [allNodes, selectedIds]
   );
 
   const [newTagName, setNewTagName] = useState("");
-
   const [pendingChanges, setPendingChanges] = useState<Record<string, TagOp>>(
     {}
   );
+
   const changesCount = useMemo(
     () => Object.keys(pendingChanges).length,
     [pendingChanges]
   );
+  const hasChanges = changesCount > 0;
 
   const { tags: masterTags } = useTags();
   const { tagStates } = useTagSelection(selectedNodes, masterTags);
 
-  const selectAll = () => {
-    const all = allNodes.map((n) => n.path);
-    selectIds(all);
-  };
+  console.log("selectedIds.size", selectedIds.size);
+  console.log("selectedNodes.length", selectedNodes.length);
 
-  const addTag = () => {
-    // TODO: タグ追加ロジック
-    // サーバーアクションで新規タグを DB に追加し、masterTags に反映
-    setNewTagName("");
-  };
+  const router = useRouter();
 
-  const toggleTag = (tag: Tag) => {
-    const isCurrentlyAll = tagStates[tag.name] === "all";
+  const [isLoading, setIsLoading] = useState(false);
 
-    setPendingChanges((prev) => {
-      const next = { ...prev };
-      const currentOp = prev[tag.id];
+  const selectAll = useCallback(() => {
+    const allIds = allNodes.map((n) => n.id);
+    selectIds(allIds);
+  }, [allNodes, selectIds]);
 
-      if (currentOp) {
-        // すでに変更リストにある場合は、変更をキャンセル（元に戻す）
-        delete next[tag.id];
-      } else {
-        // 元が ON なら「削除予約」、OFF なら「追加予約」
-        next[tag.id] = isCurrentlyAll ? "remove" : "add";
-      }
-      return next;
+  const toggleTag = useCallback(
+    (tag: Tag) => {
+      const isCurrentlyAll = tagStates[tag.name] === "all";
+
+      setPendingChanges((prev) => {
+        const next = { ...prev };
+        const currentOp = prev[tag.id];
+
+        if (currentOp) {
+          // すでに変更リストにある場合は、変更をキャンセル（元に戻す）
+          delete next[tag.id];
+        } else {
+          // 元が ON なら「削除予約」、OFF なら「追加予約」
+          next[tag.id] = isCurrentlyAll ? "remove" : "add";
+        }
+        return next;
+      });
+    },
+    [tagStates]
+  );
+
+  const applyChanges = useCallback(async () => {
+    if (isLoading) return;
+
+    setIsLoading(true); // ローディング状態を追加
+
+    const result = await updateMediaTagsAction({
+      mediaIds: Array.from(selectedIds) as string[],
+      changes: pendingChanges,
     });
-  };
 
-  const applyChanges = () => {
-    // TODO: サーバーアクションで changed をDBに適用
-  };
+    if (result.success) {
+      toast.success("タグを更新しました");
 
-  const handleCancel = () => {
+      // 状態のクリーンアップ
+      setPendingChanges({});
+      clearSelection();
+
+      // 画面のデータを最新にする
+      router.refresh();
+    } else {
+      toast.error("更新に失敗しました");
+    }
+
+    setIsLoading(false);
+  }, [clearSelection, isLoading, pendingChanges, router, selectedIds]);
+
+  const addTag = useCallback(async () => {
+    const name = newTagName.trim();
+    if (!name) return;
+
+    // すでにマスタにあるか確認
+    const existingTag = masterTags.find((t) => t.name === name);
+
+    if (existingTag) {
+      // すでに存在する場合、そのタグを ON にする（add予約）
+      toggleTag(existingTag);
+      setNewTagName("");
+      return;
+    }
+
+    const result = await createTagAction(name);
+    if (result.success && result.tag) {
+      // 1. マスタリストを更新（SWRや独自の状態管理、または revalidatePath）
+      // ここでは masterTags が再取得される想定
+
+      // 2. 作成したタグを選択中の全ファイルに対して "add" 予約
+      setPendingChanges((prev) => ({
+        ...prev,
+        [result.tag.id]: "add",
+      }));
+
+      setNewTagName("");
+      toast.success(`タグ "${name}" を作成しました`);
+    } else {
+      toast.error("タグの作成に失敗しました");
+    }
+  }, [masterTags, newTagName, toggleTag]);
+
+  const handleCancel = useCallback(() => {
     setPendingChanges({});
     clearSelection();
-  };
+  }, [clearSelection]);
 
   if (!isSelectionMode) return null;
 
@@ -83,24 +153,14 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
             <Button size="sm" variant="outline" onClick={selectAll}>
               すべて選択
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={clearSelection}
-              className="text-destructive hover:text-destructive border-destructive"
-            >
-              選択解除
-            </Button>
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={handleCancel}>
-              キャンセル
-            </Button>
+            <CancelButton onConfirm={handleCancel} hasChanges={hasChanges} />
             <Button
               size="sm"
-              onClick={applyChanges}
-              disabled={Object.keys(pendingChanges).length === 0}
+              onClick={() => void applyChanges()}
+              disabled={!hasChanges || isLoading}
             >
               {changesCount > 0 ? `変更を適用 (${changesCount})` : "変更を適用"}
             </Button>
@@ -123,7 +183,7 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
                 key={tag.id}
                 variant={displayState === "none" ? "outline" : "default"}
                 className={cn(
-                  "cursor-pointer py-1 px-3 text-xs transition-all select-none",
+                  "cursor-pointer py-1 px-3 text-[10px] transition-all select-none",
                   tagStates[tag.name] === "all" &&
                     "bg-primary text-primary-foreground"
                 )}
@@ -152,7 +212,7 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
               onChange={(e) => setNewTagName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  addTag();
+                  void addTag();
                 }
               }}
             />
@@ -160,5 +220,58 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function CancelButton({
+  hasChanges,
+  onConfirm,
+}: {
+  hasChanges: boolean;
+  onConfirm: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const onCancelClick = () => {
+    if (hasChanges) {
+      setOpen(true);
+    } else {
+      onConfirm();
+    }
+  };
+
+  return (
+    <>
+      {/* キャンセルボタン */}
+      <Button
+        size="sm"
+        variant="outline"
+        className="text-destructive hover:text-destructive border-destructive"
+        onClick={onCancelClick}
+      >
+        キャンセル
+      </Button>
+
+      {/* 確認ダイアログ */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>変更が保存されていません</DialogTitle>
+            <DialogDescription>
+              変更内容は破棄されます。 続行しますか？
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              戻る
+            </Button>
+            <Button variant="destructive" onClick={onConfirm}>
+              破棄する
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

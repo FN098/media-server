@@ -51,6 +51,7 @@ export type DbMedia = {
   isFavorite: boolean;
   fileMtime: Date;
   fileSize?: number;
+  tags?: MediaTag[];
 };
 
 export type DbVisitedInfo = {

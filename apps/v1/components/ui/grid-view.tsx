@@ -103,7 +103,7 @@ function Cell({ node, onOpen }: CellProps) {
   };
 
   const { isSelected, isSelectionMode, toggleSelection } = useSelection();
-  const selected = isSelected(node.path);
+  const selected = isSelected(node.id);
 
   return (
     <div className="p-1 w-full h-full">
@@ -116,7 +116,7 @@ function Cell({ node, onOpen }: CellProps) {
         )}
         onClick={() => {
           if (isSelectionMode) {
-            toggleSelection(node.path);
+            toggleSelection(node.id);
           } else {
             onOpen?.();
           }
@@ -139,7 +139,7 @@ function Cell({ node, onOpen }: CellProps) {
         >
           <Checkbox
             checked={selected}
-            onCheckedChange={() => toggleSelection(node.path)}
+            onCheckedChange={() => toggleSelection(node.id)}
             onClick={(e) => e.stopPropagation()}
           />
         </div>

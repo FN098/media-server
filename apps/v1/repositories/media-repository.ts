@@ -44,6 +44,11 @@ export async function getDbMedia(
         where: { userId },
         select: { mediaId: true },
       },
+      mediaTags: {
+        select: {
+          tag: { select: { name: true } },
+        },
+      },
     },
   });
 
@@ -54,6 +59,7 @@ export async function getDbMedia(
     path: m.path,
     fileSize: Number(m.fileSize),
     title: m.title ?? undefined,
+    tags: m.mediaTags.map((t) => ({ name: t.tag.name })),
   }));
 }
 

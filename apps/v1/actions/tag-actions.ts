@@ -11,11 +11,11 @@ export async function updateMediaTagsAction(payload: {
   if (mediaIds.length === 0) return { success: true };
 
   const tagIdsToAdd = Object.entries(changes)
-    .filter(([_, op]) => op === "add")
+    .filter(([, op]) => op === "add")
     .map(([id]) => id);
 
   const tagIdsToRemove = Object.entries(changes)
-    .filter(([_, op]) => op === "remove")
+    .filter(([, op]) => op === "remove")
     .map(([id]) => id);
 
   try {
@@ -52,6 +52,23 @@ export async function updateMediaTagsAction(payload: {
     return { success: true };
   } catch (error) {
     console.error("Failed to update tags:", error);
-    throw new Error("タグの更新に失敗しました");
+    return { success: false, error: "タグの更新に失敗しました" };
+  }
+}
+
+export async function createTagAction(name: string) {
+  try {
+    // 同じ名前のタグが既にあるか確認、なければ作成
+    const tag = await prisma.tag.upsert({
+      where: { name },
+      update: {}, // 存在すれば何もしない
+      create: {
+        name,
+      },
+    });
+    return { success: true, tag };
+  } catch (error) {
+    console.error("Create tag error:", error);
+    return { success: false, error: "タグの作成に失敗しました" };
   }
 }

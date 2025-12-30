@@ -29,6 +29,7 @@ export function mergeFsWithDb(
       isFavorite: dbMedia.isFavorite ?? false,
       lastViewedAt: dbVisited?.lastViewedAt ?? undefined,
       favoriteCount: dbFavorite?.favoriteCountInFolder,
+      tags: dbMedia.tags,
     } satisfies MediaNode;
   });
 
