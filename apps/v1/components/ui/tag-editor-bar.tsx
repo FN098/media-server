@@ -48,7 +48,7 @@ export function TagEditorBar({
     [allNodes, selectedPaths]
   );
 
-  const { tags: masterTags } = useTags(Array.from(selectedPaths));
+  const { tags: masterTags, refreshTags } = useTags(Array.from(selectedPaths));
   const { tagStates } = useTagSelection(selectedNodes, masterTags);
 
   const displayMasterTags = useMemo(() => {
@@ -151,6 +151,7 @@ export function TagEditorBar({
         toast.success("タグを更新しました");
         setPendingChanges({});
         clearSelection();
+        await refreshTags();
         router.refresh();
       } else {
         toast.error("更新に失敗しました");
@@ -158,7 +159,14 @@ export function TagEditorBar({
     } finally {
       setIsLoading(false);
     }
-  }, [clearSelection, isLoading, pendingChanges, router, selectedPaths]);
+  }, [
+    clearSelection,
+    isLoading,
+    pendingChanges,
+    refreshTags,
+    router,
+    selectedPaths,
+  ]);
 
   const handleCancel = useCallback(() => {
     setPendingChanges({});
