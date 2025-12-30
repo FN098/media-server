@@ -114,10 +114,6 @@ export function MediaViewer({
   useEffect(() => {
     const { title, name } = items[index];
     setTitle(`${title ?? name} | ${APP_CONFIG.meta.title}`);
-
-    return () => {
-      resetTitle();
-    };
   }, [index, items, resetTitle, setTitle]);
 
   // お気に入りボタンクリック時の処理
@@ -165,6 +161,25 @@ export function MediaViewer({
 
   // 仮想スライド中のコンテンツ専用インデックス
   const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
+
+  // スワイプ時の移動処理
+  const handleSwipe = (swiper: SwiperClass) => {
+    const activeIdx = swiper.activeIndex;
+    setVIndex(activeIdx);
+
+    const itemIdx = Math.max(
+      0,
+      Math.min(activeIdx - offsetPrev, items.length - 1)
+    );
+    setIndex(itemIdx);
+
+    if (hasPrev && activeIdx === 0) {
+      onPrevFolder();
+    }
+    if (hasNext && activeIdx === allSlides.length - 1) {
+      onNextFolder();
+    }
+  };
 
   return (
     <div
@@ -263,23 +278,7 @@ export function MediaViewer({
         onSwiper={setSwiperInstance}
         modules={[Virtual, Navigation, Zoom]}
         initialSlide={vindex}
-        onSlideChange={(swiper) => {
-          const activeIdx = swiper.activeIndex;
-          setVIndex(activeIdx);
-
-          const itemIdx = Math.max(
-            0,
-            Math.min(activeIdx - offsetPrev, items.length - 1)
-          );
-          setIndex(itemIdx);
-
-          if (hasPrev && activeIdx === 0) {
-            onPrevFolder();
-          }
-          if (hasNext && activeIdx === allSlides.length - 1) {
-            onNextFolder();
-          }
-        }}
+        onSlideChange={handleSwipe}
         virtual={{
           enabled: true,
           slides: allSlides,
