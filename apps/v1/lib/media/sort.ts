@@ -1,4 +1,4 @@
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaFsNode } from "./types";
 
 export type SortOrder = "asc" | "desc";
 

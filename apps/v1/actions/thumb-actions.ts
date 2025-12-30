@@ -1,8 +1,8 @@
 "use server";
 
-import { getParentDirPath } from "@/lib/path-helpers";
-import { thumbQueue } from "@/lib/thumb/queue";
+import { getParentDirPath } from "@/lib/path/helpers";
 import { hashPath } from "@/lib/utils/path";
+import { thumbQueue } from "@/workers/thumb/queue";
 
 export async function enqueueThumbJob(dirPath: string) {
   await thumbQueue.add(

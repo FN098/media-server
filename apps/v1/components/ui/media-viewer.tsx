@@ -11,9 +11,9 @@ import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useScrollLockControl } from "@/hooks/use-scroll-lock";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTitleControl } from "@/hooks/use-title";
-import { isMedia } from "@/lib/media/detector";
+import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { getClientExplorerPath } from "@/lib/path-helpers";
+import { getClientExplorerPath } from "@/lib/path/helpers";
 import { useFavorite } from "@/providers/favorite-provider";
 import {
   DropdownMenu,

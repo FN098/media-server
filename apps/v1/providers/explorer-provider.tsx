@@ -1,7 +1,7 @@
 "use client";
 
 import { MediaListing } from "@/lib/media/types";
-import { getClientExplorerPath } from "@/lib/path-helpers";
+import { getClientExplorerPath } from "@/lib/path/helpers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,

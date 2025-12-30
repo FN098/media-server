@@ -5,9 +5,9 @@ import {
   createFavorite,
   deleteFavorite,
   isFavorite,
-} from "@/lib/favorite/repository";
-import { findMediaByPath } from "@/lib/media/repository";
-import { findUserById } from "@/lib/user/repository";
+} from "@/repositories/favorite-repository";
+import { findMediaByPath } from "@/repositories/media-repository";
+import { findUserById } from "@/repositories/user-repository";
 
 type UpdateFavoriteResult = {
   message: string;

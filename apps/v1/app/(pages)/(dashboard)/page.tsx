@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
 import { RecentFolders } from "@/components/ui/recent-folders";
-import { getRecentFolders } from "@/lib/folder/repository";
+import { getRecentFolders } from "@/repositories/folder-repository";
 import { Button } from "@/shadcn/components/ui/button";
 import { ArrowRight, ArrowUpRight, FolderPlus, History } from "lucide-react"; // アイコン追加
 import { Metadata } from "next";

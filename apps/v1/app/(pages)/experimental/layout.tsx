@@ -1,5 +1,5 @@
 import { Header } from "@/components/ui/header";
-import { PATHS } from "@/lib/path";
+import { PATHS } from "@/lib/path/paths";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

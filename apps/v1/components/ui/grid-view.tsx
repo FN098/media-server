@@ -6,7 +6,7 @@ import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { useGridViewConfig } from "@/hooks/use-grid-view";
-import { isMedia } from "@/lib/media/detector";
+import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
 import { useSelection } from "@/providers/selection-provider";

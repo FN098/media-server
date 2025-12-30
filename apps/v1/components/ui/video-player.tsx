@@ -1,7 +1,7 @@
 import { LoadingSpinner } from "@/components/ui/spinners";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/lib/media/types";
-import { getAbsoluteMediaUrl, getThumbUrl } from "@/lib/path-helpers";
+import { getAbsoluteMediaUrl, getThumbUrl } from "@/lib/path/helpers";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";

@@ -1,5 +1,5 @@
 import type { VisitedFolder } from "@/generated/prisma/client";
-import { DbFavoriteInfo, DbVisitedInfo } from "@/lib/folder/types";
+import { DbFavoriteInfo, DbVisitedInfo } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import { benchmark } from "@/lib/utils/benchmark";
 

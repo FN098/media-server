@@ -1,5 +1,5 @@
 import { PASS, USER } from "@/basic-auth";
-import { blackListPrefixes } from "@/lib/blacklist";
+import { blackListPrefixes } from "@/lib/path/blacklist";
 import { NextRequest, NextResponse } from "next/server";
 
 // TODO: BASIC認証以外を実装

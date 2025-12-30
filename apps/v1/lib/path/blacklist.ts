@@ -1,4 +1,4 @@
-import { getClientExplorerPath } from "@/lib/path-helpers";
+import { getClientExplorerPath } from "@/lib/path/helpers";
 import path from "path";
 
 // ユーザーに表示させないパス一覧

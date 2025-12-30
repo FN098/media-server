@@ -1,5 +1,5 @@
 import { Header } from "@/components/ui/header";
-import { PATHS } from "@/lib/path";
+import { PATHS } from "@/lib/path/paths";
 import { SearchProvider } from "@/providers/search-provider";
 import { ViewModeProvider } from "@/providers/view-mode-provider";
 

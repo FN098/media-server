@@ -1,7 +1,7 @@
 "use client";
 
-import { getThumbEventsUrl } from "@/lib/path-helpers";
-import { ThumbCompletedEvent } from "@/lib/thumb/types";
+import { getThumbEventsUrl } from "@/lib/path/helpers";
+import { ThumbCompletedEvent } from "@/workers/thumb/types";
 import { createContext, useContext, useEffect, useRef } from "react";
 
 type Listener = (e: ThumbCompletedEvent) => void;

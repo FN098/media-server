@@ -1,4 +1,4 @@
-import { ThumbJobData } from "@/lib/thumb/types";
+import { ThumbJobData } from "@/workers/thumb/types";
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
 

@@ -1,4 +1,4 @@
-import { connection } from "@/lib/thumb/queue";
+import { connection } from "@/workers/thumb/queue";
 import { NextRequest } from "next/server";
 
 export function GET(req: NextRequest) {

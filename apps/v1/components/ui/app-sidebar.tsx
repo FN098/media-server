@@ -1,6 +1,6 @@
 "use client";
 
-import { PATHS } from "@/lib/path";
+import { PATHS } from "@/lib/path/paths";
 import {
   Sidebar,
   SidebarContent,

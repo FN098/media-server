@@ -1,5 +1,10 @@
-import { DbFavoriteInfo, DbVisitedInfo } from "@/lib/folder/types";
-import { DbMedia, MediaFsNode, MediaNode } from "@/lib/media/types";
+import {
+  DbFavoriteInfo,
+  DbMedia,
+  DbVisitedInfo,
+  MediaFsNode,
+  MediaNode,
+} from "@/lib/media/types";
 
 export function mergeFsWithDb(
   fsMedia: MediaFsNode[],

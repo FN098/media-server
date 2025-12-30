@@ -1,7 +1,7 @@
 "use client";
 
 import type { VisitedFolder } from "@/generated/prisma/client";
-import { getClientExplorerPath } from "@/lib/path-helpers";
+import { getClientExplorerPath } from "@/lib/path/helpers";
 import { formatRecentDate } from "@/lib/utils/formatter";
 import { splitDirPath } from "@/lib/utils/path";
 import { Button } from "@/shadcn/components/ui/button";

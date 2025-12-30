@@ -1,6 +1,6 @@
 import { LoadingSpinner } from "@/components/ui/spinners";
 import { MediaFsNode } from "@/lib/media/types";
-import { getMediaUrl, getThumbUrl } from "@/lib/path-helpers";
+import { getMediaUrl, getThumbUrl } from "@/lib/path/helpers";
 import Image from "next/image";
 import { memo, useState } from "react";
 

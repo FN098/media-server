@@ -1,7 +1,7 @@
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
-import { getAbsoluteMediaUrl } from "@/lib/path-helpers";
+import { getAbsoluteMediaUrl } from "@/lib/path/helpers";
 import {
   Tooltip,
   TooltipContent,

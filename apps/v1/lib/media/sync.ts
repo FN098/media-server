@@ -85,6 +85,4 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
       });
     }
   });
-
-  console.log("sync completed");
 }

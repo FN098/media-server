@@ -1,6 +1,6 @@
 "use client";
 
-import { revalidateFavorite, updateFavorite } from "@/lib/favorite/actions";
+import { revalidateFavorite, updateFavorite } from "@/actions/favorite-actions";
 import {
   createContext,
   useCallback,

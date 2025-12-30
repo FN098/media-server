@@ -1,5 +1,5 @@
 import type { Media } from "@/generated/prisma/client";
-import { detectMediaType } from "@/lib/media/detector";
+import { detectMediaType } from "@/lib/media/media-types";
 import { DbMedia, MediaNode } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import path from "path";

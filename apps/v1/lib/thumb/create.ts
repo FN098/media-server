@@ -1,10 +1,10 @@
-import { MediaFsNode } from "@/lib/media/types";
-import { getMediaPath, getMediaThumbPath } from "@/lib/path-helpers";
+import { getMediaPath, getMediaThumbPath } from "@/lib/path/helpers";
 import { existsFile } from "@/lib/utils/fs";
 import { spawn } from "child_process";
 import { mkdir } from "fs/promises";
 import { dirname } from "path";
 import sharp from "sharp";
+import { MediaFsNode } from "../media/types";
 
 export async function createImageThumb(
   imagePath: string,
