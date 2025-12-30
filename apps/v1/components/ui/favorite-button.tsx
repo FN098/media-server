@@ -20,8 +20,8 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   // 1. ボタン全体のスタイル定義
   const containerStyles = {
-    grid: "z-10 rounded-full p-1 bg-black/40 hover:bg-black/60 absolute top-1 right-1",
-    list: "relative flex items-center justify-center rounded-md p-1 hover:bg-muted focus-visible:outline-none",
+    grid: "z-10 rounded-full p-1 bg-black/40 hover:bg-black/60",
+    list: "flex items-center justify-center rounded-md p-1 hover:bg-muted focus-visible:outline-none",
     viewer:
       "p-2 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20",
   };

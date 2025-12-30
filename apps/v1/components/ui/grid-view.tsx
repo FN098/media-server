@@ -158,6 +158,7 @@ function Cell({ node, onOpen }: CellProps) {
             variant="grid"
             active={favoriteCtx.isFavorite(node.path)}
             onToggle={() => void toggleFavorite(node)}
+            className="absolute top-1 right-1"
           />
         )}
 
