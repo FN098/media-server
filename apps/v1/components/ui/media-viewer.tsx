@@ -78,7 +78,6 @@ export function MediaViewer({
   initialIndex,
   onClose,
   features,
-  onFolder,
   onNextFolder,
   onPrevFolder,
 }: MediaViewerProps) {

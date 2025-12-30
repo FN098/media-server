@@ -39,7 +39,10 @@ export function Favorites() {
 
   // フォルダ/ファイルオープン
   const handleOpen = useCallback(
-    (node: MediaNode, index: number) => {
+    (nodes: MediaNode[], index: number) => {
+      if (index < 0 || index > nodes.length) return;
+      const node = nodes[index];
+
       // フォルダ
       if (node.isDirectory) {
         const href = getClientExplorerPath(node.path);
@@ -79,7 +82,7 @@ export function Favorites() {
             <div>
               <GridView
                 nodes={filtered}
-                onOpen={(node, index) => void handleOpen(node, index)}
+                onOpen={(index) => void handleOpen(filtered, index)}
               />
             </div>
           )}
@@ -89,7 +92,7 @@ export function Favorites() {
             <div>
               <ListView
                 nodes={filtered}
-                onOpen={(node, index) => void handleOpen(node, index)}
+                onOpen={(index) => void handleOpen(filtered, index)}
               />
             </div>
           )}
