@@ -39,8 +39,13 @@ export function formatBytes(
  * - 昨日: 「昨日」
  * - それ以前: 「MM/dd」
  */
-export function formatRecentDate(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
+export function formatRecentDate(
+  value: string | Date | null | undefined,
+  fallback = "-"
+): string {
+  if (!value) return fallback;
+
+  const d = value instanceof Date ? value : new Date(value);
   const now = new Date();
   const diffInHours = (now.getTime() - d.getTime()) / (1000 * 60 * 60);
 

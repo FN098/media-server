@@ -1,8 +1,8 @@
 "use client";
 
+import { LocalRecentDateValue } from "@/components/ui/local-date";
 import type { VisitedFolder } from "@/generated/prisma/client";
 import { getClientExplorerPath } from "@/lib/path/helpers";
-import { formatRecentDate } from "@/lib/utils/formatter";
 import { splitDirPath } from "@/lib/utils/path";
 import { Button } from "@/shadcn/components/ui/button";
 import { Clock, Folder, History } from "lucide-react"; // アイコンを追加
@@ -58,7 +58,7 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
               {/* 右側に日付を入れる場合（DBにupdatedAt等があれば） */}
               <div className="ml-auto text-[10px] text-muted-foreground flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {formatRecentDate(folder.lastViewedAt)}
+                <LocalRecentDateValue value={folder.lastViewedAt} />
               </div>
             </Link>
           </Button>
