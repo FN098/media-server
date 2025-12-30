@@ -8,24 +8,16 @@ import { uniqueBy } from "@/lib/utils/unique";
 import { useSelection } from "@/providers/selection-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shadcn/components/ui/dialog";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, TagIcon } from "lucide-react";
+import { CheckCircle, Plus, TagIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export function TagEditorBar({
   allNodes,
-  mode,
+  mode = "bulk",
 }: {
   allNodes: MediaNode[];
   mode?: "single" | "bulk";
@@ -36,6 +28,8 @@ export function TagEditorBar({
     clearSelection,
     isSelectionMode,
   } = useSelection();
+
+  const isAllSelected = selectedPaths.size === allNodes.length;
 
   // シングルモードの場合、現在のアイテムを自動選択
   useEffect(() => {
@@ -174,17 +168,45 @@ export function TagEditorBar({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 20, opacity: 0 }}
           className={cn(
-            "absolute bottom-6 left-1/2 -translate-x-1/2 z-[70] w-[95%] max-w-2xl",
+            "fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] w-[95%] max-w-2xl",
             "bg-background/80 backdrop-blur-md border rounded-xl shadow-2xl p-4"
           )}
         >
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between border-b pb-2">
               <span className="text-xs font-bold flex items-center gap-2">
-                <TagIcon size={14} />
-                {mode === "single"
-                  ? "タグを編集"
-                  : `${selectedPaths.size} 件を選択中`}
+                {mode === "single" && (
+                  <>
+                    <TagIcon size={14} />
+                    {`タグを編集`}
+                  </>
+                )}
+                {mode === "bulk" && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        if (isAllSelected) {
+                          clearSelection();
+                        } else {
+                          selectAll();
+                        }
+                      }}
+                      disabled={isLoading}
+                    >
+                      <CheckCircle
+                        className={cn(
+                          isAllSelected &&
+                            "text-xs text-green-600 hover:text-green-700"
+                        )}
+                      />
+                      <span className="text-xs">
+                        {`${selectedPaths.size} 件を選択中`}
+                      </span>
+                    </Button>
+                  </>
+                )}
               </span>
               <div className="flex gap-2">
                 {hasChanges && (
@@ -235,6 +257,7 @@ export function TagEditorBar({
                   </Badge>
                 );
               })}
+
               {/* 新規タグ入力 */}
               <div className="flex items-center ml-2 px-2 rounded-md border bg-muted/30 focus-within:bg-background">
                 <Plus className="h-3 w-3 text-muted-foreground" />
@@ -260,58 +283,5 @@ export function TagEditorBar({
         </motion.div>
       )}
     </AnimatePresence>
-  );
-}
-
-function CancelButton({
-  hasChanges,
-  onConfirm,
-}: {
-  hasChanges: boolean;
-  onConfirm: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  const onCancelClick = () => {
-    if (hasChanges) {
-      setOpen(true);
-    } else {
-      onConfirm();
-    }
-  };
-
-  return (
-    <>
-      {/* キャンセルボタン */}
-      <Button
-        size="sm"
-        variant="outline"
-        className="text-destructive hover:text-destructive border-destructive"
-        onClick={onCancelClick}
-      >
-        キャンセル
-      </Button>
-
-      {/* 確認ダイアログ */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>変更が保存されていません</DialogTitle>
-            <DialogDescription>
-              変更内容は破棄されます。 続行しますか？
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>
-              戻る
-            </Button>
-            <Button variant="destructive" onClick={onConfirm}>
-              破棄する
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
   );
 }

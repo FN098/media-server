@@ -325,17 +325,16 @@ export function MediaViewer({
             </div>
           </SwiperSlide>
         ))}
+      </Swiper>
 
-        {/* タグエディター */}
+      {/* タグエディター */}
+      {isTagEditing && (
         <SelectionProvider>
           <QueryProvider>
-            <TagEditorBar
-              allNodes={isTagEditing ? [items[index]] : []}
-              mode="single"
-            />
+            <TagEditorBar allNodes={[items[index]]} mode="single" />
           </QueryProvider>
         </SelectionProvider>
-      </Swiper>
+      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
 import { useSelection } from "@/providers/selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useRef } from "react";
@@ -105,6 +106,8 @@ function Cell({ node, onOpen }: CellProps) {
   const { isSelected, isSelectionMode, toggleSelection } = useSelection();
   const selected = isSelected(node.path);
 
+  const isMobile = useIsMobile();
+
   return (
     <div className="p-1 w-full h-full">
       <div
@@ -132,7 +135,7 @@ function Cell({ node, onOpen }: CellProps) {
         <div
           className={cn(
             "absolute top-2 left-2 transition-opacity",
-            isSelectionMode
+            isSelectionMode || isMobile
               ? "opacity-100"
               : "opacity-0 group-hover:opacity-100"
           )}
