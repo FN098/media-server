@@ -6,6 +6,7 @@ import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { useGridViewConfig } from "@/hooks/use-grid-view";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { useFavorite } from "@/providers/favorite-provider";
@@ -14,7 +15,7 @@ import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { memo, useRef } from "react";
+import { memo, useCallback, useRef } from "react";
 import { toast } from "sonner";
 
 type GridViewProps = {
@@ -40,6 +41,24 @@ export const GridView = memo(function GridView1({
     estimateSize: () => rowHeight, // 各行の高さ
     overscan: 1, // 画面外に何行予備を持っておくか
   });
+
+  const { selectValues: selectPaths, clearSelection } = useSelection();
+
+  const selectAll = useCallback(() => {
+    const allPaths = nodes.map((n) => n.path);
+    selectPaths(allPaths);
+  }, [nodes, selectPaths]);
+
+  useShortcutKeys([
+    {
+      key: "Ctrl+a",
+      callback: selectAll,
+    },
+    {
+      key: "Escape",
+      callback: clearSelection,
+    },
+  ]);
 
   return (
     <div ref={parentRef} className="w-full h-full flex flex-col">

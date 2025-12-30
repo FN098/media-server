@@ -118,7 +118,7 @@ export function TagEditorBar({
         }));
 
         setNewTagName("");
-        toast.success(`タグ "${name}" を作成しました`);
+        // toast.success(`タグ "${name}" を作成しました`);
       } else {
         toast.error("タグの作成に失敗しました");
       }
