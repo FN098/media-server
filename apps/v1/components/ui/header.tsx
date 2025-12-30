@@ -49,46 +49,51 @@ export function Header({ title, basePath, features }: HeaderProps) {
 
   if (!mounted) return null;
 
-  // Mobile
-  if (isMobile) {
-    return (
-      <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
-        <div className="flex h-full items-center gap-2 px-2">
-          <AppSidebarOpenButton />
+  return (
+    <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
+      <div className="flex h-full items-center gap-2 px-2 md:px-3">
+        <AppSidebarOpenButton />
 
-          <div className="text-lg font-semibold mx-2 hidden sm:block">
-            {title}
-          </div>
+        <div className="text-lg font-semibold mx-2 hidden sm:block">
+          {title}
+        </div>
 
-          {/* ナビゲーション */}
-          {navigation && (
-            <>
-              {backHref ? (
-                <Link
-                  href={backHref}
-                  className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Link>
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center opacity-40">
-                  <ArrowLeft className="h-5 w-5" />
-                </div>
-              )}
+        {/* ナビゲーション */}
+        {navigation && (
+          <>
+            {backHref ? (
+              <Link
+                href={backHref}
+                className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center opacity-40">
+                <ArrowLeft className="h-5 w-5" />
+              </div>
+            )}
 
+            {isMobile ? (
               <div className="min-w-0 flex-1 text-sm font-medium truncate">
                 {current?.label ?? ""}
               </div>
-            </>
-          )}
+            ) : (
+              <DynamicBreadcrumbs items={breadcrumbs} />
+            )}
+          </>
+        )}
 
+        <div className="ml-auto flex items-center gap-2">
           {search && searchCtx && (
             <Search
               value={searchCtx.query}
               setValue={searchCtx.setQuery}
-              className="w-[100px] shrink-0"
+              className="w-[180px] shrink-0"
             />
           )}
+
+          <Separator orientation="vertical" className="h-6" />
 
           {viewMode && viewCtx && (
             <ViewModeSwitch
@@ -98,60 +103,7 @@ export function Header({ title, basePath, features }: HeaderProps) {
             />
           )}
         </div>
-      </header>
-    );
-  }
-
-  // PC
-  return (
-    <>
-      <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
-        <div className="flex h-full items-center gap-2 px-3">
-          <AppSidebarOpenButton />
-
-          <div className="text-lg font-semibold mx-2">{title}</div>
-
-          {/* ナビゲーション */}
-          {navigation && (
-            <>
-              {backHref ? (
-                <Link
-                  href={backHref}
-                  className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Link>
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center opacity-40">
-                  <ArrowLeft className="h-5 w-5" />
-                </div>
-              )}
-
-              <DynamicBreadcrumbs items={breadcrumbs} />
-            </>
-          )}
-
-          <div className="ml-auto flex items-center gap-2">
-            {search && searchCtx && (
-              <Search
-                value={searchCtx.query}
-                setValue={searchCtx.setQuery}
-                className="w-[180px] shrink-0"
-              />
-            )}
-
-            <Separator orientation="vertical" className="h-6" />
-
-            {viewMode && viewCtx && (
-              <ViewModeSwitch
-                value={viewCtx.view}
-                setValue={viewCtx.setView}
-                className="shrink-0"
-              />
-            )}
-          </div>
-        </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }
