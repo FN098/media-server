@@ -1,3 +1,4 @@
+import type { Tag } from "@/generated/prisma";
 import { useTagSelection } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
@@ -5,27 +6,69 @@ import { useSelection } from "@/providers/selection-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
+
+type TagOp = "add" | "remove";
 
 export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
   const { selectedIds, selectIds, clearSelection, isSelectionMode } =
     useSelection();
-  const [newTagName, setNewTagName] = useState("");
 
-  // 選択されたノードの実データを取得
   const selectedNodes = useMemo(
     () => allNodes.filter((n) => selectedIds.has(n.path)),
     [allNodes, selectedIds]
   );
 
-  // 全タグ一覧
+  const [newTagName, setNewTagName] = useState("");
+
+  const [pendingChanges, setPendingChanges] = useState<Record<string, TagOp>>(
+    {}
+  );
+  const changesCount = useMemo(
+    () => Object.keys(pendingChanges).length,
+    [pendingChanges]
+  );
+
   const { tags: masterTags } = useTags();
   const { tagStates } = useTagSelection(selectedNodes, masterTags);
 
   const selectAll = () => {
     const all = allNodes.map((n) => n.path);
     selectIds(all);
+  };
+
+  const addTag = () => {
+    // TODO: タグ追加ロジック
+    // サーバーアクションで新規タグを DB に追加し、masterTags に反映
+    setNewTagName("");
+  };
+
+  const toggleTag = (tag: Tag) => {
+    const isCurrentlyAll = tagStates[tag.name] === "all";
+
+    setPendingChanges((prev) => {
+      const next = { ...prev };
+      const currentOp = prev[tag.id];
+
+      if (currentOp) {
+        // すでに変更リストにある場合は、変更をキャンセル（元に戻す）
+        delete next[tag.id];
+      } else {
+        // 元が ON なら「削除予約」、OFF なら「追加予約」
+        next[tag.id] = isCurrentlyAll ? "remove" : "add";
+      }
+      return next;
+    });
+  };
+
+  const applyChanges = () => {
+    // TODO: サーバーアクションで changed をDBに適用
+  };
+
+  const handleCancel = () => {
+    setPendingChanges({});
+    clearSelection();
   };
 
   if (!isSelectionMode) return null;
@@ -36,52 +79,63 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
         {/* ヘッダー: 選択件数と操作ボタン */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-sm font-bold">
-              {selectedIds.size} 件を選択中
-            </span>
+            <span className="text-[10px]">{selectedIds.size} 件を選択中</span>
             <Button size="sm" variant="outline" onClick={selectAll}>
               すべて選択
             </Button>
-            <Button size="sm" variant="ghost" onClick={clearSelection}>
-              解除
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={clearSelection}
+              className="text-destructive hover:text-destructive border-destructive"
+            >
+              選択解除
             </Button>
           </div>
+
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={clearSelection}>
-              <X className="h-4 w-4 mr-1" /> キャンセル
+            <Button variant="ghost" size="sm" onClick={handleCancel}>
+              キャンセル
             </Button>
             <Button
               size="sm"
-              onClick={() => {
-                /* 反映処理 */
-              }}
+              onClick={applyChanges}
+              disabled={Object.keys(pendingChanges).length === 0}
             >
-              変更を適用
+              {changesCount > 0 ? `変更を適用 (${changesCount})` : "変更を適用"}
             </Button>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
           {/* タグバッジ一覧 */}
-          {masterTags.map((tag) => (
-            <Badge
-              key={tag.id}
-              variant={tagStates[tag.name] === "none" ? "outline" : "default"}
-              className={cn(
-                "cursor-pointer py-1 px-3 text-sm transition-all",
-                tagStates[tag.name] === "some" &&
-                  "opacity-60 ring-2 ring-primary/30",
-                tagStates[tag.name] === "all" &&
-                  "bg-primary text-primary-foreground"
-              )}
-              onClick={() => {
-                /* トグル処理 */
-              }}
-            >
-              {tag.name}
-              {tagStates[tag.name] === "some" && " (+)"}
-            </Badge>
-          ))}
+          {masterTags.map((tag) => {
+            const op = pendingChanges[tag.id];
+            const displayState =
+              op === "add"
+                ? "all"
+                : op === "remove"
+                  ? "none"
+                  : tagStates[tag.name];
+
+            return (
+              <Badge
+                key={tag.id}
+                variant={displayState === "none" ? "outline" : "default"}
+                className={cn(
+                  "cursor-pointer py-1 px-3 text-xs transition-all select-none",
+                  tagStates[tag.name] === "all" &&
+                    "bg-primary text-primary-foreground"
+                )}
+                onClick={() => toggleTag(tag)}
+              >
+                {tag.name}
+                {op && (
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-yellow-400" />
+                )}
+              </Badge>
+            );
+          })}
 
           {/* 新規タグ入力 */}
           <div
@@ -92,14 +146,13 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
           >
             <Plus className="h-3 w-3 text-muted-foreground" />
             <input
-              className="bg-transparent border-none outline-none p-1 text-sm w-24 focus:w-40 transition-all"
+              className="bg-transparent border-none outline-none p-1 text-xs w-24 focus:w-40 transition-all"
               placeholder="タグを追加..."
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  // タグ追加ロジック
-                  setNewTagName("");
+                  addTag();
                 }
               }}
             />
