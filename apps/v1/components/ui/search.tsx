@@ -2,6 +2,7 @@ import { useShortcutKey } from "@/hooks/use-shortcut-keys";
 import { Input } from "@/shadcn/components/ui/input";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
+import { SearchIcon } from "lucide-react";
 import { useRef, useState } from "react";
 
 export function Search({
@@ -23,12 +24,14 @@ export function Search({
   });
 
   return (
-    <div className="relative">
+    <div className="relative group">
+      <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+
       <Input
         ref={inputRef}
         type="search"
         placeholder="Search…"
-        className={cn("w-48", className)}
+        className={cn("w-48 pl-9", className)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onFocus={() => setFocused(true)}
