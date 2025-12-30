@@ -1,7 +1,6 @@
 "use client";
 
 import { visitFolderAction } from "@/actions/folder-actions";
-import { syncMediaDirAction } from "@/actions/media-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
@@ -72,11 +71,6 @@ export function Explorer() {
   // サムネイル作成リクエスト送信
   useEffect(() => {
     void enqueueThumbJob(listing.path);
-  }, [listing.path]);
-
-  // FS <=> DB 同期リクエスト送信
-  useEffect(() => {
-    void syncMediaDirAction(listing.path);
   }, [listing.path]);
 
   // 訪問済みフォルダ更新リクエスト送信

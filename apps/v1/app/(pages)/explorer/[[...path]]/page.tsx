@@ -5,6 +5,7 @@ import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { sortMediaFsNodes, SortOptions } from "@/lib/media/sort";
+import { syncMediaDir } from "@/lib/media/sync";
 import { MediaFsNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import {
@@ -51,6 +52,9 @@ export default async function Page(props: Props) {
 
   const rawNodes = listing.nodes;
 
+  // FS <=> DB 同期 (先にクエリを投げておき、後で待機)
+  const syncTask = syncMediaDir(currentDirPath, rawNodes);
+
   // ソート
   const sorted = sortMediaFsNodes(rawNodes, {
     key: sortKey,
@@ -58,6 +62,9 @@ export default async function Page(props: Props) {
   });
 
   const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
+
+  // FS <=> DB 同期完了を待機
+  await syncTask;
 
   // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
