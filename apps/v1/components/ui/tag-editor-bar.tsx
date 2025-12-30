@@ -202,7 +202,7 @@ export function TagEditorBar({
                         )}
                       />
                       <span className="text-xs">
-                        {`${selectedPaths.size} 件を選択中`}
+                        {`${selectedPaths.size} / ${allNodes.length} 件を選択中`}
                       </span>
                     </Button>
                   </>
