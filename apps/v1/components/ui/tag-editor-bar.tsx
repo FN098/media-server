@@ -4,6 +4,7 @@ import { useTagSelection } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import { TagOperation, TagOperator } from "@/lib/tag/types";
+import { uniqueBy } from "@/lib/utils/unique";
 import { useSelection } from "@/providers/selection-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
@@ -42,16 +43,8 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
   const { tags: masterTags } = useTags(Array.from(selectedPaths));
   const { tagStates } = useTagSelection(selectedNodes, masterTags);
 
-  console.log({ tagStates });
-
   const displayMasterTags = useMemo(() => {
-    const combined = [...masterTags, ...createdTags];
-
-    // IDの重複を排除
-    const map = new Map<string, Tag>();
-    combined.forEach((t) => map.set(t.id, t));
-
-    return Array.from(map.values());
+    return uniqueBy([...masterTags, ...createdTags], "id");
   }, [masterTags, createdTags]);
 
   // 未保存の変更を管理 { [tagId]: "add" | "remove" }
@@ -93,9 +86,7 @@ export function TagEditorBar({ allNodes }: { allNodes: MediaNode[] }) {
     const name = newTagName.trim();
     if (!name) return;
 
-    // TODO: Map で O(1)
     const existingTag = displayMasterTags.find((t) => t.name === name);
-
     if (existingTag) {
       setPendingChanges((prev) => ({
         ...prev,
