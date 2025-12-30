@@ -1,6 +1,7 @@
 import type { VisitedFolder } from "@/generated/prisma/client";
 import { DbFavoriteInfo, DbVisitedInfo } from "@/lib/folder/types";
 import { prisma } from "@/lib/prisma";
+import { benchmark } from "@/lib/utils/benchmark";
 
 export async function getRecentFolders(
   userId: string,
@@ -36,6 +37,44 @@ export async function getDbVisitedInfo(
 
 export async function getDbVisitedInfoDeeply(
   dirPaths: string[],
+  userId: string,
+  strategy: "single" | "transaction" = "single"
+): Promise<DbVisitedInfo[]> {
+  // シングルクエリのほうがトランザクションより5倍くらい速い
+  switch (strategy) {
+    case "single":
+      return await getDbVisitedInfoDeeplyWithSingleQuery(dirPaths, userId);
+
+    case "transaction":
+      return await getDbVisitedInfoDeeplyWithTransaction(dirPaths, userId);
+  }
+}
+
+export async function benchGetDbVisitedInfoDeeply(
+  dirPaths: string[],
+  userId: string
+): Promise<void> {
+  await benchmark(`Performance Test (dirPaths count: ${dirPaths.length})`, [
+    {
+      // 結果: 50ms / 18 dirs
+      name: "Transaction Method",
+      callback: async () => {
+        await getDbVisitedInfoDeeplyWithTransaction(dirPaths, userId);
+      },
+    },
+    {
+      // 結果: 10ms / 18 dirs
+      name: "Single Query Method",
+      callback: async () => {
+        await getDbVisitedInfoDeeplyWithSingleQuery(dirPaths, userId);
+      },
+    },
+  ]);
+}
+
+// Transaction 方式（DBサーバー負荷↑）
+export async function getDbVisitedInfoDeeplyWithTransaction(
+  dirPaths: string[],
   userId: string
 ): Promise<DbVisitedInfo[]> {
   // 1. 各パスに対するクエリ（Promise）の配列を作成
@@ -48,6 +87,10 @@ export async function getDbVisitedInfoDeeply(
         userId,
         dirPath: { startsWith: d },
       },
+      orderBy: {
+        lastViewedAt: "desc",
+      },
+      take: 1,
     })
   );
 
@@ -56,26 +99,68 @@ export async function getDbVisitedInfoDeeply(
   const results = await prisma.$transaction(tasks);
 
   // 3. 結果を元のパスと紐付けて加工
-  return dirPaths.map((path, index) => {
-    const folders = results[index];
+  return dirPaths.map((d, index) => {
+    const latest = results[index];
 
-    if (folders.length === 0) {
+    if (latest.length === 0) {
       return {
-        path,
+        path: d,
         lastViewedAt: null,
       };
     }
 
-    // 取得したレコードの中から最新の時刻を算出
-    const latestViewedAt = folders
-      .map((f) => f.lastViewedAt)
-      .filter((date): date is Date => date !== null) // null除外（DB設計による）
-      .reduce((a, b) => (a > b ? a : b), new Date(0));
+    return {
+      path: d,
+      lastViewedAt: latest[0].lastViewedAt,
+    } satisfies DbVisitedInfo;
+  });
+}
+
+// Single Query 方式（WEBサーバー負荷↑）
+export async function getDbVisitedInfoDeeplyWithSingleQuery(
+  dirPaths: string[],
+  userId: string
+): Promise<DbVisitedInfo[]> {
+  // 1. 指定されたいずれかのパスに前方一致するレコードをすべて取得
+  const allRelatedFolders = await prisma.visitedFolder.findMany({
+    where: {
+      userId,
+      OR: dirPaths.map((d) => ({
+        dirPath: { startsWith: d },
+      })),
+    },
+    select: {
+      dirPath: true,
+      lastViewedAt: true,
+    },
+  });
+
+  // 2. メモリ上で dirPaths ごとに集計
+  return dirPaths.map((d) => {
+    // このパス (d) で始まるレコードだけをフィルタリング
+    const children = allRelatedFolders.filter((f) => f.dirPath.startsWith(d));
+
+    if (children.length === 0) {
+      return {
+        path: d,
+        lastViewedAt: null,
+      };
+    }
+
+    // フィルタリングされた中から最新の日付を特定
+    const latestViewedAt = children.reduce(
+      (latest, current) => {
+        if (!current.lastViewedAt) return latest;
+        if (!latest) return current.lastViewedAt;
+        return current.lastViewedAt > latest ? current.lastViewedAt : latest;
+      },
+      null as Date | null
+    );
 
     return {
-      path,
-      lastViewedAt: latestViewedAt.getTime() === 0 ? null : latestViewedAt,
-    } satisfies DbVisitedInfo;
+      path: d,
+      lastViewedAt: latestViewedAt,
+    };
   });
 }
 
