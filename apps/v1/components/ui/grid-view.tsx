@@ -26,7 +26,9 @@ export const GridView = memo(function GridView1({
   onOpen,
 }: GridViewProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const { columnCount, rowHeight } = useGridViewConfig(parentRef);
+  const { columnCount, rowHeight } = useGridViewConfig(parentRef, {
+    columnWidth: 200,
+  });
   const rowCount = Math.ceil(nodes.length / columnCount);
 
   // 仮想グリッドの設定
@@ -104,10 +106,10 @@ function Cell({ node, onOpen }: CellProps) {
   const selected = isSelected(node.path);
 
   return (
-    <div className="p-1">
+    <div className="p-1 w-full h-full">
       <div
         className={cn(
-          "relative group aspect-square w-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
+          "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
           selected
             ? "ring-2 ring-primary border-transparent"
             : "hover:border-primary/50"
@@ -121,7 +123,10 @@ function Cell({ node, onOpen }: CellProps) {
         }}
       >
         {/* サムネイル */}
-        <MediaThumb node={node} className="w-full h-full object-cover" />
+        <MediaThumb
+          node={node}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
 
         {/* 選択チェックボックス */}
         <div

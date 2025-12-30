@@ -6,23 +6,31 @@ type GridViewConfig = {
   rowHeight: number;
 };
 
+type GridViewConfigOptions = {
+  columnWidth: number;
+  rowHeight?: number; // 固定したい場合
+  square?: boolean; // 正方形にしたい場合
+  aspectRatio?: number; // 応用（例: 16/9）
+};
+
 export function useGridViewConfig(
   ref: React.RefObject<HTMLElement | null>,
-  options: Omit<GridViewConfig, "columnCount"> = {
+  options: GridViewConfigOptions = {
     columnWidth: 200,
-    rowHeight: 200,
+    square: true,
   }
 ): GridViewConfig {
   const [config, setConfig] = useState<GridViewConfig>({
     columnCount: 1,
     columnWidth: options.columnWidth,
-    rowHeight: options.rowHeight,
+    rowHeight: options.rowHeight ?? options.columnWidth,
   });
 
   const update = useCallback(() => {
     if (!ref.current) return;
 
     const containerWidth = ref.current.offsetWidth;
+
     const columnCount = Math.max(
       1,
       Math.ceil(containerWidth / options.columnWidth)
@@ -30,16 +38,31 @@ export function useGridViewConfig(
 
     const actualColumnWidth = containerWidth / columnCount;
 
+    let rowHeight: number;
+
+    if (options.square) {
+      rowHeight = actualColumnWidth;
+    } else if (options.aspectRatio) {
+      rowHeight = actualColumnWidth / options.aspectRatio;
+    } else {
+      rowHeight = options.rowHeight ?? actualColumnWidth;
+    }
+
     setConfig({
       columnCount,
       columnWidth: actualColumnWidth,
-      rowHeight: options.rowHeight,
+      rowHeight,
     });
-  }, [ref, options.columnWidth, options.rowHeight]);
+  }, [
+    ref,
+    options.columnWidth,
+    options.square,
+    options.aspectRatio,
+    options.rowHeight,
+  ]);
 
   useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
+    if (!ref.current) return;
 
     // 初期実行
     update();
@@ -48,7 +71,7 @@ export function useGridViewConfig(
       requestAnimationFrame(update);
     });
 
-    observer.observe(node);
+    observer.observe(ref.current);
     return () => observer.disconnect();
   }, [ref, update]);
 
