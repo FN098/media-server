@@ -35,6 +35,7 @@ import {
   TagIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import path from "path";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -103,6 +104,7 @@ export function MediaViewer({
   );
   const { setTitle, resetTitle } = useTitleControl();
   const { lock: lockScroll, unlock: unlockScroll } = useScrollLockControl();
+  const router = useRouter();
 
   const { openFolder } = mergedFeatures;
 
@@ -141,15 +143,25 @@ export function MediaViewer({
     }
   }, [favoriteCtx, interactHeader, index, items]);
 
+  const handleOpenFolder = () => {
+    const url = getClientExplorerPath(path.dirname(items[index].path));
+    router.push(url);
+  };
+
   useShortcutKeys([
     { key: "Escape", callback: onClose },
-    { key: "f", callback: () => void handleToggleFavorite() },
     { key: "Enter", callback: toggleHeaderVisibility },
     { key: " ", callback: toggleHeaderVisibility },
     { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
     { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
     { key: "a", callback: () => swiperInstance?.slidePrev() },
+    { key: "s", callback: () => void handleToggleFavorite() },
     { key: "d", callback: () => swiperInstance?.slideNext() },
+    { key: "f", callback: toggleFullscreen },
+    { key: "t", callback: () => setIsTagEditing((prev) => !prev) },
+    { key: "q", callback: () => onPrevFolder?.() },
+    { key: "e", callback: () => onNextFolder?.() },
+    { key: "o", callback: handleOpenFolder },
   ]);
 
   const hasPrev = !!onPrevFolder;
@@ -266,6 +278,13 @@ export function MediaViewer({
                       >
                         <Folder className="mr-2 h-4 w-4" />
                         <span>フォルダを開く</span>
+                        {!isMobile && (
+                          <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                            <kbd className="rounded border px-1.5 py-0.5">
+                              O
+                            </kbd>
+                          </div>
+                        )}
                       </Link>
                     </DropdownMenuItem>
                   )}
@@ -273,6 +292,11 @@ export function MediaViewer({
                   <DropdownMenuItem onClick={toggleFullscreen}>
                     <Maximize className="mr-2 h-4 w-4" />
                     <span>全画面表示</span>
+                    {!isMobile && (
+                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                        <kbd className="rounded border px-1.5 py-0.5">F</kbd>
+                      </div>
+                    )}
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
@@ -282,6 +306,11 @@ export function MediaViewer({
                     <span>
                       {isTagEditing ? "タグ編集を終了" : "タグを編集"}
                     </span>
+                    {!isMobile && (
+                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                        <kbd className="rounded border px-1.5 py-0.5">T</kbd>
+                      </div>
+                    )}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
