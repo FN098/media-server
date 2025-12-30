@@ -193,15 +193,12 @@ export function TagEditorBar({
                 {mode === "single" ? (
                   <></>
                 ) : (
+                  /* 一括編集モード時の全選択ボタン */
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => {
-                      if (isAllSelected) {
-                        clearSelection();
-                      } else {
-                        selectAll();
-                      }
+                      selectAll();
                     }}
                     disabled={isLoading}
                   >
