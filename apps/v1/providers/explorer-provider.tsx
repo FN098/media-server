@@ -18,7 +18,7 @@ interface ExplorerContextType {
   setIndex: (newIndex: number | "first" | "last") => void;
   openMedia: (index: number) => void;
   closeMedia: () => void;
-  moveFolder: (path: string, at: "first" | "last" | number) => void;
+  moveFolder: (path: string, at?: "first" | "last" | number) => void;
 }
 
 const ExplorerContext = createContext<ExplorerContextType | undefined>(
@@ -76,10 +76,10 @@ export function ExplorerProvider({
   }, [pathname, router, searchParams]);
 
   const moveFolder = useCallback(
-    (path: string, at: "first" | "last" | number) => {
+    (path: string, at?: "first" | "last" | number) => {
       const params = new URLSearchParams();
       if (modal) params.set("modal", "true");
-      params.set("at", String(at));
+      if (at) params.set("at", String(at));
       const baseUrl = getClientExplorerPath(path);
       router.push(`${baseUrl}?${params.toString()}`);
     },

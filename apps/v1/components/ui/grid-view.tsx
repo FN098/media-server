@@ -50,14 +50,8 @@ export const GridView = memo(function GridView1({
   }, [nodes, selectPaths]);
 
   useShortcutKeys([
-    {
-      key: "Ctrl+a",
-      callback: selectAll,
-    },
-    {
-      key: "Escape",
-      callback: clearSelection,
-    },
+    { key: "Ctrl+a", callback: selectAll },
+    { key: "Escape", callback: clearSelection },
   ]);
 
   return (
