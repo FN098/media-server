@@ -3,7 +3,7 @@
 import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { TagEditorBar } from "@/components/ui/tag-editor-bar-v2";
+import { TagEditorBar } from "@/components/ui/tag-editor-bar";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
