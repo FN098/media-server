@@ -5,7 +5,7 @@ import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { GridView } from "@/components/ui/grid-view";
 import { ListView } from "@/components/ui/list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { TagEditorBar } from "@/components/ui/tag-editor-bar";
+import { TagEditorBar } from "@/components/ui/tag-editor-bar-v1";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
@@ -106,33 +106,31 @@ export function Explorer() {
             />
           </div>
 
-          {/* ビューワ */}
-          {modal && index != null && (
-            <MediaViewer
-              items={mediaOnly}
-              initialIndex={index}
-              onClose={closeMedia}
-              features={{
-                openFolder: false,
-              }}
-              onPrevFolder={
-                listing.prev
-                  ? () => moveFolder(listing.prev!, "last")
-                  : undefined
-              }
-              onNextFolder={
-                listing.next
-                  ? () => moveFolder(listing.next!, "first")
-                  : undefined
-              }
-            />
-          )}
-
-          {/* タグ編集バー */}
+          {/* タグエディター */}
           <QueryProvider>
             <TagEditorBar allNodes={filtered} />
           </QueryProvider>
         </SelectionProvider>
+
+        {/* ビューワ */}
+        {modal && index != null && (
+          <MediaViewer
+            items={mediaOnly}
+            initialIndex={index}
+            onClose={closeMedia}
+            features={{
+              openFolder: false,
+            }}
+            onPrevFolder={
+              listing.prev ? () => moveFolder(listing.prev!, "last") : undefined
+            }
+            onNextFolder={
+              listing.next
+                ? () => moveFolder(listing.next!, "first")
+                : undefined
+            }
+          />
+        )}
       </FavoriteProvider>
 
       {/* フォルダナビゲーション */}

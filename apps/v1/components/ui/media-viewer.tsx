@@ -5,6 +5,7 @@ import { AudioPlayer } from "@/components/ui/audio-player";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
+import { TagEditorBar } from "@/components/ui/tag-editor-bar-v2";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useFullscreen } from "@/hooks/use-fullscreen";
@@ -15,6 +16,8 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { useFavorite } from "@/providers/favorite-provider";
+import { QueryProvider } from "@/providers/query-provider";
+import { SelectionProvider } from "@/providers/selection-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +32,7 @@ import {
   Loader2,
   Maximize,
   MoreVertical,
+  TagIcon,
 } from "lucide-react";
 import Link from "next/link";
 import path from "path";
@@ -81,6 +85,7 @@ export function MediaViewer({
   };
   const favoriteCtx = useFavorite();
   const [index, setIndex] = useState(initialIndex);
+  const [isTagEditing, setIsTagEditing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {
@@ -266,6 +271,15 @@ export function MediaViewer({
                     <Maximize className="mr-2 h-4 w-4" />
                     <span>全画面表示</span>
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => setIsTagEditing(!isTagEditing)}
+                  >
+                    <TagIcon className="mr-2 h-4 w-4" />
+                    <span>
+                      {isTagEditing ? "タグ編集を終了" : "タグを編集"}
+                    </span>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -311,6 +325,16 @@ export function MediaViewer({
             </div>
           </SwiperSlide>
         ))}
+
+        {/* タグエディター */}
+        <SelectionProvider>
+          <QueryProvider>
+            <TagEditorBar
+              allNodes={isTagEditing ? [items[index]] : []}
+              mode="single"
+            />
+          </QueryProvider>
+        </SelectionProvider>
       </Swiper>
     </div>
   );
