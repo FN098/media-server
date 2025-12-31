@@ -35,7 +35,7 @@ import {
   TagIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import path from "path";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -99,8 +99,6 @@ export function MediaViewer({
   const { setTitle, resetTitle } = useTitleControl();
   const { lock: lockScroll, unlock: unlockScroll } = useScrollLockControl();
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const toggleTagManagerOpen = () => setIsTagManagerOpen((prev) => !prev);
 
@@ -175,14 +173,6 @@ export function MediaViewer({
   // 仮想スライド中のコンテンツ専用インデックス
   const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
 
-  // URL パラメータを書き換えるだけ（表示中の内容とURLが一致していないと気持ち悪いので）
-  const syncIndexToUrl = (index: number) => {
-    const qs = new URLSearchParams(searchParams);
-    qs.set("at", String(index));
-    const newUrl = `${pathname}?${qs.toString()}`;
-    window.history.replaceState(null, "", newUrl);
-  };
-
   // スワイプ時の移動処理
   const handleSwipe = (swiper: SwiperClass) => {
     const activeIdx = swiper.activeIndex;
@@ -193,8 +183,6 @@ export function MediaViewer({
       Math.min(activeIdx - offsetPrev, items.length - 1)
     );
     setIndex(itemIdx);
-
-    syncIndexToUrl(itemIdx);
 
     if (hasPrev && activeIdx === 0) {
       onPrevFolder("last");
