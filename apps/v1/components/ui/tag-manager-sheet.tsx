@@ -84,8 +84,6 @@ export function TagManagerSheet({
   const router = useRouter();
   const tm = useTagManager(targetNodes, mode);
 
-  console.log(tm.pendingNewTags);
-
   // シングルモードの自動選択
   useEffect(() => {
     if (mode === "single" && allNodes.length === 1) {

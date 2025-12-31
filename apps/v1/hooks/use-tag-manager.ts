@@ -25,12 +25,19 @@ export function useTagManager(
     [targetNodes]
   );
 
+  // TODO: ストラテジーオプション追加
   // マスターデータ
   const {
     tags: masterTags,
     refreshTags,
     isLoading: isLoadingTags,
-  } = useTags(targetPaths);
+  } = useTags({
+    paths: targetPaths,
+    strategy: "recently-used",
+    // strategy: "recently-created",
+    // strategy: "most-related",
+    // limit: 10,
+  });
   const { tagStates } = useTagSelection(targetNodes, masterTags);
 
   // 編集用
@@ -40,9 +47,11 @@ export function useTagManager(
       name: t.name,
     }));
 
-    return uniqueBy([...masterTags, ...pendingAsTags], "id").sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
+    // TODO: 並べ替えオプション追加
+    return uniqueBy([...masterTags, ...pendingAsTags], "id");
+    // .sort((a, b) =>
+    //   a.name.localeCompare(b.name)
+    // );
   }, [masterTags, pendingNewTags]);
 
   // 閲覧用

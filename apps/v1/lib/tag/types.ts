@@ -1,3 +1,5 @@
+import { searchTagStrategies } from "@/lib/tag/strategies";
+
 export type {
   MediaTag as PrismaMediaTag,
   Tag as PrismaTag,
@@ -33,3 +35,19 @@ export type CreateTagsResult =
       success: false;
       error: string;
     };
+
+export type SearchTagStrategy = (typeof searchTagStrategies)[number];
+
+export type SearchTagsOptions = {
+  excludeIds?: string[];
+  limit?: number;
+  query?: string;
+  strategy?: SearchTagStrategy;
+};
+
+export type SearchTagsRequestParams = {
+  paths?: string[];
+  limit?: number;
+  query?: string;
+  strategy?: SearchTagStrategy;
+};

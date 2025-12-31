@@ -8,17 +8,14 @@ export async function removeTag(tagId: string) {
   });
 }
 
-export async function searchTags(query: string, limit = 10) {
-  return await prisma.tag.findMany({
+export async function removeTagFromMedia(mediaId: string, tagId: string) {
+  return await prisma.mediaTag.delete({
     where: {
-      name: { contains: query },
-    },
-    orderBy: {
-      mediaTags: {
-        _count: "desc", // 多く紐づけされたタグを優先
+      mediaId_tagId: {
+        mediaId: mediaId,
+        tagId: tagId,
       },
     },
-    take: limit,
   });
 }
 
@@ -35,17 +32,6 @@ export async function addTagsToMedia(mediaId: string, tagNames: string[]) {
             },
           },
         })),
-      },
-    },
-  });
-}
-
-export async function removeTagFromMedia(mediaId: string, tagId: string) {
-  return await prisma.mediaTag.delete({
-    where: {
-      mediaId_tagId: {
-        mediaId: mediaId,
-        tagId: tagId,
       },
     },
   });
@@ -69,23 +55,4 @@ export async function getRelatedTags(
   }
 
   return [];
-}
-
-export async function getPopularTags(options?: {
-  excludeIds?: string[];
-  limit?: number;
-}) {
-  const excludeIds = options?.excludeIds;
-  const limit = options?.limit;
-
-  return await prisma.tag.findMany({
-    where: {
-      id: excludeIds ? { notIn: excludeIds } : undefined,
-      mediaTags: { some: {} }, // 最低1つは紐付いているもの
-    },
-    orderBy: {
-      mediaTags: { _count: "desc" },
-    },
-    take: limit,
-  });
 }
