@@ -104,6 +104,7 @@ export function MediaViewer({
   const router = useRouter();
 
   const toggleTagManagerOpen = () => setIsTagManagerOpen((prev) => !prev);
+  const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
 
   // スクロールロック
   useEffect(() => {
@@ -159,7 +160,7 @@ export function MediaViewer({
     { key: "q", callback: () => onPrevFolder?.() },
     { key: "e", callback: () => onNextFolder?.() },
     { key: "o", callback: handleOpenFolder },
-    { key: "h", callback: () => setIsHeaderPinned((prev) => !prev) },
+    { key: "h", callback: toggleHeaderPinned },
   ]);
 
   const hasPrev = !!onPrevFolder;
@@ -243,6 +244,14 @@ export function MediaViewer({
             </div>
 
             <div className="flex items-center gap-4">
+              {/* ヘッダー固定ピン */}
+              <button
+                className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
+                onClick={toggleHeaderPinned}
+              >
+                {isHeaderPinned ? <PinOff size={28} /> : <Pin size={28} />}
+              </button>
+
               {/* お気に入りボタン */}
               {isMedia(items[index].type) && (
                 <FavoriteButton
@@ -267,22 +276,6 @@ export function MediaViewer({
                   align="end"
                   className="flex flex-col w-48 gap-2"
                 >
-                  <DropdownMenuItem
-                    onClick={() => setIsHeaderPinned((prev) => !prev)}
-                  >
-                    {isHeaderPinned ? (
-                      <PinOff className="mr-2 h-4 w-4" />
-                    ) : (
-                      <Pin className="mr-2 h-4 w-4" />
-                    )}
-                    {isHeaderPinned ? "ヘッダー固定解除" : "ヘッダーを固定"}
-                    {!isMobile && (
-                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                        <kbd className="rounded border px-1.5 py-0.5">H</kbd>
-                      </div>
-                    )}
-                  </DropdownMenuItem>
-
                   {openFolder && (
                     <DropdownMenuItem asChild>
                       <Link
