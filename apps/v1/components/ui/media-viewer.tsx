@@ -10,7 +10,6 @@ import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useScrollLockControl } from "@/hooks/use-scroll-lock";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTitleControl } from "@/hooks/use-title";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
@@ -18,6 +17,7 @@ import { getClientExplorerPath } from "@/lib/path/helpers";
 import { useFavorite } from "@/providers/favorite-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { SelectionProvider } from "@/providers/selection-provider";
+import { useShortcutKeys } from "@/providers/shortcut-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,

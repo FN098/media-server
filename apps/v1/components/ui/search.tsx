@@ -1,4 +1,4 @@
-import { useShortcutKey } from "@/hooks/use-shortcut-keys";
+import { useShortcutKeys } from "@/providers/shortcut-provider";
 import { Input } from "@/shadcn/components/ui/input";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
@@ -18,10 +18,9 @@ export function Search({
   const isMobile = useIsMobile();
   const [focused, setFocused] = useState(false);
 
-  useShortcutKey({
-    key: "Ctrl+k",
-    callback: () => inputRef.current?.focus(),
-  });
+  useShortcutKeys([
+    { key: "Ctrl+k", callback: () => inputRef.current?.focus() },
+  ]);
 
   return (
     <div className="relative group">

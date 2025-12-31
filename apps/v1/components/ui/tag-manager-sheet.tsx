@@ -6,6 +6,7 @@ import { MediaNode } from "@/lib/media/types";
 import { TagOperation, TagOperator } from "@/lib/tag/types";
 import { TagEditMode, TagState } from "@/lib/view/types";
 import { useSelection } from "@/providers/selection-provider";
+import { useShortcutKeys } from "@/providers/shortcut-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -156,6 +157,8 @@ export function TagManagerSheet({
 
   const showMainsheet =
     (mode === "default" && tm.isEditing) || mode === "single";
+
+  useShortcutKeys([{ key: "Escape", callback: handleClose }]);
 
   return (
     <>

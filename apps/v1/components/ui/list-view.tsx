@@ -5,12 +5,12 @@ import { FavoriteCountBadge } from "@/components/ui/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { LocalDateValue } from "@/components/ui/local-date";
 import { MediaThumbIcon } from "@/components/ui/media-thumb";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
 import { useFavorite } from "@/providers/favorite-provider";
 import { useSelection } from "@/providers/selection-provider";
+import { useShortcutKeys } from "@/providers/shortcut-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import {
   Table,
