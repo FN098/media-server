@@ -114,7 +114,7 @@ export function TagManagerSheet({
     if (!name) return;
     const existing = tm.displayMasterTags.find((t) => t.name === name);
     if (existing) {
-      tm.toggleTag(existing);
+      tm.setTagChange(existing, "add");
       tm.setNewTagName("");
       return;
     }
@@ -378,8 +378,7 @@ function TagList({
                 ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                 : "bg-muted text-muted-foreground",
               op === "add" && "ring-2 ring-yellow-400 ring-offset-2",
-              op === "remove" &&
-                "opacity-40 line-through decoration-destructive"
+              op === "remove" && "opacity-40 line-through"
             )}
           >
             {willBeOn && <Check size={12} />}

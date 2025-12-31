@@ -53,6 +53,12 @@ export function useTagManager(
     [tagStates]
   );
 
+  const setTagChange = useCallback((tag: Tag, op: TagOperator) => {
+    setPendingChanges((prev) => {
+      return { ...prev, [tag.id]: op };
+    });
+  }, []);
+
   const resetChanges = useCallback(() => {
     setPendingChanges({});
     setCreatedTags([]);
@@ -73,6 +79,7 @@ export function useTagManager(
     setIsEditing,
     hasChanges,
     toggleTag,
+    setTagChange,
     resetChanges,
     refreshTags,
     masterTags,
