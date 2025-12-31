@@ -3,6 +3,7 @@ import { SelectionBar } from "@/components/ui/selection-bar";
 import { Record } from "@/generated/prisma/runtime/library";
 import { useTagManager } from "@/hooks/use-tag-manager";
 import { MediaNode } from "@/lib/media/types";
+import { normalizeTagName } from "@/lib/tag/normalize";
 import {
   PendingNewTag,
   Tag,
@@ -398,6 +399,10 @@ function TagInput({
   onSelectSuggestion,
 }: TagInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggests = useMemo(
+    () => new Map(suggestions.map((s) => [s.name, s])),
+    [suggestions]
+  );
 
   useShortcutKeys([{ key: "i", callback: () => inputRef.current?.focus() }]);
 
@@ -411,12 +416,19 @@ function TagInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              // サジェストがある場合は一番上を選択、なければ新規作成
-              if (suggestions.length > 0) {
-                onSelectSuggestion(suggestions[0]);
+            if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+
+              if (!value.trim()) return;
+
+              const normalized = normalizeTagName(value);
+
+              // サジェストに一致する場合は選択、なければ新規作成
+              if (suggests.has(normalized)) {
+                onSelectSuggestion(suggests.get(value)!);
               } else {
                 onAdd();
+                onChange("");
               }
             }
           }}
