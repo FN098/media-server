@@ -112,7 +112,8 @@ export function TagManagerSheet({
       return;
     }
 
-    //
+    // FIXME: 追加したタグが画面に表示されない
+    // マスタータグ追加
     tm.setIsLoading(true);
     try {
       const result = await createTagAction(name);
