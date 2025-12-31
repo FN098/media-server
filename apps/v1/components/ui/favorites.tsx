@@ -37,19 +37,14 @@ export function Favorites() {
     [filtered]
   );
 
-  // 表示中の一覧（filtered）から選択されたノードのインデックス（baseIndex）を
-  // ビューア用のインデックス（modifiedIndex）に変換
-  const mediaOnlyMap = useMemo(() => {
-    return new Map(mediaOnly.map((e, index) => [e.path, index]));
-  }, [mediaOnly]);
-
-  const pathToIndex = useCallback(
-    (path: string) => mediaOnlyMap.get(path) ?? 0,
-    [mediaOnlyMap]
-  );
-
-  const baseIndex = Math.max(0, Math.min(index ?? 0, filtered.length - 1));
-  const modifiedIndex = pathToIndex(filtered[baseIndex].path);
+  const mediaPath = filtered[index ?? 0]?.path;
+  const mediaIndex =
+    mediaPath != null
+      ? Math.max(
+          0,
+          mediaOnly.findIndex((e) => e.path === mediaPath)
+        )
+      : 0;
 
   // フォルダ/ファイルオープン
   const handleOpen = useCallback(
@@ -121,7 +116,7 @@ export function Favorites() {
         {modal && index != null && (
           <MediaViewer
             items={mediaOnly}
-            initialIndex={modifiedIndex}
+            initialIndex={mediaIndex}
             onClose={closeMedia}
           />
         )}
