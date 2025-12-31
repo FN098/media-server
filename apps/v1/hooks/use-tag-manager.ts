@@ -76,6 +76,10 @@ export function useTagManager(
     setCreatedTags([]);
   }, []);
 
+  const addCreatedTag = useCallback((tag: Tag) => {
+    setCreatedTags((prev) => [...prev, tag]);
+  }, []);
+
   return {
     targetPaths,
     masterTags,
@@ -98,5 +102,6 @@ export function useTagManager(
     setTagChange,
     resetChanges,
     refreshTags,
+    addCreatedTag,
   };
 }

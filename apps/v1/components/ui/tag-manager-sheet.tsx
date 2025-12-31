@@ -12,7 +12,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 interface TagManagerSheetProps {
@@ -73,6 +73,13 @@ export function TagManagerSheet({
   const router = useRouter();
   const tm = useTagManager(targetNodes, mode);
 
+  // シングルモードの自動選択
+  useEffect(() => {
+    if (mode === "single" && allNodes.length === 1) {
+      selectPaths([allNodes[0].path]);
+    }
+  }, [allNodes, mode, selectPaths]);
+
   // 保存処理
   const handleApply = async () => {
     if (tm.isLoading) return;
@@ -112,7 +119,6 @@ export function TagManagerSheet({
       return;
     }
 
-    // FIXME: 追加したタグが画面に表示されない
     // マスタータグ追加
     tm.setIsLoading(true);
     try {
@@ -120,6 +126,7 @@ export function TagManagerSheet({
       if (result.success && result.tag) {
         tm.setPendingChanges((prev) => ({ ...prev, [result.tag.id]: "add" }));
         tm.setNewTagName("");
+        tm.addCreatedTag(result.tag);
       }
     } finally {
       tm.setIsLoading(false);
