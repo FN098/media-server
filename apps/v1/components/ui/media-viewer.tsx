@@ -9,6 +9,7 @@ import { TagManagerSheet } from "@/components/ui/tag-manager-sheet";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import { useMounted } from "@/hooks/use-mounted";
 import { useScrollLockControl } from "@/hooks/use-scroll-lock";
 import { useTitleControl } from "@/hooks/use-title";
 import { isMedia } from "@/lib/media/media-types";
@@ -79,6 +80,7 @@ export function MediaViewer({
   onNextFolder,
   onPrevFolder,
 }: MediaViewerProps) {
+  const router = useRouter();
   const openFolder = features?.openFolder ?? true;
   const favoriteCtx = useFavorite();
   const [index, setIndex] = useState(initialIndex);
@@ -101,7 +103,7 @@ export function MediaViewer({
   );
   const { setTitle, resetTitle } = useTitleControl();
   const { lock: lockScroll, unlock: unlockScroll } = useScrollLockControl();
-  const router = useRouter();
+  const mounted = useMounted();
 
   const toggleTagManagerOpen = () => setIsTagManagerOpen((prev) => !prev);
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
@@ -202,6 +204,8 @@ export function MediaViewer({
       onNextFolder("first");
     }
   };
+
+  if (!mounted) return;
 
   return (
     <div
