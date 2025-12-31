@@ -8,7 +8,7 @@ export const FavoriteCountBadge = ({
   count: number;
   className?: string;
 }) => {
-  if (count <= 0) return null; // 0の場合は表示しない（お好みで）
+  // if (count <= 0) return null; // 0の場合は表示しない（お好みで）
 
   return (
     <div
