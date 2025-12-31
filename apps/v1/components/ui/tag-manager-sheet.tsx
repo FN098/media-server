@@ -1,5 +1,5 @@
 import { createTagAction, updateMediaTagsAction } from "@/actions/tag-actions";
-import { AnimatedCheckCircle } from "@/components/ui/animated-check-circle";
+import { SelectionBar } from "@/components/ui/selection-bar";
 import type { Tag } from "@/generated/prisma";
 import { useTagManager } from "@/hooks/use-tag-manager";
 import { MediaNode } from "@/lib/media/types";
@@ -50,14 +50,6 @@ interface SheetFooterProps {
   onApply: () => void;
   hasChanges: boolean;
   isLoading: boolean;
-}
-
-interface SelectionBarProps {
-  count: number;
-  totalCount: number;
-  onEditClick: () => void;
-  onSelectAll: () => void;
-  onCancel: () => void;
 }
 
 export function TagManagerSheet({
@@ -154,87 +146,130 @@ export function TagManagerSheet({
     (mode === "default" && tm.isEditing) || mode === "single";
 
   return (
-    <AnimatePresence>
-      {/* 選択バー */}
-      {showSelectionBar && (
-        <SelectionBar
-          key="selection-bar"
-          count={selectedPaths.size}
-          totalCount={allNodes.length}
-          onEditClick={() => tm.setIsEditing(true)}
-          onSelectAll={handleSelectAll}
-          onCancel={clearSelection}
-        />
-      )}
+    <>
+      <AnimatePresence>
+        {/* --- 1. 選択バー (タグ編集に依存しない独立した部品へ) --- */}
+        {showSelectionBar && (
+          <SelectionBar
+            key="selection-bar"
+            count={selectedPaths.size}
+            totalCount={allNodes.length}
+            onSelectAll={handleSelectAll}
+            onCancel={clearSelection}
+            actions={
+              <>
+                {/* 将来的にここへ <Button>ダウンロード</Button> 等を追加可能 */}
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="rounded-xl text-xs h-10 px-5 font-bold shadow-lg"
+                  onClick={() => tm.setIsEditing(true)}
+                >
+                  タグ編集
+                </Button>
+              </>
+            }
+          />
+        )}
+      </AnimatePresence>
 
-      {/* メインシート */}
-      {showMainsheet && (
-        <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
-          {/* オーバーレイ */}
-          {tm.isEditing && (
+      <AnimatePresence>
+        {/* --- 2. メインシート (閲覧モード or 編集モード) --- */}
+        {showMainsheet && (
+          <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
+            {/* オーバーレイは編集モードのみ */}
+            {tm.isEditing && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/40 pointer-events-auto"
+                onClick={handleClose}
+              />
+            )}
+
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/20 pointer-events-auto"
-              onClick={() => tm.setIsEditing(false)}
-            />
-          )}
+              layout // コンテナのサイズ変化をスムーズに
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full bg-background border-t rounded-t-[24px] shadow-2xl pointer-events-auto pb-safe overflow-hidden"
+            >
+              <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-3 mb-2" />
 
-          {/* シート */}
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative w-full bg-background border-t rounded-t-[24px] shadow-2xl pointer-events-auto pb-safe"
-          >
-            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-3 mb-2" />
-
-            <div className="px-4 pb-6 space-y-4">
-              {/* ヘッダーセクション */}
-              <SheetHeader
-                mode={mode}
-                isEditing={tm.isEditing}
-                count={selectedPaths.size}
-                onEditClick={() => tm.setIsEditing(true)}
-                onClose={handleClose}
-              />
-
-              {/* 入力セクション */}
-              {tm.isEditing && (
-                <TagInput
-                  value={tm.newTagName}
-                  onChange={tm.setNewTagName}
-                  onAdd={() => void handleAddTag()}
-                  disabled={tm.isLoading}
-                />
-              )}
-
-              {/* タグリストセクション */}
-              <TagList
-                isEditing={tm.isEditing}
-                displayTags={tm.displayMasterTags}
-                pendingChanges={tm.pendingChanges}
-                tagStates={tm.tagStates}
-                onToggle={tm.toggleTag}
-                masterTags={tm.masterTags}
-              />
-
-              {/* フッターセクション */}
-              {tm.isEditing && (
-                <SheetFooter
-                  onReset={tm.resetChanges}
-                  onApply={() => void handleApply()}
-                  hasChanges={tm.hasChanges}
-                  isLoading={tm.isLoading}
-                />
-              )}
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+              <div className="px-4 pb-6">
+                <AnimatePresence mode="wait">
+                  {!tm.isEditing ? (
+                    /* --- 閲覧ビュー --- */
+                    <motion.div
+                      key="view-mode"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="space-y-4"
+                    >
+                      <SheetHeader
+                        mode={mode}
+                        isEditing={false}
+                        count={selectedPaths.size}
+                        onEditClick={() => tm.setIsEditing(true)}
+                        onClose={handleClose}
+                      />
+                      <TagList
+                        isEditing={false}
+                        displayTags={tm.displayMasterTags}
+                        pendingChanges={tm.pendingChanges}
+                        tagStates={tm.tagStates}
+                        onToggle={tm.toggleTag}
+                        masterTags={tm.masterTags}
+                      />
+                    </motion.div>
+                  ) : (
+                    /* --- 編集ビュー --- */
+                    <motion.div
+                      key="edit-mode"
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      className="space-y-4"
+                    >
+                      <SheetHeader
+                        mode={mode}
+                        isEditing={true}
+                        count={selectedPaths.size}
+                        onEditClick={() => {}}
+                        onClose={handleClose}
+                      />
+                      <TagInput
+                        value={tm.newTagName}
+                        onChange={tm.setNewTagName}
+                        onAdd={() => void handleAddTag()}
+                        disabled={tm.isLoading}
+                      />
+                      <TagList
+                        isEditing={true}
+                        displayTags={tm.displayMasterTags}
+                        pendingChanges={tm.pendingChanges}
+                        tagStates={tm.tagStates}
+                        onToggle={tm.toggleTag}
+                        masterTags={tm.masterTags}
+                      />
+                      <SheetFooter
+                        onReset={tm.resetChanges}
+                        onApply={() => void handleApply()}
+                        hasChanges={tm.hasChanges}
+                        isLoading={tm.isLoading}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -417,70 +452,5 @@ function SheetFooter({
         <Save size={16} /> {isLoading ? "保存中..." : "変更を保存"}
       </Button>
     </div>
-  );
-}
-
-function SelectionBar({
-  count,
-  totalCount,
-  onEditClick,
-  onSelectAll,
-  onCancel,
-}: SelectionBarProps) {
-  const isAllSelected = count > 0 && count === totalCount;
-
-  console.log({ count, totalCount, isAllSelected });
-
-  return (
-    <motion.div
-      initial={{ y: 100, x: "-50%", opacity: 0 }}
-      animate={{ y: 0, x: "-50%", opacity: 1 }}
-      exit={{ y: 100, x: "-50%", opacity: 0 }}
-      className="fixed bottom-8 left-1/2 z-[60] w-[95%] max-w-md pointer-events-auto"
-    >
-      <div className="flex items-center justify-between gap-2 p-2 bg-background/80 backdrop-blur-xl border rounded-2xl shadow-2xl">
-        {/* すべて選択 */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "rounded-xl text-xs h-10 px-3 gap-2 transition-colors",
-            isAllSelected && "bg-green-500/10"
-          )}
-          onClick={onSelectAll}
-        >
-          <AnimatedCheckCircle active={isAllSelected} />
-          {isAllSelected ? "全選択済み" : "すべて選択"}
-        </Button>
-
-        {/* カウント */}
-        <div className="flex-1 text-center">
-          <span className="text-sm font-bold">{count}</span>
-          <span className="text-[10px] text-muted-foreground ml-1">
-            項目を選択中
-          </span>
-        </div>
-
-        {/* 右側 */}
-        <div className="flex gap-1">
-          <Button
-            variant="default"
-            size="sm"
-            className="rounded-xl text-xs h-10 px-5 font-bold shadow-lg shadow-primary/20"
-            onClick={onEditClick}
-          >
-            編集
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="rounded-xl w-10 h-10 p-0"
-            onClick={onCancel}
-          >
-            <X size={18} />
-          </Button>
-        </div>
-      </div>
-    </motion.div>
   );
 }
