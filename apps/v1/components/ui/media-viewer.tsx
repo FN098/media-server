@@ -160,7 +160,13 @@ export function MediaViewer({
     { key: "q", callback: () => onPrevFolder?.() },
     { key: "e", callback: () => onNextFolder?.() },
     { key: "o", callback: handleOpenFolder },
-    { key: "h", callback: toggleHeaderPinned },
+    {
+      key: "h",
+      callback: () => {
+        toggleHeaderPinned();
+        interactHeader();
+      },
+    },
   ]);
 
   const hasPrev = !!onPrevFolder;
