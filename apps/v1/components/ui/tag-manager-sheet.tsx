@@ -119,12 +119,10 @@ export function TagManagerSheet({
     }
   };
 
-  // if (!isSelectionMode || mode === "none") return null;
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
-        {isSelectionMode && mode !== "none" && (
+      {isSelectionMode && mode !== "none" && (
+        <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
           <>
             {/* オーバーレイ */}
             {tm.isEditing && (
@@ -192,8 +190,8 @@ export function TagManagerSheet({
               </div>
             </motion.div>
           </>
-        )}
-      </div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }
