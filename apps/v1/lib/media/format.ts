@@ -2,11 +2,9 @@ import { allMediaExtensions } from "@/lib/media/extensions";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 
+const targetExtensions = [...allMediaExtensions] as string[];
+
 export function formatNodes(nodes: MediaNode[]): MediaNode[] {
-  const targetExtensions = [...allMediaExtensions] as string[];
-
-  const extensionRegex = new RegExp(`\\.(${targetExtensions.join("|")})$`, "i");
-
   return nodes.map((node) => {
     // ディレクトリの場合は処理をスキップ
     if (node.isDirectory) {
@@ -14,18 +12,17 @@ export function formatNodes(nodes: MediaNode[]): MediaNode[] {
     }
 
     // ファイル名から拡張子を取得
-    const ext = getExtension(node.name, { withDot: false, case: "lower" });
+    const ext = getExtension(node.name, { withDot: true, case: "lower" });
 
     // タイトルの加工
     let newTitle = node.title;
-    if (node.title && targetExtensions.includes(ext || "")) {
-      newTitle = node.title.replace(extensionRegex, "");
+    if (node.title && ext && targetExtensions.includes(ext)) {
+      newTitle = node.title.replace(ext, "");
     }
 
     return {
       ...node,
       title: newTitle,
-      extension: ext,
     };
   });
 }

@@ -32,7 +32,6 @@ export type MediaNode = MediaFsNode & {
   isFavorite: boolean;
   lastViewedAt?: Date;
   favoriteCount?: number;
-  extension?: string;
   tags?: MediaTag[];
 };
 
