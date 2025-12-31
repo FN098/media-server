@@ -177,7 +177,7 @@ export function TagManagerSheet({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black/20 pointer-events-auto"
-              onClick={() => mode !== "single" && tm.setIsEditing(false)}
+              onClick={() => tm.setIsEditing(false)}
             />
           )}
 
