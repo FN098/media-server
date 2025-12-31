@@ -25,6 +25,8 @@ export function useTagManager(
     () => targetNodes.map((n) => n.path),
     [targetNodes]
   );
+
+  // マスターデータ
   const {
     tags: masterTags,
     refreshTags,
@@ -32,11 +34,17 @@ export function useTagManager(
   } = useTags(targetPaths);
   const { tagStates } = useTagSelection(targetNodes, masterTags);
 
-  const displayMasterTags = useMemo(() => {
+  // 編集用
+  const editModeTags = useMemo(() => {
     return uniqueBy([...masterTags, ...createdTags], "id").sort((a, b) =>
       a.name.localeCompare(b.name)
     );
   }, [masterTags, createdTags]);
+
+  // 閲覧用
+  const viewModeTags = masterTags.filter(
+    (tag) => tagStates[tag.name] === "all"
+  );
 
   const hasChanges = Object.keys(pendingChanges).length > 0;
 
@@ -70,24 +78,25 @@ export function useTagManager(
 
   return {
     targetPaths,
+    masterTags,
+    editModeTags,
+    viewModeTags,
     mode,
     setMode,
     newTagName,
     setNewTagName,
     isLoading,
     setIsLoading,
-    displayMasterTags,
     isLoadingTags,
     tagStates,
     pendingChanges,
     setPendingChanges,
+    hasChanges,
     isEditing,
     setIsEditing,
-    hasChanges,
     toggleTag,
     setTagChange,
     resetChanges,
     refreshTags,
-    masterTags,
   };
 }

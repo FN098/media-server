@@ -39,7 +39,7 @@ interface TagInputProps {
 interface TagListProps {
   isEditing: boolean;
   isLoading?: boolean;
-  displayTags: Tag[];
+  tags: Tag[];
   pendingChanges: Record<string, TagOperator>; // key: tagId
   tagStates: Record<string, TagState>; // key: tagId
   onToggle: (tag: Tag) => void;
@@ -103,12 +103,16 @@ export function TagManagerSheet({
   const handleAddTag = async () => {
     const name = tm.newTagName.trim();
     if (!name) return;
-    const existing = tm.displayMasterTags.find((t) => t.name === name);
+
+    // 既に存在すれば「追加候補」
+    const existing = tm.editModeTags.find((t) => t.name === name);
     if (existing) {
       tm.setTagChange(existing, "add");
       tm.setNewTagName("");
       return;
     }
+
+    //
     tm.setIsLoading(true);
     try {
       const result = await createTagAction(name);
@@ -121,6 +125,7 @@ export function TagManagerSheet({
     }
   };
 
+  // 閉じる処理
   const handleClose = () => {
     if (tm.isEditing) {
       tm.setIsEditing(false);
@@ -132,7 +137,7 @@ export function TagManagerSheet({
     onClose?.();
   };
 
-  // 全選択ハンドラ
+  // 全選択処理
   const handleSelectAll = () => {
     const paths = allNodes.map((n) => n.path);
     selectPaths(paths);
@@ -218,7 +223,7 @@ export function TagManagerSheet({
                       <TagList
                         isEditing={false}
                         isLoading={tm.isLoadingTags}
-                        displayTags={tm.displayMasterTags}
+                        tags={tm.viewModeTags}
                         pendingChanges={tm.pendingChanges}
                         tagStates={tm.tagStates}
                         onToggle={tm.toggleTag}
@@ -250,7 +255,7 @@ export function TagManagerSheet({
                       <TagList
                         isEditing={true}
                         isLoading={tm.isLoadingTags}
-                        displayTags={tm.displayMasterTags}
+                        tags={tm.editModeTags}
                         pendingChanges={tm.pendingChanges}
                         tagStates={tm.tagStates}
                         onToggle={tm.toggleTag}
@@ -365,20 +370,18 @@ function TagInput({ value, onChange, onAdd, disabled }: TagInputProps) {
 
 function TagList({
   isEditing,
-  displayTags,
+  tags,
   pendingChanges,
   tagStates,
   onToggle,
-  masterTags,
 }: TagListProps) {
   // --- 閲覧モード ---
   if (!isEditing) {
-    const viewTags = masterTags.filter((tag) => tagStates[tag.name] === "all");
     return (
       <div className="flex flex-wrap gap-2 py-2">
         <AnimatePresence>
-          {viewTags.length > 0 ? (
-            viewTags.map((tag, index) => (
+          {tags.length > 0 ? (
+            tags.map((tag, index) => (
               <motion.div
                 key={tag.id}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -421,7 +424,7 @@ function TagList({
   // --- 編集モード ---
   return (
     <div className="flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto py-1">
-      {displayTags.map((tag) => {
+      {tags.map((tag) => {
         const op = pendingChanges[tag.id];
         const willBeOn =
           op === "add"
