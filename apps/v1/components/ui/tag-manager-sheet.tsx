@@ -401,7 +401,19 @@ function TagInput({
         {value && (
           <button
             onClick={onAdd}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-lg text-xs font-medium"
+            className={cn([
+              // layout
+              "absolute right-2 top-1/2 -translate-y-1/2",
+
+              // base style
+              "bg-primary text-primary-foreground",
+              "px-3 py-1 rounded-lg text-xs font-medium",
+
+              // focus (keyboard)
+              "focus-visible:outline-none",
+              "focus-visible:ring-2 focus-visible:ring-primary",
+              "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            ])}
           >
             新規作成
           </button>
