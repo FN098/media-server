@@ -44,20 +44,24 @@ model Media {
 }
 
 model Tag {
-  id   String @id @default(uuid())
-  name String @unique
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   mediaTags MediaTag[]
 }
 
 model MediaTag {
-  mediaId String
-  tagId   String
+  mediaId   String
+  tagId     String
+  createdAt DateTime @default(now())
 
   media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([mediaId, tagId])
+  @@index([tagId, createdAt])
 }
 
 model Favorite {
