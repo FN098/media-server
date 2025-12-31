@@ -25,7 +25,11 @@ export function useTagManager(
     () => targetNodes.map((n) => n.path),
     [targetNodes]
   );
-  const { tags: masterTags, refreshTags } = useTags(targetPaths);
+  const {
+    tags: masterTags,
+    refreshTags,
+    isLoading: isLoadingTags,
+  } = useTags(targetPaths);
   const { tagStates } = useTagSelection(targetNodes, masterTags);
 
   const displayMasterTags = useMemo(() => {
@@ -73,6 +77,7 @@ export function useTagManager(
     isLoading,
     setIsLoading,
     displayMasterTags,
+    isLoadingTags,
     tagStates,
     pendingChanges,
     setPendingChanges,

@@ -12,7 +12,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 
 interface TagManagerSheetProps {
@@ -38,6 +38,7 @@ interface TagInputProps {
 
 interface TagListProps {
   isEditing: boolean;
+  isLoading?: boolean;
   displayTags: Tag[];
   pendingChanges: Record<string, TagOperator>; // key: tagId
   tagStates: Record<string, TagState>; // key: tagId
@@ -71,13 +72,6 @@ export function TagManagerSheet({
 
   const router = useRouter();
   const tm = useTagManager(targetNodes, mode);
-
-  // シングルモードの自動選択
-  useEffect(() => {
-    if (mode === "single" && allNodes.length === 1) {
-      selectPaths([allNodes[0].path]);
-    }
-  }, [allNodes, mode, selectPaths]);
 
   // 保存処理
   const handleApply = async () => {
@@ -223,6 +217,7 @@ export function TagManagerSheet({
                       />
                       <TagList
                         isEditing={false}
+                        isLoading={tm.isLoadingTags}
                         displayTags={tm.displayMasterTags}
                         pendingChanges={tm.pendingChanges}
                         tagStates={tm.tagStates}
@@ -254,6 +249,7 @@ export function TagManagerSheet({
                       />
                       <TagList
                         isEditing={true}
+                        isLoading={tm.isLoadingTags}
                         displayTags={tm.displayMasterTags}
                         pendingChanges={tm.pendingChanges}
                         tagStates={tm.tagStates}
@@ -375,29 +371,54 @@ function TagList({
   onToggle,
   masterTags,
 }: TagListProps) {
+  // --- 閲覧モード ---
   if (!isEditing) {
     const viewTags = masterTags.filter((tag) => tagStates[tag.name] === "all");
     return (
       <div className="flex flex-wrap gap-2 py-2">
-        {viewTags.length > 0 ? (
-          viewTags.map((tag) => (
-            <Badge
-              key={tag.id}
-              variant="secondary"
-              className="py-2 px-4 rounded-lg text-xs"
+        <AnimatePresence>
+          {viewTags.length > 0 ? (
+            viewTags.map((tag, index) => (
+              <motion.div
+                key={tag.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{
+                  opacity: 0,
+                  scale: 0.9,
+                  transition: { duration: 0.15 },
+                }} // 消える時のアニメーション
+                transition={{
+                  duration: 0.2,
+                  delay: index * 0.03,
+                }}
+                layout // これを入れると、タグが消えた後に隣のタグがスルスルと詰まる
+              >
+                <Badge
+                  variant="secondary"
+                  className="py-2 px-4 rounded-lg text-xs"
+                >
+                  {tag.name}
+                </Badge>
+              </motion.div>
+            ))
+          ) : (
+            <motion.p
+              key="empty-message" // AnimatePresence内で識別するためにkeyが必要
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-sm text-muted-foreground py-4 w-full text-center italic"
             >
-              {tag.name}
-            </Badge>
-          ))
-        ) : (
-          <p className="text-sm text-muted-foreground py-4 w-full text-center italic">
-            タグがありません
-          </p>
-        )}
+              タグがありません
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
 
+  // --- 編集モード ---
   return (
     <div className="flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto py-1">
       {displayTags.map((tag) => {
