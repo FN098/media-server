@@ -12,11 +12,16 @@ const RequestSchema = z.object({
 
 async function getTags(paths: string[]): Promise<Tag[]> {
   // 1. 関連タグの取得
-  const relatedTags = await getRelatedTags(paths, MAX_RETURN_TAGS_COUNT);
+  const relatedTags = await getRelatedTags(paths, {
+    limit: MAX_RETURN_TAGS_COUNT,
+  });
 
   // 2. その他（人気）タグの取得
   const excludeIds = relatedTags.map((t) => t.id);
-  const popularTags = await getPopularTags(excludeIds, MAX_RETURN_TAGS_COUNT);
+  const popularTags = await getPopularTags({
+    excludeIds,
+    limit: MAX_RETURN_TAGS_COUNT,
+  });
 
   // 3. マージ
   const result = [...relatedTags, ...popularTags];
