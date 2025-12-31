@@ -253,9 +253,9 @@ export function TagManagerSheet({
                     /* --- 閲覧ビュー --- */
                     <motion.div
                       key="view-mode"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
                       className="space-y-4"
                     >
                       <SheetHeader
@@ -280,9 +280,9 @@ export function TagManagerSheet({
                     /* --- 編集ビュー --- */
                     <motion.div
                       key="edit-mode"
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10 }}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
                       className="space-y-4"
                     >
                       <SheetHeader
