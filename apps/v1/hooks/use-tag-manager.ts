@@ -10,15 +10,16 @@ import { useCallback, useMemo, useState } from "react";
 export function useTagManager(
   allNodes: MediaNode[],
   selectedPaths: Set<string>,
-  mode: TagEditMode
+  initialMode: TagEditMode
 ) {
+  const [mode, setMode] = useState(initialMode);
   const [newTagName, setNewTagName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [createdTags, setCreatedTags] = useState<Tag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<
     Record<string, TagOperator>
   >({});
-  const [isEditing, setIsEditing] = useState(mode !== "single");
+  const [isEditing, setIsEditing] = useState(false);
 
   const selectedNodes = useMemo(
     () => allNodes.filter((n) => selectedPaths.has(n.path)),
@@ -58,6 +59,8 @@ export function useTagManager(
   }, []);
 
   return {
+    mode,
+    setMode,
     newTagName,
     setNewTagName,
     isLoading,

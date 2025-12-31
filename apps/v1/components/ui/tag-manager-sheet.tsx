@@ -17,6 +17,7 @@ import { toast } from "sonner";
 interface TagManagerSheetProps {
   allNodes: MediaNode[];
   mode?: TagEditMode;
+  onClose?: () => void;
 }
 
 interface SheetHeaderProps {
@@ -53,6 +54,7 @@ interface SheetFooterProps {
 export function TagManagerSheet({
   allNodes,
   mode = "default",
+  onClose,
 }: TagManagerSheetProps) {
   const {
     selectedValues: selectedPaths,
@@ -119,6 +121,17 @@ export function TagManagerSheet({
     }
   };
 
+  const handleClose = () => {
+    if (tm.isEditing) {
+      tm.setIsEditing(false);
+      return;
+    }
+
+    tm.setMode("none");
+    clearSelection();
+    onClose?.();
+  };
+
   return (
     <AnimatePresence>
       {isSelectionMode && mode !== "none" && (
@@ -151,11 +164,7 @@ export function TagManagerSheet({
                   isEditing={tm.isEditing}
                   count={selectedPaths.size}
                   onEditClick={() => tm.setIsEditing(true)}
-                  onClose={() =>
-                    mode === "single"
-                      ? tm.setIsEditing(false)
-                      : clearSelection()
-                  }
+                  onClose={handleClose}
                 />
 
                 {/* 入力セクション */}
@@ -203,6 +212,27 @@ function SheetHeader({
   onEditClick,
   onClose,
 }: SheetHeaderProps) {
+  const textMap = {
+    single: {
+      "edit-title": "タグを編集",
+      "view-title": "タグ",
+      selection: "",
+    },
+    default: {
+      "edit-title": "一括タグ編集",
+      "view-title": "タグ",
+      selection: `${count}件を選択中`,
+    },
+    none: {
+      "edit-title": "",
+      "view-title": "",
+      selection: "",
+    },
+  } as const;
+
+  const title = textMap[mode][isEditing ? "edit-title" : "view-title"];
+  const selection = textMap[mode]["selection"];
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -210,17 +240,12 @@ function SheetHeader({
           <TagIcon size={18} className="text-primary" />
         </div>
         <div>
-          <h3 className="text-sm font-bold">
-            {mode === "single"
-              ? isEditing
-                ? "タグを編集"
-                : "タグ"
-              : "一括タグ管理"}
-          </h3>
-          <p className="text-[10px] text-muted-foreground">{count}件を選択中</p>
+          <h3 className="text-sm font-bold">{title}</h3>
+          <p className="text-[10px] text-muted-foreground">{selection}</p>
         </div>
       </div>
-      {!isEditing && mode === "single" ? (
+
+      {!isEditing && (
         <Button
           size="sm"
           variant="outline"
@@ -229,16 +254,16 @@ function SheetHeader({
         >
           <Edit2 size={14} /> 編集
         </Button>
-      ) : (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-10 w-10 p-0 rounded-full"
-          onClick={onClose}
-        >
-          <X size={20} />
-        </Button>
       )}
+
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-10 w-10 p-0 rounded-full"
+        onClick={onClose}
+      >
+        <X size={20} />
+      </Button>
     </div>
   );
 }

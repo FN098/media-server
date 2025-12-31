@@ -87,7 +87,7 @@ export function MediaViewer({
   };
   const favoriteCtx = useFavorite();
   const [index, setIndex] = useState(initialIndex);
-  const [isTagEditing, setIsTagEditing] = useState(false);
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {
@@ -108,6 +108,8 @@ export function MediaViewer({
   const router = useRouter();
 
   const { openFolder } = mergedFeatures;
+
+  const toggleTagManagerOpen = () => setIsTagManagerOpen((prev) => !prev);
 
   // スクロールロック
   useEffect(() => {
@@ -159,7 +161,7 @@ export function MediaViewer({
     { key: "s", callback: () => void handleToggleFavorite() },
     { key: "d", callback: () => swiperInstance?.slideNext() },
     { key: "f", callback: toggleFullscreen },
-    { key: "t", callback: () => setIsTagEditing((prev) => !prev) },
+    { key: "t", callback: toggleTagManagerOpen },
     { key: "q", callback: () => onPrevFolder?.() },
     { key: "e", callback: () => onNextFolder?.() },
     { key: "o", callback: handleOpenFolder },
@@ -300,9 +302,7 @@ export function MediaViewer({
                     )}
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    onClick={() => setIsTagEditing(!isTagEditing)}
-                  >
+                  <DropdownMenuItem onClick={toggleTagManagerOpen}>
                     <TagIcon className="mr-2 h-4 w-4" />
                     <span>タグを表示</span>
                     {!isMobile && (
@@ -363,7 +363,8 @@ export function MediaViewer({
         <QueryProvider>
           <TagManagerSheet
             allNodes={[items[index]]}
-            mode={isTagEditing ? "single" : "none"}
+            mode={isTagManagerOpen ? "single" : "none"}
+            onClose={() => setIsTagManagerOpen(false)}
           />
         </QueryProvider>
       </SelectionProvider>
