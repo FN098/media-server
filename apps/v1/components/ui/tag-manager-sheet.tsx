@@ -160,7 +160,10 @@ export function TagManagerSheet({
   const showMainsheet =
     (mode === "default" && tm.isEditing) || mode === "single";
 
-  useShortcutKeys([{ key: "Escape", callback: handleClose }]);
+  useShortcutKeys([
+    { key: "Escape", callback: handleClose },
+    { key: "e", callback: () => tm.setIsEditing((prev) => !prev) },
+  ]);
 
   return (
     <>
