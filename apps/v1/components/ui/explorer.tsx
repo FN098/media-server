@@ -53,8 +53,6 @@ export function Explorer() {
         )
       : 0;
 
-  console.log({ index, mediaIndex });
-
   // フォルダ/ファイルオープン
   const handleOpen = useCallback(
     (nodes: MediaNode[], index: number) => {
