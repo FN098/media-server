@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma"; // Prismaクライアントのパス
+import { normalizeTagName } from "@/lib/tag/normalize";
 import { TagOperation } from "@/lib/tag/types";
 
 export async function updateMediaTagsAction(payload: {
@@ -80,14 +81,16 @@ export async function updateMediaTagsAction(payload: {
 
 export async function createTagAction(name: string) {
   try {
-    const trimmedName = name.trim();
-    if (!trimmedName) return { success: false, error: "タグ名が空です" };
+    const normalizedName = normalizeTagName(name);
+    if (!normalizedName) {
+      return { success: false, error: "タグ名が空です" };
+    }
 
     // 同じ名前のタグが既にあるか確認、なければ作成
     const tag = await prisma.tag.upsert({
-      where: { name: trimmedName },
+      where: { name: normalizedName },
       update: {}, // 存在すれば何もしない
-      create: { name: trimmedName },
+      create: { name: normalizedName },
     });
     return { success: true, tag };
   } catch (error) {
