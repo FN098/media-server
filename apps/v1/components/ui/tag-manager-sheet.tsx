@@ -268,26 +268,25 @@ function SheetHeader({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <div className="bg-primary/10 p-2 rounded-full">
           <TagIcon size={18} className="text-primary" />
         </div>
         <div>
-          <h3 className="text-sm font-bold">{title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold">{title}</h3>
+            {!isEditing && (
+              <button
+                onClick={onEditClick}
+                className="text-primary hover:bg-primary/5 p-1 rounded-md transition-colors"
+              >
+                <Edit2 size={14} />
+              </button>
+            )}
+          </div>
           <p className="text-[10px] text-muted-foreground">{selection}</p>
         </div>
       </div>
-
-      {!isEditing && (
-        <Button
-          size="sm"
-          variant="outline"
-          className="rounded-full gap-1"
-          onClick={onEditClick}
-        >
-          <Edit2 size={14} /> 編集
-        </Button>
-      )}
 
       <Button
         size="sm"
