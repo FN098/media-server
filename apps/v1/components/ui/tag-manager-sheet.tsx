@@ -18,7 +18,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 interface TagManagerSheetProps {
@@ -42,7 +42,6 @@ interface TagInputProps {
   disabled: boolean;
   suggestions: Tag[];
   onSelectSuggestion: (tag: Tag) => void;
-  focus?: boolean;
 }
 
 interface TagListProps {
@@ -82,7 +81,6 @@ export function TagManagerSheet({
 
   const router = useRouter();
   const tm = useTagManager(targetNodes, mode);
-  const [focusInputTag, setFocusInputTag] = useState(false);
 
   console.log(tm.pendingNewTags);
 
@@ -192,7 +190,6 @@ export function TagManagerSheet({
   useShortcutKeys([
     { key: "Escape", callback: handleClose },
     { key: "e", callback: () => tm.setIsEditing((prev) => !prev) },
-    { key: "i", callback: () => setFocusInputTag((prev) => !prev) },
   ]);
 
   return (
@@ -300,7 +297,6 @@ export function TagManagerSheet({
                         disabled={tm.isLoading}
                         suggestions={tm.suggestedTags}
                         onSelectSuggestion={tm.selectSuggestion}
-                        focus={focusInputTag}
                       />
                       <TagList
                         isEditing={true}
@@ -399,15 +395,10 @@ function TagInput({
   disabled,
   suggestions,
   onSelectSuggestion,
-  focus,
 }: TagInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (focus) {
-      inputRef.current?.focus();
-    }
-  }, [focus]);
+  useShortcutKeys([{ key: "i", callback: () => inputRef.current?.focus() }]);
 
   return (
     <div className="relative">
