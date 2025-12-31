@@ -21,7 +21,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
-import { toast } from "sonner";
 
 interface TagManagerSheetProps {
   allNodes: MediaNode[];
@@ -129,7 +128,7 @@ export function TagManagerSheet({
       });
 
       if (result.success) {
-        toast.success("保存しました");
+        // toast.success("保存しました");
 
         tm.resetChanges();
         if (mode !== "single") clearSelection();
