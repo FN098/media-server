@@ -3,6 +3,7 @@ import { useTagSelection } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import { TagOperator } from "@/lib/tag/types";
+import { isMatchJapanese } from "@/lib/utils/search";
 import { uniqueBy } from "@/lib/utils/unique";
 import { TagEditMode } from "@/lib/view/types";
 import { useCallback, useMemo, useState } from "react";
@@ -54,7 +55,8 @@ export function useTagManager(
     if (!query) return [];
 
     return masterTags.filter((tag) => {
-      const isMatch = tag.name.toLowerCase().includes(query);
+      const isMatch = isMatchJapanese(tag.name, query);
+
       // すでに選択済み（pendingChanges にある）や、
       // すでに全てのターゲットに適用済みのタグは除外
       const isAlreadyApplied = tagStates[tag.name] === "all";
