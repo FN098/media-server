@@ -44,6 +44,20 @@ export function Explorer() {
     [filtered]
   );
 
+  // 表示中の一覧（filtered）から選択されたノードのインデックス（baseIndex）を
+  // ビューア用のインデックス（modifiedIndex）に変換
+  const mediaOnlyMap = useMemo(() => {
+    return new Map(mediaOnly.map((e, index) => [e.path, index]));
+  }, [mediaOnly]);
+
+  const pathToIndex = useCallback(
+    (path: string) => mediaOnlyMap.get(path) ?? 0,
+    [mediaOnlyMap]
+  );
+
+  const baseIndex = Math.max(0, Math.min(index ?? 0, filtered.length - 1));
+  const modifiedIndex = pathToIndex(filtered[baseIndex].path);
+
   // フォルダ/ファイルオープン
   const handleOpen = useCallback(
     (nodes: MediaNode[], index: number) => {
@@ -127,15 +141,15 @@ export function Explorer() {
 
           {/* タグエディター */}
           <QueryProvider>
-            <TagManagerSheet allNodes={filtered} />
+            <TagManagerSheet allNodes={mediaOnly} />
           </QueryProvider>
         </SelectionProvider>
 
         {/* ビューワ */}
         {modal && index != null && (
           <MediaViewer
-            items={filtered}
-            initialIndex={index}
+            items={mediaOnly}
+            initialIndex={modifiedIndex}
             onClose={closeMedia}
             features={{
               openFolder: false,
