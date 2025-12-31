@@ -1,5 +1,4 @@
-import { Media } from "@/generated/prisma";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaFsNode, PrismaMedia } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 
 export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
@@ -25,7 +24,7 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
   const dbMap = new Map(dbMedia.map((m) => [m.path, m]));
 
   // --- 差分計算 ---
-  const toInsert: Omit<Media, "id" | "createdAt" | "updatedAt">[] = [];
+  const toInsert: Omit<PrismaMedia, "id" | "createdAt" | "updatedAt">[] = [];
   for (const [path, meta] of fsMap) {
     if (!dbMap.has(path)) {
       toInsert.push({
@@ -38,8 +37,10 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
     }
   }
 
-  const toUpdate: Omit<Media, "id" | "dirPath" | "createdAt" | "updatedAt">[] =
-    [];
+  const toUpdate: Omit<
+    PrismaMedia,
+    "id" | "dirPath" | "createdAt" | "updatedAt"
+  >[] = [];
   for (const [path, meta] of fsMap) {
     const dbMeta = dbMap.get(path);
     if (dbMeta && dbMeta.fileMtime.getTime() !== meta.fileMtime.getTime()) {

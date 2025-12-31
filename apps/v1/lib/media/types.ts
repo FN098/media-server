@@ -1,3 +1,5 @@
+export type { Media as PrismaMedia } from "@/generated/prisma";
+
 export type MediaFsNodeType =
   | "directory"
   | "image"

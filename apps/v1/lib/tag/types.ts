@@ -1,4 +1,12 @@
-import type { Tag } from "@/generated/prisma";
+export type {
+  MediaTag as PrismaMediaTag,
+  Tag as PrismaTag,
+} from "@/generated/prisma";
+
+export type Tag = {
+  id: string;
+  name: string;
+};
 
 export type TagOperator = "add" | "remove";
 
@@ -25,5 +33,3 @@ export type CreateTagsResult =
       success: false;
       error: string;
     };
-
-export type { Tag };

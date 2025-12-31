@@ -1,10 +1,11 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { SelectionBar } from "@/components/ui/selection-bar";
-import type { Tag } from "@/generated/prisma";
+import { Record } from "@/generated/prisma/runtime/library";
 import { useTagManager } from "@/hooks/use-tag-manager";
 import { MediaNode } from "@/lib/media/types";
 import {
   PendingNewTag,
+  Tag,
   TagEditMode,
   TagOperation,
   TagOperator,

@@ -1,4 +1,4 @@
-import { Tag } from "@/generated/prisma";
+import { Tag } from "@/lib/tag/types";
 import { getPopularTags, getRelatedTags } from "@/repositories/tag-repository";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";

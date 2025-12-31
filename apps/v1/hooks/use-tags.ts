@@ -1,4 +1,4 @@
-import { Tag } from "@/generated/prisma";
+import { Tag } from "@/lib/tag/types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 export function useTags(paths?: string[]) {

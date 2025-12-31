@@ -1,8 +1,7 @@
-import { Tag } from "@/generated/prisma";
 import { useTagSelection } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
-import { PendingNewTag, TagEditMode, TagOperator } from "@/lib/tag/types";
+import { PendingNewTag, Tag, TagEditMode, TagOperator } from "@/lib/tag/types";
 import { isMatchJapanese } from "@/lib/utils/search";
 import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
