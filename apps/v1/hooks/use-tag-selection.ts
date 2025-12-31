@@ -1,9 +1,8 @@
-import { Tag } from "@/generated/prisma";
+import type { Tag } from "@/generated/prisma";
 import { MediaNode } from "@/lib/media/types";
 import { uniqueBy } from "@/lib/utils/unique";
+import { TagState } from "@/lib/view/types";
 import { useMemo } from "react";
-
-export type TagState = "all" | "some" | "none";
 
 export function useTagSelection(selectedNodes: MediaNode[], allTags: Tag[]) {
   return useMemo(() => {
