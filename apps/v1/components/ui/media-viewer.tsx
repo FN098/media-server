@@ -5,7 +5,7 @@ import { AudioPlayer } from "@/components/ui/audio-player";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
-import { TagEditorBar } from "@/components/ui/tag-editor-bar";
+import { TagManagerSheet } from "@/components/ui/tag-manager-sheet";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useFullscreen } from "@/hooks/use-fullscreen";
@@ -361,7 +361,7 @@ export function MediaViewer({
       {/* タグエディター */}
       <SelectionProvider>
         <QueryProvider>
-          <TagEditorBar
+          <TagManagerSheet
             allNodes={[items[index]]}
             mode={isTagEditing ? "single" : "none"}
           />
