@@ -48,6 +48,22 @@ export function useTagManager(
 
   const hasChanges = Object.keys(pendingChanges).length > 0;
 
+  // タグ入力時サジェスト
+  const suggestedTags = useMemo(() => {
+    const query = newTagName.trim().toLowerCase();
+    if (!query) return [];
+
+    return masterTags.filter((tag) => {
+      const isMatch = tag.name.toLowerCase().includes(query);
+      // すでに選択済み（pendingChanges にある）や、
+      // すでに全てのターゲットに適用済みのタグは除外
+      const isAlreadyApplied = tagStates[tag.name] === "all";
+      const isPending = !!pendingChanges[tag.id];
+
+      return isMatch && !isAlreadyApplied && !isPending;
+    });
+  }, [newTagName, masterTags, tagStates, pendingChanges]);
+
   const toggleTag = useCallback(
     (tag: Tag) => {
       const dbState = tagStates[tag.name] || "none";
@@ -80,6 +96,14 @@ export function useTagManager(
     setCreatedTags((prev) => [...prev, tag]);
   }, []);
 
+  const selectSuggestion = useCallback(
+    (tag: Tag) => {
+      setTagChange(tag, "add");
+      setNewTagName("");
+    },
+    [setTagChange]
+  );
+
   return {
     targetPaths,
     masterTags,
@@ -103,5 +127,7 @@ export function useTagManager(
     resetChanges,
     refreshTags,
     addCreatedTag,
+    suggestedTags,
+    selectSuggestion,
   };
 }

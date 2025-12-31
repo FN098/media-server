@@ -35,6 +35,8 @@ interface TagInputProps {
   onChange: (val: string) => void;
   onAdd: () => void;
   disabled: boolean;
+  suggestions: Tag[];
+  onSelectSuggestion: (tag: Tag) => void;
 }
 
 interface TagListProps {
@@ -262,6 +264,8 @@ export function TagManagerSheet({
                         onChange={tm.setNewTagName}
                         onAdd={() => void handleAddTag()}
                         disabled={tm.isLoading}
+                        suggestions={tm.suggestedTags}
+                        onSelectSuggestion={tm.selectSuggestion}
                       />
                       <TagList
                         isEditing={true}
@@ -352,29 +356,78 @@ function SheetHeader({
   );
 }
 
-function TagInput({ value, onChange, onAdd, disabled }: TagInputProps) {
+function TagInput({
+  value,
+  onChange,
+  onAdd,
+  disabled,
+  suggestions,
+  onSelectSuggestion,
+}: TagInputProps) {
   return (
     <div className="relative">
-      <input
-        className="w-full bg-muted/50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 ring-primary/20 outline-none"
-        placeholder="新しいタグを入力..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && onAdd()}
-        disabled={disabled}
-      />
-      <Plus
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-        size={18}
-      />
-      {value && (
-        <button
-          onClick={onAdd}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-lg text-xs font-medium"
-        >
-          追加
-        </button>
-      )}
+      <div className="relative">
+        <input
+          className="w-full bg-muted/50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 ring-primary/20 outline-none"
+          placeholder="新しいタグを入力..."
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              // サジェストがある場合は一番上を選択、なければ新規作成
+              if (suggestions.length > 0) {
+                onSelectSuggestion(suggestions[0]);
+              } else {
+                onAdd();
+              }
+            }
+          }}
+          disabled={disabled}
+        />
+        <Plus
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          size={18}
+        />
+        {value && (
+          <button
+            onClick={onAdd}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-lg text-xs font-medium"
+          >
+            新規作成
+          </button>
+        )}
+      </div>
+
+      {/* --- サジェストリストの表示 --- */}
+      <AnimatePresence>
+        {suggestions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-[80] left-0 right-0 mt-1 bg-popover border rounded-xl shadow-xl overflow-hidden"
+          >
+            <div className="max-h-[200px] overflow-y-auto p-1">
+              <p className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                既存のタグから選択
+              </p>
+              {suggestions.map((tag) => (
+                <button
+                  key={tag.id}
+                  onClick={() => onSelectSuggestion(tag)}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors flex items-center justify-between group"
+                >
+                  <span>{tag.name}</span>
+                  <Check
+                    size={14}
+                    className="opacity-0 group-hover:opacity-100 text-primary"
+                  />
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
