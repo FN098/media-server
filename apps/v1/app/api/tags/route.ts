@@ -1,33 +1,11 @@
-import { Tag } from "@/lib/tag/types";
-import { getPopularTags, getRelatedTags } from "@/repositories/tag-repository";
+import { MAX_PATHS_TO_PROCESS, MAX_RETURN_TAGS_COUNT } from "@/lib/tag/limits";
+import { searchTags } from "@/lib/tag/search";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
-
-const MAX_RETURN_TAGS_COUNT = 100;
-const MAX_PATHS_TO_PROCESS = 500;
 
 const RequestSchema = z.object({
   paths: z.array(z.string()).optional().default([]),
 });
-
-async function getTags(paths: string[]): Promise<Tag[]> {
-  // 1. 関連タグの取得
-  const relatedTags = await getRelatedTags(paths, {
-    limit: MAX_RETURN_TAGS_COUNT,
-  });
-
-  // 2. その他（人気）タグの取得
-  const excludeIds = relatedTags.map((t) => t.id);
-  const popularTags = await getPopularTags({
-    excludeIds,
-    limit: MAX_RETURN_TAGS_COUNT,
-  });
-
-  // 3. マージ
-  const result = [...relatedTags, ...popularTags];
-
-  return result;
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
     const paths = parsed.data.paths.slice(0, MAX_PATHS_TO_PROCESS);
-    const result = await getTags(paths);
+    const result = await searchTags(paths, { limit: MAX_RETURN_TAGS_COUNT });
 
     return NextResponse.json(result);
   } catch (error) {
@@ -52,6 +30,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// paths が多い場合、GET だとエラーになる可能性があるので POST も用意しておく
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as unknown;
@@ -63,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
     const paths = parsed.data.paths.slice(0, MAX_PATHS_TO_PROCESS);
-    const result = await getTags(paths);
+    const result = await searchTags(paths, { limit: MAX_RETURN_TAGS_COUNT });
 
     return NextResponse.json(result);
   } catch (error) {
