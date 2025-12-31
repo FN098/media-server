@@ -8,8 +8,7 @@ import { TagEditMode } from "@/lib/view/types";
 import { useCallback, useMemo, useState } from "react";
 
 export function useTagManager(
-  allNodes: MediaNode[],
-  selectedPaths: Set<string>,
+  targetNodes: MediaNode[],
   initialMode: TagEditMode
 ) {
   const [mode, setMode] = useState(initialMode);
@@ -21,13 +20,13 @@ export function useTagManager(
   >({});
   const [isEditing, setIsEditing] = useState(false);
 
-  const selectedNodes = useMemo(
-    () => allNodes.filter((n) => selectedPaths.has(n.path)),
-    [allNodes, selectedPaths]
+  // targetNodesからパスを抽出（APIコールや状態計算に利用）
+  const targetPaths = useMemo(
+    () => targetNodes.map((n) => n.path),
+    [targetNodes]
   );
-
-  const { tags: masterTags, refreshTags } = useTags(Array.from(selectedPaths));
-  const { tagStates } = useTagSelection(selectedNodes, masterTags);
+  const { tags: masterTags, refreshTags } = useTags(targetPaths);
+  const { tagStates } = useTagSelection(targetNodes, masterTags);
 
   const displayMasterTags = useMemo(() => {
     return uniqueBy([...masterTags, ...createdTags], "id").sort((a, b) =>
@@ -45,6 +44,7 @@ export function useTagManager(
         if (prev[tag.id]) {
           delete next[tag.id];
         } else {
+          // 「既に全員が持っている」なら「削除候補」、「それ以外」なら「追加候補」
           next[tag.id] = dbState === "all" ? "remove" : "add";
         }
         return next;
@@ -65,6 +65,7 @@ export function useTagManager(
   }, []);
 
   return {
+    targetPaths,
     mode,
     setMode,
     newTagName,

@@ -12,7 +12,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 interface TagManagerSheetProps {
@@ -64,8 +64,13 @@ export function TagManagerSheet({
     isSelectionMode,
   } = useSelection();
 
+  const targetNodes = useMemo(() => {
+    if (mode === "single" && allNodes.length === 1) return allNodes;
+    return allNodes.filter((n) => selectedPaths.has(n.path));
+  }, [allNodes, selectedPaths, mode]);
+
   const router = useRouter();
-  const tm = useTagManager(allNodes, selectedPaths, mode);
+  const tm = useTagManager(targetNodes, mode);
 
   // シングルモードの自動選択
   useEffect(() => {
