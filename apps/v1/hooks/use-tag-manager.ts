@@ -2,10 +2,9 @@ import { Tag } from "@/generated/prisma";
 import { useTagSelection } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
-import { TagOperator } from "@/lib/tag/types";
+import { PendingNewTag, TagEditMode, TagOperator } from "@/lib/tag/types";
 import { isMatchJapanese } from "@/lib/utils/search";
 import { uniqueBy } from "@/lib/utils/unique";
-import { TagEditMode } from "@/lib/view/types";
 import { useCallback, useMemo, useState } from "react";
 
 export function useTagManager(
@@ -15,7 +14,7 @@ export function useTagManager(
   const [mode, setMode] = useState(initialMode);
   const [newTagName, setNewTagName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [createdTags, setCreatedTags] = useState<Tag[]>([]);
+  const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<
     Record<string, TagOperator>
   >({});
@@ -37,17 +36,23 @@ export function useTagManager(
 
   // 編集用
   const editModeTags = useMemo(() => {
-    return uniqueBy([...masterTags, ...createdTags], "id").sort((a, b) =>
+    const pendingAsTags: Tag[] = pendingNewTags.map((t) => ({
+      id: t.tempId, // 仮ID
+      name: t.name,
+    }));
+
+    return uniqueBy([...masterTags, ...pendingAsTags], "id").sort((a, b) =>
       a.name.localeCompare(b.name)
     );
-  }, [masterTags, createdTags]);
+  }, [masterTags, pendingNewTags]);
 
   // 閲覧用
   const viewModeTags = masterTags.filter(
     (tag) => tagStates[tag.name] === "all"
   );
 
-  const hasChanges = Object.keys(pendingChanges).length > 0;
+  const hasChanges =
+    Object.keys(pendingChanges).length > 0 || pendingNewTags.length > 0;
 
   // タグ入力時サジェスト
   const suggestedTags = useMemo(() => {
@@ -56,15 +61,13 @@ export function useTagManager(
 
     return masterTags.filter((tag) => {
       const isMatch = isMatchJapanese(tag.name, query);
-
-      // すでに選択済み（pendingChanges にある）や、
-      // すでに全てのターゲットに適用済みのタグは除外
       const isAlreadyApplied = tagStates[tag.name] === "all";
       const isPending = !!pendingChanges[tag.id];
+      const isPendingNew = pendingNewTags.some((t) => t.name === tag.name);
 
-      return isMatch && !isAlreadyApplied && !isPending;
+      return isMatch && !isAlreadyApplied && !isPending && !isPendingNew;
     });
-  }, [newTagName, masterTags, tagStates, pendingChanges]);
+  }, [newTagName, masterTags, tagStates, pendingChanges, pendingNewTags]);
 
   const toggleTag = useCallback(
     (tag: Tag) => {
@@ -91,11 +94,14 @@ export function useTagManager(
 
   const resetChanges = useCallback(() => {
     setPendingChanges({});
-    setCreatedTags([]);
+    setPendingNewTags([]);
   }, []);
 
-  const addCreatedTag = useCallback((tag: Tag) => {
-    setCreatedTags((prev) => [...prev, tag]);
+  const addPendingNewTag = useCallback((name: string) => {
+    setPendingNewTags((prev) => {
+      if (prev.some((t) => t.name === name)) return prev;
+      return [...prev, { tempId: crypto.randomUUID(), name }];
+    });
   }, []);
 
   const selectSuggestion = useCallback(
@@ -128,8 +134,10 @@ export function useTagManager(
     setTagChange,
     resetChanges,
     refreshTags,
-    addCreatedTag,
     suggestedTags,
     selectSuggestion,
+    pendingNewTags,
+    setPendingNewTags,
+    addPendingNewTag,
   };
 }

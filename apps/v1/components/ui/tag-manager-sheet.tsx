@@ -1,10 +1,15 @@
-import { createTagAction, updateMediaTagsAction } from "@/actions/tag-actions";
+import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { SelectionBar } from "@/components/ui/selection-bar";
 import type { Tag } from "@/generated/prisma";
 import { useTagManager } from "@/hooks/use-tag-manager";
 import { MediaNode } from "@/lib/media/types";
-import { TagOperation, TagOperator } from "@/lib/tag/types";
-import { TagEditMode, TagState } from "@/lib/view/types";
+import {
+  PendingNewTag,
+  TagEditMode,
+  TagOperation,
+  TagOperator,
+  TagState,
+} from "@/lib/tag/types";
 import { useSelection } from "@/providers/selection-provider";
 import { useShortcutKeys } from "@/providers/shortcut-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
@@ -45,6 +50,7 @@ interface TagListProps {
   isLoading?: boolean;
   tags: Tag[];
   pendingChanges: Record<string, TagOperator>; // key: tagId
+  pendingNewTags: PendingNewTag[];
   tagStates: Record<string, TagState>; // key: tagId
   onToggle: (tag: Tag) => void;
   masterTags: Tag[];
@@ -78,6 +84,8 @@ export function TagManagerSheet({
   const tm = useTagManager(targetNodes, mode);
   const [focusInputTag, setFocusInputTag] = useState(false);
 
+  console.log(tm.pendingNewTags);
+
   // シングルモードの自動選択
   useEffect(() => {
     if (mode === "single" && allNodes.length === 1) {
@@ -89,10 +97,34 @@ export function TagManagerSheet({
   const handleApply = async () => {
     if (tm.isLoading) return;
     tm.setIsLoading(true);
+
     try {
-      const operations: TagOperation[] = Object.entries(tm.pendingChanges).map(
-        ([tagId, operator]) => ({ tagId, operator })
+      // 仮タグを DB 作成
+      const created = await createTagsAction(
+        tm.pendingNewTags.map((t) => t.name)
       );
+
+      if (!created.success) throw new Error(created.error);
+
+      // 新規タグの操作
+      const createdOps: TagOperation[] = created.tags.map((tag) => ({
+        tagId: tag.id,
+        operator: "add",
+      }));
+
+      // 既存タグの操作
+      const existingOps: TagOperation[] = Object.entries(tm.pendingChanges).map(
+        ([tagId, operator]) => ({
+          tagId,
+          operator,
+        })
+      );
+
+      const operations = [...existingOps, ...createdOps];
+
+      if (operations.length === 0) return;
+
+      // 紐づけ実行
       const result = await updateMediaTagsAction({
         mediaPaths: Array.from(selectedPaths),
         operations,
@@ -100,11 +132,14 @@ export function TagManagerSheet({
 
       if (result.success) {
         toast.success("保存しました");
-        tm.setPendingChanges({});
+
+        tm.resetChanges();
         if (mode !== "single") clearSelection();
+
         tm.setIsEditing(mode !== "single");
         await tm.refreshTags();
         router.refresh();
+
         if (mode === "default") handleClose();
       }
     } finally {
@@ -113,7 +148,7 @@ export function TagManagerSheet({
   };
 
   // タグ追加処理
-  const handleAddTag = async () => {
+  const handleAddTag = () => {
     const name = tm.newTagName.trim();
     if (!name) return;
 
@@ -125,18 +160,9 @@ export function TagManagerSheet({
       return;
     }
 
-    // マスタータグ追加
-    tm.setIsLoading(true);
-    try {
-      const result = await createTagAction(name);
-      if (result.success && result.tag) {
-        tm.setPendingChanges((prev) => ({ ...prev, [result.tag.id]: "add" }));
-        tm.setNewTagName("");
-        tm.addCreatedTag(result.tag);
-      }
-    } finally {
-      tm.setIsLoading(false);
-    }
+    // 仮タグとしてメモリに積む
+    tm.addPendingNewTag(name);
+    tm.setNewTagName("");
   };
 
   // 閉じる処理
@@ -245,6 +271,7 @@ export function TagManagerSheet({
                         isLoading={tm.isLoadingTags}
                         tags={tm.viewModeTags}
                         pendingChanges={tm.pendingChanges}
+                        pendingNewTags={tm.pendingNewTags}
                         tagStates={tm.tagStates}
                         onToggle={tm.toggleTag}
                         masterTags={tm.masterTags}
@@ -280,6 +307,7 @@ export function TagManagerSheet({
                         isLoading={tm.isLoadingTags}
                         tags={tm.editModeTags}
                         pendingChanges={tm.pendingChanges}
+                        pendingNewTags={tm.pendingNewTags}
                         tagStates={tm.tagStates}
                         onToggle={tm.toggleTag}
                         masterTags={tm.masterTags}
@@ -466,6 +494,7 @@ function TagList({
   isEditing,
   tags,
   pendingChanges,
+  pendingNewTags,
   tagStates,
   onToggle,
 }: TagListProps) {
@@ -526,6 +555,8 @@ function TagList({
             : op === "remove"
               ? false
               : tagStates[tag.name] === "all";
+        const isPendingNew = pendingNewTags.some((t) => t.tempId === tag.id);
+
         return (
           <button
             key={tag.id}
@@ -536,13 +567,20 @@ function TagList({
                 ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                 : "bg-muted text-muted-foreground",
               op === "add" && "ring-2 ring-yellow-400 ring-offset-2",
-              op === "remove" && "opacity-40 line-through"
+              op === "remove" && "opacity-40 line-through",
+              isPendingNew &&
+                "border-2 border-dashed border-primary/60 bg-primary/10 text-primary"
             )}
           >
             {willBeOn && <Check size={12} />}
             {tag.name}
             {op && (
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-yellow-400 rounded-full border-2 border-background" />
+            )}
+            {isPendingNew && (
+              <span className="absolute -top-1 -right-1 rounded-full bg-primary px-1.5 text-[9px] font-bold text-primary-foreground shadow">
+                NEW
+              </span>
             )}
           </button>
         );

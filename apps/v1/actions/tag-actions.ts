@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma"; // Prismaクライアントのパス
 import { normalizeTagName } from "@/lib/tag/normalize";
-import { TagOperation } from "@/lib/tag/types";
+import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
 
 export async function updateMediaTagsAction(payload: {
   mediaPaths: string[];
@@ -95,6 +95,50 @@ export async function createTagAction(name: string) {
     return { success: true, tag };
   } catch (error) {
     console.error("Create tag error:", error);
+    return { success: false, error: "タグの作成に失敗しました" };
+  }
+}
+
+export async function createTagsAction(
+  names: string[]
+): Promise<CreateTagsResult> {
+  try {
+    // 正規化 & 空除外 & 重複排除
+    const normalizedNames = Array.from(
+      new Set(names.map(normalizeTagName).filter((n): n is string => !!n))
+    );
+
+    if (normalizedNames.length === 0) {
+      return { success: true, tags: [] };
+    }
+
+    // 既存タグ取得
+    const existingTags = await prisma.tag.findMany({
+      where: { name: { in: normalizedNames } },
+    });
+
+    const existingNames = new Set(existingTags.map((t) => t.name));
+
+    // 未存在のみ作成
+    const toCreate = normalizedNames
+      .filter((name) => !existingNames.has(name))
+      .map((name) => ({ name }));
+
+    if (toCreate.length > 0) {
+      await prisma.tag.createMany({
+        data: toCreate,
+        skipDuplicates: true, // 念のため
+      });
+    }
+
+    // 改めて全タグ取得
+    const tags = await prisma.tag.findMany({
+      where: { name: { in: normalizedNames } },
+    });
+
+    return { success: true, tags };
+  } catch (error) {
+    console.error("Create tags error:", error);
     return { success: false, error: "タグの作成に失敗しました" };
   }
 }
