@@ -105,6 +105,7 @@ export function TagManagerSheet({
         tm.setIsEditing(mode !== "single");
         await tm.refreshTags();
         router.refresh();
+        if (mode === "default") handleClose();
       }
     } finally {
       tm.setIsLoading(false);
