@@ -24,12 +24,17 @@ export const audioExtensions = [
   ".ogg",
 ] as const;
 
-// 拡張子をまとめて型として定義
 export const mediaExtensions = {
   image: imageExtensions,
   video: videoExtensions,
   audio: audioExtensions,
 } as const;
+
+export const allMediaExtensions = [
+  ...imageExtensions,
+  ...videoExtensions,
+  ...audioExtensions,
+] as const;
 
 export type MediaType = keyof typeof mediaExtensions;
 
