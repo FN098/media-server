@@ -32,6 +32,8 @@ import {
   Loader2,
   Maximize,
   MoreVertical,
+  Pin,
+  PinOff,
   TagIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -83,13 +85,14 @@ export function MediaViewer({
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isHeaderPinned, setIsHeaderPinned] = useState(false);
   const {
     isVisible: isHeaderVisible,
     toggle: toggleHeaderVisibility,
     interact: interactHeader,
   } = useAutoHidingUI({
     duration: 2000,
-    disabled: isHovered || isMenuOpen,
+    disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
@@ -156,6 +159,7 @@ export function MediaViewer({
     { key: "q", callback: () => onPrevFolder?.() },
     { key: "e", callback: () => onNextFolder?.() },
     { key: "o", callback: handleOpenFolder },
+    { key: "h", callback: () => setIsHeaderPinned((prev) => !prev) },
   ]);
 
   const hasPrev = !!onPrevFolder;
@@ -263,6 +267,22 @@ export function MediaViewer({
                   align="end"
                   className="flex flex-col w-48 gap-2"
                 >
+                  <DropdownMenuItem
+                    onClick={() => setIsHeaderPinned((prev) => !prev)}
+                  >
+                    {isHeaderPinned ? (
+                      <PinOff className="mr-2 h-4 w-4" />
+                    ) : (
+                      <Pin className="mr-2 h-4 w-4" />
+                    )}
+                    {isHeaderPinned ? "ヘッダー固定解除" : "ヘッダーを固定"}
+                    {!isMobile && (
+                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                        <kbd className="rounded border px-1.5 py-0.5">H</kbd>
+                      </div>
+                    )}
+                  </DropdownMenuItem>
+
                   {openFolder && (
                     <DropdownMenuItem asChild>
                       <Link
