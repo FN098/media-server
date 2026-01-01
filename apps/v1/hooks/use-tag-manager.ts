@@ -5,6 +5,7 @@ import { PendingNewTag, Tag, TagEditMode, TagOperator } from "@/lib/tag/types";
 import { isMatchJapanese } from "@/lib/utils/search";
 import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
+import { v4 } from "uuid";
 
 export function useTagManager(
   targetNodes: MediaNode[],
@@ -108,7 +109,7 @@ export function useTagManager(
   const addPendingNewTag = useCallback((name: string) => {
     setPendingNewTags((prev) => {
       if (prev.some((t) => t.name === name)) return prev;
-      return [...prev, { tempId: crypto.randomUUID(), name }];
+      return [...prev, { tempId: v4(), name }];
     });
   }, []);
 
