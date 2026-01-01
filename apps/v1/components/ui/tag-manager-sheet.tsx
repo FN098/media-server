@@ -1,5 +1,4 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
-import { SaveConfirmationOverlay } from "@/components/ui/save-animation-overlay";
 import { SelectionBar } from "@/components/ui/selection-bar";
 import { Record } from "@/generated/prisma/runtime/library";
 import { useTagManager } from "@/hooks/use-tag-manager";
@@ -22,6 +21,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export function TagManagerSheet({
   allNodes,
@@ -56,13 +56,6 @@ export function TagManagerSheet({
   // 透明モード
   const [isTransparent, setIsTransparent] = useState(false);
   const toggleTransparent = () => setIsTransparent((prev) => !prev);
-
-  // 完了チェック表示
-  const [showCheck, setShowCheck] = useState(false);
-  const showCheckOnce = (duration: number) => {
-    setShowCheck(true);
-    setTimeout(() => setShowCheck(false), duration);
-  };
 
   // シングルモードの自動選択
   useEffect(() => {
@@ -118,9 +111,8 @@ export function TagManagerSheet({
 
         if (mode === "default") handleClose();
 
-        // toast.success("保存しました");
-
-        showCheckOnce(700);
+        toast.success("保存しました");
+        // showCheckOnce(700);
       }
     } finally {
       tm.setIsLoading(false);
@@ -308,8 +300,6 @@ export function TagManagerSheet({
           </div>
         )}
       </AnimatePresence>
-
-      <SaveConfirmationOverlay trigger={showCheck} />
     </>
   );
 }
