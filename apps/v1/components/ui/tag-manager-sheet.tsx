@@ -1,4 +1,5 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
+import { SaveConfirmationOverlay } from "@/components/ui/save-animation-overlay";
 import { SelectionBar } from "@/components/ui/selection-bar";
 import { Record } from "@/generated/prisma/runtime/library";
 import { useTagManager } from "@/hooks/use-tag-manager";
@@ -46,6 +47,23 @@ export function TagManagerSheet({
   const router = useRouter();
   const tm = useTagManager(targetNodes, mode);
 
+  const showSelectionBar =
+    mode === "default" && !tm.isEditing && isSelectionMode;
+
+  const showMainsheet =
+    (mode === "default" && tm.isEditing) || mode === "single";
+
+  // 透明モード
+  const [isTransparent, setIsTransparent] = useState(false);
+  const toggleTransparent = () => setIsTransparent((prev) => !prev);
+
+  // 完了チェック表示
+  const [showCheck, setShowCheck] = useState(false);
+  const showCheckOnce = (duration: number) => {
+    setShowCheck(true);
+    setTimeout(() => setShowCheck(false), duration);
+  };
+
   // シングルモードの自動選択
   useEffect(() => {
     if (mode === "single" && allNodes.length === 1) {
@@ -91,8 +109,6 @@ export function TagManagerSheet({
       });
 
       if (result.success) {
-        // toast.success("保存しました");
-
         tm.resetChanges();
         if (mode !== "single") clearSelection();
 
@@ -101,6 +117,10 @@ export function TagManagerSheet({
         router.refresh();
 
         if (mode === "default") handleClose();
+
+        // toast.success("保存しました");
+
+        showCheckOnce(700);
       }
     } finally {
       tm.setIsLoading(false);
@@ -143,23 +163,16 @@ export function TagManagerSheet({
     selectPaths(paths);
   };
 
-  const showSelectionBar =
-    mode === "default" && !tm.isEditing && isSelectionMode;
-
-  const showMainsheet =
-    (mode === "default" && tm.isEditing) || mode === "single";
-
   useShortcutKeys([
     { key: "Escape", callback: handleClose },
     { key: "e", callback: () => tm.setIsEditing((prev) => !prev) },
   ]);
 
-  // 透明モード
-  const [isTransparent, setIsTransparent] = useState(false);
-  const toggleTransparent = () => setIsTransparent((prev) => !prev);
-
   return (
     <>
+      {/* チェックアニメーション確認用 */}
+      {/* <Button onClick={() => showCheckOnce(700)}>Show Check</Button> */}
+
       <AnimatePresence>
         {/* --- 1. 選択バー (タグ編集に依存しない独立した部品へ) --- */}
         {showSelectionBar && (
@@ -295,6 +308,8 @@ export function TagManagerSheet({
           </div>
         )}
       </AnimatePresence>
+
+      <SaveConfirmationOverlay trigger={showCheck} />
     </>
   );
 }

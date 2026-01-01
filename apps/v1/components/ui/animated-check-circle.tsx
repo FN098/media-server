@@ -16,7 +16,7 @@ export function AnimatedCheckCircle({ active, size = 16 }: Props) {
       viewBox="0 0 24 24"
       fill="none"
       initial={false}
-      animate={active ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+      animate={{ scale: active ? [1, 1.2, 1] : 1 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
     >
       {/* 円 */}
@@ -27,16 +27,14 @@ export function AnimatedCheckCircle({ active, size = 16 }: Props) {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeDasharray={c}
-        strokeDashoffset={active ? 0 : c}
-        stroke={active ? "#22c55e" : "currentColor"}
-        initial={false}
+        strokeDashoffset={c}
+        stroke="#22c55e"
+        initial={{ strokeDashoffset: c }}
         animate={{
           strokeDashoffset: active ? 0 : c,
-          stroke: active ? "#22c55e" : "currentColor",
         }}
         transition={{
           strokeDashoffset: { duration: 0.35, ease: "easeInOut" },
-          stroke: { duration: 0.15, delay: 0.35 },
         }}
       />
 
@@ -53,7 +51,7 @@ export function AnimatedCheckCircle({ active, size = 16 }: Props) {
           active ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }
         }
         transition={{
-          pathLength: { duration: 0.2, delay: 0.35 },
+          pathLength: { duration: 0.2, delay: 0.35 }, // 円が描き終わった後に開始
           opacity: { duration: 0.01, delay: 0.35 },
         }}
       />
