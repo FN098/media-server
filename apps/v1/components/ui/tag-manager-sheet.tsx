@@ -20,54 +20,17 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
-
-interface TagManagerSheetProps {
-  allNodes: MediaNode[];
-  mode?: TagEditMode;
-  onClose?: () => void;
-}
-
-interface SheetHeaderProps {
-  mode: TagEditMode;
-  isEditing: boolean;
-  count: number;
-  onEditClick: () => void;
-  onClose: () => void;
-}
-
-interface TagInputProps {
-  value: string;
-  onChange: (val: string) => void;
-  onAdd: () => void;
-  disabled: boolean;
-  suggestions: Tag[];
-  onSelectSuggestion: (tag: Tag) => void;
-}
-
-interface TagListProps {
-  isEditing: boolean;
-  isLoading?: boolean;
-  tags: Tag[];
-  pendingChanges: Record<string, TagOperator>; // key: tagId
-  pendingNewTags: PendingNewTag[];
-  tagStates: Record<string, TagState>; // key: tagId
-  onToggle: (tag: Tag) => void;
-  masterTags: Tag[];
-}
-
-interface SheetFooterProps {
-  onReset: () => void;
-  onApply: () => void;
-  hasChanges: boolean;
-  isLoading: boolean;
-}
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function TagManagerSheet({
   allNodes,
   mode = "default",
   onClose,
-}: TagManagerSheetProps) {
+}: {
+  allNodes: MediaNode[];
+  mode?: TagEditMode;
+  onClose?: () => void;
+}) {
   const {
     selectedValues: selectedPaths,
     selectValues: selectPaths,
@@ -191,6 +154,10 @@ export function TagManagerSheet({
     { key: "e", callback: () => tm.setIsEditing((prev) => !prev) },
   ]);
 
+  // 透明モード
+  const [isTransparent, setIsTransparent] = useState(false);
+  const toggleTransparent = () => setIsTransparent((prev) => !prev);
+
   return (
     <>
       <AnimatePresence>
@@ -240,9 +207,12 @@ export function TagManagerSheet({
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full bg-background border-t rounded-t-[24px] shadow-2xl pointer-events-auto pb-safe overflow-hidden"
+              className={cn(
+                "relative w-full bg-background border-t rounded-t-[24px] shadow-2xl pointer-events-auto pb-safe overflow-hidden",
+                isTransparent && "bg-background/20"
+              )}
             >
-              <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-3 mb-2" />
+              <div className="w-12 h-1.5 bg-muted/20 rounded-full mx-auto mt-3 mb-2" />
 
               <div className="px-4 pb-6">
                 <AnimatePresence mode="wait">
@@ -261,16 +231,17 @@ export function TagManagerSheet({
                         count={selectedPaths.size}
                         onEditClick={() => tm.setIsEditing(true)}
                         onClose={handleClose}
+                        isTransparent={isTransparent}
+                        onToggleTransparent={toggleTransparent}
                       />
                       <TagList
                         isEditing={false}
-                        isLoading={tm.isLoadingTags}
                         tags={tm.viewModeTags}
                         pendingChanges={tm.pendingChanges}
                         pendingNewTags={tm.pendingNewTags}
                         tagStates={tm.tagStates}
                         onToggle={tm.toggleTag}
-                        masterTags={tm.masterTags}
+                        isTransparent={isTransparent}
                       />
                     </motion.div>
                   ) : (
@@ -288,6 +259,8 @@ export function TagManagerSheet({
                         count={selectedPaths.size}
                         onEditClick={() => {}}
                         onClose={handleClose}
+                        isTransparent={isTransparent}
+                        onToggleTransparent={toggleTransparent}
                       />
                       <TagInput
                         value={tm.newTagName}
@@ -296,22 +269,23 @@ export function TagManagerSheet({
                         disabled={tm.isLoading}
                         suggestions={tm.suggestedTags}
                         onSelectSuggestion={tm.selectSuggestion}
+                        isTransparent={isTransparent}
                       />
                       <TagList
                         isEditing={true}
-                        isLoading={tm.isLoadingTags}
                         tags={tm.editModeTags}
                         pendingChanges={tm.pendingChanges}
                         pendingNewTags={tm.pendingNewTags}
                         tagStates={tm.tagStates}
                         onToggle={tm.toggleTag}
-                        masterTags={tm.masterTags}
+                        isTransparent={isTransparent}
                       />
                       <SheetFooter
                         onReset={tm.resetChanges}
                         onApply={() => void handleApply()}
                         hasChanges={tm.hasChanges}
                         isLoading={tm.isLoading}
+                        isTransparent={isTransparent}
                       />
                     </motion.div>
                   )}
@@ -331,7 +305,17 @@ function SheetHeader({
   count,
   onEditClick,
   onClose,
-}: SheetHeaderProps) {
+  isTransparent,
+  onToggleTransparent,
+}: {
+  mode: TagEditMode;
+  isEditing: boolean;
+  count: number;
+  onEditClick: () => void;
+  onClose: () => void;
+  isTransparent: boolean;
+  onToggleTransparent: () => void;
+}) {
   const textMap = {
     single: {
       "edit-title": "タグを編集",
@@ -356,29 +340,62 @@ function SheetHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="bg-primary/10 p-2 rounded-full">
-          <TagIcon size={18} className="text-primary" />
-        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          className={cn(
+            "h-10 w-10 p-0 rounded-full",
+            isTransparent &&
+              "text-primary-foreground bg-background/20 hover:bg-accent"
+          )}
+          onClick={onToggleTransparent}
+        >
+          <TagIcon />
+        </Button>
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold">{title}</h3>
+            <h3
+              className={cn(
+                "text-sm font-bold",
+                isTransparent && "text-primary-foreground"
+              )}
+            >
+              {title}
+            </h3>
             {!isEditing && (
-              <button
+              <Button
+                size="sm"
+                variant="ghost"
+                className={cn(
+                  "text-primary hover:bg-primary/5 p-1 rounded-md transition-colors ml-2",
+                  isTransparent &&
+                    "text-primary-foreground bg-background/20 hover:bg-accent"
+                )}
                 onClick={onEditClick}
-                className="text-primary hover:bg-primary/5 p-1 rounded-md transition-colors"
               >
                 <Edit2 size={14} />
-              </button>
+              </Button>
             )}
           </div>
-          <p className="text-[10px] text-muted-foreground">{selection}</p>
+          <p
+            className={cn(
+              "text-[10px] text-muted-foreground",
+              isTransparent && "text-primary-foreground"
+            )}
+          >
+            {selection}
+          </p>
         </div>
       </div>
 
       <Button
         size="sm"
         variant="ghost"
-        className="h-10 w-10 p-0 rounded-full"
+        className={cn(
+          "h-10 w-10 p-0 rounded-full",
+          isTransparent &&
+            "text-primary-foreground bg-background/20 hover:bg-accent"
+        )}
         onClick={onClose}
       >
         <X size={20} />
@@ -394,7 +411,16 @@ function TagInput({
   disabled,
   suggestions,
   onSelectSuggestion,
-}: TagInputProps) {
+  isTransparent,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  onAdd: () => void;
+  disabled: boolean;
+  suggestions: Tag[];
+  onSelectSuggestion: (tag: Tag) => void;
+  isTransparent: boolean;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggests = useMemo(
     () => new Map(suggestions.map((s) => [s.name, s])),
@@ -450,6 +476,8 @@ function TagInput({
               "focus-visible:outline-none",
               "focus-visible:ring-2 focus-visible:ring-primary",
               "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+
+              isTransparent && "bg-primary/50",
             ])}
           >
             新規作成
@@ -474,7 +502,7 @@ function TagInput({
                 <button
                   key={tag.id}
                   onClick={() => onSelectSuggestion(tag)}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors flex items-center justify-between group"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-primary-foreground-foreground rounded-lg transition-colors flex items-center justify-between group"
                 >
                   <span>{tag.name}</span>
                   <Check
@@ -498,7 +526,16 @@ function TagList({
   pendingNewTags,
   tagStates,
   onToggle,
-}: TagListProps) {
+  isTransparent,
+}: {
+  isEditing: boolean;
+  tags: Tag[];
+  pendingChanges: Record<string, TagOperator>; // key: tagId
+  pendingNewTags: PendingNewTag[];
+  tagStates: Record<string, TagState>; // key: tagId
+  onToggle: (tag: Tag) => void;
+  isTransparent: boolean;
+}) {
   // --- 閲覧モード ---
   if (!isEditing) {
     return (
@@ -523,7 +560,10 @@ function TagList({
               >
                 <Badge
                   variant="secondary"
-                  className="py-2 px-4 rounded-lg text-xs"
+                  className={cn(
+                    "py-2 px-4 rounded-lg text-xs",
+                    isTransparent && "bg-secondary/50"
+                  )}
                 >
                   {tag.name}
                 </Badge>
@@ -570,7 +610,8 @@ function TagList({
               op === "add" && "ring-2 ring-yellow-400 ring-offset-2",
               op === "remove" && "opacity-40 line-through",
               isPendingNew &&
-                "border-2 border-dashed border-primary/60 bg-primary/10 text-primary"
+                "border-2 border-dashed border-primary/60 bg-primary/10 text-primary",
+              isTransparent && (willBeOn ? "bg-primary/50" : "bg-muted/50")
             )}
           >
             {willBeOn && <Check size={12} />}
@@ -595,19 +636,32 @@ function SheetFooter({
   onApply,
   hasChanges,
   isLoading,
-}: SheetFooterProps) {
+  isTransparent,
+}: {
+  onReset: () => void;
+  onApply: () => void;
+  hasChanges: boolean;
+  isLoading: boolean;
+  isTransparent: boolean;
+}) {
   return (
     <div className="flex gap-3 pt-2">
       <Button
         variant="outline"
-        className="flex-1 h-12 rounded-xl gap-2"
+        className={cn(
+          "flex-1 h-12 rounded-xl gap-2",
+          isTransparent && "bg-secondary/50"
+        )}
         onClick={onReset}
         disabled={!hasChanges || isLoading}
       >
         <RotateCcw size={16} /> リセット
       </Button>
       <Button
-        className="flex-[2] h-12 rounded-xl gap-2 shadow-lg shadow-primary/25"
+        className={cn(
+          "flex-[2] h-12 rounded-xl gap-2 shadow-lg shadow-primary/25",
+          isTransparent && "bg-primary/50"
+        )}
         onClick={onApply}
         disabled={!hasChanges || isLoading}
       >
