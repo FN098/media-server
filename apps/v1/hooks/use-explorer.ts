@@ -1,6 +1,6 @@
 import { useSetExplorerQuery } from "@/hooks/use-explorer-query";
 import { isMedia } from "@/lib/media/media-types";
-import { MediaListing } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { isOutOfBounds } from "@/lib/utils/array";
@@ -8,6 +8,7 @@ import { isMatchJapanese } from "@/lib/utils/search";
 import { useSearchContext } from "@/providers/search-provider";
 import { useSelectionContext } from "@/providers/selection-provider";
 import { useCallback, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 
 export function useExplorer(listing: MediaListing) {
   const { query } = useSearchContext();
@@ -103,6 +104,25 @@ export function useExplorer(listing: MediaListing) {
     [listing.prev, openFolder]
   );
 
+  const openNode = useCallback(
+    (node: MediaNode) => {
+      // フォルダ
+      if (node.isDirectory) {
+        openFolder(node.path);
+        return;
+      }
+
+      // ファイル
+      if (isMedia(node.type)) {
+        openViewer(node.path);
+        return;
+      }
+
+      toast.warning("このファイル形式は対応していません");
+    },
+    [openFolder, openViewer]
+  );
+
   const selectAllMedia = useCallback(() => {
     const paths = mediaOnly.map((n) => n.path);
     selectPaths(paths);
@@ -124,6 +144,7 @@ export function useExplorer(listing: MediaListing) {
     getMediaNode,
     openNextFolder,
     openPrevFolder,
+    openNode,
     selectAllMedia,
     clearSelection,
   };

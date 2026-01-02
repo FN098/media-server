@@ -11,8 +11,6 @@ import {
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { isMedia } from "@/lib/media/media-types";
-import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
@@ -24,8 +22,7 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect } from "react";
-import { toast } from "sonner";
+import { useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export function Explorer() {
@@ -33,9 +30,8 @@ export function Explorer() {
     listing,
     searchFiltered,
     mediaOnly,
-    openViewer,
+    openNode,
     closeViewer,
-    openFolder,
     openNextFolder,
     openPrevFolder,
     selectAllMedia,
@@ -84,26 +80,6 @@ export function Explorer() {
   // クエリパラメータ正規化
   useNormalizeExplorerQuery();
 
-  // ファイルまたはフォルダを開く
-  const handleOpen = useCallback(
-    (node: MediaNode) => {
-      // フォルダ
-      if (node.isDirectory) {
-        openFolder(node.path);
-        return;
-      }
-
-      // ファイル
-      if (isMedia(node.type)) {
-        openViewer(node.path);
-        return;
-      }
-
-      toast.warning("このファイル形式は対応していません");
-    },
-    [openFolder, openViewer]
-  );
-
   // サムネイル作成リクエスト送信
   useEffect(() => {
     void enqueueThumbJob(listing.path);
@@ -133,14 +109,14 @@ export function Explorer() {
       {/* グリッドビュー */}
       {viewMode === "grid" && (
         <div>
-          <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
+          <ExplorerGridView nodes={searchFiltered} onOpen={openNode} />
         </div>
       )}
 
       {/* リストビュー */}
       {viewMode === "list" && (
         <div>
-          <ListView nodes={searchFiltered} onOpen={handleOpen} />
+          <ListView nodes={searchFiltered} onOpen={openNode} />
         </div>
       )}
 
