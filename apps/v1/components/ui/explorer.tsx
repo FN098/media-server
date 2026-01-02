@@ -14,14 +14,16 @@ import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
+import { ExplorerQuery } from "@/lib/query/types";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
+import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect } from "react";
+import { startTransition, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
 export function Explorer() {
@@ -40,26 +42,44 @@ export function Explorer() {
     clearSelection,
   } = useExplorerContext();
 
-  const setQuery = useSetExplorerQuery();
-
-  // 表示モード
+  // クエリパラメータ
+  const setUrlQuery = useSetExplorerQuery();
+  const { view, q } = useExplorerQuery(); // URL
+  const { query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
-  const { view } = useExplorerQuery(); // URL
 
   // 初期同期：URL → Context（1回だけ）
   useEffect(() => {
     if (view !== viewMode) {
       setViewMode(view);
     }
+    if (q !== query) {
+      setQuery(q ?? "");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // UI操作：Context → URL
   useEffect(() => {
+    const patch: Partial<ExplorerQuery> = {};
+
+    // undefined と空文字列の比較にならないように normalize しておく
+    const nq = q ?? "";
+    const nQuery = query ?? "";
+
     if (view !== viewMode) {
-      setQuery({ view: viewMode });
+      patch.view = viewMode;
     }
-  }, [setQuery, view, viewMode]);
+    if (nq !== nQuery) {
+      patch.q = nQuery || undefined;
+    }
+
+    if (Object.keys(patch).length === 0) return;
+
+    startTransition(() => {
+      setUrlQuery(patch);
+    });
+  }, [q, query, setUrlQuery, view, viewMode]);
 
   // ファイルまたはフォルダを開く
   const handleOpen = useCallback(
@@ -106,19 +126,19 @@ export function Explorer() {
     <div
       className={cn(
         "flex-1 overflow-auto",
-        view === "grid" && "p-4",
-        view === "list" && "px-4"
+        viewMode === "grid" && "p-4",
+        viewMode === "list" && "px-4"
       )}
     >
       {/* グリッドビュー */}
-      {view === "grid" && (
+      {viewMode === "grid" && (
         <div>
           <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
 
       {/* リストビュー */}
-      {view === "list" && (
+      {viewMode === "list" && (
         <div>
           <ListView nodes={searchFiltered} onOpen={handleOpen} />
         </div>
