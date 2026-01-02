@@ -1,21 +1,15 @@
-import { useExplorerQuery } from "@/hooks/use-explorer-query";
+import { useSetExplorerQuery } from "@/hooks/use-explorer-query";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing } from "@/lib/media/types";
-import { getClientExplorerPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { isOutOfBounds } from "@/lib/utils/array";
 import { isMatchJapanese } from "@/lib/utils/search";
 import { useSearchContext } from "@/providers/search-provider";
 import { useSelectionContext } from "@/providers/selection-provider";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 export function useExplorer(listing: MediaListing) {
-  useExplorerQuery();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
   const { query } = useSearchContext();
   const {
     selectedKeys: selectedPaths,
@@ -25,18 +19,18 @@ export function useExplorer(listing: MediaListing) {
     setIsSelectionMode,
   } = useSelectionContext();
   const { nodes: allNodes } = listing;
-  const [modal, setModal] = useState(false);
-  const [index, setIndex] = useState<number | null>(null);
+
+  const trimmedQuery = query.trim();
 
   // フィルターノードリスト
   const searchFiltered = useMemo(() => {
-    if (!query.trim()) return allNodes;
-    return allNodes.filter((e) => isMatchJapanese(e.name, query));
-  }, [allNodes, query]);
+    if (!trimmedQuery) return allNodes;
+    return allNodes.filter((n) => isMatchJapanese(n.name, trimmedQuery));
+  }, [allNodes, trimmedQuery]);
 
   // メディアノードリスト
   const mediaOnly = useMemo(
-    () => searchFiltered.filter((e) => isMedia(e.type)),
+    () => searchFiltered.filter((n) => isMedia(n.type)),
     [searchFiltered]
   );
 
@@ -62,7 +56,7 @@ export function useExplorer(listing: MediaListing) {
     [mediaOnly]
   );
 
-  // メディアノードリストのインデックスを計算
+  // メディアノードリストのインデックスを取得
   const getMediaIndex = useCallback(
     (path: string) => {
       if (mediaOnlyMap.has(path)) return mediaOnlyMap.get(path)!;
@@ -71,50 +65,26 @@ export function useExplorer(listing: MediaListing) {
     [mediaOnlyMap]
   );
 
-  const navigate = useCallback(
-    (path?: string | null, replace?: boolean) => {
-      const baseUrl = path ? encodeURI(getClientExplorerPath(path)) : pathname;
-      const params = new URLSearchParams();
-      if (index !== null) params.set("at", String(index));
-      if (modal) params.set("modal", "true");
-      if (query.trim()) params.set("q", query.trim());
-      const url = `${baseUrl}?${params}`;
-      if (replace) {
-        router.replace(url);
-      } else {
-        router.push(url);
-      }
-    },
-    [index, modal, pathname, query, router]
-  );
+  const setExplorerQuery = useSetExplorerQuery();
 
   const openViewer = useCallback(
     (path: string) => {
       const index = getMediaIndex(path);
-      if (index !== null) {
-        setModal(true);
-        setIndex(index);
-        requestAnimationFrame(() => navigate());
-      }
+      if (index == null) return;
+      setExplorerQuery({ modal: true, at: index }, { history: "push" });
     },
-    [getMediaIndex, navigate]
+    [getMediaIndex, setExplorerQuery]
   );
 
   const closeViewer = useCallback(() => {
-    setModal(false);
-    setIndex(null);
-    requestAnimationFrame(() => navigate());
-  }, [navigate]);
+    setExplorerQuery({ modal: false, at: null }, { history: "push" });
+  }, [setExplorerQuery]);
 
   const openFolder = useCallback(
     (path: string, at?: IndexLike) => {
-      const baseUrl = encodeURI(getClientExplorerPath(path));
-      const params = new URLSearchParams(searchParams);
-      if (at !== undefined) params.set("at", String(at));
-      const url = `${baseUrl}?${params}`;
-      router.push(url);
+      setExplorerQuery({ at: at ?? null }, { path, history: "push" });
     },
-    [router, searchParams]
+    [setExplorerQuery]
   );
 
   const openNextFolder = useCallback(
@@ -127,10 +97,10 @@ export function useExplorer(listing: MediaListing) {
 
   const openPrevFolder = useCallback(
     (at: IndexLike) => {
-      if (listing.next == null) return;
-      openFolder(listing.next, at);
+      if (listing.prev == null) return;
+      openFolder(listing.prev, at);
     },
-    [listing.next, openFolder]
+    [listing.prev, openFolder]
   );
 
   const selectAllMedia = useCallback(() => {
@@ -140,22 +110,14 @@ export function useExplorer(listing: MediaListing) {
 
   // 選択モード
   useEffect(() => {
-    if (selectedCount === 0) {
-      setIsSelectionMode(false);
-    } else {
-      setIsSelectionMode(true);
-    }
+    setIsSelectionMode(selectedCount > 0);
   }, [selectedCount, setIsSelectionMode]);
 
   return {
-    selectedPaths,
     listing,
     searchFiltered,
     mediaOnly,
     selected,
-    modal,
-    index,
-    setIndex,
     openViewer,
     closeViewer,
     openFolder,

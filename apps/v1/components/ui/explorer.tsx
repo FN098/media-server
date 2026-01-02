@@ -15,6 +15,7 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
+import { normalizeIndex } from "@/lib/query/utils";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -23,7 +24,7 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { startTransition, useCallback, useEffect } from "react";
+import { startTransition, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 export function Explorer() {
@@ -31,8 +32,6 @@ export function Explorer() {
     listing,
     searchFiltered,
     mediaOnly,
-    modal,
-    index,
     openViewer,
     closeViewer,
     openFolder,
@@ -43,10 +42,13 @@ export function Explorer() {
   } = useExplorerContext();
 
   // クエリパラメータ
-  const setUrlQuery = useSetExplorerQuery();
-  const { view, q } = useExplorerQuery(); // URL
+  const setExplorerQuery = useSetExplorerQuery();
+  const { view, q, at, modal } = useExplorerQuery(); // URL
   const { query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
+  const initialized = useRef(false);
+
+  const index = at != null ? normalizeIndex(at, mediaOnly.length) : null;
 
   // 初期同期：URL → Context（1回だけ）
   useEffect(() => {
@@ -56,6 +58,7 @@ export function Explorer() {
     if (q !== query) {
       setQuery(q ?? "");
     }
+    initialized.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -77,9 +80,12 @@ export function Explorer() {
     if (Object.keys(patch).length === 0) return;
 
     startTransition(() => {
-      setUrlQuery(patch);
+      setExplorerQuery(patch);
     });
-  }, [q, query, setUrlQuery, view, viewMode]);
+  }, [q, query, setExplorerQuery, view, viewMode]);
+
+  // クエリパラメータ正規化
+  useNormalizeExplorerQuery();
 
   // ファイルまたはフォルダを開く
   const handleOpen = useCallback(
@@ -100,9 +106,6 @@ export function Explorer() {
     },
     [openFolder, openViewer]
   );
-
-  // URL パラメータ正規化
-  useNormalizeExplorerQuery();
 
   // サムネイル作成リクエスト送信
   useEffect(() => {
@@ -150,9 +153,6 @@ export function Explorer() {
           <MediaViewer
             items={mediaOnly}
             initialIndex={index}
-            features={{
-              openFolder: false,
-            }}
             onClose={closeViewer}
             onPrevFolder={() => openPrevFolder("last")}
             onNextFolder={() => openNextFolder("first")}

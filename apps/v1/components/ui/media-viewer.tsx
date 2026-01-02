@@ -89,7 +89,7 @@ export function MediaViewer({
   );
   const { setTitle, resetTitle } = useDocumentTitleControl();
   const mounted = useMounted();
-  const openFolder = features?.openFolder ?? true;
+  const openFolder = features?.openFolder ?? false;
   const hasPrev = !!onPrevFolder;
   const hasNext = !!onNextFolder;
   const offsetPrev = hasPrev ? 1 : 0;

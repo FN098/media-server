@@ -1,3 +1,4 @@
+import { getClientExplorerPath } from "@/lib/path/helpers";
 import { normalizeExplorerQuery } from "@/lib/query/normalize";
 import { ExplorerQuerySchema } from "@/lib/query/schemas";
 import { toSearchParams } from "@/lib/query/search-params";
@@ -50,7 +51,12 @@ export function useSetExplorerQuery() {
 
       const normalized = normalizeExplorerQuery(merged);
       const search = toSearchParams(normalized);
-      const url = search ? `${pathname}?${search}` : pathname;
+
+      const basePath = options.path
+        ? encodeURI(getClientExplorerPath(options.path))
+        : pathname;
+
+      const url = search ? `${basePath}?${search}` : basePath;
 
       if (options.history === "push") {
         router.push(url);

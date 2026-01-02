@@ -7,6 +7,7 @@ export type IndexLike = number | "first" | "last";
 
 export type SetExplorerQueryOptions = {
   history?: "replace" | "push";
+  path?: string;
 };
 
 export type ExplorerQuery = z.infer<typeof ExplorerQuerySchema>;
