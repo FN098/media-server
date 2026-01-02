@@ -24,8 +24,9 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { startTransition, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
+import { useDebouncedCallback } from "use-debounce";
 
 export function Explorer() {
   const {
@@ -43,11 +44,10 @@ export function Explorer() {
 
   // クエリパラメータ
   const setExplorerQuery = useSetExplorerQuery();
+  const debouncedSetExplorerQuery = useDebouncedCallback(setExplorerQuery, 200);
   const { view, q, at, modal } = useExplorerQuery(); // URL
   const { query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
-  const initialized = useRef(false);
-
   const index = at != null ? normalizeIndex(at, mediaOnly.length) : null;
 
   // 初期同期：URL → Context（1回だけ）
@@ -58,7 +58,6 @@ export function Explorer() {
     if (q !== query) {
       setQuery(q ?? "");
     }
-    initialized.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -79,10 +78,8 @@ export function Explorer() {
 
     if (Object.keys(patch).length === 0) return;
 
-    startTransition(() => {
-      setExplorerQuery(patch);
-    });
-  }, [q, query, setExplorerQuery, view, viewMode]);
+    debouncedSetExplorerQuery(patch);
+  }, [q, query, debouncedSetExplorerQuery, view, viewMode]);
 
   // クエリパラメータ正規化
   useNormalizeExplorerQuery();
@@ -124,8 +121,6 @@ export function Explorer() {
     { key: "Ctrl+a", callback: () => selectAllMedia() },
     { key: "Escape", callback: () => clearSelection() },
   ]);
-
-  console.log({ modal, index });
 
   return (
     <div
