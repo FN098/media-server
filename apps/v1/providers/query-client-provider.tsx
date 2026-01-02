@@ -5,7 +5,7 @@ import { useState } from "react";
 
 // QueryClientProvider で必要な QueryClient を生成して提供するためのラッパー
 // QueryClient の細かい制御が必要な場合は使用しないこと
-export function QueryClientWrapperProvider({
+export function AppQueryClientProvider({
   children,
 }: {
   children: React.ReactNode;

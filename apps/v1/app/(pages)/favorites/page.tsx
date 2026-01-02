@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
 import { Favorites } from "@/components/ui/favorites";
 import { formatNodes } from "@/lib/media/format";
-import { ExplorerListingProvider } from "@/providers/explorer-listing-provider";
+import { ExplorerProvider } from "@/providers/explorer-provider";
 import { getFavoriteMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 
@@ -20,7 +20,7 @@ export default async function Page() {
   const formatted = formatNodes(nodes);
 
   return (
-    <ExplorerListingProvider
+    <ExplorerProvider
       listing={{
         nodes: formatted,
         path: "",
@@ -30,6 +30,6 @@ export default async function Page() {
       }}
     >
       <Favorites />
-    </ExplorerListingProvider>
+    </ExplorerProvider>
   );
 }

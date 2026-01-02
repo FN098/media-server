@@ -49,3 +49,6 @@ export type SearchTagsRequestParams = {
   query?: string;
   strategy?: SearchTagStrategy;
 };
+
+export type TagIdType = string;
+export type PendingChangesType = Record<TagIdType, TagOperator>;

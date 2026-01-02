@@ -1,4 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
+import { AppQueryClientProvider } from "@/providers/query-client-provider";
 import { ThumbEventProvider } from "@/providers/thumb-event-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
 import { TooltipProvider } from "@/shadcn/components/ui/tooltip";
@@ -31,9 +32,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TooltipProvider>
-          <ThumbEventProvider>{children}</ThumbEventProvider>
-        </TooltipProvider>
+        <AppQueryClientProvider>
+          <TooltipProvider>
+            <ThumbEventProvider>{children}</ThumbEventProvider>
+          </TooltipProvider>
+        </AppQueryClientProvider>
         <Toaster />
       </body>
     </html>

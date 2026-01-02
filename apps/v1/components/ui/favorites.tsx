@@ -7,9 +7,9 @@ import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
-import { useExplorer } from "@/providers/explorer-listing-provider";
+import { useExplorer } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
-import { QueryClientWrapperProvider } from "@/providers/query-client-provider";
+import { AppQueryClientProvider } from "@/providers/query-client-provider";
 import { useSearch } from "@/providers/search-provider";
 import { SelectionProvider } from "@/providers/selection-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
@@ -107,9 +107,9 @@ export function Favorites() {
           )}
 
           {/* タグエディター */}
-          <QueryClientWrapperProvider>
+          <AppQueryClientProvider>
             <TagEditSheet allNodes={mediaOnly} />
-          </QueryClientWrapperProvider>
+          </AppQueryClientProvider>
         </SelectionProvider>
 
         {/* ビューワ */}

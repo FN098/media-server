@@ -1,0 +1,63 @@
+import { normalizeExplorerQuery } from "@/lib/query/normalize";
+import { ExplorerQuerySchema } from "@/lib/query/schemas";
+import { toSearchParams } from "@/lib/query/search-params";
+import type { ExplorerQuery, SetExplorerQueryOptions } from "@/lib/query/types";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect } from "react";
+
+export function useExplorerQuery() {
+  const searchParams = useSearchParams();
+  const params = Object.fromEntries(searchParams);
+  const query = ExplorerQuerySchema.parse(params);
+
+  return {
+    ...query,
+  };
+}
+
+export function useNormalizeExplorerQuery() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const query = useExplorerQuery();
+
+  useEffect(() => {
+    const normalized = normalizeExplorerQuery(query);
+    const next = toSearchParams(normalized);
+    const current = searchParams.toString();
+
+    if (next !== current) {
+      router.replace(next ? `${pathname}?${next}` : pathname);
+    }
+  }, [query, pathname, router, searchParams]);
+}
+
+export function useSetExplorerQuery() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const current = useExplorerQuery();
+
+  return useCallback(
+    (
+      partial: Partial<ExplorerQuery>,
+      options: SetExplorerQueryOptions = {}
+    ) => {
+      const merged: ExplorerQuery = {
+        ...current,
+        ...partial,
+      };
+
+      const normalized = normalizeExplorerQuery(merged);
+      const search = toSearchParams(normalized);
+      const url = search ? `${pathname}?${search}` : pathname;
+
+      if (options.history === "push") {
+        router.push(url);
+      } else {
+        router.replace(url);
+      }
+    },
+    [current, pathname, router]
+  );
+}

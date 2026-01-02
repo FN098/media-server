@@ -1,4 +1,4 @@
-import { ViewMode } from "@/lib/view/types";
+import { ViewMode } from "@/lib/query/types";
 import { useMemo, useState } from "react";
 
 export function useViewMode(initialViewMode: ViewMode = "grid") {

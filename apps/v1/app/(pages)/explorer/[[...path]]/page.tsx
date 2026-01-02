@@ -7,8 +7,7 @@ import { mergeFsWithDb } from "@/lib/media/merge";
 import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { MediaFsNode } from "@/lib/media/types";
-import { ExplorerListingProvider } from "@/providers/explorer-listing-provider";
-import { ExplorerNavigationProvider } from "@/providers/explorer-navigation-provider";
+import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { SelectionProvider } from "@/providers/selection-provider";
 import {
@@ -89,11 +88,9 @@ export default async function Page(props: Props) {
   return (
     <SelectionProvider>
       <FavoritesProvider>
-        <ExplorerListingProvider listing={finalListing}>
-          <ExplorerNavigationProvider>
-            <Explorer />
-          </ExplorerNavigationProvider>
-        </ExplorerListingProvider>
+        <ExplorerProvider listing={finalListing}>
+          <Explorer />
+        </ExplorerProvider>
       </FavoritesProvider>
     </SelectionProvider>
   );

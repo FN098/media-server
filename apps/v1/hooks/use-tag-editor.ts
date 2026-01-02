@@ -1,14 +1,17 @@
 import { useTagSelection } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
-import { PendingNewTag, Tag, TagEditMode, TagOperator } from "@/lib/tag/types";
+import {
+  PendingChangesType,
+  PendingNewTag,
+  Tag,
+  TagEditMode,
+  TagOperator,
+} from "@/lib/tag/types";
 import { isMatchJapanese } from "@/lib/utils/search";
 import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
 import { v4 } from "uuid";
-
-type TagIdType = string;
-type PendingChangesType = Record<TagIdType, TagOperator>;
 
 export function useTagEditor(targetNodes: MediaNode[]) {
   const [mode, setMode] = useState<TagEditMode>("none");
@@ -18,6 +21,7 @@ export function useTagEditor(targetNodes: MediaNode[]) {
   const [pendingChanges, setPendingChanges] = useState<PendingChangesType>({});
   const [isEditing, setIsEditing] = useState(false);
   const [isTransparent, setIsTransparent] = useState(false);
+  const toggleIsEditing = () => setIsEditing((prev) => !prev);
 
   // targetNodesからパスを抽出（APIコールや状態計算に利用）
   const targetPaths = useMemo(
@@ -141,6 +145,7 @@ export function useTagEditor(targetNodes: MediaNode[]) {
       hasChanges,
       isEditing,
       setIsEditing,
+      toggleIsEditing,
       toggleTag,
       setTagChange,
       resetChanges,

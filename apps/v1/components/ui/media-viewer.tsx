@@ -11,10 +11,11 @@ import { useDocumentTitleControl } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useMounted } from "@/hooks/use-mounted";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
+import { useTagEditor } from "@/hooks/use-tag-editor";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
-import { IndexLike } from "@/lib/view/types";
+import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import {
   DropdownMenu,
@@ -66,12 +67,9 @@ export function MediaViewer({
   onNextFolder?: (at?: IndexLike) => void;
   onPrevFolder?: (at?: IndexLike) => void;
 }) {
-  const openFolder = features?.openFolder ?? true;
-
   const router = useRouter();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const [index, setIndex] = useState(initialIndex);
-  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHeaderPinned, setIsHeaderPinned] = useState(false);
@@ -83,6 +81,7 @@ export function MediaViewer({
     duration: 2000,
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
+  const { toggleIsEditing } = useTagEditor(items);
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(
@@ -90,9 +89,12 @@ export function MediaViewer({
   );
   const { setTitle, resetTitle } = useDocumentTitleControl();
   const mounted = useMounted();
-
-  const toggleTagManagerOpen = () => setIsTagManagerOpen((prev) => !prev);
+  const openFolder = features?.openFolder ?? true;
+  const hasPrev = !!onPrevFolder;
+  const hasNext = !!onNextFolder;
+  const offsetPrev = hasPrev ? 1 : 0;
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
+  const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
 
   // タイトル設定
   useEffect(() => {
@@ -123,10 +125,6 @@ export function MediaViewer({
     router.push(url);
   };
 
-  const hasPrev = !!onPrevFolder;
-  const hasNext = !!onNextFolder;
-  const offsetPrev = hasPrev ? 1 : 0;
-
   // 前のフォルダ、次のフォルダを仮想スライドに追加
   const allSlides = useMemo(() => {
     const slides: Slide[] = [...items];
@@ -134,9 +132,6 @@ export function MediaViewer({
     if (hasNext) slides.push(nextFolderNav);
     return slides;
   }, [items, hasPrev, hasNext]);
-
-  // 仮想スライド中のコンテンツ専用インデックス
-  const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
 
   // スワイプ時の移動処理
   const handleSwipe = (swiper: SwiperClass) => {
@@ -158,19 +153,19 @@ export function MediaViewer({
   };
 
   useShortcutKeys([
-    { key: "Escape", callback: onClose },
-    { key: "Enter", callback: toggleHeaderVisibility },
-    { key: " ", callback: toggleHeaderVisibility },
+    { key: "Escape", callback: () => onClose() },
+    { key: "Enter", callback: () => toggleHeaderVisibility() },
+    { key: " ", callback: () => toggleHeaderVisibility() },
     { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
     { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
     { key: "a", callback: () => swiperInstance?.slidePrev() },
     { key: "s", callback: () => void handleToggleFavorite() },
     { key: "d", callback: () => swiperInstance?.slideNext() },
-    { key: "f", callback: toggleFullscreen },
-    { key: "t", callback: toggleTagManagerOpen },
+    { key: "f", callback: () => toggleFullscreen() },
+    { key: "t", callback: () => toggleIsEditing },
     { key: "q", callback: () => onPrevFolder?.() },
     { key: "e", callback: () => onNextFolder?.() },
-    { key: "o", callback: handleOpenFolder },
+    { key: "o", callback: () => handleOpenFolder() },
     {
       key: "h",
       callback: () => {
@@ -291,7 +286,7 @@ export function MediaViewer({
                     )}
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={toggleTagManagerOpen}>
+                  <DropdownMenuItem onClick={toggleIsEditing}>
                     <TagIcon className="mr-2 h-4 w-4" />
                     <span>タグを表示</span>
                     {!isMobile && (

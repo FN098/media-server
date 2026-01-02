@@ -5,16 +5,17 @@ import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
 import { ListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { useInitialize } from "@/hooks/use-initialize";
-import { useMediaViewer } from "@/hooks/use-media-selection";
+import {
+  useExplorerQuery,
+  useNormalizeExplorerQuery,
+  useSetExplorerQuery,
+} from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { useExplorerListingContext } from "@/providers/explorer-listing-provider";
-import { useExplorerNavigationContext } from "@/providers/explorer-navigation-provider";
+import { getClientExplorerPath } from "@/lib/path/helpers";
+import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
-import { useSearchContext } from "@/providers/search-provider";
-import { useSelectionContext } from "@/providers/selection-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -24,100 +25,64 @@ import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
 export function Explorer() {
-  const { listing } = useExplorerListingContext();
-  const listingCtx = useExplorerListingContext();
-  const navigationCtx = useExplorerNavigationContext();
-  const viewModeCtx = useViewModeContext();
-  const searchCtx = useSearchContext();
-  const selectCtx = useSelectionContext();
-  const { currentMediaIndex, setCurrentMediaIndex } = useMediaViewer();
+  const {
+    listing,
+    searchFiltered,
+    mediaOnly,
+    modal,
+    index,
+    openViewer,
+    closeViewer,
+    openFolder,
+    openNextFolder,
+    openPrevFolder,
+    selectAllMedia,
+    clearSelection,
+  } = useExplorerContext();
+
+  const setQuery = useSetExplorerQuery();
+
+  // 表示モード
+  const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
+  const { view } = useExplorerQuery(); // URL
+
+  // 初期同期：URL → Context（1回だけ）
+  useEffect(() => {
+    if (view !== viewMode) {
+      setViewMode(view);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // UI操作：Context → URL
+  useEffect(() => {
+    if (view !== viewMode) {
+      setQuery({ view: viewMode });
+    }
+  }, [setQuery, view, viewMode]);
 
   // ファイルまたはフォルダを開く
   const handleOpen = useCallback(
     (node: MediaNode) => {
       // フォルダ
       if (node.isDirectory) {
-        navigationCtx.navigate(node.path);
+        openFolder(node.path);
         return;
       }
 
       // ファイル
       if (isMedia(node.type)) {
-        const index = listingCtx.getMediaIndex(node.path);
-        if (index === null) return;
-        setCurrentMediaIndex(index);
-        navigationCtx.refresh({
-          index,
-          modal: true,
-        });
+        openViewer(node.path);
         return;
       }
 
       toast.warning("このファイル形式は対応していません");
     },
-    [listingCtx, navigationCtx, setCurrentMediaIndex]
+    [openFolder, openViewer]
   );
 
-  // ビューアを閉じる
-  const handleCloseViewer = useCallback(() => {
-    navigationCtx.refresh({
-      modal: false,
-    });
-  }, [navigationCtx]);
-
-  // 次のフォルダに移動
-  const navigateToNextFolder = useCallback(() => {
-    if (!listingCtx.listing.next) return;
-    const modal = navigationCtx.modal;
-    navigationCtx.navigate(listingCtx.listing.next, {
-      index: modal ? "first" : undefined,
-      modal,
-    });
-  }, [listingCtx.listing.next, navigationCtx]);
-
-  // 前のフォルダに移動
-  const navigateToPrevFolder = useCallback(() => {
-    if (!listingCtx.listing.prev) return;
-    const modal = navigationCtx.modal;
-    navigationCtx.navigate(listingCtx.listing.prev, {
-      index: modal ? "last" : undefined,
-      modal,
-    });
-  }, [listingCtx.listing.prev, navigationCtx]);
-
-  // すべて選択
-  const handleSelectAll = useCallback(() => {
-    const paths = listingCtx.mediaOnly.map((n) => n.path);
-    selectCtx.selectKeys(paths);
-  }, [listingCtx, selectCtx]);
-
-  // 選択解除
-  const handleClearSelection = useCallback(() => {
-    selectCtx.clearSelection();
-  }, [selectCtx]);
-
-  // 1つ以上選択された状態なら選択モードに移行
-  useEffect(() => {
-    if (selectCtx.selectedCount === 0) {
-      selectCtx.setIsSelectionMode(false);
-    } else {
-      selectCtx.setIsSelectionMode(true);
-    }
-  }, [selectCtx]);
-
-  // 初回のみ実行
-  useInitialize(() => {
-    // const index = navigationCtx.index;
-    // const node = listingCtx.getMediaNode(index);
-    // const mediaIndex = listingCtx.getMediaIndex(node.path);
-    // setCurrentMediaIndex(mediaIndex);
-  });
-
-  // クエリ入力時に遅延反映
-  // const debouncedSetQuery = useDebouncedCallback(setQuery, 300);
-  // useEffect(() => {
-  // debouncedSetQuery(searchCtx.query);
-  // }, [debouncedSetQuery, searchCtx.query]);
+  // URL パラメータ正規化
+  useNormalizeExplorerQuery();
 
   // サムネイル作成リクエスト送信
   useEffect(() => {
@@ -131,77 +96,67 @@ export function Explorer() {
 
   // ショートカット
   useShortcutKeys([
-    { key: "q", callback: navigateToNextFolder },
-    { key: "e", callback: navigateToPrevFolder },
-    { key: "Ctrl+a", callback: handleSelectAll },
-    { key: "Escape", callback: handleClearSelection },
-    { key: "Ctrl+k", callback: searchCtx.focus },
+    { key: "q", callback: () => openPrevFolder("first") },
+    { key: "e", callback: () => openNextFolder("first") },
+    { key: "Ctrl+a", callback: () => selectAllMedia() },
+    { key: "Escape", callback: () => clearSelection() },
   ]);
-
-  // エイリアス
-  const { viewMode } = viewModeCtx;
-  const {
-    searchFiltered,
-    mediaOnly,
-    listing: { prev: prevFolderPath, next: nextFolderPath },
-  } = listingCtx;
-  const { modal, getFolderUrl } = navigationCtx;
 
   return (
     <div
       className={cn(
         "flex-1 overflow-auto",
-        viewMode === "grid" && "p-4",
-        viewMode === "list" && "px-4"
+        view === "grid" && "p-4",
+        view === "list" && "px-4"
       )}
     >
       {/* グリッドビュー */}
-      {viewMode === "grid" && (
+      {view === "grid" && (
         <div>
           <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
 
       {/* リストビュー */}
-      {viewMode === "list" && (
+      {view === "list" && (
         <div>
           <ListView nodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
 
       {/* ビューワ */}
-      <ScrollLockProvider>
-        {modal && currentMediaIndex != null && (
+      {modal && index != null && (
+        <ScrollLockProvider>
           <MediaViewer
             items={mediaOnly}
-            initialIndex={currentMediaIndex}
+            initialIndex={index}
             features={{
               openFolder: false,
             }}
-            onClose={handleCloseViewer}
-            onPrevFolder={navigateToPrevFolder}
-            onNextFolder={navigateToNextFolder}
+            onClose={closeViewer}
+            onPrevFolder={() => openPrevFolder("last")}
+            onNextFolder={() => openNextFolder("first")}
           />
-        )}
-      </ScrollLockProvider>
+        </ScrollLockProvider>
+      )}
 
       {/* フォルダナビゲーション */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
         {/* 前のフォルダ */}
         <div className="w-full sm:flex-1">
-          {prevFolderPath && (
+          {listing.prev && (
             <Button
               variant="outline"
               className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
               asChild
             >
-              <Link href={getFolderUrl(prevFolderPath)}>
+              <Link href={encodeURI(getClientExplorerPath(listing.prev))}>
                 <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                   <ArrowLeft className="mr-1 h-3 w-3" />
                   Previous
                 </div>
                 <div className="text-base font-medium truncate w-full text-left">
-                  {prevFolderPath.split("/").filter(Boolean).pop()}
+                  {listing.prev.split("/").filter(Boolean).pop()}
                 </div>
               </Link>
             </Button>
@@ -210,19 +165,19 @@ export function Explorer() {
 
         {/* 次のフォルダ */}
         <div className="w-full sm:flex-1 flex justify-end">
-          {nextFolderPath && (
+          {listing.next && (
             <Button
               variant="outline"
               className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
               asChild
             >
-              <Link href={getFolderUrl(nextFolderPath)}>
+              <Link href={encodeURI(getClientExplorerPath(listing.next))}>
                 <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                   Next
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </div>
                 <div className="text-base font-medium truncate w-full text-right">
-                  {nextFolderPath.split("/").filter(Boolean).pop()}
+                  {listing.next.split("/").filter(Boolean).pop()}
                 </div>
               </Link>
             </Button>
