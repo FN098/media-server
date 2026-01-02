@@ -1,6 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
+import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
@@ -80,6 +81,10 @@ export default async function Page(props: Props) {
   // フォーマット
   const formatted = formatNodes(merged);
 
+  const favorites: FavoritesRecord = Object.fromEntries(
+    formatted.map((n) => [n.path, n.isFavorite])
+  );
+
   const finalListing = {
     ...listing,
     nodes: formatted,
@@ -87,7 +92,7 @@ export default async function Page(props: Props) {
 
   return (
     <SelectionProvider>
-      <FavoritesProvider>
+      <FavoritesProvider favorites={favorites}>
         <ExplorerProvider listing={finalListing}>
           <Explorer />
         </ExplorerProvider>
