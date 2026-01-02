@@ -44,16 +44,12 @@ export function Explorer() {
   const { view, q, at, modal } = useExplorerQuery(); // URL
   const { query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
-  const index = at != null ? normalizeIndex(at, mediaOnly.length) : null;
+  const viewerIndex = at != null ? normalizeIndex(at, mediaOnly.length) : null;
 
   // 初期同期：URL → Context（1回だけ）
   useEffect(() => {
-    if (view !== viewMode) {
-      setViewMode(view);
-    }
-    if (q !== query) {
-      setQuery(q ?? "");
-    }
+    if (view !== viewMode) setViewMode(view);
+    if (q !== query) setQuery(q ?? "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -65,12 +61,8 @@ export function Explorer() {
     const nq = q ?? "";
     const nQuery = query ?? "";
 
-    if (view !== viewMode) {
-      patch.view = viewMode;
-    }
-    if (nq !== nQuery) {
-      patch.q = nQuery || undefined;
-    }
+    if (view !== viewMode) patch.view = viewMode;
+    if (nq !== nQuery) patch.q = nQuery || undefined;
 
     if (Object.keys(patch).length === 0) return;
 
@@ -121,11 +113,11 @@ export function Explorer() {
       )}
 
       {/* ビューワ */}
-      {modal && index != null && (
+      {modal && viewerIndex != null && (
         <ScrollLockProvider>
           <MediaViewer
             items={mediaOnly}
-            initialIndex={index}
+            initialIndex={viewerIndex}
             onClose={closeViewer}
             onPrevFolder={() => openPrevFolder("last")}
             onNextFolder={() => openNextFolder("first")}
