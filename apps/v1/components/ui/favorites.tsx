@@ -1,79 +1,99 @@
 "use client";
 
+import { visitFolderAction } from "@/actions/folder-actions";
+import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
 import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
-import { isMedia } from "@/lib/media/media-types";
+import {
+  useExplorerQuery,
+  useNormalizeExplorerQuery,
+  useSetExplorerQuery,
+} from "@/hooks/use-explorer-query";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
-import { getClientExplorerPath } from "@/lib/path/helpers";
-import { useExplorer } from "@/providers/explorer-provider";
-import { FavoritesProvider } from "@/providers/favorites-provider";
-import { AppQueryClientProvider } from "@/providers/query-client-provider";
-import { useSearch } from "@/providers/search-provider";
-import { SelectionProvider } from "@/providers/selection-provider";
-import { useViewMode } from "@/providers/view-mode-provider";
+import { ExplorerQuery } from "@/lib/query/types";
+import { normalizeIndex } from "@/lib/query/utils";
+import { useExplorerContext } from "@/providers/explorer-provider";
+import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
+import { useSearchContext } from "@/providers/search-provider";
+import { useViewModeContext } from "@/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
 export function Favorites() {
-  const { listing, index, modal, openMedia, closeMedia } = useExplorer();
-  const router = useRouter();
-  const { view } = useViewMode();
+  const {
+    listing,
+    searchFiltered,
+    mediaOnly,
+    openNode,
+    closeViewer,
+    openNextFolder,
+    openPrevFolder,
+    selectAllMedia,
+    clearSelection,
+  } = useExplorerContext();
 
-  // 検索フィルター機能
-  const { query } = useSearch();
-  const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
-  const filtered = useMemo(() => {
-    return listing.nodes
-      .filter((e) => e.isDirectory || isMedia(e.type))
-      .filter((e) => e.name.toLowerCase().includes(lowerQuery));
-  }, [listing.nodes, lowerQuery]);
+  // クエリパラメータ
+  const setExplorerQuery = useSetExplorerQuery();
+  const { view, q, at, modal } = useExplorerQuery(); // URL
+  const { query, setQuery } = useSearchContext(); // ヘッダーUI
+  const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
+  const viewerIndex = at != null ? normalizeIndex(at, mediaOnly.length) : null;
 
-  const mediaOnly = useMemo(
-    () => filtered.filter((e) => isMedia(e.type)),
-    [filtered]
-  );
+  // 初期同期：URL → Context（1回だけ）
+  useEffect(() => {
+    if (view !== viewMode) setViewMode(view);
+    if (q !== query) setQuery(q ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const mediaPath = filtered[index ?? 0]?.path;
-  const mediaIndex =
-    mediaPath != null
-      ? Math.max(
-          0,
-          mediaOnly.findIndex((e) => e.path === mediaPath)
-        )
-      : 0;
+  // UI操作：Context → URL
+  useEffect(() => {
+    const patch: Partial<ExplorerQuery> = {};
 
-  // フォルダ/ファイルオープン
+    // undefined と空文字列の比較にならないように normalize しておく
+    const nq = q ?? "";
+    const nQuery = query ?? "";
+
+    if (view !== viewMode) patch.view = viewMode;
+    if (nq !== nQuery) patch.q = nQuery || undefined;
+
+    if (Object.keys(patch).length === 0) return;
+
+    setExplorerQuery(patch);
+  }, [q, query, setExplorerQuery, view, viewMode]);
+
+  // クエリパラメータ正規化
+  useNormalizeExplorerQuery();
+
+  // サムネイル作成リクエスト送信
+  useEffect(() => {
+    void enqueueThumbJob(listing.path);
+  }, [listing.path]);
+
+  // 訪問済みフォルダ更新リクエスト送信
+  useEffect(() => {
+    void visitFolderAction(listing.path);
+  }, [listing.path]);
+
+  // ショートカット
+  useShortcutKeys([
+    { key: "Ctrl+a", callback: () => selectAllMedia() },
+    { key: "Escape", callback: () => clearSelection() },
+  ]);
+
+  // ファイル/フォルダオープン
   const handleOpen = useCallback(
-    (nodes: MediaNode[], index: number) => {
-      if (index < 0 || index > nodes.length) return;
-      const node = nodes[index];
+    (node: MediaNode) => {
+      const result = openNode(node);
 
-      // フォルダ
-      if (node.isDirectory) {
-        const href = getClientExplorerPath(node.path);
-        router.push(href);
-        return;
+      if (result === "unsupported") {
+        toast.warning("このファイル形式は対応していません");
       }
-
-      // ファイル
-      if (isMedia(node.type)) {
-        openMedia(index);
-        return;
-      }
-
-      toast.warning("このファイル形式は対応していません");
     },
-    [openMedia, router]
-  );
-
-  // お気に入り設定
-  const initialFavorites = useMemo(
-    () => Object.fromEntries(filtered.map((n) => [n.path, n.isFavorite])),
-    [filtered]
+    [openNode]
   );
 
   return (
@@ -84,43 +104,35 @@ export function Favorites() {
         view === "list" && "px-4"
       )}
     >
-      <FavoritesProvider favoritePaths={initialFavorites}>
-        <SelectionProvider>
-          {/* グリッドビュー */}
-          {view === "grid" && (
-            <div>
-              <ExplorerGridView
-                nodes={filtered}
-                onOpen={(index) => void handleOpen(filtered, index)}
-              />
-            </div>
-          )}
+      {/* グリッドビュー */}
+      {view === "grid" && (
+        <div>
+          <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
+        </div>
+      )}
 
-          {/* リストビュー */}
-          {view === "list" && (
-            <div>
-              <ExplorerListView
-                nodes={filtered}
-                onOpen={(index) => void handleOpen(filtered, index)}
-              />
-            </div>
-          )}
+      {/* リストビュー */}
+      {view === "list" && (
+        <div>
+          <ExplorerListView nodes={searchFiltered} onOpen={handleOpen} />
+        </div>
+      )}
 
-          {/* タグエディター */}
-          <AppQueryClientProvider>
-            <TagEditSheet allNodes={mediaOnly} />
-          </AppQueryClientProvider>
-        </SelectionProvider>
+      {/* タグエディター */}
+      {/* <TagEditSheet allNodes={mediaOnly} /> */}
 
-        {/* ビューワ */}
-        {modal && index != null && (
+      {/* ビューワ */}
+      {modal && viewerIndex != null && (
+        <ScrollLockProvider>
           <MediaViewer
             items={mediaOnly}
-            initialIndex={mediaIndex}
-            onClose={closeMedia}
+            initialIndex={viewerIndex}
+            onClose={closeViewer}
+            onPrevFolder={() => openPrevFolder("last")}
+            onNextFolder={() => openNextFolder("first")}
           />
-        )}
-      </FavoritesProvider>
+        </ScrollLockProvider>
+      )}
     </div>
   );
 }
