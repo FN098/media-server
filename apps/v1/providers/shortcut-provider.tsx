@@ -1,102 +1,35 @@
 "use client";
 
-import { KeyAction, ParsedKeyAction } from "@/lib/shortcut-keys/types";
-import { matchModifiers, parseShortcut } from "@/lib/shortcut-keys/utils";
-import { castArray } from "@/lib/utils/cast-array";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
+import { KeyAction } from "@/lib/shortcut-keys/types";
+import { createContext, useContext } from "react";
 
-type ShortcutRegistry = {
-  register: (action: ParsedKeyAction) => () => void;
-};
+type ShortcutContextType = ReturnType<typeof useShortcutKeys>;
 
-const ShortcutContext = createContext<ShortcutRegistry | null>(null);
+const ShortcutContext = createContext<ShortcutContextType | undefined>(
+  undefined
+);
 
-export function useShortcutRegistry() {
-  const ctx = useContext(ShortcutContext);
-  if (!ctx) {
-    throw new Error("useShortcutKeys must be used within ShortcutProvider");
-  }
-  return ctx;
-}
-
-export function ShortcutProvider({ children }: { children: React.ReactNode }) {
-  const stack = useRef<ParsedKeyAction[]>([]);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLElement &&
-        ["INPUT", "TEXTAREA"].includes(e.target.tagName)
-      ) {
-        return;
-      }
-
-      const key = e.key.toLowerCase();
-
-      for (let i = stack.current.length - 1; i >= 0; i--) {
-        const { key: k, modifiers, callback, condition } = stack.current[i];
-
-        if (k !== key) continue;
-
-        const isActive =
-          typeof condition === "function" ? condition() : (condition ?? true);
-        if (!isActive) continue;
-        if (!matchModifiers(e, modifiers)) continue;
-
-        e.preventDefault();
-        callback();
-        break;
-      }
-    };
-
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, []);
-
-  const register = useCallback((action: ParsedKeyAction) => {
-    stack.current.push(action);
-    return () => {
-      const idx = stack.current.indexOf(action);
-      if (idx !== -1) stack.current.splice(idx, 1);
-    };
-  }, []);
+export function ShortcutProvider({
+  children,
+  actions,
+}: {
+  children: React.ReactNode;
+  actions: KeyAction[];
+}) {
+  const value = useShortcutKeys(actions);
 
   return (
-    <ShortcutContext.Provider value={{ register }}>
+    <ShortcutContext.Provider value={value}>
       {children}
     </ShortcutContext.Provider>
   );
 }
 
-export function useShortcutKeys(actions: KeyAction[]) {
-  const { register } = useShortcutRegistry();
-
-  useEffect(() => {
-    const unregisters: (() => void)[] = [];
-
-    actions.forEach((action) => {
-      castArray(action.key).forEach((k) => {
-        const { key, modifiers } = parseShortcut(k);
-
-        unregisters.push(
-          register({
-            key,
-            modifiers,
-            callback: action.callback,
-            condition: action.condition,
-          })
-        );
-      });
-    });
-
-    return () => {
-      unregisters.forEach((fn) => fn());
-    };
-  }, [actions, register]);
+export function useShortcutContext() {
+  const context = useContext(ShortcutContext);
+  if (!context) {
+    throw new Error("useShortcutContext must be used within ShortcutProvider");
+  }
+  return context;
 }

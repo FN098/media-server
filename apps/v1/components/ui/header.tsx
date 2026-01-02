@@ -1,6 +1,10 @@
 import { AppSidebarOpenButton } from "@/components/ui/app-sidebar";
-import { HeaderActions } from "@/components/ui/header-actions";
-import { HeaderNavigation } from "@/components/ui/header-navigation";
+import {
+  HeaderNavigation,
+  HeaderSearch,
+  HeaderViewModeSwitch,
+} from "@/components/ui/header-components";
+import { Separator } from "@/shadcn/components/ui/separator";
 
 type HeaderFeatures = {
   navigation?: boolean;
@@ -8,13 +12,15 @@ type HeaderFeatures = {
   viewMode?: boolean;
 };
 
-type HeaderProps = {
+export function Header({
+  title,
+  basePath,
+  features,
+}: {
   title: string;
   basePath?: string;
   features?: HeaderFeatures;
-};
-
-export function Header({ title, basePath, features }: HeaderProps) {
+}) {
   const navigation = features?.navigation ?? true;
   const search = features?.search ?? true;
   const viewMode = features?.viewMode ?? true;
@@ -30,7 +36,13 @@ export function Header({ title, basePath, features }: HeaderProps) {
 
         {navigation && <HeaderNavigation basePath={basePath} />}
 
-        <HeaderActions searchEnabled={search} viewModeEnabled={viewMode} />
+        <div className="ml-auto flex items-center gap-2">
+          {search && <HeaderSearch />}
+          {search && viewMode && (
+            <Separator orientation="vertical" className="h-6" />
+          )}
+          {viewMode && <HeaderViewModeSwitch />}
+        </div>
       </div>
     </header>
   );

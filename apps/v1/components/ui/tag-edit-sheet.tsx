@@ -1,7 +1,6 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
-import { SelectionBar } from "@/components/ui/selection-bar";
 import { Record } from "@/generated/prisma/runtime/library";
-import { useTagManager } from "@/hooks/use-tag-manager";
+import { useTagEditor } from "@/hooks/use-tag-editor";
 import { MediaNode } from "@/lib/media/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import {
@@ -13,68 +12,72 @@ import {
   TagState,
 } from "@/lib/tag/types";
 import { useSelection } from "@/providers/selection-provider";
-import { useShortcutKeys } from "@/providers/shortcut-provider";
+import { useShortcutKeys } from "@/providers/shortcut-provider-old";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
-export function TagManagerSheet({
+export function TagEditSheet({
   allNodes,
-  mode = "default",
+  active,
   onClose,
 }: {
   allNodes: MediaNode[];
-  mode?: TagEditMode;
+  active: boolean;
   onClose?: () => void;
 }) {
+  const router = useRouter();
+
+  // タグエディターステート
+  const {
+    mode,
+    setMode,
+    isEditing,
+    setIsEditing,
+    isLoading,
+    setIsLoading,
+    newTagName,
+    setNewTagName,
+    pendingNewTags,
+    addPendingNewTag,
+    pendingChanges,
+    hasChanges,
+    toggleTag,
+    setTagChange,
+    tagStates,
+    suggestedTags,
+    selectSuggestion,
+    editModeTags,
+    viewModeTags,
+    refreshTags,
+    resetChanges,
+    isTransparent,
+    setIsTransparent,
+  } = useTagEditor(allNodes);
+
+  // パス選択ステート
   const {
     selectedValues: selectedPaths,
     selectValues: selectPaths,
     clearSelection,
-    isSelectionMode,
   } = useSelection();
 
-  const targetNodes = useMemo(() => {
-    if (mode === "single" && allNodes.length === 1) return allNodes;
-    return allNodes.filter((n) => selectedPaths.has(n.path));
-  }, [allNodes, selectedPaths, mode]);
-
-  const router = useRouter();
-  const tm = useTagManager(targetNodes, mode);
-
-  const showSelectionBar =
-    mode === "default" && !tm.isEditing && isSelectionMode;
-
-  const showMainsheet =
-    (mode === "default" && tm.isEditing) || mode === "single";
-
-  // 透明モード
-  const [isTransparent, setIsTransparent] = useState(false);
+  // 透明モードトグル
   const toggleTransparent = () => setIsTransparent((prev) => !prev);
-
-  // シングルモードの自動選択
-  useEffect(() => {
-    if (mode === "single" && allNodes.length === 1) {
-      selectPaths([allNodes[0].path]);
-    }
-  }, [allNodes, mode, selectPaths]);
 
   // 保存処理
   const handleApply = async () => {
-    if (tm.isLoading) return;
-    tm.setIsLoading(true);
+    if (isLoading) return;
+    setIsLoading(true);
 
     try {
       // 仮タグを DB 作成
-      const created = await createTagsAction(
-        tm.pendingNewTags.map((t) => t.name)
-      );
-
+      const created = await createTagsAction(pendingNewTags.map((t) => t.name));
       if (!created.success) throw new Error(created.error);
 
       // 新規タグの操作
@@ -84,15 +87,15 @@ export function TagManagerSheet({
       }));
 
       // 既存タグの操作
-      const existingOps: TagOperation[] = Object.entries(tm.pendingChanges).map(
+      const existingOps: TagOperation[] = Object.entries(pendingChanges).map(
         ([tagId, operator]) => ({
           tagId,
           operator,
         })
       );
 
+      // マージ
       const operations = [...existingOps, ...createdOps];
-
       if (operations.length === 0) return;
 
       // 紐づけ実行
@@ -102,205 +105,176 @@ export function TagManagerSheet({
       });
 
       if (result.success) {
-        tm.resetChanges();
-        if (mode !== "single") clearSelection();
-
-        tm.setIsEditing(mode !== "single");
-        await tm.refreshTags();
-        router.refresh();
-
-        if (mode === "default") handleClose();
-
         toast.success("保存しました");
-        // showCheckOnce(700);
+        await refreshTags();
+        router.refresh();
+        handleClose();
       }
     } finally {
-      tm.setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   // タグ追加処理
   const handleAddTag = () => {
-    const name = tm.newTagName.trim();
+    const name = newTagName.trim();
     if (!name) return;
 
     // 既に存在すれば「追加候補」
-    const existing = tm.editModeTags.find((t) => t.name === name);
+    const existing = editModeTags.find((t) => t.name === name);
     if (existing) {
-      tm.setTagChange(existing, "add");
-      tm.setNewTagName("");
+      setTagChange(existing, "add");
+      setNewTagName("");
       return;
     }
 
     // 仮タグとしてメモリに積む
-    tm.addPendingNewTag(name);
-    tm.setNewTagName("");
+    addPendingNewTag(name);
+    setNewTagName("");
   };
 
-  // 閉じる処理
+  // 閉じる処理（正常終了）
   const handleClose = () => {
-    if (tm.isEditing) {
-      tm.setIsEditing(false);
-      return;
-    }
-
-    tm.setMode("none");
+    setIsEditing(false);
+    setMode("none");
     clearSelection();
+    resetChanges();
     onClose?.();
-  };
-
-  // 全選択処理
-  const handleSelectAll = () => {
-    const paths = allNodes.map((n) => n.path);
-    selectPaths(paths);
   };
 
   useShortcutKeys([
     { key: "Escape", callback: handleClose },
-    { key: "e", callback: () => tm.setIsEditing((prev) => !prev) },
+    { key: "e", callback: () => setIsEditing((prev) => !prev) },
   ]);
 
+  // モードの設定
+  useEffect(() => {
+    if (active && allNodes.length === 1) {
+      setMode("single");
+    } else if (active && allNodes.length > 1) {
+      setMode("default");
+    } else {
+      setMode("none");
+    }
+  }, [active, allNodes.length, setMode]);
+
+  // シングルモードの場合は自動選択
+  useEffect(() => {
+    if (mode === "single") {
+      selectPaths([allNodes[0].path]);
+    }
+  }, [allNodes, mode, selectPaths]);
+
   return (
-    <>
-      {/* チェックアニメーション確認用 */}
-      {/* <Button onClick={() => showCheckOnce(700)}>Show Check</Button> */}
-
-      <AnimatePresence>
-        {/* --- 1. 選択バー (タグ編集に依存しない独立した部品へ) --- */}
-        {showSelectionBar && (
-          <SelectionBar
-            key="selection-bar"
-            count={selectedPaths.size}
-            totalCount={allNodes.length}
-            onSelectAll={handleSelectAll}
-            onCancel={clearSelection}
-            actions={
-              <>
-                {/* 将来的にここへ <Button>ダウンロード</Button> 等を追加可能 */}
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="rounded-xl text-xs h-10 px-5 font-bold shadow-lg"
-                  onClick={() => tm.setIsEditing(true)}
-                >
-                  タグ編集
-                </Button>
-              </>
-            }
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {/* --- 2. メインシート (閲覧モード or 編集モード) --- */}
-        {showMainsheet && (
-          <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
-            {/* オーバーレイは編集モードのみ */}
-            {tm.isEditing && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/40 pointer-events-auto"
-                onClick={handleClose}
-              />
-            )}
-
+    <AnimatePresence>
+      {active && (
+        <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
+          {/* 暗転オーバーレイ */}
+          {isEditing && (
             <motion.div
-              layout // コンテナのサイズ変化をスムーズに
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className={cn(
-                "relative w-full bg-background border-t rounded-t-[24px] shadow-2xl pointer-events-auto pb-safe overflow-hidden",
-                isTransparent && "bg-background/20"
-              )}
-            >
-              <div className="w-12 h-1.5 bg-muted/20 rounded-full mx-auto mt-3 mb-2" />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 pointer-events-auto"
+              onClick={handleClose}
+            />
+          )}
 
-              <div className="px-4 pb-6">
-                <AnimatePresence mode="wait">
-                  {!tm.isEditing ? (
-                    /* --- 閲覧ビュー --- */
-                    <motion.div
-                      key="view-mode"
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      className="space-y-4"
-                    >
-                      <SheetHeader
-                        mode={mode}
-                        isEditing={false}
-                        count={selectedPaths.size}
-                        onEditClick={() => tm.setIsEditing(true)}
-                        onClose={handleClose}
-                        isTransparent={isTransparent}
-                        onToggleTransparent={toggleTransparent}
-                      />
-                      <TagList
-                        isEditing={false}
-                        tags={tm.viewModeTags}
-                        pendingChanges={tm.pendingChanges}
-                        pendingNewTags={tm.pendingNewTags}
-                        tagStates={tm.tagStates}
-                        onToggle={tm.toggleTag}
-                        isTransparent={isTransparent}
-                      />
-                    </motion.div>
-                  ) : (
-                    /* --- 編集ビュー --- */
-                    <motion.div
-                      key="edit-mode"
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 5 }}
-                      className="space-y-4"
-                    >
-                      <SheetHeader
-                        mode={mode}
-                        isEditing={true}
-                        count={selectedPaths.size}
-                        onEditClick={() => {}}
-                        onClose={handleClose}
-                        isTransparent={isTransparent}
-                        onToggleTransparent={toggleTransparent}
-                      />
-                      <TagInput
-                        value={tm.newTagName}
-                        onChange={tm.setNewTagName}
-                        onAdd={() => void handleAddTag()}
-                        disabled={tm.isLoading}
-                        suggestions={tm.suggestedTags}
-                        onSelectSuggestion={tm.selectSuggestion}
-                        isTransparent={isTransparent}
-                      />
-                      <TagList
-                        isEditing={true}
-                        tags={tm.editModeTags}
-                        pendingChanges={tm.pendingChanges}
-                        pendingNewTags={tm.pendingNewTags}
-                        tagStates={tm.tagStates}
-                        onToggle={tm.toggleTag}
-                        isTransparent={isTransparent}
-                      />
-                      <SheetFooter
-                        onReset={tm.resetChanges}
-                        onApply={() => void handleApply()}
-                        hasChanges={tm.hasChanges}
-                        isLoading={tm.isLoading}
-                        isTransparent={isTransparent}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </>
+          {/* メインエディター */}
+          <motion.div
+            layout
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className={cn(
+              "relative w-full bg-background border-t rounded-t-[24px] shadow-2xl pointer-events-auto pb-safe overflow-hidden",
+              isTransparent && "bg-background/20"
+            )}
+          >
+            <div className="w-12 h-1.5 bg-muted/20 rounded-full mx-auto mt-3 mb-2" />
+
+            <div className="px-4 pb-6">
+              <AnimatePresence mode="wait">
+                {!isEditing ? (
+                  /* --- 閲覧ビュー --- */
+                  <motion.div
+                    key="view-mode"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="space-y-4"
+                  >
+                    <SheetHeader
+                      mode={mode}
+                      isEditing={false}
+                      count={selectedPaths.size}
+                      onEditClick={() => setIsEditing(true)}
+                      onClose={handleClose}
+                      isTransparent={isTransparent}
+                      onToggleTransparent={toggleTransparent}
+                    />
+                    <TagList
+                      isEditing={false}
+                      tags={viewModeTags}
+                      pendingChanges={pendingChanges}
+                      pendingNewTags={pendingNewTags}
+                      tagStates={tagStates}
+                      onToggle={toggleTag}
+                      isTransparent={isTransparent}
+                    />
+                  </motion.div>
+                ) : (
+                  /* --- 編集ビュー --- */
+                  <motion.div
+                    key="edit-mode"
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="space-y-4"
+                  >
+                    <SheetHeader
+                      mode={mode}
+                      isEditing={true}
+                      count={selectedPaths.size}
+                      onEditClick={() => {}}
+                      onClose={handleClose}
+                      isTransparent={isTransparent}
+                      onToggleTransparent={toggleTransparent}
+                    />
+                    <TagInput
+                      value={newTagName}
+                      onChange={setNewTagName}
+                      onAdd={() => void handleAddTag()}
+                      disabled={isLoading}
+                      suggestions={suggestedTags}
+                      onSelectSuggestion={selectSuggestion}
+                      isTransparent={isTransparent}
+                    />
+                    <TagList
+                      isEditing={true}
+                      tags={editModeTags}
+                      pendingChanges={pendingChanges}
+                      pendingNewTags={pendingNewTags}
+                      tagStates={tagStates}
+                      onToggle={toggleTag}
+                      isTransparent={isTransparent}
+                    />
+                    <SheetFooter
+                      onReset={resetChanges}
+                      onApply={() => void handleApply()}
+                      hasChanges={hasChanges}
+                      isLoading={isLoading}
+                      isTransparent={isTransparent}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -490,7 +464,7 @@ function TagInput({
         )}
       </div>
 
-      {/* --- サジェストリストの表示 --- */}
+      {/* サジェストリスト */}
       <AnimatePresence>
         {suggestions.length > 0 && (
           <motion.div

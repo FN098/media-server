@@ -7,13 +7,16 @@ import { revalidatePath } from "next/cache";
 
 export async function visitFolderAction(dirPath: string): Promise<void> {
   // TODO: ユーザー認証機能実装後に差し替える
-  await visitFolder(dirPath, USER);
+  await visitFolderByUser(dirPath, USER);
 
   // ダッシュボードの履歴キャッシュをクリア
   revalidatePath(PATHS.client.dashboard.root);
 }
 
-async function visitFolder(dirPath: string, userId: string): Promise<void> {
+async function visitFolderByUser(
+  dirPath: string,
+  userId: string
+): Promise<void> {
   const normalizedDirPath = dirPath.replace(/\/+$/, "");
 
   // 最近訪れたフォルダを更新

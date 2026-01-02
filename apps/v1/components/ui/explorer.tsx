@@ -1,178 +1,221 @@
 "use client";
 
-import { visitFolderAction } from "@/actions/folder-actions";
-import { enqueueThumbJob } from "@/actions/thumb-actions";
-import { GridView } from "@/components/ui/grid-view";
-import { ListView } from "@/components/ui/list-view";
+import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
+import { ListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { TagManagerSheet } from "@/components/ui/tag-manager-sheet";
+import { useInitialize } from "@/hooks/use-initialize";
+import { useMediaViewer } from "@/hooks/use-media-selection";
+import { useThumb } from "@/hooks/use-thumb";
+import { useVisitFolder } from "@/hooks/use-visit-folder";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { getClientExplorerPath } from "@/lib/path/helpers";
-import { useExplorer } from "@/providers/explorer-provider";
-import { FavoriteProvider } from "@/providers/favorite-provider";
-import { QueryProvider } from "@/providers/query-provider";
-import { useSearch } from "@/providers/search-provider";
-import { SelectionProvider } from "@/providers/selection-provider";
-import { useShortcutKeys } from "@/providers/shortcut-provider";
-import { useViewMode } from "@/providers/view-mode-provider";
+import { KeyAction } from "@/lib/shortcut-keys/types";
+import { useExplorerListingContext } from "@/providers/explorer-listing-provider";
+import { useExplorerNavigationContext } from "@/providers/explorer-navigation-provider";
+import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
+import { useSearchContext } from "@/providers/search-provider";
+import { useSelectionContext } from "@/providers/selection-provider";
+import { ShortcutProvider } from "@/providers/shortcut-provider";
+import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
 export function Explorer() {
-  const { listing, index, modal, openMedia, closeMedia, moveFolder } =
-    useExplorer();
-  const router = useRouter();
-  const { view } = useViewMode();
+  const listingCtx = useExplorerListingContext();
+  const navigationCtx = useExplorerNavigationContext();
+  const viewModeCtx = useViewModeContext();
+  const searchCtx = useSearchContext();
+  const selectCtx = useSelectionContext();
+  const { sendVisitFolderUpdateRequest } = useVisitFolder();
+  const { sendCreateThumbRequest } = useThumb();
+  const { currentMediaIndex, setCurrentMediaIndex } = useMediaViewer();
 
-  // 検索フィルター機能
-  const { query } = useSearch();
-  const lowerQuery = useMemo(() => query.toLowerCase(), [query]);
-  const filtered = useMemo(() => {
-    return listing.nodes
-      .filter((e) => e.isDirectory || isMedia(e.type))
-      .filter((e) => e.name.toLowerCase().includes(lowerQuery));
-  }, [listing.nodes, lowerQuery]);
+  console.log(navigationCtx.modal);
 
-  const mediaOnly = useMemo(
-    () => filtered.filter((e) => isMedia(e.type)),
-    [filtered]
-  );
-
-  const mediaPath = filtered[index ?? 0]?.path;
-  const mediaIndex =
-    mediaPath != null
-      ? Math.max(
-          0,
-          mediaOnly.findIndex((e) => e.path === mediaPath)
-        )
-      : 0;
-
-  // フォルダ/ファイルオープン
+  // ファイルまたはフォルダを開く
   const handleOpen = useCallback(
-    (nodes: MediaNode[], index: number) => {
-      if (index < 0 || index > nodes.length) return;
-      const node = nodes[index];
-
+    (node: MediaNode) => {
       // フォルダ
       if (node.isDirectory) {
-        const href = getClientExplorerPath(node.path);
-        router.push(href);
+        navigationCtx.navigate(node.path);
         return;
       }
 
       // ファイル
       if (isMedia(node.type)) {
-        openMedia(index);
+        const index = listingCtx.getMediaIndex(node.path);
+        if (index === null) return;
+        setCurrentMediaIndex(index);
+        navigationCtx.refresh({
+          index,
+          modal: true,
+        });
         return;
       }
 
       toast.warning("このファイル形式は対応していません");
     },
-    [openMedia, router]
+    [listingCtx, navigationCtx, setCurrentMediaIndex]
   );
 
-  // お気に入り設定
-  const initialFavorites = useMemo(
-    () => Object.fromEntries(mediaOnly.map((n) => [n.path, n.isFavorite])),
-    [mediaOnly]
-  );
+  // ビューアを閉じる
+  const handleCloseViewer = useCallback(() => {
+    navigationCtx.refresh({
+      modal: false,
+    });
+  }, [navigationCtx]);
 
-  // サムネイル作成リクエスト送信
+  // 次のフォルダに移動
+  const navigateToNextFolder = useCallback(() => {
+    if (!listingCtx.listing.next) return;
+    const modal = navigationCtx.modal;
+    navigationCtx.navigate(listingCtx.listing.next, {
+      index: modal ? "first" : undefined,
+      modal,
+    });
+  }, [listingCtx.listing.next, navigationCtx]);
+
+  // 前のフォルダに移動
+  const navigateToPrevFolder = useCallback(() => {
+    if (!listingCtx.listing.prev) return;
+    const modal = navigationCtx.modal;
+    navigationCtx.navigate(listingCtx.listing.prev, {
+      index: modal ? "last" : undefined,
+      modal,
+    });
+  }, [listingCtx.listing.prev, navigationCtx]);
+
+  // すべて選択
+  const handleSelectAll = useCallback(() => {
+    const paths = listingCtx.mediaOnly.map((n) => n.path);
+    selectCtx.selectKeys(paths);
+  }, [listingCtx, selectCtx]);
+
+  // 選択解除
+  const handleClearSelection = useCallback(() => {
+    selectCtx.clearSelection();
+  }, [selectCtx]);
+
+  // 1つ以上選択された状態なら選択モードに移行
   useEffect(() => {
-    void enqueueThumbJob(listing.path);
-  }, [listing.path]);
+    if (selectCtx.selectedCount === 0) {
+      selectCtx.setIsSelectionMode(false);
+    } else {
+      selectCtx.setIsSelectionMode(true);
+    }
+  }, [selectCtx]);
 
-  // 訪問済みフォルダ更新リクエスト送信
+  // 初回のみ実行
+  useInitialize(() => {
+    debugger;
+    const index = navigationCtx.index;
+    const node = listingCtx.getMediaNode(index);
+    const mediaIndex = listingCtx.getMediaIndex(node.path);
+    setCurrentMediaIndex(mediaIndex);
+  });
+
+  // クエリ入力時に遅延反映
+  // const debouncedSetQuery = useDebouncedCallback(setQuery, 300);
+  // useEffect(() => {
+  // debouncedSetQuery(searchCtx.query);
+  // }, [debouncedSetQuery, searchCtx.query]);
+
+  // フォルダ訪問時に訪問履歴を更新
   useEffect(() => {
-    void visitFolderAction(listing.path);
-  }, [listing.path]);
+    void sendVisitFolderUpdateRequest(listingCtx.listing.path);
+  }, [listingCtx.listing.path, sendVisitFolderUpdateRequest]);
 
-  const movePrevFolder = (at?: "first" | "last") =>
-    listing.prev ? moveFolder(listing.prev, at) : undefined;
+  // フォルダ訪問時にサムネイルを作成
+  useEffect(() => {
+    void sendCreateThumbRequest(listingCtx.listing.path);
+  }, [listingCtx.listing.path, sendCreateThumbRequest]);
 
-  const moveNextFolder = (at?: "first" | "last") =>
-    listing.next ? moveFolder(listing.next, at) : undefined;
+  // ショートカット
+  // useShortcutKeys([
+  //   { key: "q", callback: navigateToNextFolder },
+  //   { key: "e", callback: navigateToPrevFolder },
+  //   { key: "Ctrl+a", callback: handleSelectAll },
+  //   { key: "Escape", callback: handleClearSelection },
+  //   { key: "Ctrl+k", callback: searchCtx.focus },
+  // ]);
+  const shortcuts: KeyAction[] = [
+    { key: "q", callback: navigateToNextFolder },
+    { key: "e", callback: navigateToPrevFolder },
+    { key: "Ctrl+a", callback: handleSelectAll },
+    { key: "Escape", callback: handleClearSelection },
+    { key: "Ctrl+k", callback: searchCtx.focus },
+  ];
 
-  useShortcutKeys([
-    { key: "q", callback: movePrevFolder },
-    { key: "e", callback: moveNextFolder },
-  ]);
+  // エイリアス
+  const { viewMode } = viewModeCtx;
+  const {
+    searchFiltered,
+    mediaOnly,
+    listing: { prev: prevFolderPath, next: nextFolderPath },
+  } = listingCtx;
+  const { modal, getFolderUrl } = navigationCtx;
 
   return (
     <div
       className={cn(
         "flex-1 overflow-auto",
-        view === "grid" && "p-4",
-        view === "list" && "px-4"
+        viewMode === "grid" && "p-4",
+        viewMode === "list" && "px-4"
       )}
     >
-      <FavoriteProvider initialFavorites={initialFavorites}>
-        <SelectionProvider>
-          {/* グリッドビュー */}
-          {view === "grid" && (
-            <div>
-              <GridView
-                nodes={filtered}
-                onOpen={(index) => void handleOpen(filtered, index)}
-              />
-            </div>
-          )}
+      <ShortcutProvider actions={shortcuts}>
+        {/* グリッドビュー */}
+        {viewMode === "grid" && (
+          <div>
+            <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
+          </div>
+        )}
 
-          {/* リストビュー */}
-          {view === "list" && (
-            <div>
-              <ListView
-                nodes={filtered}
-                onOpen={(index) => void handleOpen(filtered, index)}
-              />
-            </div>
-          )}
+        {/* リストビュー */}
+        {viewMode === "list" && (
+          <div>
+            <ListView nodes={searchFiltered} onOpen={handleOpen} />
+          </div>
+        )}
+      </ShortcutProvider>
 
-          {/* タグエディター */}
-          <QueryProvider>
-            <TagManagerSheet allNodes={mediaOnly} />
-          </QueryProvider>
-        </SelectionProvider>
-
-        {/* ビューワ */}
-        {modal && (
+      {/* ビューワ */}
+      <ScrollLockProvider>
+        {modal && currentMediaIndex != null && (
           <MediaViewer
             items={mediaOnly}
-            initialIndex={mediaIndex}
-            onClose={closeMedia}
+            initialIndex={currentMediaIndex}
             features={{
               openFolder: false,
             }}
-            onFolder={moveFolder}
-            onPrevFolder={movePrevFolder}
-            onNextFolder={moveNextFolder}
+            onClose={handleCloseViewer}
+            onPrevFolder={navigateToPrevFolder}
+            onNextFolder={navigateToNextFolder}
           />
         )}
-      </FavoriteProvider>
+      </ScrollLockProvider>
 
       {/* フォルダナビゲーション */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
         {/* 前のフォルダ */}
         <div className="w-full sm:flex-1">
-          {listing.prev && (
+          {prevFolderPath && (
             <Button
               variant="outline"
               className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
               asChild
             >
-              <Link href={encodeURI(getClientExplorerPath(listing.prev))}>
+              <Link href={getFolderUrl(prevFolderPath)}>
                 <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                   <ArrowLeft className="mr-1 h-3 w-3" />
                   Previous
                 </div>
                 <div className="text-base font-medium truncate w-full text-left">
-                  {listing.prev.split("/").filter(Boolean).pop()}
+                  {prevFolderPath.split("/").filter(Boolean).pop()}
                 </div>
               </Link>
             </Button>
@@ -181,19 +224,19 @@ export function Explorer() {
 
         {/* 次のフォルダ */}
         <div className="w-full sm:flex-1 flex justify-end">
-          {listing.next && (
+          {nextFolderPath && (
             <Button
               variant="outline"
               className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
               asChild
             >
-              <Link href={encodeURI(getClientExplorerPath(listing.next))}>
+              <Link href={getFolderUrl(nextFolderPath)}>
                 <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                   Next
                   <ArrowRight className="ml-1 h-3 w-3" />
                 </div>
                 <div className="text-base font-medium truncate w-full text-right">
-                  {listing.next.split("/").filter(Boolean).pop()}
+                  {nextFolderPath.split("/").filter(Boolean).pop()}
                 </div>
               </Link>
             </Button>

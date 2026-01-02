@@ -8,9 +8,8 @@ import { MediaThumbIcon } from "@/components/ui/media-thumb";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
-import { useFavorite } from "@/providers/favorite-provider";
-import { useSelection } from "@/providers/selection-provider";
-import { useShortcutKeys } from "@/providers/shortcut-provider";
+import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useSelectionContext } from "@/providers/selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import {
   Table,
@@ -21,34 +20,18 @@ import {
   TableRow,
 } from "@/shadcn/components/ui/table";
 import { cn } from "@/shadcn/lib/utils";
-import { memo, useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { toast } from "sonner";
 
-type ListViewProps = {
-  nodes: MediaNode[];
-  onOpen?: (index: number) => void;
-};
-
-export const ListView = memo(function ListView1({
+export function ListView({
   nodes,
   onOpen,
-}: ListViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const { selectValues: selectPaths, clearSelection } = useSelection();
-
-  const selectAll = useCallback(() => {
-    const allPaths = nodes.map((n) => n.path);
-    selectPaths(allPaths);
-  }, [nodes, selectPaths]);
-
-  useShortcutKeys([
-    { key: "Ctrl+a", callback: selectAll },
-    { key: "Escape", callback: clearSelection },
-  ]);
-
+}: {
+  nodes: MediaNode[];
+  onOpen?: (node: MediaNode) => void;
+}) {
   return (
-    <div ref={containerRef} className="w-full h-full">
+    <div className="w-full h-full">
       <Table>
         <TableHeader>
           <TableRow>
@@ -62,57 +45,60 @@ export const ListView = memo(function ListView1({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {nodes.map((node, index) => (
-            <RowItem
-              key={node.path}
-              node={node}
-              className={cn("hover:bg-blue-100 active:bg-blue-200")}
-              onOpen={() => onOpen?.(index)}
-            />
+          {nodes.map((node) => (
+            <RowItem key={node.path} node={node} onOpen={onOpen} />
           ))}
         </TableBody>
       </Table>
     </div>
   );
-});
+}
 
-type RowItemProps = {
+function RowItem({
+  node,
+  onOpen,
+}: {
   node: MediaNode;
-  onOpen?: () => void;
-  className?: string;
-};
+  onOpen?: (node: MediaNode) => void;
+}) {
+  const { toggleFavorite, isFavorite } = useFavoritesContext();
+  const { isSelected, isSelectionMode, toggleSelection } =
+    useSelectionContext();
 
-function RowItem({ node, onOpen, className }: RowItemProps) {
-  const favoriteCtx = useFavorite();
+  const favorite = isFavorite(node.path);
+  const selected = isSelected(node.path);
 
-  const handleToggleFavorite = async (node: MediaNode) => {
+  const handleSelectOrOpen = useCallback(() => {
+    if (isSelectionMode) {
+      toggleSelection(node.path);
+    } else {
+      onOpen?.(node);
+    }
+  }, [isSelectionMode, node, onOpen, toggleSelection]);
+
+  const handleSelect = useCallback(() => {
+    toggleSelection(node.path);
+  }, [node, toggleSelection]);
+
+  const handleToggleFavorite = useCallback(() => {
     try {
-      await favoriteCtx.toggleFavorite(node.path);
+      void toggleFavorite(node.path);
     } catch (e) {
       console.error(e);
       toast.error("お気に入りの更新に失敗しました");
     }
-  };
-
-  const { isSelected, isSelectionMode, toggleSelection } = useSelection();
-  const selected = isSelected(node.path);
+  }, [node.path, toggleFavorite]);
 
   return (
     <TableRow
-      onClick={() => {
-        if (isSelectionMode) {
-          toggleSelection(node.path);
-        } else {
-          onOpen?.();
-        }
-      }}
-      className={className}
+      onClick={handleSelectOrOpen}
+      className={cn("hover:bg-blue-100 active:bg-blue-200")}
     >
       <TableCell>
         <div className={cn("transition-opacity")}>
           <Checkbox
             checked={selected}
-            onCheckedChange={() => toggleSelection(node.path)}
+            onCheckedChange={handleSelect}
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -146,8 +132,8 @@ function RowItem({ node, onOpen, className }: RowItemProps) {
         ) : (
           <FavoriteButton
             variant="list"
-            active={favoriteCtx.isFavorite(node.path)}
-            onToggle={() => void handleToggleFavorite(node)}
+            active={favorite}
+            onClick={handleToggleFavorite}
           />
         )}
       </TableCell>

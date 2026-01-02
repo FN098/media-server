@@ -1,15 +1,15 @@
 "use client";
 
-import { GridView } from "@/components/ui/grid-view";
-import { ListView } from "@/components/ui/list-view";
+import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
+import { ListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
-import { TagManagerSheet } from "@/components/ui/tag-manager-sheet";
+import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
-import { useExplorer } from "@/providers/explorer-provider";
-import { FavoriteProvider } from "@/providers/favorite-provider";
-import { QueryProvider } from "@/providers/query-provider";
+import { useExplorer } from "@/providers/explorer-listing-provider";
+import { FavoritesProvider } from "@/providers/favorites-provider";
+import { QueryClientWrapperProvider } from "@/providers/query-client-provider";
 import { useSearch } from "@/providers/search-provider";
 import { SelectionProvider } from "@/providers/selection-provider";
 import { useViewMode } from "@/providers/view-mode-provider";
@@ -84,12 +84,12 @@ export function Favorites() {
         view === "list" && "px-4"
       )}
     >
-      <FavoriteProvider initialFavorites={initialFavorites}>
+      <FavoritesProvider favoritePaths={initialFavorites}>
         <SelectionProvider>
           {/* グリッドビュー */}
           {view === "grid" && (
             <div>
-              <GridView
+              <ExplorerGridView
                 nodes={filtered}
                 onOpen={(index) => void handleOpen(filtered, index)}
               />
@@ -107,9 +107,9 @@ export function Favorites() {
           )}
 
           {/* タグエディター */}
-          <QueryProvider>
-            <TagManagerSheet allNodes={mediaOnly} />
-          </QueryProvider>
+          <QueryClientWrapperProvider>
+            <TagEditSheet allNodes={mediaOnly} />
+          </QueryClientWrapperProvider>
         </SelectionProvider>
 
         {/* ビューワ */}
@@ -120,7 +120,7 @@ export function Favorites() {
             onClose={closeMedia}
           />
         )}
-      </FavoriteProvider>
+      </FavoritesProvider>
     </div>
   );
 }

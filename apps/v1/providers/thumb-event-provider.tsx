@@ -4,6 +4,8 @@ import { getThumbEventsUrl } from "@/lib/path/helpers";
 import { ThumbCompletedEvent } from "@/workers/thumb/types";
 import { createContext, useContext, useEffect, useRef } from "react";
 
+// TODO: リファクタリング
+
 type Listener = (e: ThumbCompletedEvent) => void;
 
 const ThumbEventContext = createContext<{

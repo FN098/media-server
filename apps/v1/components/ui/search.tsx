@@ -1,26 +1,22 @@
-import { useShortcutKeys } from "@/providers/shortcut-provider";
 import { Input } from "@/shadcn/components/ui/input";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { SearchIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { RefObject, useState } from "react";
 
 export function Search({
+  inputRef,
   value,
   setValue,
   className,
 }: {
+  inputRef: RefObject<HTMLInputElement | null>;
   value: string;
   setValue: (value: string) => void;
   className?: string;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const [focused, setFocused] = useState(false);
-
-  useShortcutKeys([
-    { key: "Ctrl+k", callback: () => inputRef.current?.focus() },
-  ]);
 
   return (
     <div className="relative group">

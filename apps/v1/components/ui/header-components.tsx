@@ -1,7 +1,11 @@
 "use client";
 
 import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs";
+import { Search } from "@/components/ui/search";
+import { ViewModeSwitch } from "@/components/ui/view-mode-switch";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
+import { useSearchContext } from "@/providers/search-provider";
+import { useViewModeContext } from "@/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -35,5 +39,30 @@ export function HeaderNavigation({ basePath }: { basePath?: string }) {
         <DynamicBreadcrumbs items={breadcrumbs} />
       )}
     </>
+  );
+}
+
+export function HeaderSearch() {
+  const { inputRef, query, setQuery } = useSearchContext();
+
+  return (
+    <Search
+      inputRef={inputRef}
+      value={query}
+      setValue={setQuery}
+      className="w-[180px] shrink-0"
+    />
+  );
+}
+
+export function HeaderViewModeSwitch() {
+  const { viewMode, setViewMode } = useViewModeContext();
+
+  return (
+    <ViewModeSwitch
+      viewMode={viewMode}
+      setViewMode={setViewMode}
+      className="shrink-0"
+    />
   );
 }

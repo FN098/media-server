@@ -1,79 +1,68 @@
-import { useCallback, useEffect, useState } from "react";
+import { useGridConfig } from "@/hooks/use-grid-config";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useCallback, useMemo, useRef } from "react";
 
-type GridViewConfig = {
-  columnCount: number;
-  columnWidth: number;
-  rowHeight: number;
-};
+export function useGridView<T>(items: T[]) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-type GridViewConfigOptions = {
-  columnWidth: number;
-  rowHeight?: number; // 固定したい場合
-  square?: boolean; // 正方形にしたい場合
-  aspectRatio?: number; // 応用（例: 16/9）
-};
-
-export function useGridViewConfig(
-  ref: React.RefObject<HTMLElement | null>,
-  options: GridViewConfigOptions = {
+  const { columnCount, rowHeight } = useGridConfig(containerRef, {
     columnWidth: 200,
-    square: true,
-  }
-): GridViewConfig {
-  const [config, setConfig] = useState<GridViewConfig>({
-    columnCount: 1,
-    columnWidth: options.columnWidth,
-    rowHeight: options.rowHeight ?? options.columnWidth,
   });
 
-  const update = useCallback(() => {
-    if (!ref.current) return;
+  const rowCount = useMemo(
+    () => Math.ceil(items.length / columnCount),
+    [columnCount, items.length]
+  );
 
-    const containerWidth = ref.current.offsetWidth;
+  // 仮想グリッドの設定
+  // eslint-disable-next-line react-hooks/incompatible-library -- メモ化すると正しく動作しないという警告を無視
+  const rowVirtualizer = useVirtualizer({
+    count: rowCount,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => rowHeight, // 各行の高さ
+    overscan: 1, // 画面外に何行予備を持っておくか
+  });
 
-    const columnCount = Math.max(
-      1,
-      Math.ceil(containerWidth / options.columnWidth)
-    );
+  const getCellIndex = useCallback(
+    (rowIndex: number, colIndex: number) => {
+      return rowIndex * columnCount + colIndex;
+    },
+    [columnCount]
+  );
 
-    const actualColumnWidth = containerWidth / columnCount;
+  const getCellItem = useCallback(
+    (rowIndex: number, colIndex: number) => {
+      const index = getCellIndex(rowIndex, colIndex);
+      if (index < 0 || index >= items.length) return null;
+      return items[index];
+    },
+    [getCellIndex, items]
+  );
 
-    let rowHeight: number;
+  const getTotalHeight = rowVirtualizer.getTotalSize;
+  const getRows = rowVirtualizer.getVirtualItems;
 
-    if (options.square) {
-      rowHeight = actualColumnWidth;
-    } else if (options.aspectRatio) {
-      rowHeight = actualColumnWidth / options.aspectRatio;
-    } else {
-      rowHeight = options.rowHeight ?? actualColumnWidth;
-    }
-
-    setConfig({
+  return useMemo(
+    () => ({
+      items,
+      containerRef,
       columnCount,
-      columnWidth: actualColumnWidth,
       rowHeight,
-    });
-  }, [
-    ref,
-    options.columnWidth,
-    options.square,
-    options.aspectRatio,
-    options.rowHeight,
-  ]);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    // 初期実行
-    update();
-
-    const observer = new ResizeObserver(() => {
-      requestAnimationFrame(update);
-    });
-
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [ref, update]);
-
-  return config;
+      rowCount,
+      getCellIndex,
+      getCellItem,
+      getTotalHeight,
+      getRows,
+    }),
+    [
+      items,
+      columnCount,
+      rowHeight,
+      rowCount,
+      getCellIndex,
+      getCellItem,
+      getTotalHeight,
+      getRows,
+    ]
+  );
 }

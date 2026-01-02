@@ -7,18 +7,17 @@ import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
 import { v4 } from "uuid";
 
-export function useTagManager(
-  targetNodes: MediaNode[],
-  initialMode: TagEditMode
-) {
-  const [mode, setMode] = useState(initialMode);
+type TagIdType = string;
+type PendingChangesType = Record<TagIdType, TagOperator>;
+
+export function useTagEditor(targetNodes: MediaNode[]) {
+  const [mode, setMode] = useState<TagEditMode>("none");
   const [newTagName, setNewTagName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
-  const [pendingChanges, setPendingChanges] = useState<
-    Record<string, TagOperator>
-  >({});
+  const [pendingChanges, setPendingChanges] = useState<PendingChangesType>({});
   const [isEditing, setIsEditing] = useState(false);
+  const [isTransparent, setIsTransparent] = useState(false);
 
   // targetNodesからパスを抽出（APIコールや状態計算に利用）
   const targetPaths = useMemo(
@@ -27,7 +26,6 @@ export function useTagManager(
   );
 
   // TODO: ストラテジーオプション追加
-  // マスターデータ
   const {
     tags: masterTags,
     refreshTags,
@@ -39,9 +37,10 @@ export function useTagManager(
     // strategy: "most-related",
     // limit: 10,
   });
+
   const { tagStates } = useTagSelection(targetNodes, masterTags);
 
-  // 編集用
+  // 編集用タグ一覧
   const editModeTags = useMemo(() => {
     const pendingAsTags: Tag[] = pendingNewTags.map((t) => ({
       id: t.tempId, // 仮ID
@@ -55,7 +54,7 @@ export function useTagManager(
     // );
   }, [masterTags, pendingNewTags]);
 
-  // 閲覧用
+  // 閲覧用タグ一覧
   const viewModeTags = masterTags.filter(
     (tag) => tagStates[tag.name] === "all"
   );
@@ -63,7 +62,7 @@ export function useTagManager(
   const hasChanges =
     Object.keys(pendingChanges).length > 0 || pendingNewTags.length > 0;
 
-  // タグ入力時サジェスト
+  // タグ入力時サジェスト用タグ一覧
   const suggestedTags = useMemo(() => {
     const query = newTagName.trim().toLowerCase();
     if (!query) return [];
@@ -121,32 +120,62 @@ export function useTagManager(
     [setTagChange]
   );
 
-  return {
-    targetPaths,
-    masterTags,
-    editModeTags,
-    viewModeTags,
-    mode,
-    setMode,
-    newTagName,
-    setNewTagName,
-    isLoading,
-    setIsLoading,
-    isLoadingTags,
-    tagStates,
-    pendingChanges,
-    setPendingChanges,
-    hasChanges,
-    isEditing,
-    setIsEditing,
-    toggleTag,
-    setTagChange,
-    resetChanges,
-    refreshTags,
-    suggestedTags,
-    selectSuggestion,
-    pendingNewTags,
-    setPendingNewTags,
-    addPendingNewTag,
-  };
+  const toggleTransparent = () => setIsTransparent((prev) => !prev);
+
+  return useMemo(
+    () => ({
+      targetPaths,
+      masterTags,
+      editModeTags,
+      viewModeTags,
+      mode,
+      setMode,
+      newTagName,
+      setNewTagName,
+      isLoading,
+      setIsLoading,
+      isLoadingTags,
+      tagStates,
+      pendingChanges,
+      setPendingChanges,
+      hasChanges,
+      isEditing,
+      setIsEditing,
+      toggleTag,
+      setTagChange,
+      resetChanges,
+      refreshTags,
+      suggestedTags,
+      selectSuggestion,
+      pendingNewTags,
+      setPendingNewTags,
+      addPendingNewTag,
+      isTransparent,
+      setIsTransparent,
+      toggleTransparent,
+    }),
+    [
+      addPendingNewTag,
+      editModeTags,
+      hasChanges,
+      isEditing,
+      isLoading,
+      isLoadingTags,
+      isTransparent,
+      masterTags,
+      mode,
+      newTagName,
+      pendingChanges,
+      pendingNewTags,
+      refreshTags,
+      resetChanges,
+      selectSuggestion,
+      setTagChange,
+      suggestedTags,
+      tagStates,
+      targetPaths,
+      toggleTag,
+      viewModeTags,
+    ]
+  );
 }

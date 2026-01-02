@@ -7,7 +7,10 @@ export type SortOptions<T> = {
   order?: SortOrder;
 };
 
-const collator = new Intl.Collator("ja-JP", {
+export type SortKeyOf<T> = SortOptions<T>["key"];
+export type SortOrderOf<T> = SortOptions<T>["order"];
+
+export const collator = new Intl.Collator("ja-JP", {
   numeric: true, // 10 を 2 の後ろにする
   sensitivity: "base", // 大文字小文字・記号差を無視（Explorer寄り）
   ignorePunctuation: true, // 記号を無視

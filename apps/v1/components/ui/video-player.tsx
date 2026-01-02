@@ -1,7 +1,7 @@
 import { LoadingSpinner } from "@/components/ui/spinners";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/lib/media/types";
 import { getAbsoluteMediaUrl, getThumbUrl } from "@/lib/path/helpers";
-import { useShortcutKeys } from "@/providers/shortcut-provider";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
@@ -9,12 +9,12 @@ import { memo, useRef, useState } from "react";
 
 type VideoPlayerProps = {
   media: MediaFsNode;
-  isCurrent: boolean;
+  active: boolean;
 };
 
 export const VideoPlayer = memo(function VideoPlayer({
   media,
-  isCurrent,
+  active,
 }: VideoPlayerProps) {
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
@@ -73,7 +73,7 @@ export const VideoPlayer = memo(function VideoPlayer({
       <div
         className={cn(
           "absolute inset-0 z-10 transition-opacity duration-500",
-          isCurrent ? "opacity-0 pointer-events-none" : "opacity-100"
+          active ? "opacity-0 pointer-events-none" : "opacity-100"
         )}
       >
         <Image
@@ -93,7 +93,7 @@ export const VideoPlayer = memo(function VideoPlayer({
         className={cn("absolute inset-0 w-full h-full")}
         onPointerDownCapture={(e) => e.stopPropagation()}
       >
-        {isCurrent && (
+        {active && (
           <MuxPlayer
             ref={playerRef}
             src={getAbsoluteMediaUrl(media.path)}

@@ -7,14 +7,14 @@ type FavoriteButtonVariant = "grid" | "list" | "viewer";
 
 type FavoriteButtonProps = {
   active: boolean;
-  onToggle: () => void;
+  onClick: () => void;
   variant: FavoriteButtonVariant;
   className?: string;
 };
 
 export function FavoriteButton({
   active,
-  onToggle,
+  onClick,
   variant,
   className,
 }: FavoriteButtonProps) {
@@ -51,7 +51,7 @@ export function FavoriteButton({
       type="button"
       onClick={(e) => {
         e.stopPropagation();
-        onToggle();
+        onClick();
       }}
       className={cn("transition-all", containerStyles[variant], className)}
       aria-label="お気に入り"

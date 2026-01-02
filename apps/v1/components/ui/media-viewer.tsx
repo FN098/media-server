@@ -5,20 +5,17 @@ import { AudioPlayer } from "@/components/ui/audio-player";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
-import { TagManagerSheet } from "@/components/ui/tag-manager-sheet";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
+import { useDocumentTitleControl } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useMounted } from "@/hooks/use-mounted";
-import { useScrollLockControl } from "@/hooks/use-scroll-lock";
-import { useTitleControl } from "@/hooks/use-title";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
-import { useFavorite } from "@/providers/favorite-provider";
-import { QueryProvider } from "@/providers/query-provider";
-import { SelectionProvider } from "@/providers/selection-provider";
-import { useShortcutKeys } from "@/providers/shortcut-provider";
+import { IndexLike } from "@/lib/view/types";
+import { useFavoritesContext } from "@/providers/favorites-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,37 +37,17 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import path from "path";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
-type MediaViewerFeatures = {
-  openFolder?: boolean;
-};
+const prevFolderNav = { type: "nav_prev", path: "prev-loader" } as const;
+const nextFolderNav = { type: "nav_next", path: "next-loader" } as const;
 
-interface MediaViewerProps {
-  items: MediaNode[];
-  initialIndex: number;
-  onClose: () => void;
-  features?: MediaViewerFeatures;
-  onFolder?: (path: string, at?: "first" | "last") => void;
-  onNextFolder?: (at?: "first" | "last") => void;
-  onPrevFolder?: (at?: "first" | "last") => void;
-}
-
-type Slide =
-  | MediaNode
-  | {
-      type: "nav_prev";
-      path: "prev-loader";
-    }
-  | {
-      type: "nav_next";
-      path: "next-loader";
-    };
+type Slide = MediaNode | typeof prevFolderNav | typeof nextFolderNav;
 
 export function MediaViewer({
   items,
@@ -79,10 +56,20 @@ export function MediaViewer({
   features,
   onNextFolder,
   onPrevFolder,
-}: MediaViewerProps) {
-  const router = useRouter();
+}: {
+  items: MediaNode[];
+  initialIndex: number;
+  onClose: () => void;
+  features?: {
+    openFolder?: boolean;
+  };
+  onNextFolder?: (at?: IndexLike) => void;
+  onPrevFolder?: (at?: IndexLike) => void;
+}) {
   const openFolder = features?.openFolder ?? true;
-  const favoriteCtx = useFavorite();
+
+  const router = useRouter();
+  const { toggleFavorite, isFavorite } = useFavoritesContext();
   const [index, setIndex] = useState(initialIndex);
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -101,21 +88,11 @@ export function MediaViewer({
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(
     null
   );
-  const { setTitle, resetTitle } = useTitleControl();
-  const { lock: lockScroll, unlock: unlockScroll } = useScrollLockControl();
+  const { setTitle, resetTitle } = useDocumentTitleControl();
   const mounted = useMounted();
 
   const toggleTagManagerOpen = () => setIsTagManagerOpen((prev) => !prev);
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
-
-  // スクロールロック
-  useEffect(() => {
-    lockScroll();
-
-    return () => {
-      unlockScroll();
-    };
-  }, [lockScroll, unlockScroll]);
 
   // タイトル設定
   useEffect(() => {
@@ -126,9 +103,7 @@ export function MediaViewer({
   // お気に入りボタンクリック時の処理
   const handleToggleFavorite = useCallback(async () => {
     try {
-      const nextIsFavorite = await favoriteCtx.toggleFavorite(
-        items[index].path
-      );
+      const nextIsFavorite = await toggleFavorite(items[index].path);
       if (nextIsFavorite === undefined) return;
 
       const message = nextIsFavorite
@@ -141,35 +116,12 @@ export function MediaViewer({
       console.error(e);
       toast.error("お気に入りの更新に失敗しました");
     }
-  }, [favoriteCtx, interactHeader, index, items]);
+  }, [toggleFavorite, items, index, interactHeader]);
 
   const handleOpenFolder = () => {
     const url = getClientExplorerPath(path.dirname(items[index].path));
     router.push(url);
   };
-
-  useShortcutKeys([
-    { key: "Escape", callback: onClose },
-    { key: "Enter", callback: toggleHeaderVisibility },
-    { key: " ", callback: toggleHeaderVisibility },
-    { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
-    { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
-    { key: "a", callback: () => swiperInstance?.slidePrev() },
-    { key: "s", callback: () => void handleToggleFavorite() },
-    { key: "d", callback: () => swiperInstance?.slideNext() },
-    { key: "f", callback: toggleFullscreen },
-    { key: "t", callback: toggleTagManagerOpen },
-    { key: "q", callback: () => onPrevFolder?.() },
-    { key: "e", callback: () => onNextFolder?.() },
-    { key: "o", callback: handleOpenFolder },
-    {
-      key: "h",
-      callback: () => {
-        toggleHeaderPinned();
-        interactHeader();
-      },
-    },
-  ]);
 
   const hasPrev = !!onPrevFolder;
   const hasNext = !!onNextFolder;
@@ -178,8 +130,8 @@ export function MediaViewer({
   // 前のフォルダ、次のフォルダを仮想スライドに追加
   const allSlides = useMemo(() => {
     const slides: Slide[] = [...items];
-    if (hasPrev) slides.unshift({ type: "nav_prev", path: "prev-loader" });
-    if (hasNext) slides.push({ type: "nav_next", path: "next-loader" });
+    if (hasPrev) slides.unshift(prevFolderNav);
+    if (hasNext) slides.push(nextFolderNav);
     return slides;
   }, [items, hasPrev, hasNext]);
 
@@ -204,6 +156,29 @@ export function MediaViewer({
       onNextFolder("first");
     }
   };
+
+  useShortcutKeys([
+    { key: "Escape", callback: onClose },
+    { key: "Enter", callback: toggleHeaderVisibility },
+    { key: " ", callback: toggleHeaderVisibility },
+    { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
+    { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
+    { key: "a", callback: () => swiperInstance?.slidePrev() },
+    { key: "s", callback: () => void handleToggleFavorite() },
+    { key: "d", callback: () => swiperInstance?.slideNext() },
+    { key: "f", callback: toggleFullscreen },
+    { key: "t", callback: toggleTagManagerOpen },
+    { key: "q", callback: () => onPrevFolder?.() },
+    { key: "e", callback: () => onNextFolder?.() },
+    { key: "o", callback: handleOpenFolder },
+    {
+      key: "h",
+      callback: () => {
+        toggleHeaderPinned();
+        interactHeader();
+      },
+    },
+  ]);
 
   if (!mounted) return;
 
@@ -266,8 +241,8 @@ export function MediaViewer({
               {isMedia(items[index].type) && (
                 <FavoriteButton
                   variant="viewer"
-                  active={favoriteCtx.isFavorite(items[index].path)}
-                  onToggle={() => void handleToggleFavorite()}
+                  active={isFavorite(items[index].path)}
+                  onClick={() => void handleToggleFavorite()}
                 />
               )}
 
@@ -348,63 +323,44 @@ export function MediaViewer({
         zoom={true}
         className="h-full w-full"
       >
-        {allSlides.map((item, i) => (
-          <SwiperSlide
-            key={item.path}
-            virtualIndex={i} // 0から始まる連続した数値
-            className="flex items-center justify-center"
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              {item.type === "nav_prev" || item.type === "nav_next" ? (
-                <div className="flex flex-col items-center justify-center text-white/50">
-                  <Loader2 className="animate-spin mb-4" size={48} />
-                  <p>
-                    {item.type === "nav_prev"
-                      ? "前のフォルダへ..."
-                      : "次のフォルダへ..."}
-                  </p>
-                </div>
-              ) : (
-                <Media media={item} isCurrent={index === i - offsetPrev} />
-              )}
-            </div>
-          </SwiperSlide>
-        ))}
+        {allSlides.map((slide, i) => {
+          const active = index === i - offsetPrev;
+          return (
+            <SwiperSlide
+              key={slide.path}
+              virtualIndex={i}
+              className="flex items-center justify-center"
+            >
+              <div className="w-full h-full flex items-center justify-center">
+                {slide === prevFolderNav || slide === nextFolderNav ? (
+                  // 次・前のフォルダ
+                  <div className="flex flex-col items-center justify-center text-white/50">
+                    <Loader2 className="animate-spin mb-4" size={48} />
+                    <p>
+                      {slide === prevFolderNav
+                        ? "前のフォルダへ..."
+                        : "次のフォルダへ..."}
+                    </p>
+                  </div>
+                ) : slide.type === "image" ? (
+                  // 画像
+                  <ImageViewer media={slide} active={active} />
+                ) : slide.type === "video" ? (
+                  // 動画
+                  <VideoPlayer media={slide} active={active} />
+                ) : slide.type === "audio" ? (
+                  // オーディオ
+                  <AudioPlayer media={slide} active={active} />
+                ) : (
+                  <div className="text-white/50 text-sm">
+                    Unsupported file type: {slide.type}
+                  </div>
+                )}
+              </div>
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
-
-      {/* タグエディター */}
-      <SelectionProvider>
-        <QueryProvider>
-          <TagManagerSheet
-            allNodes={[items[index]]}
-            mode={isTagManagerOpen ? "single" : "none"}
-            onClose={() => setIsTagManagerOpen(false)}
-          />
-        </QueryProvider>
-      </SelectionProvider>
     </div>
   );
 }
-
-const Media = memo(function Media1({
-  media,
-  isCurrent,
-}: {
-  media: MediaNode;
-  isCurrent: boolean;
-}) {
-  switch (media.type) {
-    case "image":
-      return <ImageViewer media={media} isCurrent={isCurrent} />;
-    case "video":
-      return <VideoPlayer media={media} isCurrent={isCurrent} />;
-    case "audio":
-      return <AudioPlayer media={media} isCurrent={isCurrent} />;
-    default:
-      return (
-        <div className="text-white/50 text-sm">
-          Unsupported file type: {media.type}
-        </div>
-      );
-  }
-});

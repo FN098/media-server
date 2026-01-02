@@ -3,7 +3,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
-export function QueryProvider({ children }: { children: React.ReactNode }) {
+// QueryClientProvider で必要な QueryClient を生成して提供するためのラッパー
+// QueryClient の細かい制御が必要な場合は使用しないこと
+export function QueryClientWrapperProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [client] = useState(
     () =>
       new QueryClient({

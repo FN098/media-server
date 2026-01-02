@@ -5,92 +5,57 @@ import { FavoriteCountBadge } from "@/components/ui/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
-import { useGridViewConfig } from "@/hooks/use-grid-view";
+import { useGridView } from "@/hooks/use-grid-view";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { useFavorite } from "@/providers/favorite-provider";
-import { useSelection } from "@/providers/selection-provider";
-import { useShortcutKeys } from "@/providers/shortcut-provider";
+import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useSelectionContext } from "@/providers/selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { memo, useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { toast } from "sonner";
 
-type GridViewProps = {
-  nodes: MediaNode[];
-  onOpen?: (index: number) => void;
-};
-
-export const GridView = memo(function GridView1({
+export function ExplorerGridView({
   nodes,
   onOpen,
-}: GridViewProps) {
-  const parentRef = useRef<HTMLDivElement>(null);
-  const { columnCount, rowHeight } = useGridViewConfig(parentRef, {
-    columnWidth: 200,
-  });
-  const rowCount = Math.ceil(nodes.length / columnCount);
-
-  // 仮想グリッドの設定
-  // eslint-disable-next-line react-hooks/incompatible-library -- メモ化すると正しく動作しないという警告を無効化。無視しても実害はない
-  const rowVirtualizer = useVirtualizer({
-    count: rowCount,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => rowHeight, // 各行の高さ
-    overscan: 1, // 画面外に何行予備を持っておくか
-  });
-
-  const { selectValues: selectPaths, clearSelection } = useSelection();
-
-  const selectAll = useCallback(() => {
-    const allPaths = nodes.map((n) => n.path);
-    selectPaths(allPaths);
-  }, [nodes, selectPaths]);
-
-  useShortcutKeys([
-    { key: "Ctrl+a", callback: selectAll },
-    { key: "Escape", callback: clearSelection },
-  ]);
+}: {
+  nodes: MediaNode[];
+  onOpen?: (node: MediaNode) => void;
+}) {
+  const { containerRef, columnCount, getTotalHeight, getRows, getCellItem } =
+    useGridView(nodes);
 
   return (
-    <div ref={parentRef} className="w-full h-full flex flex-col">
+    <div ref={containerRef} className="w-full h-full flex flex-col">
       {/* グリッド */}
       <div
         style={{
-          height: `${rowVirtualizer.getTotalSize()}px`,
+          height: `${getTotalHeight()}px`,
           width: "100%",
           position: "relative",
         }}
       >
         {/* 行 */}
-        {rowVirtualizer.getVirtualItems().map((virtualRow) => (
+        {getRows().map((row) => (
           <div
-            key={virtualRow.key}
+            key={row.key}
             style={{
               position: "absolute",
               top: 0,
               left: 0,
               width: "100%",
-              height: `${virtualRow.size}px`,
-              transform: `translateY(${virtualRow.start}px)`,
+              height: `${row.size}px`,
+              transform: `translateY(${row.start}px)`,
               display: "grid",
               gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
             }}
           >
             {/* セル */}
             {Array.from({ length: columnCount }).map((_, colIndex) => {
-              const index = virtualRow.index * columnCount + colIndex;
-              if (index < 0 || index >= nodes.length) return;
-
-              const node = nodes[index];
+              const node = getCellItem(row.index, colIndex);
               return (
-                <Cell
-                  key={node.path}
-                  node={node}
-                  onOpen={onOpen ? () => onOpen?.(index) : undefined}
-                />
+                node && <Cell key={node.path} node={node} onOpen={onOpen} />
               );
             })}
           </div>
@@ -98,31 +63,46 @@ export const GridView = memo(function GridView1({
       </div>
     </div>
   );
-});
+}
 
-type CellProps = {
+function Cell({
+  node,
+  onOpen,
+}: {
   node: MediaNode;
-  onOpen?: () => void;
-};
+  onOpen?: (node: MediaNode) => void;
+}) {
+  const { toggleFavorite, isFavorite } = useFavoritesContext();
+  const { isSelectionMode, isSelected, toggleSelection } =
+    useSelectionContext();
 
-function Cell({ node, onOpen }: CellProps) {
-  const favoriteCtx = useFavorite();
-  const toggleFavorite = async (node: MediaNode) => {
+  const favorite = isFavorite(node.path);
+  const selected = isSelected(node.path);
+  const isMobile = useIsMobile();
+
+  const handleSelectOrOpen = useCallback(() => {
+    if (isSelectionMode) {
+      toggleSelection(node.path);
+    } else {
+      onOpen?.(node);
+    }
+  }, [isSelectionMode, node, onOpen, toggleSelection]);
+
+  const handleSelect = useCallback(() => {
+    toggleSelection(node.path);
+  }, [node, toggleSelection]);
+
+  const handleToggleFavorite = useCallback(() => {
     try {
-      await favoriteCtx.toggleFavorite(node.path);
+      void toggleFavorite(node.path);
     } catch (e) {
       console.error(e);
       toast.error("お気に入りの更新に失敗しました");
     }
-  };
-
-  const { isSelected, isSelectionMode, toggleSelection } = useSelection();
-  const selected = isSelected(node.path);
-
-  const isMobile = useIsMobile();
+  }, [node.path, toggleFavorite]);
 
   return (
-    <div className="p-1 w-full h-full">
+    <div className="w-full h-full p-1">
       <div
         className={cn(
           "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
@@ -130,13 +110,7 @@ function Cell({ node, onOpen }: CellProps) {
             ? "ring-2 ring-primary border-transparent"
             : "hover:border-primary/50"
         )}
-        onClick={() => {
-          if (isSelectionMode) {
-            toggleSelection(node.path);
-          } else {
-            onOpen?.();
-          }
-        }}
+        onClick={handleSelectOrOpen}
       >
         {/* サムネイル */}
         <MediaThumb
@@ -155,7 +129,7 @@ function Cell({ node, onOpen }: CellProps) {
         >
           <Checkbox
             checked={selected}
-            onCheckedChange={() => toggleSelection(node.path)}
+            onCheckedChange={handleSelect}
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -172,8 +146,8 @@ function Cell({ node, onOpen }: CellProps) {
         {!isSelectionMode && isMedia(node.type) && (
           <FavoriteButton
             variant="grid"
-            active={favoriteCtx.isFavorite(node.path)}
-            onToggle={() => void toggleFavorite(node)}
+            active={favorite}
+            onClick={handleToggleFavorite}
             className="absolute top-1 right-1"
           />
         )}
@@ -186,7 +160,7 @@ function Cell({ node, onOpen }: CellProps) {
           />
         )}
 
-        {/* ★ お気に入り数バッジ */}
+        {/* お気に入り数バッジ */}
         {node.isDirectory && (
           <FavoriteCountBadge
             count={node.favoriteCount ?? 0}

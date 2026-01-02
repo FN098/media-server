@@ -4,27 +4,27 @@ import { cn } from "@/shadcn/lib/utils";
 import { GridIcon, ListIcon } from "lucide-react";
 
 export function ViewModeSwitch({
-  value,
-  setValue,
+  viewMode,
+  setViewMode,
   className,
 }: {
-  value: ViewMode;
-  setValue: (value: ViewMode) => void;
+  viewMode: ViewMode;
+  setViewMode: (viewMode: ViewMode) => void;
   className?: string;
 }) {
   return (
     <div className={cn("flex gap-1", className)}>
       <Button
         size="icon"
-        variant={value === "list" ? "default" : "ghost"}
-        onClick={() => setValue("list")}
+        variant={viewMode === "list" ? "default" : "ghost"}
+        onClick={() => setViewMode("list")}
       >
         <ListIcon />
       </Button>
       <Button
         size="icon"
-        variant={value === "grid" ? "default" : "ghost"}
-        onClick={() => setValue("grid")}
+        variant={viewMode === "grid" ? "default" : "ghost"}
+        onClick={() => setViewMode("grid")}
       >
         <GridIcon />
       </Button>

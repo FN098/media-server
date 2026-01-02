@@ -1,31 +1,30 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { useSearch } from "@/hooks/use-search";
+import { createContext, useContext } from "react";
 
-type SearchContextValue = {
-  query: string;
-  setQuery: (s: string) => void;
-};
+type SearchContextType = ReturnType<typeof useSearch>;
 
-const SearchContext = createContext<SearchContextValue | null>(null);
+const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
-export function SearchProvider({ children }: { children: React.ReactNode }) {
-  const [query, setQuery] = useState("");
+export function SearchProvider({
+  children,
+  query,
+}: {
+  children: React.ReactNode;
+  query?: string;
+}) {
+  const value = useSearch(query);
 
   return (
-    <SearchContext.Provider value={{ query, setQuery }}>
-      {children}
-    </SearchContext.Provider>
+    <SearchContext.Provider value={value}>{children}</SearchContext.Provider>
   );
 }
 
-export function useSearch() {
-  const ctx = useContext(SearchContext);
-  if (!ctx) throw new Error("useSearch must be used within SearchProvider");
-  return ctx;
-}
-
-export function useSearchOptional() {
-  const ctx = useContext(SearchContext);
-  return ctx;
+export function useSearchContext() {
+  const context = useContext(SearchContext);
+  if (context === undefined) {
+    throw new Error("useSearchContext must be used within SearchProvider");
+  }
+  return context;
 }

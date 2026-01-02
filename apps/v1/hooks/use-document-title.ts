@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 
-export function useTitleControl() {
+export function useDocumentTitleControl() {
   // 初回マウント時のタイトルを保持する
   const originalTitle = useRef<string | null>(null);
 

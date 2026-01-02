@@ -4,10 +4,13 @@ import { Explorer } from "@/components/ui/explorer";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
-import { sortMediaFsNodes, SortOptions } from "@/lib/media/sort";
+import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { MediaFsNode } from "@/lib/media/types";
-import { ExplorerProvider } from "@/providers/explorer-provider";
+import { ExplorerListingProvider } from "@/providers/explorer-listing-provider";
+import { ExplorerNavigationProvider } from "@/providers/explorer-navigation-provider";
+import { FavoritesProvider } from "@/providers/favorites-provider";
+import { SelectionProvider } from "@/providers/selection-provider";
 import {
   getDbFavoriteCount,
   getDbVisitedInfoDeeply,
@@ -21,19 +24,19 @@ export const dynamic = "force-dynamic";
 type Props = {
   params: Promise<{
     path?: string[];
-    sort?: SortOptions<MediaFsNode>["key"];
-    order?: SortOptions<MediaFsNode>["order"];
+    sort?: SortKeyOf<MediaFsNode>;
+    order?: SortOrderOf<MediaFsNode>;
   }>;
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { path: pathParts = [] } = await props.params;
 
-  const last = pathParts[pathParts.length - 1];
-  const decoded = decodeURIComponent(last);
+  const lastPart = pathParts[pathParts.length - 1];
+  const decodedPart = decodeURIComponent(lastPart);
 
   return {
-    title: `${decoded} | ${APP_CONFIG.meta.title}`,
+    title: `${decodedPart} | ${APP_CONFIG.meta.title}`,
   };
 }
 
@@ -78,14 +81,20 @@ export default async function Page(props: Props) {
   // フォーマット
   const formatted = formatNodes(merged);
 
+  const finalListing = {
+    ...listing,
+    nodes: formatted,
+  };
+
   return (
-    <ExplorerProvider
-      listing={{
-        ...listing,
-        nodes: formatted,
-      }}
-    >
-      <Explorer />
-    </ExplorerProvider>
+    <SelectionProvider>
+      <FavoritesProvider>
+        <ExplorerListingProvider listing={finalListing}>
+          <ExplorerNavigationProvider>
+            <Explorer />
+          </ExplorerNavigationProvider>
+        </ExplorerListingProvider>
+      </FavoritesProvider>
+    </SelectionProvider>
   );
 }

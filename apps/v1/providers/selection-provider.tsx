@@ -1,71 +1,25 @@
 "use client";
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { useSelection } from "@/hooks/use-selection";
+import { MediaSelectionKeyType } from "@/lib/media/types";
+import React, { createContext, useContext } from "react";
 
-interface SelectionContextType {
-  selectedValues: Set<string>;
-  isSelectionMode: boolean;
-  isSelected: (value: string) => boolean;
-  toggleSelection: (value: string) => void;
-  selectValues: (values: string[]) => void;
-  clearSelection: () => void;
-}
+type SelectionContextType = ReturnType<
+  typeof useSelection<MediaSelectionKeyType>
+>;
 
 const SelectionContext = createContext<SelectionContextType | undefined>(
   undefined
 );
 
-export function SelectionProvider({ children }: { children: React.ReactNode }) {
-  const [selectedValues, setSelectedValues] = useState<Set<string>>(new Set());
-
-  const isSelectionMode = selectedValues.size > 0;
-
-  const isSelected = useCallback(
-    (value: string) => selectedValues.has(value),
-    [selectedValues]
-  );
-
-  const toggleSelection = useCallback((id: string) => {
-    setSelectedValues((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
-
-  const selectValues = useCallback((ids: string[]) => {
-    setSelectedValues(new Set(ids));
-  }, []);
-
-  const clearSelection = useCallback(() => {
-    setSelectedValues(new Set());
-  }, []);
-
-  const value = useMemo(
-    () => ({
-      selectedValues,
-      isSelectionMode,
-      isSelected,
-      toggleSelection,
-      selectValues,
-      clearSelection,
-    }),
-    [
-      selectedValues,
-      isSelectionMode,
-      isSelected,
-      toggleSelection,
-      selectValues,
-      clearSelection,
-    ]
-  );
+export function SelectionProvider({
+  children,
+  selectedKeys,
+}: {
+  children: React.ReactNode;
+  selectedKeys?: MediaSelectionKeyType;
+}) {
+  const value = useSelection(selectedKeys);
 
   return (
     <SelectionContext.Provider value={value}>
@@ -74,9 +28,12 @@ export function SelectionProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useSelection = () => {
+export function useSelectionContext() {
   const context = useContext(SelectionContext);
-  if (!context)
-    throw new Error("useSelection must be used within SelectionProvider");
+  if (context === undefined) {
+    throw new Error(
+      "useSelectionContext must be used within SelectionProvider"
+    );
+  }
   return context;
-};
+}

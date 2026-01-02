@@ -64,3 +64,5 @@ export type DbFavoriteInfo = {
   path: string;
   favoriteCountInFolder: number;
 };
+
+export type MediaSelectionKeyType = string;

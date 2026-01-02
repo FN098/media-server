@@ -1,32 +1,35 @@
 "use client";
 
+import { useViewMode } from "@/hooks/use-view-mode";
 import { ViewMode } from "@/lib/view/types";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 
-type ViewModeContextValue = {
-  view: ViewMode;
-  setView: (v: ViewMode) => void;
-};
+type ViewModeContextType = ReturnType<typeof useViewMode>;
 
-const ViewModeContext = createContext<ViewModeContextValue | null>(null);
+const ViewModeContext = createContext<ViewModeContextType | undefined>(
+  undefined
+);
 
-export function ViewModeProvider({ children }: { children: React.ReactNode }) {
-  const [view, setView] = useState<ViewMode>("grid");
+export function ViewModeProvider({
+  children,
+  mode,
+}: {
+  children: React.ReactNode;
+  mode?: ViewMode;
+}) {
+  const value = useViewMode(mode);
 
   return (
-    <ViewModeContext.Provider value={{ view, setView }}>
+    <ViewModeContext.Provider value={value}>
       {children}
     </ViewModeContext.Provider>
   );
 }
 
-export function useViewMode() {
-  const ctx = useContext(ViewModeContext);
-  if (!ctx) throw new Error("useViewMode must be used within ViewModeProvider");
-  return ctx;
-}
-
-export function useViewModeOptional() {
-  const ctx = useContext(ViewModeContext);
-  return ctx;
+export function useViewModeContext() {
+  const context = useContext(ViewModeContext);
+  if (context === undefined) {
+    throw new Error("useViewModeContext must be used within ViewModeProvider");
+  }
+  return context;
 }

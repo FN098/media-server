@@ -1,28 +1,29 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useState } from "react";
 
 export const useScrollLockControl = () => {
-  // 元のスタイルを保存しておくためのRef
-  const originalStyle = useRef<string>("");
+  const [isLocked, setIsLocked] = useState(false);
+  const [prevOverflowStyle, setPrevOverflowStyle] = useState("");
 
-  // ロックする関数
   const lock = useCallback(() => {
     if (typeof window === "undefined") return;
-
-    // すでにロックされている場合は二重に保存しない
     if (document.body.style.overflow === "hidden") return;
 
-    // 現在のスタイルを保存して、hiddenにする
-    originalStyle.current = window.getComputedStyle(document.body).overflow;
+    const overflow = window.getComputedStyle(document.body).overflow;
+    setPrevOverflowStyle(overflow);
+
     document.body.style.overflow = "hidden";
+
+    setIsLocked(true);
   }, []);
 
-  // 解除する関数
   const unlock = useCallback(() => {
     if (typeof window === "undefined") return;
 
     // 保存していたスタイルに戻す
-    document.body.style.overflow = originalStyle.current || "unset";
-  }, []);
+    document.body.style.overflow = prevOverflowStyle || "unset";
 
-  return { lock, unlock };
+    setIsLocked(false);
+  }, [prevOverflowStyle]);
+
+  return { isLocked, lock, unlock };
 };
