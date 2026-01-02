@@ -23,7 +23,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { useCallback } from "react";
 import { toast } from "sonner";
 
-export function ListView({
+export function ExplorerListView({
   nodes,
   onOpen,
 }: {

@@ -3,7 +3,7 @@
 import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
-import { ListView } from "@/components/ui/explorer-list-view";
+import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import {
   useExplorerQuery,
@@ -122,7 +122,7 @@ export function Explorer() {
       {/* リストビュー */}
       {viewMode === "list" && (
         <div>
-          <ListView nodes={searchFiltered} onOpen={handleOpen} />
+          <ExplorerListView nodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
 

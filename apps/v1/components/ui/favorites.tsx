@@ -1,7 +1,7 @@
 "use client";
 
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
-import { ListView } from "@/components/ui/explorer-list-view";
+import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
 import { isMedia } from "@/lib/media/media-types";
@@ -99,7 +99,7 @@ export function Favorites() {
           {/* リストビュー */}
           {view === "list" && (
             <div>
-              <ListView
+              <ExplorerListView
                 nodes={filtered}
                 onOpen={(index) => void handleOpen(filtered, index)}
               />
