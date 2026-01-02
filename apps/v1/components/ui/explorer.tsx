@@ -42,7 +42,7 @@ export function Explorer() {
   // クエリパラメータ
   const setExplorerQuery = useSetExplorerQuery();
   const { view, q, at, modal } = useExplorerQuery(); // URL
-  const { query, setQuery } = useSearchContext(); // ヘッダーUI
+  const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
   const viewerIndex = at != null ? normalizeIndex(at, mediaOnly.length) : null;
 
@@ -87,6 +87,7 @@ export function Explorer() {
     { key: "q", callback: () => openPrevFolder("first") },
     { key: "e", callback: () => openNextFolder("first") },
     { key: "Ctrl+a", callback: () => selectAllMedia() },
+    { key: "Ctrl+k", callback: () => focusSearch() },
     { key: "Escape", callback: () => clearSelection() },
   ]);
 

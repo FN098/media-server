@@ -38,7 +38,7 @@ export function Favorites() {
   // クエリパラメータ
   const setExplorerQuery = useSetExplorerQuery();
   const { view, q, at, modal } = useExplorerQuery(); // URL
-  const { query, setQuery } = useSearchContext(); // ヘッダーUI
+  const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
   const viewerIndex = at != null ? normalizeIndex(at, mediaOnly.length) : null;
 
@@ -81,6 +81,7 @@ export function Favorites() {
   // ショートカット
   useShortcutKeys([
     { key: "Ctrl+a", callback: () => selectAllMedia() },
+    { key: "Ctrl+k", callback: () => focusSearch() },
     { key: "Escape", callback: () => clearSelection() },
   ]);
 
@@ -127,6 +128,7 @@ export function Favorites() {
           <MediaViewer
             items={mediaOnly}
             initialIndex={viewerIndex}
+            features={{ openFolder: true }}
             onClose={closeViewer}
             onPrevFolder={() => openPrevFolder("last")}
             onNextFolder={() => openNextFolder("first")}
