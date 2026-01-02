@@ -1,21 +1,20 @@
 "use client";
 
+import { visitFolderAction } from "@/actions/folder-actions";
+import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
 import { ListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { useInitialize } from "@/hooks/use-initialize";
 import { useMediaViewer } from "@/hooks/use-media-selection";
-import { useThumb } from "@/hooks/use-thumb";
-import { useVisitFolder } from "@/hooks/use-visit-folder";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { KeyAction } from "@/lib/shortcut-keys/types";
 import { useExplorerListingContext } from "@/providers/explorer-listing-provider";
 import { useExplorerNavigationContext } from "@/providers/explorer-navigation-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useSelectionContext } from "@/providers/selection-provider";
-import { ShortcutProvider } from "@/providers/shortcut-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -25,16 +24,13 @@ import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
 export function Explorer() {
+  const { listing } = useExplorerListingContext();
   const listingCtx = useExplorerListingContext();
   const navigationCtx = useExplorerNavigationContext();
   const viewModeCtx = useViewModeContext();
   const searchCtx = useSearchContext();
   const selectCtx = useSelectionContext();
-  const { sendVisitFolderUpdateRequest } = useVisitFolder();
-  const { sendCreateThumbRequest } = useThumb();
   const { currentMediaIndex, setCurrentMediaIndex } = useMediaViewer();
-
-  console.log(navigationCtx.modal);
 
   // ファイルまたはフォルダを開く
   const handleOpen = useCallback(
@@ -111,11 +107,10 @@ export function Explorer() {
 
   // 初回のみ実行
   useInitialize(() => {
-    debugger;
-    const index = navigationCtx.index;
-    const node = listingCtx.getMediaNode(index);
-    const mediaIndex = listingCtx.getMediaIndex(node.path);
-    setCurrentMediaIndex(mediaIndex);
+    // const index = navigationCtx.index;
+    // const node = listingCtx.getMediaNode(index);
+    // const mediaIndex = listingCtx.getMediaIndex(node.path);
+    // setCurrentMediaIndex(mediaIndex);
   });
 
   // クエリ入力時に遅延反映
@@ -124,31 +119,24 @@ export function Explorer() {
   // debouncedSetQuery(searchCtx.query);
   // }, [debouncedSetQuery, searchCtx.query]);
 
-  // フォルダ訪問時に訪問履歴を更新
+  // サムネイル作成リクエスト送信
   useEffect(() => {
-    void sendVisitFolderUpdateRequest(listingCtx.listing.path);
-  }, [listingCtx.listing.path, sendVisitFolderUpdateRequest]);
+    void enqueueThumbJob(listing.path);
+  }, [listing.path]);
 
-  // フォルダ訪問時にサムネイルを作成
+  // 訪問済みフォルダ更新リクエスト送信
   useEffect(() => {
-    void sendCreateThumbRequest(listingCtx.listing.path);
-  }, [listingCtx.listing.path, sendCreateThumbRequest]);
+    void visitFolderAction(listing.path);
+  }, [listing.path]);
 
   // ショートカット
-  // useShortcutKeys([
-  //   { key: "q", callback: navigateToNextFolder },
-  //   { key: "e", callback: navigateToPrevFolder },
-  //   { key: "Ctrl+a", callback: handleSelectAll },
-  //   { key: "Escape", callback: handleClearSelection },
-  //   { key: "Ctrl+k", callback: searchCtx.focus },
-  // ]);
-  const shortcuts: KeyAction[] = [
+  useShortcutKeys([
     { key: "q", callback: navigateToNextFolder },
     { key: "e", callback: navigateToPrevFolder },
     { key: "Ctrl+a", callback: handleSelectAll },
     { key: "Escape", callback: handleClearSelection },
     { key: "Ctrl+k", callback: searchCtx.focus },
-  ];
+  ]);
 
   // エイリアス
   const { viewMode } = viewModeCtx;
@@ -167,21 +155,19 @@ export function Explorer() {
         viewMode === "list" && "px-4"
       )}
     >
-      <ShortcutProvider actions={shortcuts}>
-        {/* グリッドビュー */}
-        {viewMode === "grid" && (
-          <div>
-            <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
-          </div>
-        )}
+      {/* グリッドビュー */}
+      {viewMode === "grid" && (
+        <div>
+          <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
+        </div>
+      )}
 
-        {/* リストビュー */}
-        {viewMode === "list" && (
-          <div>
-            <ListView nodes={searchFiltered} onOpen={handleOpen} />
-          </div>
-        )}
-      </ShortcutProvider>
+      {/* リストビュー */}
+      {viewMode === "list" && (
+        <div>
+          <ListView nodes={searchFiltered} onOpen={handleOpen} />
+        </div>
+      )}
 
       {/* ビューワ */}
       <ScrollLockProvider>
