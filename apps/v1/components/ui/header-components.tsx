@@ -9,6 +9,8 @@ import { useViewModeContext } from "@/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 export function HeaderNavigation({ basePath }: { basePath?: string }) {
   const breadcrumbs = useBreadcrumbs(basePath ?? "");
@@ -44,12 +46,31 @@ export function HeaderNavigation({ basePath }: { basePath?: string }) {
 
 export function HeaderSearch() {
   const { inputRef, query, setQuery } = useSearchContext();
+  const [input, setInput] = useState(query);
+
+  const debouncedSetQuery = useDebouncedCallback(
+    (v: string) => setQuery(v),
+    300
+  );
+
+  // 外部 query → input 同期
+  useEffect(() => {
+    setInput(query);
+  }, [query]);
+
+  // input → query（debounce）
+  useEffect(() => {
+    debouncedSetQuery(input);
+    return () => {
+      debouncedSetQuery.cancel();
+    };
+  }, [debouncedSetQuery, input]);
 
   return (
     <Search
       inputRef={inputRef}
-      value={query}
-      setValue={setQuery}
+      value={input}
+      setValue={setInput}
       className="w-[180px] shrink-0"
     />
   );

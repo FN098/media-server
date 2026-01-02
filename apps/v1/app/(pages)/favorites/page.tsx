@@ -3,6 +3,8 @@ import { USER } from "@/basic-auth";
 import { Favorites } from "@/components/ui/favorites";
 import { formatNodes } from "@/lib/media/format";
 import { ExplorerProvider } from "@/providers/explorer-provider";
+import { FavoritesProvider } from "@/providers/favorites-provider";
+import { SelectionProvider } from "@/providers/selection-provider";
 import { getFavoriteMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 
@@ -19,17 +21,21 @@ export default async function Page() {
 
   const formatted = formatNodes(nodes);
 
+  const listing = {
+    nodes: formatted,
+    path: "",
+    parent: null,
+    prev: null,
+    next: null,
+  };
+
   return (
-    <ExplorerProvider
-      listing={{
-        nodes: formatted,
-        path: "",
-        parent: null,
-        prev: null,
-        next: null,
-      }}
-    >
-      <Favorites />
-    </ExplorerProvider>
+    <SelectionProvider>
+      <FavoritesProvider>
+        <ExplorerProvider listing={listing}>
+          <Favorites />
+        </ExplorerProvider>
+      </FavoritesProvider>
+    </SelectionProvider>
   );
 }

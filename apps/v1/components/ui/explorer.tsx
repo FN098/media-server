@@ -25,7 +25,6 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
-import { useDebouncedCallback } from "use-debounce";
 
 export function Explorer() {
   const {
@@ -42,7 +41,6 @@ export function Explorer() {
 
   // クエリパラメータ
   const setExplorerQuery = useSetExplorerQuery();
-  const debouncedSetExplorerQuery = useDebouncedCallback(setExplorerQuery, 200);
   const { view, q, at, modal } = useExplorerQuery(); // URL
   const { query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
@@ -68,8 +66,8 @@ export function Explorer() {
 
     if (Object.keys(patch).length === 0) return;
 
-    debouncedSetExplorerQuery(patch);
-  }, [q, query, debouncedSetExplorerQuery, view, viewMode]);
+    setExplorerQuery(patch);
+  }, [q, query, setExplorerQuery, view, viewMode]);
 
   // クエリパラメータ正規化
   useNormalizeExplorerQuery();
