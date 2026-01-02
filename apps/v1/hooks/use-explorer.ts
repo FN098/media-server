@@ -8,7 +8,6 @@ import { isMatchJapanese } from "@/lib/utils/search";
 import { useSearchContext } from "@/providers/search-provider";
 import { useSelectionContext } from "@/providers/selection-provider";
 import { useCallback, useEffect, useMemo } from "react";
-import { toast } from "sonner";
 
 export function useExplorer(listing: MediaListing) {
   const { query } = useSearchContext();
@@ -106,19 +105,17 @@ export function useExplorer(listing: MediaListing) {
 
   const openNode = useCallback(
     (node: MediaNode) => {
-      // フォルダ
       if (node.isDirectory) {
         openFolder(node.path);
-        return;
+        return "folder";
       }
 
-      // ファイル
       if (isMedia(node.type)) {
         openViewer(node.path);
-        return;
+        return "media";
       }
 
-      toast.warning("このファイル形式は対応していません");
+      return "unsupported";
     },
     [openFolder, openViewer]
   );

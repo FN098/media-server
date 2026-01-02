@@ -11,6 +11,7 @@ import {
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
+import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
@@ -22,7 +23,8 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 
 export function Explorer() {
@@ -90,6 +92,18 @@ export function Explorer() {
     { key: "Escape", callback: () => clearSelection() },
   ]);
 
+  // ファイル/フォルダオープン
+  const handleOpen = useCallback(
+    (node: MediaNode) => {
+      const result = openNode(node);
+
+      if (result === "unsupported") {
+        toast.warning("このファイル形式は対応していません");
+      }
+    },
+    [openNode]
+  );
+
   return (
     <div
       className={cn(
@@ -101,14 +115,14 @@ export function Explorer() {
       {/* グリッドビュー */}
       {viewMode === "grid" && (
         <div>
-          <ExplorerGridView nodes={searchFiltered} onOpen={openNode} />
+          <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
 
       {/* リストビュー */}
       {viewMode === "list" && (
         <div>
-          <ListView nodes={searchFiltered} onOpen={openNode} />
+          <ListView nodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
 
