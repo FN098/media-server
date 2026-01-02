@@ -29,8 +29,6 @@ export function Favorites() {
     mediaOnly,
     openNode,
     closeViewer,
-    openNextFolder,
-    openPrevFolder,
     selectAllMedia,
     clearSelection,
   } = useExplorerContext();
@@ -130,8 +128,6 @@ export function Favorites() {
             initialIndex={viewerIndex}
             features={{ openFolder: true }}
             onClose={closeViewer}
-            onPrevFolder={() => openPrevFolder("last")}
-            onNextFolder={() => openNextFolder("first")}
           />
         </ScrollLockProvider>
       )}
