@@ -9,7 +9,6 @@ import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitleControl } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { useMounted } from "@/hooks/use-mounted";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTagEditor } from "@/hooks/use-tag-editor";
 import { isMedia } from "@/lib/media/media-types";
@@ -88,7 +87,6 @@ export function MediaViewer({
     null
   );
   const { setTitle, resetTitle } = useDocumentTitleControl();
-  const mounted = useMounted();
   const openFolder = features?.openFolder ?? false;
   const hasPrev = !!onPrevFolder;
   const hasNext = !!onNextFolder;
@@ -174,8 +172,6 @@ export function MediaViewer({
       },
     },
   ]);
-
-  if (!mounted) return;
 
   return (
     <div

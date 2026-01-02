@@ -125,6 +125,8 @@ export function Explorer() {
     { key: "Escape", callback: () => clearSelection() },
   ]);
 
+  console.log({ modal, index });
+
   return (
     <div
       className={cn(
