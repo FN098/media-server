@@ -1,5 +1,6 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { Record } from "@/generated/prisma/runtime/library";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTagEditor } from "@/hooks/use-tag-editor";
 import { MediaNode } from "@/lib/media/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
@@ -11,8 +12,7 @@ import {
   TagOperator,
   TagState,
 } from "@/lib/tag/types";
-import { useSelection } from "@/providers/selection-provider";
-import { useShortcutKeys } from "@/providers/shortcut-provider-old";
+import { useSelectionContext } from "@/providers/selection-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -31,12 +31,8 @@ export function TagEditSheet({
   active: boolean;
   onClose?: () => void;
 }) {
-  const router = useRouter();
-
-  // タグエディターステート
   const {
     mode,
-    setMode,
     isEditing,
     setIsEditing,
     isLoading,
@@ -44,11 +40,10 @@ export function TagEditSheet({
     newTagName,
     setNewTagName,
     pendingNewTags,
-    addPendingNewTag,
+    addTagByName,
     pendingChanges,
     hasChanges,
     toggleTag,
-    setTagChange,
     tagStates,
     suggestedTags,
     selectSuggestion,
@@ -58,14 +53,18 @@ export function TagEditSheet({
     resetChanges,
     isTransparent,
     setIsTransparent,
-  } = useTagEditor(allNodes);
+    toggleIsEditing,
+    endSession,
+    singleTargetPath,
+  } = useTagEditor(allNodes, active);
 
-  // パス選択ステート
   const {
-    selectedValues: selectedPaths,
-    selectValues: selectPaths,
+    selectedKeys: selectedPaths,
+    selectKeys: selectPaths,
     clearSelection,
-  } = useSelection();
+  } = useSelectionContext();
+
+  const router = useRouter();
 
   // 透明モードトグル
   const toggleTransparent = () => setIsTransparent((prev) => !prev);
@@ -115,55 +114,25 @@ export function TagEditSheet({
     }
   };
 
-  // タグ追加処理
-  const handleAddTag = () => {
-    const name = newTagName.trim();
-    if (!name) return;
-
-    // 既に存在すれば「追加候補」
-    const existing = editModeTags.find((t) => t.name === name);
-    if (existing) {
-      setTagChange(existing, "add");
-      setNewTagName("");
-      return;
-    }
-
-    // 仮タグとしてメモリに積む
-    addPendingNewTag(name);
-    setNewTagName("");
-  };
-
   // 閉じる処理（正常終了）
   const handleClose = () => {
-    setIsEditing(false);
-    setMode("none");
+    endSession();
     clearSelection();
-    resetChanges();
     onClose?.();
   };
 
+  // ショートカット
   useShortcutKeys([
     { key: "Escape", callback: handleClose },
-    { key: "e", callback: () => setIsEditing((prev) => !prev) },
+    { key: "e", callback: toggleIsEditing },
   ]);
-
-  // モードの設定
-  useEffect(() => {
-    if (active && allNodes.length === 1) {
-      setMode("single");
-    } else if (active && allNodes.length > 1) {
-      setMode("default");
-    } else {
-      setMode("none");
-    }
-  }, [active, allNodes.length, setMode]);
 
   // シングルモードの場合は自動選択
   useEffect(() => {
-    if (mode === "single") {
-      selectPaths([allNodes[0].path]);
+    if (singleTargetPath) {
+      selectPaths([singleTargetPath]);
     }
-  }, [allNodes, mode, selectPaths]);
+  }, [singleTargetPath, selectPaths]);
 
   return (
     <AnimatePresence>
@@ -245,7 +214,7 @@ export function TagEditSheet({
                     <TagInput
                       value={newTagName}
                       onChange={setNewTagName}
-                      onAdd={() => void handleAddTag()}
+                      onAdd={() => addTagByName(newTagName)}
                       disabled={isLoading}
                       suggestions={suggestedTags}
                       onSelectSuggestion={selectSuggestion}

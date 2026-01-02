@@ -3,3 +3,5 @@ export const searchTagStrategies = [
   "recently-created",
   "recently-used",
 ] as const;
+
+export const sortTagStrategies = ["default", "by-name"] as const;

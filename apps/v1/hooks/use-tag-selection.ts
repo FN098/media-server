@@ -1,20 +1,23 @@
 import { MediaNode } from "@/lib/media/types";
-import { Tag, TagNameType, TagState } from "@/lib/tag/types";
+import { Tag, TagCounts, TagStates } from "@/lib/tag/types";
 import { uniqueBy } from "@/lib/utils/unique";
 import { useMemo } from "react";
 
-export function useTagSelection(selectedNodes: MediaNode[], allTags: Tag[]) {
+export function useTagStates(
+  selectedNodes: MediaNode[],
+  allTags: Tag[]
+): TagStates {
   return useMemo(() => {
     const totalSelected = selectedNodes.length;
 
     // 何も選択されていない場合はすべて none
     if (totalSelected === 0) {
-      const emptyStates: Record<string, TagState> = {};
+      const emptyStates: TagStates = {};
       allTags.forEach((tag) => (emptyStates[tag.name] = "none"));
-      return { tagStates: emptyStates };
+      return emptyStates;
     }
 
-    const tagCounts: Record<TagNameType, number> = {};
+    const tagCounts: TagCounts = {};
 
     // 選択ノードのタグを集計
     selectedNodes
@@ -26,7 +29,7 @@ export function useTagSelection(selectedNodes: MediaNode[], allTags: Tag[]) {
         });
       });
 
-    const tagStates: Record<TagNameType, TagState> = {};
+    const tagStates: TagStates = {};
 
     // タグごとの状態を決定
     // - all: すべての選択ノードにタグが含まれる
@@ -39,6 +42,6 @@ export function useTagSelection(selectedNodes: MediaNode[], allTags: Tag[]) {
       else tagStates[tag.name] = "some";
     });
 
-    return { tagStates };
+    return tagStates;
   }, [allTags, selectedNodes]);
 }

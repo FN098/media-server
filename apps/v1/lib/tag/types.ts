@@ -1,4 +1,4 @@
-import { searchTagStrategies } from "@/lib/tag/strategies";
+import { searchTagStrategies, sortTagStrategies } from "@/lib/tag/strategies";
 
 export type {
   MediaTag as PrismaMediaTag,
@@ -19,7 +19,10 @@ export type TagOperation = {
 };
 
 export type TagEditMode = "default" | "single" | "none";
+
 export type TagState = "all" | "some" | "none";
+export type TagStates = Record<TagNameType, TagState>;
+export type TagCounts = Record<TagNameType, number>;
 
 export type PendingNewTag = {
   tempId: string;
@@ -49,6 +52,8 @@ export type SearchTagsRequestParams = {
   query?: string;
   strategy?: SearchTagStrategy;
 };
+
+export type SortTagStrategy = (typeof sortTagStrategies)[number];
 
 export type TagIdType = string;
 export type PendingChangesType = Record<TagIdType, TagOperator>;
