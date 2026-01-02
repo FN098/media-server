@@ -14,7 +14,6 @@ export function useShortcutKeys(actions: KeyAction[]) {
     };
   }, []);
 
-  // マウント時にキー入力イベントハンドラを登録
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (
