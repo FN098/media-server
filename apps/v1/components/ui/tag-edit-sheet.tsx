@@ -25,22 +25,26 @@ export function TagEditSheet({
   targetNodes,
   mode = "default",
   active,
+  transparent,
+  edit,
   onClose,
 }: {
   targetNodes: MediaNode[];
   mode?: TagEditMode;
   active?: boolean;
+  transparent?: boolean;
+  edit?: boolean;
   onClose?: () => void;
 }) {
   const router = useRouter();
   const editor = useTagEditor(targetNodes);
 
   // 編集モード
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(edit ?? false);
   const toggleIsEditing = () => setIsEditing((prev) => !prev);
 
   // 透明モード
-  const [isTransparent, setIsTransparent] = useState(false);
+  const [isTransparent, setIsTransparent] = useState(transparent ?? false);
   const toggleIsTransparent = () => setIsTransparent((prev) => !prev);
 
   // 処理中
@@ -135,6 +139,11 @@ export function TagEditSheet({
     {
       key: "e",
       callback: () => toggleIsEditing(),
+      condition: () => active ?? false,
+    },
+    {
+      key: "x",
+      callback: () => toggleIsTransparent(),
       condition: () => active ?? false,
     },
   ]);

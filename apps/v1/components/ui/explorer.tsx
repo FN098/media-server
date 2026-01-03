@@ -133,7 +133,7 @@ export function Explorer() {
     clearSelection();
   };
 
-  // タグエディタ起動/終了
+  // タグエディタ表示・非表示
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
   const handleOpenTagEditor = () => setIsTagEditorOpen(true);
   const handleCloseTagEditor = () => setIsTagEditorOpen(false);
@@ -186,7 +186,6 @@ export function Explorer() {
     { key: "q", callback: () => openPrevFolder("first") },
     { key: "e", callback: () => openNextFolder("first") },
     { key: "t", callback: () => toggleIsTagEditorOpen() },
-    // { key: "x", callback: () => toggleTagEditorTransparent() },
     { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
     { key: "Escape", callback: () => handleClearSelection() },
