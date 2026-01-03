@@ -1,12 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+
   const [selectedKeys, setSelectedKeys] = useState<Set<K>>(
     () => new Set(initialSelectedKeys)
   );
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-
-  const selectedCount = selectedKeys.size;
 
   const isSelected = useCallback(
     (key: K) => selectedKeys.has(key),
@@ -30,25 +29,13 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     setSelectedKeys(new Set());
   }, []);
 
-  return useMemo(
-    () => ({
-      selectedKeys,
-      isSelectionMode,
-      selectedCount,
-      setIsSelectionMode,
-      isSelected,
-      toggleSelection,
-      selectKeys,
-      clearSelection,
-    }),
-    [
-      selectedKeys,
-      isSelectionMode,
-      selectedCount,
-      isSelected,
-      toggleSelection,
-      selectKeys,
-      clearSelection,
-    ]
-  );
+  return {
+    isSelectionMode,
+    setIsSelectionMode,
+    selectedKeys,
+    isSelected,
+    toggleSelection,
+    selectKeys,
+    clearSelection,
+  };
 }

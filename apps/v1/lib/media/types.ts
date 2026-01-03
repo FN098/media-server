@@ -1,3 +1,5 @@
+import { PathType } from "@/lib/path/types";
+
 export type { Media as PrismaMedia } from "@/generated/prisma";
 
 export type MediaFsNodeType =
@@ -65,4 +67,4 @@ export type DbFavoriteInfo = {
   favoriteCountInFolder: number;
 };
 
-export type MediaSelectionKeyType = string;
+export type MediaPathToIndexMap = Map<PathType, number>;

@@ -140,14 +140,14 @@ export function Favorites() {
       {/* グリッドビュー */}
       {view === "grid" && (
         <div>
-          <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
+          <ExplorerGridView allNodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
 
       {/* リストビュー */}
       {view === "list" && (
         <div>
-          <ExplorerListView nodes={searchFiltered} onOpen={handleOpen} />
+          <ExplorerListView allNodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
 
@@ -158,7 +158,7 @@ export function Favorites() {
       {modal && viewerIndex != null && (
         <ScrollLockProvider>
           <MediaViewer
-            items={mediaOnly}
+            allNodes={mediaOnly}
             initialIndex={viewerIndex}
             features={{ openFolder: true }}
             onClose={closeViewer}

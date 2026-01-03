@@ -1,7 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/explorer";
-import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
@@ -9,9 +8,7 @@ import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { MediaFsNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
-import { FavoritesProvider } from "@/providers/favorites-provider";
-import { SelectionProvider } from "@/providers/selection-provider";
-import { TagEditorProvider } from "@/providers/tag-editor-provider";
+import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import {
   getDbFavoriteCount,
   getDbVisitedInfoDeeply,
@@ -82,25 +79,16 @@ export default async function Page(props: Props) {
   // フォーマット
   const formatted = formatNodes(merged);
 
-  // お気に入り
-  const favorites: FavoritesRecord = Object.fromEntries(
-    merged.map((n) => [n.path, n.isFavorite])
-  );
-
   const listing = {
     ...fsListing,
     nodes: formatted,
   };
 
   return (
-    <SelectionProvider>
-      <TagEditorProvider>
-        <FavoritesProvider favorites={favorites}>
-          <ExplorerProvider listing={listing}>
-            <Explorer />
-          </ExplorerProvider>
-        </FavoritesProvider>
-      </TagEditorProvider>
-    </SelectionProvider>
+    <ExplorerProvider listing={listing}>
+      <PathSelectionProvider>
+        <Explorer />
+      </PathSelectionProvider>
+    </ExplorerProvider>
   );
 }

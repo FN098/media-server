@@ -8,7 +8,7 @@ import z from "zod";
 const RequestSchema = z.object({
   query: z.string().optional(),
   paths: z.array(z.string()).optional().default([]),
-  strategy: z.enum(searchTagStrategies).optional(),
+  strategy: z.enum(searchTagStrategies).optional().default("default"),
   limit: z.coerce.number().optional().default(MAX_RETURN_TAGS_COUNT),
 });
 

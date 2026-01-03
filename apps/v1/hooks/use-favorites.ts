@@ -3,9 +3,8 @@ import {
   FavoritesMap,
   FavoritesRecord,
   IsFavoriteType,
-  PathType,
-  PathTypeSet,
 } from "@/lib/favorite/types";
+import { PathSet, PathType } from "@/lib/path/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function useFavorites(initialFavorites?: FavoritesRecord) {
@@ -110,7 +109,7 @@ function useFavoriteChannel(
 // 同時連打防止（in-flight 管理）
 function useInFlight() {
   // 再レンダリングによる Set の再インスタンス化を防ぐためラムダ式を使う
-  const [inFlight, setInFlight] = useState<PathTypeSet>(() => new Set());
+  const [inFlight, setInFlight] = useState<PathSet>(() => new Set());
 
   const startFlight = useCallback(
     (path: PathType) => setInFlight((s) => new Set(s).add(path)),

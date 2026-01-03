@@ -5,6 +5,7 @@ import { AudioPlayer } from "@/components/ui/audio-player";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
+import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitleControl } from "@/hooks/use-document-title";
@@ -14,9 +15,7 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
-import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +36,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import path from "path";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -50,28 +49,26 @@ const nextFolderNav = { type: "nav_next", path: "next-loader" } as const;
 type Slide = MediaNode | typeof prevFolderNav | typeof nextFolderNav;
 
 export function MediaViewer({
-  items,
+  allNodes,
   initialIndex,
   onClose,
-  features,
+  onOpenFolder,
   onNextFolder,
   onPrevFolder,
 }: {
-  items: MediaNode[];
+  allNodes: MediaNode[];
   initialIndex: number;
   onClose: () => void;
-  features?: {
-    openFolder?: boolean;
-  };
+  onOpenFolder?: (path: string, at?: IndexLike) => void;
   onNextFolder?: (at?: IndexLike) => void;
   onPrevFolder?: (at?: IndexLike) => void;
 }) {
-  const { openFolder } = useExplorerContext();
+  const isMobile = useIsMobile();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
-  const { toggleEditorOpenClose } = useTagEditorContext();
   const [index, setIndex] = useState(initialIndex);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
   const [isHeaderPinned, setIsHeaderPinned] = useState(false);
   const {
     isVisible: isHeaderVisible,
@@ -81,28 +78,40 @@ export function MediaViewer({
     duration: 2000,
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
-  const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(
     null
   );
   const { setTitle, resetTitle } = useDocumentTitleControl();
+  const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
+  const toggleTagEditorOpen = () => setIsTagEditorOpen((prev) => !prev);
+
+  const currentNode = allNodes[index];
   const hasPrev = !!onPrevFolder;
   const hasNext = !!onNextFolder;
   const offsetPrev = hasPrev ? 1 : 0;
-  const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
+
+  // 前のフォルダ、次のフォルダを仮想スライドに追加
+  const allSlides = useMemo(() => {
+    const slides: Slide[] = [...allNodes];
+    if (hasPrev) slides.unshift(prevFolderNav);
+    if (hasNext) slides.push(nextFolderNav);
+    return slides;
+  }, [allNodes, hasPrev, hasNext]);
+
+  // 仮想スライド中のコンテンツ専用インデックス
   const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
 
   // タイトル設定
   useEffect(() => {
-    const { title, name } = items[index];
+    const { title, name } = allNodes[index];
     setTitle(`${title ?? name} | ${APP_CONFIG.meta.title}`);
-  }, [index, items, resetTitle, setTitle]);
+  }, [index, allNodes, resetTitle, setTitle]);
 
   // お気に入りボタンクリック時の処理
-  const handleToggleFavorite = useCallback(async () => {
+  const handleToggleFavorite = async () => {
     try {
-      const nextIsFavorite = await toggleFavorite(items[index].path);
+      const nextIsFavorite = await toggleFavorite(allNodes[index].path);
       if (nextIsFavorite === undefined) return;
 
       const message = nextIsFavorite
@@ -115,20 +124,12 @@ export function MediaViewer({
       console.error(e);
       toast.error("お気に入りの更新に失敗しました");
     }
-  }, [toggleFavorite, items, index, interactHeader]);
+  };
 
   // 現在のファイルが存在するフォルダを開く
-  const handleOpenFolder = useCallback(() => {
-    openFolder(path.dirname(items[index].path));
-  }, [index, items, openFolder]);
-
-  // 前のフォルダ、次のフォルダを仮想スライドに追加
-  const allSlides = useMemo(() => {
-    const slides: Slide[] = [...items];
-    if (hasPrev) slides.unshift(prevFolderNav);
-    if (hasNext) slides.push(nextFolderNav);
-    return slides;
-  }, [items, hasPrev, hasNext]);
+  const handleOpenFolder = () => {
+    onOpenFolder?.(path.dirname(allNodes[index].path));
+  };
 
   // スワイプ時の移動処理
   const handleSwipe = (swiper: SwiperClass) => {
@@ -137,7 +138,7 @@ export function MediaViewer({
 
     const itemIdx = Math.max(
       0,
-      Math.min(activeIdx - offsetPrev, items.length - 1)
+      Math.min(activeIdx - offsetPrev, allNodes.length - 1)
     );
     setIndex(itemIdx);
 
@@ -171,42 +172,6 @@ export function MediaViewer({
       },
     },
   ]);
-
-  // ショートカット beta
-  // const { register: registerShortcuts } = useShortcutContext();
-  // useEffect(() => {
-  //   return registerShortcuts([
-  //     { priority: 100, key: "Escape", callback: () => onClose() },
-  //     { priority: 100, key: "Enter", callback: () => toggleHeaderVisibility() },
-  //     { priority: 100, key: " ", callback: () => toggleHeaderVisibility() },
-  //     {
-  //       priority: 100,
-  //       key: "ArrowLeft",
-  //       callback: () => swiperInstance?.slidePrev(),
-  //     },
-  //     {
-  //       priority: 100,
-  //       key: "ArrowRight",
-  //       callback: () => swiperInstance?.slideNext(),
-  //     },
-  //     { priority: 100, key: "a", callback: () => swiperInstance?.slidePrev() },
-  //     { priority: 100, key: "s", callback: () => void handleToggleFavorite() },
-  //     { priority: 100, key: "d", callback: () => swiperInstance?.slideNext() },
-  //     { priority: 100, key: "f", callback: () => toggleFullscreen() },
-  //     { priority: 100, key: "q", callback: () => onPrevFolder?.() },
-  //     { priority: 100, key: "e", callback: () => onNextFolder?.() },
-  //     { priority: 100, key: "o", callback: () => handleOpenFolder() },
-  //     {
-  //       priority: 100,
-  //       key: "h",
-  //       callback: () => {
-  //         toggleHeaderPinned();
-  //         interactHeader();
-  //       },
-  //     },
-  //   ]);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   return (
     <div
@@ -243,14 +208,14 @@ export function MediaViewer({
               <span className="text-white md:text-lg font-medium drop-shadow-md">
                 <MarqueeText
                   key={index}
-                  text={items[index].title ?? items[index].name}
+                  text={allNodes[index].title ?? allNodes[index].name}
                   autoplay={isMobile}
                   speed={40}
                   delay={1}
                 />
               </span>
               <span className="text-white/60 text-sm">
-                {index + 1} / {items.length}
+                {index + 1} / {allNodes.length}
               </span>
             </div>
 
@@ -264,10 +229,10 @@ export function MediaViewer({
               </button>
 
               {/* お気に入りボタン */}
-              {isMedia(items[index].type) && (
+              {isMedia(allNodes[index].type) && (
                 <FavoriteButton
                   variant="viewer"
-                  active={isFavorite(items[index].path)}
+                  active={isFavorite(allNodes[index].path)}
                   onClick={() => void handleToggleFavorite()}
                 />
               )}
@@ -287,11 +252,11 @@ export function MediaViewer({
                   align="end"
                   className="flex flex-col w-48 gap-2"
                 >
-                  {features?.openFolder && (
+                  {onOpenFolder && (
                     <DropdownMenuItem asChild>
                       <Link
                         href={getClientExplorerPath(
-                          path.dirname(items[index].path)
+                          path.dirname(allNodes[index].path)
                         )}
                       >
                         <Folder className="mr-2 h-4 w-4" />
@@ -317,7 +282,7 @@ export function MediaViewer({
                     )}
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={toggleEditorOpenClose}>
+                  <DropdownMenuItem onClick={toggleTagEditorOpen}>
                     <TagIcon className="mr-2 h-4 w-4" />
                     <span>タグを表示</span>
                     {!isMobile && (
@@ -387,6 +352,13 @@ export function MediaViewer({
           );
         })}
       </Swiper>
+
+      {/* タグエディター */}
+      <TagEditSheet
+        targetNodes={[currentNode]}
+        mode="single"
+        active={isTagEditorOpen}
+      />
     </div>
   );
 }

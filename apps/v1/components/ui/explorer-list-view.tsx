@@ -9,7 +9,7 @@ import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import { useSelectionContext } from "@/providers/selection-provider";
+import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import {
   Table,
@@ -24,10 +24,10 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 export function ExplorerListView({
-  nodes,
+  allNodes,
   onOpen,
 }: {
-  nodes: MediaNode[];
+  allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
 }) {
   return (
@@ -45,7 +45,7 @@ export function ExplorerListView({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {nodes.map((node) => (
+          {allNodes.map((node) => (
             <RowItem key={node.path} node={node} onOpen={onOpen} />
           ))}
         </TableBody>
@@ -63,7 +63,7 @@ function RowItem({
 }) {
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const { isSelected, isSelectionMode, toggleSelection } =
-    useSelectionContext();
+    usePathSelectionContext();
 
   const favorite = isFavorite(node.path);
   const selected = isSelected(node.path);

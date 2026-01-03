@@ -9,7 +9,7 @@ import { useGridView } from "@/hooks/use-grid-view";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import { useSelectionContext } from "@/providers/selection-provider";
+import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
@@ -17,14 +17,14 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 export function ExplorerGridView({
-  nodes,
+  allNodes,
   onOpen,
 }: {
-  nodes: MediaNode[];
+  allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
 }) {
   const { containerRef, columnCount, getTotalHeight, getRows, getCellItem } =
-    useGridView(nodes);
+    useGridView(allNodes);
 
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col">
@@ -74,7 +74,7 @@ function Cell({
 }) {
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const { isSelectionMode, isSelected, toggleSelection } =
-    useSelectionContext();
+    usePathSelectionContext();
 
   const favorite = isFavorite(node.path);
   const selected = isSelected(node.path);

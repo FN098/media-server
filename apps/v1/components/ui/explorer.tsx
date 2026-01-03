@@ -5,6 +5,7 @@ import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
 import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
+import { SelectionBar } from "@/components/ui/selection-bar";
 import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
 import {
   useExplorerQuery,
@@ -12,57 +13,41 @@ import {
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { MediaNode } from "@/lib/media/types";
+import { FavoritesRecord } from "@/lib/favorite/types";
+import { isMedia } from "@/lib/media/media-types";
+import { MediaNode, MediaPathToIndexMap } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
+import { isMatchJapanese } from "@/lib/utils/search";
 import { useExplorerContext } from "@/providers/explorer-provider";
+import { FavoritesProvider } from "@/providers/favorites-provider";
+import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
-import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export function Explorer() {
   const {
     listing,
-    searchFiltered,
-    mediaOnly,
-    selected,
-    openNode,
+    openViewer,
     closeViewer,
+    openFolder,
     openNextFolder,
     openPrevFolder,
-    selectAllMedia,
-    clearSelection,
   } = useExplorerContext();
 
-  const {
-    setTargetNodes: setTagEditTargetNodes,
-    toggleEditorOpenClose: toggleTagEditorOpenClose,
-    toggleIsTransparent: toggleTagEditorTransparent,
-    openEditor: openTagEditor,
-    closeEditor: closeTagEditor,
-  } = useTagEditorContext();
-
-  // 選択された項目をタグ編集の対象に指定
-  useEffect(() => {
-    setTagEditTargetNodes(selected);
-    if (selected.length > 0) openTagEditor();
-    else closeTagEditor();
-  }, [closeTagEditor, openTagEditor, selected, setTagEditTargetNodes]);
-
-  // クエリパラメータ
+  // URLパラメータによるステート管理
   const setExplorerQuery = useSetExplorerQuery();
   const { view, q, at, modal } = useExplorerQuery(); // URL
   const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
-  const viewerIndex = at != null ? normalizeIndex(at, mediaOnly.length) : null;
 
   // 初期同期：URL → Context（1回だけ）
   useEffect(() => {
@@ -90,6 +75,101 @@ export function Explorer() {
   // クエリパラメータ正規化
   useNormalizeExplorerQuery();
 
+  // 全ノードリスト
+  const { nodes: allNodes } = listing;
+
+  // フィルターノードリスト
+  const searchFiltered: MediaNode[] = useMemo(() => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return allNodes;
+    return allNodes.filter((n) => isMatchJapanese(n.name, trimmedQuery));
+  }, [allNodes, query]);
+
+  // メディアノードリスト
+  const mediaOnly: MediaNode[] = useMemo(
+    () => searchFiltered.filter((n) => isMedia(n.type)),
+    [searchFiltered]
+  );
+
+  // メディアノードリストのインデックスを計算するためのマップ
+  const mediaOnlyMap: MediaPathToIndexMap = useMemo(
+    () => new Map(mediaOnly.map((n, index) => [n.path, index])),
+    [mediaOnly]
+  );
+
+  // お気に入り
+  const favorites: FavoritesRecord = useMemo(
+    () => Object.fromEntries(mediaOnly.map((n) => [n.path, n.isFavorite])),
+    [mediaOnly]
+  );
+
+  // 選択機能
+  const {
+    isSelectionMode,
+    setIsSelectionMode,
+    selectedKeys: selectedPaths,
+    selectKeys: selectPaths,
+    clearSelection,
+  } = usePathSelectionContext();
+
+  // 選択済みノードリスト
+  const selected = useMemo(
+    () => searchFiltered.filter((n) => selectedPaths.has(n.path)),
+    [searchFiltered, selectedPaths]
+  );
+
+  // 1つ以上選択されたら選択モードに移行、0ならモード解除
+  useEffect(() => {
+    setIsSelectionMode(selected.length > 0);
+  }, [selected, setIsSelectionMode]);
+
+  // 全選択
+  const handleSelectAll = () => {
+    selectPaths(mediaOnly.map((n) => n.path));
+  };
+
+  // 選択解除
+  const handleClearSelection = () => {
+    clearSelection();
+  };
+
+  // タグエディタ起動/終了
+  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
+  const handleOpenTagEditor = () => setIsTagEditorOpen(true);
+  const handleCloseTagEditor = () => setIsTagEditorOpen(false);
+
+  // ビューア表示用インデックス
+  const viewerIndex = useMemo(
+    () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
+    [at, mediaOnly.length]
+  );
+
+  // メディアノードリストのインデックスを取得
+  const getMediaIndex = useCallback(
+    (path: string) => {
+      if (mediaOnlyMap.has(path)) return mediaOnlyMap.get(path)!;
+      return null;
+    },
+    [mediaOnlyMap]
+  );
+
+  // ファイル/フォルダオープン
+  const handleOpen = (node: MediaNode) => {
+    if (node.isDirectory) {
+      openFolder(node.path);
+      return;
+    }
+
+    if (isMedia(node.type)) {
+      const index = getMediaIndex(node.path);
+      if (index == null) return;
+      openViewer(index);
+      return;
+    }
+
+    toast.warning("このファイル形式は対応していません");
+  };
+
   // サムネイル作成リクエスト送信
   useEffect(() => {
     void enqueueThumbJob(listing.path);
@@ -104,39 +184,12 @@ export function Explorer() {
   useShortcutKeys([
     { key: "q", callback: () => openPrevFolder("first") },
     { key: "e", callback: () => openNextFolder("first") },
-    { key: "t", callback: () => toggleTagEditorOpenClose() },
-    { key: "x", callback: () => toggleTagEditorTransparent() },
-    { key: "Ctrl+a", callback: () => selectAllMedia() },
+    // { key: "t", callback: () => toggleTagEditorOpenClose() },
+    // { key: "x", callback: () => toggleTagEditorTransparent() },
+    { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
-    { key: "Escape", callback: () => clearSelection() },
+    { key: "Escape", callback: () => handleClearSelection() },
   ]);
-
-  // ショートカット beta
-  // const { register: registerShortcuts } = useShortcutContext();
-  // useEffect(() => {
-  //   return registerShortcuts([
-  //     { priority: 10, key: "q", callback: () => openPrevFolder("first") },
-  //     { priority: 10, key: "e", callback: () => openNextFolder("first") },
-  //     { priority: 10, key: "t", callback: () => toggleTagEditorOpenClose() },
-  //     { priority: 10, key: "x", callback: () => toggleTagEditorTransparent() },
-  //     { priority: 10, key: "Ctrl+a", callback: () => selectAllMedia() },
-  //     { priority: 10, key: "Ctrl+k", callback: () => focusSearch() },
-  //     { priority: 10, key: "Escape", callback: () => clearSelection() },
-  //   ]);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  // ファイル/フォルダオープン
-  const handleOpen = useCallback(
-    (node: MediaNode) => {
-      const result = openNode(node);
-
-      if (result === "unsupported") {
-        toast.warning("このファイル形式は対応していません");
-      }
-    },
-    [openNode]
-  );
 
   return (
     <div
@@ -146,35 +199,58 @@ export function Explorer() {
         viewMode === "list" && "px-4"
       )}
     >
-      {/* グリッドビュー */}
-      {viewMode === "grid" && (
-        <div>
-          <ExplorerGridView nodes={searchFiltered} onOpen={handleOpen} />
-        </div>
-      )}
+      <FavoritesProvider favorites={favorites}>
+        {/* グリッドビュー */}
+        {viewMode === "grid" && (
+          <div>
+            <ExplorerGridView allNodes={searchFiltered} onOpen={handleOpen} />
+          </div>
+        )}
 
-      {/* リストビュー */}
-      {viewMode === "list" && (
-        <div>
-          <ExplorerListView nodes={searchFiltered} onOpen={handleOpen} />
-        </div>
-      )}
+        {/* リストビュー */}
+        {viewMode === "list" && (
+          <div>
+            <ExplorerListView allNodes={searchFiltered} onOpen={handleOpen} />
+          </div>
+        )}
 
-      {/* タグエディター */}
-      <TagEditSheet />
+        {/* タグエディター */}
+        <TagEditSheet
+          targetNodes={selected}
+          active={isTagEditorOpen}
+          onClose={handleCloseTagEditor}
+        />
 
-      {/* ビューワ */}
-      {modal && viewerIndex != null && (
-        <ScrollLockProvider>
-          <MediaViewer
-            items={mediaOnly}
-            initialIndex={viewerIndex}
-            onClose={closeViewer}
-            onPrevFolder={() => openPrevFolder("last")}
-            onNextFolder={() => openNextFolder("first")}
+        {/* 選択バー */}
+        {/* TODO: 非表示アニメーション */}
+        {isSelectionMode && (
+          <SelectionBar
+            count={selected.length}
+            totalCount={mediaOnly.length}
+            onSelectAll={handleSelectAll}
+            onCancel={handleClearSelection}
+            actions={
+              <>
+                <Button onClick={handleOpenTagEditor}>タグ編集</Button>
+              </>
+            }
           />
-        </ScrollLockProvider>
-      )}
+        )}
+
+        {/* ビューワ */}
+        {modal && viewerIndex != null && (
+          <ScrollLockProvider>
+            <MediaViewer
+              allNodes={mediaOnly}
+              initialIndex={viewerIndex}
+              onClose={closeViewer}
+              onOpenFolder={openFolder}
+              onPrevFolder={() => openPrevFolder("last")}
+              onNextFolder={() => openNextFolder("first")}
+            />
+          </ScrollLockProvider>
+        )}
+      </FavoritesProvider>
 
       {/* フォルダナビゲーション */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">

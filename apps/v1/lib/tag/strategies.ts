@@ -1,4 +1,5 @@
 export const searchTagStrategies = [
+  "default",
   "most-related",
   "recently-created",
   "recently-used",

@@ -1,6 +1,8 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { Record } from "@/generated/prisma/runtime/library";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
+import { useTagEditor } from "@/hooks/use-tag-editor";
+import { MediaNode } from "@/lib/media/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import {
   PendingNewTag,
@@ -10,69 +12,68 @@ import {
   TagOperator,
   TagState,
 } from "@/lib/tag/types";
-import { useSelectionContext } from "@/providers/selection-provider";
-import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export function TagEditSheet({ onClose }: { onClose?: () => void }) {
-  const {
-    mode,
-    isEditing,
-    setIsEditing,
-    isLoading,
-    setIsLoading,
-    newTagName,
-    setNewTagName,
-    pendingNewTags,
-    addTagByName,
-    pendingChanges,
-    hasChanges,
-    toggleTagChange,
-    tagStates,
-    suggestedTags,
-    selectSuggestion,
-    editModeTags,
-    viewModeTags,
-    refreshTags,
-    resetChanges,
-    isTransparent,
-    toggleIsEditing,
-    endSession,
-    singleTargetPath,
-    isActive,
-    toggleIsTransparent,
-  } = useTagEditorContext();
-
-  const {
-    selectedKeys: selectedPaths,
-    selectKeys: selectPaths,
-    clearSelection,
-  } = useSelectionContext();
-
+export function TagEditSheet({
+  targetNodes,
+  mode = "default",
+  active,
+  onClose,
+}: {
+  targetNodes: MediaNode[];
+  mode?: TagEditMode;
+  active?: boolean;
+  onClose?: () => void;
+}) {
   const router = useRouter();
+  const editor = useTagEditor(targetNodes);
 
-  // 閉じる処理
-  const handleClose = useCallback(() => {
-    endSession();
-    clearSelection();
-    onClose?.();
-  }, [clearSelection, endSession, onClose]);
+  // 編集モード
+  const [isEditing, setIsEditing] = useState(false);
+  const toggleIsEditing = () => setIsEditing((prev) => !prev);
+
+  // 透明モード
+  const [isTransparent, setIsTransparent] = useState(false);
+  const toggleIsTransparent = () => setIsTransparent((prev) => !prev);
+
+  // 処理中
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 新規作成
+  const handleNewAdd = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+
+    // 既に存在すれば「追加候補」
+    const existing = editor.editModeTags.find((t) => t.name === trimmed);
+    if (existing) {
+      editor.setTagChange(existing, "add");
+      editor.setNewTagName("");
+      return;
+    }
+
+    // 存在しない場合は仮タグとしてメモリに積む
+    editor.addPendingNewTag(trimmed);
+    editor.setNewTagName("");
+  };
 
   // 保存処理
-  const handleApply = useCallback(async () => {
+  const handleApply = async () => {
     if (isLoading) return;
     setIsLoading(true);
 
     try {
       // 仮タグを DB 作成
-      const created = await createTagsAction(pendingNewTags.map((t) => t.name));
+      const created = await createTagsAction(
+        editor.pendingNewTags.map((t) => t.name)
+      );
       if (!created.success) throw new Error(created.error);
 
       // 新規タグの操作
@@ -82,12 +83,12 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
       }));
 
       // 既存タグの操作
-      const existingOps: TagOperation[] = Object.entries(pendingChanges).map(
-        ([tagId, operator]) => ({
-          tagId,
-          operator,
-        })
-      );
+      const existingOps: TagOperation[] = Object.entries(
+        editor.pendingChanges
+      ).map(([tagId, operator]) => ({
+        tagId,
+        operator,
+      }));
 
       // マージ
       const operations = [...existingOps, ...createdOps];
@@ -95,74 +96,52 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
 
       // 紐づけ実行
       const result = await updateMediaTagsAction({
-        mediaPaths: Array.from(selectedPaths),
+        mediaPaths: targetNodes.map((n) => n.path),
         operations,
       });
 
       if (result.success) {
         toast.success("保存しました");
-        await refreshTags();
+        editor.resetChanges();
+        setIsEditing(mode !== "single");
+        await editor.refreshTags();
         router.refresh();
-        handleClose();
+        if (mode === "default") handleTerminate();
       }
     } finally {
       setIsLoading(false);
     }
-  }, [
-    handleClose,
-    isLoading,
-    pendingChanges,
-    pendingNewTags,
-    refreshTags,
-    router,
-    selectedPaths,
-    setIsLoading,
-  ]);
+  };
+
+  // 終了処理
+  const handleTerminate = () => {
+    // 編集モードなら閲覧モードに移行（閉じない）
+    if (isEditing) {
+      setIsEditing(false);
+      return;
+    }
+
+    // 閲覧モードなら閉じる
+    onClose?.();
+  };
 
   // ショートカット
   useShortcutKeys([
     {
       key: "Escape",
-      callback: () => handleClose,
-      condition: () => isActive,
+      callback: () => handleTerminate(),
+      condition: () => active ?? false,
     },
     {
       key: "e",
-      callback: () => toggleIsEditing,
-      condition: () => isActive,
+      callback: () => toggleIsEditing(),
+      condition: () => active ?? false,
     },
   ]);
 
-  // ショートカット beta
-  // const { register: registerShortcuts } = useShortcutContext();
-  // useEffect(() => {
-  //   return registerShortcuts([
-  //     {
-  //       priority: 1000,
-  //       key: "Escape",
-  //       callback: () => handleClose,
-  //       condition: () => isActive,
-  //     },
-  //     {
-  //       priority: 1000,
-  //       key: "e",
-  //       callback: () => toggleIsEditing,
-  //       condition: () => isActive,
-  //     },
-  //   ]);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  // シングルモードの場合は自動選択
-  useEffect(() => {
-    if (singleTargetPath) {
-      selectPaths([singleTargetPath]);
-    }
-  }, [singleTargetPath, selectPaths]);
-
   return (
     <AnimatePresence>
-      {isActive && (
+      {active && (
         <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
           {/* 暗転オーバーレイ */}
           {isEditing && (
@@ -171,7 +150,7 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black/40 pointer-events-auto"
-              onClick={handleClose}
+              onClick={handleTerminate}
             />
           )}
 
@@ -203,19 +182,19 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
                     <SheetHeader
                       mode={mode}
                       isEditing={false}
-                      count={selectedPaths.size}
+                      count={targetNodes.length}
                       onEditClick={() => setIsEditing(true)}
-                      onClose={handleClose}
+                      onClose={handleTerminate}
                       isTransparent={isTransparent}
                       onToggleTransparent={toggleIsTransparent}
                     />
                     <TagList
                       isEditing={false}
-                      tags={viewModeTags}
-                      pendingChanges={pendingChanges}
-                      pendingNewTags={pendingNewTags}
-                      tagStates={tagStates}
-                      onToggle={toggleTagChange}
+                      tags={editor.viewModeTags}
+                      pendingChanges={editor.pendingChanges}
+                      pendingNewTags={editor.pendingNewTags}
+                      tagStates={editor.tagStates}
+                      onToggle={editor.toggleTagChange}
                       isTransparent={isTransparent}
                     />
                   </motion.div>
@@ -231,34 +210,34 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
                     <SheetHeader
                       mode={mode}
                       isEditing={true}
-                      count={selectedPaths.size}
+                      count={targetNodes.length}
                       onEditClick={() => {}}
-                      onClose={handleClose}
+                      onClose={handleTerminate}
                       isTransparent={isTransparent}
                       onToggleTransparent={toggleIsTransparent}
                     />
                     <TagInput
-                      value={newTagName}
-                      onChange={setNewTagName}
-                      onAdd={() => addTagByName(newTagName)}
+                      value={editor.newTagName}
+                      onChange={editor.setNewTagName}
+                      onAdd={() => handleNewAdd(editor.newTagName)}
                       disabled={isLoading}
-                      suggestions={suggestedTags}
-                      onSelectSuggestion={selectSuggestion}
+                      suggestions={editor.suggestedTags}
+                      onSelectSuggestion={editor.selectSuggestion}
                       isTransparent={isTransparent}
                     />
                     <TagList
                       isEditing={true}
-                      tags={editModeTags}
-                      pendingChanges={pendingChanges}
-                      pendingNewTags={pendingNewTags}
-                      tagStates={tagStates}
-                      onToggle={toggleTagChange}
+                      tags={editor.editModeTags}
+                      pendingChanges={editor.pendingChanges}
+                      pendingNewTags={editor.pendingNewTags}
+                      tagStates={editor.tagStates}
+                      onToggle={editor.toggleTagChange}
                       isTransparent={isTransparent}
                     />
                     <SheetFooter
-                      onReset={resetChanges}
+                      onReset={editor.resetChanges}
                       onApply={() => void handleApply()}
-                      hasChanges={hasChanges}
+                      hasChanges={editor.hasChanges}
                       isLoading={isLoading}
                       isTransparent={isTransparent}
                     />
@@ -567,8 +546,8 @@ function TagList({
             ? true
             : op === "remove"
               ? false
-              : tagStates[tag.name] === "all" || tagStates[tag.name] === "some"; // TODO: some を追加すれば見た目はいい（ひとつでも存在するものがハイライトされる）が、 WillBeOnという名前からは意味がずれてしまう
-        // : tagStates[tag.name] === "all";
+              : tagStates[tag.name] === "all" || tagStates[tag.name] === "some";
+        // TODO: some を追加すれば見た目はよくなる（ひとつでも存在するものがハイライトされる）が、 WillBeOnという名前からは意味がずれてしまう
         const isPendingNew = pendingNewTags.some((t) => t.tempId === tag.id);
 
         return (

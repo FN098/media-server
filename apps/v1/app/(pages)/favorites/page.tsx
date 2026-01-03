@@ -5,7 +5,7 @@ import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
-import { SelectionProvider } from "@/providers/selection-provider";
+import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { TagEditorProvider } from "@/providers/tag-editor-provider";
 import { getFavoriteMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
@@ -37,7 +37,7 @@ export default async function Page() {
   };
 
   return (
-    <SelectionProvider>
+    <PathSelectionProvider>
       <TagEditorProvider>
         <FavoritesProvider favorites={favorites}>
           <ExplorerProvider listing={listing}>
@@ -45,6 +45,6 @@ export default async function Page() {
           </ExplorerProvider>
         </FavoritesProvider>
       </TagEditorProvider>
-    </SelectionProvider>
+    </PathSelectionProvider>
   );
 }

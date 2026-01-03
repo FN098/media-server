@@ -7,7 +7,6 @@ import {
   SearchTagStrategy,
   SortTagStrategy,
   Tag,
-  TagEditMode,
   TagOperator,
 } from "@/lib/tag/types";
 import { isMatchJapanese } from "@/lib/utils/search";
@@ -15,42 +14,18 @@ import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
 import { v4 } from "uuid";
 
-export function useTagEditor(initialTargetNodes?: MediaNode[]) {
-  const [targetNodes, setTargetNodes] = useState<MediaNode[]>(
-    initialTargetNodes ?? []
-  );
+export function useTagEditor(targetNodes: MediaNode[]) {
   const [newTagName, setNewTagName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<PendingChangesType>({});
-  const [isEditing, setIsEditing] = useState(false); // 編集・閲覧
-  const [isActive, setIsActive] = useState(false); // 表示・非表示
-  const [isTransparent, setIsTransparent] = useState(false); // 透明・非透明
   const [searchStrategy, setSearchStrategy] =
-    useState<SearchTagStrategy>("recently-used");
+    useState<SearchTagStrategy>("default");
   const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
-  const toggleIsTransparent = () => setIsTransparent((prev) => !prev);
-  const toggleIsEditing = () => setIsEditing((prev) => !prev);
-  const toggleIsActive = () => setIsActive((prev) => !prev);
-  const isOpen = isActive;
-  const isClose = !isActive;
 
-  // モードの設定
-  const mode: TagEditMode = useMemo(() => {
-    if (isActive && targetNodes.length === 1) return "single";
-    if (isActive && targetNodes.length > 1) return "default";
-    return "none";
-  }, [isActive, targetNodes.length]);
-
-  // シングルモード時の対象パスを判定
-  const singleTargetPath = useMemo(() => {
-    if (mode !== "single") return null;
-    return targetNodes[0]?.path ?? null;
-  }, [mode, targetNodes]);
-
-  // 変更件数
-  const hasChanges =
-    Object.keys(pendingChanges).length > 0 || pendingNewTags.length > 0;
+  const hasChanges = useMemo(
+    () => Object.keys(pendingChanges).length > 0 || pendingNewTags.length > 0,
+    [pendingChanges, pendingNewTags.length]
+  );
 
   // targetNodesからパスを抽出（APIコールや状態計算に利用）
   const targetPaths = useMemo(
@@ -58,7 +33,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     [targetNodes]
   );
 
-  // APIでマスタータグを取得
+  // マスターデータ
   const {
     tags: masterTags,
     refreshTags,
@@ -67,11 +42,9 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     paths: targetPaths,
     strategy: searchStrategy,
   });
-
-  // マスタータグ状態を計算
   const tagStates = useTagStates(targetNodes, masterTags);
 
-  // 編集用タグ一覧
+  // 編集用
   const editModeTags = useMemo(() => {
     const pendingAsTags: Tag[] = pendingNewTags.map((t) => ({
       id: t.tempId, // 仮ID
@@ -88,7 +61,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     }
   }, [masterTags, pendingNewTags, sortStrategy]);
 
-  // 閲覧用タグ一覧
+  // 閲覧用
   const viewModeTags = useMemo(() => {
     const relatedTags = masterTags.filter(
       (tag) => tagStates[tag.name] === "some" || tagStates[tag.name] === "all"
@@ -102,7 +75,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     }
   }, [masterTags, sortStrategy, tagStates]);
 
-  // タグ入力時サジェスト用タグ一覧
+  // サジェスト用
   const suggestedTags = useMemo(() => {
     const query = newTagName.trim().toLowerCase();
     if (!query) return [];
@@ -117,7 +90,6 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     });
   }, [newTagName, masterTags, tagStates, pendingChanges, pendingNewTags]);
 
-  // タグの追加・削除状態をトグル
   const toggleTagChange = useCallback(
     (tag: Tag) => {
       const dbState = tagStates[tag.name] || "none";
@@ -135,20 +107,17 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     [tagStates]
   );
 
-  // タグの操作状態をセット
   const setTagChange = useCallback((tag: Tag, op: TagOperator) => {
     setPendingChanges((prev) => {
       return { ...prev, [tag.id]: op };
     });
   }, []);
 
-  // すべての変更をリセット
   const resetChanges = useCallback(() => {
     setPendingChanges({});
     setPendingNewTags([]);
   }, []);
 
-  // 新規タグを追加（DBにはまだ登録しない）
   const addPendingNewTag = useCallback((name: string) => {
     setPendingNewTags((prev) => {
       if (prev.some((t) => t.name === name)) return prev;
@@ -156,26 +125,6 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     });
   }, []);
 
-  // タグを追加（DBにはまだ登録しない）
-  const addTagByName = useCallback(
-    (name: string) => {
-      const trimmed = name.trim();
-      if (!trimmed) return;
-
-      const existing = editModeTags.find((t) => t.name === trimmed);
-      if (existing) {
-        // 既に存在すれば「追加候補」
-        setTagChange(existing, "add");
-      } else {
-        // 仮タグとしてメモリに積む
-        addPendingNewTag(trimmed);
-      }
-      setNewTagName("");
-    },
-    [addPendingNewTag, editModeTags, setTagChange]
-  );
-
-  // サジェスト候補の選択処理
   const selectSuggestion = useCallback(
     (tag: Tag) => {
       setTagChange(tag, "add");
@@ -184,74 +133,24 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     [setTagChange]
   );
 
-  // エディタを開く
-  const openEditor = useCallback(() => {
-    setIsActive(true);
-  }, []);
-
-  // エディタを閉じる
-  const closeEditor = useCallback(() => {
-    setIsActive(false);
-  }, []);
-
-  // エディタを開く/閉じる
-  const toggleEditorOpenClose = useCallback(() => {
-    toggleIsActive();
-  }, []);
-
-  // タグ編集セッション終了
-  const endSession = useCallback(() => {
-    setIsEditing(false);
-    setIsActive(false);
-    resetChanges();
-  }, [resetChanges]);
-
   return {
-    targetNodes,
-    setTargetNodes,
-    singleTargetPath,
-    targetPaths,
-    masterTags,
-    editModeTags,
-    viewModeTags,
-    mode,
     newTagName,
     setNewTagName,
-    isActive,
-    setIsActive,
-    isLoading,
-    setIsLoading,
+    pendingNewTags,
+    pendingChanges,
+    hasChanges,
+    setSearchStrategy,
+    setSortStrategy,
+    refreshTags,
     isLoadingTags,
     tagStates,
-    pendingChanges,
-    setPendingChanges,
-    hasChanges,
-    isEditing,
-    setIsEditing,
+    editModeTags,
+    viewModeTags,
+    suggestedTags,
+    toggleTagChange,
     setTagChange,
     resetChanges,
-    refreshTags,
-    suggestedTags,
-    selectSuggestion,
-    pendingNewTags,
-    setPendingNewTags,
     addPendingNewTag,
-    isTransparent,
-    setIsTransparent,
-    toggleIsTransparent,
-    toggleTagChange,
-    searchStrategy,
-    setSearchStrategy,
-    sortStrategy,
-    setSortStrategy,
-    addTagByName,
-    endSession,
-    isOpen,
-    isClose,
-    openEditor,
-    closeEditor,
-    toggleEditorOpenClose,
-    toggleIsEditing,
-    toggleIsActive,
+    selectSuggestion,
   };
 }
