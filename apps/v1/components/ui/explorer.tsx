@@ -127,7 +127,7 @@ export function Explorer() {
   // 選択解除
   const handleClearSelection = () => {
     clearSelection();
-    setIsSelectionMode(true);
+    setIsSelectionMode(false);
   };
 
   // 選択バー閉じる
