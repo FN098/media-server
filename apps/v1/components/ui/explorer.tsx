@@ -142,10 +142,19 @@ export function Explorer() {
     [at, mediaOnly.length]
   );
 
-  // タグエディタ開閉
+  // タグエディタ
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
-  const handleOpenTagEditor = () => setIsTagEditorOpen(true);
-  const handleCloseTagEditor = () => setIsTagEditorOpen(false);
+  const [isTagEditing, setIsTagEditing] = useState(false);
+
+  const handleOpenTagEditor = () => {
+    setIsTagEditorOpen(true);
+    setIsTagEditing(true);
+  };
+
+  const handleCloseTagEditor = () => {
+    setIsTagEditorOpen(false);
+    setIsTagEditing(false);
+  };
 
   // タグエディタの起動モード
   const tagEditMode = useMemo(() => {
@@ -211,8 +220,6 @@ export function Explorer() {
 
   // ショートカット
   useShortcutKeys([
-    { key: "q", callback: () => openPrevFolder("first") },
-    { key: "e", callback: () => openNextFolder("first") },
     { key: "t", callback: () => handleToggleTagEditor() },
     { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
@@ -243,26 +250,31 @@ export function Explorer() {
         )}
 
         {/* タグエディター */}
-        <TagEditSheet
-          targetNodes={selected}
-          active={isTagEditorOpen}
-          onClose={handleCloseTagEditor}
-          mode={tagEditMode}
-        />
+        {isTagEditorOpen && (
+          <TagEditSheet
+            targetNodes={selected}
+            active={isTagEditorOpen}
+            onClose={handleCloseTagEditor}
+            mode={tagEditMode}
+            edit={isTagEditing}
+          />
+        )}
 
         {/* 選択バー */}
-        <SelectionBar
-          count={selected.length}
-          totalCount={mediaOnly.length}
-          active={isSelectionMode}
-          onSelectAll={handleSelectAll}
-          onClose={handleCloseSelectionBar}
-          actions={
-            <>
-              <Button onClick={handleOpenTagEditor}>タグ編集</Button>
-            </>
-          }
-        />
+        {isSelectionMode && (
+          <SelectionBar
+            count={selected.length}
+            totalCount={mediaOnly.length}
+            active={isSelectionMode}
+            onSelectAll={handleSelectAll}
+            onClose={handleCloseSelectionBar}
+            actions={
+              <>
+                <Button onClick={handleOpenTagEditor}>タグ編集</Button>
+              </>
+            }
+          />
+        )}
 
         {/* ビューワ */}
         {modal && viewerIndex != null && (
