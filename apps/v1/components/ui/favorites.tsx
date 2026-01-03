@@ -29,6 +29,7 @@ export function Favorites() {
     listing,
     searchFiltered,
     mediaOnly,
+    selected,
     openNode,
     closeViewer,
     selectAllMedia,
@@ -36,9 +37,19 @@ export function Favorites() {
   } = useExplorerContext();
 
   const {
+    setTargetNodes: setTagEditTargetNodes,
     toggleEditorOpenClose: toggleTagEditorOpenClose,
     toggleIsTransparent: toggleTagEditorTransparent,
+    openEditor: openTagEditor,
+    closeEditor: closeTagEditor,
   } = useTagEditorContext();
+
+  // 選択された項目をタグ編集の対象に指定
+  useEffect(() => {
+    setTagEditTargetNodes(selected);
+    if (selected.length > 0) openTagEditor();
+    else closeTagEditor();
+  }, [closeTagEditor, openTagEditor, selected, setTagEditTargetNodes]);
 
   // クエリパラメータ
   const setExplorerQuery = useSetExplorerQuery();
