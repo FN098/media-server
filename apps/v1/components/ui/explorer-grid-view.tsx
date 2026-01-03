@@ -13,7 +13,7 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { useCallback } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 
 export function ExplorerGridView({
@@ -76,30 +76,40 @@ function Cell({
   const { isSelectionMode, isSelected, toggleSelection } =
     usePathSelectionContext();
 
-  const favorite = isFavorite(node.path);
-  const selected = isSelected(node.path);
+  const favorite = useMemo(
+    () => isFavorite(node.path),
+    [isFavorite, node.path]
+  );
+
+  const selected = useMemo(
+    () => isSelected(node.path),
+    [isSelected, node.path]
+  );
+
   const isMobile = useIsMobile();
 
-  const handleSelectOrOpen = useCallback(() => {
+  const handleSelectOrOpen = () => {
     if (isSelectionMode) {
-      toggleSelection(node.path);
+      if (isMedia(node.type)) toggleSelection(node.path);
+      else if (node.isDirectory) toast.warning("フォルダは選択できません！");
+      else toast.warning("このファイルは選択できません！");
     } else {
       onOpen?.(node);
     }
-  }, [isSelectionMode, node, onOpen, toggleSelection]);
+  };
 
-  const handleSelect = useCallback(() => {
+  const handleSelect = () => {
     toggleSelection(node.path);
-  }, [node, toggleSelection]);
+  };
 
-  const handleToggleFavorite = useCallback(() => {
+  const handleToggleFavorite = () => {
     try {
       void toggleFavorite(node.path);
     } catch (e) {
       console.error(e);
       toast.error("お気に入りの更新に失敗しました");
     }
-  }, [node.path, toggleFavorite]);
+  };
 
   return (
     <div className="w-full h-full p-1">
@@ -131,6 +141,7 @@ function Cell({
             checked={selected}
             onCheckedChange={handleSelect}
             onClick={(e) => e.stopPropagation()}
+            disabled={!isMedia(node.type)}
           />
         </div>
 

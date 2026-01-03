@@ -5,7 +5,7 @@ import {
   IsFavoriteType,
 } from "@/lib/favorite/types";
 import { PathSet, PathType } from "@/lib/path/types";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useFavorites(initialFavorites?: FavoritesRecord) {
   const [favorites, setFavorites] = useState<FavoritesMap>(
@@ -62,15 +62,12 @@ export function useFavorites(initialFavorites?: FavoritesRecord) {
     [broadcast, finishFlight, isFavorite, isInFlight, setFavorite, startFlight]
   );
 
-  return useMemo(
-    () => ({
-      favorites,
-      isFavorite,
-      setFavorite,
-      toggleFavorite,
-    }),
-    [favorites, isFavorite, setFavorite, toggleFavorite]
-  );
+  return {
+    favorites,
+    isFavorite,
+    setFavorite,
+    toggleFavorite,
+  };
 }
 
 // 複数タブ同期（BroadcastChannel）
