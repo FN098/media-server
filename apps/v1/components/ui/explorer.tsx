@@ -222,20 +222,18 @@ export function Explorer() {
         />
 
         {/* 選択バー */}
-        {/* TODO: 非表示アニメーション */}
-        {isSelectionMode && (
-          <SelectionBar
-            count={selected.length}
-            totalCount={mediaOnly.length}
-            onSelectAll={handleSelectAll}
-            onCancel={handleClearSelection}
-            actions={
-              <>
-                <Button onClick={handleOpenTagEditor}>タグ編集</Button>
-              </>
-            }
-          />
-        )}
+        <SelectionBar
+          count={selected.length}
+          totalCount={mediaOnly.length}
+          active={isSelectionMode}
+          onSelectAll={handleSelectAll}
+          onCancel={handleClearSelection}
+          actions={
+            <>
+              <Button onClick={handleOpenTagEditor}>タグ編集</Button>
+            </>
+          }
+        />
 
         {/* ビューワ */}
         {modal && viewerIndex != null && (
