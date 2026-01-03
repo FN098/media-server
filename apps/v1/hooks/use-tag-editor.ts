@@ -93,14 +93,32 @@ export function useTagEditor(targetNodes: MediaNode[]) {
   const toggleTagChange = useCallback(
     (tag: Tag) => {
       const dbState = tagStates[tag.name] || "none";
+
       setPendingChanges((prev) => {
         const next = { ...prev };
-        if (prev[tag.id]) {
+        const current = prev[tag.id]; // "add" | "remove" | undefined
+
+        let nextState: "add" | "remove" | undefined;
+
+        if (dbState === "all") {
+          // none <-> remove
+          nextState = current === "remove" ? undefined : "remove";
+        } else if (dbState === "none") {
+          // none <-> add
+          nextState = current === "add" ? undefined : "add";
+        } else {
+          // some: none -> add -> remove -> none
+          if (current === undefined) nextState = "add";
+          else if (current === "add") nextState = "remove";
+          else nextState = undefined;
+        }
+
+        if (nextState === undefined) {
           delete next[tag.id];
         } else {
-          // 「既に全員が持っている」なら「削除候補」、「それ以外」なら「追加候補」
-          next[tag.id] = dbState === "all" ? "remove" : "add";
+          next[tag.id] = nextState;
         }
+
         return next;
       });
     },
