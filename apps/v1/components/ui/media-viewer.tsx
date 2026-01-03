@@ -9,13 +9,13 @@ import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitleControl } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { useTagEditor } from "@/hooks/use-tag-editor";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useShortcutContext } from "@/providers/shortcut-provider";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,6 +68,7 @@ export function MediaViewer({
 }) {
   const router = useRouter();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
+  const { toggleEditorOpenClose } = useTagEditorContext();
   const [index, setIndex] = useState(initialIndex);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -80,7 +81,6 @@ export function MediaViewer({
     duration: 2000,
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
-  const { toggleEditorOpenClose } = useTagEditor(items);
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(

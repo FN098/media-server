@@ -112,12 +112,13 @@ export function useExplorer(listing: MediaListing) {
 
       if (isMedia(node.type)) {
         openViewer(node.path);
+        selectPaths([node.path]); // タグ編集のために選択状態にしておく
         return "media";
       }
 
       return "unsupported";
     },
-    [openFolder, openViewer]
+    [openFolder, openViewer, selectPaths]
   );
 
   const selectAllMedia = useCallback(() => {
