@@ -11,7 +11,6 @@ import {
   useNormalizeExplorerQuery,
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
@@ -19,6 +18,7 @@ import { normalizeIndex } from "@/lib/query/utils";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
+import { useShortcutContext } from "@/providers/shortcut-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
@@ -45,7 +45,7 @@ export function Explorer() {
   const {
     setTargetNodes: setTagEditTargetNodes,
     toggleEditorOpenClose: toggleTagEditorOpenClose,
-    toggleTransparent: toggleTagEditorTransparent,
+    toggleIsTransparent: toggleTagEditorTransparent,
     openEditor: openTagEditor,
     closeEditor: closeTagEditor,
   } = useTagEditorContext();
@@ -101,15 +101,40 @@ export function Explorer() {
   }, [listing.path]);
 
   // ショートカット
-  useShortcutKeys([
-    { key: "q", callback: () => openPrevFolder("first") },
-    { key: "e", callback: () => openNextFolder("first") },
-    { key: "t", callback: () => toggleTagEditorOpenClose() },
-    { key: "x", callback: () => toggleTagEditorTransparent() },
-    { key: "Ctrl+a", callback: () => selectAllMedia() },
-    { key: "Ctrl+k", callback: () => focusSearch() },
-    { key: "Escape", callback: () => clearSelection() },
+  const { register: registerShortcuts } = useShortcutContext();
+  useEffect(() => {
+    return registerShortcuts([
+      { key: "q", callback: () => openPrevFolder("first") },
+      { key: "e", callback: () => openNextFolder("first") },
+      { key: "t", callback: () => toggleTagEditorOpenClose() },
+      { key: "x", callback: () => toggleTagEditorTransparent() },
+      { key: "Ctrl+a", callback: () => selectAllMedia() },
+      { key: "Ctrl+k", callback: () => focusSearch() },
+      { key: "Escape", callback: () => clearSelection() },
+    ]);
+  }, [
+    clearSelection,
+    focusSearch,
+    openNextFolder,
+    openPrevFolder,
+    registerShortcuts,
+    selectAllMedia,
+    toggleTagEditorOpenClose,
+    toggleTagEditorTransparent,
   ]);
+
+  // ショートカット
+  // useShortcutKeys([
+  //   { key: "q", callback: () => openPrevFolder("first") },
+  //   { key: "e", callback: () => openNextFolder("first") },
+  //   { key: "t", callback: () => toggleTagEditorOpenClose() },
+  //   { key: "x", callback: () => toggleTagEditorTransparent() },
+  //   { key: "Ctrl+a", callback: () => selectAllMedia() },
+  //   { key: "Ctrl+k", callback: () => focusSearch() },
+  //   { key: "Escape", callback: () => clearSelection() },
+  // ]);
+
+  console.log({ selected });
 
   // ファイル/フォルダオープン
   const handleOpen = useCallback(

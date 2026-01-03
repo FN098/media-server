@@ -11,6 +11,7 @@ import {
   TagState,
 } from "@/lib/tag/types";
 import { useSelectionContext } from "@/providers/selection-provider";
+import { useShortcutContext } from "@/providers/shortcut-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
@@ -18,7 +19,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 export function TagEditSheet({ onClose }: { onClose?: () => void }) {
@@ -43,11 +44,11 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
     refreshTags,
     resetChanges,
     isTransparent,
-    setIsTransparent,
     toggleIsEditing,
     endSession,
     singleTargetPath,
     isActive,
+    toggleIsTransparent,
   } = useTagEditorContext();
 
   const {
@@ -58,11 +59,15 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
 
   const router = useRouter();
 
-  // 透明モードトグル
-  const toggleTransparent = () => setIsTransparent((prev) => !prev);
+  // 閉じる処理
+  const handleClose = useCallback(() => {
+    endSession();
+    clearSelection();
+    onClose?.();
+  }, [clearSelection, endSession, onClose]);
 
   // 保存処理
-  const handleApply = async () => {
+  const handleApply = useCallback(async () => {
     if (isLoading) return;
     setIsLoading(true);
 
@@ -104,20 +109,31 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // 閉じる処理
-  const handleClose = () => {
-    endSession();
-    clearSelection();
-    onClose?.();
-  };
+  }, [
+    handleClose,
+    isLoading,
+    pendingChanges,
+    pendingNewTags,
+    refreshTags,
+    router,
+    selectedPaths,
+    setIsLoading,
+  ]);
 
   // ショートカット
-  useShortcutKeys([
-    { key: "Escape", callback: handleClose },
-    { key: "e", callback: toggleIsEditing },
-  ]);
+  const { register: registerShortcuts } = useShortcutContext();
+  useEffect(() => {
+    return registerShortcuts([
+      { key: "Escape", callback: handleClose },
+      { key: "e", callback: toggleIsEditing },
+    ]);
+  }, [handleClose, registerShortcuts, toggleIsEditing]);
+
+  // ショートカット
+  // useShortcutKeys([
+  //   { key: "Escape", callback: handleClose },
+  //   { key: "e", callback: toggleIsEditing },
+  // ]);
 
   // シングルモードの場合は自動選択
   useEffect(() => {
@@ -173,7 +189,7 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
                       onEditClick={() => setIsEditing(true)}
                       onClose={handleClose}
                       isTransparent={isTransparent}
-                      onToggleTransparent={toggleTransparent}
+                      onToggleTransparent={toggleIsTransparent}
                     />
                     <TagList
                       isEditing={false}
@@ -201,7 +217,7 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
                       onEditClick={() => {}}
                       onClose={handleClose}
                       isTransparent={isTransparent}
-                      onToggleTransparent={toggleTransparent}
+                      onToggleTransparent={toggleIsTransparent}
                     />
                     <TagInput
                       value={newTagName}

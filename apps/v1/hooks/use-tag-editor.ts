@@ -23,13 +23,13 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   const [isLoading, setIsLoading] = useState(false);
   const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<PendingChangesType>({});
-  const [isEditing, setIsEditing] = useState(false); // 閲覧・編集モード
-  const [isActive, setIsActive] = useState(false); // 表示・非表示モード
-  const [isTransparent, setIsTransparent] = useState(false); // 透明モード
+  const [isEditing, setIsEditing] = useState(false); // 編集・閲覧
+  const [isActive, setIsActive] = useState(false); // 表示・非表示
+  const [isTransparent, setIsTransparent] = useState(false); // 透明・非透明
   const [searchStrategy, setSearchStrategy] =
     useState<SearchTagStrategy>("recently-used");
   const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
-  const toggleTransparent = () => setIsTransparent((prev) => !prev);
+  const toggleIsTransparent = () => setIsTransparent((prev) => !prev);
   const toggleIsEditing = () => setIsEditing((prev) => !prev);
   const toggleIsActive = () => setIsActive((prev) => !prev);
   const isOpen = isActive;
@@ -242,7 +242,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     addPendingNewTag,
     isTransparent,
     setIsTransparent,
-    toggleTransparent,
+    toggleIsTransparent,
     toggleTagChange,
     searchStrategy,
     setSearchStrategy,

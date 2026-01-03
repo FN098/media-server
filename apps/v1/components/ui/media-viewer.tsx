@@ -9,13 +9,13 @@ import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitleControl } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTagEditor } from "@/hooks/use-tag-editor";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useShortcutContext } from "@/providers/shortcut-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -150,30 +150,68 @@ export function MediaViewer({
     }
   };
 
-  useShortcutKeys([
-    { key: "Escape", callback: () => onClose() },
-    { key: "Enter", callback: () => toggleHeaderVisibility() },
-    { key: " ", callback: () => toggleHeaderVisibility() },
-    { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
-    { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
-    { key: "a", callback: () => swiperInstance?.slidePrev() },
-    { key: "s", callback: () => void handleToggleFavorite() },
-    { key: "d", callback: () => swiperInstance?.slideNext() },
-    { key: "f", callback: () => toggleFullscreen() },
-    // TODO: 親の explorer のショートカットと被ってしまうので修正
-    // { key: "q", callback: () => onPrevFolder?.() },
-    // { key: "e", callback: () => onNextFolder?.() },
-    { key: "q", callback: () => console.log("pressed q in media viewer") },
-    { key: "e", callback: () => console.log("pressed e in media viewer") },
-    { key: "o", callback: () => handleOpenFolder() },
-    {
-      key: "h",
-      callback: () => {
-        toggleHeaderPinned();
-        interactHeader();
+  // ショートカット
+  const { register: registerShortcuts } = useShortcutContext();
+  useEffect(() => {
+    return registerShortcuts([
+      { key: "Escape", callback: () => onClose() },
+      { key: "Enter", callback: () => toggleHeaderVisibility() },
+      { key: " ", callback: () => toggleHeaderVisibility() },
+      { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
+      { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
+      { key: "a", callback: () => swiperInstance?.slidePrev() },
+      { key: "s", callback: () => void handleToggleFavorite() },
+      { key: "d", callback: () => swiperInstance?.slideNext() },
+      { key: "f", callback: () => toggleFullscreen() },
+      { key: "q", callback: () => onPrevFolder?.() },
+      { key: "e", callback: () => onNextFolder?.() },
+      { key: "o", callback: () => handleOpenFolder() },
+      {
+        key: "h",
+        callback: () => {
+          toggleHeaderPinned();
+          interactHeader();
+        },
       },
-    },
+    ]);
+  }, [
+    handleOpenFolder,
+    handleToggleFavorite,
+    interactHeader,
+    onClose,
+    onNextFolder,
+    onPrevFolder,
+    registerShortcuts,
+    swiperInstance,
+    toggleFullscreen,
+    toggleHeaderVisibility,
   ]);
+
+  // ショートカット
+  // useShortcutKeys([
+  //   { key: "Escape", callback: () => onClose() },
+  //   { key: "Enter", callback: () => toggleHeaderVisibility() },
+  //   { key: " ", callback: () => toggleHeaderVisibility() },
+  //   { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
+  //   { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
+  //   { key: "a", callback: () => swiperInstance?.slidePrev() },
+  //   { key: "s", callback: () => void handleToggleFavorite() },
+  //   { key: "d", callback: () => swiperInstance?.slideNext() },
+  //   { key: "f", callback: () => toggleFullscreen() },
+  //   // TODO: 親の explorer のショートカットと被ってしまうので修正
+  //   // { key: "q", callback: () => onPrevFolder?.() },
+  //   // { key: "e", callback: () => onNextFolder?.() },
+  //   { key: "q", callback: () => console.log("pressed q in media viewer") },
+  //   { key: "e", callback: () => console.log("pressed e in media viewer") },
+  //   { key: "o", callback: () => handleOpenFolder() },
+  //   {
+  //     key: "h",
+  //     callback: () => {
+  //       toggleHeaderPinned();
+  //       interactHeader();
+  //     },
+  //   },
+  // ]);
 
   return (
     <div
