@@ -137,6 +137,7 @@ export function Explorer() {
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
   const handleOpenTagEditor = () => setIsTagEditorOpen(true);
   const handleCloseTagEditor = () => setIsTagEditorOpen(false);
+  const toggleIsTagEditorOpen = () => setIsTagEditorOpen((prev) => !prev);
 
   // ビューア表示用インデックス
   const viewerIndex = useMemo(
@@ -184,7 +185,7 @@ export function Explorer() {
   useShortcutKeys([
     { key: "q", callback: () => openPrevFolder("first") },
     { key: "e", callback: () => openNextFolder("first") },
-    // { key: "t", callback: () => toggleTagEditorOpenClose() },
+    { key: "t", callback: () => toggleIsTagEditorOpen() },
     // { key: "x", callback: () => toggleTagEditorTransparent() },
     { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
