@@ -107,20 +107,7 @@ export function AudioPlayer({
     { key: "Ctrl+ArrowRight", callback: () => seek(10) },
     { key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
     { key: " ", callback: () => togglePlaying() },
-    { key: "r", callback: () => toggleRepeating() },
   ]);
-
-  // ショートカット beta
-  // const { register: registerShortcuts } = useShortcutContext();
-  // useEffect(() => {
-  //   return registerShortcuts([
-  //     { priority: 500, key: "Ctrl+ArrowRight", callback: () => seek(10) },
-  //     { priority: 500, key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
-  //     { priority: 500, key: " ", callback: () => togglePlaying() },
-  //     { priority: 500, key: "r", callback: () => toggleRepeating() },
-  //   ]);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   return (
     <div className="w-full h-full flex items-center justify-center">

@@ -68,17 +68,6 @@ export const VideoPlayer = memo(function VideoPlayer({
     { key: " ", callback: () => togglePlay() },
   ]);
 
-  // ショートカット beta
-  // const { register: registerShortcuts } = useShortcutContext();
-  // useEffect(() => {
-  //   return registerShortcuts([
-  //     { priority: 500, key: "Ctrl+ArrowRight", callback: () => seek(10) },
-  //     { priority: 500, key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
-  //     { priority: 500, key: " ", callback: () => togglePlay() },
-  //   ]);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
   return (
     <div className="relative group overflow-hidden bg-black aspect-video w-full max-w-4xl mx-auto shadow-lg">
       {/* サムネイル */}

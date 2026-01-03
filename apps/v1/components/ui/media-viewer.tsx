@@ -159,8 +159,8 @@ export function MediaViewer({
     { key: "s", callback: () => void handleToggleFavorite() },
     { key: "d", callback: () => swiperInstance?.slideNext() },
     { key: "f", callback: () => toggleFullscreen() },
-    { key: "q", callback: () => onPrevFolder?.() },
-    { key: "e", callback: () => onNextFolder?.() },
+    { key: "p", callback: () => onPrevFolder?.() },
+    { key: "n", callback: () => onNextFolder?.() },
     { key: "o", callback: () => handleOpenFolder() },
     {
       key: "h",
