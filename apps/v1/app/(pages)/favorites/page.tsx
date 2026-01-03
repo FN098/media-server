@@ -43,7 +43,7 @@ export default async function Page() {
           <ExplorerProvider listing={listing}>
             <Favorites />
           </ExplorerProvider>
-        </FavoritesProvider>{" "}
+        </FavoritesProvider>
       </TagEditorProvider>
     </SelectionProvider>
   );
