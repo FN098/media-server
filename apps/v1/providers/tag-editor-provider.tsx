@@ -1,7 +1,6 @@
 "use client";
 
 import { useTagEditor } from "@/hooks/use-tag-editor";
-import { MediaNode } from "@/lib/media/types";
 import { createContext, ReactNode, useContext } from "react";
 
 type TagEditorContextType = ReturnType<typeof useTagEditor>;
@@ -10,14 +9,8 @@ const TagEditorContext = createContext<TagEditorContextType | undefined>(
   undefined
 );
 
-export function TagEditorProvider({
-  children,
-  targetNodes,
-}: {
-  children: ReactNode;
-  targetNodes: MediaNode[];
-}) {
-  const value = useTagEditor(targetNodes);
+export function TagEditorProvider({ children }: { children: ReactNode }) {
+  const value = useTagEditor();
 
   return (
     <TagEditorContext.Provider value={value}>

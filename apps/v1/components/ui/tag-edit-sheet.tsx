@@ -1,8 +1,6 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { Record } from "@/generated/prisma/runtime/library";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { useTagEditor } from "@/hooks/use-tag-editor";
-import { MediaNode } from "@/lib/media/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import {
   PendingNewTag,
@@ -13,6 +11,7 @@ import {
   TagState,
 } from "@/lib/tag/types";
 import { useSelectionContext } from "@/providers/selection-provider";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -22,15 +21,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
-export function TagEditSheet({
-  allNodes,
-  active,
-  onClose,
-}: {
-  allNodes: MediaNode[];
-  active: boolean;
-  onClose?: () => void;
-}) {
+export function TagEditSheet({ onClose }: { onClose?: () => void }) {
   const {
     mode,
     isEditing,
@@ -43,7 +34,7 @@ export function TagEditSheet({
     addTagByName,
     pendingChanges,
     hasChanges,
-    toggleTag,
+    toggleTagChange,
     tagStates,
     suggestedTags,
     selectSuggestion,
@@ -56,7 +47,8 @@ export function TagEditSheet({
     toggleIsEditing,
     endSession,
     singleTargetPath,
-  } = useTagEditor(allNodes, active);
+    isActive,
+  } = useTagEditorContext();
 
   const {
     selectedKeys: selectedPaths,
@@ -114,7 +106,7 @@ export function TagEditSheet({
     }
   };
 
-  // 閉じる処理（正常終了）
+  // 閉じる処理
   const handleClose = () => {
     endSession();
     clearSelection();
@@ -136,7 +128,7 @@ export function TagEditSheet({
 
   return (
     <AnimatePresence>
-      {active && (
+      {isActive && (
         <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
           {/* 暗転オーバーレイ */}
           {isEditing && (
@@ -189,7 +181,7 @@ export function TagEditSheet({
                       pendingChanges={pendingChanges}
                       pendingNewTags={pendingNewTags}
                       tagStates={tagStates}
-                      onToggle={toggleTag}
+                      onToggle={toggleTagChange}
                       isTransparent={isTransparent}
                     />
                   </motion.div>
@@ -226,7 +218,7 @@ export function TagEditSheet({
                       pendingChanges={pendingChanges}
                       pendingNewTags={pendingNewTags}
                       tagStates={tagStates}
-                      onToggle={toggleTag}
+                      onToggle={toggleTagChange}
                       isTransparent={isTransparent}
                     />
                     <SheetFooter

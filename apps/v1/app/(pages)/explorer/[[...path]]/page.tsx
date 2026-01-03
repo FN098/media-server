@@ -11,6 +11,7 @@ import { MediaFsNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { SelectionProvider } from "@/providers/selection-provider";
+import { TagEditorProvider } from "@/providers/tag-editor-provider";
 import {
   getDbFavoriteCount,
   getDbVisitedInfoDeeply,
@@ -50,13 +51,13 @@ export default async function Page(props: Props) {
   const currentDirPath = pathParts.map(decodeURIComponent).join("/");
 
   // 取得
-  const listing = await getMediaFsListing(currentDirPath);
-  if (!listing) notFound();
+  const fsListing = await getMediaFsListing(currentDirPath);
+  if (!fsListing) notFound();
 
-  const rawNodes = listing.nodes;
+  const allNodes = fsListing.nodes;
 
   // ソート
-  const sorted = sortMediaFsNodes(rawNodes, {
+  const sorted = sortMediaFsNodes(allNodes, {
     key: sortKey,
     order: sortOrder,
   });
@@ -65,8 +66,8 @@ export default async function Page(props: Props) {
 
   // DB の件数を先に取得し、一致しなければ同期
   const dbCount = await getDbMediaCount(currentDirPath);
-  if (dbCount !== rawNodes.length) {
-    await syncMediaDir(currentDirPath, rawNodes);
+  if (dbCount !== allNodes.length) {
+    await syncMediaDir(currentDirPath, allNodes);
   }
 
   // DB クエリ
@@ -81,22 +82,25 @@ export default async function Page(props: Props) {
   // フォーマット
   const formatted = formatNodes(merged);
 
+  // お気に入り
   const favorites: FavoritesRecord = Object.fromEntries(
-    formatted.map((n) => [n.path, n.isFavorite])
+    merged.map((n) => [n.path, n.isFavorite])
   );
 
-  const finalListing = {
-    ...listing,
+  const listing = {
+    ...fsListing,
     nodes: formatted,
   };
 
   return (
     <SelectionProvider>
-      <FavoritesProvider favorites={favorites}>
-        <ExplorerProvider listing={finalListing}>
-          <Explorer />
-        </ExplorerProvider>
-      </FavoritesProvider>
+      <TagEditorProvider>
+        <FavoritesProvider favorites={favorites}>
+          <ExplorerProvider listing={listing}>
+            <Explorer />
+          </ExplorerProvider>
+        </FavoritesProvider>
+      </TagEditorProvider>
     </SelectionProvider>
   );
 }

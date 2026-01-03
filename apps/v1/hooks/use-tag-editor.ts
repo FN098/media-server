@@ -15,25 +15,32 @@ import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
 import { v4 } from "uuid";
 
-export function useTagEditor(targetNodes: MediaNode[], active: boolean) {
+export function useTagEditor(initialTargetNodes?: MediaNode[]) {
+  const [targetNodes, setTargetNodes] = useState<MediaNode[]>(
+    initialTargetNodes ?? []
+  );
   const [newTagName, setNewTagName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<PendingChangesType>({});
-  const [isEditing, setIsEditing] = useState(false);
-  const [isTransparent, setIsTransparent] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // 閲覧・編集モード
+  const [isActive, setIsActive] = useState(false); // 表示・非表示モード
+  const [isTransparent, setIsTransparent] = useState(false); // 透明モード
   const [searchStrategy, setSearchStrategy] =
     useState<SearchTagStrategy>("recently-used");
   const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
-  const toggleIsEditing = () => setIsEditing((prev) => !prev);
   const toggleTransparent = () => setIsTransparent((prev) => !prev);
+  const toggleIsEditing = () => setIsEditing((prev) => !prev);
+  const toggleIsActive = () => setIsActive((prev) => !prev);
+  const isOpen = isActive;
+  const isClose = !isActive;
 
   // モードの設定
   const mode: TagEditMode = useMemo(() => {
-    if (active && targetNodes.length === 1) return "single";
-    if (active && targetNodes.length > 1) return "default";
+    if (isActive && targetNodes.length === 1) return "single";
+    if (isActive && targetNodes.length > 1) return "default";
     return "none";
-  }, [active, targetNodes.length]);
+  }, [isActive, targetNodes.length]);
 
   // シングルモード時の対象パスを判定
   const singleTargetPath = useMemo(() => {
@@ -61,7 +68,7 @@ export function useTagEditor(targetNodes: MediaNode[], active: boolean) {
     strategy: searchStrategy,
   });
 
-  // 選択タグ選択状態を計算
+  // マスタータグ状態を計算
   const tagStates = useTagStates(targetNodes, masterTags);
 
   // 編集用タグ一覧
@@ -84,7 +91,7 @@ export function useTagEditor(targetNodes: MediaNode[], active: boolean) {
   // 閲覧用タグ一覧
   const viewModeTags = useMemo(() => {
     const relatedTags = masterTags.filter(
-      (tag) => tagStates[tag.name] === "all"
+      (tag) => tagStates[tag.name] === "some" || tagStates[tag.name] === "all"
     );
 
     switch (sortStrategy) {
@@ -177,13 +184,35 @@ export function useTagEditor(targetNodes: MediaNode[], active: boolean) {
     [setTagChange]
   );
 
+  // エディタを開く
+  const openEditor = useCallback(() => {
+    setIsActive(true);
+  }, []);
+
+  // エディタを閉じる
+  const closeEditor = useCallback(() => {
+    setIsActive(false);
+  }, []);
+
+  // エディタを開く/閉じる
+  const toggleEditorOpenClose = useCallback(() => {
+    if (isOpen) {
+      closeEditor();
+    } else {
+      openEditor();
+    }
+  }, [closeEditor, isOpen, openEditor]);
+
   // タグ編集セッション終了
   const endSession = useCallback(() => {
     setIsEditing(false);
+    setIsActive(false);
     resetChanges();
   }, [resetChanges]);
 
   return {
+    targetNodes,
+    setTargetNodes,
     singleTargetPath,
     targetPaths,
     masterTags,
@@ -192,6 +221,8 @@ export function useTagEditor(targetNodes: MediaNode[], active: boolean) {
     mode,
     newTagName,
     setNewTagName,
+    isActive,
+    setIsActive,
     isLoading,
     setIsLoading,
     isLoadingTags,
@@ -212,13 +243,19 @@ export function useTagEditor(targetNodes: MediaNode[], active: boolean) {
     isTransparent,
     setIsTransparent,
     toggleTransparent,
-    toggleIsEditing,
-    toggleTag: toggleTagChange,
+    toggleTagChange,
     searchStrategy,
     setSearchStrategy,
     sortStrategy,
     setSortStrategy,
     addTagByName,
     endSession,
+    isOpen,
+    isClose,
+    openEditor,
+    closeEditor,
+    toggleEditorOpenClose,
+    toggleIsEditing,
+    toggleIsActive,
   };
 }

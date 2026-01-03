@@ -6,6 +6,7 @@ import { formatNodes } from "@/lib/media/format";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { SelectionProvider } from "@/providers/selection-provider";
+import { TagEditorProvider } from "@/providers/tag-editor-provider";
 import { getFavoriteMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 
@@ -18,10 +19,11 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   // TODO: ユーザー認証機能実装後に差し替える
-  const nodes = await getFavoriteMediaNodes(USER);
+  const allNodes = await getFavoriteMediaNodes(USER);
 
-  const formatted = formatNodes(nodes);
+  const formatted = formatNodes(allNodes);
 
+  // お気に入り
   const favorites: FavoritesRecord = Object.fromEntries(
     formatted.map((n) => [n.path, n.isFavorite])
   );
@@ -36,11 +38,13 @@ export default async function Page() {
 
   return (
     <SelectionProvider>
-      <FavoritesProvider favorites={favorites}>
-        <ExplorerProvider listing={listing}>
-          <Favorites />
-        </ExplorerProvider>
-      </FavoritesProvider>
+      <TagEditorProvider>
+        <FavoritesProvider favorites={favorites}>
+          <ExplorerProvider listing={listing}>
+            <Favorites />
+          </ExplorerProvider>
+        </FavoritesProvider>{" "}
+      </TagEditorProvider>
     </SelectionProvider>
   );
 }

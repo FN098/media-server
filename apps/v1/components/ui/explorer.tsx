@@ -5,6 +5,7 @@ import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
 import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
+import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
@@ -18,6 +19,7 @@ import { normalizeIndex } from "@/lib/query/utils";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -31,6 +33,7 @@ export function Explorer() {
     listing,
     searchFiltered,
     mediaOnly,
+    selected,
     openNode,
     closeViewer,
     openNextFolder,
@@ -38,6 +41,21 @@ export function Explorer() {
     selectAllMedia,
     clearSelection,
   } = useExplorerContext();
+
+  const {
+    setTargetNodes: setTagEditTargetNodes,
+    toggleEditorOpenClose: toggleTagEditorOpenClose,
+    toggleTransparent: toggleTagEditorTransparent,
+    openEditor: openTagEditor,
+    closeEditor: closeTagEditor,
+  } = useTagEditorContext();
+
+  // 選択された項目をタグ編集の対象に指定
+  useEffect(() => {
+    setTagEditTargetNodes(selected);
+    if (selected.length > 0) openTagEditor();
+    else closeTagEditor();
+  }, [closeTagEditor, openTagEditor, selected, setTagEditTargetNodes]);
 
   // クエリパラメータ
   const setExplorerQuery = useSetExplorerQuery();
@@ -86,6 +104,8 @@ export function Explorer() {
   useShortcutKeys([
     { key: "q", callback: () => openPrevFolder("first") },
     { key: "e", callback: () => openNextFolder("first") },
+    { key: "t", callback: () => toggleTagEditorOpenClose() },
+    { key: "x", callback: () => toggleTagEditorTransparent() },
     { key: "Ctrl+a", callback: () => selectAllMedia() },
     { key: "Ctrl+k", callback: () => focusSearch() },
     { key: "Escape", callback: () => clearSelection() },
@@ -124,6 +144,9 @@ export function Explorer() {
           <ExplorerListView nodes={searchFiltered} onOpen={handleOpen} />
         </div>
       )}
+
+      {/* タグエディター */}
+      <TagEditSheet />
 
       {/* ビューワ */}
       {modal && viewerIndex != null && (

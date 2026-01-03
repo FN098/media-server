@@ -4,7 +4,7 @@ import { SearchProvider } from "@/providers/search-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    // 検索キーワードはページ遷移後にリセット
+    // ここに書いたプロバイダーはページ遷移後に状態をリセット
     <SearchProvider>
       <div className="flex flex-col min-h-screen">
         <Header title="Explorer" basePath={PATHS.client.explorer.root} />

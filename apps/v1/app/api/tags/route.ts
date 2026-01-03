@@ -55,12 +55,16 @@ export async function POST(request: NextRequest) {
 }
 
 async function process(params: RequestParams) {
+  const { paths: pathsRaw, limit, query, strategy } = params;
+
   // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
-  const paths = params.paths.slice(0, MAX_PATHS_TO_PROCESS);
-  const limit = params.limit;
+  const paths = pathsRaw.slice(0, MAX_PATHS_TO_PROCESS);
 
   // 1. 関連タグの取得
   const relatedTags = await getRelatedTags(paths, { limit });
+
+  if (strategy === "related-only") return relatedTags;
+
   const excludeIds = relatedTags.map((t) => t.id);
   const remain = limit - relatedTags.length;
 
@@ -68,8 +72,8 @@ async function process(params: RequestParams) {
   const popularTags = await searchTags({
     excludeIds,
     limit: remain,
-    query: params.query,
-    strategy: params.strategy,
+    query,
+    strategy,
   });
 
   // 3. マージ

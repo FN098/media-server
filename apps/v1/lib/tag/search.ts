@@ -4,16 +4,19 @@ import { SearchTagsOptions, Tag } from "@/lib/tag/types";
 export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {
   const strategy = options?.strategy ?? "most-related";
 
-  if (strategy === "recently-used") {
-    return searchRecentlyUsedTags(options);
-  }
+  switch (strategy) {
+    case "most-related":
+      return searchMostRelatedTags(options);
 
-  if (strategy === "recently-created") {
-    return searchRecentlyCreatedTags(options);
-  }
+    case "recently-created":
+      return searchRecentlyCreatedTags(options);
 
-  // default
-  return searchMostRelatedTags(options);
+    case "recently-used":
+      return searchRecentlyUsedTags(options);
+
+    default:
+      throw new Error(`Unsupported Strategy: ${strategy}`);
+  }
 }
 
 // 最も参照件数が多いタグ

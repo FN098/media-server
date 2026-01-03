@@ -80,7 +80,7 @@ export function MediaViewer({
     duration: 2000,
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
-  const { toggleIsEditing } = useTagEditor(items);
+  const { toggleEditorOpenClose } = useTagEditor(items);
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(
@@ -160,9 +160,11 @@ export function MediaViewer({
     { key: "s", callback: () => void handleToggleFavorite() },
     { key: "d", callback: () => swiperInstance?.slideNext() },
     { key: "f", callback: () => toggleFullscreen() },
-    { key: "t", callback: () => toggleIsEditing },
-    { key: "q", callback: () => onPrevFolder?.() },
-    { key: "e", callback: () => onNextFolder?.() },
+    // TODO: 親の explorer のショートカットと被ってしまうので修正
+    // { key: "q", callback: () => onPrevFolder?.() },
+    // { key: "e", callback: () => onNextFolder?.() },
+    { key: "q", callback: () => console.log("pressed q in media viewer") },
+    { key: "e", callback: () => console.log("pressed e in media viewer") },
     { key: "o", callback: () => handleOpenFolder() },
     {
       key: "h",
@@ -282,7 +284,7 @@ export function MediaViewer({
                     )}
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={toggleIsEditing}>
+                  <DropdownMenuItem onClick={toggleEditorOpenClose}>
                     <TagIcon className="mr-2 h-4 w-4" />
                     <span>タグを表示</span>
                     {!isMobile && (

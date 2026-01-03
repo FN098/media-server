@@ -5,6 +5,7 @@ import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
 import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
+import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
@@ -118,7 +119,7 @@ export function Favorites() {
       )}
 
       {/* タグエディター */}
-      {/* <TagEditSheet allNodes={mediaOnly} /> */}
+      <TagEditSheet />
 
       {/* ビューワ */}
       {modal && viewerIndex != null && (
