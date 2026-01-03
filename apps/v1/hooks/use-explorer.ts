@@ -19,7 +19,7 @@ export function useExplorer(listing: MediaListing) {
 
   const openFolder = useCallback(
     (path: string, at?: IndexLike) => {
-      setExplorerQuery({ at: at ?? null }, { path, history: "push" });
+      setExplorerQuery({ at: at ?? null, q: "" }, { path, history: "push" });
     },
     [setExplorerQuery]
   );
