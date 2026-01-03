@@ -185,18 +185,8 @@ export function MediaViewer({
         },
       },
     ]);
-  }, [
-    handleOpenFolder,
-    handleToggleFavorite,
-    interactHeader,
-    onClose,
-    onNextFolder,
-    onPrevFolder,
-    registerShortcuts,
-    swiperInstance,
-    toggleFullscreen,
-    toggleHeaderVisibility,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div

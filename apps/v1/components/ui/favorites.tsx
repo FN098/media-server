@@ -18,6 +18,7 @@ import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useShortcutContext } from "@/providers/shortcut-provider";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useEffect } from "react";
@@ -33,6 +34,11 @@ export function Favorites() {
     selectAllMedia,
     clearSelection,
   } = useExplorerContext();
+
+  const {
+    toggleEditorOpenClose: toggleTagEditorOpenClose,
+    toggleIsTransparent: toggleTagEditorTransparent,
+  } = useTagEditorContext();
 
   // クエリパラメータ
   const setExplorerQuery = useSetExplorerQuery();
@@ -80,12 +86,16 @@ export function Favorites() {
   // ショートカット
   const { register: registerShortcuts } = useShortcutContext();
   useEffect(() => {
+    console.log("aaa");
     return registerShortcuts([
+      { priority: 10, key: "t", callback: () => toggleTagEditorOpenClose() },
+      { priority: 10, key: "x", callback: () => toggleTagEditorTransparent() },
       { priority: 10, key: "Ctrl+a", callback: () => selectAllMedia() },
       { priority: 10, key: "Ctrl+k", callback: () => focusSearch() },
       { priority: 10, key: "Escape", callback: () => clearSelection() },
     ]);
-  }, [clearSelection, focusSearch, registerShortcuts, selectAllMedia]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ファイル/フォルダオープン
   const handleOpen = useCallback(

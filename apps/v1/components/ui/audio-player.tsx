@@ -111,7 +111,8 @@ export function AudioPlayer({
       { priority: 500, key: " ", callback: () => togglePlaying() },
       { priority: 500, key: "r", callback: () => toggleRepeating() },
     ]);
-  }, [registerShortcuts, seek, togglePlaying]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="w-full h-full flex items-center justify-center">

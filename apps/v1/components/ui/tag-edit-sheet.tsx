@@ -126,17 +126,18 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
       {
         priority: 1000,
         key: "Escape",
-        callback: handleClose,
-        condition: isActive,
+        callback: () => handleClose,
+        condition: () => isActive,
       },
       {
         priority: 1000,
         key: "e",
-        callback: toggleIsEditing,
-        condition: isActive,
+        callback: () => toggleIsEditing,
+        condition: () => isActive,
       },
     ]);
-  }, [handleClose, isActive, registerShortcuts, toggleIsEditing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // シングルモードの場合は自動選択
   useEffect(() => {

@@ -196,12 +196,8 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
 
   // エディタを開く/閉じる
   const toggleEditorOpenClose = useCallback(() => {
-    if (isOpen) {
-      closeEditor();
-    } else {
-      openEditor();
-    }
-  }, [closeEditor, isOpen, openEditor]);
+    toggleIsActive();
+  }, []);
 
   // タグ編集セッション終了
   const endSession = useCallback(() => {

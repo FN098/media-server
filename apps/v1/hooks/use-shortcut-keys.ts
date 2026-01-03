@@ -135,7 +135,8 @@ export function useShortcutKeys(actions: KeyAction[]) {
        *       condition: isOpen,
        *     },
        *   ]);
-       * }, [register]);
+       *   // eslint-disable-next-line react-hooks/exhaustive-deps
+       * }, []);
        * ```
        */
       register,

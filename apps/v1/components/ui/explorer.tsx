@@ -112,16 +112,8 @@ export function Explorer() {
       { priority: 10, key: "Ctrl+k", callback: () => focusSearch() },
       { priority: 10, key: "Escape", callback: () => clearSelection() },
     ]);
-  }, [
-    clearSelection,
-    focusSearch,
-    openNextFolder,
-    openPrevFolder,
-    registerShortcuts,
-    selectAllMedia,
-    toggleTagEditorOpenClose,
-    toggleTagEditorTransparent,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ファイル/フォルダオープン
   const handleOpen = useCallback(

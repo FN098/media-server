@@ -69,7 +69,8 @@ export const VideoPlayer = memo(function VideoPlayer({
       { priority: 500, key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
       { priority: 500, key: " ", callback: () => togglePlay() },
     ]);
-  }, [registerShortcuts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative group overflow-hidden bg-black aspect-video w-full max-w-4xl mx-auto shadow-lg">
