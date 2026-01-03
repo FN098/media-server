@@ -82,7 +82,6 @@ export function MediaViewer({
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(
     null
   );
-  const { setTitle, resetTitle } = useDocumentTitleControl();
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
 
   const hasPrev = !!onPrevFolder;
@@ -101,10 +100,11 @@ export function MediaViewer({
   const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
 
   // タイトル設定
+  const { setTitle } = useDocumentTitleControl();
   useEffect(() => {
     const { title, name } = allNodes[index];
     setTitle(`${title ?? name} | ${APP_CONFIG.meta.title}`);
-  }, [index, allNodes, resetTitle, setTitle]);
+  }, [index, allNodes, setTitle]);
 
   // お気に入りボタンクリック時の処理
   const handleToggleFavorite = async () => {
