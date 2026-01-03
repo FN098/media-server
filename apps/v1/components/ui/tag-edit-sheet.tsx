@@ -1,6 +1,7 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { Record } from "@/generated/prisma/runtime/library";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
+import { KeyAction } from "@/lib/shortcut/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import {
   PendingNewTag,
@@ -123,9 +124,10 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
   // ショートカット
   const { register: registerShortcuts } = useShortcutContext();
   useEffect(() => {
+    const partial: Partial<KeyAction> = { priority: 1000 };
     return registerShortcuts([
-      { key: "Escape", callback: handleClose },
-      { key: "e", callback: toggleIsEditing },
+      { ...partial, key: "Escape", callback: handleClose },
+      { ...partial, key: "e", callback: toggleIsEditing },
     ]);
   }, [handleClose, registerShortcuts, toggleIsEditing]);
 

@@ -14,6 +14,7 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
+import { KeyAction } from "@/lib/shortcut/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useShortcutContext } from "@/providers/shortcut-provider";
 import {
@@ -118,10 +119,10 @@ export function MediaViewer({
     }
   }, [toggleFavorite, items, index, interactHeader]);
 
-  const handleOpenFolder = () => {
+  const handleOpenFolder = useCallback(() => {
     const url = getClientExplorerPath(path.dirname(items[index].path));
     router.push(url);
-  };
+  }, [index, items, router]);
 
   // 前のフォルダ、次のフォルダを仮想スライドに追加
   const allSlides = useMemo(() => {
@@ -153,20 +154,30 @@ export function MediaViewer({
   // ショートカット
   const { register: registerShortcuts } = useShortcutContext();
   useEffect(() => {
+    const partial: Partial<KeyAction> = { priority: 100 };
     return registerShortcuts([
-      { key: "Escape", callback: () => onClose() },
-      { key: "Enter", callback: () => toggleHeaderVisibility() },
-      { key: " ", callback: () => toggleHeaderVisibility() },
-      { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
-      { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
-      { key: "a", callback: () => swiperInstance?.slidePrev() },
-      { key: "s", callback: () => void handleToggleFavorite() },
-      { key: "d", callback: () => swiperInstance?.slideNext() },
-      { key: "f", callback: () => toggleFullscreen() },
-      { key: "q", callback: () => onPrevFolder?.() },
-      { key: "e", callback: () => onNextFolder?.() },
-      { key: "o", callback: () => handleOpenFolder() },
+      { ...partial, key: "Escape", callback: () => onClose() },
+      { ...partial, key: "Enter", callback: () => toggleHeaderVisibility() },
+      { ...partial, key: " ", callback: () => toggleHeaderVisibility() },
       {
+        ...partial,
+        key: "ArrowLeft",
+        callback: () => swiperInstance?.slidePrev(),
+      },
+      {
+        ...partial,
+        key: "ArrowRight",
+        callback: () => swiperInstance?.slideNext(),
+      },
+      { ...partial, key: "a", callback: () => swiperInstance?.slidePrev() },
+      { ...partial, key: "s", callback: () => void handleToggleFavorite() },
+      { ...partial, key: "d", callback: () => swiperInstance?.slideNext() },
+      { ...partial, key: "f", callback: () => toggleFullscreen() },
+      { ...partial, key: "q", callback: () => onPrevFolder?.() },
+      { ...partial, key: "e", callback: () => onNextFolder?.() },
+      { ...partial, key: "o", callback: () => handleOpenFolder() },
+      {
+        ...partial,
         key: "h",
         callback: () => {
           toggleHeaderPinned();

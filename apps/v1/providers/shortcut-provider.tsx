@@ -1,7 +1,7 @@
 "use client";
 
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { KeyAction } from "@/lib/shortcut-keys/types";
+import { KeyAction } from "@/lib/shortcut/types";
 import { createContext, useContext } from "react";
 
 type ShortcutContextType = ReturnType<typeof useShortcutKeys>;

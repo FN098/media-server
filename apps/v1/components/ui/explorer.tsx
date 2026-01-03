@@ -15,6 +15,7 @@ import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
+import { KeyAction } from "@/lib/shortcut/types";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -103,14 +104,15 @@ export function Explorer() {
   // ショートカット
   const { register: registerShortcuts } = useShortcutContext();
   useEffect(() => {
+    const partial: Partial<KeyAction> = { priority: 10 };
     return registerShortcuts([
-      { key: "q", callback: () => openPrevFolder("first") },
-      { key: "e", callback: () => openNextFolder("first") },
-      { key: "t", callback: () => toggleTagEditorOpenClose() },
-      { key: "x", callback: () => toggleTagEditorTransparent() },
-      { key: "Ctrl+a", callback: () => selectAllMedia() },
-      { key: "Ctrl+k", callback: () => focusSearch() },
-      { key: "Escape", callback: () => clearSelection() },
+      { ...partial, key: "q", callback: () => openPrevFolder("first") },
+      { ...partial, key: "e", callback: () => openNextFolder("first") },
+      { ...partial, key: "t", callback: () => toggleTagEditorOpenClose() },
+      { ...partial, key: "x", callback: () => toggleTagEditorTransparent() },
+      { ...partial, key: "Ctrl+a", callback: () => selectAllMedia() },
+      { ...partial, key: "Ctrl+k", callback: () => focusSearch() },
+      { ...partial, key: "Escape", callback: () => clearSelection() },
     ]);
   }, [
     clearSelection,
@@ -133,8 +135,6 @@ export function Explorer() {
   //   { key: "Ctrl+k", callback: () => focusSearch() },
   //   { key: "Escape", callback: () => clearSelection() },
   // ]);
-
-  console.log({ selected });
 
   // ファイル/フォルダオープン
   const handleOpen = useCallback(
