@@ -13,7 +13,7 @@ import {
   getDbFavoriteCount,
   getDbVisitedInfoDeeply,
 } from "@/repositories/folder-repository";
-import { getDbMedia, getDbMediaCount } from "@/repositories/media-repository";
+import { getDbMedia } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -61,17 +61,14 @@ export default async function Page(props: Props) {
 
   const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
 
-  // DB の件数を先に取得し、一致しなければ同期
-  const dbCount = await getDbMediaCount(currentDirPath);
-  if (dbCount !== allNodes.length) {
-    await syncMediaDir(currentDirPath, allNodes);
-  }
-
   // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
-  const dbMedia = await getDbMedia(currentDirPath, USER);
-  const dbVisited = await getDbVisitedInfoDeeply(dirPaths, USER);
-  const dbFavorites = await getDbFavoriteCount(dirPaths, USER);
+  await syncMediaDir(currentDirPath, allNodes); // TODO: クローラーワーカージョブに移動
+  const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
+    getDbMedia(currentDirPath, USER),
+    getDbVisitedInfoDeeply(dirPaths, USER),
+    getDbFavoriteCount(dirPaths, USER),
+  ]);
 
   // マージ
   const merged = mergeFsWithDb(sorted, dbMedia, dbVisited, dbFavorites);
