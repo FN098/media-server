@@ -5,7 +5,6 @@ import { AudioPlayer } from "@/components/ui/audio-player";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ImageViewer } from "@/components/ui/image-viewer";
 import { MarqueeText } from "@/components/ui/marquee-text";
-import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitleControl } from "@/hooks/use-document-title";
@@ -55,6 +54,7 @@ export function MediaViewer({
   onOpenFolder,
   onNextFolder,
   onPrevFolder,
+  onTags,
 }: {
   allNodes: MediaNode[];
   initialIndex: number;
@@ -62,13 +62,13 @@ export function MediaViewer({
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onNextFolder?: (at?: IndexLike) => void;
   onPrevFolder?: (at?: IndexLike) => void;
+  onTags?: () => void;
 }) {
   const isMobile = useIsMobile();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const [index, setIndex] = useState(initialIndex);
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
   const [isHeaderPinned, setIsHeaderPinned] = useState(false);
   const {
     isVisible: isHeaderVisible,
@@ -84,9 +84,7 @@ export function MediaViewer({
   );
   const { setTitle, resetTitle } = useDocumentTitleControl();
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
-  const toggleTagEditorOpen = () => setIsTagEditorOpen((prev) => !prev);
 
-  const currentNode = allNodes[index];
   const hasPrev = !!onPrevFolder;
   const hasNext = !!onNextFolder;
   const offsetPrev = hasPrev ? 1 : 0;
@@ -282,7 +280,7 @@ export function MediaViewer({
                     )}
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={toggleTagEditorOpen}>
+                  <DropdownMenuItem onClick={onTags}>
                     <TagIcon className="mr-2 h-4 w-4" />
                     <span>タグを表示</span>
                     {!isMobile && (
@@ -352,13 +350,6 @@ export function MediaViewer({
           );
         })}
       </Swiper>
-
-      {/* タグエディター */}
-      <TagEditSheet
-        targetNodes={[currentNode]}
-        mode="single"
-        active={isTagEditorOpen}
-      />
     </div>
   );
 }

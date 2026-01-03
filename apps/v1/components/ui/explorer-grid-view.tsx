@@ -73,8 +73,13 @@ function Cell({
   onOpen?: (node: MediaNode) => void;
 }) {
   const { toggleFavorite, isFavorite } = useFavoritesContext();
-  const { isSelectionMode, isSelected, toggleSelection } =
-    usePathSelectionContext();
+  const {
+    isSelectionMode,
+    isSelected,
+    setIsSelectionMode,
+    selectKey,
+    unselectKey,
+  } = usePathSelectionContext();
 
   const favorite = useMemo(
     () => isFavorite(node.path),
@@ -88,9 +93,9 @@ function Cell({
 
   const isMobile = useIsMobile();
 
-  const handleSelectOrOpen = () => {
+  const handleSelectChangeOrOpen = () => {
     if (isSelectionMode) {
-      if (isMedia(node.type)) toggleSelection(node.path);
+      if (isMedia(node.type)) handleSelectChange(!selected);
       else if (node.isDirectory) toast.warning("フォルダは選択できません！");
       else toast.warning("このファイルは選択できません！");
     } else {
@@ -98,8 +103,14 @@ function Cell({
     }
   };
 
-  const handleSelect = () => {
-    toggleSelection(node.path);
+  const handleSelectChange = (selected: boolean) => {
+    setIsSelectionMode(true);
+
+    if (selected) {
+      selectKey(node.path);
+    } else {
+      unselectKey(node.path);
+    }
   };
 
   const handleToggleFavorite = () => {
@@ -120,7 +131,7 @@ function Cell({
             ? "ring-2 ring-primary border-transparent"
             : "hover:border-primary/50"
         )}
-        onClick={handleSelectOrOpen}
+        onClick={handleSelectChangeOrOpen}
       >
         {/* サムネイル */}
         <MediaThumb
@@ -139,7 +150,7 @@ function Cell({
         >
           <Checkbox
             checked={selected}
-            onCheckedChange={handleSelect}
+            onCheckedChange={handleSelectChange}
             onClick={(e) => e.stopPropagation()}
             disabled={!isMedia(node.type)}
           />

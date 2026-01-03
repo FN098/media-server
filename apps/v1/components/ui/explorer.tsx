@@ -118,32 +118,60 @@ export function Explorer() {
     [searchFiltered, selectedPaths]
   );
 
-  // 1つ以上選択されたら選択モードに移行、0ならモード解除
-  useEffect(() => {
-    setIsSelectionMode(selected.length > 0);
-  }, [selected, setIsSelectionMode]);
-
   // 全選択
   const handleSelectAll = () => {
     selectPaths(mediaOnly.map((n) => n.path));
+    setIsSelectionMode(true);
   };
 
   // 選択解除
   const handleClearSelection = () => {
     clearSelection();
+    setIsSelectionMode(true);
   };
 
-  // タグエディタ表示・非表示
-  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
-  const handleOpenTagEditor = () => setIsTagEditorOpen(true);
-  const handleCloseTagEditor = () => setIsTagEditorOpen(false);
-  const toggleIsTagEditorOpen = () => setIsTagEditorOpen((prev) => !prev);
+  // 選択バー閉じる
+  const handleCloseSelectionBar = () => {
+    clearSelection();
+    setIsSelectionMode(false);
+  };
 
-  // ビューア表示用インデックス
+  // ビューア
   const viewerIndex = useMemo(
     () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
     [at, mediaOnly.length]
   );
+
+  // タグエディタ開閉
+  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
+  const handleOpenTagEditor = () => setIsTagEditorOpen(true);
+  const handleCloseTagEditor = () => setIsTagEditorOpen(false);
+
+  // タグエディタの起動モード
+  const tagEditMode = useMemo(() => {
+    if (modal) return "single";
+    return "default";
+  }, [modal]);
+
+  // タグエディタの状態切り替え
+  const handleToggleTagEditor = () => {
+    if (isTagEditorOpen) {
+      setIsTagEditorOpen(false);
+      return;
+    }
+    if (tagEditMode === "default") {
+      setIsSelectionMode(true);
+      setIsTagEditorOpen(true);
+      return;
+    }
+    if (tagEditMode === "single" && viewerIndex != null) {
+      const media = mediaOnly[viewerIndex];
+      selectPaths([media.path]);
+      setIsSelectionMode(false);
+      setIsTagEditorOpen(true);
+      return;
+    }
+  };
 
   // メディアノードリストのインデックスを取得
   const getMediaIndex = useCallback(
@@ -185,7 +213,7 @@ export function Explorer() {
   useShortcutKeys([
     { key: "q", callback: () => openPrevFolder("first") },
     { key: "e", callback: () => openNextFolder("first") },
-    { key: "t", callback: () => toggleIsTagEditorOpen() },
+    { key: "t", callback: () => handleToggleTagEditor() },
     { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
     { key: "Escape", callback: () => handleClearSelection() },
@@ -219,6 +247,7 @@ export function Explorer() {
           targetNodes={selected}
           active={isTagEditorOpen}
           onClose={handleCloseTagEditor}
+          mode={tagEditMode}
         />
 
         {/* 選択バー */}
@@ -227,7 +256,7 @@ export function Explorer() {
           totalCount={mediaOnly.length}
           active={isSelectionMode}
           onSelectAll={handleSelectAll}
-          onCancel={handleClearSelection}
+          onClose={handleCloseSelectionBar}
           actions={
             <>
               <Button onClick={handleOpenTagEditor}>タグ編集</Button>
@@ -245,6 +274,7 @@ export function Explorer() {
               onOpenFolder={openFolder}
               onPrevFolder={() => openPrevFolder("last")}
               onNextFolder={() => openNextFolder("first")}
+              onTags={handleToggleTagEditor}
             />
           </ScrollLockProvider>
         )}

@@ -8,7 +8,7 @@ interface SelectionBarProps {
   count: number;
   totalCount: number;
   onSelectAll: () => void;
-  onCancel: () => void;
+  onClose: () => void;
   actions: React.ReactNode;
   active?: boolean;
 }
@@ -17,7 +17,7 @@ export function SelectionBar({
   count,
   totalCount,
   onSelectAll,
-  onCancel,
+  onClose,
   actions, // アクションボタンの定義を配列で受ける
   active,
 }: SelectionBarProps) {
@@ -60,7 +60,7 @@ export function SelectionBar({
                 variant="ghost"
                 size="sm"
                 className="rounded-xl w-10 h-10 p-0"
-                onClick={onCancel}
+                onClick={onClose}
               >
                 <X size={18} />
               </Button>
