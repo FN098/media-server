@@ -21,6 +21,7 @@ export type KeyAction = {
   key: Shortcut | Shortcut[];
   callback: () => void;
   condition?: boolean | (() => boolean);
+  priority?: Priority;
 };
 
 export type ParsedKeyAction = {
@@ -28,4 +29,10 @@ export type ParsedKeyAction = {
   modifiers: Modifiers;
   callback: () => void;
   condition?: boolean | (() => boolean);
+  priority?: Priority;
 };
+
+export type KeyValueLike = string;
+export type Priority = number;
+export type ActionMap = Map<KeyValueLike, ParsedKeyAction[]>;
+export type ShortcutMap = Map<Priority, ActionMap>;

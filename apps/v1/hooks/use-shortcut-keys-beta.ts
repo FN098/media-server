@@ -1,28 +1,44 @@
-import { KeyAction, ParsedKeyAction } from "@/lib/shortcut/types";
-import { matchModifiers, parseShortcut } from "@/lib/shortcut/utils";
+import {
+  KeyAction,
+  ParsedKeyAction,
+  ShortcutMap,
+} from "@/lib/shortcut/types-beta";
+import { matchModifiers, parseShortcut } from "@/lib/shortcut/utils-beta";
 import { castArray } from "@/lib/utils/cast-array";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 export function useShortcutKeys(actions: KeyAction[]) {
-  const stack = useRef<ParsedKeyAction[]>([]);
+  const shortcutMapRef = useRef<ShortcutMap>(new Map());
 
-  // 現在のスタックにショートカットキーを追加登録（非公開API）
+  /**
+   * 非公開API: priority→key→actions 配列に格納
+   */
   const _register_internal = useCallback((action: ParsedKeyAction) => {
-    stack.current.push(action);
+    const priority = action.priority ?? 0;
+    const key = action.key;
 
-    // 登録解除用のコールバックを返す
+    if (!shortcutMapRef.current.has(priority))
+      shortcutMapRef.current.set(priority, new Map());
+    const actionMap = shortcutMapRef.current.get(priority)!;
+
+    if (!actionMap.has(key)) actionMap.set(key, []);
+    const actions = actionMap.get(key)!;
+    actions.push(action);
+
     return () => {
-      const i = stack.current.indexOf(action);
-      if (i !== -1) stack.current.splice(i, 1);
+      const i = shortcutMapRef.current.get(priority)?.get(key)?.indexOf(action);
+      if (i !== undefined && i !== -1)
+        shortcutMapRef.current.get(priority)?.get(key)?.splice(i, 1);
     };
   }, []);
 
-  // 現在のスタックにショートカットキーを追加登録（公開API）
+  /**
+   * 公開API: KeyAction 配列で登録可能
+   */
   const register = useCallback(
     (actions: KeyAction | KeyAction[]) => {
       const unregisters: (() => void)[] = [];
 
-      // 現在のスタックにショートカットキーを追加登録
       castArray(actions).forEach((action) => {
         castArray(action.key).forEach((k) => {
           const { key, modifiers } = parseShortcut(k);
@@ -33,18 +49,20 @@ export function useShortcutKeys(actions: KeyAction[]) {
               modifiers,
               callback: action.callback,
               condition: action.condition,
+              priority: action.priority,
             })
           );
         });
       });
 
-      // 登録解除用のコールバックを返す
       return () => unregisters.forEach((fn) => fn());
     },
     [_register_internal]
   );
 
-  // 登録済みスタックを処理する共通の keydown ハンドラを設定 (LIFO)
+  /**
+   * keydown ハンドラ: priority 高い順 → LIFO
+   */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (
@@ -54,23 +72,30 @@ export function useShortcutKeys(actions: KeyAction[]) {
         return;
       }
 
-      const key = e.key.toLowerCase();
+      const key = e.key;
 
-      // 最後に登録されたアクションのみ実行
-      // （同じキーが複数登録された場合の対策）
-      for (let i = stack.current.length - 1; i >= 0; i--) {
-        const { key: k, modifiers, callback, condition } = stack.current[i];
+      // priority 高い順で取得
+      const priorities = [...shortcutMapRef.current.keys()].sort(
+        (a, b) => b - a
+      );
 
-        if (k !== key) continue;
+      for (const p of priorities) {
+        const actionMap = shortcutMapRef.current.get(p)!;
+        const actions = actionMap.get(key);
+        if (!actions) continue;
 
-        const isActive =
-          typeof condition === "function" ? condition() : (condition ?? true);
-        if (!isActive) continue;
-        if (!matchModifiers(e, modifiers)) continue;
+        // LIFO: 最後に登録されたものを優先
+        for (let i = actions.length - 1; i >= 0; i--) {
+          const { modifiers, callback, condition } = actions[i];
+          if (!matchModifiers(e, modifiers)) continue;
+          const isActive =
+            typeof condition === "function" ? condition() : (condition ?? true);
+          if (!isActive) continue;
 
-        e.preventDefault();
-        callback();
-        break;
+          e.preventDefault();
+          callback();
+          return;
+        }
       }
     };
 
@@ -102,7 +127,8 @@ export function useShortcutKeys(actions: KeyAction[]) {
        *       condition: isOpen,
        *     },
        *   ]);
-       * }, [register]);
+       *   // eslint-disable-next-line react-hooks/exhaustive-deps
+       * }, []);
        * ```
        */
       register,

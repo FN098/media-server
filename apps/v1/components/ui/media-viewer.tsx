@@ -9,12 +9,12 @@ import { VideoPlayer } from "@/components/ui/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitleControl } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import { useShortcutContext } from "@/providers/shortcut-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import {
   DropdownMenu,
@@ -153,40 +153,63 @@ export function MediaViewer({
   };
 
   // ショートカット
-  const { register: registerShortcuts } = useShortcutContext();
-  useEffect(() => {
-    return registerShortcuts([
-      { priority: 100, key: "Escape", callback: () => onClose() },
-      { priority: 100, key: "Enter", callback: () => toggleHeaderVisibility() },
-      { priority: 100, key: " ", callback: () => toggleHeaderVisibility() },
-      {
-        priority: 100,
-        key: "ArrowLeft",
-        callback: () => swiperInstance?.slidePrev(),
+  useShortcutKeys([
+    { key: "Escape", callback: () => onClose() },
+    { key: "Enter", callback: () => toggleHeaderVisibility() },
+    { key: " ", callback: () => toggleHeaderVisibility() },
+    { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
+    { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
+    { key: "a", callback: () => swiperInstance?.slidePrev() },
+    { key: "s", callback: () => void handleToggleFavorite() },
+    { key: "d", callback: () => swiperInstance?.slideNext() },
+    { key: "f", callback: () => toggleFullscreen() },
+    { key: "q", callback: () => onPrevFolder?.() },
+    { key: "e", callback: () => onNextFolder?.() },
+    { key: "o", callback: () => handleOpenFolder() },
+    {
+      key: "h",
+      callback: () => {
+        toggleHeaderPinned();
+        interactHeader();
       },
-      {
-        priority: 100,
-        key: "ArrowRight",
-        callback: () => swiperInstance?.slideNext(),
-      },
-      { priority: 100, key: "a", callback: () => swiperInstance?.slidePrev() },
-      { priority: 100, key: "s", callback: () => void handleToggleFavorite() },
-      { priority: 100, key: "d", callback: () => swiperInstance?.slideNext() },
-      { priority: 100, key: "f", callback: () => toggleFullscreen() },
-      { priority: 100, key: "q", callback: () => onPrevFolder?.() },
-      { priority: 100, key: "e", callback: () => onNextFolder?.() },
-      { priority: 100, key: "o", callback: () => handleOpenFolder() },
-      {
-        priority: 100,
-        key: "h",
-        callback: () => {
-          toggleHeaderPinned();
-          interactHeader();
-        },
-      },
-    ]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    },
+  ]);
+
+  // ショートカット beta
+  // const { register: registerShortcuts } = useShortcutContext();
+  // useEffect(() => {
+  //   return registerShortcuts([
+  //     { priority: 100, key: "Escape", callback: () => onClose() },
+  //     { priority: 100, key: "Enter", callback: () => toggleHeaderVisibility() },
+  //     { priority: 100, key: " ", callback: () => toggleHeaderVisibility() },
+  //     {
+  //       priority: 100,
+  //       key: "ArrowLeft",
+  //       callback: () => swiperInstance?.slidePrev(),
+  //     },
+  //     {
+  //       priority: 100,
+  //       key: "ArrowRight",
+  //       callback: () => swiperInstance?.slideNext(),
+  //     },
+  //     { priority: 100, key: "a", callback: () => swiperInstance?.slidePrev() },
+  //     { priority: 100, key: "s", callback: () => void handleToggleFavorite() },
+  //     { priority: 100, key: "d", callback: () => swiperInstance?.slideNext() },
+  //     { priority: 100, key: "f", callback: () => toggleFullscreen() },
+  //     { priority: 100, key: "q", callback: () => onPrevFolder?.() },
+  //     { priority: 100, key: "e", callback: () => onNextFolder?.() },
+  //     { priority: 100, key: "o", callback: () => handleOpenFolder() },
+  //     {
+  //       priority: 100,
+  //       key: "h",
+  //       callback: () => {
+  //         toggleHeaderPinned();
+  //         interactHeader();
+  //       },
+  //     },
+  //   ]);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   return (
     <div

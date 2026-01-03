@@ -1,4 +1,5 @@
-import { Modifiers } from "@/lib/shortcut/types";
+import { Keys } from "@/lib/shortcut/keys";
+import { KeyValue, Modifiers, Shortcut } from "@/lib/shortcut/types-beta";
 
 export function matchModifiers(
   e: KeyboardEvent,
@@ -15,11 +16,14 @@ export function matchModifiers(
   return true;
 }
 
-export function normalizeKey(key: string): string {
-  return key.toLowerCase();
+export function normalizeKey(key: string): KeyValue {
+  const lower = key.toLowerCase();
+  const matched = Object.values(Keys).find((k) => k.toLowerCase() === lower);
+  if (!matched) throw new Error(`Invalid Key: ${key}`);
+  return matched as KeyValue;
 }
 
-export function parseShortcut(shortcut: string) {
+export function parseShortcut(shortcut: Shortcut) {
   const parts = shortcut.split("+");
 
   const rawKey = parts.pop()!;

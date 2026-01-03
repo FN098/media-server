@@ -11,6 +11,7 @@ import {
   useNormalizeExplorerQuery,
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
@@ -18,7 +19,6 @@ import { normalizeIndex } from "@/lib/query/utils";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
-import { useShortcutContext } from "@/providers/shortcut-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
@@ -101,19 +101,30 @@ export function Explorer() {
   }, [listing.path]);
 
   // ショートカット
-  const { register: registerShortcuts } = useShortcutContext();
-  useEffect(() => {
-    return registerShortcuts([
-      { priority: 10, key: "q", callback: () => openPrevFolder("first") },
-      { priority: 10, key: "e", callback: () => openNextFolder("first") },
-      { priority: 10, key: "t", callback: () => toggleTagEditorOpenClose() },
-      { priority: 10, key: "x", callback: () => toggleTagEditorTransparent() },
-      { priority: 10, key: "Ctrl+a", callback: () => selectAllMedia() },
-      { priority: 10, key: "Ctrl+k", callback: () => focusSearch() },
-      { priority: 10, key: "Escape", callback: () => clearSelection() },
-    ]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useShortcutKeys([
+    { key: "q", callback: () => openPrevFolder("first") },
+    { key: "e", callback: () => openNextFolder("first") },
+    { key: "t", callback: () => toggleTagEditorOpenClose() },
+    { key: "x", callback: () => toggleTagEditorTransparent() },
+    { key: "Ctrl+a", callback: () => selectAllMedia() },
+    { key: "Ctrl+k", callback: () => focusSearch() },
+    { key: "Escape", callback: () => clearSelection() },
+  ]);
+
+  // ショートカット beta
+  // const { register: registerShortcuts } = useShortcutContext();
+  // useEffect(() => {
+  //   return registerShortcuts([
+  //     { priority: 10, key: "q", callback: () => openPrevFolder("first") },
+  //     { priority: 10, key: "e", callback: () => openNextFolder("first") },
+  //     { priority: 10, key: "t", callback: () => toggleTagEditorOpenClose() },
+  //     { priority: 10, key: "x", callback: () => toggleTagEditorTransparent() },
+  //     { priority: 10, key: "Ctrl+a", callback: () => selectAllMedia() },
+  //     { priority: 10, key: "Ctrl+k", callback: () => focusSearch() },
+  //     { priority: 10, key: "Escape", callback: () => clearSelection() },
+  //   ]);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   // ファイル/フォルダオープン
   const handleOpen = useCallback(

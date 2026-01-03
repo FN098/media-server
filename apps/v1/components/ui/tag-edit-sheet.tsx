@@ -1,5 +1,6 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { Record } from "@/generated/prisma/runtime/library";
+import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import {
   PendingNewTag,
@@ -10,7 +11,6 @@ import {
   TagState,
 } from "@/lib/tag/types";
 import { useSelectionContext } from "@/providers/selection-provider";
-import { useShortcutContext } from "@/providers/shortcut-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
@@ -120,24 +120,38 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
   ]);
 
   // ショートカット
-  const { register: registerShortcuts } = useShortcutContext();
-  useEffect(() => {
-    return registerShortcuts([
-      {
-        priority: 1000,
-        key: "Escape",
-        callback: () => handleClose,
-        condition: () => isActive,
-      },
-      {
-        priority: 1000,
-        key: "e",
-        callback: () => toggleIsEditing,
-        condition: () => isActive,
-      },
-    ]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useShortcutKeys([
+    {
+      key: "Escape",
+      callback: () => handleClose,
+      condition: () => isActive,
+    },
+    {
+      key: "e",
+      callback: () => toggleIsEditing,
+      condition: () => isActive,
+    },
+  ]);
+
+  // ショートカット beta
+  // const { register: registerShortcuts } = useShortcutContext();
+  // useEffect(() => {
+  //   return registerShortcuts([
+  //     {
+  //       priority: 1000,
+  //       key: "Escape",
+  //       callback: () => handleClose,
+  //       condition: () => isActive,
+  //     },
+  //     {
+  //       priority: 1000,
+  //       key: "e",
+  //       callback: () => toggleIsEditing,
+  //       condition: () => isActive,
+  //     },
+  //   ]);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   // シングルモードの場合は自動選択
   useEffect(() => {
