@@ -1,7 +1,5 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { Record } from "@/generated/prisma/runtime/library";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { KeyAction } from "@/lib/shortcut/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import {
   PendingNewTag,
@@ -124,18 +122,21 @@ export function TagEditSheet({ onClose }: { onClose?: () => void }) {
   // ショートカット
   const { register: registerShortcuts } = useShortcutContext();
   useEffect(() => {
-    const partial: Partial<KeyAction> = { priority: 1000 };
     return registerShortcuts([
-      { ...partial, key: "Escape", callback: handleClose },
-      { ...partial, key: "e", callback: toggleIsEditing },
+      {
+        priority: 1000,
+        key: "Escape",
+        callback: handleClose,
+        condition: isActive,
+      },
+      {
+        priority: 1000,
+        key: "e",
+        callback: toggleIsEditing,
+        condition: isActive,
+      },
     ]);
-  }, [handleClose, registerShortcuts, toggleIsEditing]);
-
-  // ショートカット
-  // useShortcutKeys([
-  //   { key: "Escape", callback: handleClose },
-  //   { key: "e", callback: toggleIsEditing },
-  // ]);
+  }, [handleClose, isActive, registerShortcuts, toggleIsEditing]);
 
   // シングルモードの場合は自動選択
   useEffect(() => {
@@ -385,8 +386,6 @@ function TagInput({
     [suggestions]
   );
 
-  useShortcutKeys([{ key: "i", callback: () => inputRef.current?.focus() }]);
-
   return (
     <div className="relative">
       <div className="relative">
@@ -553,7 +552,8 @@ function TagList({
             ? true
             : op === "remove"
               ? false
-              : tagStates[tag.name] === "all";
+              : tagStates[tag.name] === "all" || tagStates[tag.name] === "some"; // TODO: some を追加すれば見た目はいい（ひとつでも存在するものがハイライトされる）が、 WillBeOnという名前からは意味がずれてしまう
+        // : tagStates[tag.name] === "all";
         const isPendingNew = pendingNewTags.some((t) => t.tempId === tag.id);
 
         return (

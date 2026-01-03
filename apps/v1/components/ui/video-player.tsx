@@ -1,11 +1,11 @@
 import { LoadingSpinner } from "@/components/ui/spinners";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/lib/media/types";
 import { getAbsoluteMediaUrl, getThumbUrl } from "@/lib/path/helpers";
+import { useShortcutContext } from "@/providers/shortcut-provider";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
-import { memo, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 type VideoPlayerProps = {
   media: MediaFsNode;
@@ -61,11 +61,15 @@ export const VideoPlayer = memo(function VideoPlayer({
     }
   };
 
-  useShortcutKeys([
-    { key: "Ctrl+ArrowRight", callback: () => seek(10) },
-    { key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
-    { key: " ", callback: () => togglePlay() },
-  ]);
+  // ショートカット
+  const { register: registerShortcuts } = useShortcutContext();
+  useEffect(() => {
+    return registerShortcuts([
+      { priority: 500, key: "Ctrl+ArrowRight", callback: () => seek(10) },
+      { priority: 500, key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
+      { priority: 500, key: " ", callback: () => togglePlay() },
+    ]);
+  }, [registerShortcuts]);
 
   return (
     <div className="relative group overflow-hidden bg-black aspect-video w-full max-w-4xl mx-auto shadow-lg">

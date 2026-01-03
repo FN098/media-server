@@ -1,7 +1,7 @@
 import { MarqueeText } from "@/components/ui/marquee-text";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { getAbsoluteMediaUrl } from "@/lib/path/helpers";
+import { useShortcutContext } from "@/providers/shortcut-provider";
 import {
   Tooltip,
   TooltipContent,
@@ -16,7 +16,7 @@ import {
   RotateCcw,
   RotateCw,
 } from "lucide-react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export function AudioPlayer({
   media,
@@ -103,12 +103,15 @@ export function AudioPlayer({
   }, []);
 
   // ショートカット
-  useShortcutKeys([
-    { key: "Ctrl+ArrowRight", callback: () => seek(10) },
-    { key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
-    { key: " ", callback: () => togglePlaying() },
-    { key: "r", callback: () => toggleRepeating() },
-  ]);
+  const { register: registerShortcuts } = useShortcutContext();
+  useEffect(() => {
+    return registerShortcuts([
+      { priority: 500, key: "Ctrl+ArrowRight", callback: () => seek(10) },
+      { priority: 500, key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
+      { priority: 500, key: " ", callback: () => togglePlaying() },
+      { priority: 500, key: "r", callback: () => toggleRepeating() },
+    ]);
+  }, [registerShortcuts, seek, togglePlaying]);
 
   return (
     <div className="w-full h-full flex items-center justify-center">

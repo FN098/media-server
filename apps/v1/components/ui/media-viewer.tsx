@@ -14,7 +14,6 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
-import { KeyAction } from "@/lib/shortcut/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useShortcutContext } from "@/providers/shortcut-provider";
 import {
@@ -119,7 +118,9 @@ export function MediaViewer({
     }
   }, [toggleFavorite, items, index, interactHeader]);
 
+  // 現在のファイルが存在するフォルダを開く
   const handleOpenFolder = useCallback(() => {
+    // TODO: useExplorer の openFolder で移動する
     const url = getClientExplorerPath(path.dirname(items[index].path));
     router.push(url);
   }, [index, items, router]);
@@ -154,30 +155,29 @@ export function MediaViewer({
   // ショートカット
   const { register: registerShortcuts } = useShortcutContext();
   useEffect(() => {
-    const partial: Partial<KeyAction> = { priority: 100 };
     return registerShortcuts([
-      { ...partial, key: "Escape", callback: () => onClose() },
-      { ...partial, key: "Enter", callback: () => toggleHeaderVisibility() },
-      { ...partial, key: " ", callback: () => toggleHeaderVisibility() },
+      { priority: 100, key: "Escape", callback: () => onClose() },
+      { priority: 100, key: "Enter", callback: () => toggleHeaderVisibility() },
+      { priority: 100, key: " ", callback: () => toggleHeaderVisibility() },
       {
-        ...partial,
+        priority: 100,
         key: "ArrowLeft",
         callback: () => swiperInstance?.slidePrev(),
       },
       {
-        ...partial,
+        priority: 100,
         key: "ArrowRight",
         callback: () => swiperInstance?.slideNext(),
       },
-      { ...partial, key: "a", callback: () => swiperInstance?.slidePrev() },
-      { ...partial, key: "s", callback: () => void handleToggleFavorite() },
-      { ...partial, key: "d", callback: () => swiperInstance?.slideNext() },
-      { ...partial, key: "f", callback: () => toggleFullscreen() },
-      { ...partial, key: "q", callback: () => onPrevFolder?.() },
-      { ...partial, key: "e", callback: () => onNextFolder?.() },
-      { ...partial, key: "o", callback: () => handleOpenFolder() },
+      { priority: 100, key: "a", callback: () => swiperInstance?.slidePrev() },
+      { priority: 100, key: "s", callback: () => void handleToggleFavorite() },
+      { priority: 100, key: "d", callback: () => swiperInstance?.slideNext() },
+      { priority: 100, key: "f", callback: () => toggleFullscreen() },
+      { priority: 100, key: "q", callback: () => onPrevFolder?.() },
+      { priority: 100, key: "e", callback: () => onNextFolder?.() },
+      { priority: 100, key: "o", callback: () => handleOpenFolder() },
       {
-        ...partial,
+        priority: 100,
         key: "h",
         callback: () => {
           toggleHeaderPinned();
@@ -197,32 +197,6 @@ export function MediaViewer({
     toggleFullscreen,
     toggleHeaderVisibility,
   ]);
-
-  // ショートカット
-  // useShortcutKeys([
-  //   { key: "Escape", callback: () => onClose() },
-  //   { key: "Enter", callback: () => toggleHeaderVisibility() },
-  //   { key: " ", callback: () => toggleHeaderVisibility() },
-  //   { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
-  //   { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
-  //   { key: "a", callback: () => swiperInstance?.slidePrev() },
-  //   { key: "s", callback: () => void handleToggleFavorite() },
-  //   { key: "d", callback: () => swiperInstance?.slideNext() },
-  //   { key: "f", callback: () => toggleFullscreen() },
-  //   // TODO: 親の explorer のショートカットと被ってしまうので修正
-  //   // { key: "q", callback: () => onPrevFolder?.() },
-  //   // { key: "e", callback: () => onNextFolder?.() },
-  //   { key: "q", callback: () => console.log("pressed q in media viewer") },
-  //   { key: "e", callback: () => console.log("pressed e in media viewer") },
-  //   { key: "o", callback: () => handleOpenFolder() },
-  //   {
-  //     key: "h",
-  //     callback: () => {
-  //       toggleHeaderPinned();
-  //       interactHeader();
-  //     },
-  //   },
-  // ]);
 
   return (
     <div

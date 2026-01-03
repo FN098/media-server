@@ -11,13 +11,13 @@ import {
   useNormalizeExplorerQuery,
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
+import { useShortcutContext } from "@/providers/shortcut-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useEffect } from "react";
@@ -78,11 +78,14 @@ export function Favorites() {
   }, [listing.path]);
 
   // ショートカット
-  useShortcutKeys([
-    { key: "Ctrl+a", callback: () => selectAllMedia() },
-    { key: "Ctrl+k", callback: () => focusSearch() },
-    { key: "Escape", callback: () => clearSelection() },
-  ]);
+  const { register: registerShortcuts } = useShortcutContext();
+  useEffect(() => {
+    return registerShortcuts([
+      { priority: 10, key: "Ctrl+a", callback: () => selectAllMedia() },
+      { priority: 10, key: "Ctrl+k", callback: () => focusSearch() },
+      { priority: 10, key: "Escape", callback: () => clearSelection() },
+    ]);
+  }, [clearSelection, focusSearch, registerShortcuts, selectAllMedia]);
 
   // ファイル/フォルダオープン
   const handleOpen = useCallback(
