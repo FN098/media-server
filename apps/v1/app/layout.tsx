@@ -1,5 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { AppQueryClientProvider } from "@/providers/query-client-provider";
+import { ShortcutProvider } from "@/providers/shortcut-provider";
 import { ThumbEventProvider } from "@/providers/thumb-event-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
 import { TooltipProvider } from "@/shadcn/components/ui/tooltip";
@@ -34,7 +35,9 @@ export default function RootLayout({
       >
         <AppQueryClientProvider>
           <TooltipProvider>
-            <ThumbEventProvider>{children}</ThumbEventProvider>
+            <ShortcutProvider>
+              <ThumbEventProvider>{children}</ThumbEventProvider>
+            </ShortcutProvider>
           </TooltipProvider>
         </AppQueryClientProvider>
         <Toaster />

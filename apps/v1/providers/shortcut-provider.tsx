@@ -15,9 +15,9 @@ export function ShortcutProvider({
   actions,
 }: {
   children: React.ReactNode;
-  actions: KeyAction[];
+  actions?: KeyAction[];
 }) {
-  const value = useShortcutKeys(actions);
+  const value = useShortcutKeys(actions ?? []);
 
   return (
     <ShortcutContext.Provider value={value}>

@@ -29,3 +29,6 @@ export type ParsedKeyAction = {
   callback: () => void;
   condition?: boolean | (() => boolean);
 };
+
+export type RegisterFn = (actions: KeyAction | KeyAction[]) => () => void;
+export type RegisterParsedFn = (action: ParsedKeyAction) => () => void;
