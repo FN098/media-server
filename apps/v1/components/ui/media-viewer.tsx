@@ -14,6 +14,7 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
+import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import {
@@ -35,7 +36,6 @@ import {
   TagIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import path from "path";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -66,7 +66,7 @@ export function MediaViewer({
   onNextFolder?: (at?: IndexLike) => void;
   onPrevFolder?: (at?: IndexLike) => void;
 }) {
-  const router = useRouter();
+  const { openFolder } = useExplorerContext();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const { toggleEditorOpenClose } = useTagEditorContext();
   const [index, setIndex] = useState(initialIndex);
@@ -87,7 +87,6 @@ export function MediaViewer({
     null
   );
   const { setTitle, resetTitle } = useDocumentTitleControl();
-  const openFolder = features?.openFolder ?? false;
   const hasPrev = !!onPrevFolder;
   const hasNext = !!onNextFolder;
   const offsetPrev = hasPrev ? 1 : 0;
@@ -120,10 +119,8 @@ export function MediaViewer({
 
   // 現在のファイルが存在するフォルダを開く
   const handleOpenFolder = useCallback(() => {
-    // TODO: useExplorer の openFolder で移動する
-    const url = getClientExplorerPath(path.dirname(items[index].path));
-    router.push(url);
-  }, [index, items, router]);
+    openFolder(path.dirname(items[index].path));
+  }, [index, items, openFolder]);
 
   // 前のフォルダ、次のフォルダを仮想スライドに追加
   const allSlides = useMemo(() => {
@@ -290,7 +287,7 @@ export function MediaViewer({
                   align="end"
                   className="flex flex-col w-48 gap-2"
                 >
-                  {openFolder && (
+                  {features?.openFolder && (
                     <DropdownMenuItem asChild>
                       <Link
                         href={getClientExplorerPath(
