@@ -7,12 +7,14 @@ import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { SelectionBar } from "@/components/ui/selection-bar";
 import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
+import { TagFilterBar } from "@/components/ui/tag-filter-bar";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
+import { useTagFilter } from "@/hooks/use-tag-filter";
 import { FavoritesRecord } from "@/lib/favorite/types";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode, MediaPathToIndexMap } from "@/lib/media/types";
@@ -99,10 +101,24 @@ export function Explorer() {
     return new Map(mediaOnly.map((node) => [node.path, node]));
   }, [mediaOnly]);
 
+  // タグフィルタリング
+  const {
+    allTags,
+    selectedTags,
+    filteredNodes: tagFiltered,
+    selectTags,
+  } = useTagFilter(searchFiltered);
+
+  // タグ+メディアフィルタリング
+  const tagFilteredMediaOnly: MediaNode[] = useMemo(
+    () => tagFiltered.filter((n) => isMedia(n.type)),
+    [tagFiltered]
+  );
+
   // ===== ビューア =====
 
   // ビューア用ノードリスト
-  const viewerNodes = mediaOnly;
+  const viewerNodes = tagFilteredMediaOnly;
 
   // ビューアのインデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
@@ -171,6 +187,9 @@ export function Explorer() {
     selectPaths,
     clearSelection,
   } = usePathSelectionContext();
+
+  // 選択可能ノードリスト
+  const selectable = tagFilteredMediaOnly;
 
   // 選択済みノードリスト
   const selected = useMemo(() => {
@@ -264,11 +283,18 @@ export function Explorer() {
       )}
     >
       <FavoritesProvider favorites={favorites}>
+        {/* タグフィルター */}
+        <TagFilterBar
+          tags={allTags}
+          selectedTags={selectedTags}
+          onApply={selectTags}
+        />
+
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div>
             <ExplorerGridView
-              allNodes={searchFiltered}
+              allNodes={tagFiltered}
               onOpen={handleOpen}
               onSelect={handleSelect}
             />
@@ -279,7 +305,7 @@ export function Explorer() {
         {viewMode === "list" && (
           <div>
             <ExplorerListView
-              allNodes={searchFiltered}
+              allNodes={tagFiltered}
               onOpen={handleOpen}
               onSelect={handleSelect}
             />
@@ -300,7 +326,7 @@ export function Explorer() {
         {isSelectionMode && (
           <SelectionBar
             count={selected.length}
-            totalCount={mediaOnly.length}
+            totalCount={selectable.length}
             active={isSelectionMode}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}

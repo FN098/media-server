@@ -29,6 +29,7 @@ import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
+import { TagIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -95,9 +96,15 @@ export function FavoritesExplorer() {
   const {
     allTags,
     selectedTags,
-    filteredNodes: tagFilteredMediaOnly,
+    filteredNodes: tagFiltered,
     selectTags,
-  } = useTagFilter(mediaOnly);
+  } = useTagFilter(searchFiltered);
+
+  // タグ+メディアフィルタリング
+  const tagFilteredMediaOnly: MediaNode[] = useMemo(
+    () => tagFiltered.filter((n) => isMedia(n.type)),
+    [tagFiltered]
+  );
 
   // ===== ビューア =====
 
@@ -172,6 +179,9 @@ export function FavoritesExplorer() {
     selectPaths,
     clearSelection,
   } = usePathSelectionContext();
+
+  // 選択可能ノードリスト
+  const selectable = tagFilteredMediaOnly;
 
   // 選択済みノードリスト
   const selected = useMemo(() => {
@@ -276,7 +286,7 @@ export function FavoritesExplorer() {
         {viewMode === "grid" && (
           <div>
             <ExplorerGridView
-              allNodes={tagFilteredMediaOnly}
+              allNodes={tagFiltered}
               onOpen={handleOpen}
               onSelect={handleSelect}
             />
@@ -287,7 +297,7 @@ export function FavoritesExplorer() {
         {viewMode === "list" && (
           <div>
             <ExplorerListView
-              allNodes={tagFilteredMediaOnly}
+              allNodes={tagFiltered}
               onOpen={handleOpen}
               onSelect={handleSelect}
             />
@@ -308,13 +318,16 @@ export function FavoritesExplorer() {
         {isSelectionMode && (
           <SelectionBar
             count={selected.length}
-            totalCount={tagFilteredMediaOnly.length}
+            totalCount={selectable.length}
             active={isSelectionMode}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}
             actions={
               <>
-                <Button onClick={handleOpenTagEditor}>タグ編集</Button>
+                <Button size="sm" onClick={handleOpenTagEditor}>
+                  <TagIcon />
+                  タグ表示
+                </Button>
               </>
             }
           />

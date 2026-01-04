@@ -8,7 +8,9 @@ export function useTagFilter(nodes: MediaNode[]) {
 
   // 全ノードからユニークなタグを抽出
   const allTags = useMemo(() => {
-    const tagNames = nodes.flatMap((n) => n.tags?.map((t) => t.name) ?? []);
+    const tagNames = nodes
+      .filter((n) => n.tags && n.tags.length > 0)
+      .flatMap((n) => n.tags!.map((t) => t.name));
     return Array.from(new Set(tagNames)).sort((a, b) => a.localeCompare(b));
   }, [nodes]);
 
@@ -16,10 +18,10 @@ export function useTagFilter(nodes: MediaNode[]) {
   const filteredNodes = useMemo(() => {
     if (selectedTags.size === 0) return nodes;
     return nodes.filter((node) => {
-      const nodeTagNames = node.tags?.map((t) => t.name) ?? [];
-      return Array.from(selectedTags).every((tag) =>
-        nodeTagNames.includes(tag)
-      );
+      if (node.isDirectory) return true; // フォルダは例外的に許可
+      if (!node.tags || node.tags.length === 0) return false;
+      const nodeTagNames = new Set(node.tags.map((t) => t.name));
+      return Array.from(selectedTags).every((tag) => nodeTagNames.has(tag));
     });
   }, [nodes, selectedTags]);
 
