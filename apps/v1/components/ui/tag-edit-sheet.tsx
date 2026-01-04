@@ -553,13 +553,16 @@ function TagList({
     <div className="flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto py-1">
       {tags.map((tag) => {
         const op = pendingChanges[tag.id];
-        const willBeOn =
+
+        const isOnAfterApply =
           op === "add"
             ? true
             : op === "remove"
               ? false
-              : tagStates[tag.name] === "all" || tagStates[tag.name] === "some";
-        // TODO: some を追加すれば見た目はよくなる（ひとつでも存在するものがハイライトされる）が、 WillBeOnという名前からは意味がずれてしまう
+              : tagStates[tag.name] === "all";
+
+        const isPartiallyOn = op == null && tagStates[tag.name] === "some";
+        const isHighlighted = isOnAfterApply || isPartiallyOn;
         const isPendingNew = pendingNewTags.some((t) => t.tempId === tag.id);
 
         return (
@@ -568,17 +571,17 @@ function TagList({
             onClick={() => onToggle(tag)}
             className={cn(
               "relative flex items-center gap-1.5 py-2 px-4 rounded-xl text-xs font-medium transition-all active:scale-95",
-              willBeOn
+              isHighlighted
                 ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                 : "bg-muted text-muted-foreground",
               op === "add" && "ring-2 ring-yellow-400 ring-offset-2",
               op === "remove" && "opacity-40 line-through",
               isPendingNew &&
                 "border-2 border-dashed border-primary/60 bg-primary/10 text-primary",
-              isTransparent && (willBeOn ? "bg-primary/50" : "bg-muted/50")
+              isTransparent && (isHighlighted ? "bg-primary/50" : "bg-muted/50")
             )}
           >
-            {willBeOn && <Check size={12} />}
+            {isOnAfterApply && <Check size={12} />}
             {tag.name}
             {op && (
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-yellow-400 rounded-full border-2 border-background" />
