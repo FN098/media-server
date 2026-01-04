@@ -145,6 +145,7 @@ function Cell({
       <div
         className={cn(
           "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
+          "select-none touch-none-z-index",
           selected
             ? "ring-2 ring-primary border-transparent"
             : "hover:border-primary/50"
@@ -160,7 +161,7 @@ function Cell({
         {/* サムネイル */}
         <MediaThumb
           node={node}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
 
         {/* 選択チェックボックス */}
