@@ -7,12 +7,14 @@ import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { SelectionBar } from "@/components/ui/selection-bar";
 import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
+import { TagFilterBar } from "@/components/ui/tag-filter-bar";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
+import { useTagFilter } from "@/hooks/use-tag-filter";
 import { FavoritesRecord } from "@/lib/favorite/types";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode, MediaPathToIndexMap } from "@/lib/media/types";
@@ -25,7 +27,6 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
-import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { Separator } from "@/shadcn/components/ui/separator";
 import { cn } from "@/shadcn/lib/utils";
@@ -89,43 +90,14 @@ export function FavoritesExplorer() {
     [mediaOnly]
   );
 
-  // メディアノードの全タグ
-  const allTags: string[] = useMemo(() => {
-    const tagNames = mediaOnly
-      .filter((n) => n.tags && n.tags.length > 0)
-      .flatMap((n) => n.tags!.map((t) => t.name));
-
-    const unique = Array.from(new Set(tagNames));
-    const sorted = unique.sort((a, b) => a.localeCompare(b));
-
-    return sorted;
-  }, [mediaOnly]);
-
   // フィルタータグ
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-
-  const toggleTag = (tag: string) => {
-    const next = new Set(selectedTags);
-    if (next.has(tag)) next.delete(tag);
-    else next.add(tag);
-    setSelectedTags(next);
-  };
-
-  const resetSelectedTags = () => {
-    setSelectedTags(new Set());
-  };
-
-  // タグフィルターノードリスト
-  const tagFiltered: MediaNode[] = useMemo(() => {
-    if (selectedTags.size === 0) return mediaOnly;
-    return mediaOnly.filter((n) => {
-      const tags = n.tags?.map((t) => t.name);
-      if (!tags || tags.length === 0) return false;
-      if (!selectedTags.values().every((tag) => tags.includes(tag)))
-        return false;
-      return true;
-    });
-  }, [mediaOnly, selectedTags]);
+  const {
+    allTags,
+    selectedTags,
+    filteredNodes: tagFiltered,
+    toggleTag,
+    resetTags,
+  } = useTagFilter(mediaOnly);
 
   // お気に入り
   const favorites: FavoritesRecord = useMemo(
@@ -281,24 +253,13 @@ export function FavoritesExplorer() {
       )}
     >
       <FavoritesProvider favorites={favorites}>
-        {/* フィルタ用タグバッジ */}
-        <div className="flex flex-col w-full gap-4">
-          {selectedTags.size > 0 && (
-            <Button onClick={resetSelectedTags}>リセット</Button>
-          )}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {allTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant={selectedTags.has(tag) ? "default" : "secondary"}
-                onClick={() => toggleTag(tag)}
-                className="cursor-pointer"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </div>
+        {/* タグフィルター */}
+        <TagFilterBar
+          tags={allTags}
+          selectedTags={selectedTags}
+          onToggle={toggleTag}
+          onClear={resetTags}
+        />
 
         <Separator className="mb-4" />
 
