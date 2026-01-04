@@ -10,12 +10,12 @@ import {
 } from "@/shadcn/components/ui/dialog";
 import { cn } from "@/shadcn/lib/utils";
 import { ListFilter, RotateCcw, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface TagFilterBarProps {
   tags: string[];
-  selectedTags: Set<string>; // 親が持っている「確定済み」のタグ
-  onApply: (tags: Set<string>) => void; // 決定時に呼ばれる
+  selectedTags: Set<string>;
+  onApply: (tags: Set<string>) => void;
 }
 
 export function TagFilterBar({
@@ -23,18 +23,16 @@ export function TagFilterBar({
   selectedTags,
   onApply,
 }: TagFilterBarProps) {
-  // モーダル内だけで使う「仮の選択状態」
   const [tempSelected, setTempSelected] = useState<Set<string>>(
     new Set(selectedTags)
   );
   const [open, setOpen] = useState(false);
 
-  // モーダルが開くたびに、親の最新の状態（selectedTags）で初期化する
-  // useEffect(() => {
-  //   if (open) {
-  //     setTempSelected(new Set(selectedTags));
-  //   }
-  // }, [open, selectedTags]);
+  useEffect(() => {
+    if (open) {
+      setTempSelected(new Set(selectedTags));
+    }
+  }, [open, selectedTags]);
 
   if (tags.length === 0) return null;
 
@@ -67,8 +65,9 @@ export function TagFilterBar({
             variant="outline"
             size="sm"
             className={cn(
-              "gap-2 h-9",
-              hasSelection && "border-primary bg-primary/5"
+              "gap-2 h-9 transition-colors",
+              hasSelection &&
+                "border-primary bg-primary/5 text-primary hover:bg-primary/10"
             )}
           >
             <ListFilter className="h-4 w-4" />
@@ -84,15 +83,13 @@ export function TagFilterBar({
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-[425px] max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
+        <DialogContent className="sm:max-w-[450px] max-h-[85vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-2">
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
               タグを選択
             </DialogTitle>
           </DialogHeader>
-
-          {/* 仮の状態（tempSelected）を表示 */}
-          <div className="flex flex-wrap gap-2 py-6 overflow-y-auto">
+          <div className="flex flex-wrap gap-x-3 gap-y-4 p-6 overflow-y-auto min-h-[200px]">
             {tags.map((tag) => {
               const isSelected = tempSelected.has(tag);
               return (
@@ -100,27 +97,27 @@ export function TagFilterBar({
                   key={tag}
                   variant={isSelected ? "default" : "secondary"}
                   className={cn(
-                    "cursor-pointer px-4 py-1.5 text-sm transition-all select-none",
+                    "cursor-pointer px-4 py-2 text-sm transition-all select-none border-transparent",
                     isSelected
-                      ? "ring-2 ring-primary ring-offset-2"
+                      ? "ring-2 ring-primary shadow-sm"
                       : "hover:bg-secondary/80"
                   )}
                   onClick={() => handleToggle(tag)}
                 >
                   {tag}
-                  {isSelected && <X className="ml-1.5 h-3.5 w-3.5" />}
+                  {isSelected && <X className="ml-2 h-3.5 w-3.5" />}
                 </Badge>
               );
             })}
           </div>
 
-          <DialogFooter className="flex flex-row items-center justify-between sm:justify-between border-t pt-4">
+          <DialogFooter className="flex flex-row items-center justify-between p-6 border-t bg-muted/20">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleClear}
               disabled={tempSelected.size === 0}
-              className="text-muted-foreground hover:text-destructive"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/5"
             >
               <RotateCcw className="mr-2 h-3.5 w-3.5" />
               選択を解除
@@ -130,7 +127,7 @@ export function TagFilterBar({
               type="button"
               size="sm"
               onClick={handleApply}
-              className="px-8"
+              className="px-8 shadow-md"
             >
               決定
             </Button>
@@ -143,9 +140,9 @@ export function TagFilterBar({
           variant="ghost"
           size="sm"
           onClick={() => onApply(new Set())}
-          className="h-8 text-xs text-muted-foreground hover:bg-transparent hover:text-destructive"
+          className="h-8 text-xs text-muted-foreground hover:text-destructive"
         >
-          クリア
+          リセット
         </Button>
       )}
     </div>
