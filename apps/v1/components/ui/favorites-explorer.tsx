@@ -7,7 +7,7 @@ import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { SelectionBar } from "@/components/ui/selection-bar";
 import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
-import { TagFilterBar } from "@/components/ui/tag-filter-bar-v2";
+import { TagFilterBar } from "@/components/ui/tag-filter-bar";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
@@ -91,8 +91,7 @@ export function FavoritesExplorer() {
     allTags,
     selectedTags,
     filteredNodes: tagFiltered,
-    toggleTag,
-    resetTags,
+    selectTags,
   } = useTagFilter(mediaOnly);
 
   // 最終フィルタリング
@@ -268,8 +267,7 @@ export function FavoritesExplorer() {
         <TagFilterBar
           tags={allTags}
           selectedTags={selectedTags}
-          onToggle={toggleTag}
-          onClear={resetTags}
+          onApply={selectTags}
         />
 
         {/* グリッドビュー */}

@@ -35,11 +35,14 @@ export function useTagFilter(nodes: MediaNode[]) {
 
   const resetTags = () => setSelectedTags(new Set());
 
+  const selectTags = (tags: Iterable<string>) => setSelectedTags(new Set(tags));
+
   return {
     allTags,
     selectedTags,
     filteredNodes,
     toggleTag,
     resetTags,
+    selectTags,
   };
 }
