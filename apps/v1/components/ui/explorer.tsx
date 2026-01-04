@@ -164,6 +164,8 @@ export function Explorer() {
     [at, mediaOnly.length]
   );
 
+  const isViewMode = modal && viewerIndex && mediaOnly[viewerIndex];
+
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
     const media = mediaOnly[index];
@@ -265,9 +267,9 @@ export function Explorer() {
 
   // タグエディタの起動モード
   const tagEditMode = useMemo(() => {
-    if (modal) return "single";
+    if (isViewMode) return "single";
     return "default";
-  }, [modal]);
+  }, [isViewMode]);
 
   // ===== サーバーアクション =====
 
@@ -374,7 +376,7 @@ export function Explorer() {
         )}
 
         {/* ビューワ */}
-        {modal && viewerIndex != null && (
+        {isViewMode && (
           <ScrollLockProvider>
             <MediaViewer
               allNodes={mediaOnly}
