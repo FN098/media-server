@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
-import { Explorer } from "@/components/ui/explorer";
+import { FavoritesExplorer } from "@/components/ui/favorites-explorer";
 import { formatNodes } from "@/lib/media/format";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
@@ -31,7 +31,7 @@ export default async function Page() {
   return (
     <ExplorerProvider listing={listing}>
       <PathSelectionProvider>
-        <Explorer mode="favorite" />
+        <FavoritesExplorer />
       </PathSelectionProvider>
     </ExplorerProvider>
   );
