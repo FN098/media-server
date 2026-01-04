@@ -1,3 +1,5 @@
+"use client";
+
 import { useGridConfig } from "@/hooks/use-grid-config";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useMemo, useRef } from "react";

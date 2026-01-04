@@ -1,3 +1,5 @@
+"use client";
+
 import { KeyAction, ParsedKeyAction } from "@/lib/shortcut/types";
 import { matchModifiers, parseShortcut } from "@/lib/shortcut/utils";
 import { castArray } from "@/lib/utils/cast-array";

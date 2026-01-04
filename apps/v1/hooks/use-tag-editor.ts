@@ -1,3 +1,5 @@
+"use client";
+
 import { useTagStates } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";

@@ -1,3 +1,5 @@
+"use client";
+
 import { ViewMode } from "@/lib/query/types";
 import { useMemo, useState } from "react";
 

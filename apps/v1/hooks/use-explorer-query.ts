@@ -1,3 +1,5 @@
+"use client";
+
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { normalizeExplorerQuery } from "@/lib/query/normalize";
 import { ExplorerQuerySchema } from "@/lib/query/schemas";

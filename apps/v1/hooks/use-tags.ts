@@ -1,3 +1,5 @@
+"use client";
+
 import { SearchTagsRequestParams, Tag } from "@/lib/tag/types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 

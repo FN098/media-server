@@ -1,3 +1,5 @@
+"use client";
+
 import { useSelection } from "@/hooks/use-selection";
 import { PathType } from "@/lib/path/types";
 

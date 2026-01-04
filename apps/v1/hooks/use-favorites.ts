@@ -1,3 +1,5 @@
+"use client";
+
 import { revalidateFavorite, updateFavorite } from "@/actions/favorite-actions";
 import {
   FavoritesMap,

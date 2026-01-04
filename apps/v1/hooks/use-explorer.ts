@@ -1,3 +1,5 @@
+"use client";
+
 import { useSetExplorerQuery } from "@/hooks/use-explorer-query";
 import { MediaListing } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";

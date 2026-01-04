@@ -1,3 +1,5 @@
+"use client";
+
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { useCallback, useMemo } from "react";
 
