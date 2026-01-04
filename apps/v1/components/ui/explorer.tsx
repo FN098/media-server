@@ -28,7 +28,7 @@ import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, TagIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -159,7 +159,7 @@ export function Explorer() {
 
   const handleOpenTagEditor = () => {
     setIsTagEditorOpen(true);
-    setIsTagEditing(true);
+    setIsTagEditing(false);
   };
 
   const handleCloseTagEditor = () => {
@@ -287,7 +287,10 @@ export function Explorer() {
             onClose={handleCloseSelectionBar}
             actions={
               <>
-                <Button onClick={handleOpenTagEditor}>タグ編集</Button>
+                <Button size="sm" onClick={handleOpenTagEditor}>
+                  <TagIcon />
+                  タグ表示
+                </Button>
               </>
             }
           />
