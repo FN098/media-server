@@ -30,7 +30,7 @@ type Props = {
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { path: pathParts = [] } = await props.params;
 
-  const lastPart = pathParts[pathParts.length - 1];
+  const lastPart = pathParts[pathParts.length - 1] ?? "HOME";
   const decodedPart = decodeURIComponent(lastPart);
 
   return {
