@@ -184,6 +184,7 @@ function Cell({
     if (isCmdOrCtrl) {
       enterSelectionMode();
       togglePath(node.path);
+      setLastSelectedPath(node.path);
       return;
     }
 
