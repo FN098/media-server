@@ -133,6 +133,16 @@ export function Favorites() {
     [at, mediaOnly.length]
   );
 
+  // ビューアスライド移動時の処理
+  const handleViewerIndexChange = (index: number) => {
+    const media = mediaOnly[index];
+    if (!media) return;
+
+    // 選択状態の更新
+    selectPaths([media.path]);
+    exitSelectionMode();
+  };
+
   // タグエディタ
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
   const [isTagEditing, setIsTagEditing] = useState(false);
@@ -273,6 +283,7 @@ export function Favorites() {
             <MediaViewer
               allNodes={mediaOnly}
               initialIndex={viewerIndex}
+              onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
               onOpenFolder={openFolder}
               onTags={handleToggleTagEditor}
