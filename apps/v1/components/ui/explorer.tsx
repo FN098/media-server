@@ -142,12 +142,12 @@ export function Explorer() {
     [at, mediaOnly.length]
   );
 
-  // スライド移動時にタグの表示を更新
+  // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
     const media = mediaOnly[index];
     if (!media) return;
 
-    // 単一選択に切り替える
+    // 選択状態の更新
     selectPaths([media.path]);
     setIsSelectionMode(false);
   };
@@ -185,6 +185,7 @@ export function Explorer() {
     }
     if (tagEditMode === "single" && viewerIndex != null) {
       const media = mediaOnly[viewerIndex];
+      if (!media) return;
       selectPaths([media.path]);
       setIsSelectionMode(false);
       setIsTagEditorOpen(true);
