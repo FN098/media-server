@@ -161,7 +161,7 @@ export function Explorer() {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-    // selectedCount,
+    selectedCount,
     selectedPaths,
     selectPaths,
     clearSelection,
@@ -201,6 +201,8 @@ export function Explorer() {
   // ===== タグエディタ =====
 
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false); // TODO: URLパラメータ tag=true
+
+  const isTagEditorOpenEffective = isTagEditorOpen && selectedCount > 0;
 
   const handleOpenTagEditor = () => {
     setIsTagEditorOpen(true);
@@ -278,7 +280,7 @@ export function Explorer() {
         )}
 
         {/* タグエディター */}
-        {isTagEditorOpen && (
+        {isTagEditorOpenEffective && (
           <TagEditSheet
             targetNodes={selected}
             active={isTagEditorOpen}

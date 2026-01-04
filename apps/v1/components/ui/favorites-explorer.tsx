@@ -162,7 +162,7 @@ export function FavoritesExplorer() {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-    // selectedCount,
+    selectedCount,
     selectedPaths,
     selectPaths,
     clearSelection,
@@ -202,6 +202,8 @@ export function FavoritesExplorer() {
   // ===== タグエディタ =====
 
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false); // TODO: URLパラメータ tag=true
+
+  const isTagEditorOpenEffective = isTagEditorOpen && selectedCount > 0;
 
   const handleOpenTagEditor = () => {
     setIsTagEditorOpen(true);
@@ -286,7 +288,7 @@ export function FavoritesExplorer() {
         )}
 
         {/* タグエディター */}
-        {isTagEditorOpen && (
+        {isTagEditorOpenEffective && (
           <TagEditSheet
             targetNodes={selected}
             active={isTagEditorOpen}
