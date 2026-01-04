@@ -36,7 +36,9 @@ import { toast } from "sonner";
 export function FavoritesExplorer() {
   const { listing, openViewer, closeViewer, openFolder } = useExplorerContext();
 
-  // URLパラメータによるステート管理
+  // ===== URL ステート =====
+
+  // URLファーストのステート管理
   const setExplorerQuery = useSetExplorerQuery();
   const { view, q, at, modal } = useExplorerQuery(); // URL
   const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
@@ -68,29 +70,24 @@ export function FavoritesExplorer() {
   // クエリパラメータ正規化
   useNormalizeExplorerQuery();
 
-  // 全ノードリスト
+  // ===== フィルタリング =====
+
   const { nodes: allNodes } = listing;
 
-  // 検索フィルターノードリスト
+  // 検索フィルタリング
   const searchFiltered: MediaNode[] = useMemo(() => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return allNodes;
     return allNodes.filter((n) => isMatchJapanese(n.name, trimmedQuery));
   }, [allNodes, query]);
 
-  // メディアノードリスト
+  // メディアフィルタリング
   const mediaOnly: MediaNode[] = useMemo(
     () => searchFiltered.filter((n) => isMedia(n.type)),
     [searchFiltered]
   );
 
-  // メディアノードリストのインデックスを計算するためのマップ
-  const mediaOnlyMap: MediaPathToIndexMap = useMemo(
-    () => new Map(mediaOnly.map((n, index) => [n.path, index])),
-    [mediaOnly]
-  );
-
-  // フィルタータグ
+  // タグフィルタリング
   const {
     allTags,
     selectedTags,
@@ -99,13 +96,73 @@ export function FavoritesExplorer() {
     resetTags,
   } = useTagFilter(mediaOnly);
 
-  // お気に入り
+  // 最終フィルタリング
+  const finalFiltered = tagFiltered;
+
+  // ===== ビューア =====
+
+  // ビューア用ノードリスト
+  const viewerNodes = finalFiltered;
+
+  // ビューア用インデックスを計算するためのマップ
+  const viewerIndexMap: MediaPathToIndexMap = useMemo(
+    () => new Map(viewerNodes.map((n, index) => [n.path, index])),
+    [viewerNodes]
+  );
+
+  // ビューア用インデックスを取得
+  const getMediaIndex = useCallback(
+    (path: string) => {
+      if (viewerIndexMap.has(path)) return viewerIndexMap.get(path)!;
+      return null;
+    },
+    [viewerIndexMap]
+  );
+
+  // ビューア用インデックス
+  const viewerIndex = useMemo(
+    () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
+    [at, mediaOnly.length]
+  );
+
+  // ビューアスライド移動時の処理
+  const handleViewerIndexChange = (index: number) => {
+    const media = mediaOnly[index];
+    if (!media) return;
+
+    // 選択状態の更新
+    selectPaths([media.path]);
+    exitSelectionMode();
+  };
+
+  // ===== ナビゲーション =====
+
+  // ファイル/フォルダオープン
+  const handleOpen = (node: MediaNode) => {
+    if (node.isDirectory) {
+      openFolder(node.path);
+      return;
+    }
+
+    if (isMedia(node.type)) {
+      const index = getMediaIndex(node.path);
+      if (index == null) return;
+      openViewer(index);
+      return;
+    }
+
+    toast.warning("このファイル形式は対応していません");
+  };
+
+  // ===== お気に入り =====
+
   const favorites: FavoritesRecord = useMemo(
     () => Object.fromEntries(mediaOnly.map((n) => [n.path, n.isFavorite])),
     [mediaOnly]
   );
 
-  // 選択機能
+  // ===== 選択機能 =====
+
   const {
     isSelectionMode,
     enterSelectionMode,
@@ -115,10 +172,12 @@ export function FavoritesExplorer() {
     clearSelection,
   } = usePathSelectionContext();
 
+  const selectable = finalFiltered;
+
   // 選択済みノードリスト
   const selected = useMemo(
-    () => searchFiltered.filter((n) => selectedPaths.has(n.path)),
-    [searchFiltered, selectedPaths]
+    () => selectable.filter((n) => selectedPaths.has(n.path)),
+    [selectable, selectedPaths]
   );
 
   // 全選択
@@ -139,23 +198,8 @@ export function FavoritesExplorer() {
     exitSelectionMode();
   };
 
-  // ビューア
-  const viewerIndex = useMemo(
-    () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
-    [at, mediaOnly.length]
-  );
+  // ===== タグエディタ =====
 
-  // ビューアスライド移動時の処理
-  const handleViewerIndexChange = (index: number) => {
-    const media = mediaOnly[index];
-    if (!media) return;
-
-    // 選択状態の更新
-    selectPaths([media.path]);
-    exitSelectionMode();
-  };
-
-  // タグエディタ
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false); // TODO: URLパラメータ tag=true
 
   const handleOpenTagEditor = () => {
@@ -176,31 +220,7 @@ export function FavoritesExplorer() {
     return "default";
   }, [modal]);
 
-  // メディアノードリストのインデックスを取得
-  const getMediaIndex = useCallback(
-    (path: string) => {
-      if (mediaOnlyMap.has(path)) return mediaOnlyMap.get(path)!;
-      return null;
-    },
-    [mediaOnlyMap]
-  );
-
-  // ファイル/フォルダオープン
-  const handleOpen = (node: MediaNode) => {
-    if (node.isDirectory) {
-      openFolder(node.path);
-      return;
-    }
-
-    if (isMedia(node.type)) {
-      const index = getMediaIndex(node.path);
-      if (index == null) return;
-      openViewer(index);
-      return;
-    }
-
-    toast.warning("このファイル形式は対応していません");
-  };
+  // ===== サーバーアクション =====
 
   // サムネイル作成リクエスト送信
   useEffect(() => {
@@ -215,6 +235,8 @@ export function FavoritesExplorer() {
       void visitFolderAction(listing.path);
     }
   }, [listing.path]);
+
+  // ===== その他 =====
 
   // ショートカット
   useShortcutKeys([
@@ -234,6 +256,7 @@ export function FavoritesExplorer() {
     >
       <FavoritesProvider favorites={favorites}>
         {/* タグフィルター */}
+        {/* TODO: 折り畳み（アコーディオン） */}
         <TagFilterBar
           tags={allTags}
           selectedTags={selectedTags}
@@ -246,14 +269,14 @@ export function FavoritesExplorer() {
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div>
-            <ExplorerGridView allNodes={tagFiltered} onOpen={handleOpen} />
+            <ExplorerGridView allNodes={finalFiltered} onOpen={handleOpen} />
           </div>
         )}
 
         {/* リストビュー */}
         {viewMode === "list" && (
           <div>
-            <ExplorerListView allNodes={tagFiltered} onOpen={handleOpen} />
+            <ExplorerListView allNodes={finalFiltered} onOpen={handleOpen} />
           </div>
         )}
 
@@ -271,7 +294,7 @@ export function FavoritesExplorer() {
         {isSelectionMode && (
           <SelectionBar
             count={selected.length}
-            totalCount={mediaOnly.length}
+            totalCount={finalFiltered.length}
             active={isSelectionMode}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}
@@ -287,7 +310,7 @@ export function FavoritesExplorer() {
         {modal && viewerIndex != null && (
           <ScrollLockProvider>
             <MediaViewer
-              allNodes={mediaOnly}
+              allNodes={viewerNodes}
               initialIndex={viewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
