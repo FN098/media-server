@@ -72,6 +72,7 @@ function RowItem({
     selectedPaths,
     selectPath,
     unselectPath,
+    clearSelection,
   } = usePathSelectionContext();
 
   const favorite = useMemo(
@@ -116,16 +117,31 @@ function RowItem({
     if (isMedia(node.type)) handleSelectChange(true);
   }, 600);
 
-  const handleClick = () => {
-    // 「長押し状態」ならクリック処理をガードする
+  const handleClick = (e: React.MouseEvent) => {
     if (isLongPressed) return;
 
+    const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+
     if (isSelectionMode) {
-      if (isMedia(node.type)) handleSelectChange(!selected);
-      else if (node.isDirectory) toast.warning("フォルダは選択できません！");
-      else toast.warning("このファイルは選択できません！");
+      if (!isMedia(node.type)) {
+        if (node.isDirectory) toast.warning("フォルダは選択できません！");
+        return;
+      }
+
+      if (isCmdOrCtrl) {
+        handleSelectChange(!selected);
+      } else {
+        // Ctrlなし：これだけを選択
+        clearSelection();
+        selectPath(node.path);
+      }
     } else {
-      onOpen?.(node);
+      // 選択モードではない時、Ctrlクリックで選択モードを開始する
+      if (isCmdOrCtrl && isMedia(node.type)) {
+        handleSelectChange(true);
+      } else {
+        onOpen?.(node);
+      }
     }
   };
 
