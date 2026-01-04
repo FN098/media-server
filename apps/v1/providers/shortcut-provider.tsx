@@ -10,6 +10,7 @@ const ShortcutContext = createContext<ShortcutContextType | undefined>(
   undefined
 );
 
+/** @deprecated 使用されていない */
 export function ShortcutProvider({
   children,
   actions,

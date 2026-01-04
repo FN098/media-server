@@ -10,6 +10,7 @@ const TagEditorContext = createContext<TagEditorContextType | undefined>(
   undefined
 );
 
+/** @deprecated 使用されていない */
 export function TagEditorProvider({
   children,
   targetNodes,
