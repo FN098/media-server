@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { AppQueryClientProvider } from "@/providers/query-client-provider";
+import { AppQueryClientProvider } from "@/providers/app-query-client-provider";
 import { ThumbEventProvider } from "@/providers/thumb-event-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
 import { TooltipProvider } from "@/shadcn/components/ui/tooltip";
