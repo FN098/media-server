@@ -83,7 +83,7 @@ function Cell({
     selectedPaths,
     selectPath,
     unselectPath,
-    clearSelection,
+    replaceSelection,
   } = usePathSelectionContext();
 
   const favorite = useMemo(
@@ -143,8 +143,7 @@ function Cell({
         handleSelectChange(!selected);
       } else {
         // Ctrlなし：これだけを選択
-        clearSelection();
-        selectPath(node.path);
+        replaceSelection(node.path);
       }
     } else {
       // 選択モードではない時、Ctrlクリックで選択モードを開始する
