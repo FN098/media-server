@@ -6,6 +6,7 @@ import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { MarqueeText } from "@/components/ui/marquee-text";
 import { MediaThumb } from "@/components/ui/media-thumb";
 import { useGridView } from "@/hooks/use-grid-view";
+import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
@@ -78,6 +79,8 @@ function Cell({
     isSelectionMode,
     isPathSelected,
     enterSelectionMode,
+    exitSelectionMode,
+    selectedPaths,
     selectPath,
     unselectPath,
   } = usePathSelectionContext();
@@ -92,16 +95,6 @@ function Cell({
     [isPathSelected, node.path]
   );
 
-  const handleSelectChangeOrOpen = () => {
-    if (isSelectionMode) {
-      if (isMedia(node.type)) handleSelectChange(!selected);
-      else if (node.isDirectory) toast.warning("フォルダは選択できません！");
-      else toast.warning("このファイルは選択できません！");
-    } else {
-      onOpen?.(node);
-    }
-  };
-
   const handleSelectChange = (selected: boolean) => {
     enterSelectionMode();
 
@@ -109,6 +102,11 @@ function Cell({
       selectPath(node.path);
     } else {
       unselectPath(node.path);
+
+      // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
+      if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
+        exitSelectionMode();
+      }
     }
   };
 
@@ -121,6 +119,27 @@ function Cell({
     }
   };
 
+  const {
+    start: startLongPress,
+    stop: stopLongPress,
+    isLongPressed,
+  } = useLongPress(() => {
+    if (isMedia(node.type)) handleSelectChange(true);
+  }, 600);
+
+  const handleClick = () => {
+    // 「長押し状態」ならクリック処理をガードする
+    if (isLongPressed) return;
+
+    if (isSelectionMode) {
+      if (isMedia(node.type)) handleSelectChange(!selected);
+      else if (node.isDirectory) toast.warning("フォルダは選択できません！");
+      else toast.warning("このファイルは選択できません！");
+    } else {
+      onOpen?.(node);
+    }
+  };
+
   return (
     <div className="w-full h-full p-1">
       <div
@@ -130,7 +149,13 @@ function Cell({
             ? "ring-2 ring-primary border-transparent"
             : "hover:border-primary/50"
         )}
-        onClick={handleSelectChangeOrOpen}
+        onMouseDown={startLongPress}
+        onMouseUp={stopLongPress}
+        onMouseLeave={stopLongPress}
+        onTouchStart={startLongPress}
+        onTouchEnd={stopLongPress}
+        onTouchMove={stopLongPress} // スクロール時に長押しをキャンセル
+        onClick={handleClick}
       >
         {/* サムネイル */}
         <MediaThumb

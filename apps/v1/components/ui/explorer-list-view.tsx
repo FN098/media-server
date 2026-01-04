@@ -5,6 +5,7 @@ import { FavoriteCountBadge } from "@/components/ui/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
 import { LocalDateValue } from "@/components/ui/local-date";
 import { MediaThumbIcon } from "@/components/ui/media-thumb";
+import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
@@ -67,6 +68,8 @@ function RowItem({
     isSelectionMode,
     isPathSelected,
     enterSelectionMode,
+    exitSelectionMode,
+    selectedPaths,
     selectPath,
     unselectPath,
   } = usePathSelectionContext();
@@ -81,16 +84,6 @@ function RowItem({
     [isPathSelected, node.path]
   );
 
-  const handleSelectChangeOrOpen = () => {
-    if (isSelectionMode) {
-      if (isMedia(node.type)) handleSelectChange(!selected);
-      else if (node.isDirectory) toast.warning("フォルダは選択できません！");
-      else toast.warning("このファイルは選択できません！");
-    } else {
-      onOpen?.(node);
-    }
-  };
-
   const handleSelectChange = (selected: boolean) => {
     enterSelectionMode();
 
@@ -98,6 +91,11 @@ function RowItem({
       selectPath(node.path);
     } else {
       unselectPath(node.path);
+
+      // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
+      if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
+        exitSelectionMode();
+      }
     }
   };
 
@@ -110,9 +108,36 @@ function RowItem({
     }
   };
 
+  const {
+    start: startLongPress,
+    stop: stopLongPress,
+    isLongPressed,
+  } = useLongPress(() => {
+    if (isMedia(node.type)) handleSelectChange(true);
+  }, 600);
+
+  const handleClick = () => {
+    // 「長押し状態」ならクリック処理をガードする
+    if (isLongPressed) return;
+
+    if (isSelectionMode) {
+      if (isMedia(node.type)) handleSelectChange(!selected);
+      else if (node.isDirectory) toast.warning("フォルダは選択できません！");
+      else toast.warning("このファイルは選択できません！");
+    } else {
+      onOpen?.(node);
+    }
+  };
+
   return (
     <TableRow
-      onClick={handleSelectChangeOrOpen}
+      onMouseDown={startLongPress}
+      onMouseUp={stopLongPress}
+      onMouseLeave={stopLongPress}
+      onTouchStart={startLongPress}
+      onTouchEnd={stopLongPress}
+      onTouchMove={stopLongPress} // スクロール時に長押しをキャンセル
+      onClick={handleClick}
       className={cn("hover:bg-blue-100 active:bg-blue-200")}
     >
       <TableCell>
