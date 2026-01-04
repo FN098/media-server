@@ -1,10 +1,10 @@
 "use client";
 
-import { useSelection } from "@/hooks/use-selection";
+import { usePathSelection } from "@/hooks/use-path-selection";
 import { PathType } from "@/lib/path/types";
 import React, { createContext, useContext } from "react";
 
-type PathSelectionContextType = ReturnType<typeof useSelection<PathType>>;
+type PathSelectionContextType = ReturnType<typeof usePathSelection>;
 
 const PathSelectionContext = createContext<
   PathSelectionContextType | undefined
@@ -17,7 +17,7 @@ export function PathSelectionProvider({
   children: React.ReactNode;
   initialSelectedPaths?: Iterable<PathType>;
 }) {
-  const value = useSelection(initialSelectedPaths);
+  const value = usePathSelection(initialSelectedPaths);
 
   return (
     <PathSelectionContext.Provider value={value}>

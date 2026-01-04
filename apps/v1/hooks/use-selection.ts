@@ -20,7 +20,7 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     [selectedKeys]
   );
 
-  const toggleSelection = useCallback((key: K) => {
+  const toggleKey = useCallback((key: K) => {
     setSelectedKeys((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
@@ -62,7 +62,7 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
 
     selectedKeys,
     isSelected,
-    toggleSelection,
+    toggleKey,
     selectKeys,
     clearSelection,
     selectKey,

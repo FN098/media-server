@@ -113,8 +113,8 @@ export function Explorer({ mode = "explorer" }: { mode?: ExplorerMode }) {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-    selectedKeys: selectedPaths,
-    selectKeys: selectPaths,
+    selectedPaths,
+    selectPaths,
     clearSelection,
   } = usePathSelectionContext();
 

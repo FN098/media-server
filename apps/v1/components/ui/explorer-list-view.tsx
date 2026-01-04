@@ -63,7 +63,7 @@ function RowItem({
   onOpen?: (node: MediaNode) => void;
 }) {
   const { toggleFavorite, isFavorite } = useFavoritesContext();
-  const { isSelected, isSelectionMode, toggleSelection } =
+  const { isPathSelected, isSelectionMode, togglePath } =
     usePathSelectionContext();
 
   const favorite = useMemo(
@@ -72,13 +72,13 @@ function RowItem({
   );
 
   const selected = useMemo(
-    () => isSelected(node.path),
-    [isSelected, node.path]
+    () => isPathSelected(node.path),
+    [isPathSelected, node.path]
   );
 
   const handleSelectOrOpen = () => {
     if (isSelectionMode) {
-      if (isMedia(node.type)) toggleSelection(node.path);
+      if (isMedia(node.type)) togglePath(node.path);
       else if (node.isDirectory) toast.warning("フォルダは選択できません！");
       else toast.warning("このファイルは選択できません！");
     } else {
@@ -87,7 +87,7 @@ function RowItem({
   };
 
   const handleSelect = () => {
-    toggleSelection(node.path);
+    togglePath(node.path);
   };
 
   const handleToggleFavorite = () => {

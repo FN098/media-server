@@ -75,10 +75,10 @@ function Cell({
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const {
     isSelectionMode,
-    isSelected,
+    isPathSelected,
     enterSelectionMode,
-    selectKey,
-    unselectKey,
+    selectPath,
+    unselectPath,
   } = usePathSelectionContext();
 
   const favorite = useMemo(
@@ -87,8 +87,8 @@ function Cell({
   );
 
   const selected = useMemo(
-    () => isSelected(node.path),
-    [isSelected, node.path]
+    () => isPathSelected(node.path),
+    [isPathSelected, node.path]
   );
 
   const isMobile = useIsMobile();
@@ -107,9 +107,9 @@ function Cell({
     enterSelectionMode();
 
     if (selected) {
-      selectKey(node.path);
+      selectPath(node.path);
     } else {
-      unselectKey(node.path);
+      unselectPath(node.path);
     }
   };
 
