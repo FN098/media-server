@@ -84,7 +84,7 @@ export default async function Page(props: Props) {
   return (
     <ExplorerProvider listing={listing}>
       <PathSelectionProvider>
-        <Explorer />
+        <Explorer mode="explorer" />
       </PathSelectionProvider>
     </ExplorerProvider>
   );

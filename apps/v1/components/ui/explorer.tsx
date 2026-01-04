@@ -33,7 +33,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-export function Explorer() {
+export type ExplorerMode = "explorer" | "favorite";
+
+export function Explorer({ mode = "explorer" }: { mode?: ExplorerMode }) {
   const {
     listing,
     openViewer,
@@ -42,6 +44,9 @@ export function Explorer() {
     openNextFolder,
     openPrevFolder,
   } = useExplorerContext();
+
+  const isFavoriteMode = mode === "favorite";
+  const isExplorerMode = mode === "explorer";
 
   // URLパラメータによるステート管理
   const setExplorerQuery = useSetExplorerQuery();
@@ -300,9 +305,13 @@ export function Explorer() {
               initialIndex={viewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
-              onOpenFolder={openFolder}
-              onPrevFolder={() => openPrevFolder("last")}
-              onNextFolder={() => openNextFolder("first")}
+              onOpenFolder={isFavoriteMode ? openFolder : undefined}
+              onPrevFolder={
+                isExplorerMode ? () => openPrevFolder("last") : undefined
+              }
+              onNextFolder={
+                isExplorerMode ? () => openNextFolder("first") : undefined
+              }
               onTags={handleToggleTagEditor}
             />
           </ScrollLockProvider>
@@ -310,49 +319,51 @@ export function Explorer() {
       </FavoritesProvider>
 
       {/* フォルダナビゲーション */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
-        {/* 前のフォルダ */}
-        <div className="w-full sm:flex-1">
-          {listing.prev && (
-            <Button
-              variant="outline"
-              className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
-              asChild
-            >
-              <Link href={encodeURI(getClientExplorerPath(listing.prev))}>
-                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
-                  <ArrowLeft className="mr-1 h-3 w-3" />
-                  Previous
-                </div>
-                <div className="text-base font-medium truncate w-full text-left">
-                  {listing.prev.split("/").filter(Boolean).pop()}
-                </div>
-              </Link>
-            </Button>
-          )}
-        </div>
+      {isExplorerMode && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
+          {/* 前のフォルダ */}
+          <div className="w-full sm:flex-1">
+            {listing.prev && (
+              <Button
+                variant="outline"
+                className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
+                asChild
+              >
+                <Link href={encodeURI(getClientExplorerPath(listing.prev))}>
+                  <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                    <ArrowLeft className="mr-1 h-3 w-3" />
+                    Previous
+                  </div>
+                  <div className="text-base font-medium truncate w-full text-left">
+                    {listing.prev.split("/").filter(Boolean).pop()}
+                  </div>
+                </Link>
+              </Button>
+            )}
+          </div>
 
-        {/* 次のフォルダ */}
-        <div className="w-full sm:flex-1 flex justify-end">
-          {listing.next && (
-            <Button
-              variant="outline"
-              className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
-              asChild
-            >
-              <Link href={encodeURI(getClientExplorerPath(listing.next))}>
-                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
-                  Next
-                  <ArrowRight className="ml-1 h-3 w-3" />
-                </div>
-                <div className="text-base font-medium truncate w-full text-right">
-                  {listing.next.split("/").filter(Boolean).pop()}
-                </div>
-              </Link>
-            </Button>
-          )}
+          {/* 次のフォルダ */}
+          <div className="w-full sm:flex-1 flex justify-end">
+            {listing.next && (
+              <Button
+                variant="outline"
+                className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
+                asChild
+              >
+                <Link href={encodeURI(getClientExplorerPath(listing.next))}>
+                  <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                    Next
+                    <ArrowRight className="ml-1 h-3 w-3" />
+                  </div>
+                  <div className="text-base font-medium truncate w-full text-right">
+                    {listing.next.split("/").filter(Boolean).pop()}
+                  </div>
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
