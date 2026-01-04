@@ -63,8 +63,13 @@ function RowItem({
   onOpen?: (node: MediaNode) => void;
 }) {
   const { toggleFavorite, isFavorite } = useFavoritesContext();
-  const { isPathSelected, isSelectionMode, togglePath } =
-    usePathSelectionContext();
+  const {
+    isSelectionMode,
+    isPathSelected,
+    enterSelectionMode,
+    selectPath,
+    unselectPath,
+  } = usePathSelectionContext();
 
   const favorite = useMemo(
     () => isFavorite(node.path),
@@ -76,9 +81,9 @@ function RowItem({
     [isPathSelected, node.path]
   );
 
-  const handleSelectOrOpen = () => {
+  const handleSelectChangeOrOpen = () => {
     if (isSelectionMode) {
-      if (isMedia(node.type)) togglePath(node.path);
+      if (isMedia(node.type)) handleSelectChange(!selected);
       else if (node.isDirectory) toast.warning("フォルダは選択できません！");
       else toast.warning("このファイルは選択できません！");
     } else {
@@ -86,8 +91,14 @@ function RowItem({
     }
   };
 
-  const handleSelect = () => {
-    togglePath(node.path);
+  const handleSelectChange = (selected: boolean) => {
+    enterSelectionMode();
+
+    if (selected) {
+      selectPath(node.path);
+    } else {
+      unselectPath(node.path);
+    }
   };
 
   const handleToggleFavorite = () => {
@@ -101,14 +112,14 @@ function RowItem({
 
   return (
     <TableRow
-      onClick={handleSelectOrOpen}
+      onClick={handleSelectChangeOrOpen}
       className={cn("hover:bg-blue-100 active:bg-blue-200")}
     >
       <TableCell>
         <div className={cn("transition-opacity")}>
           <Checkbox
             checked={selected}
-            onCheckedChange={handleSelect}
+            onCheckedChange={handleSelectChange}
             onClick={(e) => e.stopPropagation()}
             disabled={!isMedia(node.type)}
           />

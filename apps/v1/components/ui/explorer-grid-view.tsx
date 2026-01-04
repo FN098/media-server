@@ -72,6 +72,7 @@ function Cell({
   node: MediaNode;
   onOpen?: (node: MediaNode) => void;
 }) {
+  const isMobile = useIsMobile();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const {
     isSelectionMode,
@@ -90,8 +91,6 @@ function Cell({
     () => isPathSelected(node.path),
     [isPathSelected, node.path]
   );
-
-  const isMobile = useIsMobile();
 
   const handleSelectChangeOrOpen = () => {
     if (isSelectionMode) {
