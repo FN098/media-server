@@ -107,6 +107,7 @@ export function AudioPlayer({
     { key: "Ctrl+ArrowRight", callback: () => seek(10) },
     { key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
     { key: " ", callback: () => togglePlaying() },
+    { key: "r", callback: () => toggleRepeating() },
   ]);
 
   return (
