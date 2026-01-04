@@ -254,7 +254,7 @@ function Cell({
       <div
         className={cn(
           "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
-          "select-none touch-none",
+          "select-none",
           selected
             ? "ring-2 ring-primary border-transparent"
             : "hover:border-primary/50"
