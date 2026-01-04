@@ -91,7 +91,7 @@ export function TagFilterBar({
               タグを選択
             </DialogTitle>
           </DialogHeader>
-          <div className="flex flex-wrap gap-x-3 gap-y-4 p-6 overflow-y-auto min-h-[200px]">
+          <div className="flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto min-h-[200px]">
             {tags.map((tag) => {
               const isSelected = tempSelected.has(tag);
               return (
@@ -99,7 +99,7 @@ export function TagFilterBar({
                   key={tag}
                   variant={isSelected ? "default" : "secondary"}
                   className={cn(
-                    "cursor-pointer px-4 py-2 text-sm transition-all select-none border-transparent",
+                    "cursor-pointer px-4 h-9 text-sm transition-all select-none border-transparent inline-flex items-center justify-center", // h-9で固定
                     isSelected
                       ? "ring-2 ring-primary shadow-sm"
                       : "hover:bg-secondary/80"
