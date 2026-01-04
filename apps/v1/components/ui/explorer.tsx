@@ -4,6 +4,7 @@ import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
 import { ExplorerListView } from "@/components/ui/explorer-list-view";
+import { FavoriteFilterButton } from "@/components/ui/favorite-filter-button";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { SelectionBar } from "@/components/ui/selection-bar";
 import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
@@ -115,10 +116,24 @@ export function Explorer() {
     [tagFiltered]
   );
 
+  // お気に入りフィルタリング
+  const [favoriteFilter, setFavoriteFilter] = useState(false);
+  const toggleFavoriteFilter = () => setFavoriteFilter((prev) => !prev);
+  const favoriteFiltered: MediaNode[] = useMemo(
+    () =>
+      favoriteFilter
+        ? tagFilteredMediaOnly.filter((n) => n.isFavorite)
+        : tagFilteredMediaOnly,
+    [favoriteFilter, tagFilteredMediaOnly]
+  );
+
+  // フィルタリング結果
+  const filtered = favoriteFiltered;
+
   // ===== ビューア =====
 
   // ビューア用ノードリスト
-  const viewerNodes = tagFilteredMediaOnly;
+  const viewerNodes = filtered;
 
   // ビューアのインデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
@@ -189,7 +204,7 @@ export function Explorer() {
   } = usePathSelectionContext();
 
   // 選択可能ノードリスト
-  const selectable = tagFilteredMediaOnly;
+  const selectable = favoriteFiltered;
 
   // 選択済みノードリスト
   const selected = useMemo(() => {
@@ -283,18 +298,28 @@ export function Explorer() {
       )}
     >
       <FavoritesProvider favorites={favorites}>
-        {/* タグフィルター */}
-        <TagFilterBar
-          tags={allTags}
-          selectedTags={selectedTags}
-          onApply={selectTags}
-        />
+        <div className="flex items-center gap-2">
+          {/* タグフィルター */}
+          <TagFilterBar
+            tags={allTags}
+            selectedTags={selectedTags}
+            onApply={selectTags}
+          />
+
+          {/* お気に入りフィルター */}
+          <FavoriteFilterButton
+            isActive={favoriteFilter}
+            onClick={toggleFavoriteFilter}
+            showCount
+            count={favoriteFiltered.length}
+          />
+        </div>
 
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div>
             <ExplorerGridView
-              allNodes={tagFiltered}
+              allNodes={favoriteFiltered}
               onOpen={handleOpen}
               onSelect={handleSelect}
             />
@@ -305,7 +330,7 @@ export function Explorer() {
         {viewMode === "list" && (
           <div>
             <ExplorerListView
-              allNodes={tagFiltered}
+              allNodes={favoriteFiltered}
               onOpen={handleOpen}
               onSelect={handleSelect}
             />
