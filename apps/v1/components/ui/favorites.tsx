@@ -211,12 +211,16 @@ export function Favorites() {
 
   // サムネイル作成リクエスト送信
   useEffect(() => {
-    void enqueueThumbJob(listing.path);
+    if (listing.path) {
+      void enqueueThumbJob(listing.path);
+    }
   }, [listing.path]);
 
   // 訪問済みフォルダ更新リクエスト送信
   useEffect(() => {
-    void visitFolderAction(listing.path);
+    if (listing.path) {
+      void visitFolderAction(listing.path);
+    }
   }, [listing.path]);
 
   // ショートカット
