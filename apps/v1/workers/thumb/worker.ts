@@ -9,7 +9,7 @@ import { connection } from "./queue";
 const EXPIRE_MS = 1000 * 60 * 10; // 10分
 
 export const startThumbWorker = () => {
-  console.log("🚀 Worker process started");
+  console.log("🚀 Thumb worker process started");
 
   const worker = new Worker<ThumbJobData>(
     "thumbs",
