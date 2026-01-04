@@ -28,8 +28,6 @@ export function TagFilterBar({
   );
   const [open, setOpen] = useState(false);
 
-  if (tags.length === 0) return null;
-
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
       // 開く瞬間に、親の最新状態でローカルステートを上書き
@@ -136,7 +134,6 @@ export function TagFilterBar({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       {hasSelection && (
         <Button
           variant="ghost"
