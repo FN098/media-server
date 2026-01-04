@@ -12,7 +12,7 @@ import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { getClientExplorerPath } from "@/lib/path/helpers";
+import { getClientExplorerPath, getParentDirPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import {
@@ -128,7 +128,7 @@ export function MediaViewer({
 
   // 現在のファイルが存在するフォルダを開く
   const handleOpenFolder = () => {
-    onOpenFolder?.(path.dirname(allNodes[index].path));
+    onOpenFolder?.(getParentDirPath(allNodes[index].path));
   };
 
   // インデックス変更確定
