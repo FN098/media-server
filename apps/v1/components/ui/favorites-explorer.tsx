@@ -25,7 +25,9 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
+import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
+import { Separator } from "@/shadcn/components/ui/separator";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -68,7 +70,7 @@ export function FavoritesExplorer() {
   // 全ノードリスト
   const { nodes: allNodes } = listing;
 
-  // フィルターノードリスト
+  // 検索フィルターノードリスト
   const searchFiltered: MediaNode[] = useMemo(() => {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return allNodes;
@@ -86,6 +88,44 @@ export function FavoritesExplorer() {
     () => new Map(mediaOnly.map((n, index) => [n.path, index])),
     [mediaOnly]
   );
+
+  // メディアノードの全タグ
+  const allTags: string[] = useMemo(() => {
+    const tagNames = mediaOnly
+      .filter((n) => n.tags && n.tags.length > 0)
+      .flatMap((n) => n.tags!.map((t) => t.name));
+
+    const unique = Array.from(new Set(tagNames));
+    const sorted = unique.sort((a, b) => a.localeCompare(b));
+
+    return sorted;
+  }, [mediaOnly]);
+
+  // フィルタータグ
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+
+  const toggleTag = (tag: string) => {
+    const next = new Set(selectedTags);
+    if (next.has(tag)) next.delete(tag);
+    else next.add(tag);
+    setSelectedTags(next);
+  };
+
+  const resetSelectedTags = () => {
+    setSelectedTags(new Set());
+  };
+
+  // タグフィルターノードリスト
+  const tagFiltered: MediaNode[] = useMemo(() => {
+    if (selectedTags.size === 0) return mediaOnly;
+    return mediaOnly.filter((n) => {
+      const tags = n.tags?.map((t) => t.name);
+      if (!tags || tags.length === 0) return false;
+      if (!selectedTags.values().every((tag) => tags.includes(tag)))
+        return false;
+      return true;
+    });
+  }, [mediaOnly, selectedTags]);
 
   // お気に入り
   const favorites: FavoritesRecord = useMemo(
@@ -241,17 +281,38 @@ export function FavoritesExplorer() {
       )}
     >
       <FavoritesProvider favorites={favorites}>
+        {/* フィルタ用タグバッジ */}
+        <div className="flex flex-col w-full gap-4">
+          {selectedTags.size > 0 && (
+            <Button onClick={resetSelectedTags}>リセット</Button>
+          )}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {allTags.map((tag) => (
+              <Badge
+                key={tag}
+                variant={selectedTags.has(tag) ? "default" : "secondary"}
+                onClick={() => toggleTag(tag)}
+                className="cursor-pointer"
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <Separator className="mb-4" />
+
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div>
-            <ExplorerGridView allNodes={searchFiltered} onOpen={handleOpen} />
+            <ExplorerGridView allNodes={tagFiltered} onOpen={handleOpen} />
           </div>
         )}
 
         {/* リストビュー */}
         {viewMode === "list" && (
           <div>
-            <ExplorerListView allNodes={searchFiltered} onOpen={handleOpen} />
+            <ExplorerListView allNodes={tagFiltered} onOpen={handleOpen} />
           </div>
         )}
 

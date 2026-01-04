@@ -26,7 +26,7 @@ export type MediaFsListing = {
   next: string | null;
 };
 
-export type MediaTag = {
+export type MediaNodeTag = {
   name: string;
 };
 
@@ -36,7 +36,7 @@ export type MediaNode = MediaFsNode & {
   isFavorite: boolean;
   lastViewedAt?: Date;
   favoriteCount?: number;
-  tags?: MediaTag[];
+  tags?: MediaNodeTag[];
 };
 
 export type MediaListing = {
@@ -54,7 +54,7 @@ export type DbMedia = {
   isFavorite: boolean;
   fileMtime: Date;
   fileSize?: number;
-  tags?: MediaTag[];
+  tags?: MediaNodeTag[];
 };
 
 export type DbVisitedInfo = {
