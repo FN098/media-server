@@ -76,7 +76,7 @@ function Cell({
   const {
     isSelectionMode,
     isSelected,
-    setIsSelectionMode,
+    enterSelectionMode,
     selectKey,
     unselectKey,
   } = usePathSelectionContext();
@@ -104,7 +104,7 @@ function Cell({
   };
 
   const handleSelectChange = (selected: boolean) => {
-    setIsSelectionMode(true);
+    enterSelectionMode();
 
     if (selected) {
       selectKey(node.path);

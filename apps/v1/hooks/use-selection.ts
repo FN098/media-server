@@ -7,6 +7,14 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     () => new Set(initialSelectedKeys)
   );
 
+  const enterSelectionMode = useCallback(() => {
+    setIsSelectionMode(true);
+  }, []);
+
+  const exitSelectionMode = useCallback(() => {
+    setIsSelectionMode(false);
+  }, []);
+
   const isSelected = useCallback(
     (key: K) => selectedKeys.has(key),
     [selectedKeys]
@@ -49,7 +57,9 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
 
   return {
     isSelectionMode,
-    setIsSelectionMode,
+    enterSelectionMode,
+    exitSelectionMode,
+
     selectedKeys,
     isSelected,
     toggleSelection,

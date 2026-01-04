@@ -106,7 +106,8 @@ export function Explorer() {
   // 選択機能
   const {
     isSelectionMode,
-    setIsSelectionMode,
+    enterSelectionMode,
+    exitSelectionMode,
     selectedKeys: selectedPaths,
     selectKeys: selectPaths,
     clearSelection,
@@ -121,19 +122,19 @@ export function Explorer() {
   // 全選択
   const handleSelectAll = () => {
     selectPaths(mediaOnly.map((n) => n.path));
-    setIsSelectionMode(true);
+    enterSelectionMode();
   };
 
   // 選択解除
   const handleClearSelection = () => {
     clearSelection();
-    setIsSelectionMode(false);
+    exitSelectionMode();
   };
 
   // 選択バー閉じる
   const handleCloseSelectionBar = () => {
     clearSelection();
-    setIsSelectionMode(false);
+    exitSelectionMode();
   };
 
   // ビューア
@@ -149,7 +150,7 @@ export function Explorer() {
 
     // 選択状態の更新
     selectPaths([media.path]);
-    setIsSelectionMode(false);
+    exitSelectionMode();
   };
 
   // タグエディタ
@@ -179,7 +180,7 @@ export function Explorer() {
       return;
     }
     if (tagEditMode === "default") {
-      setIsSelectionMode(true);
+      enterSelectionMode();
       setIsTagEditorOpen(true);
       return;
     }
@@ -187,7 +188,7 @@ export function Explorer() {
       const media = mediaOnly[viewerIndex];
       if (!media) return;
       selectPaths([media.path]);
-      setIsSelectionMode(false);
+      exitSelectionMode();
       setIsTagEditorOpen(true);
       return;
     }
