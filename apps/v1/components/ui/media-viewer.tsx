@@ -90,15 +90,15 @@ export function MediaViewer({
   const hasNext = !!onNextFolder;
   const offsetPrev = hasPrev ? 1 : 0;
 
-  // 前のフォルダ、次のフォルダを仮想スライドに追加
+  // 仮想スライド
   const allSlides = useMemo(() => {
     const slides: Slide[] = [...allNodes];
-    if (hasPrev) slides.unshift(prevFolderNav);
-    if (hasNext) slides.push(nextFolderNav);
+    if (hasPrev) slides.unshift(prevFolderNav); // 先頭: 前のフォルダ
+    if (hasNext) slides.push(nextFolderNav); // 末尾: 次のフォルダ
     return slides;
   }, [allNodes, hasPrev, hasNext]);
 
-  // 仮想スライド中のコンテンツ専用インデックス
+  // 仮想スライドインデックス
   const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
 
   // タイトル設定
@@ -131,24 +131,27 @@ export function MediaViewer({
     onOpenFolder?.(path.dirname(allNodes[index].path));
   };
 
+  // インデックス変更確定
+  const commitIndex = (itemIdx: number, vIdx: number) => {
+    setIndex(itemIdx);
+    setVIndex(vIdx);
+    onIndexChange(itemIdx); // 親に通知
+  };
+
   // スワイプ時の移動処理
   const handleSwipe = (swiper: SwiperClass) => {
-    const activeIdx = swiper.activeIndex;
-    setVIndex(activeIdx);
-
+    const vIdx = swiper.activeIndex;
     const itemIdx = Math.max(
       0,
-      Math.min(activeIdx - offsetPrev, allNodes.length - 1)
+      Math.min(vIdx - offsetPrev, allNodes.length - 1)
     );
-    setIndex(itemIdx);
 
-    // 親に通知
-    onIndexChange(itemIdx);
+    commitIndex(itemIdx, vIdx);
 
-    if (hasPrev && activeIdx === 0) {
+    if (hasPrev && vIdx === 0) {
       onPrevFolder("last");
     }
-    if (hasNext && activeIdx === allSlides.length - 1) {
+    if (hasNext && vIdx === allSlides.length - 1) {
       onNextFolder("first");
     }
   };
