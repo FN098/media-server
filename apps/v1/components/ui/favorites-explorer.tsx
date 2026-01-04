@@ -90,17 +90,14 @@ export function FavoritesExplorer() {
   const {
     allTags,
     selectedTags,
-    filteredNodes: tagFiltered,
+    filteredNodes: tagFilteredMediaOnly,
     selectTags,
   } = useTagFilter(mediaOnly);
-
-  // 最終フィルタリング
-  const finalFiltered = tagFiltered;
 
   // ===== ビューア =====
 
   // ビューア用ノードリスト
-  const viewerNodes = finalFiltered;
+  const viewerNodes = tagFilteredMediaOnly;
 
   // ビューア用インデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
@@ -171,7 +168,7 @@ export function FavoritesExplorer() {
     clearSelection,
   } = usePathSelectionContext();
 
-  const selectable = finalFiltered;
+  const selectable = tagFilteredMediaOnly;
 
   // 選択済みノードリスト
   const selected = useMemo(
@@ -273,14 +270,20 @@ export function FavoritesExplorer() {
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div>
-            <ExplorerGridView allNodes={finalFiltered} onOpen={handleOpen} />
+            <ExplorerGridView
+              allNodes={tagFilteredMediaOnly}
+              onOpen={handleOpen}
+            />
           </div>
         )}
 
         {/* リストビュー */}
         {viewMode === "list" && (
           <div>
-            <ExplorerListView allNodes={finalFiltered} onOpen={handleOpen} />
+            <ExplorerListView
+              allNodes={tagFilteredMediaOnly}
+              onOpen={handleOpen}
+            />
           </div>
         )}
 
@@ -298,7 +301,7 @@ export function FavoritesExplorer() {
         {isSelectionMode && (
           <SelectionBar
             count={selected.length}
-            totalCount={finalFiltered.length}
+            totalCount={tagFilteredMediaOnly.length}
             active={isSelectionMode}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}

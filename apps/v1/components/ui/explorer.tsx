@@ -94,13 +94,10 @@ export function Explorer() {
     [searchFiltered]
   );
 
-  // 最終フィルタリング
-  const finalFiltered = mediaOnly;
-
   // ===== ビューア =====
 
   // ビューア用ノードリスト
-  const viewerNodes = finalFiltered;
+  const viewerNodes = mediaOnly;
 
   // ビューアのインデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
@@ -170,7 +167,7 @@ export function Explorer() {
     clearSelection,
   } = usePathSelectionContext();
 
-  const selectable = finalFiltered;
+  const selectable = mediaOnly;
 
   // 選択済みノードリスト
   const selected = useMemo(
@@ -265,14 +262,14 @@ export function Explorer() {
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div>
-            <ExplorerGridView allNodes={finalFiltered} onOpen={handleOpen} />
+            <ExplorerGridView allNodes={searchFiltered} onOpen={handleOpen} />
           </div>
         )}
 
         {/* リストビュー */}
         {viewMode === "list" && (
           <div>
-            <ExplorerListView allNodes={finalFiltered} onOpen={handleOpen} />
+            <ExplorerListView allNodes={searchFiltered} onOpen={handleOpen} />
           </div>
         )}
 
@@ -290,7 +287,7 @@ export function Explorer() {
         {isSelectionMode && (
           <SelectionBar
             count={selected.length}
-            totalCount={finalFiltered.length}
+            totalCount={mediaOnly.length}
             active={isSelectionMode}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}
