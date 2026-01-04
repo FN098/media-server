@@ -1,31 +1,28 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+
+let lockCount = 0;
+let prevOverflow = "";
 
 export const useScrollLockControl = () => {
-  const [isLocked, setIsLocked] = useState(false);
-  const [prevOverflowStyle, setPrevOverflowStyle] = useState("");
-
   const lock = useCallback(() => {
     if (typeof window === "undefined") return;
-    if (document.body.style.overflow === "hidden") return;
-
-    const overflow = window.getComputedStyle(document.body).overflow;
-    setPrevOverflowStyle(overflow);
-
-    document.body.style.overflow = "hidden";
-
-    setIsLocked(true);
+    if (lockCount === 0) {
+      prevOverflow = document.body.style.overflow || "";
+      document.body.style.overflow = "hidden";
+    }
+    lockCount += 1;
   }, []);
 
   const unlock = useCallback(() => {
     if (typeof window === "undefined") return;
+    if (lockCount <= 0) return;
+    lockCount -= 1;
+    if (lockCount === 0) {
+      document.body.style.overflow = prevOverflow || "unset";
+    }
+  }, []);
 
-    // 保存していたスタイルに戻す
-    document.body.style.overflow = prevOverflowStyle || "unset";
-
-    setIsLocked(false);
-  }, [prevOverflowStyle]);
-
-  return { isLocked, lock, unlock };
+  return { lock, unlock };
 };
