@@ -8,6 +8,7 @@ export async function existsDir(dirPath: string): Promise<boolean> {
     return false;
   }
 }
+
 export async function existsFile(filePath: string): Promise<boolean> {
   try {
     await fs.access(filePath);

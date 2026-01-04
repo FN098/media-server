@@ -1,5 +1,6 @@
 import { getMimetype } from "@/lib/media/mimetype";
 import { getMediaPath } from "@/lib/path/helpers";
+import { isErrnoException } from "@/lib/utils/error";
 import fsSync from "fs";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
@@ -14,15 +15,31 @@ export async function GET(
     const rel = p.join("/");
     const filePath = getMediaPath(rel);
 
-    const stat = await fs.stat(filePath);
+    let stat;
+    try {
+      stat = await fs.stat(filePath);
+    } catch (e: unknown) {
+      if (isErrnoException(e) && e.code === "ENOENT") {
+        return new NextResponse("File not found", { status: 404 });
+      }
+      throw e;
+    }
     const fileSize = stat.size;
 
     // ---- Range リクエスト ----
     const range = req.headers.get("Range");
     if (range) {
-      const [startStr, endStr] = range.replace(/bytes=/, "").split("-");
-      const start = parseInt(startStr, 10);
-      const end = endStr ? parseInt(endStr, 10) : fileSize - 1;
+      const match = range.match(/bytes=(\d*)-(\d*)/);
+      if (!match) {
+        return new NextResponse("Invalid Range", { status: 416 });
+      }
+
+      const start = match[1] ? Number(match[1]) : 0;
+      const end = match[2] ? Number(match[2]) : fileSize - 1;
+
+      if (start >= fileSize || start > end) {
+        return new NextResponse("Range Not Satisfiable", { status: 416 });
+      }
 
       const chunkSize = end - start + 1;
 
