@@ -85,13 +85,13 @@ export function TagFilterBar({
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-[450px] max-h-[85vh] flex flex-col p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[450px] h-[500px] flex flex-col p-0 overflow-hidden">
           <DialogHeader className="p-6 pb-2">
             <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
               タグを選択
             </DialogTitle>
           </DialogHeader>
-          <div className="flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto min-h-[200px]">
+          <div className="flex-1 flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto border-t border-b border-transparent">
             {tags.map((tag) => {
               const isSelected = tempSelected.has(tag);
               return (
@@ -99,7 +99,7 @@ export function TagFilterBar({
                   key={tag}
                   variant={isSelected ? "default" : "secondary"}
                   className={cn(
-                    "cursor-pointer px-4 h-9 text-sm transition-all select-none border-transparent inline-flex items-center justify-center", // h-9で固定
+                    "cursor-pointer px-4 h-9 text-sm transition-all select-none border-transparent inline-flex items-center justify-center",
                     isSelected
                       ? "ring-2 ring-primary shadow-sm"
                       : "hover:bg-secondary/80"
@@ -113,7 +113,7 @@ export function TagFilterBar({
             })}
           </div>
 
-          <DialogFooter className="flex flex-row items-center justify-between p-6 border-t bg-muted/20">
+          <DialogFooter className="flex flex-row items-center justify-between p-6 bg-muted/20">
             <Button
               variant="ghost"
               size="sm"
