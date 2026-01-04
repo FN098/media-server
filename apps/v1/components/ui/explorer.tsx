@@ -319,6 +319,7 @@ export function Explorer() {
             active={isTagEditorOpen}
             onClose={handleCloseTagEditor}
             mode={tagEditMode}
+            transparent={tagEditMode === "single"}
           />
         )}
 

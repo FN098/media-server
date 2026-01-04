@@ -18,7 +18,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function TagEditSheet({
@@ -42,10 +42,20 @@ export function TagEditSheet({
   // 編集モード
   const [isEditing, setIsEditing] = useState(edit ?? false);
   const toggleIsEditing = () => setIsEditing((prev) => !prev);
+  useEffect(() => {
+    if (edit !== undefined) {
+      setIsEditing(edit);
+    }
+  }, [edit]);
 
   // 透明モード
   const [isTransparent, setIsTransparent] = useState(transparent ?? false);
   const toggleIsTransparent = () => setIsTransparent((prev) => !prev);
+  useEffect(() => {
+    if (transparent !== undefined) {
+      setIsTransparent(transparent);
+    }
+  }, [transparent]);
 
   // 処理中
   const [isLoading, setIsLoading] = useState(false);
