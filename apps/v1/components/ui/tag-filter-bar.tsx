@@ -10,7 +10,7 @@ import {
 } from "@/shadcn/components/ui/dialog";
 import { cn } from "@/shadcn/lib/utils";
 import { ListFilter, RotateCcw, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface TagFilterBarProps {
   tags: string[];
@@ -28,13 +28,15 @@ export function TagFilterBar({
   );
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    if (open) {
+  if (tags.length === 0) return null;
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      // 開く瞬間に、親の最新状態でローカルステートを上書き
       setTempSelected(new Set(selectedTags));
     }
-  }, [open, selectedTags]);
-
-  if (tags.length === 0) return null;
+    setOpen(nextOpen);
+  };
 
   const handleToggle = (tag: string) => {
     const next = new Set(tempSelected);
@@ -59,7 +61,7 @@ export function TagFilterBar({
 
   return (
     <div className="flex items-center gap-2 py-2">
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button
             variant="outline"
