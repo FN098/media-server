@@ -34,8 +34,9 @@ export async function GET(
         return new NextResponse("Invalid Range", { status: 416 });
       }
 
-      const start = match[1] ? Number(match[1]) : 0;
-      const end = match[2] ? Number(match[2]) : fileSize - 1;
+      const truncate = (n: number) => Math.max(0, Math.min(n, fileSize - 1));
+      const start = match[1] ? truncate(Number(match[1])) : 0;
+      const end = match[2] ? truncate(Number(match[2])) : fileSize - 1;
 
       if (start >= fileSize || start > end) {
         return new NextResponse("Range Not Satisfiable", { status: 416 });
@@ -48,6 +49,20 @@ export async function GET(
         end,
       });
       const webStream = Readable.toWeb(fileStream);
+
+      // ファイルロックが解除されない問題の対策
+      req.signal.addEventListener(
+        "abort",
+        () => {
+          if (!fileStream.destroyed) {
+            fileStream.destroy();
+          }
+        },
+        { once: true }
+      );
+      fileStream.on("error", (err) => {
+        console.error("stream error", err);
+      });
 
       return new NextResponse(webStream as ReadableStream, {
         status: 206,
@@ -63,6 +78,21 @@ export async function GET(
     // ---- 通常リクエスト ----
     const fileStream = fsSync.createReadStream(filePath);
     const webStream = Readable.toWeb(fileStream);
+
+    // ファイルロックが解除されない問題の対策
+    req.signal.addEventListener(
+      "abort",
+      () => {
+        if (!fileStream.destroyed) {
+          fileStream.destroy();
+        }
+      },
+      { once: true }
+    );
+    fileStream.on("error", (err) => {
+      console.error("stream error", err);
+    });
+
     return new NextResponse(webStream as ReadableStream, {
       headers: {
         "Content-Length": fileSize.toString(),
