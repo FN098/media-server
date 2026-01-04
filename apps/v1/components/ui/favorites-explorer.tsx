@@ -156,17 +156,18 @@ export function FavoritesExplorer() {
   };
 
   // タグエディタ
-  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
-  const [isTagEditing, setIsTagEditing] = useState(false);
+  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false); // TODO: URLパラメータ tag=true
 
   const handleOpenTagEditor = () => {
     setIsTagEditorOpen(true);
-    setIsTagEditing(false);
   };
 
   const handleCloseTagEditor = () => {
     setIsTagEditorOpen(false);
-    setIsTagEditing(false);
+  };
+
+  const handleToggleTagEditor = () => {
+    setIsTagEditorOpen((prev) => !prev);
   };
 
   // タグエディタの起動モード
@@ -174,28 +175,6 @@ export function FavoritesExplorer() {
     if (modal) return "single";
     return "default";
   }, [modal]);
-
-  // タグエディタの状態切り替え
-  const handleToggleTagEditor = () => {
-    if (isTagEditorOpen) {
-      exitSelectionMode();
-      setIsTagEditorOpen(false);
-      return;
-    }
-    if (tagEditMode === "default") {
-      enterSelectionMode();
-      setIsTagEditorOpen(true);
-      return;
-    }
-    if (tagEditMode === "single" && viewerIndex != null) {
-      const media = mediaOnly[viewerIndex];
-      if (!media) return;
-      selectPaths([media.path]);
-      exitSelectionMode();
-      setIsTagEditorOpen(true);
-      return;
-    }
-  };
 
   // メディアノードリストのインデックスを取得
   const getMediaIndex = useCallback(
@@ -285,7 +264,6 @@ export function FavoritesExplorer() {
             active={isTagEditorOpen}
             onClose={handleCloseTagEditor}
             mode={tagEditMode}
-            edit={isTagEditing}
           />
         )}
 
