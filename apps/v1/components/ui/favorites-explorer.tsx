@@ -166,6 +166,7 @@ export function FavoritesExplorer() {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
+    // selectedCount,
     selectedPaths,
     selectPaths,
     clearSelection,
@@ -196,6 +197,15 @@ export function FavoritesExplorer() {
     clearSelection();
     exitSelectionMode();
   };
+
+  // 選択変更時にタグエディタ起動
+  // useEffect(() => {
+  //   if (selectedCount > 0) {
+  //     handleOpenTagEditor();
+  //   } else {
+  //     handleCloseTagEditor();
+  //   }
+  // });
 
   // ===== タグエディタ =====
 

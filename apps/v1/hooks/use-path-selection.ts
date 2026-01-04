@@ -9,6 +9,7 @@ export function usePathSelection(initialSelectedPaths?: Iterable<PathType>) {
     enterSelectionMode,
     exitSelectionMode,
 
+    selectedCount,
     selectedKeys,
     isSelected,
     toggleKey,
@@ -28,6 +29,7 @@ export function usePathSelection(initialSelectedPaths?: Iterable<PathType>) {
     enterSelectionMode,
     exitSelectionMode,
 
+    selectedCount,
     selectedPaths: selectedKeys,
     isPathSelected: isSelected,
     togglePath: toggleKey,

@@ -11,6 +11,8 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
 
   const [lastSelectedKey, setLastSelectedKey] = useState<K | null>(null);
 
+  const selectedCount = selectedKeys.size;
+
   const enterSelectionMode = useCallback(() => {
     setIsSelectionMode(true);
   }, []);
@@ -76,6 +78,7 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     enterSelectionMode,
     exitSelectionMode,
 
+    selectedCount,
     selectedKeys,
     isSelected,
     toggleKey,

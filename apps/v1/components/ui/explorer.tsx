@@ -164,6 +164,7 @@ export function Explorer() {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
+    // selectedCount,
     selectedPaths,
     selectPaths,
     clearSelection,
@@ -194,6 +195,15 @@ export function Explorer() {
     clearSelection();
     exitSelectionMode();
   };
+
+  // 選択変更時にタグエディタ起動
+  // useEffect(() => {
+  //   if (selectedCount > 0) {
+  //     handleOpenTagEditor();
+  //   } else {
+  //     handleCloseTagEditor();
+  //   }
+  // });
 
   // ===== タグエディタ =====
 
