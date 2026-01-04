@@ -9,6 +9,8 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     () => new Set(initialSelectedKeys)
   );
 
+  const [lastSelectedKey, setLastSelectedKey] = useState<K | null>(null);
+
   const enterSelectionMode = useCallback(() => {
     setIsSelectionMode(true);
   }, []);
@@ -83,5 +85,8 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     unselectKey,
     addKeys,
     replaceSelection,
+
+    lastSelectedKey,
+    setLastSelectedKey,
   };
 }

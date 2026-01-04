@@ -21,8 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/components/ui/table";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { toast } from "sonner";
 
 export function ExplorerListView({
@@ -47,8 +48,14 @@ export function ExplorerListView({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allNodes.map((node) => (
-            <RowItem key={node.path} node={node} onOpen={onOpen} />
+          {allNodes.map((node, index) => (
+            <RowItem
+              key={node.path}
+              node={node}
+              allNodes={allNodes}
+              index={index}
+              onOpen={onOpen}
+            />
           ))}
         </TableBody>
       </Table>
@@ -58,47 +65,25 @@ export function ExplorerListView({
 
 function RowItem({
   node,
+  index,
+  allNodes,
   onOpen,
 }: {
   node: MediaNode;
+  index: number;
+  allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
 }) {
+  const isMobile = useIsMobile();
+  const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
+
+  // お気に入り
   const { toggleFavorite, isFavorite } = useFavoritesContext();
-  const {
-    isSelectionMode,
-    isPathSelected,
-    enterSelectionMode,
-    exitSelectionMode,
-    selectedPaths,
-    selectPath,
-    unselectPath,
-    replaceSelection,
-  } = usePathSelectionContext();
 
   const favorite = useMemo(
     () => isFavorite(node.path),
     [isFavorite, node.path]
   );
-
-  const selected = useMemo(
-    () => isPathSelected(node.path),
-    [isPathSelected, node.path]
-  );
-
-  const handleSelectChange = (selected: boolean) => {
-    enterSelectionMode();
-
-    if (selected) {
-      selectPath(node.path);
-    } else {
-      unselectPath(node.path);
-
-      // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
-      if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
-        exitSelectionMode();
-      }
-    }
-  };
 
   const handleToggleFavorite = () => {
     try {
@@ -110,39 +95,138 @@ function RowItem({
   };
 
   const {
-    start: startLongPress,
-    stop: stopLongPress,
-    isLongPressed,
-  } = useLongPress(() => {
-    if (isMedia(node.type)) handleSelectChange(true);
-  }, 600);
+    isSelectionMode,
+    isPathSelected,
+    enterSelectionMode,
+    exitSelectionMode,
+    selectedPaths,
+    selectPath,
+    addPaths,
+    togglePath,
+    replaceSelection,
+    unselectPath,
+    lastSelectedPath,
+    setLastSelectedPath,
+  } = usePathSelectionContext();
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (isLongPressed) return;
+  const selected = useMemo(
+    () => isPathSelected(node.path),
+    [isPathSelected, node.path]
+  );
 
-    const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+  // チェックボックス
+  const handleCheckedChange = (checked: boolean) => {
+    if (!isMediaNode) return;
 
-    if (isSelectionMode) {
-      if (!isMedia(node.type)) {
-        if (node.isDirectory) toast.warning("フォルダは選択できません！");
-        return;
-      }
+    enterSelectionMode();
 
-      if (isCmdOrCtrl) {
-        handleSelectChange(!selected);
-      } else {
-        // Ctrlなし：これだけを選択
-        replaceSelection(node.path);
-      }
+    if (checked) {
+      selectPath(node.path);
     } else {
-      // 選択モードではない時、Ctrlクリックで選択モードを開始する
-      if (isCmdOrCtrl && isMedia(node.type)) {
-        handleSelectChange(true);
-      } else {
-        onOpen?.(node);
+      unselectPath(node.path);
+
+      // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
+      if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
+        exitSelectionMode();
       }
     }
   };
+
+  // クリック
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isMediaNode || isLongPressed || isMobile) return;
+
+    e.preventDefault();
+
+    const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+    const isShift = e.shiftKey;
+
+    // Shift
+    if (isShift) {
+      enterSelectionMode();
+
+      // 前回の選択がある場合、範囲を選択
+      if (lastSelectedPath !== null) {
+        const lastSelectedIndex = allNodes.findIndex(
+          (n) => n.path === lastSelectedPath
+        );
+        if (lastSelectedIndex < 0) return;
+        const start = Math.min(lastSelectedIndex, index);
+        const end = Math.max(lastSelectedIndex, index);
+        const pathsInRange = allNodes
+          .slice(start, end + 1)
+          .filter((n) => isMedia(n.type))
+          .map((n) => n.path);
+
+        addPaths(pathsInRange); // 範囲を一括選択
+        return;
+      }
+
+      selectPath(node.path);
+      setLastSelectedPath(node.path);
+      return;
+    }
+
+    // Ctrl
+    if (isCmdOrCtrl) {
+      enterSelectionMode();
+      togglePath(node.path);
+      return;
+    }
+
+    // 通常
+    exitSelectionMode();
+    replaceSelection(node.path);
+    setLastSelectedPath(node.path);
+  };
+
+  // タップ（モバイル用）
+  const handleTap = (e: React.MouseEvent) => {
+    if (!isMediaNode || isLongPressed || !isMobile) return;
+
+    e.preventDefault();
+
+    // 選択モード中
+    if (isSelectionMode) {
+      if (!selected) {
+        selectPath(node.path);
+      } else {
+        unselectPath(node.path);
+
+        // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
+        if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
+          exitSelectionMode();
+        }
+      }
+      return;
+    }
+
+    // 通常
+    onOpen?.(node);
+  };
+
+  // ダブルクリック
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (isSelectionMode || isMobile) return;
+
+    e.preventDefault();
+
+    onOpen?.(node);
+  };
+
+  // 長押し
+  const handleLongPress = () => {
+    if (!isMediaNode) return;
+    enterSelectionMode();
+    selectPath(node.path);
+    setLastSelectedPath(node.path);
+  };
+
+  const {
+    start: startLongPress,
+    stop: stopLongPress,
+    isLongPressed,
+  } = useLongPress(handleLongPress, 600);
 
   return (
     <TableRow
@@ -152,14 +236,20 @@ function RowItem({
       onTouchStart={startLongPress}
       onTouchEnd={stopLongPress}
       onTouchMove={stopLongPress} // スクロール時に長押しをキャンセル
-      onClick={handleClick}
-      className={cn("hover:bg-blue-100 active:bg-blue-200")}
+      onClick={isMobile ? handleTap : handleClick}
+      onDoubleClick={isMobile ? undefined : handleDoubleClick}
+      className={cn(
+        "select-none cursor-pointer transition-colors",
+        selected
+          ? "bg-primary/10 hover:bg-primary/20"
+          : "hover:bg-muted/50 active:bg-muted"
+      )}
     >
       <TableCell>
         <div className={cn("transition-opacity")}>
           <Checkbox
             checked={selected}
-            onCheckedChange={handleSelectChange}
+            onCheckedChange={handleCheckedChange}
             onClick={(e) => e.stopPropagation()}
             disabled={!isMedia(node.type)}
           />
