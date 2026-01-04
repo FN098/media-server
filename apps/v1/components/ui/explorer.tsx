@@ -193,14 +193,10 @@ export function Explorer() {
     exitSelectionMode();
   };
 
-  // 選択変更時にタグエディタ起動
-  // useEffect(() => {
-  //   if (selectedCount > 0) {
-  //     handleOpenTagEditor();
-  //   } else {
-  //     handleCloseTagEditor();
-  //   }
-  // });
+  // 選択時にタグエディタを起動
+  const handleSelect = useCallback(() => {
+    setIsTagEditorOpen(true);
+  }, []);
 
   // ===== タグエディタ =====
 
@@ -262,14 +258,22 @@ export function Explorer() {
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div>
-            <ExplorerGridView allNodes={searchFiltered} onOpen={handleOpen} />
+            <ExplorerGridView
+              allNodes={searchFiltered}
+              onOpen={handleOpen}
+              onSelect={handleSelect}
+            />
           </div>
         )}
 
         {/* リストビュー */}
         {viewMode === "list" && (
           <div>
-            <ExplorerListView allNodes={searchFiltered} onOpen={handleOpen} />
+            <ExplorerListView
+              allNodes={searchFiltered}
+              onOpen={handleOpen}
+              onSelect={handleSelect}
+            />
           </div>
         )}
 

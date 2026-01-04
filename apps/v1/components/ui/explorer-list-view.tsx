@@ -29,9 +29,11 @@ import { toast } from "sonner";
 export function ExplorerListView({
   allNodes,
   onOpen,
+  onSelect,
 }: {
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
+  onSelect?: () => void;
 }) {
   return (
     <div className="w-full h-full">
@@ -55,6 +57,7 @@ export function ExplorerListView({
               allNodes={allNodes}
               index={index}
               onOpen={onOpen}
+              onSelect={onSelect}
             />
           ))}
         </TableBody>
@@ -68,11 +71,13 @@ function RowItem({
   index,
   allNodes,
   onOpen,
+  onSelect,
 }: {
   node: MediaNode;
   index: number;
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
+  onSelect?: () => void;
 }) {
   const isMobile = useIsMobile();
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
@@ -122,6 +127,7 @@ function RowItem({
 
     if (checked) {
       selectPath(node.path);
+      onSelect?.();
     } else {
       unselectPath(node.path);
 
@@ -179,6 +185,7 @@ function RowItem({
     exitSelectionMode();
     replaceSelection(node.path);
     setLastSelectedPath(node.path);
+    onSelect?.();
   };
 
   // タップ（モバイル用）

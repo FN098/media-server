@@ -20,9 +20,11 @@ import { toast } from "sonner";
 export function ExplorerGridView({
   allNodes,
   onOpen,
+  onSelect,
 }: {
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
+  onSelect?: () => void;
 }) {
   const { containerRef, columnCount, getTotalHeight, getRows, getCellItem } =
     useGridView(allNodes);
@@ -64,6 +66,7 @@ export function ExplorerGridView({
                     index={globalIndex}
                     allNodes={allNodes}
                     onOpen={onOpen}
+                    onSelect={onSelect}
                   />
                 )
               );
@@ -80,11 +83,13 @@ function Cell({
   index,
   allNodes,
   onOpen,
+  onSelect,
 }: {
   node: MediaNode;
   index: number;
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
+  onSelect?: () => void;
 }) {
   const isMobile = useIsMobile();
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
@@ -135,6 +140,7 @@ function Cell({
 
     if (checked) {
       selectPath(node.path);
+      onSelect?.();
     } else {
       unselectPath(node.path);
 
@@ -192,6 +198,7 @@ function Cell({
     exitSelectionMode();
     replaceSelection(node.path);
     setLastSelectedPath(node.path);
+    onSelect?.();
   };
 
   // タップ（モバイル用）

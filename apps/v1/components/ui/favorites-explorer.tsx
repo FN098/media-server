@@ -194,14 +194,10 @@ export function FavoritesExplorer() {
     exitSelectionMode();
   };
 
-  // 選択変更時にタグエディタ起動
-  // useEffect(() => {
-  //   if (selectedCount > 0) {
-  //     handleOpenTagEditor();
-  //   } else {
-  //     handleCloseTagEditor();
-  //   }
-  // });
+  // 選択時にタグエディタを起動
+  const handleSelect = useCallback(() => {
+    setIsTagEditorOpen(true);
+  }, []);
 
   // ===== タグエディタ =====
 
@@ -273,6 +269,7 @@ export function FavoritesExplorer() {
             <ExplorerGridView
               allNodes={tagFilteredMediaOnly}
               onOpen={handleOpen}
+              onSelect={handleSelect}
             />
           </div>
         )}
@@ -283,6 +280,7 @@ export function FavoritesExplorer() {
             <ExplorerListView
               allNodes={tagFilteredMediaOnly}
               onOpen={handleOpen}
+              onSelect={handleSelect}
             />
           </div>
         )}
