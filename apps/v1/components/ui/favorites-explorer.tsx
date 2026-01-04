@@ -161,7 +161,7 @@ export function FavoritesExplorer() {
 
   const handleOpenTagEditor = () => {
     setIsTagEditorOpen(true);
-    setIsTagEditing(true);
+    setIsTagEditing(false);
   };
 
   const handleCloseTagEditor = () => {
@@ -178,6 +178,7 @@ export function FavoritesExplorer() {
   // タグエディタの状態切り替え
   const handleToggleTagEditor = () => {
     if (isTagEditorOpen) {
+      exitSelectionMode();
       setIsTagEditorOpen(false);
       return;
     }
