@@ -176,6 +176,7 @@ export function Explorer() {
   // タグエディタの状態切り替え
   const handleToggleTagEditor = () => {
     if (isTagEditorOpen) {
+      exitSelectionMode();
       setIsTagEditorOpen(false);
       return;
     }
