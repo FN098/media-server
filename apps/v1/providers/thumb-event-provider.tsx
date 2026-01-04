@@ -1,52 +1,34 @@
 "use client";
 
-import { getThumbEventsUrl } from "@/lib/path/helpers";
-import { ThumbCompletedEvent } from "@/workers/thumb/types";
-import { createContext, useContext, useEffect, useRef } from "react";
+import { useThumbEvent } from "@/hooks/use-thumb-event";
+import { createContext, useContext } from "react";
 
-// TODO: リファクタリング
+type ThumbEventContextType = ReturnType<typeof useThumbEvent>;
 
-type Listener = (e: ThumbCompletedEvent) => void;
-
-const ThumbEventContext = createContext<{
-  subscribe: (listener: Listener) => () => void;
-} | null>(null);
+const ThumbEventContext = createContext<ThumbEventContextType | undefined>(
+  undefined
+);
 
 export function ThumbEventProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const listeners = useRef(new Set<Listener>());
-
-  useEffect(() => {
-    const eventSource = new EventSource(getThumbEventsUrl());
-
-    eventSource.onmessage = (e: MessageEvent<string>) => {
-      const event = JSON.parse(e.data) as ThumbCompletedEvent;
-      listeners.current.forEach((l) => l(event));
-    };
-
-    return () => eventSource.close();
-  }, []);
+  const value = useThumbEvent();
 
   return (
-    <ThumbEventContext.Provider
-      value={{
-        subscribe(listener) {
-          listeners.current.add(listener);
-          return () => listeners.current.delete(listener);
-        },
-      }}
-    >
+    <ThumbEventContext.Provider value={value}>
       {children}
     </ThumbEventContext.Provider>
   );
 }
 
-export function useThumbEventObserver(
-  handler: (e: ThumbCompletedEvent) => void
-) {
-  const ctx = useContext(ThumbEventContext);
-  useEffect(() => ctx?.subscribe(handler), [ctx, handler]);
+export function useThumbEventContext() {
+  const context = useContext(ThumbEventContext);
+  if (context === undefined) {
+    throw new Error(
+      "useThumbEventContext must be used within ThumbEventProvider"
+    );
+  }
+  return context;
 }
