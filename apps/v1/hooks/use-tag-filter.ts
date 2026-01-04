@@ -1,29 +1,9 @@
 "use client";
 
-import { MediaNode } from "@/lib/media/types";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-export function useTagFilter(nodes: MediaNode[]) {
+export function useTagFilter() {
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-
-  // 全ノードからユニークなタグを抽出
-  const allTags = useMemo(() => {
-    const tagNames = nodes
-      .filter((n) => n.tags && n.tags.length > 0)
-      .flatMap((n) => n.tags!.map((t) => t.name));
-    return Array.from(new Set(tagNames)).sort((a, b) => a.localeCompare(b));
-  }, [nodes]);
-
-  // 選択されたタグでフィルタリング (AND条件)
-  const filteredNodes = useMemo(() => {
-    if (selectedTags.size === 0) return nodes;
-    return nodes.filter((node) => {
-      if (node.isDirectory) return true; // フォルダは例外的に許可
-      if (!node.tags || node.tags.length === 0) return false;
-      const nodeTagNames = new Set(node.tags.map((t) => t.name));
-      return Array.from(selectedTags).every((tag) => nodeTagNames.has(tag));
-    });
-  }, [nodes, selectedTags]);
 
   const toggleTag = (tag: string) => {
     const next = new Set(selectedTags);
@@ -40,9 +20,7 @@ export function useTagFilter(nodes: MediaNode[]) {
   const selectTags = (tags: Iterable<string>) => setSelectedTags(new Set(tags));
 
   return {
-    allTags,
     selectedTags,
-    filteredNodes,
     toggleTag,
     resetTags,
     selectTags,

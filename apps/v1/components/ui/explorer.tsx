@@ -17,12 +17,22 @@ import {
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { FavoritesRecord } from "@/lib/favorite/types";
+import {
+  createFavoriteFilter,
+  createSearchFilter,
+  createTagFilter,
+} from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
-import { MediaNode, MediaPathToIndexMap } from "@/lib/media/types";
+import { sortNames } from "@/lib/media/sort";
+import {
+  MediaNode,
+  MediaNodeFilter,
+  MediaPathToIndexMap,
+} from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
-import { isMatchJapanese } from "@/lib/utils/search";
+import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
@@ -82,19 +92,40 @@ export function Explorer() {
 
   // ===== フィルタリング =====
 
-  const { nodes: allNodes } = listing;
+  // フィルタリング対象タグ
+  const { selectedTags, selectTags } = useTagFilter();
 
-  // 検索フィルタリング
-  const searchFiltered: MediaNode[] = useMemo(() => {
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery) return allNodes;
-    return allNodes.filter((n) => isMatchJapanese(n.name, trimmedQuery));
-  }, [allNodes, query]);
+  // お気に入りフィルタ有効フラグ
+  const [favoriteFilter, setFavoriteFilter] = useState(false);
+  const toggleFavoriteFilter = () => setFavoriteFilter((prev) => !prev);
 
-  // メディアフィルタリング
-  const mediaOnly: MediaNode[] = useMemo(
-    () => searchFiltered.filter((n) => isMedia(n.type)),
-    [searchFiltered]
+  const filteredNodes = useMemo(() => {
+    const { nodes: allNodes } = listing;
+
+    // 1. 各フィルタの生成
+    const filters: MediaNodeFilter[] = [
+      createSearchFilter(query),
+      createTagFilter(Array.from(selectedTags)),
+      createFavoriteFilter(favoriteFilter),
+    ];
+
+    // 2. フィルタの適用
+    return allNodes.filter((node) => {
+      // フォルダは常に表示する場合 (検索にはヒットさせたい場合は条件を調整)
+      if (node.isDirectory) {
+        // 例: フォルダは検索クエリには反応させるが、タグやお気に入りフィルタからは除外する
+        return createSearchFilter(query)(node);
+      }
+
+      // メディアファイルは全てのフィルタを適用
+      return filters.every((fn) => fn(node));
+    });
+  }, [listing, query, selectedTags, favoriteFilter]);
+
+  // ビューアや選択機能で使う「メディアのみ」のリストは filteredNodes から抽出
+  const mediaOnly = useMemo(
+    () => filteredNodes.filter((n) => isMedia(n.type)),
+    [filteredNodes]
   );
 
   // 処理高速化のため、path => node の Map を作成しておく
@@ -102,43 +133,21 @@ export function Explorer() {
     return new Map(mediaOnly.map((node) => [node.path, node]));
   }, [mediaOnly]);
 
-  // タグフィルタリング
-  const {
-    allTags,
-    selectedTags,
-    filteredNodes: tagFiltered,
-    selectTags,
-  } = useTagFilter(searchFiltered);
-
-  // タグ+メディアフィルタリング
-  const tagFilteredMediaOnly: MediaNode[] = useMemo(
-    () => tagFiltered.filter((n) => isMedia(n.type)),
-    [tagFiltered]
+  // すべてのタグ
+  const allTags = sortNames(
+    unique(
+      mediaOnly
+        .filter((n) => n.tags && n.tags.length > 0)
+        .flatMap((n) => n.tags!.map((t) => t.name))
+    )
   );
-
-  // お気に入りフィルタリング
-  const [favoriteFilter, setFavoriteFilter] = useState(false);
-  const toggleFavoriteFilter = () => setFavoriteFilter((prev) => !prev);
-  const favoriteFiltered: MediaNode[] = useMemo(
-    () =>
-      favoriteFilter
-        ? tagFilteredMediaOnly.filter((n) => n.isFavorite)
-        : tagFilteredMediaOnly,
-    [favoriteFilter, tagFilteredMediaOnly]
-  );
-
-  // フィルタリング結果
-  const filtered = favoriteFiltered;
 
   // ===== ビューア =====
 
-  // ビューア用ノードリスト
-  const viewerNodes = filtered;
-
   // ビューアのインデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
-    () => new Map(viewerNodes.map((n, index) => [n.path, index])),
-    [viewerNodes]
+    () => new Map(mediaOnly.map((n, index) => [n.path, index])),
+    [mediaOnly]
   );
 
   // ビューアのインデックスを取得
@@ -202,9 +211,6 @@ export function Explorer() {
     selectPaths,
     clearSelection,
   } = usePathSelectionContext();
-
-  // 選択可能ノードリスト
-  const selectable = favoriteFiltered;
 
   // 選択済みノードリスト
   const selected = useMemo(() => {
@@ -311,7 +317,7 @@ export function Explorer() {
             isActive={favoriteFilter}
             onClick={toggleFavoriteFilter}
             showCount
-            count={favoriteFiltered.length}
+            count={mediaOnly.length}
           />
         </div>
 
@@ -319,7 +325,7 @@ export function Explorer() {
         {viewMode === "grid" && (
           <div>
             <ExplorerGridView
-              allNodes={favoriteFiltered}
+              allNodes={filteredNodes}
               onOpen={handleOpen}
               onSelect={handleSelect}
             />
@@ -330,7 +336,7 @@ export function Explorer() {
         {viewMode === "list" && (
           <div>
             <ExplorerListView
-              allNodes={favoriteFiltered}
+              allNodes={filteredNodes}
               onOpen={handleOpen}
               onSelect={handleSelect}
             />
@@ -352,7 +358,7 @@ export function Explorer() {
         {isSelectionMode && (
           <SelectionBar
             count={selected.length}
-            totalCount={selectable.length}
+            totalCount={mediaOnly.length}
             active={isSelectionMode}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}
@@ -371,7 +377,7 @@ export function Explorer() {
         {modal && viewerIndex != null && (
           <ScrollLockProvider>
             <MediaViewer
-              allNodes={viewerNodes}
+              allNodes={mediaOnly}
               initialIndex={viewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
