@@ -46,6 +46,12 @@ function MediaThumbImage({
   const [version, setVersion] = useState(0);
   const [requested, setRequested] = useState(false);
 
+  const update = () => {
+    setVersion(Date.now());
+    setIsProcessing(false);
+    setRequested(false);
+  };
+
   // サムネイル作成完了イベントの監視
   useThumbEventObserver((event) => {
     if (!isProcessing) return; // イベント発行していない場合は無視
@@ -53,12 +59,6 @@ function MediaThumbImage({
     console.log("Event received:", event, "Node path:", node.path);
 
     const { filePath, dirPath } = event;
-
-    const update = () => {
-      setVersion(Date.now());
-      setIsProcessing(false);
-      setRequested(false);
-    };
 
     if (filePath && filePath === node.path) {
       // ファイル一致なら即時
