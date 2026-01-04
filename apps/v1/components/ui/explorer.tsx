@@ -142,6 +142,16 @@ export function Explorer() {
     [at, mediaOnly.length]
   );
 
+  // スライド移動時にタグの表示を更新
+  const handleViewerIndexChange = (index: number) => {
+    const media = mediaOnly[index];
+    if (!media) return;
+
+    // 単一選択に切り替える
+    selectPaths([media.path]);
+    setIsSelectionMode(false);
+  };
+
   // タグエディタ
   const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
   const [isTagEditing, setIsTagEditing] = useState(false);
@@ -282,6 +292,7 @@ export function Explorer() {
             <MediaViewer
               allNodes={mediaOnly}
               initialIndex={viewerIndex}
+              onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
               onOpenFolder={openFolder}
               onPrevFolder={() => openPrevFolder("last")}

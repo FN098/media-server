@@ -50,6 +50,7 @@ type Slide = MediaNode | typeof prevFolderNav | typeof nextFolderNav;
 export function MediaViewer({
   allNodes,
   initialIndex,
+  onIndexChange,
   onClose,
   onOpenFolder,
   onNextFolder,
@@ -58,6 +59,7 @@ export function MediaViewer({
 }: {
   allNodes: MediaNode[];
   initialIndex: number;
+  onIndexChange: (index: number) => void;
   onClose: () => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onNextFolder?: (at?: IndexLike) => void;
@@ -139,6 +141,9 @@ export function MediaViewer({
       Math.min(activeIdx - offsetPrev, allNodes.length - 1)
     );
     setIndex(itemIdx);
+
+    // 親に通知
+    onIndexChange(itemIdx);
 
     if (hasPrev && activeIdx === 0) {
       onPrevFolder("last");
