@@ -7,7 +7,7 @@ import { ExplorerListView } from "@/components/ui/explorer-list-view";
 import { MediaViewer } from "@/components/ui/media-viewer";
 import { SelectionBar } from "@/components/ui/selection-bar";
 import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
-import { TagFilterBar } from "@/components/ui/tag-filter-bar";
+import { TagFilterBar } from "@/components/ui/tag-filter-bar-v2";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
@@ -28,7 +28,6 @@ import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
-import { Separator } from "@/shadcn/components/ui/separator";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -256,15 +255,12 @@ export function FavoritesExplorer() {
     >
       <FavoritesProvider favorites={favorites}>
         {/* タグフィルター */}
-        {/* TODO: 折り畳み（アコーディオン） */}
         <TagFilterBar
           tags={allTags}
           selectedTags={selectedTags}
           onToggle={toggleTag}
           onClear={resetTags}
         />
-
-        <Separator className="mb-4" />
 
         {/* グリッドビュー */}
         {viewMode === "grid" && (
