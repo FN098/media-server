@@ -499,43 +499,46 @@ function TagList({
   // --- 閲覧モード ---
   if (!isEditing) {
     return (
-      <div className="flex flex-wrap gap-2 py-2">
-        <AnimatePresence>
+      <div className="flex flex-wrap gap-2 py-2 overflow-hidden relative">
+        <AnimatePresence mode="wait">
           {tags.length > 0 ? (
-            tags.map((tag, index) => (
-              <motion.div
-                key={tag.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{
-                  opacity: 0,
-                  scale: 0.9,
-                  transition: { duration: 0.15 },
-                }} // 消える時のアニメーション
-                transition={{
-                  duration: 0.2,
-                  delay: index * 0.03,
-                }}
-                layout // これを入れると、タグが消えた後に隣のタグがスルスルと詰まる
-              >
-                <Badge
-                  variant="secondary"
-                  className={cn(
-                    "py-2 px-4 rounded-lg text-xs",
-                    isTransparent && "bg-secondary/50"
-                  )}
+            <motion.div
+              key="tags-container"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-wrap gap-2 w-full"
+            >
+              {tags.map((tag, index) => (
+                <motion.div
+                  key={tag.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.15, delay: index * 0.03 }}
                 >
-                  {tag.name}
-                </Badge>
-              </motion.div>
-            ))
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      "py-2 px-4 rounded-lg text-xs",
+                      isTransparent && "bg-secondary/50"
+                    )}
+                  >
+                    {tag.name}
+                  </Badge>
+                </motion.div>
+              ))}
+            </motion.div>
           ) : (
             <motion.p
-              key="empty-message" // AnimatePresence内で識別するためにkeyが必要
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-sm text-muted-foreground py-4 w-full text-center italic"
+              key="empty-message"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm text-muted-foreground py-2 w-full text-center italic"
             >
               タグがありません
             </motion.p>
