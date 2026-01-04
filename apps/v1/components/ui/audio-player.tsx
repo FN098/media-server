@@ -151,6 +151,7 @@ export function AudioPlayer({
             type="range"
             min="0"
             max={duration || 0}
+            step="any"
             value={currentTime}
             onChange={handleSeekChange}
             className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
