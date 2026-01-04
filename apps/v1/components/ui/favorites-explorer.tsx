@@ -86,6 +86,11 @@ export function FavoritesExplorer() {
     [searchFiltered]
   );
 
+  // 処理高速化のため、path => node の Map を作成しておく
+  const mediaOnlyMap = useMemo(() => {
+    return new Map(mediaOnly.map((node) => [node.path, node]));
+  }, [mediaOnly]);
+
   // タグフィルタリング
   const {
     allTags,
@@ -168,13 +173,15 @@ export function FavoritesExplorer() {
     clearSelection,
   } = usePathSelectionContext();
 
-  const selectable = tagFilteredMediaOnly;
-
   // 選択済みノードリスト
-  const selected = useMemo(
-    () => selectable.filter((n) => selectedPaths.has(n.path)),
-    [selectable, selectedPaths]
-  );
+  const selected = useMemo(() => {
+    const result = [];
+    for (const path of selectedPaths) {
+      const node = mediaOnlyMap.get(path);
+      if (node) result.push(node);
+    }
+    return result;
+  }, [mediaOnlyMap, selectedPaths]);
 
   // 全選択
   const handleSelectAll = () => {
