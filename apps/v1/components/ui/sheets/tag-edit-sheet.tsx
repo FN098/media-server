@@ -78,7 +78,13 @@ export function TagEditSheet({
     editor.setNewTagName("");
   };
 
-  // 保存処理
+  // 編集
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setIsTransparent(false); // 編集モードでは不透明
+  };
+
+  // 保存
   const handleApply = async () => {
     if (isLoading) return;
     setIsLoading(true);
@@ -127,11 +133,12 @@ export function TagEditSheet({
     }
   };
 
-  // 終了処理
+  // 終了
   const handleTerminate = () => {
     // 編集モードなら閲覧モードに移行（閉じない）
     if (isEditing) {
       setIsEditing(false);
+      setIsTransparent(true); // 閲覧モードでは透明
       return;
     }
 
@@ -201,11 +208,11 @@ export function TagEditSheet({
                     <SheetHeader
                       mode={mode}
                       isEditing={false}
-                      count={targetNodes.length}
-                      onEditClick={() => setIsEditing(true)}
-                      onClose={handleTerminate}
                       isTransparent={isTransparent}
+                      count={targetNodes.length}
+                      onClose={handleTerminate}
                       onToggleTransparent={toggleIsTransparent}
+                      onEditClick={handleEditClick}
                     />
                     <TagList
                       isEditing={false}
