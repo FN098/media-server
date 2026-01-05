@@ -25,6 +25,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
           alt={media.name}
           fill
           className="absolute inset-0 object-contain opacity-50"
+          draggable={false}
         />
       )}
 
@@ -40,6 +41,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
         onLoad={() => setIsLoaded(true)}
         priority
         unoptimized
+        draggable={false}
       />
     </div>
   );
