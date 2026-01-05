@@ -13,7 +13,7 @@ export async function enqueueThumbJob(dirPath: string) {
     {
       jobId: `thumb-dir-${hashPath(dirPath)}`,
       removeOnComplete: {
-        age: 60,
+        age: 60, // seconds
       },
       removeOnFail: true,
       lifo: true,
@@ -31,7 +31,7 @@ export async function enqueueSingleThumbJob(filePath: string) {
     {
       jobId: `thumb-file-${hashPath(filePath)}`,
       removeOnComplete: {
-        age: 10,
+        age: 60, // seconds
       },
       removeOnFail: true,
       lifo: true,
