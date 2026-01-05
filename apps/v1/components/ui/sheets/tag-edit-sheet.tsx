@@ -81,7 +81,6 @@ export function TagEditSheet({
   // 編集
   const handleEditClick = () => {
     setIsEditing(true);
-    setIsTransparent(false); // 編集モードでは不透明
   };
 
   // 保存
@@ -138,7 +137,6 @@ export function TagEditSheet({
     // 編集モードなら閲覧モードに移行（閉じない）
     if (isEditing) {
       setIsEditing(false);
-      setIsTransparent(true); // 閲覧モードでは透明
       return;
     }
 
