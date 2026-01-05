@@ -7,7 +7,7 @@ import {
   CarouselPrevious,
 } from "@/shadcn/components/ui/carousel";
 
-export function CarouselDemo() {
+export default function CarouselDemo() {
   return (
     <Carousel className="w-full max-w-xs">
       <CarouselContent>
