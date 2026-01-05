@@ -1,6 +1,5 @@
 "use server";
 
-import { getParentDirPath } from "@/lib/path/helpers";
 import { hashPath } from "@/lib/utils/path";
 import { thumbQueue } from "@/workers/thumb/queue";
 
@@ -38,9 +37,4 @@ export async function enqueueSingleThumbJob(filePath: string) {
       lifo: true,
     }
   );
-}
-
-export async function enqueueThumbJobByFilePath(filePath: string) {
-  const parentDir = getParentDirPath(filePath);
-  return await enqueueThumbJob(parentDir);
 }

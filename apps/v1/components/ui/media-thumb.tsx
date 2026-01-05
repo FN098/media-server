@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { enqueueThumbJobByFilePath } from "@/actions/thumb-actions";
+import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { FallbackImage } from "@/components/ui/fallback-image";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
 import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
@@ -79,7 +79,7 @@ function MediaThumbImage({
     setIsProcessing(true);
 
     try {
-      await enqueueThumbJobByFilePath(node.path);
+      await enqueueThumbJob(getParentDirPath(node.path));
     } catch (e) {
       console.error("Failed to enqueue thumb job", e);
       setIsProcessing(false);
