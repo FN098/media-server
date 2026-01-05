@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import path from "path";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -81,9 +81,7 @@ export function MediaViewer({
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
   const { toggleFullscreen } = useFullscreen();
-  const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(
-    null
-  );
+  const swiperRef = useRef<SwiperClass | null>(null);
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
 
   const hasPrev = !!onPrevFolder;
@@ -161,11 +159,11 @@ export function MediaViewer({
     { key: "Escape", callback: () => onClose() },
     { key: "Enter", callback: () => toggleHeaderVisibility() },
     { key: " ", callback: () => toggleHeaderVisibility() },
-    { key: "ArrowLeft", callback: () => swiperInstance?.slidePrev() },
-    { key: "ArrowRight", callback: () => swiperInstance?.slideNext() },
-    { key: "a", callback: () => swiperInstance?.slidePrev() },
+    { key: "ArrowLeft", callback: () => swiperRef.current?.slidePrev() },
+    { key: "ArrowRight", callback: () => swiperRef.current?.slideNext() },
+    { key: "a", callback: () => swiperRef.current?.slidePrev() },
     { key: "s", callback: () => void handleToggleFavorite() },
-    { key: "d", callback: () => swiperInstance?.slideNext() },
+    { key: "d", callback: () => swiperRef.current?.slideNext() },
     { key: "f", callback: () => toggleFullscreen() },
     { key: "p", callback: () => onPrevFolder?.() },
     { key: "n", callback: () => onNextFolder?.() },
@@ -306,7 +304,7 @@ export function MediaViewer({
 
       {/* メディアコンテンツ */}
       <Swiper
-        onSwiper={setSwiperInstance}
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
         modules={[Virtual, Navigation, Zoom]}
         initialSlide={vindex}
         onSlideChange={handleSwipe}
