@@ -302,7 +302,8 @@ export function Explorer() {
       className={cn(
         "flex-1 overflow-auto",
         viewMode === "grid" && "p-4",
-        viewMode === "list" && "px-4"
+        viewMode === "list" && "px-4",
+        isTagEditorOpenEffective && "mb-[150px]"
       )}
     >
       <FavoritesProvider favorites={favorites}>
