@@ -120,6 +120,9 @@ WORKDIR /app
 # 依存ファイルをコピー
 COPY --from=deps /app/node_modules ./node_modules
 
+# package.json をコピー
+COPY --from=deps /app/package.json ./
+
 # prisma 関連ファイルをコピー
 COPY apps/v1/prisma ./prisma
 # COPY apps/v1/prisma.config.ts ./ # v7 以上の場合
