@@ -146,7 +146,7 @@ export function FavoritesExplorer() {
     [at, mediaOnly.length]
   );
 
-  const isViewMode = modal && viewerIndex && mediaOnly[viewerIndex];
+  const isViewMode = modal && viewerIndex != null && mediaOnly[viewerIndex];
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
