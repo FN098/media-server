@@ -2,7 +2,7 @@ import {
   HeaderNavigation,
   HeaderSearch,
   HeaderViewModeSwitch,
-} from "@/components/ui/headers/header-components";
+} from "@/components/ui/headers/header-client-components";
 import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-sidebar";
 import { Separator } from "@/shadcn/components/ui/separator";
 
