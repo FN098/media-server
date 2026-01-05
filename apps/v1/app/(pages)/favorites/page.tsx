@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
-import { FavoritesExplorer } from "@/components/ui/favorites-explorer";
+import { FavoritesExplorer } from "@/components/ui/pages/favorites";
 import { formatNodes } from "@/lib/media/format";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";

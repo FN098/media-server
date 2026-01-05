@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@/components/ui/spinners";
+import { LoadingSpinner } from "@/components/ui/spinners/spinners";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/lib/media/types";
 import { getAbsoluteMediaUrl, getThumbUrl } from "@/lib/path/helpers";

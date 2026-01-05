@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/ui/app-sidebar";
+import { AppSidebar } from "@/components/ui/sidebars/app-sidebar";
 import { SidebarProvider } from "@/shadcn/components/ui/sidebar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {

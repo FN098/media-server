@@ -1,8 +1,8 @@
 "use client";
 
-import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs";
-import { Search } from "@/components/ui/search";
-import { ViewModeSwitch } from "@/components/ui/view-mode-switch";
+import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs/dynamic-breadcrumbs";
+import { ViewModeSwitch } from "@/components/ui/buttons/view-mode-switch";
+import { Search } from "@/components/ui/inputs/search";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";

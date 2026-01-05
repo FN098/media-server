@@ -1,6 +1,6 @@
 "use client";
 
-import { BreadcrumbLinkItem } from "@/components/ui/breadcrumbs";
+import { BreadcrumbLinkItem } from "@/components/ui/breadcrumbs/types";
 import { usePathname } from "next/navigation";
 import path from "path";
 import { useMemo } from "react";

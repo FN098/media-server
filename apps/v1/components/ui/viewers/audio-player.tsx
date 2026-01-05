@@ -1,4 +1,4 @@
-import { MarqueeText } from "@/components/ui/marquee-text";
+import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { getAbsoluteMediaUrl } from "@/lib/path/helpers";

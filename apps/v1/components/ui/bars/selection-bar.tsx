@@ -1,4 +1,4 @@
-import { AnimatedCheckCircle } from "@/components/ui/animated-check-circle";
+import { AnimatedCheckCircle } from "@/components/ui/icons/animated-check-circle";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";

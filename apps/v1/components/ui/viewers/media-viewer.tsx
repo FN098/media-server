@@ -1,11 +1,11 @@
 "use client";
 
 import { APP_CONFIG } from "@/app.config";
-import { AudioPlayer } from "@/components/ui/audio-player";
-import { FavoriteButton } from "@/components/ui/favorite-button";
-import { ImageViewer } from "@/components/ui/image-viewer";
-import { MarqueeText } from "@/components/ui/marquee-text";
-import { VideoPlayer } from "@/components/ui/video-player";
+import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
+import { MarqueeText } from "@/components/ui/texts/marquee-text";
+import { AudioPlayer } from "@/components/ui/viewers/audio-player";
+import { ImageViewer } from "@/components/ui/viewers/image-viewer";
+import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitleControl } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";

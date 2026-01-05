@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@/components/ui/spinners";
+import { LoadingSpinner } from "@/components/ui/spinners/spinners";
 import { MediaFsNode } from "@/lib/media/types";
 import { getMediaUrl, getThumbUrl } from "@/lib/path/helpers";
 import { cn } from "@/shadcn/lib/utils";

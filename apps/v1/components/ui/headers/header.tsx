@@ -1,9 +1,9 @@
-import { AppSidebarOpenButton } from "@/components/ui/app-sidebar";
 import {
   HeaderNavigation,
   HeaderSearch,
   HeaderViewModeSwitch,
-} from "@/components/ui/header-components";
+} from "@/components/ui/headers/header-components";
+import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-sidebar";
 import { Separator } from "@/shadcn/components/ui/separator";
 
 type HeaderFeatures = {

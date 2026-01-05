@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { enqueueThumbJob } from "@/actions/thumb-actions";
-import { FallbackImage } from "@/components/ui/fallback-image";
+import { FallbackImage } from "@/components/ui/images/fallback-image";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
 import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
 import { getParentDirPath, getThumbUrl } from "@/lib/path/helpers";

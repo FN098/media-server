@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
-import { Explorer } from "@/components/ui/explorer";
+import { Explorer } from "@/components/ui/pages/explorer";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";

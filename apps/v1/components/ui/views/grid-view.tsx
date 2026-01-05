@@ -1,32 +1,23 @@
 "use client";
 
-import { FavoriteButton } from "@/components/ui/favorite-button";
-import { FavoriteCountBadge } from "@/components/ui/favorite-count-badge";
-import { FolderStatusBadge } from "@/components/ui/folder-status-badge";
-import { LocalDateValue } from "@/components/ui/local-date";
-import { MediaThumbIcon } from "@/components/ui/media-thumb";
+import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
+import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
+import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
+import { MarqueeText } from "@/components/ui/texts/marquee-text";
+import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
+import { useGridView } from "@/hooks/use-grid-view";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { getExtension } from "@/lib/utils/filename";
-import { formatBytes } from "@/lib/utils/formatter";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shadcn/components/ui/table";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import React, { useMemo } from "react";
 import { toast } from "sonner";
 
-export function ExplorerListView({
+export function GridView({
   allNodes,
   onOpen,
   onSelect,
@@ -35,38 +26,59 @@ export function ExplorerListView({
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
 }) {
+  const { containerRef, columnCount, getTotalHeight, getRows, getCellItem } =
+    useGridView(allNodes);
+
   return (
-    <div className="w-full h-full">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead></TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Updated</TableHead>
-            <TableHead>Size</TableHead>
-            <TableHead>Last Viewed</TableHead>
-            <TableHead>Favorite</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {allNodes.map((node, index) => (
-            <RowItem
-              key={node.path}
-              node={node}
-              allNodes={allNodes}
-              index={index}
-              onOpen={onOpen}
-              onSelect={onSelect}
-            />
-          ))}
-        </TableBody>
-      </Table>
+    <div ref={containerRef} className="w-full h-full flex flex-col">
+      {/* グリッド */}
+      <div
+        style={{
+          height: `${getTotalHeight()}px`,
+          width: "100%",
+          position: "relative",
+        }}
+      >
+        {/* 行 */}
+        {getRows().map((row) => (
+          <div
+            key={row.key}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: `${row.size}px`,
+              transform: `translateY(${row.start}px)`,
+              display: "grid",
+              gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
+            }}
+          >
+            {/* セル */}
+            {Array.from({ length: columnCount }).map((_, colIndex) => {
+              const node = getCellItem(row.index, colIndex);
+              const globalIndex = row.index * columnCount + colIndex; // 全体でのインデックス
+              return (
+                node && (
+                  <Cell
+                    key={node.path}
+                    node={node}
+                    index={globalIndex}
+                    allNodes={allNodes}
+                    onOpen={onOpen}
+                    onSelect={onSelect}
+                  />
+                )
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-function RowItem({
+function Cell({
   node,
   index,
   allNodes,
@@ -99,6 +111,7 @@ function RowItem({
     }
   };
 
+  // 選択
   const {
     isSelectionMode,
     isPathSelected,
@@ -237,66 +250,81 @@ function RowItem({
   } = useLongPress(handleLongPress, 600);
 
   return (
-    <TableRow
-      onMouseDown={startLongPress}
-      onMouseUp={stopLongPress}
-      onMouseLeave={stopLongPress}
-      onTouchStart={startLongPress}
-      onTouchEnd={stopLongPress}
-      onTouchMove={stopLongPress} // スクロール時に長押しをキャンセル
-      onClick={isMobile ? handleTap : handleClick}
-      onDoubleClick={isMobile ? undefined : handleDoubleClick}
-      className={cn(
-        "select-none cursor-pointer transition-colors",
-        selected
-          ? "bg-primary/10 hover:bg-primary/20"
-          : "hover:bg-muted/50 active:bg-muted"
-      )}
-    >
-      <TableCell>
-        <div className={cn("transition-opacity")}>
+    <div className="w-full h-full p-1">
+      <div
+        className={cn(
+          "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
+          "select-none",
+          selected
+            ? "ring-2 ring-primary border-transparent"
+            : "hover:border-primary/50"
+        )}
+        onMouseDown={startLongPress}
+        onMouseUp={stopLongPress}
+        onMouseLeave={stopLongPress}
+        onTouchStart={startLongPress}
+        onTouchEnd={stopLongPress}
+        onTouchMove={stopLongPress} // スクロール時に長押しをキャンセル
+        onClick={isMobile ? handleTap : handleClick}
+        onDoubleClick={isMobile ? undefined : handleDoubleClick}
+      >
+        {/* サムネイル */}
+        <MediaThumb
+          node={node}
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        />
+
+        {/* 選択チェックボックス */}
+        <div
+          className={cn(
+            "absolute top-2 left-2 transition-opacity",
+            isSelectionMode
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100"
+          )}
+        >
           <Checkbox
             checked={selected}
             onCheckedChange={handleCheckedChange}
             onClick={(e) => e.stopPropagation()}
-            disabled={!isMedia(node.type)}
+            disabled={!isMediaNode}
           />
         </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <MediaThumbIcon type={node.type} className="w-6 h-6" />
-          <span className="truncate">{node.title ?? node.name}</span>
-        </div>
-      </TableCell>
-      <TableCell>
-        {node.isDirectory
-          ? "folder"
-          : getExtension(node.name, { withDot: false, case: "lower" })}
-      </TableCell>
-      <TableCell>
-        <LocalDateValue value={node.mtime} />
-      </TableCell>
-      <TableCell>{formatBytes(node.size)}</TableCell>
-      <TableCell>
-        {node.isDirectory && (
-          <FolderStatusBadge date={node.lastViewedAt} className="border-none" />
-        )}
-      </TableCell>
-      <TableCell>
-        {node.isDirectory ? (
-          <FavoriteCountBadge
-            count={node.favoriteCount ?? 0}
-            className="border-none"
+
+        {/* テキストオーバーレイ */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+          <MarqueeText
+            text={node.title ?? node.name}
+            className="text-center text-[10px] leading-tight text-white"
           />
-        ) : (
+        </div>
+
+        {/* お気に入りボタン */}
+        {!isSelectionMode && isMediaNode && (
           <FavoriteButton
-            variant="list"
+            variant="grid"
             active={favorite}
             onClick={handleToggleFavorite}
+            className="absolute top-1 right-1"
           />
         )}
-      </TableCell>
-    </TableRow>
+
+        {/* ステータスバッジ */}
+        {node.isDirectory && (
+          <FolderStatusBadge
+            date={node.lastViewedAt}
+            className="absolute top-1 right-1"
+          />
+        )}
+
+        {/* お気に入り数バッジ */}
+        {node.isDirectory && (
+          <FavoriteCountBadge
+            count={node.favoriteCount ?? 0}
+            className="absolute top-1 left-1"
+          />
+        )}
+      </div>
+    </div>
   );
 }

@@ -2,12 +2,13 @@
 
 import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
-import { ExplorerGridView } from "@/components/ui/explorer-grid-view";
-import { ExplorerListView } from "@/components/ui/explorer-list-view";
-import { MediaViewer } from "@/components/ui/media-viewer";
-import { SelectionBar } from "@/components/ui/selection-bar";
-import { TagEditSheet } from "@/components/ui/tag-edit-sheet";
-import { TagFilterBar } from "@/components/ui/tag-filter-bar";
+import { SelectionBar } from "@/components/ui/bars/selection-bar";
+import { TagFilterBar } from "@/components/ui/bars/tag-filter-bar";
+import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
+import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
+import { MediaViewer } from "@/components/ui/viewers/media-viewer";
+import { GridView } from "@/components/ui/views/grid-view";
+import { ListView } from "@/components/ui/views/list-view";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
@@ -16,7 +17,11 @@ import {
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { FavoritesRecord } from "@/lib/favorite/types";
-import { createSearchFilter, createTagFilter } from "@/lib/media/filters";
+import {
+  createFavoriteFilter,
+  createSearchFilter,
+  createTagFilter,
+} from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
 import { sortNames } from "@/lib/media/sort";
 import {
@@ -24,6 +29,7 @@ import {
   MediaNodeFilter,
   MediaPathToIndexMap,
 } from "@/lib/media/types";
+import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { unique } from "@/lib/utils/unique";
@@ -35,12 +41,20 @@ import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import { TagIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, TagIcon } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-export function FavoritesExplorer() {
-  const { listing, openViewer, closeViewer, openFolder } = useExplorerContext();
+export function Explorer() {
+  const {
+    listing,
+    openViewer,
+    closeViewer,
+    openFolder,
+    openNextFolder,
+    openPrevFolder,
+  } = useExplorerContext();
 
   // ===== URL ステート =====
 
@@ -81,6 +95,10 @@ export function FavoritesExplorer() {
   // フィルタリング対象タグ
   const { selectedTags, selectTags } = useTagFilter();
 
+  // お気に入りフィルタ有効フラグ
+  const [favoriteFilter, setFavoriteFilter] = useState(false);
+  const toggleFavoriteFilter = () => setFavoriteFilter((prev) => !prev);
+
   const filteredNodes = useMemo(() => {
     const { nodes: allNodes } = listing;
 
@@ -88,6 +106,7 @@ export function FavoritesExplorer() {
     const filters: MediaNodeFilter[] = [
       createSearchFilter(query),
       createTagFilter(Array.from(selectedTags)),
+      createFavoriteFilter(favoriteFilter),
     ];
 
     // 2. フィルタの適用
@@ -101,7 +120,7 @@ export function FavoritesExplorer() {
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, query, selectedTags]);
+  }, [listing, query, selectedTags, favoriteFilter]);
 
   // ビューアや選択機能で使う「メディアのみ」のリストは filteredNodes から抽出
   const mediaOnly = useMemo(
@@ -131,8 +150,8 @@ export function FavoritesExplorer() {
     [mediaOnly]
   );
 
-  // ビューア用インデックスを取得
-  const getMediaIndex = useCallback(
+  // ビューアのインデックスを取得
+  const getViewerIndex = useCallback(
     (path: string) => {
       if (viewerIndexMap.has(path)) return viewerIndexMap.get(path)!;
       return null;
@@ -140,7 +159,6 @@ export function FavoritesExplorer() {
     [viewerIndexMap]
   );
 
-  // ビューア用インデックス
   const viewerIndex = useMemo(
     () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
     [at, mediaOnly.length]
@@ -168,7 +186,7 @@ export function FavoritesExplorer() {
     }
 
     if (isMedia(node.type)) {
-      const index = getMediaIndex(node.path);
+      const index = getViewerIndex(node.path);
       if (index == null) return;
       openViewer(index);
       return;
@@ -288,17 +306,27 @@ export function FavoritesExplorer() {
       )}
     >
       <FavoritesProvider favorites={favorites}>
-        {/* タグフィルター */}
-        <TagFilterBar
-          tags={allTags}
-          selectedTags={selectedTags}
-          onApply={selectTags}
-        />
+        <div className="flex items-center gap-2">
+          {/* タグフィルター */}
+          <TagFilterBar
+            tags={allTags}
+            selectedTags={selectedTags}
+            onApply={selectTags}
+          />
+
+          {/* お気に入りフィルター */}
+          <FavoriteFilterButton
+            isActive={favoriteFilter}
+            onClick={toggleFavoriteFilter}
+            showCount
+            count={mediaOnly.length}
+          />
+        </div>
 
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div>
-            <ExplorerGridView
+            <GridView
               allNodes={filteredNodes}
               onOpen={handleOpen}
               onSelect={handleSelect}
@@ -309,7 +337,7 @@ export function FavoritesExplorer() {
         {/* リストビュー */}
         {viewMode === "list" && (
           <div>
-            <ExplorerListView
+            <ListView
               allNodes={filteredNodes}
               onOpen={handleOpen}
               onSelect={handleSelect}
@@ -355,12 +383,58 @@ export function FavoritesExplorer() {
               initialIndex={viewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
-              onOpenFolder={openFolder}
+              onPrevFolder={() => openPrevFolder("last")}
+              onNextFolder={() => openNextFolder("first")}
               onTags={handleToggleTagEditor}
             />
           </ScrollLockProvider>
         )}
       </FavoritesProvider>
+
+      {/* フォルダナビゲーション */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">
+        {/* 前のフォルダ */}
+        <div className="w-full sm:flex-1">
+          {listing.prev && (
+            <Button
+              variant="outline"
+              className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
+              asChild
+            >
+              <Link href={encodeURI(getClientExplorerPath(listing.prev))}>
+                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                  <ArrowLeft className="mr-1 h-3 w-3" />
+                  Previous
+                </div>
+                <div className="text-base font-medium truncate w-full text-left">
+                  {listing.prev.split("/").filter(Boolean).pop()}
+                </div>
+              </Link>
+            </Button>
+          )}
+        </div>
+
+        {/* 次のフォルダ */}
+        <div className="w-full sm:flex-1 flex justify-end">
+          {listing.next && (
+            <Button
+              variant="outline"
+              className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
+              asChild
+            >
+              <Link href={encodeURI(getClientExplorerPath(listing.next))}>
+                <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
+                  Next
+                  <ArrowRight className="ml-1 h-3 w-3" />
+                </div>
+                <div className="text-base font-medium truncate w-full text-right">
+                  {listing.next.split("/").filter(Boolean).pop()}
+                </div>
+              </Link>
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
