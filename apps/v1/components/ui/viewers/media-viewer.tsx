@@ -37,10 +37,12 @@ import Link from "next/link";
 import path from "path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import "swiper/css";
-import "swiper/css/virtual";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+
+import "swiper/css";
+import "swiper/css/virtual";
+import "swiper/css/zoom";
 
 const prevFolderNav = { type: "nav_prev", path: "prev-loader" } as const;
 const nextFolderNav = { type: "nav_next", path: "next-loader" } as const;
@@ -151,6 +153,22 @@ export function MediaViewer({
     }
     if (hasNext && vIdx === allSlides.length - 1) {
       onNextFolder("first");
+    }
+  };
+
+  // マウスホイールイベントでズームを制御する関数
+  const handleWheel = (e: React.WheelEvent) => {
+    const swiper = swiperRef.current;
+    if (!swiper?.zoom) return;
+
+    const currentScale = swiper.zoom.scale;
+    const delta = e.deltaY < 0 ? 0.2 : -0.2;
+    const newScale = Math.min(Math.max(currentScale + delta, 1), 3);
+
+    if (newScale === 1) {
+      swiper.zoom.out();
+    } else {
+      swiper.zoom.in(newScale);
     }
   };
 
@@ -325,6 +343,7 @@ export function MediaViewer({
               key={slide.path}
               virtualIndex={i}
               className="flex items-center justify-center"
+              onWheel={handleWheel}
             >
               <div className="w-full h-full flex items-center justify-center">
                 {slide === prevFolderNav || slide === nextFolderNav ? (
