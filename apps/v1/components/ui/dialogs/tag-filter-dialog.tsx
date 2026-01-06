@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shadcn/components/ui/dialog";
+import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
 import { ListFilter, RotateCcw, X } from "lucide-react";
 import { useState } from "react";
@@ -59,7 +60,13 @@ export function TagFilterDialog({
   const hasSelection = selectedTags.size > 0;
 
   const mounted = useMounted();
-  if (!mounted) return;
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-2 py-2">
+        <Skeleton className="h-9 w-[140px] rounded-md" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2 py-2">
