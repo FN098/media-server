@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma"; // Prismaクライアントのパス
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
+import { revalidateTag } from "next/cache";
 
 export async function updateMediaTagsAction(payload: {
   mediaPaths: string[];
@@ -72,6 +73,8 @@ export async function updateMediaTagsAction(payload: {
       }
     });
 
+    revalidateTag("tags", "max");
+
     return { success: true };
   } catch (error) {
     console.error("Failed to update tags:", error);
@@ -92,6 +95,9 @@ export async function createTagAction(name: string) {
       update: {}, // 存在すれば何もしない
       create: { name: normalizedName },
     });
+
+    revalidateTag("tags", "max");
+
     return { success: true, tag };
   } catch (error) {
     console.error("Create tag error:", error);
@@ -135,6 +141,8 @@ export async function createTagsAction(
     const tags = await prisma.tag.findMany({
       where: { name: { in: normalizedNames } },
     });
+
+    revalidateTag("tags", "max");
 
     return { success: true, tags };
   } catch (error) {

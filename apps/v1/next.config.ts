@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     ],
   },
   output: "standalone",
+  cacheComponents: true,
 };
 
 export default nextConfig;

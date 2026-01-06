@@ -16,9 +16,6 @@ interface FavoritePageProps {
   }>;
 }
 
-// 動的ページとしてレンダリング
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: `Favorites | ${APP_CONFIG.meta.title}`,
 };

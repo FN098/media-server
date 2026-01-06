@@ -15,6 +15,7 @@ import {
 } from "@/repositories/folder-repository";
 import { getDbMedia } from "@/repositories/media-repository";
 import { Metadata } from "next";
+import { cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 
 interface ExplorerPageProps {
@@ -24,9 +25,6 @@ interface ExplorerPageProps {
     order?: SortOrderOf<MediaFsNode>;
   }>;
 }
-
-// 動的ページとしてレンダリング
-export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
   props: ExplorerPageProps
@@ -41,12 +39,36 @@ export async function generateMetadata(
   };
 }
 
+async function getCachedDbMedia(dirPath: string, userId: string) {
+  "use cache";
+  cacheTag("media", "tags", "favorites");
+  return getDbMedia(dirPath, userId);
+}
+
+async function getCachedDbFavoriteCount(dirPaths: string[], userId: string) {
+  "use cache";
+  cacheTag("favorites");
+  return getDbFavoriteCount(dirPaths, userId);
+}
+
+async function getCachedDbVisitedInfoDeeply(
+  dirPaths: string[],
+  userId: string
+) {
+  "use cache";
+  cacheTag("folders");
+  return getDbVisitedInfoDeeply(dirPaths, userId);
+}
+
 export default async function Page(props: ExplorerPageProps) {
   const {
     path: pathParts = [],
     sort: sortKey = "name",
     order: sortOrder = "asc",
   } = await props.params;
+
+  // TODO: ユーザー認証機能実装後に差し替える
+  const userId = USER;
 
   const currentDirPath = pathParts.map(decodeURIComponent).join("/");
 
@@ -64,13 +86,13 @@ export default async function Page(props: ExplorerPageProps) {
 
   const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
 
-  // DB クエリ
-  // TODO: ユーザー認証機能実装後に差し替える
   await syncMediaDir(currentDirPath, allNodes); // TODO: クローラーワーカージョブに移動
+
+  // DB クエリ
   const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
-    getDbMedia(currentDirPath, USER),
-    getDbVisitedInfoDeeply(dirPaths, USER),
-    getDbFavoriteCount(dirPaths, USER),
+    getCachedDbMedia(currentDirPath, userId),
+    getCachedDbVisitedInfoDeeply(dirPaths, userId),
+    getCachedDbFavoriteCount(dirPaths, userId),
   ]);
 
   // マージ

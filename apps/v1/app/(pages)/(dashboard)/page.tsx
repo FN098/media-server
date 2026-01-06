@@ -9,8 +9,6 @@ import Link from "next/link";
 
 const RECENT_FOLDERS_LIMIT = 10;
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: `Dashboard | ${APP_CONFIG.meta.title}`,
 };
