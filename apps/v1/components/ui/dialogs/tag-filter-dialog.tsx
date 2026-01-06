@@ -1,5 +1,4 @@
-"use client";
-
+import { useMounted } from "@/hooks/use-mounted";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -58,6 +57,9 @@ export function TagFilterDialog({
   };
 
   const hasSelection = selectedTags.size > 0;
+
+  const mounted = useMounted();
+  if (!mounted) return;
 
   return (
     <div className="flex items-center gap-2 py-2">
