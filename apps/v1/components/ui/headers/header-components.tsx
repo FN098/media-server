@@ -7,6 +7,7 @@ import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
+import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -51,6 +52,10 @@ export function HeaderSearch() {
   const [focused, setFocused] = useState(false);
   const isMobile = useIsMobile();
 
+  const placeholder = isMobile ? "" : undefined;
+  const collapsedWidth = isMobile ? 36 : 180;
+  const expandedWidth = isMobile ? 180 : 320;
+
   const debouncedSetQuery = useDebouncedCallback(
     (v: string) => setQuery(v),
     300
@@ -72,16 +77,29 @@ export function HeaderSearch() {
   return (
     <motion.div
       initial={{ width: 180 }}
-      animate={{ width: focused ? 320 : 180 }}
+      animate={{
+        width: focused ? expandedWidth : collapsedWidth,
+        zIndex: focused ? 50 : 1,
+      }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className="relative shrink-0"
+      className="relative shrink-0 w-full"
+      style={{ maxWidth: isMobile ? "calc(100vw - 2rem)" : "none" }}
     >
       <Search
+        placeholder={placeholder}
         inputRef={inputRef}
         value={input}
         setValue={setInput}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        className={cn(
+          "transition-all",
+          focused
+            ? "pl-9"
+            : isMobile
+              ? "pl-0 border-transparent bg-transparent shadow-none"
+              : "pl-9"
+        )}
       />
       <AnimatePresence>
         {!focused && !isMobile && (
