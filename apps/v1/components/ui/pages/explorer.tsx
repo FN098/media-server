@@ -418,8 +418,8 @@ export function Explorer() {
               initialIndex={viewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
-              onPrevFolder={() => openPrevFolder("last")}
-              onNextFolder={() => openNextFolder("first")}
+              onPrevFolder={(at) => openPrevFolder(at ?? "last")}
+              onNextFolder={(at) => openNextFolder(at ?? "first")}
               onTags={handleToggleTagEditor}
             />
           </ScrollLockProvider>

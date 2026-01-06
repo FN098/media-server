@@ -12,7 +12,7 @@ import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { getClientExplorerPath, getParentDirPath } from "@/lib/path/helpers";
+import { getParentDirPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import {
@@ -26,6 +26,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
   Folder,
+  FolderInput,
+  FolderOutput,
   Loader2,
   Maximize,
   MoreVertical,
@@ -33,8 +35,6 @@ import {
   PinOff,
   TagIcon,
 } from "lucide-react";
-import Link from "next/link";
-import path from "path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
@@ -86,17 +86,17 @@ export function MediaViewer({
   const swiperRef = useRef<SwiperClass | null>(null);
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
 
-  const hasPrev = !!onPrevFolder;
-  const hasNext = !!onNextFolder;
-  const offsetPrev = hasPrev ? 1 : 0;
+  const hasPrevFolder = !!onPrevFolder;
+  const hasNextFolder = !!onNextFolder;
+  const offsetPrev = hasPrevFolder ? 1 : 0;
 
   // 仮想スライド
   const allSlides = useMemo(() => {
     const slides: Slide[] = [...allNodes];
-    if (hasPrev) slides.unshift(prevFolderNav); // 先頭: 前のフォルダ
-    if (hasNext) slides.push(nextFolderNav); // 末尾: 次のフォルダ
+    if (hasPrevFolder) slides.unshift(prevFolderNav); // 先頭: 前のフォルダ
+    if (hasNextFolder) slides.push(nextFolderNav); // 末尾: 次のフォルダ
     return slides;
-  }, [allNodes, hasPrev, hasNext]);
+  }, [allNodes, hasPrevFolder, hasNextFolder]);
 
   // 仮想スライドインデックス
   const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
@@ -128,7 +128,10 @@ export function MediaViewer({
 
   // 現在のファイルが存在するフォルダを開く
   const handleOpenFolder = () => {
-    onOpenFolder?.(getParentDirPath(allNodes[index].path));
+    if (onOpenFolder) {
+      const parentDir = getParentDirPath(allNodes[index].path);
+      onOpenFolder(parentDir);
+    }
   };
 
   // インデックス変更確定
@@ -148,10 +151,10 @@ export function MediaViewer({
 
     commitIndex(itemIdx, vIdx);
 
-    if (hasPrev && vIdx === 0) {
+    if (hasPrevFolder && vIdx === 0) {
       onPrevFolder("last");
     }
-    if (hasNext && vIdx === allSlides.length - 1) {
+    if (hasNextFolder && vIdx === allSlides.length - 1) {
       onNextFolder("first");
     }
   };
@@ -183,8 +186,8 @@ export function MediaViewer({
     { key: "s", callback: () => void handleToggleFavorite() },
     { key: "d", callback: () => swiperRef.current?.slideNext() },
     { key: "f", callback: () => toggleFullscreen() },
-    { key: "p", callback: () => onPrevFolder?.() },
-    { key: "n", callback: () => onNextFolder?.() },
+    { key: "p", callback: () => onPrevFolder?.("first") },
+    { key: "n", callback: () => onNextFolder?.("first") },
     { key: "o", callback: () => handleOpenFolder() },
     {
       key: "h",
@@ -275,22 +278,38 @@ export function MediaViewer({
                   className="flex flex-col w-48 gap-2"
                 >
                   {onOpenFolder && (
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={getClientExplorerPath(
-                          path.dirname(allNodes[index].path)
-                        )}
-                      >
-                        <Folder className="mr-2 h-4 w-4" />
-                        <span>フォルダを開く</span>
-                        {!isMobile && (
-                          <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                            <kbd className="rounded border px-1.5 py-0.5">
-                              O
-                            </kbd>
-                          </div>
-                        )}
-                      </Link>
+                    <DropdownMenuItem onClick={() => handleOpenFolder()}>
+                      <Folder className="mr-2 h-4 w-4" />
+                      <span>フォルダを開く</span>
+                      {!isMobile && (
+                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                          <kbd className="rounded border px-1.5 py-0.5">O</kbd>
+                        </div>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+
+                  {onPrevFolder && (
+                    <DropdownMenuItem onClick={() => onPrevFolder("first")}>
+                      <FolderOutput className="mr-2 h-4 w-4" />
+                      <span>前のフォルダを開く</span>
+                      {!isMobile && (
+                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                          <kbd className="rounded border px-1.5 py-0.5">P</kbd>
+                        </div>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+
+                  {onNextFolder && (
+                    <DropdownMenuItem onClick={() => onNextFolder("first")}>
+                      <FolderInput className="mr-2 h-4 w-4" />
+                      <span>次のフォルダを開く</span>
+                      {!isMobile && (
+                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                          <kbd className="rounded border px-1.5 py-0.5">N</kbd>
+                        </div>
+                      )}
                     </DropdownMenuItem>
                   )}
 
