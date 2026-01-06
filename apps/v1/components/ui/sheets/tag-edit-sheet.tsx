@@ -166,31 +166,40 @@ export function TagEditSheet({
   return (
     <AnimatePresence>
       {active && (
-        <div className="fixed inset-0 z-[70] pointer-events-none flex flex-col justify-end">
+        <>
           {/* 暗転オーバーレイ */}
           {isEditing && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 pointer-events-auto"
+              className="fixed inset-0 z-[60] bg-black/40" // z-indexをエディターより下にする
               onClick={handleTerminate}
             />
           )}
 
-          {/* メインエディター */}
+          {/* メインコンテナ */}
           <motion.div
             layout
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            initial={{ y: "100%", x: "-50%" }} // 画面下からスライドイン
+            animate={{ y: 0, x: "-50%" }}
+            exit={{ y: "100%", x: "-50%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className={cn(
-              "relative w-full bg-background border-t rounded-t-[24px] shadow-2xl pointer-events-auto pb-safe overflow-hidden",
-              isTransparent && "bg-background/20"
+              "fixed bottom-0 left-1/2 z-[70]",
+              "w-full max-w-md",
+              "pointer-events-auto",
+              "bg-background border rounded-t-[24px] pb-safe overflow-hidden",
+              isTransparent && "bg-background/20 backdrop-blur-xs"
             )}
           >
-            <div className="w-12 h-1.5 bg-muted/20 rounded-full mx-auto mt-3 mb-2" />
+            {/* ハンドル（つまみ） */}
+            <div
+              className={cn(
+                "w-12 h-1.5 bg-muted rounded-full mx-auto mt-3 mb-2",
+                isTransparent && "bg-muted/20"
+              )}
+            />
 
             <div className="px-4 pb-6">
               <AnimatePresence mode="wait">
@@ -270,7 +279,7 @@ export function TagEditSheet({
               </AnimatePresence>
             </div>
           </motion.div>
-        </div>
+        </>
       )}
     </AnimatePresence>
   );
@@ -322,8 +331,7 @@ function SheetHeader({
           variant="ghost"
           className={cn(
             "h-10 w-10 p-0 rounded-full",
-            isTransparent &&
-              "text-primary-foreground bg-background/20 hover:bg-accent"
+            isTransparent && "bg-background/20 hover:bg-accent"
           )}
           onClick={onToggleTransparent}
         >
@@ -331,22 +339,14 @@ function SheetHeader({
         </Button>
         <div>
           <div className="flex items-center gap-2">
-            <h3
-              className={cn(
-                "text-sm font-bold",
-                isTransparent && "text-primary-foreground"
-              )}
-            >
-              {title}
-            </h3>
+            <h3 className={cn("text-sm font-bold")}>{title}</h3>
             {!isEditing && (
               <Button
                 size="sm"
                 variant="ghost"
                 className={cn(
                   "text-primary hover:bg-primary/5 p-1 rounded-md transition-colors ml-2",
-                  isTransparent &&
-                    "text-primary-foreground bg-background/20 hover:bg-accent"
+                  isTransparent && "bg-background/20 hover:bg-accent"
                 )}
                 onClick={onEditClick}
               >
@@ -354,14 +354,7 @@ function SheetHeader({
               </Button>
             )}
           </div>
-          <p
-            className={cn(
-              "text-[10px] text-muted-foreground",
-              isTransparent && "text-primary-foreground"
-            )}
-          >
-            {selection}
-          </p>
+          <p className={cn("text-[10px] text-muted-foreground")}>{selection}</p>
         </div>
       </div>
 
@@ -370,8 +363,7 @@ function SheetHeader({
         variant="ghost"
         className={cn(
           "h-10 w-10 p-0 rounded-full",
-          isTransparent &&
-            "text-primary-foreground bg-background/20 hover:bg-accent"
+          isTransparent && "bg-background/20 hover:bg-accent"
         )}
         onClick={onClose}
       >
