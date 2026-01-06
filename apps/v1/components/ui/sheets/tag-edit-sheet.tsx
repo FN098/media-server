@@ -195,12 +195,12 @@ export function TagEditSheet({
                 handleEdit();
               }
             }}
-            initial={{ y: "100%", x: "-50%" }}
-            animate={{ y: 0, x: "-50%" }}
-            exit={{ y: "100%", x: "-50%" }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className={cn(
-              "fixed bottom-0 left-1/2 z-[70]",
+              "fixed bottom-0 left-1/2 -translate-x-1/2 z-[70]",
               "w-full max-w-md",
               "pointer-events-auto select-none",
               "bg-background border-x rounded-t-[24px] pb-safe overflow-visible",
