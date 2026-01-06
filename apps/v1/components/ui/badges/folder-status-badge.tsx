@@ -13,14 +13,20 @@ export const FolderStatusBadge = ({
   className?: string;
 }) => {
   const mounted = useMounted();
-  if (!mounted) return <Skeleton />;
+  if (!mounted) {
+    return (
+      <Skeleton
+        className={cn("h-5 w-[72px] rounded-sm bg-muted border", className)}
+      />
+    );
+  }
 
   if (!date) {
     return (
       <div
         className={cn(
           "flex items-center gap-1 bg-yellow-500 text-black font-bold px-2 py-0.5 rounded-sm text-[10px] shadow-sm animate-pulse w-fit",
-          className // ここで absolute などを流し込む
+          className
         )}
       >
         <Sparkles size={10} fill="currentColor" />
@@ -37,7 +43,7 @@ export const FolderStatusBadge = ({
   const isRecent = diffInDays < 1;
   const colorClass = isRecent
     ? "bg-blue-500 text-white"
-    : "bg-muted text-muted-foreground border"; // テーブル用に少しマイルドな色に変更
+    : "bg-muted text-muted-foreground border";
 
   return (
     <div
