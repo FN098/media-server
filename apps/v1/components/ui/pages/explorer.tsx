@@ -341,7 +341,7 @@ export function Explorer() {
       )}
     >
       <FavoritesProvider favorites={favorites}>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1 pb-2">
           {/* タグフィルター */}
           <TagFilterDialog
             tags={allTags}
