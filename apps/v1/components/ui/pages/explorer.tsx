@@ -43,7 +43,7 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowLeft, ArrowRight, TagIcon } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function Explorer() {
@@ -167,7 +167,18 @@ export function Explorer() {
   );
 
   // ビューア起動モード
-  const isViewMode = modal && viewerIndex != null && mediaOnly[viewerIndex];
+  const isViewMode = modal && viewerIndex != null && !!mediaOnly[viewerIndex];
+
+  // 直前のインデックスを記憶するためのRef
+  const lastViewerIndexRef = useRef<number | null>(null);
+
+  // TODO: handleViewerIndexChange に処理移動
+  // viewerIndexが変わるたびにRefを更新しておく
+  useEffect(() => {
+    if (viewerIndex !== null) {
+      lastViewerIndexRef.current = viewerIndex;
+    }
+  }, [viewerIndex]);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
@@ -178,6 +189,31 @@ export function Explorer() {
     selectPaths([media.path]);
     exitSelectionMode();
   };
+
+  // TODO: handleCloseViewer にする
+  // ビューアが閉じられた瞬間にスクロールを実行
+  useEffect(() => {
+    debugger;
+    // isViewModeがfalseになった、かつ直前のインデックスがある場合
+    if (!isViewMode && lastViewerIndexRef.current !== null) {
+      const index = lastViewerIndexRef.current;
+
+      // 次のレンダリングサイクルで実行するためにsetTimeoutを使用
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`media-item-${index}`);
+        if (element) {
+          element.scrollIntoView({
+            behavior: "smooth", // または "auto"
+            block: "center", // 画面中央に来るように調整
+          });
+        }
+        // スクロール後はRefをクリア（任意）
+        lastViewerIndexRef.current = null;
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isViewMode]);
 
   // ===== ナビゲーション =====
 

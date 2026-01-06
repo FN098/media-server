@@ -252,13 +252,7 @@ function Cell({
   return (
     <div className="w-full h-full p-1">
       <div
-        className={cn(
-          "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
-          "select-none",
-          selected
-            ? "ring-2 ring-primary border-transparent"
-            : "hover:border-primary/50"
-        )}
+        id={`media-item-${index}`}
         onMouseDown={startLongPress}
         onMouseUp={stopLongPress}
         onMouseLeave={stopLongPress}
@@ -267,6 +261,13 @@ function Cell({
         onTouchMove={stopLongPress} // スクロール時に長押しをキャンセル
         onClick={isMobile ? handleTap : handleClick}
         onDoubleClick={isMobile ? undefined : handleDoubleClick}
+        className={cn(
+          "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
+          "select-none",
+          selected
+            ? "ring-2 ring-primary border-transparent"
+            : "hover:border-primary/50"
+        )}
       >
         {/* サムネイル */}
         <MediaThumb

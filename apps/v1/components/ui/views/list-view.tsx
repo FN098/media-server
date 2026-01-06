@@ -238,6 +238,7 @@ function RowItem({
 
   return (
     <TableRow
+      id={`media-item-${index}`}
       onMouseDown={startLongPress}
       onMouseUp={stopLongPress}
       onMouseLeave={stopLongPress}
