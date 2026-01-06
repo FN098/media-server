@@ -190,7 +190,7 @@ function RowItem({
 
   // タップ（モバイル用）
   const handleTap = (e: React.MouseEvent) => {
-    if (!isMediaNode || isLongPressed || !isMobile) return;
+    if (isLongPressed || !isMobile) return;
 
     e.preventDefault();
 
