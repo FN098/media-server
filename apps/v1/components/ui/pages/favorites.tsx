@@ -159,7 +159,6 @@ export function FavoritesExplorer() {
 
     // 選択状態の更新
     selectPaths([media.path]);
-    if (isSelectionMode) exitSelectionMode();
 
     // インデックス位置を覚えておく
     if (index !== null) {
@@ -246,19 +245,19 @@ export function FavoritesExplorer() {
   // 全選択
   const handleSelectAll = () => {
     selectPaths(mediaOnly.map((n) => n.path));
-    if (!isSelectionMode) enterSelectionMode();
+    enterSelectionMode();
   };
 
   // 選択解除
   const handleClearSelection = () => {
     clearSelection();
-    if (isSelectionMode) exitSelectionMode();
+    exitSelectionMode();
   };
 
   // 選択バー閉じる
   const handleCloseSelectionBar = () => {
     clearSelection();
-    if (isSelectionMode) exitSelectionMode();
+    exitSelectionMode();
   };
 
   // ===== タグエディタ =====
