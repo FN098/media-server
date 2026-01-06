@@ -145,13 +145,13 @@ export function Explorer() {
 
   // ===== ビューア =====
 
-  // ビューアのインデックスを計算するためのマップ
+  // ビューア用インデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
     () => new Map(mediaOnly.map((n, index) => [n.path, index])),
     [mediaOnly]
   );
 
-  // ビューアのインデックスを取得
+  // ビューア用インデックスを取得
   const getViewerIndex = useCallback(
     (path: string) => {
       if (viewerIndexMap.has(path)) return viewerIndexMap.get(path)!;
@@ -160,7 +160,7 @@ export function Explorer() {
     [viewerIndexMap]
   );
 
-  // ビューアのインデックス
+  // ビューア用インデックス
   const viewerIndex = useMemo(
     () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
     [at, mediaOnly.length]
@@ -187,8 +187,7 @@ export function Explorer() {
     }
   };
 
-  // TODO: handleCloseViewer にする
-  // ビューアが閉じられた瞬間にスクロールを実行
+  // ビューアが閉じられた瞬間にスクロールを実行（ブラウザバック、閉じるボタン両方対応）
   useEffect(() => {
     // isViewModeがfalseになった、かつ直前のインデックスがある場合
     if (!isViewMode && lastViewerIndexRef.current !== null) {
