@@ -358,7 +358,7 @@ export function Explorer() {
         </div>
 
         {/* グリッドビュー */}
-        {viewMode === "grid" && (
+        {viewMode === "grid" && !isViewMode && (
           <div>
             <GridView
               allNodes={filteredNodes}
@@ -369,7 +369,7 @@ export function Explorer() {
         )}
 
         {/* リストビュー */}
-        {viewMode === "list" && (
+        {viewMode === "list" && !isViewMode && (
           <div>
             <ListView
               allNodes={filteredNodes}
