@@ -35,7 +35,7 @@ import {
   PinOff,
   TagIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
@@ -69,8 +69,12 @@ export function MediaViewer({
   onTags?: () => void;
 }) {
   const isMobile = useIsMobile();
+  const { toggleFullscreen } = useFullscreen();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
-  const [index, setIndex] = useState(initialIndex);
+  const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
+  const [currentNode, setCurrentNode] = useState<MediaNode | null>(
+    allNodes[initialIndex] ?? null
+  );
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHeaderPinned, setIsHeaderPinned] = useState(false);
@@ -82,7 +86,6 @@ export function MediaViewer({
     duration: 2000,
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
-  const { toggleFullscreen } = useFullscreen();
   const swiperRef = useRef<SwiperClass | null>(null);
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
 
@@ -98,20 +101,19 @@ export function MediaViewer({
     return slides;
   }, [allNodes, hasPrevFolder, hasNextFolder]);
 
-  // 仮想スライドインデックス
-  const [vindex, setVIndex] = useState(initialIndex + offsetPrev);
-
   // タイトル設定
   const { setTitle } = useDocumentTitleControl();
-  useEffect(() => {
-    const { title, name } = allNodes[index];
+  const updateTitle = (node: MediaNode) => {
+    const { title, name } = node;
     setTitle(`${title ?? name} | ${APP_CONFIG.meta.title}`);
-  }, [index, allNodes, setTitle]);
+  };
 
   // お気に入りボタンクリック時の処理
   const handleToggleFavorite = async () => {
     try {
-      const nextIsFavorite = await toggleFavorite(allNodes[index].path);
+      if (!currentNode) return;
+
+      const nextIsFavorite = await toggleFavorite(currentNode.path);
       if (nextIsFavorite === undefined) return;
 
       const message = nextIsFavorite
@@ -129,33 +131,33 @@ export function MediaViewer({
   // 現在のファイルが存在するフォルダを開く
   const handleOpenFolder = () => {
     if (onOpenFolder) {
-      const parentDir = getParentDirPath(allNodes[index].path);
+      if (!currentNode) return;
+      const parentDir = getParentDirPath(currentNode.path);
       onOpenFolder(parentDir);
     }
   };
 
-  // インデックス変更確定
-  const commitIndex = (itemIdx: number, vIdx: number) => {
-    setIndex(itemIdx);
-    setVIndex(vIdx);
-    onIndexChange(itemIdx); // 親に通知
-  };
-
   // スワイプ時の移動処理
   const handleSwipe = (swiper: SwiperClass) => {
-    const vIdx = swiper.activeIndex;
-    const itemIdx = Math.max(
-      0,
-      Math.min(vIdx - offsetPrev, allNodes.length - 1)
-    );
+    const index = swiper.activeIndex - offsetPrev;
 
-    commitIndex(itemIdx, vIdx);
-
-    if (hasPrevFolder && vIdx === 0) {
+    if (hasPrevFolder && index < 0) {
       onPrevFolder("last");
+      return;
     }
-    if (hasNextFolder && vIdx === allSlides.length - 1) {
+
+    if (hasNextFolder && index > allSlides.length - 1) {
       onNextFolder("first");
+      return;
+    }
+
+    // 状態更新
+    const node = allNodes[index];
+    if (node) {
+      setCurrentIndex(index);
+      setCurrentNode(node);
+      updateTitle(node);
+      onIndexChange(index); // 親に通知
     }
   };
 
@@ -232,15 +234,15 @@ export function MediaViewer({
             <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0">
               <span className="text-white md:text-lg font-medium drop-shadow-md">
                 <MarqueeText
-                  key={index}
-                  text={allNodes[index].title ?? allNodes[index].name}
+                  key={currentIndex}
+                  text={currentNode?.title ?? currentNode?.name ?? "no title"}
                   autoplay={isMobile}
                   speed={40}
                   delay={1}
                 />
               </span>
               <span className="text-white/60 text-sm">
-                {index + 1} / {allNodes.length}
+                {currentIndex + 1} / {allNodes.length}
               </span>
             </div>
 
@@ -254,10 +256,10 @@ export function MediaViewer({
               </button>
 
               {/* お気に入りボタン */}
-              {isMedia(allNodes[index].type) && (
+              {!!currentNode && isMedia(currentNode.type) && (
                 <FavoriteButton
                   variant="viewer"
-                  active={isFavorite(allNodes[index].path)}
+                  active={!!currentNode && isFavorite(currentNode.path)}
                   onClick={() => void handleToggleFavorite()}
                 />
               )}
@@ -343,7 +345,7 @@ export function MediaViewer({
       <Swiper
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         modules={[Virtual, Navigation, Zoom]}
-        initialSlide={vindex}
+        initialSlide={initialIndex + offsetPrev}
         onSlideChange={handleSwipe}
         virtual={{
           enabled: true,
@@ -356,7 +358,7 @@ export function MediaViewer({
         className="h-full w-full"
       >
         {allSlides.map((slide, i) => {
-          const active = index === i - offsetPrev;
+          const active = currentIndex === i - offsetPrev;
           return (
             <SwiperSlide
               key={slide.path}
