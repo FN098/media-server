@@ -224,6 +224,11 @@ export function Explorer() {
     return result;
   }, [mediaOnlyMap, selectedPaths]);
 
+  // 選択
+  const handleSelect = useCallback(() => {
+    // setIsTagEditorOpen(true);
+  }, []);
+
   // 全選択
   const handleSelectAll = () => {
     selectPaths(mediaOnly.map((n) => n.path));
@@ -241,11 +246,6 @@ export function Explorer() {
     clearSelection();
     exitSelectionMode();
   };
-
-  // 選択時にタグエディタを起動
-  const handleSelect = useCallback(() => {
-    setIsTagEditorOpen(true);
-  }, []);
 
   // ===== タグエディタ =====
 
