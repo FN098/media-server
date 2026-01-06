@@ -17,17 +17,20 @@ import { getDbMedia } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-type Props = {
+interface ExplorerPageProps {
   params: Promise<{
     path?: string[];
     sort?: SortKeyOf<MediaFsNode>;
     order?: SortOrderOf<MediaFsNode>;
   }>;
-};
+}
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
+// 動的ページとしてレンダリング
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata(
+  props: ExplorerPageProps
+): Promise<Metadata> {
   const { path: pathParts = [] } = await props.params;
 
   const lastPart = pathParts[pathParts.length - 1] ?? "HOME";
@@ -38,7 +41,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page(props: Props) {
+export default async function Page(props: ExplorerPageProps) {
   const {
     path: pathParts = [],
     sort: sortKey = "name",
