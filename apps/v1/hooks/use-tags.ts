@@ -15,7 +15,7 @@ export function useTags(params: SearchTagsRequestParams) {
       if (!res.ok) throw new Error("Failed to fetch tags");
       return res.json() as Promise<Tag[]>;
     },
-    staleTime: 1000 * 60 * 5, // 5分間はキャッシュを利用
+    // staleTime: 1000 * 60 * 5, // 5分間はキャッシュを利用
     placeholderData: keepPreviousData,
   });
 
