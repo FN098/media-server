@@ -9,19 +9,19 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { Filter, X } from "lucide-react";
 
-interface TagFilterBarProps {
+interface TagFilterAccordionProps {
   tags: string[];
   selectedTags: Set<string>;
   onToggle: (tag: string) => void;
   onClear: () => void;
 }
 
-export function TagFilterBar({
+export function TagFilterAccordion({
   tags,
   selectedTags,
   onToggle,
   onClear,
-}: TagFilterBarProps) {
+}: TagFilterAccordionProps) {
   if (tags.length === 0) return null;
 
   const hasSelection = selectedTags.size > 0;

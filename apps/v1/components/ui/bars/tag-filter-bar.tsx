@@ -1,148 +1,69 @@
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shadcn/components/ui/dialog";
 import { cn } from "@/shadcn/lib/utils";
-import { ListFilter, RotateCcw, X } from "lucide-react";
-import { useState } from "react";
+import { RotateCcw, X } from "lucide-react";
 
 interface TagFilterBarProps {
   tags: string[];
   selectedTags: Set<string>;
-  onApply: (tags: Set<string>) => void;
+  onToggle: (tag: string) => void;
+  onClear: () => void;
 }
 
 export function TagFilterBar({
   tags,
   selectedTags,
-  onApply,
+  onToggle,
+  onClear,
 }: TagFilterBarProps) {
-  const [tempSelected, setTempSelected] = useState<Set<string>>(
-    new Set(selectedTags)
-  );
-  const [open, setOpen] = useState(false);
-
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      // 開く瞬間に、親の最新状態でローカルステートを上書き
-      setTempSelected(new Set(selectedTags));
-    }
-    setOpen(nextOpen);
-  };
-
-  const handleToggle = (tag: string) => {
-    const next = new Set(tempSelected);
-    if (next.has(tag)) {
-      next.delete(tag);
-    } else {
-      next.add(tag);
-    }
-    setTempSelected(next);
-  };
-
-  const handleClear = () => {
-    setTempSelected(new Set());
-  };
-
-  const handleApply = () => {
-    onApply(tempSelected);
-    setOpen(false); // モーダルを閉じる
-  };
+  if (tags.length === 0) return null;
 
   const hasSelection = selectedTags.size > 0;
 
   return (
-    <div className="flex items-center gap-2 py-2">
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
+    <div className="flex flex-col gap-4 py-2">
+      {/* タグ一覧 */}
+      <div className="flex flex-wrap gap-2">
+        {tags.map((tag) => {
+          const isSelected = selectedTags.has(tag);
+          return (
+            <Badge
+              key={tag}
+              variant={isSelected ? "default" : "secondary"}
+              className={cn(
+                "cursor-pointer px-3 py-1 transition-all",
+                isSelected
+                  ? "ring-2 ring-primary ring-offset-1"
+                  : "hover:bg-secondary/80"
+              )}
+              onClick={() => onToggle(tag)}
+            >
+              {tag}
+              {isSelected && <X className="ml-1.5 h-3 w-3" />}
+            </Badge>
+          );
+        })}
+      </div>
+
+      {/* フィルターの状態表示とリセットボタン */}
+      {hasSelection && (
+        <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50 border border-dashed animate-in fade-in slide-in-from-top-1">
+          <div className="text-sm text-muted-foreground ml-2">
+            <span className="font-medium text-foreground">
+              {selectedTags.size}
+            </span>
+            個のタグで絞り込み中
+          </div>
           <Button
             variant="outline"
             size="sm"
-            className={cn(
-              "gap-2 h-9 transition-colors",
-              hasSelection &&
-                "border-primary bg-primary/5 text-primary hover:bg-primary/10"
-            )}
+            onClick={onClear}
+            className="h-8 gap-2 shadow-sm"
           >
-            <ListFilter className="h-4 w-4" />
-            <span>タグで絞り込む</span>
-            {hasSelection && (
-              <Badge
-                variant="default"
-                className="ml-1 px-1.5 h-5 min-w-[20px] justify-center"
-              >
-                {selectedTags.size}
-              </Badge>
-            )}
+            <RotateCcw className="h-3.5 w-3.5" />
+            フィルターをリセット
           </Button>
-        </DialogTrigger>
-
-        <DialogContent className="sm:max-w-[450px] h-[500px] flex flex-col p-0 overflow-hidden">
-          <DialogHeader className="p-6 pb-2">
-            <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
-              タグを選択
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto border-t border-b border-transparent">
-            {tags.map((tag) => {
-              const isSelected = tempSelected.has(tag);
-              return (
-                <Badge
-                  key={tag}
-                  variant={isSelected ? "default" : "secondary"}
-                  className={cn(
-                    "cursor-pointer px-4 h-9 text-sm transition-all select-none border-transparent inline-flex items-center justify-center",
-                    isSelected
-                      ? "ring-2 ring-primary shadow-sm"
-                      : "hover:bg-secondary/80"
-                  )}
-                  onClick={() => handleToggle(tag)}
-                >
-                  {tag}
-                  {isSelected && <X className="ml-2 h-3.5 w-3.5" />}
-                </Badge>
-              );
-            })}
-          </div>
-
-          <DialogFooter className="flex flex-row items-center justify-between p-6 bg-muted/20">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClear}
-              disabled={tempSelected.size === 0}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-            >
-              <RotateCcw className="mr-2 h-3.5 w-3.5" />
-              選択を解除
-            </Button>
-
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleApply}
-              className="px-8 shadow-md"
-            >
-              決定
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      {hasSelection && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onApply(new Set())}
-          className="h-8 text-xs text-muted-foreground hover:text-destructive"
-        >
-          リセット
-        </Button>
+        </div>
       )}
     </div>
   );

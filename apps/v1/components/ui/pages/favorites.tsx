@@ -3,7 +3,7 @@
 import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { TagFilterBar } from "@/components/ui/bars/tag-filter-bar";
+import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { GridView } from "@/components/ui/views/grid-view";
@@ -290,7 +290,7 @@ export function FavoritesExplorer() {
     >
       <FavoritesProvider favorites={favorites}>
         {/* タグフィルター */}
-        <TagFilterBar
+        <TagFilterDialog
           tags={allTags}
           selectedTags={selectedTags}
           onApply={selectTags}

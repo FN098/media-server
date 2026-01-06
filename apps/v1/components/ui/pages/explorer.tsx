@@ -3,8 +3,8 @@
 import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { TagFilterBar } from "@/components/ui/bars/tag-filter-bar";
 import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
+import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { GridView } from "@/components/ui/views/grid-view";
@@ -172,14 +172,6 @@ export function Explorer() {
   // 直前のインデックスを記憶するためのRef
   const lastViewerIndexRef = useRef<number | null>(null);
 
-  // TODO: handleViewerIndexChange に処理移動
-  // viewerIndexが変わるたびにRefを更新しておく
-  useEffect(() => {
-    if (viewerIndex !== null) {
-      lastViewerIndexRef.current = viewerIndex;
-    }
-  }, [viewerIndex]);
-
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
     const media = mediaOnly[index];
@@ -188,12 +180,16 @@ export function Explorer() {
     // 選択状態の更新
     selectPaths([media.path]);
     exitSelectionMode();
+
+    // インデックス位置を覚えておく
+    if (index !== null) {
+      lastViewerIndexRef.current = index;
+    }
   };
 
   // TODO: handleCloseViewer にする
   // ビューアが閉じられた瞬間にスクロールを実行
   useEffect(() => {
-    debugger;
     // isViewModeがfalseになった、かつ直前のインデックスがある場合
     if (!isViewMode && lastViewerIndexRef.current !== null) {
       const index = lastViewerIndexRef.current;
@@ -348,7 +344,7 @@ export function Explorer() {
       <FavoritesProvider favorites={favorites}>
         <div className="flex items-center gap-2">
           {/* タグフィルター */}
-          <TagFilterBar
+          <TagFilterDialog
             tags={allTags}
             selectedTags={selectedTags}
             onApply={selectTags}
