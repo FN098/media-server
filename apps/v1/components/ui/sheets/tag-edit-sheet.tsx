@@ -203,7 +203,7 @@ export function TagEditSheet({
               "fixed bottom-0 left-1/2 -translate-x-1/2 z-[70]",
               "w-full max-w-md",
               "pointer-events-auto select-none",
-              "bg-background border-x rounded-t-[24px] pb-safe overflow-visible",
+              "bg-background border border-b-0 rounded-t-[24px] pb-safe overflow-visible",
               isTransparent && "bg-background/20 backdrop-blur-xs"
             )}
           >
