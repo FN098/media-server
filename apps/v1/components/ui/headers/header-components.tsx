@@ -76,7 +76,7 @@ export function HeaderSearch() {
 
   return (
     <motion.div
-      initial={{ width: 180 }}
+      initial={{ width: collapsedWidth }}
       animate={{
         width: focused ? expandedWidth : collapsedWidth,
         zIndex: focused ? 50 : 1,
