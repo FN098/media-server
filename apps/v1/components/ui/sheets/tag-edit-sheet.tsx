@@ -271,12 +271,13 @@ export function TagEditSheet({
                       />
                       <TagInput
                         value={editor.newTagName}
-                        onChange={editor.setNewTagName}
-                        onAdd={() => handleNewAdd(editor.newTagName)}
+                        isTransparent={isTransparent}
                         disabled={isLoading}
                         suggestions={editor.suggestedTags}
+                        onChange={editor.setNewTagName}
+                        onAdd={() => handleNewAdd(editor.newTagName)}
                         onSelectSuggestion={editor.selectSuggestion}
-                        isTransparent={isTransparent}
+                        onApply={() => void handleApply()}
                       />
                       <TagList
                         isEditing={true}
@@ -403,20 +404,22 @@ function SheetHeader({
 
 function TagInput({
   value,
-  onChange,
-  onAdd,
+  isTransparent,
   disabled,
   suggestions,
+  onChange,
+  onAdd,
   onSelectSuggestion,
-  isTransparent,
+  onApply,
 }: {
   value: string;
-  onChange: (val: string) => void;
-  onAdd: () => void;
+  isTransparent: boolean;
   disabled: boolean;
   suggestions: Tag[];
+  onChange: (val: string) => void;
+  onAdd: () => void;
   onSelectSuggestion: (tag: Tag) => void;
-  isTransparent: boolean;
+  onApply: () => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggests = useMemo(
@@ -437,7 +440,10 @@ function TagInput({
             if (e.key === "Enter" && !e.nativeEvent.isComposing) {
               e.preventDefault();
 
-              if (!value.trim()) return;
+              // 何も入力されていない場合は確定操作とみなす
+              if (!value.trim()) {
+                onApply();
+              }
 
               const normalized = normalizeTagName(value);
 
