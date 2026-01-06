@@ -2,7 +2,7 @@ import {
   HeaderNavigation,
   HeaderSearch,
   HeaderViewModeSwitch,
-} from "@/components/ui/headers/header-client-components";
+} from "@/components/ui/headers/header-components";
 import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-sidebar";
 
 type HeaderFeatures = {
