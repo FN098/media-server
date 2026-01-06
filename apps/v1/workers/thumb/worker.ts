@@ -18,7 +18,8 @@ export const startThumbWorker = () => {
 
       // 発行から時間が経ちすぎたジョブは処理せず破棄
       if (Date.now() - createdAt > EXPIRE_MS) {
-        console.log("Job expired, skipping...");
+        console.log(`[Job ${job.id}] expired, removing`);
+        await job.remove();
         return;
       }
 
@@ -28,43 +29,49 @@ export const startThumbWorker = () => {
           if (!dirPath)
             throw new Error("dirPath is required for create-thumbs");
 
-          console.log(`[Job ${job.id}] Batch Processing: ${dirPath}`);
-          const nodes = await getMediaFsNodes(dirPath);
+          try {
+            console.log(`[Job ${job.id}] Batch Processing: ${dirPath}`);
+            const nodes = await getMediaFsNodes(dirPath);
 
-          // 名前順（表示順）に処理するためにソート
-          const sorted = sortMediaFsNodes(nodes);
+            // 名前順（表示順）に処理するためにソート
+            const sorted = sortMediaFsNodes(nodes);
 
-          // 1. チャンク分けして処理（例: 10枚ずつ）
-          const chunks = chunk(sorted, 10);
-          let completed = 0;
-          for (const chunk of chunks) {
-            // サムネイル作成（このチャンク分が完了するまで待つ）
-            await createThumbsIfNotExists(chunk);
+            // 1. チャンク分けして処理（例: 10枚ずつ）
+            const chunks = chunk(sorted, 10);
+            let completed = 0;
+            for (const chunk of chunks) {
+              // サムネイル作成（このチャンク分が完了するまで待つ）
+              await createThumbsIfNotExists(chunk);
 
-            // 2. 通知は「待たずに」実行。ただしエラーハンドリングはしておく
-            Promise.all(
-              chunk.map((node) =>
-                connection.publish(
-                  "thumb-completed",
-                  JSON.stringify({ filePath: node.path })
+              // 2. 通知は「待たずに」実行。ただしエラーハンドリングはしておく
+              Promise.all(
+                chunk.map((node) =>
+                  connection.publish(
+                    "thumb-completed",
+                    JSON.stringify({ filePath: node.path })
+                  )
                 )
-              )
-            ).catch((err) => console.error("Publish error:", err));
+              ).catch((err) => console.error("Publish error:", err));
 
-            completed += chunk.length;
-            console.log(
-              `[Job ${job.id}] Progress: ${completed}/${nodes.length}`
+              completed += chunk.length;
+              console.log(
+                `[Job ${job.id}] Progress: ${completed}/${nodes.length}`
+              );
+            }
+
+            // 3. 最後にディレクトリ単位での完了通知を発行（念のためのバックアップ）
+            await connection.publish(
+              "thumb-completed",
+              JSON.stringify({ dirPath })
             );
+
+            console.log(`[Job ${job.id}] Notified completion for: ${dirPath}`);
+            break;
+          } finally {
+            if (job.data.lockKey) {
+              await connection.del(job.data.lockKey);
+            }
           }
-
-          // 3. 最後にディレクトリ単位での完了通知を発行（念のためのバックアップ）
-          await connection.publish(
-            "thumb-completed",
-            JSON.stringify({ dirPath })
-          );
-
-          console.log(`[Job ${job.id}] Notified completion for: ${dirPath}`);
-          break;
         }
 
         // ファイル単位でサムネイル作成
@@ -72,18 +79,24 @@ export const startThumbWorker = () => {
           if (!filePath)
             throw new Error("filePath is required for create-thumb-single");
 
-          console.log(`[Job ${job.id}] Single Processing: ${filePath}`);
-          const node = await getMediaFsNode(filePath);
-          await createThumbsIfNotExists([node]);
+          try {
+            console.log(`[Job ${job.id}] Single Processing: ${filePath}`);
+            const node = await getMediaFsNode(filePath);
+            await createThumbsIfNotExists([node]);
 
-          // 完了通知イベントを発行
-          await connection.publish(
-            "thumb-completed",
-            JSON.stringify({ filePath })
-          );
+            // 完了通知イベントを発行
+            await connection.publish(
+              "thumb-completed",
+              JSON.stringify({ filePath })
+            );
 
-          console.log(`[Job ${job.id}] Notified completion for: ${filePath}`);
-          break;
+            console.log(`[Job ${job.id}] Notified completion for: ${filePath}`);
+            break;
+          } finally {
+            if (job.data.lockKey) {
+              await connection.del(job.data.lockKey);
+            }
+          }
         }
 
         default:
