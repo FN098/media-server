@@ -68,10 +68,16 @@ export function MediaViewer({
   onPrevFolder?: (at?: IndexLike) => void;
   onTags?: () => void;
 }) {
+  const hasPrevFolder = !!onPrevFolder;
+  const hasNextFolder = !!onNextFolder;
+  const offsetPrev = hasPrevFolder ? 1 : 0;
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(
+    initialIndex + offsetPrev
+  );
   const [currentNode, setCurrentNode] = useState<MediaNode | null>(
     allNodes[initialIndex] ?? null
   );
@@ -88,10 +94,6 @@ export function MediaViewer({
   });
   const swiperRef = useRef<SwiperClass | null>(null);
   const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
-
-  const hasPrevFolder = !!onPrevFolder;
-  const hasNextFolder = !!onNextFolder;
-  const offsetPrev = hasPrevFolder ? 1 : 0;
 
   // 仮想スライド
   const allSlides = useMemo(() => {
@@ -139,19 +141,20 @@ export function MediaViewer({
 
   // スワイプ時の移動処理
   const handleSwipe = (swiper: SwiperClass) => {
-    const index = swiper.activeIndex - offsetPrev;
+    setCurrentSlideIndex(swiper.activeIndex);
 
-    if (hasPrevFolder && index < 0) {
+    const slide = allSlides[swiper.activeIndex];
+    if (!!onPrevFolder && slide === prevFolderNav) {
       onPrevFolder("last");
       return;
     }
-
-    if (hasNextFolder && index > allSlides.length - 1) {
+    if (!!onNextFolder && slide === nextFolderNav) {
       onNextFolder("first");
       return;
     }
 
     // 状態更新
+    const index = swiper.activeIndex - offsetPrev;
     const node = allNodes[index];
     if (node) {
       setCurrentIndex(index);
@@ -358,7 +361,10 @@ export function MediaViewer({
         className="h-full w-full"
       >
         {allSlides.map((slide, i) => {
-          const active = currentIndex === i - offsetPrev;
+          const active = currentSlideIndex === i;
+          const isPrevFolder = slide === prevFolderNav;
+          const isNextFolder = slide === nextFolderNav;
+
           return (
             <SwiperSlide
               key={slide.path}
@@ -367,14 +373,12 @@ export function MediaViewer({
               onWheel={handleWheel}
             >
               <div className="w-full h-full flex items-center justify-center">
-                {slide === prevFolderNav || slide === nextFolderNav ? (
+                {isPrevFolder || isNextFolder ? (
                   // 次・前のフォルダ
                   <div className="flex flex-col items-center justify-center text-white/50">
                     <Loader2 className="animate-spin mb-4" size={48} />
                     <p>
-                      {slide === prevFolderNav
-                        ? "前のフォルダへ..."
-                        : "次のフォルダへ..."}
+                      {isPrevFolder ? "前のフォルダへ..." : "次のフォルダへ..."}
                     </p>
                   </div>
                 ) : slide.type === "image" ? (
