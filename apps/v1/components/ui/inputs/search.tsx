@@ -1,23 +1,23 @@
 import { Input } from "@/shadcn/components/ui/input";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { SearchIcon } from "lucide-react";
-import { RefObject, useState } from "react";
+import { RefObject } from "react";
 
 export function Search({
-  inputRef,
   value,
   setValue,
   className,
+  inputRef,
+  onFocus,
+  onBlur,
 }: {
-  inputRef: RefObject<HTMLInputElement | null>;
   value: string;
   setValue: (value: string) => void;
   className?: string;
+  inputRef?: RefObject<HTMLInputElement | null>;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
-  const isMobile = useIsMobile();
-  const [focused, setFocused] = useState(false);
-
   return (
     <div className="relative group">
       <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -26,19 +26,12 @@ export function Search({
         ref={inputRef}
         type="search"
         placeholder="Search…"
-        className={cn("w-48 pl-9", className)}
+        className={cn("w-full pl-9", className)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onFocus={onFocus}
+        onBlur={onBlur}
       />
-
-      {!focused && !isMobile && (
-        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-          <kbd className="rounded border px-1.5 py-0.5">Ctrl</kbd>
-          <kbd className="rounded border px-1.5 py-0.5">K</kbd>
-        </div>
-      )}
     </div>
   );
 }

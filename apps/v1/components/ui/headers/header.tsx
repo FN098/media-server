@@ -4,7 +4,6 @@ import {
   HeaderViewModeSwitch,
 } from "@/components/ui/headers/header-client-components";
 import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-sidebar";
-import { Separator } from "@/shadcn/components/ui/separator";
 
 type HeaderFeatures = {
   navigation?: boolean;
@@ -38,9 +37,6 @@ export function Header({
 
         <div className="ml-auto flex items-center gap-2">
           {search && <HeaderSearch />}
-          {search && viewMode && (
-            <Separator orientation="vertical" className="h-6" />
-          )}
           {viewMode && <HeaderViewModeSwitch />}
         </div>
       </div>
