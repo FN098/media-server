@@ -263,20 +263,18 @@ export function FavoritesExplorer() {
 
   // ===== タグエディタ =====
 
-  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false); // TODO: URLパラメータ tag=true
-
-  const isTagEditorOpenEffective = isTagEditorOpen && selectedCount > 0;
-
+  // TODO: URLパラメータ tag=true を追加し、リロード時やページ遷移時にタグエディタの起動状態を保持
+  const [isTagEditMode, setIsTagEditMode] = useState(false);
+  const isTagEditorOpen = isTagEditMode && selectedCount > 0;
+  const isSelectionBarOpen = isSelectionMode && !isTagEditorOpen;
   const handleOpenTagEditor = () => {
-    setIsTagEditorOpen(true);
+    setIsTagEditMode(true);
   };
-
   const handleCloseTagEditor = () => {
-    setIsTagEditorOpen(false);
+    setIsTagEditMode(false);
   };
-
   const handleToggleTagEditor = () => {
-    setIsTagEditorOpen((prev) => !prev);
+    setIsTagEditMode((prev) => !prev);
   };
 
   // タグエディタの起動モード
@@ -316,8 +314,8 @@ export function FavoritesExplorer() {
       className={cn(
         "flex-1 overflow-auto",
         viewMode === "grid" && "p-4",
-        viewMode === "list" && "px-4",
-        isTagEditorOpenEffective && "mb-[150px]"
+        viewMode === "list" && "px-4"
+        // isTagEditorOpen && "mb-[150px]"
       )}
     >
       <FavoritesProvider favorites={favorites}>
@@ -351,10 +349,10 @@ export function FavoritesExplorer() {
         )}
 
         {/* タグエディター */}
-        {isTagEditorOpenEffective && (
+        {isTagEditorOpen && (
           <TagEditSheet
             targetNodes={selected}
-            active={isTagEditorOpen}
+            active={isTagEditMode}
             onClose={handleCloseTagEditor}
             mode={tagEditMode}
             transparent={tagEditMode === "single"}
@@ -362,7 +360,7 @@ export function FavoritesExplorer() {
         )}
 
         {/* 選択バー */}
-        {isSelectionMode && (
+        {isSelectionBarOpen && (
           <SelectionBar
             count={selected.length}
             totalCount={mediaOnly.length}
