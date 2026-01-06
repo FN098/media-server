@@ -20,10 +20,10 @@ export function sortNames(names: string[]): string[] {
   return [...names].sort((a, b) => collator.compare(a, b));
 }
 
-export function sortMediaFsNodes(
-  nodes: MediaFsNode[],
-  options: SortOptions<MediaFsNode> = { key: "name", order: "asc" }
-): MediaFsNode[] {
+export function sortMediaFsNodes<T extends MediaFsNode>(
+  nodes: T[],
+  options: SortOptions<T>
+): T[] {
   const { key = "name", order = "asc" } = options;
   const modifier = order === "asc" ? 1 : -1;
 
@@ -35,7 +35,7 @@ export function sortMediaFsNodes(
 
     // 2. 指定されたキーで比較
     if (key === "name" || key === "path") {
-      return collator.compare(a[key], b[key]) * modifier;
+      return collator.compare(String(a[key]), String(b[key])) * modifier;
     }
 
     const valA = a[key] ?? 0;
