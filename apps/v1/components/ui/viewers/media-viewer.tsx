@@ -204,11 +204,14 @@ export function MediaViewer({
   ]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden touch-none bg-black"
-      onMouseMove={interactHeader}
-      onPointerDown={interactHeader}
-    >
+    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black">
+      {/* ヘッダーエリア（インタラクション検知用） */}
+      <div
+        className="absolute top-0 left-0 right-0 h-24 z-40"
+        onMouseMove={interactHeader}
+        onPointerDown={interactHeader}
+      />
+
       {/* ヘッダー */}
       <AnimatePresence>
         {isHeaderVisible && (
