@@ -1,5 +1,6 @@
 import { AnimatedCheckCircle } from "@/components/ui/icons/animated-check-circle";
 import { Button } from "@/shadcn/components/ui/button";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -22,6 +23,7 @@ export function SelectionBar({
   active,
 }: SelectionBarProps) {
   const isAllSelected = count > 0 && count === totalCount;
+  const isMobile = useIsMobile();
 
   return (
     <AnimatePresence>
@@ -49,7 +51,7 @@ export function SelectionBar({
             <div className="flex-1 text-center">
               <span className="text-sm font-bold">{count}</span>
               <span className="text-[10px] text-muted-foreground ml-1">
-                項目を選択
+                {isMobile ? "項目" : "項目を選択"}
               </span>
             </div>
 
