@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -38,6 +38,7 @@ export function TagEditSheet({
 }) {
   const router = useRouter();
   const editor = useTagEditor(targetNodes);
+  const controls = useDragControls();
 
   // 編集モード
   const [isEditing, setIsEditing] = useState(edit ?? false);
@@ -79,7 +80,7 @@ export function TagEditSheet({
   };
 
   // 編集
-  const handleEditClick = () => {
+  const handleEdit = () => {
     setIsEditing(true);
   };
 
@@ -173,7 +174,7 @@ export function TagEditSheet({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-black/40" // z-indexをエディターより下にする
+              className="fixed inset-0 z-[60] bg-black/40"
               onClick={handleTerminate}
             />
           )}
@@ -182,111 +183,128 @@ export function TagEditSheet({
           <motion.div
             layout
             drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }} // 基本位置から離れないように制約
-            dragElastic={0.2} // 引っ張った時の抵抗感
+            dragControls={controls}
+            dragListener={false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
             onDragEnd={(_, info) => {
-              // 300px/s 以上の速さでスワイプするか、100px 以上下に動かしたら閉じる
               if (info.velocity.y > 300 || info.offset.y > 100) {
                 handleTerminate();
               }
+              if (info.velocity.y < -300 || info.offset.y < -100) {
+                handleEdit();
+              }
             }}
-            initial={{ y: "100%", x: "-50%" }} // 画面下からスライドイン
+            initial={{ y: "100%", x: "-50%" }}
             animate={{ y: 0, x: "-50%" }}
             exit={{ y: "100%", x: "-50%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className={cn(
               "fixed bottom-0 left-1/2 z-[70]",
               "w-full max-w-md",
-              "touch-none",
-              "pointer-events-auto",
-              "bg-background border rounded-t-[24px] pb-safe overflow-hidden",
-              isTransparent && "bg-background/20 backdrop-blur-md"
+              "pointer-events-auto select-none",
+              "bg-background border-x rounded-t-[24px] pb-safe overflow-visible",
+              isTransparent && "bg-background/20 backdrop-blur-xs"
             )}
           >
-            {/* ハンドル（つまみ） */}
-            <div
-              className={cn(
-                "w-12 h-1.5 bg-muted rounded-full mx-auto mt-3 mb-2",
-                isTransparent && "bg-muted/20"
-              )}
-            />
+            <div className="relative rounded-t-[24px] pb-safe">
+              {/* ハンドル（つまみ） */}
+              <div
+                className="w-full pt-4 pb-2 cursor-grab active:cursor-grabbing touch-none"
+                onPointerDown={(e) => controls.start(e)}
+              >
+                <div
+                  className={cn(
+                    "w-12 h-1.5 bg-muted rounded-full mx-auto",
+                    isTransparent && "bg-muted/40"
+                  )}
+                />
+              </div>
 
-            <div className="px-4 pb-6">
-              <AnimatePresence mode="wait">
-                {!isEditing ? (
-                  /* --- 閲覧ビュー --- */
-                  <motion.div
-                    key="view-mode"
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="space-y-4"
-                  >
-                    <SheetHeader
-                      mode={mode}
-                      isEditing={false}
-                      isTransparent={isTransparent}
-                      count={targetNodes.length}
-                      onClose={handleTerminate}
-                      onToggleTransparent={toggleIsTransparent}
-                      onEditClick={handleEditClick}
-                    />
-                    <TagList
-                      isEditing={false}
-                      tags={editor.viewModeTags}
-                      pendingChanges={editor.pendingChanges}
-                      pendingNewTags={editor.pendingNewTags}
-                      tagStates={editor.tagStates}
-                      onToggle={editor.toggleTagChange}
-                      isTransparent={isTransparent}
-                    />
-                  </motion.div>
-                ) : (
-                  /* --- 編集ビュー --- */
-                  <motion.div
-                    key="edit-mode"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    className="space-y-4"
-                  >
-                    <SheetHeader
-                      mode={mode}
-                      isEditing={true}
-                      count={targetNodes.length}
-                      onEditClick={() => {}}
-                      onClose={handleTerminate}
-                      isTransparent={isTransparent}
-                      onToggleTransparent={toggleIsTransparent}
-                    />
-                    <TagInput
-                      value={editor.newTagName}
-                      onChange={editor.setNewTagName}
-                      onAdd={() => handleNewAdd(editor.newTagName)}
-                      disabled={isLoading}
-                      suggestions={editor.suggestedTags}
-                      onSelectSuggestion={editor.selectSuggestion}
-                      isTransparent={isTransparent}
-                    />
-                    <TagList
-                      isEditing={true}
-                      tags={editor.editModeTags}
-                      pendingChanges={editor.pendingChanges}
-                      pendingNewTags={editor.pendingNewTags}
-                      tagStates={editor.tagStates}
-                      onToggle={editor.toggleTagChange}
-                      isTransparent={isTransparent}
-                    />
-                    <SheetFooter
-                      onReset={editor.resetChanges}
-                      onApply={() => void handleApply()}
-                      hasChanges={editor.hasChanges}
-                      isLoading={isLoading}
-                      isTransparent={isTransparent}
-                    />
-                  </motion.div>
+              <div className="px-4 pb-6 overflow-y-auto max-h-[85vh]">
+                <AnimatePresence mode="wait">
+                  {!isEditing ? (
+                    /* --- 閲覧ビュー --- */
+                    <motion.div
+                      key="view-mode"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className="space-y-4"
+                    >
+                      <SheetHeader
+                        mode={mode}
+                        isEditing={false}
+                        isTransparent={isTransparent}
+                        count={targetNodes.length}
+                        onClose={handleTerminate}
+                        onToggleTransparent={toggleIsTransparent}
+                        onEditClick={handleEdit}
+                      />
+                      <TagList
+                        isEditing={false}
+                        tags={editor.viewModeTags}
+                        pendingChanges={editor.pendingChanges}
+                        pendingNewTags={editor.pendingNewTags}
+                        tagStates={editor.tagStates}
+                        onToggle={editor.toggleTagChange}
+                        isTransparent={isTransparent}
+                      />
+                    </motion.div>
+                  ) : (
+                    /* --- 編集ビュー --- */
+                    <motion.div
+                      key="edit-mode"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      className="space-y-4"
+                    >
+                      <SheetHeader
+                        mode={mode}
+                        isEditing={true}
+                        count={targetNodes.length}
+                        onEditClick={() => {}}
+                        onClose={handleTerminate}
+                        isTransparent={isTransparent}
+                        onToggleTransparent={toggleIsTransparent}
+                      />
+                      <TagInput
+                        value={editor.newTagName}
+                        onChange={editor.setNewTagName}
+                        onAdd={() => handleNewAdd(editor.newTagName)}
+                        disabled={isLoading}
+                        suggestions={editor.suggestedTags}
+                        onSelectSuggestion={editor.selectSuggestion}
+                        isTransparent={isTransparent}
+                      />
+                      <TagList
+                        isEditing={true}
+                        tags={editor.editModeTags}
+                        pendingChanges={editor.pendingChanges}
+                        pendingNewTags={editor.pendingNewTags}
+                        tagStates={editor.tagStates}
+                        onToggle={editor.toggleTagChange}
+                        isTransparent={isTransparent}
+                      />
+                      <SheetFooter
+                        onReset={editor.resetChanges}
+                        onApply={() => void handleApply()}
+                        hasChanges={editor.hasChanges}
+                        isLoading={isLoading}
+                        isTransparent={isTransparent}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div
+                className={cn(
+                  "absolute top-[100%] left-[-1px] right-[-1px] h-[300px] border-x bg-background",
+                  isTransparent && "bg-background/20 backdrop-blur-xs"
                 )}
-              </AnimatePresence>
+              />
             </div>
           </motion.div>
         </>
