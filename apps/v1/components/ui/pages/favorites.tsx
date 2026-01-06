@@ -36,7 +36,7 @@ import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { TagIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function FavoritesExplorer() {
@@ -71,7 +71,7 @@ export function FavoritesExplorer() {
     if (Object.keys(patch).length === 0) return;
 
     setExplorerQuery(patch);
-  }, [q, query, setExplorerQuery, view, viewMode]);
+  }, [setExplorerQuery, q, query, view, viewMode]);
 
   // クエリパラメータ正規化
   useNormalizeExplorerQuery();
@@ -125,7 +125,7 @@ export function FavoritesExplorer() {
 
   // ===== ビューア =====
 
-  // ビューアのインデックスを計算するためのマップ
+  // ビューア用インデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
     () => new Map(mediaOnly.map((n, index) => [n.path, index])),
     [mediaOnly]
@@ -146,7 +146,11 @@ export function FavoritesExplorer() {
     [at, mediaOnly.length]
   );
 
-  const isViewMode = modal && viewerIndex != null && mediaOnly[viewerIndex];
+  // ビューア起動モード
+  const isViewMode = modal && viewerIndex != null && !!mediaOnly[viewerIndex];
+
+  // 直前のインデックスを記憶するためのRef
+  const lastViewerIndexRef = useRef<number | null>(null);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
@@ -156,7 +160,35 @@ export function FavoritesExplorer() {
     // 選択状態の更新
     selectPaths([media.path]);
     exitSelectionMode();
+
+    // インデックス位置を覚えておく
+    if (index !== null) {
+      lastViewerIndexRef.current = index;
+    }
   };
+
+  // ビューアが閉じられた瞬間にスクロールを実行（ブラウザバック、閉じるボタン両方対応）
+  useEffect(() => {
+    // isViewModeがfalseになった、かつ直前のインデックスがある場合
+    if (!isViewMode && lastViewerIndexRef.current !== null) {
+      const index = lastViewerIndexRef.current;
+
+      // 次のレンダリングサイクルで実行するためにsetTimeoutを使用
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`media-item-${index}`);
+        if (element) {
+          element.scrollIntoView({
+            behavior: "smooth", // または "auto"
+            block: "center", // 画面中央に来るように調整
+          });
+        }
+        // スクロール後はRefをクリア（任意）
+        lastViewerIndexRef.current = null;
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isViewMode]);
 
   // ===== ナビゲーション =====
 
