@@ -22,9 +22,9 @@ export function sortNames(names: string[]): string[] {
 
 export function sortMediaFsNodes<T extends MediaFsNode>(
   nodes: T[],
-  options: SortOptions<T>
+  options?: SortOptions<T>
 ): T[] {
-  const { key = "name", order = "asc" } = options;
+  const { key = "name", order = "asc" } = options ?? {};
   const modifier = order === "asc" ? 1 : -1;
 
   return [...nodes].sort((a, b) => {
