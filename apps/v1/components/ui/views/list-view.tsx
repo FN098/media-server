@@ -227,7 +227,7 @@ function RowItem({
   const handleLongPress = () => {
     if (!isMediaNode) return;
     enterSelectionMode();
-    selectPath(node.path);
+    replaceSelection(node.path);
     setLastSelectedPath(node.path);
   };
 
