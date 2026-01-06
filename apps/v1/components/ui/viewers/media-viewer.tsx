@@ -15,13 +15,13 @@ import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,

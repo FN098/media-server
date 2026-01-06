@@ -6,7 +6,7 @@ import { Search } from "@/components/ui/inputs/search";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
+import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";

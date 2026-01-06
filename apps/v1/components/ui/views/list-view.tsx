@@ -12,6 +12,7 @@ import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
+import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import {
   Table,
@@ -21,7 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn/components/ui/table";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import React, { useMemo } from "react";
 import { toast } from "sonner";
