@@ -196,6 +196,7 @@ function RowItem({
 
     // 選択モード中
     if (isSelectionMode) {
+      if (!isMediaNode) return;
       if (!selected) {
         selectPath(node.path);
       } else {
