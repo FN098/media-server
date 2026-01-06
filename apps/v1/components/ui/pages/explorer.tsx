@@ -99,6 +99,7 @@ export function Explorer() {
   const [favoriteFilter, setFavoriteFilter] = useState(false);
   const toggleFavoriteFilter = () => setFavoriteFilter((prev) => !prev);
 
+  // フィルタリング結果
   const filteredNodes = useMemo(() => {
     const { nodes: allNodes } = listing;
 
@@ -159,11 +160,13 @@ export function Explorer() {
     [viewerIndexMap]
   );
 
+  // ビューアのインデックス
   const viewerIndex = useMemo(
     () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
     [at, mediaOnly.length]
   );
 
+  // ビューア起動モード
   const isViewMode = modal && viewerIndex != null && mediaOnly[viewerIndex];
 
   // ビューアスライド移動時の処理
@@ -197,6 +200,8 @@ export function Explorer() {
 
   // ===== お気に入り =====
 
+  // TODO: mediaOnly => listing.nodes に変更（フィルターの度に再計算しないようにする）
+  // TODO: お気に入り変更時に更新 (ビューに onFavoriteChange を追加し、favoriteChanges に格納する。差分を保持する)
   const favorites: FavoritesRecord = useMemo(
     () => Object.fromEntries(mediaOnly.map((n) => [n.path, n.isFavorite])),
     [mediaOnly]
@@ -249,18 +254,16 @@ export function Explorer() {
 
   // ===== タグエディタ =====
 
-  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false); // TODO: URLパラメータ tag=true
+  // TODO: URLパラメータ tag=true を追加し、リロード時やページ遷移時にタグエディタの起動状態を保持
+  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
 
   const isTagEditorOpenEffective = isTagEditorOpen && selectedCount > 0;
-
   const handleOpenTagEditor = () => {
     setIsTagEditorOpen(true);
   };
-
   const handleCloseTagEditor = () => {
     setIsTagEditorOpen(false);
   };
-
   const handleToggleTagEditor = () => {
     setIsTagEditorOpen((prev) => !prev);
   };
