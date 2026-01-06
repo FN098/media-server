@@ -181,6 +181,15 @@ export function TagEditSheet({
           {/* メインコンテナ */}
           <motion.div
             layout
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }} // 基本位置から離れないように制約
+            dragElastic={0.2} // 引っ張った時の抵抗感
+            onDragEnd={(_, info) => {
+              // 300px/s 以上の速さでスワイプするか、100px 以上下に動かしたら閉じる
+              if (info.velocity.y > 300 || info.offset.y > 100) {
+                handleTerminate();
+              }
+            }}
             initial={{ y: "100%", x: "-50%" }} // 画面下からスライドイン
             animate={{ y: 0, x: "-50%" }}
             exit={{ y: "100%", x: "-50%" }}
@@ -188,9 +197,10 @@ export function TagEditSheet({
             className={cn(
               "fixed bottom-0 left-1/2 z-[70]",
               "w-full max-w-md",
+              "touch-none",
               "pointer-events-auto",
               "bg-background border rounded-t-[24px] pb-safe overflow-hidden",
-              isTransparent && "bg-background/20 backdrop-blur-xs"
+              isTransparent && "bg-background/20 backdrop-blur-md"
             )}
           >
             {/* ハンドル（つまみ） */}
