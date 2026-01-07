@@ -35,6 +35,8 @@ export function ListView({
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
 }) {
+  const isMobile = useIsMobile();
+
   return (
     <div className="w-full h-full">
       <Table>
@@ -56,6 +58,7 @@ export function ListView({
               node={node}
               allNodes={allNodes}
               index={index}
+              isMobile={isMobile}
               onOpen={onOpen}
               onSelect={onSelect}
             />
@@ -70,16 +73,17 @@ function RowItem({
   node,
   index,
   allNodes,
+  isMobile,
   onOpen,
   onSelect,
 }: {
   node: MediaNode;
   index: number;
   allNodes: MediaNode[];
+  isMobile: boolean;
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
 }) {
-  const isMobile = useIsMobile();
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り

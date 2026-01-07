@@ -57,6 +57,8 @@ export function GridView({
     overscan: 3,
   });
 
+  const isMobile = useIsMobile();
+
   return (
     <div
       ref={containerRef}
@@ -99,6 +101,7 @@ export function GridView({
                   node={node}
                   index={globalIndex}
                   allNodes={allNodes}
+                  isMobile={isMobile}
                   onOpen={onOpen}
                   onSelect={onSelect}
                 />
@@ -115,16 +118,17 @@ function Cell({
   node,
   index,
   allNodes,
+  isMobile,
   onOpen,
   onSelect,
 }: {
   node: MediaNode;
   index: number;
   allNodes: MediaNode[];
+  isMobile: boolean;
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
 }) {
-  const isMobile = useIsMobile();
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り
