@@ -97,9 +97,20 @@ export function Explorer() {
   // フィルタリング対象タグ
   const { selectedTags, selectTags } = useTagFilter();
 
-  // お気に入りフィルタ有効フラグ
-  const [favoriteFilter, setFavoriteFilter] = useState(false);
-  const toggleFavoriteFilter = () => setFavoriteFilter((prev) => !prev);
+  // お気に入りのみ有効フラグ
+  const [isFavoriteOnly, setIsFavoriteOnly] = useState(false);
+  const toggleIsFavoriteOnly = () => setIsFavoriteOnly((prev) => !prev);
+
+  // フィルタ関数
+  const searchFilter = useMemo(() => createSearchFilter(query), [query]);
+  const tagFilter = useMemo(
+    () => createTagFilter(Array.from(selectedTags)),
+    [selectedTags]
+  );
+  const favoriteFilter = useMemo(
+    () => createFavoriteFilter(isFavoriteOnly),
+    [isFavoriteOnly]
+  );
 
   // フィルタリング結果
   const filteredNodes = useMemo(() => {
@@ -107,9 +118,9 @@ export function Explorer() {
 
     // 1. 各フィルタの生成
     const filters: MediaNodeFilter[] = [
-      createSearchFilter(query),
-      createTagFilter(Array.from(selectedTags)),
-      createFavoriteFilter(favoriteFilter),
+      searchFilter,
+      tagFilter,
+      favoriteFilter,
     ];
 
     // 2. フィルタの適用
@@ -117,13 +128,13 @@ export function Explorer() {
       // フォルダは常に表示する場合 (検索にはヒットさせたい場合は条件を調整)
       if (node.isDirectory) {
         // 例: フォルダは検索クエリには反応させるが、タグやお気に入りフィルタからは除外する
-        return createSearchFilter(query)(node);
+        return searchFilter(node);
       }
 
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, query, selectedTags, favoriteFilter]);
+  }, [listing, searchFilter, tagFilter, favoriteFilter]);
 
   // ビューアや選択機能で使う「メディアのみ」のリストは filteredNodes から抽出
   const mediaOnly = useMemo(
@@ -348,8 +359,8 @@ export function Explorer() {
 
           {/* お気に入りフィルター */}
           <FavoriteFilterButton
-            isActive={favoriteFilter}
-            onClick={toggleFavoriteFilter}
+            isActive={isFavoriteOnly}
+            onClick={toggleIsFavoriteOnly}
             showCount
             count={mediaOnly.length}
           />

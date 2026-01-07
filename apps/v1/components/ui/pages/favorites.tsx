@@ -82,27 +82,31 @@ export function FavoritesExplorer() {
   // フィルタリング対象タグ
   const { selectedTags, selectTags } = useTagFilter();
 
+  // フィルタ関数
+  const searchFilter = useMemo(() => createSearchFilter(query), [query]);
+  const tagFilter = useMemo(
+    () => createTagFilter(Array.from(selectedTags)),
+    [selectedTags]
+  );
+
   const filteredNodes = useMemo(() => {
     const { nodes: allNodes } = listing;
 
     // 1. 各フィルタの生成
-    const filters: MediaNodeFilter[] = [
-      createSearchFilter(query),
-      createTagFilter(Array.from(selectedTags)),
-    ];
+    const filters: MediaNodeFilter[] = [searchFilter, tagFilter];
 
     // 2. フィルタの適用
     return allNodes.filter((node) => {
       // フォルダは常に表示する場合 (検索にはヒットさせたい場合は条件を調整)
       if (node.isDirectory) {
         // 例: フォルダは検索クエリには反応させるが、タグやお気に入りフィルタからは除外する
-        return createSearchFilter(query)(node);
+        return searchFilter(node);
       }
 
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, query, selectedTags]);
+  }, [listing, searchFilter, tagFilter]);
 
   // ビューアや選択機能で使う「メディアのみ」のリストは filteredNodes から抽出
   const mediaOnly = useMemo(
