@@ -126,7 +126,7 @@ export function TagEditSheet({
         toast.success("保存しました");
         editor.resetChanges();
 
-        await editor.refreshTags();
+        await editor.invalidateTags();
         router.refresh();
 
         handleTerminate();

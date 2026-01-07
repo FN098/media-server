@@ -1,9 +1,16 @@
 "use client";
 
 import { SearchTagsRequestParams, Tag } from "@/lib/tag/types";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback } from "react";
 
 export function useTags(params: SearchTagsRequestParams) {
+  const queryClient = useQueryClient();
+
   const { data, refetch, isLoading, isPlaceholderData } = useQuery({
     queryKey: ["tags", params],
     queryFn: async () => {
@@ -19,9 +26,16 @@ export function useTags(params: SearchTagsRequestParams) {
     placeholderData: keepPreviousData,
   });
 
+  // キャッシュを無効化する関数をメモ化して提供
+  const invalidateTags = useCallback(async () => {
+    // "tags" で始まる全てのクエリ（他のパスの組み合わせも含む）を無効化
+    await queryClient.invalidateQueries({ queryKey: ["tags"] });
+  }, [queryClient]);
+
   return {
     tags: data ?? [],
-    refreshTags: refetch,
+    refreshTags: refetch, // 特定のこのクエリだけをリフェッチ
+    invalidateTags, // タグ関連の全キャッシュを無効化（保存後などに使用）
     isLoading: isLoading || isPlaceholderData,
   };
 }

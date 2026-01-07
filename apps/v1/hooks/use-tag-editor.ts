@@ -43,6 +43,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   const {
     tags: masterTags,
     refreshTags,
+    invalidateTags,
     isLoading: isLoadingTags,
   } = useTags({
     paths: targetPaths,
@@ -169,6 +170,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     hasChanges,
     setSearchStrategy,
     setSortStrategy,
+    invalidateTags,
     refreshTags,
     isLoadingTags,
     tagStates,
