@@ -41,8 +41,8 @@ export default async function Page(props: FavoritePageProps) {
   const formatted = formatNodes(sorted);
 
   const listing = {
-    nodes: formatted.slice(0, 200), // TODO: 検証用
-    // nodes: formatted,
+    // nodes: formatted.slice(0, 200), // 検証用
+    nodes: formatted,
     path: "",
     parent: null,
     prev: null,
