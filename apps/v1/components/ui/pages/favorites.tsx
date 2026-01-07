@@ -358,23 +358,24 @@ export function FavoritesExplorer() {
         </AnimatePresence>
 
         {/* 選択バー */}
-        {isSelectionMode && !isTagEditMode && (
-          <SelectionBar
-            count={selected.length}
-            totalCount={mediaOnly.length}
-            active={isSelectionMode}
-            onSelectAll={handleSelectAll}
-            onClose={handleCloseSelectionBar}
-            actions={
-              <>
-                <Button size="sm" onClick={handleOpenTagEditor}>
-                  <TagIcon />
-                  タグ表示
-                </Button>
-              </>
-            }
-          />
-        )}
+        <AnimatePresence>
+          {isSelectionMode && !isTagEditMode && (
+            <SelectionBar
+              count={selected.length}
+              totalCount={mediaOnly.length}
+              onSelectAll={handleSelectAll}
+              onClose={handleCloseSelectionBar}
+              actions={
+                <>
+                  <Button size="sm" onClick={handleOpenTagEditor}>
+                    <TagIcon />
+                    タグ表示
+                  </Button>
+                </>
+              }
+            />
+          )}
+        </AnimatePresence>
 
         {/* ビューワ */}
         {isViewMode && (
