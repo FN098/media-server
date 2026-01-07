@@ -27,7 +27,7 @@ export function Search({
         ref={inputRef}
         type="search"
         placeholder={placeholder ?? "Search…"}
-        className={cn("w-full transition-all", className)}
+        className={cn("w-full", className)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onFocus={onFocus}

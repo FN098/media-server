@@ -74,6 +74,8 @@ export function HeaderSearch() {
     };
   }, [debouncedSetQuery, input]);
 
+  const isMobileBlur = isMobile && !focused;
+
   return (
     <motion.div
       initial={{ width: collapsedWidth }}
@@ -82,7 +84,7 @@ export function HeaderSearch() {
         zIndex: focused ? 50 : 1,
       }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className="relative shrink-0 w-full"
+      className="relative shrink-0 w-full overflow-hidden"
       style={{ maxWidth: isMobile ? "calc(100vw - 2rem)" : "none" }}
     >
       <Search
@@ -93,12 +95,12 @@ export function HeaderSearch() {
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         className={cn(
-          "transition-all",
-          focused
-            ? "pl-9"
-            : isMobile
-              ? "pl-0 border-transparent bg-transparent shadow-none"
-              : "pl-9"
+          "transition-all duration-200 pl-9",
+          isMobileBlur && [
+            "pl-0 border-transparent bg-transparent shadow-none",
+            "text-transparent placeholder:text-transparent",
+            "[&::-webkit-search-cancel-button]:appearance-none",
+          ]
         )}
       />
       <AnimatePresence>
