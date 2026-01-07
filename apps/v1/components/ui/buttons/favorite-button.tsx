@@ -2,12 +2,13 @@
 
 import { cn } from "@/shadcn/lib/utils";
 import { Star } from "lucide-react";
+import React from "react";
 
 type FavoriteButtonVariant = "grid" | "list" | "viewer";
 
 type FavoriteButtonProps = {
   active: boolean;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   variant: FavoriteButtonVariant;
   className?: string;
 };
@@ -51,7 +52,7 @@ export function FavoriteButton({
       type="button"
       onClick={(e) => {
         e.stopPropagation();
-        onClick();
+        onClick(e);
       }}
       className={cn("transition-all", containerStyles[variant], className)}
       aria-label="お気に入り"

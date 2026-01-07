@@ -29,42 +29,45 @@ export function GridView({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { columnCount, rowHeight } = useGridConfig(containerRef, {
-    columnWidth: 200,
-  });
+  // コンテナの幅に合わせてグリッドの列数と行の高さを計算
+  const { columnCount: rawColumnCount, rowHeight } = useGridConfig(
+    containerRef,
+    {
+      columnWidth: 200,
+    }
+  );
+
+  // 0除算防止
+  const columnCount = Math.max(1, rawColumnCount);
 
   const rowCount = useMemo(
     () => Math.ceil(allNodes.length / columnCount),
     [columnCount, allNodes.length]
   );
 
-  const getNodeIndex = useCallback(
-    (rowIndex: number, colIndex: number) => {
-      return rowIndex * columnCount + colIndex;
-    },
-    [columnCount]
-  );
-
   const getNode = useCallback(
     (rowIndex: number, colIndex: number) => {
-      const index = getNodeIndex(rowIndex, colIndex);
+      const index = rowIndex * columnCount + colIndex;
       if (index < 0 || index >= allNodes.length) return null;
       return allNodes[index];
     },
-    [getNodeIndex, allNodes]
+    [columnCount, allNodes]
   );
 
-  // 仮想グリッドの設定
   // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => containerRef.current,
-    estimateSize: () => rowHeight, // 各行の高さ
-    overscan: 1, // 画面外に何行予備を持っておくか
+    estimateSize: () => rowHeight,
+    overscan: 3,
   });
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col">
+    <div
+      ref={containerRef}
+      className="w-full h-full flex flex-col"
+      style={{ contain: "layout" }}
+    >
       {/* グリッド */}
       <div
         style={{
@@ -90,19 +93,20 @@ export function GridView({
           >
             {/* セル */}
             {Array.from({ length: columnCount }).map((_, colIndex) => {
-              const node = getNode(row.index, colIndex);
               const globalIndex = row.index * columnCount + colIndex; // 全体でのインデックス
+              const node = getNode(row.index, colIndex);
+
+              if (!node) return <div key={`empty-${globalIndex}`} />;
+
               return (
-                node && (
-                  <Cell
-                    key={node.path}
-                    node={node}
-                    index={globalIndex}
-                    allNodes={allNodes}
-                    onOpen={onOpen}
-                    onSelect={onSelect}
-                  />
-                )
+                <Cell
+                  key={node.path}
+                  node={node}
+                  index={globalIndex}
+                  allNodes={allNodes}
+                  onOpen={onOpen}
+                  onSelect={onSelect}
+                />
               );
             })}
           </div>
@@ -129,14 +133,15 @@ function Cell({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り
-  const { toggleFavorite, isFavorite } = useFavoritesContext();
+  const { toggleFavorite, isFavorite: isFavoritePath } = useFavoritesContext();
 
-  const favorite = useMemo(
-    () => isFavorite(node.path),
-    [isFavorite, node.path]
+  const isFavorite = useMemo(
+    () => isFavoritePath(node.path),
+    [isFavoritePath, node.path]
   );
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       void toggleFavorite(node.path);
     } catch (e) {
@@ -161,7 +166,7 @@ function Cell({
     setLastSelectedPath,
   } = usePathSelectionContext();
 
-  const selected = useMemo(
+  const isSelected = useMemo(
     () => isPathSelected(node.path),
     [isPathSelected, node.path]
   );
@@ -191,48 +196,30 @@ function Cell({
 
     e.preventDefault();
 
-    const isCmdOrCtrl = e.ctrlKey || e.metaKey;
-    const isShift = e.shiftKey;
-
-    // Shift
-    if (isShift) {
+    if (e.shiftKey && lastSelectedPath !== null) {
       enterSelectionMode();
-
-      // 前回の選択がある場合、範囲を選択
-      if (lastSelectedPath !== null) {
-        const lastSelectedIndex = allNodes.findIndex(
-          (n) => n.path === lastSelectedPath
-        );
-        if (lastSelectedIndex < 0) return;
-        const start = Math.min(lastSelectedIndex, index);
-        const end = Math.max(lastSelectedIndex, index);
-        const pathsInRange = allNodes
+      const lastIdx = allNodes.findIndex((n) => n.path === lastSelectedPath);
+      if (lastIdx !== -1) {
+        const start = Math.min(lastIdx, index);
+        const end = Math.max(lastIdx, index);
+        const paths = allNodes
           .slice(start, end + 1)
           .filter((n) => isMedia(n.type))
           .map((n) => n.path);
-
-        addPaths(pathsInRange); // 範囲を一括選択
+        addPaths(paths);
         return;
       }
-
-      selectPath(node.path);
-      setLastSelectedPath(node.path);
-      return;
     }
 
-    // Ctrl
-    if (isCmdOrCtrl) {
+    if (e.ctrlKey || e.metaKey) {
       enterSelectionMode();
       togglePath(node.path);
-      setLastSelectedPath(node.path);
-      return;
+    } else {
+      exitSelectionMode();
+      replaceSelection(node.path);
+      onSelect?.();
     }
-
-    // 通常
-    exitSelectionMode();
-    replaceSelection(node.path);
     setLastSelectedPath(node.path);
-    onSelect?.();
   };
 
   // タップ（モバイル用）
@@ -244,7 +231,7 @@ function Cell({
     // 選択モード中
     if (isSelectionMode) {
       if (!isMediaNode) return;
-      if (!selected) {
+      if (!isSelected) {
         selectPath(node.path);
       } else {
         unselectPath(node.path);
@@ -299,7 +286,7 @@ function Cell({
         className={cn(
           "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
           "select-none",
-          selected
+          isSelected
             ? "ring-2 ring-primary border-transparent"
             : "hover:border-primary/50"
         )}
@@ -320,7 +307,7 @@ function Cell({
           )}
         >
           <Checkbox
-            checked={selected}
+            checked={isSelected}
             onCheckedChange={handleCheckedChange}
             onClick={(e) => e.stopPropagation()}
             disabled={!isMediaNode}
@@ -339,7 +326,7 @@ function Cell({
         {!isSelectionMode && isMediaNode && (
           <FavoriteButton
             variant="grid"
-            active={favorite}
+            active={isFavorite}
             onClick={handleToggleFavorite}
             className="absolute top-1 right-1"
           />
