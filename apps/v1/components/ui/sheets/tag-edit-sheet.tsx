@@ -188,10 +188,12 @@ export function TagEditSheet({
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.2}
             onDragEnd={(_, info) => {
+              // 下スワイプ: 終了
               if (info.velocity.y > 300 || info.offset.y > 100) {
                 handleTerminate();
               }
-              if (info.velocity.y < -300 || info.offset.y < -100) {
+              // 上スワイプ: 編集
+              else if (info.velocity.y < -300 || info.offset.y < -100) {
                 handleEdit();
               }
             }}
@@ -221,6 +223,7 @@ export function TagEditSheet({
                 />
               </div>
 
+              {/* コンテンツエリア */}
               <div className="px-4 pb-6 overflow-y-auto max-h-[85vh]">
                 <AnimatePresence mode="wait">
                   {!isEditing ? (
@@ -300,6 +303,7 @@ export function TagEditSheet({
                 </AnimatePresence>
               </div>
 
+              {/* コンテンツエリアの見切れ防止用のダミー */}
               <div
                 className={cn(
                   "absolute top-[100%] left-[-1px] right-[-1px] h-[300px] border-x bg-background",
