@@ -87,11 +87,11 @@ function RowItem({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り
-  const { toggleFavorite, isFavorite } = useFavoritesContext();
+  const { toggleFavorite, isFavorite: isFavoritePath } = useFavoritesContext();
 
-  const favorite = useMemo(
-    () => isFavorite(node.path),
-    [isFavorite, node.path]
+  const isFavorite = useMemo(
+    () => isFavoritePath(node.path),
+    [isFavoritePath, node.path]
   );
 
   const handleToggleFavorite = () => {
@@ -103,6 +103,7 @@ function RowItem({
     }
   };
 
+  // 選択
   const {
     isSelectionMode,
     isPathSelected,
@@ -118,7 +119,7 @@ function RowItem({
     setLastSelectedPath,
   } = usePathSelectionContext();
 
-  const selected = useMemo(
+  const isSelected = useMemo(
     () => isPathSelected(node.path),
     [isPathSelected, node.path]
   );
@@ -148,44 +149,33 @@ function RowItem({
 
     e.preventDefault();
 
-    const isCmdOrCtrl = e.ctrlKey || e.metaKey;
-    const isShift = e.shiftKey;
-
-    // Shift
-    if (isShift) {
+    // Shift キー: 範囲選択
+    if (e.shiftKey && lastSelectedPath !== null) {
       enterSelectionMode();
-
-      // 前回の選択がある場合、範囲を選択
-      if (lastSelectedPath !== null) {
-        const lastSelectedIndex = allNodes.findIndex(
-          (n) => n.path === lastSelectedPath
-        );
-        if (lastSelectedIndex < 0) return;
-        const start = Math.min(lastSelectedIndex, index);
-        const end = Math.max(lastSelectedIndex, index);
-        const pathsInRange = allNodes
+      const lastIdx = allNodes.findIndex((n) => n.path === lastSelectedPath);
+      if (lastIdx !== -1) {
+        const start = Math.min(lastIdx, index);
+        const end = Math.max(lastIdx, index);
+        const paths = allNodes
           .slice(start, end + 1)
           .filter((n) => isMedia(n.type))
           .map((n) => n.path);
-
-        addPaths(pathsInRange); // 範囲を一括選択
+        addPaths(paths);
+        onSelect?.();
         return;
       }
-
-      selectPath(node.path);
-      setLastSelectedPath(node.path);
-      return;
     }
 
-    // Ctrl
-    if (isCmdOrCtrl) {
+    // Ctrl/Command キー: 複数選択
+    if (e.ctrlKey || e.metaKey) {
       enterSelectionMode();
       togglePath(node.path);
       setLastSelectedPath(node.path);
+      onSelect?.();
       return;
     }
 
-    // 通常
+    // 通常選択
     exitSelectionMode();
     replaceSelection(node.path);
     setLastSelectedPath(node.path);
@@ -201,8 +191,9 @@ function RowItem({
     // 選択モード中
     if (isSelectionMode) {
       if (!isMediaNode) return;
-      if (!selected) {
+      if (!isSelected) {
         selectPath(node.path);
+        onSelect?.();
       } else {
         unselectPath(node.path);
 
@@ -233,6 +224,7 @@ function RowItem({
     enterSelectionMode();
     replaceSelection(node.path);
     setLastSelectedPath(node.path);
+    onSelect?.();
   };
 
   const {
@@ -254,7 +246,7 @@ function RowItem({
       onDoubleClick={isMobile ? undefined : handleDoubleClick}
       className={cn(
         "select-none cursor-pointer transition-colors",
-        selected
+        isSelected
           ? "bg-primary/10 hover:bg-primary/20"
           : "hover:bg-muted/50 active:bg-muted"
       )}
@@ -262,7 +254,7 @@ function RowItem({
       <TableCell>
         <div className={cn("transition-opacity")}>
           <Checkbox
-            checked={selected}
+            checked={isSelected}
             onCheckedChange={handleCheckedChange}
             onClick={(e) => e.stopPropagation()}
             disabled={!isMedia(node.type)}
@@ -298,7 +290,7 @@ function RowItem({
         ) : (
           <FavoriteButton
             variant="list"
-            active={favorite}
+            active={isFavorite}
             onClick={handleToggleFavorite}
           />
         )}

@@ -221,7 +221,7 @@ function Cell({
       return;
     }
 
-    // 通常:
+    // 通常選択
     exitSelectionMode();
     replaceSelection(node.path);
     setLastSelectedPath(node.path);
@@ -239,6 +239,7 @@ function Cell({
       if (!isMediaNode) return;
       if (!isSelected) {
         selectPath(node.path);
+        onSelect?.();
       } else {
         unselectPath(node.path);
 
@@ -291,8 +292,7 @@ function Cell({
         onClick={isMobile ? handleTap : handleClick}
         onDoubleClick={isMobile ? undefined : handleDoubleClick}
         className={cn(
-          "relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
-          "select-none",
+          "select-none relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
           isSelected
             ? "ring-2 ring-primary border-transparent"
             : "hover:border-primary/50"
