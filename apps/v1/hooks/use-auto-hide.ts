@@ -52,7 +52,8 @@ export function useAutoHidingUI({ duration = 3000, disabled = false }: Option) {
   useEffect(() => {
     hide();
     return () => hide.cancel();
-  }, [hide]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     isVisible,
