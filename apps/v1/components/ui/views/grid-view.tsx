@@ -191,6 +191,7 @@ function Cell({
 
     e.preventDefault();
 
+    // Shift キー: 範囲選択
     if (e.shiftKey && lastSelectedPath !== null) {
       enterSelectionMode();
       const lastIdx = allNodes.findIndex((n) => n.path === lastSelectedPath);
@@ -202,19 +203,25 @@ function Cell({
           .filter((n) => isMedia(n.type))
           .map((n) => n.path);
         addPaths(paths);
+        onSelect?.();
         return;
       }
     }
 
+    // Ctrl/Command キー: 複数選択
     if (e.ctrlKey || e.metaKey) {
       enterSelectionMode();
       togglePath(node.path);
-    } else {
-      exitSelectionMode();
-      replaceSelection(node.path);
+      setLastSelectedPath(node.path);
       onSelect?.();
+      return;
     }
+
+    // 通常:
+    exitSelectionMode();
+    replaceSelection(node.path);
     setLastSelectedPath(node.path);
+    onSelect?.();
   };
 
   // タップ（モバイル用）
@@ -258,6 +265,7 @@ function Cell({
     enterSelectionMode();
     replaceSelection(node.path);
     setLastSelectedPath(node.path);
+    onSelect?.();
   };
 
   const {
