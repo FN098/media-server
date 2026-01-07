@@ -84,6 +84,7 @@ export function MediaViewer({
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHeaderPinned, setIsHeaderPinned] = useState(false);
+  const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
   const {
     isVisible: isHeaderVisible,
     toggle: toggleHeaderVisibility,
@@ -93,7 +94,6 @@ export function MediaViewer({
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
   const swiperRef = useRef<SwiperClass | null>(null);
-  const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
 
   // 仮想スライド
   const allSlides = useMemo(() => {

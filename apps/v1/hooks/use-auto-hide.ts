@@ -35,11 +35,24 @@ export function useAutoHidingUI({ duration = 3000, disabled = false }: Option) {
     });
   }, [hide]);
 
+  // disabled が変更されたときの処理
+  useEffect(() => {
+    if (disabled) {
+      // disabled になったらタイマーをキャンセル
+      hide.cancel();
+    } else {
+      // disabled が解除されたら、表示状態ならタイマーを開始
+      if (isVisible) {
+        hide();
+      }
+    }
+  }, [disabled, hide, isVisible]);
+
   // 初期ロード時：マウントから指定時間後に隠す
   useEffect(() => {
     hide();
     return () => hide.cancel();
-  }, [hide, isVisible]);
+  }, [hide]);
 
   return {
     isVisible,
