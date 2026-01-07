@@ -279,6 +279,7 @@ export function TagEditSheet({
                     onAdd={() => handleNewAdd(editor.newTagName)}
                     onSelectSuggestion={editor.selectSuggestion}
                     onApply={() => void handleApply()}
+                    autoFocus
                   />
                   <TagList
                     isEditing={true}
@@ -411,6 +412,7 @@ function TagInput({
   onAdd,
   onSelectSuggestion,
   onApply,
+  autoFocus,
 }: {
   value: string;
   isTransparent: boolean;
@@ -420,6 +422,7 @@ function TagInput({
   onAdd: () => void;
   onSelectSuggestion: (tag: Tag) => void;
   onApply: () => void;
+  autoFocus?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggests = useMemo(
@@ -432,6 +435,7 @@ function TagInput({
       <div className="relative">
         <input
           ref={inputRef}
+          autoFocus={autoFocus}
           className="w-full bg-muted/50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 ring-primary/20 outline-none"
           placeholder="新しいタグを入力..."
           value={value}
