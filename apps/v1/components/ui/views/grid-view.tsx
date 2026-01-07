@@ -5,7 +5,7 @@ import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
-import { useGridView } from "@/hooks/use-grid-view";
+import { useGridConfig } from "@/hooks/use-grid-config";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
@@ -14,7 +14,8 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import React, { useMemo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import React, { useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 export function GridView({
@@ -26,21 +27,54 @@ export function GridView({
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
 }) {
-  const { containerRef, columnCount, getTotalHeight, getRows, getCellItem } =
-    useGridView(allNodes);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { columnCount, rowHeight } = useGridConfig(containerRef, {
+    columnWidth: 200,
+  });
+
+  const rowCount = useMemo(
+    () => Math.ceil(allNodes.length / columnCount),
+    [columnCount, allNodes.length]
+  );
+
+  const getNodeIndex = useCallback(
+    (rowIndex: number, colIndex: number) => {
+      return rowIndex * columnCount + colIndex;
+    },
+    [columnCount]
+  );
+
+  const getNode = useCallback(
+    (rowIndex: number, colIndex: number) => {
+      const index = getNodeIndex(rowIndex, colIndex);
+      if (index < 0 || index >= allNodes.length) return null;
+      return allNodes[index];
+    },
+    [getNodeIndex, allNodes]
+  );
+
+  // 仮想グリッドの設定
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const rowVirtualizer = useVirtualizer({
+    count: rowCount,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => rowHeight, // 各行の高さ
+    overscan: 1, // 画面外に何行予備を持っておくか
+  });
 
   return (
     <div ref={containerRef} className="w-full h-full flex flex-col">
       {/* グリッド */}
       <div
         style={{
-          height: `${getTotalHeight()}px`,
+          height: `${rowVirtualizer.getTotalSize()}px`,
           width: "100%",
           position: "relative",
         }}
       >
         {/* 行 */}
-        {getRows().map((row) => (
+        {rowVirtualizer.getVirtualItems().map((row) => (
           <div
             key={row.key}
             style={{
@@ -56,7 +90,7 @@ export function GridView({
           >
             {/* セル */}
             {Array.from({ length: columnCount }).map((_, colIndex) => {
-              const node = getCellItem(row.index, colIndex);
+              const node = getNode(row.index, colIndex);
               const globalIndex = row.index * columnCount + colIndex; // 全体でのインデックス
               return (
                 node && (
