@@ -157,12 +157,15 @@ export function TagEditSheet({
     {
       key: "e",
       callback: () => toggleIsEditing(),
+      condition: () => canEdit,
     },
     {
       key: "x",
       callback: () => toggleIsTransparent(),
     },
   ]);
+
+  const canEdit = targetNodes.length > 0;
 
   return (
     <>
@@ -192,7 +195,9 @@ export function TagEditSheet({
           }
           // 上スワイプ: 編集
           else if (info.velocity.y < -300 || info.offset.y < -100) {
-            handleEdit();
+            if (canEdit) {
+              handleEdit();
+            }
           }
         }}
         initial={{ y: "100%" }}
@@ -235,9 +240,10 @@ export function TagEditSheet({
                 >
                   <SheetHeader
                     mode={mode}
+                    count={targetNodes.length}
                     isEditing={false}
                     isTransparent={isTransparent}
-                    count={targetNodes.length}
+                    canEdit={canEdit}
                     onClose={handleTerminate}
                     onToggleTransparent={toggleIsTransparent}
                     onEditClick={handleEdit}
@@ -263,11 +269,12 @@ export function TagEditSheet({
                 >
                   <SheetHeader
                     mode={mode}
-                    isEditing={true}
                     count={targetNodes.length}
+                    isEditing={true}
+                    isTransparent={isTransparent}
+                    canEdit={canEdit}
                     onEditClick={() => {}}
                     onClose={handleTerminate}
-                    isTransparent={isTransparent}
                     onToggleTransparent={toggleIsTransparent}
                   />
                   <TagInput
@@ -317,19 +324,21 @@ export function TagEditSheet({
 
 function SheetHeader({
   mode,
-  isEditing,
   count,
+  isEditing,
+  isTransparent,
+  canEdit,
   onEditClick,
   onClose,
-  isTransparent,
   onToggleTransparent,
 }: {
   mode: TagEditMode;
-  isEditing: boolean;
   count: number;
+  isEditing: boolean;
+  isTransparent: boolean;
+  canEdit: boolean;
   onEditClick: () => void;
   onClose: () => void;
-  isTransparent: boolean;
   onToggleTransparent: () => void;
 }) {
   const textMap = {
@@ -379,6 +388,7 @@ function SheetHeader({
                   isTransparent && "bg-background/20 hover:bg-accent"
                 )}
                 onClick={onEditClick}
+                disabled={!canEdit}
               >
                 <Edit2 size={14} />
               </Button>
