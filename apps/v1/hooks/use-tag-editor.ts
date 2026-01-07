@@ -16,7 +16,11 @@ import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
 import { v4 } from "uuid";
 
-export function useTagEditor(targetNodes: MediaNode[]) {
+export function useTagEditor(initialTargetNodes?: MediaNode[]) {
+  const [isTagEditMode, setIsTagEditMode] = useState(false);
+  const [targetNodes, setTargetNodes] = useState<MediaNode[]>(
+    initialTargetNodes ?? []
+  );
   const [newTagName, setNewTagName] = useState("");
   const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<PendingChangesType>({});
@@ -154,6 +158,10 @@ export function useTagEditor(targetNodes: MediaNode[]) {
   );
 
   return {
+    targetNodes,
+    setTargetNodes,
+    isTagEditMode,
+    setIsTagEditMode,
     newTagName,
     setNewTagName,
     pendingNewTags,

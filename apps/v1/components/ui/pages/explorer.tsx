@@ -38,6 +38,7 @@ import { FavoritesProvider } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -243,7 +244,6 @@ export function Explorer() {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-    selectedCount,
     selectedPaths,
     selectPaths,
     clearSelection,
@@ -284,10 +284,7 @@ export function Explorer() {
 
   // ===== タグエディタ =====
 
-  // TODO: URLパラメータ tag=true を追加し、リロード時やページ遷移時にタグエディタの起動状態を保持
-  const [isTagEditMode, setIsTagEditMode] = useState(false);
-  const isTagEditorOpen = isTagEditMode && selectedCount > 0;
-  const isSelectionBarOpen = isSelectionMode && !isTagEditorOpen;
+  const { isTagEditMode, setIsTagEditMode } = useTagEditorContext();
   const handleOpenTagEditor = () => {
     setIsTagEditMode(true);
   };
@@ -380,10 +377,9 @@ export function Explorer() {
         )}
 
         {/* タグエディター */}
-        {isTagEditorOpen && (
+        {isTagEditMode && (
           <TagEditSheet
             targetNodes={selected}
-            active={isTagEditMode}
             onClose={handleCloseTagEditor}
             mode={tagEditMode}
             transparent={tagEditMode === "single"}
@@ -391,7 +387,7 @@ export function Explorer() {
         )}
 
         {/* 選択バー */}
-        {isSelectionBarOpen && (
+        {isSelectionMode && !isTagEditMode && (
           <SelectionBar
             count={selected.length}
             totalCount={mediaOnly.length}

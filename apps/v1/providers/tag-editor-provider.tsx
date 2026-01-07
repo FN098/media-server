@@ -10,15 +10,14 @@ const TagEditorContext = createContext<TagEditorContextType | undefined>(
   undefined
 );
 
-/** @deprecated 使用されていない */
 export function TagEditorProvider({
   children,
-  targetNodes,
+  initialTargetNodes,
 }: {
   children: ReactNode;
-  targetNodes: MediaNode[];
+  initialTargetNodes?: MediaNode[];
 }) {
-  const value = useTagEditor(targetNodes);
+  const value = useTagEditor(initialTargetNodes);
 
   return (
     <TagEditorContext.Provider value={value}>

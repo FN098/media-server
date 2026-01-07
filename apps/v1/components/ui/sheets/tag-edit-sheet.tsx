@@ -1,7 +1,6 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { Record } from "@/generated/prisma/runtime/library";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { useTagEditor } from "@/hooks/use-tag-editor";
 import { MediaNode } from "@/lib/media/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import {
@@ -12,6 +11,7 @@ import {
   TagOperator,
   TagState,
 } from "@/lib/tag/types";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -24,21 +24,27 @@ import { toast } from "sonner";
 export function TagEditSheet({
   targetNodes,
   mode = "default",
-  active,
   transparent,
   edit,
   onClose,
 }: {
   targetNodes: MediaNode[];
   mode?: TagEditMode;
-  active?: boolean;
   transparent?: boolean;
   edit?: boolean;
-  onClose?: () => void;
+  onClose: () => void;
 }) {
   const router = useRouter();
-  const editor = useTagEditor(targetNodes);
+  const editor = useTagEditorContext();
   const controls = useDragControls();
+
+  // 表示フラグ
+  const [isVisible, setIsVisible] = useState(true);
+
+  // 対象が変更されたらコンテキストに反映
+  useEffect(() => {
+    editor.setTargetNodes(targetNodes);
+  }, [editor, targetNodes]);
 
   // 編集モード
   const [isEditing, setIsEditing] = useState(edit ?? false);
@@ -58,9 +64,6 @@ export function TagEditSheet({
     }
   }, [transparent]);
 
-  // 処理中
-  const [isLoading, setIsLoading] = useState(false);
-
   // 新規作成
   const handleNewAdd = (name: string) => {
     const trimmed = name.trim();
@@ -79,12 +82,13 @@ export function TagEditSheet({
     editor.setNewTagName("");
   };
 
-  // 編集
+  // 編集モードに移行
   const handleEdit = () => {
     setIsEditing(true);
   };
 
-  // 保存
+  // 保存処理
+  const [isLoading, setIsLoading] = useState(false);
   const handleApply = async () => {
     if (isLoading) return;
     setIsLoading(true);
@@ -140,9 +144,8 @@ export function TagEditSheet({
       setIsEditing(false);
       return;
     }
-
-    // 閲覧モードなら閉じる
-    onClose?.();
+    // 閲覧モードなら「非表示」にする（これで exit アニメーションが開始される）
+    setIsVisible(false);
   };
 
   // ショートカット
@@ -150,23 +153,23 @@ export function TagEditSheet({
     {
       key: "Escape",
       callback: () => handleTerminate(),
-      condition: () => active ?? false,
+      condition: () => isVisible,
     },
     {
       key: "e",
       callback: () => toggleIsEditing(),
-      condition: () => active ?? false,
+      condition: () => isVisible,
     },
     {
       key: "x",
       callback: () => toggleIsTransparent(),
-      condition: () => active ?? false,
+      condition: () => isVisible,
     },
   ]);
 
   return (
-    <AnimatePresence>
-      {active && (
+    <AnimatePresence onExitComplete={onClose}>
+      {isVisible && (
         <>
           {/* 暗転オーバーレイ */}
           {isEditing && (
