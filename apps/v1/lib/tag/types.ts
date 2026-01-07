@@ -18,8 +18,6 @@ export type TagOperation = {
   operator: TagOperator;
 };
 
-export type TagEditMode = "default" | "single" | "none";
-
 export type TagState = "all" | "some" | "none";
 export type TagStates = Record<TagNameType, TagState>;
 export type TagCounts = Record<TagNameType, number>;

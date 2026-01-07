@@ -35,6 +35,7 @@ import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
+import { AnimatePresence } from "framer-motion";
 import { TagIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -221,7 +222,6 @@ export function FavoritesExplorer() {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-    selectedCount,
     selectedPaths,
     selectPaths,
     clearSelection,
@@ -264,8 +264,6 @@ export function FavoritesExplorer() {
 
   // TODO: URLパラメータ tag=true を追加し、リロード時やページ遷移時にタグエディタの起動状態を保持
   const [isTagEditMode, setIsTagEditMode] = useState(false);
-  const isTagEditorOpen = isTagEditMode && selectedCount > 0;
-  const isSelectionBarOpen = isSelectionMode && !isTagEditorOpen;
   const handleOpenTagEditor = () => {
     setIsTagEditMode(true);
   };
@@ -348,18 +346,19 @@ export function FavoritesExplorer() {
         )}
 
         {/* タグエディター */}
-        {isTagEditorOpen && (
-          <TagEditSheet
-            targetNodes={selected}
-            active={isTagEditMode}
-            onClose={handleCloseTagEditor}
-            mode={tagEditMode}
-            transparent={tagEditMode === "single"}
-          />
-        )}
+        <AnimatePresence>
+          {isTagEditMode && (
+            <TagEditSheet
+              targetNodes={selected}
+              onClose={handleCloseTagEditor}
+              mode={tagEditMode}
+              transparent={tagEditMode === "single"}
+            />
+          )}
+        </AnimatePresence>
 
         {/* 選択バー */}
-        {isSelectionBarOpen && (
+        {isSelectionMode && !isTagEditMode && (
           <SelectionBar
             count={selected.length}
             totalCount={mediaOnly.length}

@@ -42,6 +42,7 @@ import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
+import { AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, TagIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -377,14 +378,16 @@ export function Explorer() {
         )}
 
         {/* タグエディター */}
-        {isTagEditMode && (
-          <TagEditSheet
-            targetNodes={selected}
-            onClose={handleCloseTagEditor}
-            mode={tagEditMode}
-            transparent={tagEditMode === "single"}
-          />
-        )}
+        <AnimatePresence>
+          {isTagEditMode && (
+            <TagEditSheet
+              targetNodes={selected}
+              onClose={handleCloseTagEditor}
+              mode={tagEditMode}
+              transparent={tagEditMode === "single"}
+            />
+          )}
+        </AnimatePresence>
 
         {/* 選択バー */}
         {isSelectionMode && !isTagEditMode && (
