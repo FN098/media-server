@@ -42,11 +42,9 @@ export function useAutoHidingUI({ duration = 3000, disabled = false }: Option) {
       hide.cancel();
     } else {
       // disabled が解除されたら、表示状態ならタイマーを開始
-      if (isVisible) {
-        hide();
-      }
+      hide();
     }
-  }, [disabled, hide, isVisible]);
+  }, [disabled, hide]);
 
   // 初期ロード時：マウントから指定時間後に隠す
   useEffect(() => {
