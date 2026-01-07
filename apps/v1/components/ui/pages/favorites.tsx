@@ -32,12 +32,13 @@ import { FavoritesProvider } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
 import { TagIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 export function FavoritesExplorer() {
@@ -137,7 +138,7 @@ export function FavoritesExplorer() {
   );
 
   // ビューア用インデックスを取得
-  const getMediaIndex = useCallback(
+  const getViewerIndex = useCallback(
     (path: string) => {
       if (viewerIndexMap.has(path)) return viewerIndexMap.get(path)!;
       return null;
@@ -204,7 +205,7 @@ export function FavoritesExplorer() {
     }
 
     if (isMedia(node.type)) {
-      const index = getMediaIndex(node.path);
+      const index = getViewerIndex(node.path);
       if (index == null) return;
       openViewer(index);
       return;
@@ -266,8 +267,7 @@ export function FavoritesExplorer() {
 
   // ===== タグエディタ =====
 
-  // TODO: URLパラメータ tag=true を追加し、リロード時やページ遷移時にタグエディタの起動状態を保持
-  const [isTagEditMode, setIsTagEditMode] = useState(false);
+  const { isTagEditMode, setIsTagEditMode } = useTagEditorContext();
   const handleOpenTagEditor = () => {
     setIsTagEditMode(true);
   };
@@ -328,7 +328,7 @@ export function FavoritesExplorer() {
         />
 
         {/* グリッドビュー */}
-        {viewMode === "grid" && (
+        {viewMode === "grid" && !isViewMode && (
           <div>
             <GridView
               allNodes={filteredNodes}
@@ -339,7 +339,7 @@ export function FavoritesExplorer() {
         )}
 
         {/* リストビュー */}
-        {viewMode === "list" && (
+        {viewMode === "list" && !isViewMode && (
           <div>
             <ListView
               allNodes={filteredNodes}

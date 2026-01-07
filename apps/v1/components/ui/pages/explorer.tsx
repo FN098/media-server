@@ -87,7 +87,7 @@ export function Explorer() {
     if (Object.keys(patch).length === 0) return;
 
     setExplorerQuery(patch);
-  }, [q, query, setExplorerQuery, view, viewMode]);
+  }, [setExplorerQuery, q, query, view, viewMode]);
 
   // クエリパラメータ正規化
   useNormalizeExplorerQuery();
