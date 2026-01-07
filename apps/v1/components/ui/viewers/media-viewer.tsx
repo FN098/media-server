@@ -15,6 +15,7 @@ import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useViewerContext } from "@/providers/viewer-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import {
   DropdownMenu,
@@ -39,12 +40,11 @@ import {
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Navigation, Virtual, Zoom } from "swiper/modules";
-import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
-
 import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
+import { Navigation, Virtual, Zoom } from "swiper/modules";
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
 const firstPageDummy = { type: "dummy_first", path: "first-page" } as const;
 const prevFolderNav = { type: "nav_prev", path: "prev-loader" } as const;
@@ -77,6 +77,7 @@ export function MediaViewer({
   onPrevFolder?: (at?: IndexLike) => void;
   onTags?: () => void;
 }) {
+  const { isHeaderPinned, toggleIsHeaderPinned } = useViewerContext();
   const hasPrevFolder = !!onPrevFolder;
   const hasNextFolder = !!onNextFolder;
   const isMobile = useIsMobile();
@@ -88,8 +89,6 @@ export function MediaViewer({
   );
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isHeaderPinned, setIsHeaderPinned] = useState(false);
-  const toggleHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
   const {
     isVisible: isHeaderVisible,
     toggle: toggleHeaderVisibility,
@@ -238,7 +237,7 @@ export function MediaViewer({
     {
       key: "h",
       callback: () => {
-        toggleHeaderPinned();
+        toggleIsHeaderPinned();
         interactHeader();
       },
     },
@@ -297,7 +296,7 @@ export function MediaViewer({
               {/* ヘッダー固定ピン */}
               <button
                 className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
-                onClick={toggleHeaderPinned}
+                onClick={toggleIsHeaderPinned}
               >
                 {isHeaderPinned ? <PinOff size={28} /> : <Pin size={28} />}
               </button>
