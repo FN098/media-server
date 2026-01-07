@@ -1,6 +1,14 @@
 import { MediaNodeFilter } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/search";
 
+export const createLimitFilter = (limit: number): MediaNodeFilter => {
+  let count = 0;
+  return () => {
+    count++;
+    return count <= limit;
+  };
+};
+
 export const createSearchFilter = (query: string): MediaNodeFilter => {
   const trimmed = query.trim();
   return (node) => !trimmed || isMatchJapanese(node.name, trimmed);
