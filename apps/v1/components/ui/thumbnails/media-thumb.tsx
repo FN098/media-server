@@ -102,6 +102,7 @@ function MediaThumbImage({
       )}
       draggable={false}
       onError={() => void handleError()} // 画像がなかったら発火
+      loading="lazy"
       fallback={
         <div
           className={cn(
