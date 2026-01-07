@@ -7,7 +7,7 @@ import { ArrowRight, ArrowUpRight, FolderPlus, History } from "lucide-react"; //
 import { Metadata } from "next";
 import Link from "next/link";
 
-const RECENT_FOLDERS_LIMIT = 10;
+const RECENT_FOLDERS_LIMIT = 20;
 
 export const dynamic = "force-dynamic";
 
