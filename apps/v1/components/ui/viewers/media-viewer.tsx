@@ -25,6 +25,8 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   Folder,
   FolderInput,
   FolderOutput,
@@ -44,10 +46,17 @@ import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
 
+const firstPageDummy = { type: "dummy_first", path: "first-page" } as const;
 const prevFolderNav = { type: "nav_prev", path: "prev-loader" } as const;
 const nextFolderNav = { type: "nav_next", path: "next-loader" } as const;
+const lastPageDummy = { type: "dummy_last", path: "last-page" } as const;
 
-type Slide = MediaNode | typeof prevFolderNav | typeof nextFolderNav;
+type Slide =
+  | MediaNode
+  | typeof firstPageDummy
+  | typeof prevFolderNav
+  | typeof nextFolderNav
+  | typeof lastPageDummy;
 
 export function MediaViewer({
   allNodes,
@@ -70,14 +79,10 @@ export function MediaViewer({
 }) {
   const hasPrevFolder = !!onPrevFolder;
   const hasNextFolder = !!onNextFolder;
-  const offsetPrev = hasPrevFolder ? 1 : 0;
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(
-    initialIndex + offsetPrev
-  );
   const [currentNode, setCurrentNode] = useState<MediaNode | null>(
     allNodes[initialIndex] ?? null
   );
@@ -95,13 +100,40 @@ export function MediaViewer({
   });
   const swiperRef = useRef<SwiperClass | null>(null);
 
-  // 仮想スライド
+  // 仮想スライド構成
+  // [最初のページダミー] → [前のフォルダナビ] → [メディア配列] → [次のフォルダナビ] → [最後のページダミー]
   const allSlides = useMemo(() => {
     const slides: Slide[] = [...allNodes];
-    if (hasPrevFolder) slides.unshift(prevFolderNav); // 先頭: 前のフォルダ
-    if (hasNextFolder) slides.push(nextFolderNav); // 末尾: 次のフォルダ
+
+    // 前側のスライドを追加
+    if (hasPrevFolder) {
+      slides.unshift(firstPageDummy);
+      slides.unshift(prevFolderNav);
+    } else {
+      slides.unshift(firstPageDummy);
+    }
+
+    // 後側のスライドを追加
+    if (hasNextFolder) {
+      slides.push(lastPageDummy);
+      slides.push(nextFolderNav);
+    } else {
+      slides.push(lastPageDummy);
+    }
+
     return slides;
   }, [allNodes, hasPrevFolder, hasNextFolder]);
+
+  // 実際のメディアインデックスからスライドインデックスへの変換
+  const getSlideIndex = (mediaIndex: number): number => {
+    let offset = 1; // firstPageDummy
+    if (hasPrevFolder) offset += 1; // prevFolderNav
+    return mediaIndex + offset;
+  };
+
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(
+    getSlideIndex(initialIndex)
+  );
 
   // タイトル設定
   const { setTitle } = useDocumentTitleControl();
@@ -144,6 +176,13 @@ export function MediaViewer({
     setCurrentSlideIndex(swiper.activeIndex);
 
     const slide = allSlides[swiper.activeIndex];
+
+    // ダミーページの場合は何もしない
+    if (slide === firstPageDummy || slide === lastPageDummy) {
+      return;
+    }
+
+    // フォルダ遷移
     if (!!onPrevFolder && slide === prevFolderNav) {
       onPrevFolder("last");
       return;
@@ -153,14 +192,16 @@ export function MediaViewer({
       return;
     }
 
-    // 状態更新
-    const index = swiper.activeIndex - offsetPrev;
+    // メディアノードの場合のみ状態更新
+    let offset = 1; // firstPageDummy
+    if (hasPrevFolder) offset += 1; // prevFolderNav
+    const index = swiper.activeIndex - offset;
     const node = allNodes[index];
     if (node) {
       setCurrentIndex(index);
       setCurrentNode(node);
       updateTitle(node);
-      onIndexChange(index); // 親に通知
+      onIndexChange(index);
     }
   };
 
@@ -351,7 +392,7 @@ export function MediaViewer({
       <Swiper
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         modules={[Virtual, Navigation, Zoom]}
-        initialSlide={initialIndex + offsetPrev}
+        initialSlide={getSlideIndex(initialIndex)}
         onSlideChange={handleSwipe}
         virtual={{
           enabled: true,
@@ -365,6 +406,8 @@ export function MediaViewer({
       >
         {allSlides.map((slide, i) => {
           const active = currentSlideIndex === i;
+          const isFirstPage = slide === firstPageDummy;
+          const isLastPage = slide === lastPageDummy;
           const isPrevFolder = slide === prevFolderNav;
           const isNextFolder = slide === nextFolderNav;
 
@@ -376,7 +419,29 @@ export function MediaViewer({
               onWheel={handleWheel}
             >
               <div className="w-full h-full flex items-center justify-center">
-                {isPrevFolder || isNextFolder ? (
+                {isFirstPage ? (
+                  // 最初のページダミー
+                  <div className="flex flex-col items-center justify-center text-white/70">
+                    <ChevronLeft className="mb-4" size={64} strokeWidth={1} />
+                    <p className="text-xl font-medium mb-2">最初のページです</p>
+                    {hasPrevFolder && (
+                      <p className="text-sm text-white/50">
+                        前のフォルダに移動するにはもう一度左にスワイプ
+                      </p>
+                    )}
+                  </div>
+                ) : isLastPage ? (
+                  // 最後のページダミー
+                  <div className="flex flex-col items-center justify-center text-white/70">
+                    <ChevronRight className="mb-4" size={64} strokeWidth={1} />
+                    <p className="text-xl font-medium mb-2">最後のページです</p>
+                    {hasNextFolder && (
+                      <p className="text-sm text-white/50">
+                        次のフォルダに移動するにはもう一度右にスワイプ
+                      </p>
+                    )}
+                  </div>
+                ) : isPrevFolder || isNextFolder ? (
                   // 次・前のフォルダ
                   <div className="flex flex-col items-center justify-center text-white/50">
                     <Loader2 className="animate-spin mb-4" size={48} />
