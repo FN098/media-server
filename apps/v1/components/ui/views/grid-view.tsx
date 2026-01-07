@@ -30,17 +30,12 @@ export function GridView({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // コンテナの幅に合わせてグリッドの列数と行の高さを計算
-  const { columnCount: rawColumnCount, rowHeight } = useGridConfig(
-    containerRef,
-    {
-      columnWidth: 200,
-    }
-  );
-
-  // 0除算防止
-  const columnCount = Math.max(1, rawColumnCount);
+  const { columnCount, rowHeight } = useGridConfig(containerRef, {
+    columnWidth: 200,
+  });
 
   const rowCount = useMemo(
+    // columnCount は 1 以上なので 0 除算の心配はない
     () => Math.ceil(allNodes.length / columnCount),
     [columnCount, allNodes.length]
   );
