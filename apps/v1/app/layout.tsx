@@ -1,4 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
+import { ScrollEdgeButtons } from "@/components/ui/buttons/scroll-edge-button";
 import { AppQueryClientProvider } from "@/providers/app-query-client-provider";
 import { ThumbEventProvider } from "@/providers/thumb-event-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
@@ -38,6 +39,7 @@ export default function RootLayout({
           </TooltipProvider>
         </AppQueryClientProvider>
         <Toaster />
+        <ScrollEdgeButtons />
       </body>
     </html>
   );
