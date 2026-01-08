@@ -516,7 +516,10 @@ function TagInput({
               {suggestions.map((tag) => (
                 <button
                   key={tag.id}
-                  onClick={() => onSelectSuggestion(tag)}
+                  onClick={() => {
+                    onSelectSuggestion(tag);
+                    inputRef.current?.focus();
+                  }}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-primary-foreground-foreground rounded-lg transition-colors flex items-center justify-between group"
                 >
                   <span>{tag.name}</span>
