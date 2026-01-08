@@ -69,6 +69,14 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     });
   }, []);
 
+  const deleteKeys = useCallback((keys: Iterable<K>) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      for (const key of keys) next.delete(key);
+      return next;
+    });
+  }, []);
+
   const replaceSelection = useCallback((key: K) => {
     setSelectedKeys(new Set([key]));
   }, []);
@@ -87,6 +95,7 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     selectKey,
     unselectKey,
     addKeys,
+    deleteKeys,
     replaceSelection,
 
     lastSelectedKey,

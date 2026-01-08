@@ -18,6 +18,7 @@ export function usePathSelection(initialSelectedPaths?: Iterable<PathType>) {
     selectKey,
     unselectKey,
     addKeys,
+    deleteKeys,
     replaceSelection,
 
     lastSelectedKey,
@@ -38,6 +39,7 @@ export function usePathSelection(initialSelectedPaths?: Iterable<PathType>) {
     selectPath: selectKey,
     unselectPath: unselectKey,
     addPaths: addKeys,
+    deletePaths: deleteKeys,
     replaceSelection,
 
     lastSelectedPath: lastSelectedKey,

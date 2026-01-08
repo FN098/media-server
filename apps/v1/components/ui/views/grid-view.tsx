@@ -169,6 +169,24 @@ function Cell({
 
     e.preventDefault();
 
+    if (e.shiftKey && e.ctrlKey && selectCtx.lastSelectedPath !== null) {
+      selectCtx.enterSelectionMode();
+      const lastIdx = allNodes.findIndex(
+        (n) => n.path === selectCtx.lastSelectedPath
+      );
+      if (lastIdx !== -1) {
+        const start = Math.min(lastIdx, index);
+        const end = Math.max(lastIdx, index);
+        const paths = allNodes
+          .slice(start, end + 1)
+          .filter((n) => isMedia(n.type))
+          .map((n) => n.path);
+        selectCtx.deletePaths(paths);
+        onSelect?.();
+        return;
+      }
+    }
+
     if (e.shiftKey && selectCtx.lastSelectedPath !== null) {
       selectCtx.enterSelectionMode();
       const lastIdx = allNodes.findIndex(
@@ -211,7 +229,6 @@ function Cell({
       if (!isMediaNode) return;
       if (!isSelected) {
         selectCtx.selectPath(node.path);
-        onSelect?.();
       } else {
         selectCtx.unselectPath(node.path);
 
@@ -223,6 +240,7 @@ function Cell({
           selectCtx.exitSelectionMode();
         }
       }
+      onSelect?.();
       return;
     }
 
