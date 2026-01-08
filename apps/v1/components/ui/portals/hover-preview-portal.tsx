@@ -35,6 +35,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
   const isMounted = useMounted();
   const [coords, setCoords] = useState<Coords | null>(null);
   const [visible, setVisible] = useState(false);
+  const [hasEverHovered, setHasEverHovered] = useState(false); // 一度でもホバーしたか
   const [imageSize, setImageSize] = useState<Size | null>(null);
 
   const handleMouseMove = useCallback(
@@ -64,8 +65,10 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
   );
 
   const handleMouseEnter = useCallback(() => {
+    if (!enabled) return;
+    setHasEverHovered(true); // 初回ホバー時にフラグを立てる
     setVisible(true);
-  }, []);
+  }, [enabled]);
 
   const handleMouseLeave = useCallback(() => {
     setVisible(false);
@@ -79,9 +82,9 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
     []
   );
 
-  // ポータルの内容をメモ化
+  // ポータルの内容をメモ化 - hasEverHoveredがtrueになるまでnullを返す
   const portalContent = useMemo(() => {
-    if (!enabled || !coords || !isMounted) return null;
+    if (!enabled || !coords || !isMounted || !hasEverHovered) return null;
 
     return (
       <AnimatePresence>
@@ -132,7 +135,15 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
         )}
       </AnimatePresence>
     );
-  }, [enabled, coords, isMounted, visible, node, handleImageLoad]);
+  }, [
+    enabled,
+    coords,
+    isMounted,
+    hasEverHovered,
+    visible,
+    node,
+    handleImageLoad,
+  ]);
 
   return (
     <div
