@@ -201,24 +201,22 @@ export function Explorer() {
 
   // ビューアが閉じられた瞬間にスクロールを実行（ブラウザバック、閉じるボタン両方対応）
   useEffect(() => {
-    // isViewModeがfalseになった、かつ直前のインデックスがある場合
     if (!isViewMode && lastViewerIndexRef.current !== null) {
       const index = lastViewerIndexRef.current;
 
-      // 次のレンダリングサイクルで実行するためにsetTimeoutを使用
-      const timer = setTimeout(() => {
+      // 次のレンダリングサイクルで実行
+      const animationId = requestAnimationFrame(() => {
         const element = document.getElementById(`media-item-${index}`);
         if (element) {
           element.scrollIntoView({
-            behavior: "smooth", // または "auto"
-            block: "center", // 画面中央に来るように調整
+            behavior: "instant",
+            block: "center",
           });
         }
-        // スクロール後はRefをクリア（任意）
         lastViewerIndexRef.current = null;
-      }, 100);
+      });
 
-      return () => clearTimeout(timer);
+      return () => cancelAnimationFrame(animationId);
     }
   }, [isViewMode]);
 
