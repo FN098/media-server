@@ -13,10 +13,20 @@ import {
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
+import { Slider } from "@/shadcn/components/ui/slider";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
-import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
+import {
+  Check,
+  Edit2,
+  Eye,
+  Plus,
+  RotateCcw,
+  Save,
+  TagIcon,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -26,13 +36,13 @@ export type TagEditMode = "default" | "single" | "none";
 export function TagEditSheet({
   targetNodes,
   mode = "default",
-  transparent,
+  opacity: initialOpacity = 100,
   edit,
   onClose,
 }: {
   targetNodes: MediaNode[];
   mode?: TagEditMode;
-  transparent?: boolean;
+  opacity?: number;
   edit?: boolean;
   onClose: () => void;
 }) {
@@ -57,13 +67,12 @@ export function TagEditSheet({
   }, [edit]);
 
   // 透明モード
-  const [isTransparent, setIsTransparent] = useState(transparent ?? false);
-  const toggleIsTransparent = () => setIsTransparent((prev) => !prev);
+  const [opacity, setOpacity] = useState(initialOpacity);
   useEffect(() => {
-    if (transparent !== undefined) {
-      setIsTransparent(transparent);
+    if (initialOpacity !== undefined) {
+      setOpacity(initialOpacity);
     }
-  }, [transparent]);
+  }, [initialOpacity]);
 
   // 新規作成
   const handleNewAdd = (name: string) => {
@@ -162,10 +171,6 @@ export function TagEditSheet({
       callback: () => toggleIsEditing(),
       condition: () => canEdit,
     },
-    {
-      key: "x",
-      callback: () => toggleIsTransparent(),
-    },
   ]);
 
   return (
@@ -212,13 +217,13 @@ export function TagEditSheet({
           "rounded-t-[24px] pb-safe overflow-visible"
         )}
       >
-        {/* 背景とブラー専用のレイヤーを内部に配置 */}
+        {/* 背景レイヤー */}
         <div
-          className={cn(
-            "absolute inset-0 -bottom-[300px] -z-10 rounded-t-[24px]",
-            "bg-background border border-b-0 border-border",
-            isTransparent && "bg-background/20 backdrop-blur-xs"
-          )}
+          className="absolute inset-0 -bottom-[300px] -z-10 rounded-t-[24px] bg-background border border-b-0 border-border"
+          style={{
+            backgroundColor: `color-mix(in oklch, var(--background), transparent)`,
+            backdropFilter: opacity > 0 ? `blur(${opacity / 10}px)` : "none",
+          }}
         />
 
         <div className="relative rounded-t-[24px] pb-safe">
@@ -228,10 +233,7 @@ export function TagEditSheet({
             onPointerDown={(e) => controls.start(e)}
           >
             <div
-              className={cn(
-                "w-12 h-1.5 bg-muted rounded-full mx-auto",
-                isTransparent && "bg-muted/40"
-              )}
+              className={cn("w-12 h-1.5 bg-muted/40 rounded-full mx-auto")}
             />
           </div>
 
@@ -251,11 +253,11 @@ export function TagEditSheet({
                     mode={mode}
                     count={targetNodes.length}
                     isEditing={false}
-                    isTransparent={isTransparent}
+                    opacity={opacity}
                     canEdit={canEdit}
                     onClose={handleTerminate}
-                    onToggleTransparent={toggleIsTransparent}
                     onEditClick={handleEdit}
+                    onOpacityChange={setOpacity}
                   />
                   <TagList
                     isEditing={false}
@@ -264,7 +266,7 @@ export function TagEditSheet({
                     pendingNewTags={editor.pendingNewTags}
                     tagStates={editor.tagStates}
                     onToggle={editor.toggleTagChange}
-                    isTransparent={isTransparent}
+                    opacity={opacity}
                   />
                 </motion.div>
               ) : (
@@ -280,15 +282,15 @@ export function TagEditSheet({
                     mode={mode}
                     count={targetNodes.length}
                     isEditing={true}
-                    isTransparent={isTransparent}
+                    opacity={opacity}
+                    onOpacityChange={setOpacity}
                     canEdit={canEdit}
                     onEditClick={() => {}}
                     onClose={handleTerminate}
-                    onToggleTransparent={toggleIsTransparent}
                   />
                   <TagInput
                     value={editor.newTagName}
-                    isTransparent={isTransparent}
+                    opacity={opacity}
                     disabled={isLoading}
                     suggestions={editor.suggestedTags}
                     onChange={editor.setNewTagName}
@@ -304,14 +306,14 @@ export function TagEditSheet({
                     pendingNewTags={editor.pendingNewTags}
                     tagStates={editor.tagStates}
                     onToggle={editor.toggleTagChange}
-                    isTransparent={isTransparent}
+                    opacity={opacity}
                   />
                   <SheetFooter
                     onReset={editor.resetChanges}
                     onApply={() => void handleApply()}
                     hasChanges={editor.hasChanges}
                     isLoading={isLoading}
-                    isTransparent={isTransparent}
+                    opacity={opacity}
                   />
                 </motion.div>
               )}
@@ -327,20 +329,20 @@ function SheetHeader({
   mode,
   count,
   isEditing,
-  isTransparent,
   canEdit,
+  opacity,
+  onOpacityChange,
   onEditClick,
   onClose,
-  onToggleTransparent,
 }: {
   mode: TagEditMode;
   count: number;
   isEditing: boolean;
-  isTransparent: boolean;
   canEdit: boolean;
+  opacity: number;
+  onOpacityChange: (val: number) => void;
   onEditClick: () => void;
   onClose: () => void;
-  onToggleTransparent: () => void;
 }) {
   const textMap = {
     single: {
@@ -364,51 +366,70 @@ function SheetHeader({
   const selection = textMap[mode]["selection"];
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <Button
-          size="sm"
-          variant="ghost"
-          className={cn(
-            "h-10 w-10 p-0 rounded-full",
-            isTransparent && "bg-background/20 hover:bg-accent"
-          )}
-          onClick={onToggleTransparent}
-        >
-          <TagIcon />
-        </Button>
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className={cn("text-sm font-bold")}>{title}</h3>
+    <div
+      className="flex items-center gap-3 w-full"
+      style={{
+        color: `color-mix(in oklch, var(--secondary-foreground) ${Math.max(70, opacity)}%, transparent)`,
+      }}
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="p-1.5 rounded-full bg-primary/10 shrink-0">
+          <TagIcon size={16} />
+        </div>
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-1">
+            <h3 className="text-sm font-bold truncate leading-none">{title}</h3>
             {!isEditing && (
               <Button
-                size="sm"
+                size="icon"
                 variant="ghost"
-                className={cn(
-                  "text-primary hover:bg-primary/5 p-1 rounded-md transition-colors ml-2",
-                  isTransparent && "bg-background/20 hover:bg-accent"
-                )}
+                className="h-5 w-5 p-0 hover:bg-primary/10 shrink-0"
                 onClick={onEditClick}
                 disabled={!canEdit}
               >
-                <Edit2 size={14} />
+                <Edit2 size={12} />
               </Button>
             )}
           </div>
-          <p className={cn("text-[10px] text-muted-foreground")}>{selection}</p>
+          {selection && (
+            <p className="text-[9px] text-muted-foreground truncate line-clamp-1">
+              {selection}
+            </p>
+          )}
         </div>
       </div>
 
+      <div
+        className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-border/40 flex-1 max-w-[120px] ml-auto"
+        style={{
+          backgroundColor: `color-mix(in oklch, var(--muted) 5%, transparent)`,
+        }}
+      >
+        <Eye size={12} className="text-muted-foreground/60 shrink-0" />
+        <Slider
+          value={[opacity]}
+          min={0}
+          max={100}
+          onValueChange={(vals) => onOpacityChange(vals[0])}
+          className={cn(
+            "flex-1 cursor-pointer",
+            "[&_[data-slot=slider-track]]:bg-muted/30",
+            "[&_[data-slot=slider-range]]:bg-transparent",
+            "[&_[data-slot=slider-thumb]]:size-3 [&_[data-slot=slider-thumb]]:bg-muted-foreground/80 [&_[data-slot=slider-thumb]]:border-none"
+          )}
+        />
+        <span className="text-[9px] font-mono text-muted-foreground/80 tabular-nums shrink-0">
+          {opacity}
+        </span>
+      </div>
+
       <Button
-        size="sm"
+        size="icon"
         variant="ghost"
-        className={cn(
-          "h-10 w-10 p-0 rounded-full",
-          isTransparent && "bg-background/20 hover:bg-accent"
-        )}
+        className="h-8 w-8 rounded-full bg-muted/20 hover:bg-muted/40 shrink-0"
         onClick={onClose}
       >
-        <X size={20} />
+        <X size={18} />
       </Button>
     </div>
   );
@@ -416,24 +437,23 @@ function SheetHeader({
 
 function TagInput({
   value,
-  isTransparent,
   disabled,
   suggestions,
+  autoFocus,
   onChange,
   onAdd,
   onSelectSuggestion,
   onApply,
-  autoFocus,
 }: {
   value: string;
-  isTransparent: boolean;
   disabled: boolean;
   suggestions: Tag[];
+  autoFocus?: boolean;
+  opacity: number;
   onChange: (val: string) => void;
   onAdd: () => void;
   onSelectSuggestion: (tag: Tag) => void;
   onApply: () => void;
-  autoFocus?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggests = useMemo(
@@ -492,8 +512,6 @@ function TagInput({
               "focus-visible:outline-none",
               "focus-visible:ring-2 focus-visible:ring-primary",
               "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-
-              isTransparent && "bg-primary/50",
             ])}
           >
             新規作成
@@ -539,26 +557,39 @@ function TagInput({
 }
 
 function TagList({
+  opacity,
   isEditing,
   tags,
   pendingChanges,
   pendingNewTags,
   tagStates,
   onToggle,
-  isTransparent,
 }: {
+  opacity: number;
   isEditing: boolean;
   tags: Tag[];
-  pendingChanges: Record<string, TagOperator>; // key: tagId
+  pendingChanges: Record<string, TagOperator>;
   pendingNewTags: PendingNewTag[];
-  tagStates: Record<string, TagState>; // key: tagId
+  tagStates: Record<string, TagState>;
   onToggle: (tag: Tag) => void;
-  isTransparent: boolean;
 }) {
   // --- 閲覧モード ---
   if (!isEditing) {
     return (
-      <div className="flex flex-wrap gap-2 py-2 overflow-hidden relative">
+      <div
+        style={
+          {
+            "--scrollbar-color": `color-mix(in oklch, var(--muted-foreground) ${Math.max(20, opacity * 0.5)}%, transparent)`,
+          } as React.CSSProperties
+        }
+        className={cn(
+          "flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto py-1 pr-1",
+          "[&::-webkit-scrollbar]:w-1.5",
+          "[&::-webkit-scrollbar-track]:bg-transparent",
+          "[&::-webkit-scrollbar-thumb]:bg-[var(--scrollbar-color)]",
+          "[&::-webkit-scrollbar-thumb]:rounded-full"
+        )}
+      >
         <AnimatePresence mode="wait">
           {tags.length > 0 ? (
             <motion.div
@@ -581,9 +612,13 @@ function TagList({
                   <Badge
                     variant="secondary"
                     className={cn(
-                      "py-2 px-4 rounded-lg text-xs",
-                      isTransparent && "bg-secondary/50"
+                      "py-2 px-4 rounded-xl text-xs border-none",
+                      "select-text cursor-text"
                     )}
+                    style={{
+                      backgroundColor: `color-mix(in oklch, var(--secondary) ${opacity}%, transparent)`,
+                      color: `color-mix(in oklch, var(--secondary-foreground) ${Math.max(70, opacity)}%, transparent)`,
+                    }}
                   >
                     {tag.name}
                   </Badge>
@@ -609,7 +644,20 @@ function TagList({
 
   // --- 編集モード ---
   return (
-    <div className="flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto py-1">
+    <div
+      style={
+        {
+          "--scrollbar-color": `color-mix(in oklch, var(--muted-foreground) ${Math.max(20, opacity * 0.5)}%, transparent)`,
+        } as React.CSSProperties
+      }
+      className={cn(
+        "flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto py-1 px-1",
+        "[&::-webkit-scrollbar]:w-1.5",
+        "[&::-webkit-scrollbar-track]:bg-transparent",
+        "[&::-webkit-scrollbar-thumb]:bg-[var(--scrollbar-color)]",
+        "[&::-webkit-scrollbar-thumb]:rounded-full"
+      )}
+    >
       {tags.map((tag) => {
         const op = pendingChanges[tag.id];
 
@@ -629,19 +677,30 @@ function TagList({
             key={tag.id}
             onClick={() => onToggle(tag)}
             className={cn(
-              "relative flex items-center gap-1.5 py-2 px-4 rounded-xl text-xs font-medium transition-all active:scale-95",
+              "relative flex items-center gap-1.5 py-2 px-4 rounded-xl text-xs font-medium transition-all active:scale-95 border-none",
               isHighlighted
-                ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                : "bg-muted text-muted-foreground",
+                ? "text-primary-foreground shadow-md shadow-primary/20"
+                : "text-muted-foreground",
               op === "add" && "ring-2 ring-yellow-400 ring-offset-2",
               op === "remove" && "opacity-40 line-through",
               isPendingNew &&
-                "border-2 border-dashed border-primary/60 bg-primary/10 text-primary",
-              isTransparent && (isHighlighted ? "bg-primary/50" : "bg-muted/50")
+                "border-2 border-dashed border-primary/60 text-primary"
             )}
+            style={{
+              backgroundColor: isHighlighted
+                ? `color-mix(in oklch, var(--primary) ${opacity}%, transparent)`
+                : `color-mix(in oklch, var(--muted) ${opacity}%, transparent)`,
+
+              color: isHighlighted
+                ? `color-mix(in oklch, var(--primary-foreground) ${Math.max(80, opacity)}%, transparent)`
+                : undefined,
+            }}
           >
-            {isOnAfterApply && <Check size={12} />}
-            {tag.name}
+            <span className="flex items-center gap-1.5 pointer-events-none">
+              {isOnAfterApply && <Check size={12} />}
+              {tag.name}
+            </span>
+
             {op && (
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-yellow-400 rounded-full border-2 border-background" />
             )}
@@ -658,26 +717,22 @@ function TagList({
 }
 
 function SheetFooter({
-  onReset,
-  onApply,
   hasChanges,
   isLoading,
-  isTransparent,
+  onReset,
+  onApply,
 }: {
-  onReset: () => void;
-  onApply: () => void;
   hasChanges: boolean;
   isLoading: boolean;
-  isTransparent: boolean;
+  opacity: number;
+  onReset: () => void;
+  onApply: () => void;
 }) {
   return (
     <div className="flex gap-3 pt-2">
       <Button
         variant="outline"
-        className={cn(
-          "flex-1 h-12 rounded-xl gap-2",
-          isTransparent && "bg-secondary/50"
-        )}
+        className={cn("flex-1 h-12 rounded-xl gap-2")}
         onClick={onReset}
         disabled={!hasChanges || isLoading}
       >
@@ -685,8 +740,7 @@ function SheetFooter({
       </Button>
       <Button
         className={cn(
-          "flex-[2] h-12 rounded-xl gap-2 shadow-lg shadow-primary/25",
-          isTransparent && "bg-primary/50"
+          "flex-[2] h-12 rounded-xl gap-2 shadow-lg shadow-primary/25"
         )}
         onClick={onApply}
         disabled={!hasChanges || isLoading}

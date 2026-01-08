@@ -393,7 +393,7 @@ export function Explorer() {
               targetNodes={selected}
               onClose={handleCloseTagEditor}
               mode={tagEditMode}
-              transparent={tagEditMode === "single"}
+              opacity={50}
             />
           )}
         </AnimatePresence>
