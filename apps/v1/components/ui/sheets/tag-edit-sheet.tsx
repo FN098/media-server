@@ -208,10 +208,18 @@ export function TagEditSheet({
           "fixed bottom-0 left-1/2 -translate-x-1/2 z-[70]",
           "w-full max-w-md",
           "pointer-events-auto select-none",
-          "bg-background border border-b-0 rounded-t-[24px] pb-safe overflow-visible",
-          isTransparent && "bg-background/20 backdrop-blur-xs"
+          "rounded-t-[24px] pb-safe overflow-visible"
         )}
       >
+        {/* 背景とブラー専用のレイヤーを内部に配置 */}
+        <div
+          className={cn(
+            "absolute inset-0 -bottom-[300px] -z-10 rounded-t-[24px]",
+            "bg-background border border-b-0 border-border",
+            isTransparent && "bg-background/20 backdrop-blur-xs"
+          )}
+        />
+
         <div className="relative rounded-t-[24px] pb-safe">
           {/* ハンドル（つまみ） */}
           <div
@@ -308,14 +316,6 @@ export function TagEditSheet({
               )}
             </AnimatePresence>
           </div>
-
-          {/* コンテンツエリアの見切れ防止用のダミー */}
-          <div
-            className={cn(
-              "absolute top-[100%] left-[-1px] right-[-1px] h-[300px] border-x bg-background",
-              isTransparent && "bg-background/20 backdrop-blur-xs"
-            )}
-          />
         </div>
       </motion.div>
     </>
