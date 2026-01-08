@@ -148,7 +148,7 @@ function Cell({
   /* ================= Selection ================= */
 
   const selectCtx = usePathSelectionContext();
-  const isSelected = selectCtx.isPathSelected(node.path);
+  const isSelected = selectCtx.isSelectedPath(node.path);
 
   /* ================= Long Press ================= */
 
@@ -219,7 +219,6 @@ function Cell({
     onSelect?.();
   };
 
-  // タップ（モバイル用）
   const handleTap = (e: React.MouseEvent) => {
     if (isLongPressed || !isMobile) return;
 
@@ -247,7 +246,6 @@ function Cell({
     onOpen?.(node);
   };
 
-  // ダブルクリック
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (selectCtx.isSelectionMode || isMobile) return;
 
@@ -255,16 +253,17 @@ function Cell({
 
     onOpen?.(node);
   };
+
   return (
     <div className="w-full h-full p-1">
       <div
-        id={`media-item-${index}`}
+        id={`media-item-${index}`} // 自動スクロールで使う
         onMouseDown={start}
         onMouseUp={stop}
         onMouseLeave={stop}
         onTouchStart={start}
         onTouchEnd={stop}
-        onTouchMove={stop} // スクロール時に長押しをキャンセル
+        onTouchMove={stop}
         onClick={isMobile ? handleTap : handleClick}
         onDoubleClick={isMobile ? undefined : handleDoubleClick}
         className={cn(

@@ -14,16 +14,9 @@ import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shadcn/components/ui/table";
 import { cn } from "@/shadcn/lib/utils";
-import React, { useMemo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import React, { useRef } from "react";
 import { toast } from "sonner";
 
 export function ListView({
@@ -35,41 +28,79 @@ export function ListView({
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const rowVirtualizer = useVirtualizer({
+    count: allNodes.length,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => 40, // 行高さ固定（px）
+    overscan: 10,
+  });
+
   return (
-    <div className="w-full h-full">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead></TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Updated</TableHead>
-            <TableHead>Size</TableHead>
-            <TableHead>Last Viewed</TableHead>
-            <TableHead>Favorite</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {allNodes.map((node, index) => (
-            <RowItem
-              key={node.path}
-              node={node}
-              allNodes={allNodes}
-              index={index}
-              isMobile={isMobile}
-              onOpen={onOpen}
-              onSelect={onSelect}
-            />
-          ))}
-        </TableBody>
-      </Table>
+    <div className="w-full h-full flex flex-col">
+      <HeaderRow />
+
+      <div ref={containerRef} className="flex-1 overflow-auto relative">
+        <div
+          style={{
+            height: rowVirtualizer.getTotalSize(),
+            position: "relative",
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((vRow) => {
+            const node = allNodes[vRow.index];
+
+            return (
+              <div
+                key={node.path}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${vRow.start}px)`,
+                }}
+              >
+                <DataRow
+                  node={node}
+                  index={vRow.index}
+                  allNodes={allNodes}
+                  isMobile={isMobile}
+                  onOpen={onOpen}
+                  onSelect={onSelect}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
 
-function RowItem({
+function HeaderRow() {
+  return (
+    <div
+      className={cn(
+        "grid grid-cols-[40px_1fr_80px_140px_100px_140px_80px]",
+        "h-10 items-center border-b bg-background px-2 text-sm font-medium"
+      )}
+    >
+      <div />
+      <div>Name</div>
+      <div>Type</div>
+      <div>Updated</div>
+      <div>Size</div>
+      <div>Last Viewed</div>
+      <div>Favorite</div>
+    </div>
+  );
+}
+
+function DataRow({
   node,
   index,
   allNodes,
@@ -84,63 +115,46 @@ function RowItem({
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
 }) {
-  const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
+  const isMediaNode = React.useMemo(() => isMedia(node.type), [node.type]);
 
-  // お気に入り
+  /* ================= Favorite ================= */
+
   const favCtx = useFavoritesContext();
+  const isFavorite = favCtx.isFavorite(node.path);
 
-  const isFavorite = useMemo(
-    () => favCtx.isFavorite(node.path),
-    [favCtx, node.path]
-  );
-
-  const handleToggleFavorite = () => {
+  const toggleFavorite = () => {
     try {
       void favCtx.toggleFavorite(node.path);
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error("お気に入りの更新に失敗しました");
     }
   };
 
-  // 選択
+  /* ================= Selection ================= */
+
   const selectCtx = usePathSelectionContext();
+  const isSelected = selectCtx.isSelectedPath(node.path);
 
-  const isSelected = useMemo(
-    () => selectCtx.isPathSelected(node.path),
-    [selectCtx, node.path]
-  );
+  /* ================= Long Press ================= */
 
-  // チェックボックス
-  const handleCheckedChange = (checked: boolean) => {
+  const handleLongPress = () => {
     if (!isMediaNode) return;
-
     selectCtx.enterSelectionMode();
-
-    if (checked) {
-      selectCtx.selectPath(node.path);
-      onSelect?.();
-    } else {
-      selectCtx.unselectPath(node.path);
-
-      // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
-      if (
-        selectCtx.selectedPaths.size === 1 &&
-        selectCtx.selectedPaths.has(node.path)
-      ) {
-        selectCtx.exitSelectionMode();
-      }
-    }
+    selectCtx.replaceSelection(node.path);
+    selectCtx.setLastSelectedPath(node.path);
+    onSelect?.();
   };
 
-  // クリック
+  const { start, stop, isLongPressed } = useLongPress(handleLongPress, 600);
+
+  /* ================= Click ================= */
+
   const handleClick = (e: React.MouseEvent) => {
     if (!isMediaNode || isLongPressed || isMobile) return;
 
     e.preventDefault();
 
-    // Shift キー: 範囲選択
-    if (e.shiftKey && selectCtx.lastSelectedPath !== null) {
+    if (e.shiftKey && e.ctrlKey && selectCtx.lastSelectedPath !== null) {
       selectCtx.enterSelectionMode();
       const lastIdx = allNodes.findIndex(
         (n) => n.path === selectCtx.lastSelectedPath
@@ -152,13 +166,29 @@ function RowItem({
           .slice(start, end + 1)
           .filter((n) => isMedia(n.type))
           .map((n) => n.path);
+        selectCtx.deletePaths(paths);
+        onSelect?.();
+        return;
+      }
+    }
+
+    if (e.shiftKey && selectCtx.lastSelectedPath) {
+      const lastIdx = allNodes.findIndex(
+        (n) => n.path === selectCtx.lastSelectedPath
+      );
+      if (lastIdx !== -1) {
+        const [s, eIdx] = [Math.min(lastIdx, index), Math.max(lastIdx, index)];
+        const paths = allNodes
+          .slice(s, eIdx + 1)
+          .filter((n) => isMedia(n.type))
+          .map((n) => n.path);
+        selectCtx.enterSelectionMode();
         selectCtx.addPaths(paths);
         onSelect?.();
         return;
       }
     }
 
-    // Ctrl/Command キー: 複数選択
     if (e.ctrlKey || e.metaKey) {
       selectCtx.enterSelectionMode();
       selectCtx.togglePath(node.path);
@@ -167,25 +197,21 @@ function RowItem({
       return;
     }
 
-    // 通常選択
     selectCtx.exitSelectionMode();
     selectCtx.replaceSelection(node.path);
     selectCtx.setLastSelectedPath(node.path);
     onSelect?.();
   };
 
-  // タップ（モバイル用）
   const handleTap = (e: React.MouseEvent) => {
     if (isLongPressed || !isMobile) return;
 
     e.preventDefault();
 
-    // 選択モード中
     if (selectCtx.isSelectionMode) {
       if (!isMediaNode) return;
       if (!isSelected) {
         selectCtx.selectPath(node.path);
-        onSelect?.();
       } else {
         selectCtx.unselectPath(node.path);
 
@@ -197,14 +223,13 @@ function RowItem({
           selectCtx.exitSelectionMode();
         }
       }
+      onSelect?.();
       return;
     }
 
-    // 通常
     onOpen?.(node);
   };
 
-  // ダブルクリック
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (selectCtx.isSelectionMode || isMobile) return;
 
@@ -213,83 +238,69 @@ function RowItem({
     onOpen?.(node);
   };
 
-  // 長押し
-  const handleLongPress = () => {
-    if (!isMediaNode) return;
-    selectCtx.enterSelectionMode();
-    selectCtx.replaceSelection(node.path);
-    selectCtx.setLastSelectedPath(node.path);
-    onSelect?.();
-  };
-
-  const {
-    start: startLongPress,
-    stop: stopLongPress,
-    isLongPressed,
-  } = useLongPress(handleLongPress, 600);
-
   return (
-    <TableRow
-      id={`media-item-${index}`}
-      onMouseDown={startLongPress}
-      onMouseUp={stopLongPress}
-      onMouseLeave={stopLongPress}
-      onTouchStart={startLongPress}
-      onTouchEnd={stopLongPress}
-      onTouchMove={stopLongPress} // スクロール時に長押しをキャンセル
+    <div
+      id={`media-item-${index}`} // 自動スクロールで使う
+      role="row"
+      onMouseDown={start}
+      onMouseUp={stop}
+      onMouseLeave={stop}
+      onTouchStart={start}
+      onTouchEnd={stop}
+      onTouchMove={stop}
       onClick={isMobile ? handleTap : handleClick}
       onDoubleClick={isMobile ? undefined : handleDoubleClick}
       className={cn(
-        "select-none cursor-pointer transition-colors",
-        isSelected
-          ? "bg-primary/10 hover:bg-primary/20"
-          : "hover:bg-muted/50 active:bg-muted"
+        "grid grid-cols-[40px_1fr_80px_140px_100px_140px_80px]",
+        "h-10 items-center px-2 border-b select-none cursor-pointer",
+        isSelected ? "bg-primary/10 hover:bg-primary/20" : "hover:bg-muted/50"
       )}
     >
-      <TableCell>
-        <div className={cn("transition-opacity")}>
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={handleCheckedChange}
-            onClick={(e) => e.stopPropagation()}
-            disabled={!isMedia(node.type)}
-          />
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <MediaThumbIcon type={node.type} className="w-6 h-6" />
-          <span className="truncate">{node.title ?? node.name}</span>
-        </div>
-      </TableCell>
-      <TableCell>
+      {/* 選択チェックボックス */}
+      <div onClick={(e) => e.stopPropagation()}>
+        <Checkbox checked={isSelected} disabled={!isMediaNode} />
+      </div>
+
+      {/* サムネイル */}
+      <div className="flex items-center gap-2 truncate">
+        <MediaThumbIcon type={node.type} className="w-6 h-6" />
+        <span className="truncate">{node.title ?? node.name}</span>
+      </div>
+
+      {/* ファイルタイプ */}
+      <div>
         {node.isDirectory
           ? "folder"
-          : getExtension(node.name, { withDot: false, case: "lower" })}
-      </TableCell>
-      <TableCell>
+          : getExtension(node.name, { withDot: false })}
+      </div>
+
+      {/* 更新日時 */}
+      <div>
         <LocalDate value={node.mtime} />
-      </TableCell>
-      <TableCell>{formatBytes(node.size)}</TableCell>
-      <TableCell>
+      </div>
+
+      {/* ファイルサイズ */}
+      <div>{formatBytes(node.size)}</div>
+
+      {/* 最終閲覧日 */}
+      <div>
         {node.isDirectory && (
           <FolderStatusBadge date={node.lastViewedAt} className="border-none" />
         )}
-      </TableCell>
-      <TableCell>
+      </div>
+
+      {/* お気に入り件数/お気に入りボタン */}
+      <div onClick={(e) => e.stopPropagation()}>
         {node.isDirectory ? (
-          <FavoriteCountBadge
-            count={node.favoriteCount ?? 0}
-            className="border-none"
-          />
+          <FavoriteCountBadge count={node.favoriteCount ?? 0} />
         ) : (
           <FavoriteButton
             variant="list"
             active={isFavorite}
-            onClick={handleToggleFavorite}
+            onClick={toggleFavorite}
           />
         )}
-      </TableCell>
-    </TableRow>
+      </div>
+    </div>
   );
 }
