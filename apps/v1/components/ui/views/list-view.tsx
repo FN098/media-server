@@ -4,6 +4,7 @@ import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge"
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { LocalDate } from "@/components/ui/dates/local-date";
+import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
@@ -239,68 +240,73 @@ function DataRow({
   };
 
   return (
-    <div
-      id={`media-item-${index}`} // 自動スクロールで使う
-      role="row"
-      onMouseDown={start}
-      onMouseUp={stop}
-      onMouseLeave={stop}
-      onTouchStart={start}
-      onTouchEnd={stop}
-      onTouchMove={stop}
-      onClick={isMobile ? handleTap : handleClick}
-      onDoubleClick={isMobile ? undefined : handleDoubleClick}
-      className={cn(
-        "grid grid-cols-[40px_1fr_80px_140px_100px_140px_80px]",
-        "h-10 items-center px-2 border-b select-none cursor-pointer",
-        isSelected ? "bg-primary/10 hover:bg-primary/20" : "hover:bg-muted/50"
-      )}
-    >
-      {/* 選択チェックボックス */}
-      <div onClick={(e) => e.stopPropagation()}>
-        <Checkbox checked={isSelected} disabled={!isMediaNode} />
-      </div>
-
-      {/* サムネイル */}
-      <div className="flex items-center gap-2 truncate">
-        <MediaThumbIcon type={node.type} className="w-6 h-6 shrink-0" />
-        <span className="truncate">{node.title ?? node.name}</span>
-      </div>
-
-      {/* ファイルタイプ */}
-      <div>
-        {node.isDirectory
-          ? "folder"
-          : getExtension(node.name, { withDot: false })}
-      </div>
-
-      {/* 更新日時 */}
-      <div>
-        <LocalDate value={node.mtime} />
-      </div>
-
-      {/* ファイルサイズ */}
-      <div>{formatBytes(node.size)}</div>
-
-      {/* 最終閲覧日 */}
-      <div>
-        {node.isDirectory && (
-          <FolderStatusBadge date={node.lastViewedAt} className="border-none" />
+    <HoverPreviewPortal node={node} enabled={isMediaNode && !isMobile}>
+      <div
+        id={`media-item-${index}`} // 自動スクロールで使う
+        role="row"
+        onMouseDown={start}
+        onMouseUp={stop}
+        onMouseLeave={stop}
+        onTouchStart={start}
+        onTouchEnd={stop}
+        onTouchMove={stop}
+        onClick={isMobile ? handleTap : handleClick}
+        onDoubleClick={isMobile ? undefined : handleDoubleClick}
+        className={cn(
+          "grid grid-cols-[40px_1fr_80px_140px_100px_140px_80px]",
+          "h-10 items-center px-2 border-b select-none cursor-pointer",
+          isSelected ? "bg-primary/10 hover:bg-primary/20" : "hover:bg-muted/50"
         )}
-      </div>
+      >
+        {/* 選択チェックボックス */}
+        <div onClick={(e) => e.stopPropagation()}>
+          <Checkbox checked={isSelected} disabled={!isMediaNode} />
+        </div>
 
-      {/* お気に入り件数/お気に入りボタン */}
-      <div onClick={(e) => e.stopPropagation()}>
-        {node.isDirectory ? (
-          <FavoriteCountBadge count={node.favoriteCount ?? 0} />
-        ) : (
-          <FavoriteButton
-            variant="list"
-            active={isFavorite}
-            onClick={toggleFavorite}
-          />
-        )}
+        {/* サムネイル */}
+        <div className="flex items-center gap-2 truncate">
+          <MediaThumbIcon type={node.type} className="w-6 h-6 shrink-0" />
+          <span className="truncate">{node.title ?? node.name}</span>
+        </div>
+
+        {/* ファイルタイプ */}
+        <div>
+          {node.isDirectory
+            ? "folder"
+            : getExtension(node.name, { withDot: false })}
+        </div>
+
+        {/* 更新日時 */}
+        <div>
+          <LocalDate value={node.mtime} />
+        </div>
+
+        {/* ファイルサイズ */}
+        <div>{formatBytes(node.size)}</div>
+
+        {/* 最終閲覧日 */}
+        <div>
+          {node.isDirectory && (
+            <FolderStatusBadge
+              date={node.lastViewedAt}
+              className="border-none"
+            />
+          )}
+        </div>
+
+        {/* お気に入り件数/お気に入りボタン */}
+        <div onClick={(e) => e.stopPropagation()}>
+          {node.isDirectory ? (
+            <FavoriteCountBadge count={node.favoriteCount ?? 0} />
+          ) : (
+            <FavoriteButton
+              variant="list"
+              active={isFavorite}
+              onClick={toggleFavorite}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </HoverPreviewPortal>
   );
 }
