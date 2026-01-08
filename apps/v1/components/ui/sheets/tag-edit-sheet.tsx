@@ -13,6 +13,7 @@ import {
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { Check, Edit2, Plus, RotateCcw, Save, TagIcon, X } from "lucide-react";
@@ -38,6 +39,8 @@ export function TagEditSheet({
   const router = useRouter();
   const editor = useTagEditorContext();
   const controls = useDragControls();
+  const isMobile = useIsMobile();
+  const canEdit = targetNodes.length > 0;
 
   // 対象が変更されたらコンテキストに反映
   useEffect(() => {
@@ -164,8 +167,6 @@ export function TagEditSheet({
       callback: () => toggleIsTransparent(),
     },
   ]);
-
-  const canEdit = targetNodes.length > 0;
 
   return (
     <>
@@ -294,7 +295,7 @@ export function TagEditSheet({
                     onAdd={() => handleNewAdd(editor.newTagName)}
                     onSelectSuggestion={editor.selectSuggestion}
                     onApply={() => void handleApply()}
-                    autoFocus
+                    autoFocus={isMobile ? false : true}
                   />
                   <TagList
                     isEditing={true}
