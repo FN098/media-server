@@ -263,7 +263,7 @@ function DataRow({
 
       {/* サムネイル */}
       <div className="flex items-center gap-2 truncate">
-        <MediaThumbIcon type={node.type} className="w-6 h-6" />
+        <MediaThumbIcon type={node.type} className="w-6 h-6 shrink-0" />
         <span className="truncate">{node.title ?? node.name}</span>
       </div>
 
