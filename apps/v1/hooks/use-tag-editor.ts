@@ -27,6 +27,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   const [searchStrategy, setSearchStrategy] =
     useState<SearchTagStrategy>("default");
   const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
+  const [opacity, setOpacity] = useState<number>(0);
 
   const hasChanges = useMemo(
     () => Object.keys(pendingChanges).length > 0 || pendingNewTags.length > 0,
@@ -182,5 +183,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     resetChanges,
     addPendingNewTag,
     selectSuggestion,
+    opacity,
+    setOpacity,
   };
 }

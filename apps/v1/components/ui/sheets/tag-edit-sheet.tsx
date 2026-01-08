@@ -36,7 +36,7 @@ export type TagEditMode = "default" | "single" | "none";
 export function TagEditSheet({
   targetNodes,
   mode = "default",
-  opacity: initialOpacity = 100,
+  opacity: initialOpacity,
   edit,
   onClose,
 }: {
@@ -67,12 +67,18 @@ export function TagEditSheet({
   }, [edit]);
 
   // 透明モード
-  const [opacity, setOpacity] = useState(initialOpacity);
+  const [opacity, setOpacity] = useState(initialOpacity ?? editor.opacity);
+
   useEffect(() => {
     if (initialOpacity !== undefined) {
       setOpacity(initialOpacity);
     }
   }, [initialOpacity]);
+
+  const handleChangeOpacity = (opacity: number) => {
+    setOpacity(opacity);
+    editor.setOpacity(opacity);
+  };
 
   // 新規作成
   const handleNewAdd = (name: string) => {
@@ -257,7 +263,7 @@ export function TagEditSheet({
                     canEdit={canEdit}
                     onClose={handleTerminate}
                     onEditClick={handleEdit}
-                    onOpacityChange={setOpacity}
+                    onOpacityChange={handleChangeOpacity}
                   />
                   <TagList
                     isEditing={false}
@@ -283,10 +289,10 @@ export function TagEditSheet({
                     count={targetNodes.length}
                     isEditing={true}
                     opacity={opacity}
-                    onOpacityChange={setOpacity}
                     canEdit={canEdit}
                     onEditClick={() => {}}
                     onClose={handleTerminate}
+                    onOpacityChange={handleChangeOpacity}
                   />
                   <TagInput
                     value={editor.newTagName}

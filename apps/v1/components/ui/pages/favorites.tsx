@@ -354,7 +354,6 @@ export function FavoritesExplorer() {
               targetNodes={selected}
               onClose={handleCloseTagEditor}
               mode={tagEditMode}
-              opacity={50}
             />
           )}
         </AnimatePresence>
