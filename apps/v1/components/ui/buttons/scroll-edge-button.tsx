@@ -2,56 +2,48 @@
 
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { Button } from "@/shadcn/components/ui/button";
-import { AnimatePresence, motion, Variants } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export function ScrollEdgeButtons() {
-  const direction = useScrollDirection();
+  const direction = useScrollDirection(5);
+
+  const scrollToEdge = () => {
+    if (!direction) return;
+
+    const targetY =
+      direction === "up" ? 0 : document.documentElement.scrollHeight;
+
+    setTimeout(() => {
+      window.scrollTo({
+        top: targetY,
+        behavior: "smooth",
+      });
+    }, 0);
+  };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed bottom-6 right-6 z-50">
       <AnimatePresence>
         {direction && (
-          <MotionButton key={direction}>
+          <motion.div
+            key={direction}
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            transition={{ duration: 0.15 }}
+          >
             <Button
               size="icon"
               variant="secondary"
-              className="rounded-full shadow-lg"
-              onClick={() => {
-                if (direction === "up") {
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                } else {
-                  window.scrollTo({
-                    top: document.documentElement.scrollHeight,
-                    behavior: "smooth",
-                  });
-                }
-              }}
+              className="h-14 w-14 rounded-full shadow-xl border touch-none bg-background/90 backdrop-blur"
+              onClick={scrollToEdge}
             >
               {direction === "up" ? <ArrowUp /> : <ArrowDown />}
             </Button>
-          </MotionButton>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-const variants = {
-  hidden: { opacity: 0, y: 10, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1 },
-} satisfies Variants;
-
-function MotionButton({ children }: { children: React.ReactNode }) {
-  return (
-    <motion.div
-      variants={variants}
-      initial="hidden"
-      animate="visible"
-      exit="hidden"
-      transition={{ duration: 0.18, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
   );
 }

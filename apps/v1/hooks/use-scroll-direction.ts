@@ -1,50 +1,58 @@
 import { useEffect, useRef, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 export type ScrollDirection = "up" | "down" | null;
 
-export function useScrollDirection() {
+export function useScrollDirection(minVelocity = 0.8) {
   const [direction, setDirection] = useState<ScrollDirection>(null);
 
   const lastY = useRef(0);
-  const hideTimer = useRef<number | null>(null);
+  const lastTime = useRef(0);
+
+  const debouncedResetDirection = useDebouncedCallback(
+    () => setDirection(null),
+    500
+  );
+
+  console.log({ direction });
 
   useEffect(() => {
+    // マウントされた瞬間の値をセット
+    lastY.current = window.scrollY;
+    lastTime.current = performance.now();
+
     const onScroll = () => {
       const currentY = window.scrollY;
-      const delta = currentY - lastY.current;
-      lastY.current = currentY;
+      const currentTime = performance.now();
 
-      // スクロールしてる間はタイマーをキャンセル
-      if (hideTimer.current) {
-        clearTimeout(hideTimer.current);
-        hideTimer.current = null;
-      }
+      const deltaTime = currentTime - lastTime.current;
+      const deltaY = currentY - lastY.current;
+
+      // 速度 = 距離 / 時間 (px/ms)
+      const velocity = Math.abs(deltaY / (deltaTime || 1));
 
       const clientHeight = window.innerHeight;
       const scrollHeight = document.documentElement.scrollHeight;
 
-      const canScrollUp = currentY > 200;
-      const canScrollDown = currentY + clientHeight < scrollHeight - 200;
-
-      if (delta < -2 && canScrollUp) {
-        setDirection("up");
-      } else if (delta > 2 && canScrollDown) {
-        setDirection("down");
+      // 指定以上の速度でスクロールされた場合のみ表示
+      if (velocity > minVelocity) {
+        if (deltaY < 0 && currentY > 300) {
+          setDirection("up");
+        } else if (deltaY > 0 && currentY + clientHeight < scrollHeight - 300) {
+          setDirection("down");
+        }
       }
 
-      hideTimer.current = window.setTimeout(() => {
-        setDirection(null);
-      }, 500);
+      debouncedResetDirection();
+
+      // 現在の状態を保存
+      lastY.current = currentY;
+      lastTime.current = currentTime;
     };
 
-    lastY.current = window.scrollY;
     window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (hideTimer.current) clearTimeout(hideTimer.current);
-    };
-  }, []);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [debouncedResetDirection, minVelocity]);
 
   return direction;
 }
