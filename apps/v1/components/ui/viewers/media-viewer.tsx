@@ -38,7 +38,7 @@ import {
   PinOff,
   TagIcon,
 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -98,6 +98,9 @@ export function MediaViewer({
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
   const swiperRef = useRef<SwiperClass | null>(null);
+  const lastViewedPathRef = useRef<string | null>(
+    allNodes[initialIndex]?.path ?? null
+  );
 
   // 仮想スライド構成
   // [最初のページダミー] → [前のフォルダナビ] → [メディア配列] → [次のフォルダナビ] → [最後のページダミー]
@@ -201,8 +204,32 @@ export function MediaViewer({
       setCurrentNode(node);
       updateTitle(node);
       onIndexChange(index);
+
+      lastViewedPathRef.current = node.path;
     }
   };
+
+  // allNodes 更新時に直前に見ていたファイルを復元
+  useEffect(() => {
+    const path = lastViewedPathRef.current;
+    if (!path) return;
+
+    const index = allNodes.findIndex((n) => n.path === path);
+    if (index === -1) return;
+    if (index === currentIndex) return;
+
+    const slideIndex = getSlideIndex(index);
+
+    setCurrentIndex(index);
+    setCurrentNode(allNodes[index]);
+    setCurrentSlideIndex(slideIndex);
+    updateTitle(allNodes[index]);
+    onIndexChange(index);
+
+    swiperRef.current?.slideTo(slideIndex, 0);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- この処理は allNodes だけに依存させる
+  }, [allNodes]);
 
   // マウスホイールイベントでズームを制御する関数
   const handleWheel = (e: React.WheelEvent) => {
