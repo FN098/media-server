@@ -14,6 +14,7 @@ export function useScrollDirection(minVelocity = 0.8) {
     500
   );
 
+  // 初回マウント時のみ実行
   useEffect(() => {
     // マウントされた瞬間の値をセット
     lastY.current = window.scrollY;
@@ -50,7 +51,8 @@ export function useScrollDirection(minVelocity = 0.8) {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [debouncedResetDirection, minVelocity]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return direction;
 }
