@@ -14,8 +14,6 @@ export function useScrollDirection(minVelocity = 0.8) {
     500
   );
 
-  console.log({ direction });
-
   useEffect(() => {
     // マウントされた瞬間の値をセット
     lastY.current = window.scrollY;
