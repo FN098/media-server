@@ -131,61 +131,44 @@ function Cell({
 }) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
-  // お気に入り
-  const favCtx = useFavoritesContext();
+  /* ================= Favorite ================= */
 
-  const isFavorite = useMemo(
-    () => favCtx.isFavorite(node.path),
-    [favCtx, node.path]
-  );
+  const favCtx = useFavoritesContext();
+  const isFavorite = favCtx.isFavorite(node.path);
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       void favCtx.toggleFavorite(node.path);
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error("お気に入りの更新に失敗しました");
     }
   };
 
-  // 選択
+  /* ================= Selection ================= */
+
   const selectCtx = usePathSelectionContext();
+  const isSelected = selectCtx.isPathSelected(node.path);
 
-  const isSelected = useMemo(
-    () => selectCtx.isPathSelected(node.path),
-    [selectCtx, node.path]
-  );
+  /* ================= Long Press ================= */
 
-  // チェックボックス
-  const handleCheckedChange = (checked: boolean) => {
+  const handleLongPress = () => {
     if (!isMediaNode) return;
-
     selectCtx.enterSelectionMode();
-
-    if (checked) {
-      selectCtx.selectPath(node.path);
-      onSelect?.();
-    } else {
-      selectCtx.unselectPath(node.path);
-
-      // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
-      if (
-        selectCtx.selectedPaths.size === 1 &&
-        selectCtx.selectedPaths.has(node.path)
-      ) {
-        selectCtx.exitSelectionMode();
-      }
-    }
+    selectCtx.replaceSelection(node.path);
+    selectCtx.setLastSelectedPath(node.path);
+    onSelect?.();
   };
 
-  // クリック
+  const { start, stop, isLongPressed } = useLongPress(handleLongPress, 600);
+
+  /* ================= Click ================= */
+
   const handleClick = (e: React.MouseEvent) => {
     if (!isMediaNode || isLongPressed || isMobile) return;
 
     e.preventDefault();
 
-    // Shift キー: 範囲選択
     if (e.shiftKey && selectCtx.lastSelectedPath !== null) {
       selectCtx.enterSelectionMode();
       const lastIdx = allNodes.findIndex(
@@ -204,7 +187,6 @@ function Cell({
       }
     }
 
-    // Ctrl/Command キー: 複数選択
     if (e.ctrlKey || e.metaKey) {
       selectCtx.enterSelectionMode();
       selectCtx.togglePath(node.path);
@@ -213,7 +195,6 @@ function Cell({
       return;
     }
 
-    // 通常選択
     selectCtx.exitSelectionMode();
     selectCtx.replaceSelection(node.path);
     selectCtx.setLastSelectedPath(node.path);
@@ -226,7 +207,6 @@ function Cell({
 
     e.preventDefault();
 
-    // 選択モード中
     if (selectCtx.isSelectionMode) {
       if (!isMediaNode) return;
       if (!isSelected) {
@@ -246,7 +226,6 @@ function Cell({
       return;
     }
 
-    // 通常
     onOpen?.(node);
   };
 
@@ -258,32 +237,16 @@ function Cell({
 
     onOpen?.(node);
   };
-
-  // 長押し
-  const handleLongPress = () => {
-    if (!isMediaNode) return;
-    selectCtx.enterSelectionMode();
-    selectCtx.replaceSelection(node.path);
-    selectCtx.setLastSelectedPath(node.path);
-    onSelect?.();
-  };
-
-  const {
-    start: startLongPress,
-    stop: stopLongPress,
-    isLongPressed,
-  } = useLongPress(handleLongPress, 600);
-
   return (
     <div className="w-full h-full p-1">
       <div
         id={`media-item-${index}`}
-        onMouseDown={startLongPress}
-        onMouseUp={stopLongPress}
-        onMouseLeave={stopLongPress}
-        onTouchStart={startLongPress}
-        onTouchEnd={stopLongPress}
-        onTouchMove={stopLongPress} // スクロール時に長押しをキャンセル
+        onMouseDown={start}
+        onMouseUp={stop}
+        onMouseLeave={stop}
+        onTouchStart={start}
+        onTouchEnd={stop}
+        onTouchMove={stop} // スクロール時に長押しをキャンセル
         onClick={isMobile ? handleTap : handleClick}
         onDoubleClick={isMobile ? undefined : handleDoubleClick}
         className={cn(
@@ -307,13 +270,9 @@ function Cell({
               ? "opacity-100"
               : "opacity-0 group-hover:opacity-100"
           )}
+          onClick={(e) => e.stopPropagation()}
         >
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={handleCheckedChange}
-            onClick={(e) => e.stopPropagation()}
-            disabled={!isMediaNode}
-          />
+          <Checkbox checked={isSelected} disabled={!isMediaNode} />
         </div>
 
         {/* テキストオーバーレイ */}
