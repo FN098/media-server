@@ -4,7 +4,7 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { memo, useCallback, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface Coords {
@@ -63,19 +63,76 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
     [enabled, imageSize, maxWidth]
   );
 
-  const handleMouseEnter = () => {
-    if (!enabled) return;
+  const handleMouseEnter = useCallback(() => {
     setVisible(true);
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setVisible(false);
-  };
+  }, []);
 
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
-  };
+  const handleImageLoad = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget;
+      setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
+    },
+    []
+  );
+
+  // ポータルの内容をメモ化
+  const portalContent = useMemo(() => {
+    if (!enabled || !coords || !isMounted) return null;
+
+    return (
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            className="fixed z-[50] pointer-events-none overflow-hidden rounded-xl border-2 border-primary/20 bg-background shadow-2xl"
+            initial={{
+              opacity: 0,
+              scale: 0.85,
+              y: 10,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.9,
+              y: 5,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 30,
+              mass: 0.8,
+            }}
+            style={{
+              left: coords.x,
+              top: coords.y,
+              width: `${coords.width}px`,
+              height: `${coords.height}px`,
+            }}
+          >
+            <motion.div
+              className="w-full h-full relative"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.05, duration: 0.2 }}
+            >
+              <MediaThumb
+                node={node}
+                className="w-full h-full object-contain bg-black"
+                onLoad={handleImageLoad}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }, [enabled, coords, isMounted, visible, node, handleImageLoad]);
 
   return (
     <div
@@ -85,60 +142,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
       onMouseLeave={handleMouseLeave}
     >
       {children}
-
-      {enabled &&
-        coords &&
-        isMounted &&
-        createPortal(
-          <AnimatePresence>
-            {visible && (
-              <motion.div
-                className="fixed z-[50] pointer-events-none overflow-hidden rounded-xl border-2 border-primary/20 bg-background shadow-2xl"
-                initial={{
-                  opacity: 0,
-                  scale: 0.85,
-                  y: 10,
-                }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  y: 0,
-                }}
-                exit={{
-                  opacity: 0,
-                  scale: 0.9,
-                  y: 5,
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 30,
-                  mass: 0.8,
-                }}
-                style={{
-                  left: coords.x,
-                  top: coords.y,
-                  width: `${coords.width}px`,
-                  height: `${coords.height}px`,
-                }}
-              >
-                <motion.div
-                  className="w-full h-full relative"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.05, duration: 0.2 }}
-                >
-                  <MediaThumb
-                    node={node}
-                    className="w-full h-full object-contain bg-black"
-                    onLoad={handleImageLoad}
-                  />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+      {portalContent && createPortal(portalContent, document.body)}
     </div>
   );
 });
