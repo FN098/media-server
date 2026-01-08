@@ -10,16 +10,20 @@ import { memo, ReactNode, useCallback, useState } from "react";
 type MediaThumbProps = {
   node: MediaNode;
   className?: string;
+  onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 };
 
 export const MediaThumb = memo(function MediaThumb1({
   node,
   className,
+  onLoad,
 }: MediaThumbProps) {
   switch (node.type) {
     case "image":
     case "video":
-      return <MediaThumbImage node={node} className={className} />;
+      return (
+        <MediaThumbImage node={node} className={className} onLoad={onLoad} />
+      );
 
     default:
       return (
@@ -38,9 +42,11 @@ export const MediaThumb = memo(function MediaThumb1({
 function MediaThumbImage({
   node,
   className,
+  onLoad,
 }: {
   node: MediaNode;
   className?: string;
+  onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [version, setVersion] = useState(0);
@@ -102,6 +108,7 @@ function MediaThumbImage({
       )}
       draggable={false}
       onError={() => void handleError()} // 画像がなかったら発火
+      onLoad={onLoad}
       loading="lazy"
       fallback={
         <div

@@ -3,6 +3,7 @@
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
+import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useGridConfig } from "@/hooks/use-grid-config";
@@ -256,76 +257,78 @@ function Cell({
 
   return (
     <div className="w-full h-full p-1">
-      <div
-        id={`media-item-${index}`} // 自動スクロールで使う
-        onMouseDown={start}
-        onMouseUp={stop}
-        onMouseLeave={stop}
-        onTouchStart={start}
-        onTouchEnd={stop}
-        onTouchMove={stop}
-        onClick={isMobile ? handleTap : handleClick}
-        onDoubleClick={isMobile ? undefined : handleDoubleClick}
-        className={cn(
-          "select-none relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
-          isSelected
-            ? "ring-2 ring-primary border-transparent"
-            : "hover:border-primary/50"
-        )}
-      >
-        {/* サムネイル */}
-        <MediaThumb
-          node={node}
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        />
-
-        {/* 選択チェックボックス */}
+      <HoverPreviewPortal node={node} enabled={isMediaNode && !isMobile}>
         <div
+          id={`media-item-${index}`} // 自動スクロールで使う
+          onMouseDown={start}
+          onMouseUp={stop}
+          onMouseLeave={stop}
+          onTouchStart={start}
+          onTouchEnd={stop}
+          onTouchMove={stop}
+          onClick={isMobile ? handleTap : handleClick}
+          onDoubleClick={isMobile ? undefined : handleDoubleClick}
           className={cn(
-            "absolute top-2 left-2 transition-opacity",
-            selectCtx.isSelectionMode
-              ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100"
+            "select-none relative group w-full h-full overflow-hidden rounded-lg border bg-muted cursor-pointer transition-all",
+            isSelected
+              ? "ring-2 ring-primary border-transparent"
+              : "hover:border-primary/50"
           )}
-          onClick={(e) => e.stopPropagation()}
         >
-          <Checkbox checked={isSelected} disabled={!isMediaNode} />
+          {/* サムネイル */}
+          <MediaThumb
+            node={node}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          />
+
+          {/* 選択チェックボックス */}
+          <div
+            className={cn(
+              "absolute top-2 left-2 transition-opacity",
+              selectCtx.isSelectionMode
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Checkbox checked={isSelected} disabled={!isMediaNode} />
+          </div>
+
+          {/* テキストオーバーレイ */}
+          <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+            <MarqueeText
+              text={node.title ?? node.name}
+              className="text-center text-[10px] leading-tight text-white"
+            />
+          </div>
+
+          {/* お気に入りボタン */}
+          {!selectCtx.isSelectionMode && isMediaNode && (
+            <FavoriteButton
+              variant="grid"
+              active={isFavorite}
+              onClick={handleToggleFavorite}
+              className="absolute top-1 right-1"
+            />
+          )}
+
+          {/* ステータスバッジ */}
+          {node.isDirectory && (
+            <FolderStatusBadge
+              date={node.lastViewedAt}
+              className="absolute top-1 right-1"
+            />
+          )}
+
+          {/* お気に入り数バッジ */}
+          {node.isDirectory && (
+            <FavoriteCountBadge
+              count={node.favoriteCount ?? 0}
+              className="absolute top-1 left-1"
+            />
+          )}
         </div>
-
-        {/* テキストオーバーレイ */}
-        <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
-          <MarqueeText
-            text={node.title ?? node.name}
-            className="text-center text-[10px] leading-tight text-white"
-          />
-        </div>
-
-        {/* お気に入りボタン */}
-        {!selectCtx.isSelectionMode && isMediaNode && (
-          <FavoriteButton
-            variant="grid"
-            active={isFavorite}
-            onClick={handleToggleFavorite}
-            className="absolute top-1 right-1"
-          />
-        )}
-
-        {/* ステータスバッジ */}
-        {node.isDirectory && (
-          <FolderStatusBadge
-            date={node.lastViewedAt}
-            className="absolute top-1 right-1"
-          />
-        )}
-
-        {/* お気に入り数バッジ */}
-        {node.isDirectory && (
-          <FavoriteCountBadge
-            count={node.favoriteCount ?? 0}
-            className="absolute top-1 left-1"
-          />
-        )}
-      </div>
+      </HoverPreviewPortal>
     </div>
   );
 }
