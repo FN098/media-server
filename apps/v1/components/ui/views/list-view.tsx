@@ -87,16 +87,16 @@ function RowItem({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り
-  const { toggleFavorite, isFavorite: isFavoritePath } = useFavoritesContext();
+  const favCtx = useFavoritesContext();
 
   const isFavorite = useMemo(
-    () => isFavoritePath(node.path),
-    [isFavoritePath, node.path]
+    () => favCtx.isFavorite(node.path),
+    [favCtx, node.path]
   );
 
   const handleToggleFavorite = () => {
     try {
-      void toggleFavorite(node.path);
+      void favCtx.toggleFavorite(node.path);
     } catch (e) {
       console.error(e);
       toast.error("お気に入りの更新に失敗しました");
@@ -104,41 +104,31 @@ function RowItem({
   };
 
   // 選択
-  const {
-    isSelectionMode,
-    isPathSelected,
-    enterSelectionMode,
-    exitSelectionMode,
-    selectedPaths,
-    selectPath,
-    addPaths,
-    togglePath,
-    replaceSelection,
-    unselectPath,
-    lastSelectedPath,
-    setLastSelectedPath,
-  } = usePathSelectionContext();
+  const selectCtx = usePathSelectionContext();
 
   const isSelected = useMemo(
-    () => isPathSelected(node.path),
-    [isPathSelected, node.path]
+    () => selectCtx.isPathSelected(node.path),
+    [selectCtx, node.path]
   );
 
   // チェックボックス
   const handleCheckedChange = (checked: boolean) => {
     if (!isMediaNode) return;
 
-    enterSelectionMode();
+    selectCtx.enterSelectionMode();
 
     if (checked) {
-      selectPath(node.path);
+      selectCtx.selectPath(node.path);
       onSelect?.();
     } else {
-      unselectPath(node.path);
+      selectCtx.unselectPath(node.path);
 
       // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
-      if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
-        exitSelectionMode();
+      if (
+        selectCtx.selectedPaths.size === 1 &&
+        selectCtx.selectedPaths.has(node.path)
+      ) {
+        selectCtx.exitSelectionMode();
       }
     }
   };
@@ -150,9 +140,11 @@ function RowItem({
     e.preventDefault();
 
     // Shift キー: 範囲選択
-    if (e.shiftKey && lastSelectedPath !== null) {
-      enterSelectionMode();
-      const lastIdx = allNodes.findIndex((n) => n.path === lastSelectedPath);
+    if (e.shiftKey && selectCtx.lastSelectedPath !== null) {
+      selectCtx.enterSelectionMode();
+      const lastIdx = allNodes.findIndex(
+        (n) => n.path === selectCtx.lastSelectedPath
+      );
       if (lastIdx !== -1) {
         const start = Math.min(lastIdx, index);
         const end = Math.max(lastIdx, index);
@@ -160,7 +152,7 @@ function RowItem({
           .slice(start, end + 1)
           .filter((n) => isMedia(n.type))
           .map((n) => n.path);
-        addPaths(paths);
+        selectCtx.addPaths(paths);
         onSelect?.();
         return;
       }
@@ -168,17 +160,17 @@ function RowItem({
 
     // Ctrl/Command キー: 複数選択
     if (e.ctrlKey || e.metaKey) {
-      enterSelectionMode();
-      togglePath(node.path);
-      setLastSelectedPath(node.path);
+      selectCtx.enterSelectionMode();
+      selectCtx.togglePath(node.path);
+      selectCtx.setLastSelectedPath(node.path);
       onSelect?.();
       return;
     }
 
     // 通常選択
-    exitSelectionMode();
-    replaceSelection(node.path);
-    setLastSelectedPath(node.path);
+    selectCtx.exitSelectionMode();
+    selectCtx.replaceSelection(node.path);
+    selectCtx.setLastSelectedPath(node.path);
     onSelect?.();
   };
 
@@ -189,17 +181,20 @@ function RowItem({
     e.preventDefault();
 
     // 選択モード中
-    if (isSelectionMode) {
+    if (selectCtx.isSelectionMode) {
       if (!isMediaNode) return;
       if (!isSelected) {
-        selectPath(node.path);
+        selectCtx.selectPath(node.path);
         onSelect?.();
       } else {
-        unselectPath(node.path);
+        selectCtx.unselectPath(node.path);
 
         // 現在の選択数が1件のみで、かつその1件を解除しようとしている場合
-        if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
-          exitSelectionMode();
+        if (
+          selectCtx.selectedPaths.size === 1 &&
+          selectCtx.selectedPaths.has(node.path)
+        ) {
+          selectCtx.exitSelectionMode();
         }
       }
       return;
@@ -211,7 +206,7 @@ function RowItem({
 
   // ダブルクリック
   const handleDoubleClick = (e: React.MouseEvent) => {
-    if (isSelectionMode || isMobile) return;
+    if (selectCtx.isSelectionMode || isMobile) return;
 
     e.preventDefault();
 
@@ -221,9 +216,9 @@ function RowItem({
   // 長押し
   const handleLongPress = () => {
     if (!isMediaNode) return;
-    enterSelectionMode();
-    replaceSelection(node.path);
-    setLastSelectedPath(node.path);
+    selectCtx.enterSelectionMode();
+    selectCtx.replaceSelection(node.path);
+    selectCtx.setLastSelectedPath(node.path);
     onSelect?.();
   };
 
