@@ -1,4 +1,4 @@
-import { ExplorerQuerySchema } from "@/lib/query/schemas";
+import { ExplorerQuerySchema } from "@/lib/query/validation";
 import z from "zod";
 
 export type ViewMode = "list" | "grid";

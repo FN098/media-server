@@ -2,9 +2,9 @@
 
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { normalizeExplorerQuery } from "@/lib/query/normalize";
-import { ExplorerQuerySchema } from "@/lib/query/schemas";
 import { toSearchParams } from "@/lib/query/search-params";
 import type { ExplorerQuery, SetExplorerQueryOptions } from "@/lib/query/types";
+import { ExplorerQuerySchema } from "@/lib/query/validation";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
 
