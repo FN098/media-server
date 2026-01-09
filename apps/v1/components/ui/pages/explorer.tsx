@@ -28,6 +28,7 @@ import {
   MediaNode,
   MediaNodeFilter,
   MediaPathToIndexMap,
+  MediaPathToNodeMap,
 } from "@/lib/media/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
@@ -236,11 +237,10 @@ export function Explorer() {
 
   // ===== お気に入り =====
 
-  // TODO: mediaOnly => listing.nodes に変更（フィルターの度に再計算しないようにする）
   // TODO: お気に入り変更時に更新 (ビューに onFavoriteChange を追加し、favoriteChanges に格納する。差分を保持する)
   const favorites: FavoritesRecord = useMemo(
-    () => Object.fromEntries(mediaOnly.map((n) => [n.path, n.isFavorite])),
-    [mediaOnly]
+    () => Object.fromEntries(listing.nodes.map((n) => [n.path, n.isFavorite])),
+    [listing.nodes]
   );
 
   // ===== 選択機能 =====
@@ -255,7 +255,7 @@ export function Explorer() {
   } = usePathSelectionContext();
 
   // 処理高速化のため、path => node の Map を作成しておく
-  const pathToNodeMap = useMemo(() => {
+  const pathToNodeMap: MediaPathToNodeMap = useMemo(() => {
     return new Map(listing.nodes.map((node) => [node.path, node]));
   }, [listing.nodes]);
 
@@ -343,7 +343,6 @@ export function Explorer() {
         "flex-1 overflow-auto",
         viewMode === "grid" && "p-4",
         viewMode === "list" && "px-4"
-        // isTagEditorOpen && "mb-[150px]"
       )}
     >
       <FavoritesProvider favorites={favorites}>

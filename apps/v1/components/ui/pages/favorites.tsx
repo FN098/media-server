@@ -23,6 +23,7 @@ import {
   MediaNode,
   MediaNodeFilter,
   MediaPathToIndexMap,
+  MediaPathToNodeMap,
 } from "@/lib/media/types";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
@@ -210,8 +211,8 @@ export function FavoritesExplorer() {
   // ===== お気に入り =====
 
   const favorites: FavoritesRecord = useMemo(
-    () => Object.fromEntries(mediaOnly.map((n) => [n.path, n.isFavorite])),
-    [mediaOnly]
+    () => Object.fromEntries(listing.nodes.map((n) => [n.path, n.isFavorite])),
+    [listing.nodes]
   );
 
   // ===== 選択機能 =====
@@ -226,7 +227,7 @@ export function FavoritesExplorer() {
   } = usePathSelectionContext();
 
   // 処理高速化のため、path => node の Map を作成しておく
-  const pathToNodeMap = useMemo(() => {
+  const pathToNodeMap: MediaPathToNodeMap = useMemo(() => {
     return new Map(listing.nodes.map((node) => [node.path, node]));
   }, [listing.nodes]);
 
@@ -314,7 +315,6 @@ export function FavoritesExplorer() {
         "flex-1 overflow-auto",
         viewMode === "grid" && "p-4",
         viewMode === "list" && "px-4"
-        // isTagEditorOpen && "mb-[150px]"
       )}
     >
       <FavoritesProvider favorites={favorites}>

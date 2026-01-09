@@ -68,5 +68,6 @@ export type DbFavoriteInfo = {
 };
 
 export type MediaPathToIndexMap = Map<PathType, number>;
+export type MediaPathToNodeMap = Map<PathType, MediaNode>;
 
 export type MediaNodeFilter = (node: MediaNode) => boolean;
