@@ -287,7 +287,7 @@ function Cell({
                 ? "opacity-100"
                 : "opacity-0 group-hover:opacity-100"
             )}
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleClick}
           >
             <Checkbox checked={isSelected} />
           </div>

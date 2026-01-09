@@ -257,7 +257,7 @@ function DataRow({
         )}
       >
         {/* 選択チェックボックス */}
-        <div onClick={(e) => e.stopPropagation()}>
+        <div onClick={handleClick}>
           <Checkbox checked={isSelected} />
         </div>
 
