@@ -1,4 +1,4 @@
-import { MediaFsNode, PrismaMedia } from "@/lib/media/types";
+import type { MediaFsNode, PrismaMedia } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 
 export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
