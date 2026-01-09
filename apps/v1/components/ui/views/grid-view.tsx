@@ -13,9 +13,17 @@ import { MediaNode } from "@/lib/media/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
+import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { MoreVertical, Move, Pencil } from "lucide-react";
 import React, { useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
@@ -23,10 +31,14 @@ export function GridView({
   allNodes,
   onOpen,
   onSelect,
+  onRename,
+  onMove,
 }: {
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
+  onRename?: (node: MediaNode) => void;
+  onMove?: (node: MediaNode) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -105,6 +117,8 @@ export function GridView({
                   isMobile={isMobile}
                   onOpen={onOpen}
                   onSelect={onSelect}
+                  onRename={onRename}
+                  onMove={onMove}
                 />
               );
             })}
@@ -122,6 +136,8 @@ function Cell({
   isMobile,
   onOpen,
   onSelect,
+  onRename,
+  onMove,
 }: {
   node: MediaNode;
   index: number;
@@ -129,6 +145,8 @@ function Cell({
   isMobile: boolean;
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
+  onRename?: (node: MediaNode) => void;
+  onMove?: (node: MediaNode) => void;
 }) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
@@ -314,7 +332,7 @@ function Cell({
           {node.isDirectory && (
             <FolderStatusBadge
               date={node.lastViewedAt}
-              className="absolute top-1 right-1"
+              className="absolute bottom-8 right-1"
             />
           )}
 
@@ -322,8 +340,55 @@ function Cell({
           {node.isDirectory && (
             <FavoriteCountBadge
               count={node.favoriteCount ?? 0}
-              className="absolute top-7 right-1"
+              className="absolute top-1 right-1"
             />
+          )}
+
+          {/* 3点リーダーメニュー */}
+          {!selectCtx.isSelectionMode && (
+            <div
+              className={cn(
+                "absolute bottom-10 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity",
+                isMobile && "opacity-100"
+              )}
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 bg-primary/20 hover:bg-primary/40 text-white hover:text-white rounded-full"
+                    onClick={(e) => e.stopPropagation()} // セルのクリックイベントを阻止
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onRename && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRename(node);
+                      }}
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      名前の変更
+                    </DropdownMenuItem>
+                  )}
+                  {onMove && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMove(node);
+                      }}
+                    >
+                      <Move className="mr-2 h-4 w-4" />
+                      移動
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
         </div>
       </HoverPreviewPortal>

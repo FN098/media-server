@@ -4,6 +4,7 @@ import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
+import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -311,6 +312,13 @@ export function Explorer() {
     return "default";
   }, [isViewMode]);
 
+  // ===== リネーム =====
+
+  const [renameTarget, setRenameTarget] = useState<{
+    path: string;
+    name: string;
+  } | null>(null);
+
   // ===== サーバーアクション =====
 
   // サムネイル作成リクエスト送信
@@ -370,6 +378,9 @@ export function Explorer() {
               allNodes={filteredNodes}
               onOpen={handleOpen}
               onSelect={handleSelect}
+              onRename={(node) =>
+                setRenameTarget({ path: node.path, name: node.name })
+              }
             />
           </div>
         )}
@@ -434,6 +445,14 @@ export function Explorer() {
             />
           </ScrollLockProvider>
         )}
+
+        {/* リネームダイアログ */}
+        <RenameDialog
+          open={!!renameTarget}
+          onOpenChange={(open) => !open && setRenameTarget(null)}
+          oldPath={renameTarget?.path ?? ""}
+          currentName={renameTarget?.name ?? ""}
+        />
       </FavoritesProvider>
 
       {/* フォルダナビゲーション */}
