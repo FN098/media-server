@@ -1,5 +1,4 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
-import { Record } from "@/generated/prisma/runtime/library";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
