@@ -368,7 +368,11 @@ export function FavoritesExplorer() {
               onClose={handleCloseSelectionBar}
               actions={
                 <>
-                  <Button size="sm" onClick={handleOpenTagEditor}>
+                  <Button
+                    size="sm"
+                    onClick={handleOpenTagEditor}
+                    disabled={selected.length === 0}
+                  >
                     <TagIcon />
                     タグ表示
                   </Button>
