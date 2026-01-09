@@ -4,14 +4,14 @@ import { getClientExplorerPath } from "@/lib/path/helpers";
 import { normalizeExplorerQuery } from "@/lib/query/normalize";
 import { toSearchParams } from "@/lib/query/search-params";
 import type { ExplorerQuery, SetExplorerQueryOptions } from "@/lib/query/types";
-import { ExplorerQuerySchema } from "@/lib/query/validation";
+import { explorerQuerySchema } from "@/lib/query/validation";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
 
 export function useExplorerQuery() {
   const searchParams = useSearchParams();
   const params = Object.fromEntries(searchParams);
-  const query = ExplorerQuerySchema.parse(params);
+  const query = explorerQuerySchema.parse(params);
 
   return {
     ...query,

@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const ExplorerQuerySchema = z.object({
+export const explorerQuerySchema = z.object({
   q: z.string().optional(),
 
   modal: z

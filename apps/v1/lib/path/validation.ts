@@ -1,6 +1,6 @@
 import z from "@/node_modules/zod/v4/classic/external.cjs";
 
-export const PathSchema = z
+export const pathSchema = z
   .string()
   .transform((val) => {
     // 1. バックスラッシュをスラッシュに正規化し、前後のスラッシュを削除
