@@ -154,7 +154,6 @@ function Cell({
   /* ================= Long Press ================= */
 
   const handleLongPress = () => {
-    if (!isMediaNode) return;
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
     selectCtx.setLastSelectedPath(node.path);
@@ -166,7 +165,7 @@ function Cell({
   /* ================= Click ================= */
 
   const handleClick = (e: React.MouseEvent) => {
-    if (!isMediaNode || isLongPressed || isMobile) return;
+    if (isLongPressed || isMobile) return;
 
     e.preventDefault();
 
@@ -226,7 +225,6 @@ function Cell({
     e.preventDefault();
 
     if (selectCtx.isSelectionMode) {
-      if (!isMediaNode) return;
       if (!isSelected) {
         selectCtx.selectPath(node.path);
       } else {
@@ -291,7 +289,7 @@ function Cell({
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <Checkbox checked={isSelected} disabled={!isMediaNode} />
+            <Checkbox checked={isSelected} />
           </div>
 
           {/* テキストオーバーレイ */}
@@ -324,7 +322,7 @@ function Cell({
           {node.isDirectory && (
             <FavoriteCountBadge
               count={node.favoriteCount ?? 0}
-              className="absolute top-1 left-1"
+              className="absolute top-7 right-1"
             />
           )}
         </div>

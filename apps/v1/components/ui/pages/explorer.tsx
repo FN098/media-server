@@ -136,16 +136,11 @@ export function Explorer() {
     });
   }, [listing, searchFilter, tagFilter, favoriteFilter]);
 
-  // ビューアや選択機能で使う「メディアのみ」のリストは filteredNodes から抽出
+  // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
     () => filteredNodes.filter((n) => isMedia(n.type)),
     [filteredNodes]
   );
-
-  // 処理高速化のため、path => node の Map を作成しておく
-  const mediaOnlyMap = useMemo(() => {
-    return new Map(mediaOnly.map((node) => [node.path, node]));
-  }, [mediaOnly]);
 
   // すべてのタグ
   const allTags = sortNames(
@@ -259,15 +254,20 @@ export function Explorer() {
     clearSelection,
   } = usePathSelectionContext();
 
+  // 処理高速化のため、path => node の Map を作成しておく
+  const pathToNodeMap = useMemo(() => {
+    return new Map(listing.nodes.map((node) => [node.path, node]));
+  }, [listing.nodes]);
+
   // 選択済みノードリスト
   const selected = useMemo(() => {
     const result = [];
     for (const path of selectedPaths) {
-      const node = mediaOnlyMap.get(path);
+      const node = pathToNodeMap.get(path);
       if (node) result.push(node);
     }
     return result;
-  }, [mediaOnlyMap, selectedPaths]);
+  }, [pathToNodeMap, selectedPaths]);
 
   // 選択
   const handleSelect = useCallback(() => {
@@ -276,7 +276,7 @@ export function Explorer() {
 
   // 全選択
   const handleSelectAll = () => {
-    selectPaths(mediaOnly.map((n) => n.path));
+    selectPaths(filteredNodes.map((n) => n.path));
     enterSelectionMode();
   };
 
@@ -402,7 +402,7 @@ export function Explorer() {
           {isSelectionMode && !isTagEditMode && (
             <SelectionBar
               count={selected.length}
-              totalCount={mediaOnly.length}
+              totalCount={filteredNodes.length}
               onSelectAll={handleSelectAll}
               onClose={handleCloseSelectionBar}
               actions={
