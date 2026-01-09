@@ -3,7 +3,7 @@ import { searchTagStrategies, sortTagStrategies } from "@/lib/tag/strategies";
 export type {
   MediaTag as PrismaMediaTag,
   Tag as PrismaTag,
-} from "@/generated/prisma";
+} from "@/generated/prisma/client";
 
 export type Tag = {
   id: string;

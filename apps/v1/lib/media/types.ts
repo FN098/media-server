@@ -1,6 +1,6 @@
 import { PathType } from "@/lib/path/types";
 
-export type { Media as PrismaMedia } from "@/generated/prisma";
+export type { Media as PrismaMedia } from "@/generated/prisma/client";
 
 export type MediaFsNodeType =
   | "directory"
