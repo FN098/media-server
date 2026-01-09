@@ -1,17 +1,8 @@
 import fs from "fs/promises";
 
-export async function existsDir(dirPath: string): Promise<boolean> {
+export async function existsPath(path: string): Promise<boolean> {
   try {
-    await fs.access(dirPath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function existsFile(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
+    await fs.access(path);
     return true;
   } catch {
     return false;

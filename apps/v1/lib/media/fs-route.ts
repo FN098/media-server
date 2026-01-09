@@ -1,14 +1,14 @@
 import { detectMediaType, isMedia } from "@/lib/media/media-types";
 import { sortNames } from "@/lib/media/sort";
 import { getMediaPath } from "@/lib/path/helpers";
-import { existsDir } from "@/lib/utils/fs";
+import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
 
 // そのディレクトリ「直下」にメディアがあるかチェック
 async function hasDirectMedia(dirPath: string): Promise<boolean> {
   const absolutePath = getMediaPath(dirPath);
-  if (!(await existsDir(absolutePath))) return false;
+  if (!(await existsPath(absolutePath))) return false;
 
   const dirents = await fs.readdir(absolutePath, { withFileTypes: true });
   // ファイルかつメディアタイプであるものが1つでもあればOK
@@ -86,7 +86,7 @@ export async function findGlobalAdjacentFolder(
   const parentPath = currentPath.split("/").slice(0, -1).join("/") || "";
   const parentTargetDir = getMediaPath(parentPath);
 
-  if (!(await existsDir(parentTargetDir))) return null;
+  if (!(await existsPath(parentTargetDir))) return null;
 
   const parentDirents = await fs.readdir(parentTargetDir, {
     withFileTypes: true,

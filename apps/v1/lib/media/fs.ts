@@ -1,7 +1,7 @@
 import { findGlobalAdjacentFolder } from "@/lib/media/fs-route";
 import { detectMediaType } from "@/lib/media/media-types";
 import { getMediaPath } from "@/lib/path/helpers";
-import { existsDir } from "@/lib/utils/fs";
+import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
 import { MediaFsListing, MediaFsNode } from "./types";
@@ -50,7 +50,7 @@ export async function getMediaFsListing(
   dirPath: string
 ): Promise<MediaFsListing | null> {
   const targetDir = getMediaPath(dirPath);
-  if (!(await existsDir(targetDir))) return null;
+  if (!(await existsPath(targetDir))) return null;
 
   // --- 現在のディレクトリのノード取得 ---
   const nodes = await getMediaFsNodes(dirPath);

@@ -1,5 +1,5 @@
 import { getMediaPath, getMediaThumbPath } from "@/lib/path/helpers";
-import { existsFile } from "@/lib/utils/fs";
+import { existsPath } from "@/lib/utils/fs";
 import { spawn } from "child_process";
 import { mkdir } from "fs/promises";
 import { dirname } from "path";
@@ -67,7 +67,7 @@ export async function createThumbsIfNotExists(
   await Promise.all(
     filtered.map(async (n) => {
       const thumb = getMediaThumbPath(n.path);
-      if (await existsFile(thumb)) return;
+      if (await existsPath(thumb)) return;
 
       const media = getMediaPath(n.path);
 
