@@ -84,7 +84,7 @@ export function HeaderSearch() {
         zIndex: focused ? 50 : 1,
       }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
-      className="relative shrink-0 w-full overflow-hidden"
+      className="relative shrink-0 w-full"
       style={{ maxWidth: isMobile ? "calc(100vw - 2rem)" : "none" }}
     >
       <Search
