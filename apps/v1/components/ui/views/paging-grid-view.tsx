@@ -37,7 +37,7 @@ interface PagingGridViewProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
-  onPageChange: (page: number) => void;
+  onPageChange?: (page: number) => void;
 }
 
 export function PagingGridView({
@@ -62,7 +62,7 @@ export function PagingGridView({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    onPageChange(page);
+    onPageChange?.(page);
   };
 
   const totalPages = Math.ceil(allNodes.length / pageSize);
@@ -225,6 +225,7 @@ function Cell({
     <div className="relative group aspect-[3/4] sm:aspect-[4/5]">
       <HoverPreviewPortal node={node} enabled={isMediaNode && !isMobile}>
         <div
+          id={`media-item-${globalIndex}`}
           onMouseDown={start}
           onMouseUp={stop}
           onMouseLeave={stop}

@@ -301,8 +301,14 @@ export function FavoritesExplorer() {
     { key: "Escape", callback: () => handleClearSelection() },
   ]);
 
+  // スクロール対象のref
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className={cn("flex-1 flex flex-col min-h-0")}>
+    <div
+      className={cn("flex-1 flex flex-col min-h-0 overflow-auto")}
+      ref={scrollRef}
+    >
       <div className="flex flex-wrap items-center gap-1 px-4">
         {/* タグフィルター */}
         <TagFilterDialog
@@ -314,7 +320,7 @@ export function FavoritesExplorer() {
 
       {/* グリッドビュー */}
       {viewMode === "grid" && !isViewMode && (
-        <div className="flex-1 min-h-0">
+        <div className="flex-1">
           <PagingGridView
             allNodes={filteredNodes}
             onOpen={handleOpen}
@@ -323,13 +329,16 @@ export function FavoritesExplorer() {
               handleSelectSingle(node);
               handleOpenTagEditor();
             }}
+            onPageChange={() =>
+              scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+            }
           />
         </div>
       )}
 
       {/* リストビュー */}
       {viewMode === "list" && !isViewMode && (
-        <div className="flex-1 min-h-0">
+        <div className="flex-1">
           <PagingListView
             allNodes={filteredNodes}
             onOpen={handleOpen}
@@ -338,6 +347,9 @@ export function FavoritesExplorer() {
               handleSelectSingle(node);
               handleOpenTagEditor();
             }}
+            onPageChange={() =>
+              scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+            }
           />
         </div>
       )}

@@ -38,7 +38,7 @@ interface PagingListViewProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
-  onPageChange: (page: number) => void;
+  onPageChange?: (page: number) => void;
 }
 
 const GRID_TEMPLATE =
@@ -66,7 +66,7 @@ export function PagingListView({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    onPageChange(page);
+    onPageChange?.(page);
   };
 
   const totalPages = Math.ceil(allNodes.length / pageSize);
@@ -241,6 +241,7 @@ function DataRow({
   return (
     <HoverPreviewPortal node={node} enabled={isMediaNode && !isMobile}>
       <div
+        id={`media-item-${globalIndex}`}
         role="row"
         onMouseDown={start}
         onMouseUp={stop}
