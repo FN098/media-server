@@ -437,7 +437,7 @@ export function Explorer() {
 
         {/* 選択バー */}
         <AnimatePresence>
-          {isSelectionMode && !isTagEditMode && (
+          {isSelectionMode && !isTagEditMode && !isMoveMode && (
             <SelectionBar
               count={selected.length}
               totalCount={filteredNodes.length}
