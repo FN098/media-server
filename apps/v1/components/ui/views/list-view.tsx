@@ -336,7 +336,7 @@ function DataRow({
           )}
         </div>
 
-        {/* アクション */}
+        {/* アクションメニュー */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

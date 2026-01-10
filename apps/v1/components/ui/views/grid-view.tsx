@@ -356,7 +356,7 @@ function Cell({
             />
           )}
 
-          {/* 3点リーダーメニュー */}
+          {/* アクションメニュー */}
           {!selectCtx.isSelectionMode && (
             <div
               className={cn(
