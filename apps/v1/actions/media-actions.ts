@@ -4,7 +4,7 @@ import { renameSchema } from "@/lib/media/validation";
 import { getMediaPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
-import { rename } from "fs/promises";
+import { lstat, rename } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { dirname, join } from "path";
 
@@ -28,12 +28,15 @@ export async function renameNodeAction(
 
   try {
     // 親ディレクトリを取得し、新しいフルパスを構築
-    const realOldPath = getMediaPath(oldVirtualPath);
-    const parentDir = dirname(realOldPath);
-    const realNewPath = join(parentDir, newName);
+    const oldRealPath = getMediaPath(oldVirtualPath);
+    const stats = await lstat(oldRealPath);
+    const isDirectory = stats.isDirectory(); // ディレクトリ判定
+
+    const parentDir = dirname(oldRealPath);
+    const newRealPath = join(parentDir, newName);
 
     // 同名パスの存在チェック
-    if (await existsPath(realNewPath)) {
+    if (await existsPath(newRealPath)) {
       return {
         success: false,
         error: "同名のファイルまたはフォルダが既に存在します。",
@@ -49,10 +52,7 @@ export async function renameNodeAction(
 
     // DB更新 (トランザクション)
     await prisma.$transaction(async (tx) => {
-      // フォルダのリネームの場合、配下のすべてのパスを置換する必要がある
-      // 例: /old-dir/file.jpg -> /new-dir/file.jpg
-
-      // 1. 自分自身の更新 (path, dirPath, title をすべて更新)
+      // 1. 自分自身の更新 (ファイルでもディレクトリでも共通)
       await tx.$executeRaw`
         UPDATE Media 
         SET path = ${newVirtualPath},
@@ -61,24 +61,40 @@ export async function renameNodeAction(
         WHERE path = ${oldVirtualPath}
       `;
 
-      // 2. 配下ノードの更新 (path と dirPath の文字列置換のみ、title は触らない)
-      await tx.$executeRaw`
-        UPDATE Media 
-        SET path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
-            dirPath = REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
-        WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
-      `;
+      // 2. ディレクトリの場合のみ、配下のリソースを更新
+      if (isDirectory) {
+        // Media配下
+        await tx.$executeRaw`
+          UPDATE Media 
+          SET 
+            path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
+            dirPath = CASE 
+              WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
+              ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+            END
+          WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
+        `;
 
-      // 3. 訪問履歴の更新 (自分自身 + 配下すべてを一括置換)
-      await tx.$executeRaw`
-        UPDATE VisitedFolder 
-        SET dirPath = REPLACE(dirPath, ${oldVirtualPath}, ${newVirtualPath})
-        WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
-      `;
+        // 訪問履歴 (ディレクトリの場合のみ存在する可能性がある)
+        await tx.$executeRaw`
+          UPDATE VisitedFolder 
+          SET dirPath = CASE 
+            WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
+            ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+          END
+          WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
+        `;
+      } else {
+        // ファイルの場合でも、自分自身が VisitedFolder に登録されている可能性が万一あれば更新
+        // (通常はないはずですが、スキーマ的に dirPath をキーにしているので念のため)
+        await tx.$executeRaw`
+          UPDATE VisitedFolder SET dirPath = ${newVirtualPath} WHERE dirPath = ${oldVirtualPath}
+        `;
+      }
     });
 
     // リネーム実行
-    await rename(realOldPath, realNewPath);
+    await rename(oldRealPath, newRealPath);
 
     // NOTE: サムネイルは再作成すればいいのでリネームしない
 
@@ -87,7 +103,7 @@ export async function renameNodeAction(
 
     return {
       success: true,
-      newPath: realNewPath,
+      newPath: newVirtualPath,
     };
   } catch (error) {
     console.error("Rename Error:", error);
