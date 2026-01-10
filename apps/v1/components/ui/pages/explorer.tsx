@@ -417,16 +417,20 @@ export function Explorer() {
         </div>
       )}
 
-      {/* タグエディター */}
-      <AnimatePresence>
-        {isTagEditMode && (
-          <TagEditSheet
-            targetNodes={selected}
-            onClose={handleCloseTagEditor}
-            mode={tagEditMode}
+      {/* ビューワ */}
+      {isViewMode && (
+        <ScrollLockProvider>
+          <MediaViewer
+            allNodes={mediaOnly}
+            initialIndex={viewerIndex}
+            onIndexChange={handleViewerIndexChange}
+            onClose={closeViewer}
+            onPrevFolder={(at) => openPrevFolder(at ?? "last")}
+            onNextFolder={(at) => openNextFolder(at ?? "first")}
+            onTags={handleToggleTagEditor}
           />
-        )}
-      </AnimatePresence>
+        </ScrollLockProvider>
+      )}
 
       {/* 選択バー */}
       <AnimatePresence>
@@ -461,20 +465,16 @@ export function Explorer() {
         )}
       </AnimatePresence>
 
-      {/* ビューワ */}
-      {isViewMode && (
-        <ScrollLockProvider>
-          <MediaViewer
-            allNodes={mediaOnly}
-            initialIndex={viewerIndex}
-            onIndexChange={handleViewerIndexChange}
-            onClose={closeViewer}
-            onPrevFolder={(at) => openPrevFolder(at ?? "last")}
-            onNextFolder={(at) => openNextFolder(at ?? "first")}
-            onTags={handleToggleTagEditor}
+      {/* タグエディター */}
+      <AnimatePresence>
+        {isTagEditMode && (
+          <TagEditSheet
+            targetNodes={selected}
+            onClose={handleCloseTagEditor}
+            mode={tagEditMode}
           />
-        </ScrollLockProvider>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* リネームダイアログ */}
       <RenameDialog
