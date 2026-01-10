@@ -31,9 +31,9 @@ export function RenameDialog({
 
   // ダイアログが開くたびに名前をリセット
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- ダイアログを開くときに一度だけ実行されるのでエラーを無視
     if (open) setNewName(currentName);
-  }, [open, currentName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleRename = async () => {
     if (isPending) return;
