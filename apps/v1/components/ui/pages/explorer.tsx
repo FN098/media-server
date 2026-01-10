@@ -48,6 +48,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, FolderInput, TagIcon } from "lucide-react";
 import Link from "next/link";
+import { dirname } from "path";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -327,6 +328,8 @@ export function Explorer() {
   // 移動対象のノードリストを管理
   const [moveTargets, setMoveTargets] = useState<MediaNode[]>([]);
   const isMoveMode = moveTargets.length > 0;
+  const initialCurrentPath =
+    moveTargets.length > 0 ? dirname(moveTargets[0]?.path) : undefined;
 
   const handleCloseMoveDialog = () => {
     setMoveTargets([]);
@@ -342,6 +345,7 @@ export function Explorer() {
   const handleOpenMoveSelected = () => {
     setMoveTargets(selected);
   };
+
   // ===== サーバーアクション =====
 
   // サムネイル作成リクエスト送信
@@ -495,6 +499,7 @@ export function Explorer() {
             path: node.path,
             name: node.name,
           }))}
+          initialCurrentPath={initialCurrentPath}
         />
       </FavoritesProvider>
 

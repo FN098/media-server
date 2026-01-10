@@ -23,22 +23,24 @@ interface MoveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sourceNodes: { path: string; name: string }[];
+  initialCurrentPath?: string;
 }
 
 export function MoveDialog({
   open,
   onOpenChange,
   sourceNodes,
+  initialCurrentPath = "/",
 }: MoveDialogProps) {
-  const [currentPath, setCurrentPath] = useState("/");
+  const [currentPath, setCurrentPath] = useState(initialCurrentPath);
   const [dirs, setDirs] = useState<{ name: string; path: string }[]>([]);
   const [isNavigating, startNavigating] = useTransition();
   const [isMoving, startMoving] = useTransition();
 
-  // ダイアログを開いたときにルートパスを開く
+  // ダイアログを開いたときに初期パスをリセット
   useEffect(() => {
-    if (open) {
-      fetchDirs("/");
+    if (open && initialCurrentPath !== currentPath) {
+      fetchDirs(initialCurrentPath);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
