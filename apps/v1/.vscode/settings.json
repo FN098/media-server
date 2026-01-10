@@ -6,7 +6,6 @@
     "source.organizeImports": "explicit",
     "source.fixAll": "explicit"
   },
-  "typescript.preferences.autoImportFileExcludePatterns": ["**/generated/**"],
   "prettier.prettierPath": "node_modules/prettier",
   "eslint.format.enable": false,
   "files.eol": "\n",
