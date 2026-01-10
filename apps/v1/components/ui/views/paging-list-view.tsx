@@ -4,28 +4,20 @@ import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge"
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { LocalDate } from "@/components/ui/dates/local-date";
+import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
 import { PagingControl } from "@/components/ui/paginations/paging-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { getParentDirPath } from "@/lib/path/helpers";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
-import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -144,10 +136,6 @@ export function PagingListView({
     </div>
   );
 }
-
-/* -------------------------------------------------------------------------- */
-/* Sub Components (HeaderRow, DataRow, ActionMenu)                            */
-/* -------------------------------------------------------------------------- */
 
 function HeaderRow() {
   return (
@@ -370,73 +358,5 @@ function DataRow({
         </div>
       </div>
     </HoverPreviewPortal>
-  );
-}
-
-interface ActionMenuProps {
-  node: MediaNode;
-  onRename?: (node: MediaNode) => void;
-  onMove?: (node: MediaNode) => void;
-  onEditTags?: (node: MediaNode) => void;
-  onOpenFolder?: (path: string) => void;
-}
-
-function ActionMenu({
-  node,
-  onRename,
-  onMove,
-  onEditTags,
-  onOpenFolder,
-}: ActionMenuProps) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-          <MoreVertical className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        {onOpenFolder && (
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenFolder(getParentDirPath(node.path));
-            }}
-          >
-            <Pencil className="mr-2 h-4 w-4" /> フォルダを開く
-          </DropdownMenuItem>
-        )}
-        {onRename && (
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              onRename(node);
-            }}
-          >
-            <Pencil className="mr-2 h-4 w-4" /> 名前の変更
-          </DropdownMenuItem>
-        )}
-        {onMove && (
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              onMove(node);
-            }}
-          >
-            <FolderInput className="mr-2 h-4 w-4" /> 他のフォルダに移動
-          </DropdownMenuItem>
-        )}
-        {onEditTags && (
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              onEditTags(node);
-            }}
-          >
-            <Tag className="mr-2 h-4 w-4" /> タグの編集
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
