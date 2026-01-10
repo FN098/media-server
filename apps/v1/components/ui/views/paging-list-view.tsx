@@ -54,7 +54,8 @@ interface PagingListViewProps {
 }
 
 // カラム定義を一箇所に集約（ヘッダーとデータ行で共通）
-const GRID_TEMPLATE = "grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]";
+const GRID_TEMPLATE =
+  "grid-cols-[40px_1fr_50px_50px] md:grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]";
 
 export function PagingListView({
   allNodes,
@@ -80,6 +81,8 @@ export function PagingListView({
     setCurrentPage(page);
     containerRef.current?.scrollTo({ top: 0, behavior: "instant" });
   };
+
+  pageSize = Math.min(Math.max(1, pageSize), allNodes.length); // 正規化
 
   const totalPages = Math.ceil(allNodes.length / pageSize);
   const currentNodes = useMemo(() => {
@@ -147,7 +150,7 @@ function HeaderRow() {
   return (
     <div
       className={cn(
-        "grid items-center h-10 px-4 border-b bg-muted/30 text-xs font-semibold text-muted-foreground sticky top-0 z-10 backdrop-blur",
+        "grid items-center h-10 border-b bg-muted/30 text-xs font-semibold text-muted-foreground sticky top-0 z-10 backdrop-blur",
         GRID_TEMPLATE
       )}
     >
@@ -155,10 +158,11 @@ function HeaderRow() {
         <Checkbox disabled className="opacity-50" />
       </div>
       <div>Name</div>
-      <div>Type</div>
-      <div>Updated</div>
-      <div>Size</div>
-      <div>Last Viewed</div>
+      {/* 2. デスクトップのみ表示するカラムに md:block / hidden を追加 */}
+      <div className="hidden md:block">Type</div>
+      <div className="hidden md:block">Updated</div>
+      <div className="hidden md:block">Size</div>
+      <div className="hidden md:block">Last Viewed</div>
       <div className="text-center">Favorite</div>
       <div className="text-center">Actions</div>
     </div>
@@ -279,7 +283,7 @@ function DataRow({
         onClick={isMobile ? handleTap : handleClick}
         onDoubleClick={!isMobile ? () => onOpen?.(node) : undefined}
         className={cn(
-          "grid items-center h-12 px-4 border-b select-none cursor-pointer transition-colors text-sm",
+          "grid items-center h-12 border-b select-none cursor-pointer transition-colors text-sm",
           GRID_TEMPLATE,
           isSelected ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-muted/50"
         )}
@@ -299,35 +303,36 @@ function DataRow({
         </div>
 
         {/* Name */}
-        <div className="flex items-center gap-3 overflow-hidden">
+        <div className="flex items-center gap-3 overflow-hidden pr-2">
           <MediaThumbIcon
             type={node.type}
             className="w-5 h-5 shrink-0 opacity-70"
           />
-          <span className="truncate font-medium">
-            {node.title ?? node.name}
-          </span>
+          <div className="flex flex-col min-w-0">
+            <span className="truncate font-medium">
+              {node.title ?? node.name}
+            </span>
+            <span className="md:hidden text-[10px] text-muted-foreground truncate">
+              {node.isDirectory
+                ? "Folder"
+                : `${getExtension(node.name)} • ${formatBytes(node.size)}`}
+            </span>
+          </div>
         </div>
 
-        {/* Type */}
-        <div className="text-muted-foreground text-xs uppercase">
+        {/* デスクトップ専用カラム */}
+        <div className="hidden md:block text-muted-foreground text-xs uppercase">
           {node.isDirectory
             ? "Folder"
             : getExtension(node.name, { withDot: false })}
         </div>
-
-        {/* Updated */}
-        <div className="text-muted-foreground text-xs tabular-nums">
+        <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
           <LocalDate value={node.mtime} />
         </div>
-
-        {/* Size */}
-        <div className="text-muted-foreground text-xs tabular-nums">
+        <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
           {node.isDirectory ? "-" : formatBytes(node.size)}
         </div>
-
-        {/* Last Viewed */}
-        <div className="flex items-center overflow-hidden">
+        <div className="hidden md:block flex items-center overflow-hidden">
           {node.isDirectory && (
             <FolderStatusBadge
               date={node.lastViewedAt}
@@ -336,7 +341,7 @@ function DataRow({
           )}
         </div>
 
-        {/* Favorite */}
+        {/* Favorite: モバイルでも表示 */}
         <div
           className="flex justify-center"
           onClick={(e) => e.stopPropagation()}
@@ -347,12 +352,12 @@ function DataRow({
             <FavoriteButton
               variant="list"
               active={isFavorite}
-              onClick={(e) => toggleFavorite(e)}
+              onClick={toggleFavorite}
             />
           )}
         </div>
 
-        {/* Action Menu */}
+        {/* Actions: モバイルでも表示 */}
         <div className="flex justify-center">
           <ActionMenu
             node={node}
