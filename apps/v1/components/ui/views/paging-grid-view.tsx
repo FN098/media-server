@@ -230,6 +230,7 @@ function Cell({
           onMouseLeave={stop}
           onTouchStart={start}
           onTouchEnd={stop}
+          onTouchMove={stop}
           onClick={isMobile ? handleTap : handleClick}
           onDoubleClick={!isMobile ? () => onOpen?.(node) : undefined}
           className={cn(
