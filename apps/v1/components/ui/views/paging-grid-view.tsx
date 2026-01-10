@@ -369,7 +369,7 @@ function ActionMenu({
               onMove(node);
             }}
           >
-            <FolderInput className="mr-2 h-4 w-4" /> 移動
+            <FolderInput className="mr-2 h-4 w-4" /> 他のフォルダに移動
           </DropdownMenuItem>
         )}
         {onEditTags && (
