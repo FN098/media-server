@@ -368,17 +368,35 @@ export function FavoritesExplorer() {
             totalCount={filteredNodes.length}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}
+            className="z-10" // DropdownMenu より小さくする
             actions={
-              <>
+              <div className="flex gap-1 items-center">
+                {/* メインのアクション */}
                 <Button
-                  size="sm"
+                  size="icon"
+                  variant="ghost"
                   onClick={handleOpenTagEditor}
                   disabled={selected.length === 0}
                 >
-                  <TagIcon />
-                  タグ表示
+                  <TagIcon size={18} />
                 </Button>
-              </>
+
+                {/* NOTE: 追加のアクション必要になったら以下を使用 */}
+
+                {/* その他 */}
+                {/* <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <MoreVertical size={18} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => console.log("clicked")}>
+                      <FolderInput className="mr-2 h-4 w-4" /> サンプル
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu> */}
+              </div>
             }
           />
         )}

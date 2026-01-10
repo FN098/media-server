@@ -42,9 +42,21 @@ import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, FolderInput, TagIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  FolderInput,
+  MoreVertical,
+  TagIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { dirname } from "path";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -447,26 +459,33 @@ export function Explorer() {
             totalCount={filteredNodes.length}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}
+            className="z-10" // DropdownMenu より小さくする
             actions={
-              <>
+              <div className="flex gap-1 items-center">
+                {/* メインのアクション */}
                 <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleOpenMoveSelected}
-                  disabled={selected.length === 0}
-                >
-                  <FolderInput className="mr-2 h-4 w-4" /> 移動
-                </Button>
-
-                <Button
-                  size="sm"
+                  size="icon"
+                  variant="ghost"
                   onClick={handleOpenTagEditor}
                   disabled={selected.length === 0}
                 >
-                  <TagIcon />
-                  タグ編集
+                  <TagIcon size={18} />
                 </Button>
-              </>
+
+                {/* その他 */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <MoreVertical size={18} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleOpenMoveSelected}>
+                      <FolderInput className="mr-2 h-4 w-4" /> 移動
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             }
           />
         )}

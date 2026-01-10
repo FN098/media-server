@@ -11,6 +11,7 @@ interface SelectionBarProps {
   onSelectAll: () => void;
   onClose: () => void;
   actions: React.ReactNode;
+  className?: string;
 }
 
 export function SelectionBar({
@@ -18,7 +19,8 @@ export function SelectionBar({
   totalCount,
   onSelectAll,
   onClose,
-  actions, // アクションボタンの定義を配列で受ける
+  actions,
+  className,
 }: SelectionBarProps) {
   const isAllSelected = count > 0 && count === totalCount;
   const isMobile = useIsMobile();
@@ -28,7 +30,10 @@ export function SelectionBar({
       initial={{ y: 100, x: "-50%", opacity: 0 }}
       animate={{ y: 0, x: "-50%", opacity: 1 }}
       exit={{ y: 100, x: "-50%", opacity: 0 }}
-      className="fixed bottom-8 left-1/2 z-[60] w-[95%] max-w-md pointer-events-auto"
+      className={cn(
+        "fixed bottom-8 left-1/2 z-[60] w-[95%] max-w-md pointer-events-auto",
+        className
+      )}
     >
       <div className="flex items-center justify-between gap-2 p-2 bg-background/80 backdrop-blur-xl border rounded-2xl shadow-2xl">
         <Button
