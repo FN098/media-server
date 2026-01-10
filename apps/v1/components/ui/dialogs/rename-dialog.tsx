@@ -31,10 +31,13 @@ export function RenameDialog({
 
   // ダイアログが開くたびに名前をリセット
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- ダイアログを開くときに一度だけ実行されるのでエラーを無視
     if (open) setNewName(currentName);
   }, [open, currentName]);
 
   const handleRename = async () => {
+    if (isPending) return;
+
     if (!newName || newName === currentName) {
       onOpenChange(false);
       return;
@@ -63,8 +66,9 @@ export function RenameDialog({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="新しい名前を入力"
-            onKeyDown={(e) => e.key === "Enter" && handleRename()}
+            onKeyDown={(e) => e.key === "Enter" && void handleRename()}
             autoFocus
+            disabled={isPending}
           />
         </div>
         <DialogFooter>
@@ -75,7 +79,7 @@ export function RenameDialog({
           >
             キャンセル
           </Button>
-          <Button onClick={handleRename} disabled={isPending}>
+          <Button onClick={() => void handleRename()} disabled={isPending}>
             {isPending ? "実行中..." : "保存"}
           </Button>
         </DialogFooter>

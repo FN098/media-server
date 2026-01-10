@@ -319,6 +319,8 @@ export function Explorer() {
     name: string;
   } | null>(null);
 
+  const isRenameMode = !!renameTarget;
+
   // ===== サーバーアクション =====
 
   // サムネイル作成リクエスト送信
@@ -448,7 +450,7 @@ export function Explorer() {
 
         {/* リネームダイアログ */}
         <RenameDialog
-          open={!!renameTarget}
+          open={isRenameMode}
           onOpenChange={(open) => !open && setRenameTarget(null)}
           oldPath={renameTarget?.path ?? ""}
           currentName={renameTarget?.name ?? ""}
