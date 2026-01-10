@@ -80,7 +80,11 @@ export function DynamicBreadcrumbs({ items }: { items: BreadcrumbLinkItem[] }) {
               >
                 {i === items.length - 1 ? (
                   <BreadcrumbPage className="truncate">
-                    {item.label}
+                    {item.key === "home" ? (
+                      <HomeIcon className="size-4" />
+                    ) : (
+                      item.label
+                    )}
                   </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
