@@ -43,8 +43,8 @@ export const startThumbWorker = () => {
               // サムネイル作成（このチャンク分が完了するまで待つ）
               await createThumbsIfNotExists(chunk);
 
-              // 2. 通知は「待たずに」実行。ただしエラーハンドリングはしておく
-              Promise.all(
+              // 2. ファイル単位での完了通知を発行
+              await Promise.all(
                 chunk.map((node) =>
                   connection.publish(
                     "thumb-completed",
