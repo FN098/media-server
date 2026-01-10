@@ -18,7 +18,6 @@ import {
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTagFilter } from "@/hooks/use-tag-filter";
-import { FavoritesRecord } from "@/lib/favorite/types";
 import {
   createFavoriteFilter,
   createSearchFilter,
@@ -37,7 +36,6 @@ import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
-import { FavoritesProvider } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -147,12 +145,16 @@ export function Explorer() {
   );
 
   // すべてのタグ
-  const allTags = sortNames(
-    unique(
-      mediaOnly
-        .filter((n) => n.tags && n.tags.length > 0)
-        .flatMap((n) => n.tags!.map((t) => t.name))
-    )
+  const allTags = useMemo(
+    () =>
+      sortNames(
+        unique(
+          mediaOnly
+            .filter((n) => n.tags && n.tags.length > 0)
+            .flatMap((n) => n.tags!.map((t) => t.name))
+        )
+      ),
+    [mediaOnly]
   );
 
   // ===== ビューア =====
@@ -237,14 +239,6 @@ export function Explorer() {
 
     toast.warning("このファイル形式は対応していません");
   };
-
-  // ===== お気に入り =====
-
-  // TODO: お気に入り変更時に更新 (ビューに onFavoriteChange を追加し、favoriteChanges に格納する。差分を保持する)
-  const favorites: FavoritesRecord = useMemo(
-    () => Object.fromEntries(listing.nodes.map((n) => [n.path, n.isFavorite])),
-    [listing.nodes]
-  );
 
   // ===== 選択機能 =====
 
@@ -380,128 +374,126 @@ export function Explorer() {
         viewMode === "list" && "px-4"
       )}
     >
-      <FavoritesProvider favorites={favorites}>
-        <div className="flex flex-wrap items-center gap-1 pb-2">
-          {/* タグフィルター */}
-          <TagFilterDialog
-            tags={allTags}
-            selectedTags={selectedTags}
-            onApply={selectTags}
-          />
+      <div className="flex flex-wrap items-center gap-1 pb-2">
+        {/* タグフィルター */}
+        <TagFilterDialog
+          tags={allTags}
+          selectedTags={selectedTags}
+          onApply={selectTags}
+        />
 
-          {/* お気に入りフィルター */}
-          <FavoriteFilterButton
-            isActive={isFavoriteOnly}
-            onClick={toggleIsFavoriteOnly}
-            showCount
-            count={mediaOnly.length}
+        {/* お気に入りフィルター */}
+        <FavoriteFilterButton
+          isActive={isFavoriteOnly}
+          onClick={toggleIsFavoriteOnly}
+          showCount
+          count={mediaOnly.length}
+        />
+      </div>
+
+      {/* グリッドビュー */}
+      {viewMode === "grid" && !isViewMode && (
+        <div>
+          <GridView
+            allNodes={filteredNodes}
+            onOpen={handleOpen}
+            onSelect={handleSelect}
+            onRename={handleRenameSingle}
+            onMove={handleOpenMoveSingle}
           />
         </div>
+      )}
 
-        {/* グリッドビュー */}
-        {viewMode === "grid" && !isViewMode && (
-          <div>
-            <GridView
-              allNodes={filteredNodes}
-              onOpen={handleOpen}
-              onSelect={handleSelect}
-              onRename={handleRenameSingle}
-              onMove={handleOpenMoveSingle}
-            />
-          </div>
+      {/* リストビュー */}
+      {viewMode === "list" && !isViewMode && (
+        <div>
+          <ListView
+            allNodes={filteredNodes}
+            onOpen={handleOpen}
+            onSelect={handleSelect}
+            onRename={handleRenameSingle}
+            onMove={handleOpenMoveSingle}
+          />
+        </div>
+      )}
+
+      {/* タグエディター */}
+      <AnimatePresence>
+        {isTagEditMode && (
+          <TagEditSheet
+            targetNodes={selected}
+            onClose={handleCloseTagEditor}
+            mode={tagEditMode}
+          />
         )}
+      </AnimatePresence>
 
-        {/* リストビュー */}
-        {viewMode === "list" && !isViewMode && (
-          <div>
-            <ListView
-              allNodes={filteredNodes}
-              onOpen={handleOpen}
-              onSelect={handleSelect}
-              onRename={handleRenameSingle}
-              onMove={handleOpenMoveSingle}
-            />
-          </div>
+      {/* 選択バー */}
+      <AnimatePresence>
+        {isSelectionMode && !isTagEditMode && !isMoveMode && (
+          <SelectionBar
+            count={selected.length}
+            totalCount={filteredNodes.length}
+            onSelectAll={handleSelectAll}
+            onClose={handleCloseSelectionBar}
+            actions={
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleOpenMoveSelected}
+                  disabled={selected.length === 0}
+                >
+                  <FolderInput className="mr-2 h-4 w-4" /> 移動
+                </Button>
+
+                <Button
+                  size="sm"
+                  onClick={handleOpenTagEditor}
+                  disabled={selected.length === 0}
+                >
+                  <TagIcon />
+                  タグ編集
+                </Button>
+              </>
+            }
+          />
         )}
+      </AnimatePresence>
 
-        {/* タグエディター */}
-        <AnimatePresence>
-          {isTagEditMode && (
-            <TagEditSheet
-              targetNodes={selected}
-              onClose={handleCloseTagEditor}
-              mode={tagEditMode}
-            />
-          )}
-        </AnimatePresence>
+      {/* ビューワ */}
+      {isViewMode && (
+        <ScrollLockProvider>
+          <MediaViewer
+            allNodes={mediaOnly}
+            initialIndex={viewerIndex}
+            onIndexChange={handleViewerIndexChange}
+            onClose={closeViewer}
+            onPrevFolder={(at) => openPrevFolder(at ?? "last")}
+            onNextFolder={(at) => openNextFolder(at ?? "first")}
+            onTags={handleToggleTagEditor}
+          />
+        </ScrollLockProvider>
+      )}
 
-        {/* 選択バー */}
-        <AnimatePresence>
-          {isSelectionMode && !isTagEditMode && !isMoveMode && (
-            <SelectionBar
-              count={selected.length}
-              totalCount={filteredNodes.length}
-              onSelectAll={handleSelectAll}
-              onClose={handleCloseSelectionBar}
-              actions={
-                <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleOpenMoveSelected}
-                    disabled={selected.length === 0}
-                  >
-                    <FolderInput className="mr-2 h-4 w-4" /> 移動
-                  </Button>
+      {/* リネームダイアログ */}
+      <RenameDialog
+        open={isRenameMode}
+        onOpenChange={(open) => !open && setRenameTarget(null)}
+        sourcePath={renameTarget?.path ?? ""}
+        currentName={renameTarget?.name ?? ""}
+      />
 
-                  <Button
-                    size="sm"
-                    onClick={handleOpenTagEditor}
-                    disabled={selected.length === 0}
-                  >
-                    <TagIcon />
-                    タグ編集
-                  </Button>
-                </>
-              }
-            />
-          )}
-        </AnimatePresence>
-
-        {/* ビューワ */}
-        {isViewMode && (
-          <ScrollLockProvider>
-            <MediaViewer
-              allNodes={mediaOnly}
-              initialIndex={viewerIndex}
-              onIndexChange={handleViewerIndexChange}
-              onClose={closeViewer}
-              onPrevFolder={(at) => openPrevFolder(at ?? "last")}
-              onNextFolder={(at) => openNextFolder(at ?? "first")}
-              onTags={handleToggleTagEditor}
-            />
-          </ScrollLockProvider>
-        )}
-
-        {/* リネームダイアログ */}
-        <RenameDialog
-          open={isRenameMode}
-          onOpenChange={(open) => !open && setRenameTarget(null)}
-          sourcePath={renameTarget?.path ?? ""}
-          currentName={renameTarget?.name ?? ""}
-        />
-
-        {/* 移動ダイアログ */}
-        <MoveDialog
-          open={isMoveMode}
-          onOpenChange={(open) => !open && handleCloseMoveDialog()}
-          sourceNodes={moveTargets.map((node) => ({
-            path: node.path,
-            name: node.name,
-          }))}
-          initialCurrentPath={initialCurrentPath}
-        />
-      </FavoritesProvider>
+      {/* 移動ダイアログ */}
+      <MoveDialog
+        open={isMoveMode}
+        onOpenChange={(open) => !open && handleCloseMoveDialog()}
+        sourceNodes={moveTargets.map((node) => ({
+          path: node.path,
+          name: node.name,
+        }))}
+        initialCurrentPath={initialCurrentPath}
+      />
 
       {/* フォルダナビゲーション */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 border-t border-border/30">

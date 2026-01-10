@@ -15,7 +15,6 @@ import {
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTagFilter } from "@/hooks/use-tag-filter";
-import { FavoritesRecord } from "@/lib/favorite/types";
 import { createSearchFilter, createTagFilter } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
 import { sortNames } from "@/lib/media/sort";
@@ -29,7 +28,6 @@ import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
-import { FavoritesProvider } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -208,13 +206,6 @@ export function FavoritesExplorer() {
     toast.warning("このファイル形式は対応していません");
   };
 
-  // ===== お気に入り =====
-
-  const favorites: FavoritesRecord = useMemo(
-    () => Object.fromEntries(listing.nodes.map((n) => [n.path, n.isFavorite])),
-    [listing.nodes]
-  );
-
   // ===== 選択機能 =====
 
   const {
@@ -317,85 +308,83 @@ export function FavoritesExplorer() {
         viewMode === "list" && "px-4"
       )}
     >
-      <FavoritesProvider favorites={favorites}>
-        {/* タグフィルター */}
-        <TagFilterDialog
-          tags={allTags}
-          selectedTags={selectedTags}
-          onApply={selectTags}
-        />
+      {/* タグフィルター */}
+      <TagFilterDialog
+        tags={allTags}
+        selectedTags={selectedTags}
+        onApply={selectTags}
+      />
 
-        {/* グリッドビュー */}
-        {viewMode === "grid" && !isViewMode && (
-          <div>
-            <GridView
-              allNodes={filteredNodes}
-              onOpen={handleOpen}
-              onSelect={handleSelect}
-            />
-          </div>
+      {/* グリッドビュー */}
+      {viewMode === "grid" && !isViewMode && (
+        <div>
+          <GridView
+            allNodes={filteredNodes}
+            onOpen={handleOpen}
+            onSelect={handleSelect}
+          />
+        </div>
+      )}
+
+      {/* リストビュー */}
+      {viewMode === "list" && !isViewMode && (
+        <div>
+          <ListView
+            allNodes={filteredNodes}
+            onOpen={handleOpen}
+            onSelect={handleSelect}
+          />
+        </div>
+      )}
+
+      {/* タグエディター */}
+      <AnimatePresence>
+        {isTagEditMode && (
+          <TagEditSheet
+            targetNodes={selected}
+            onClose={handleCloseTagEditor}
+            mode={tagEditMode}
+          />
         )}
+      </AnimatePresence>
 
-        {/* リストビュー */}
-        {viewMode === "list" && !isViewMode && (
-          <div>
-            <ListView
-              allNodes={filteredNodes}
-              onOpen={handleOpen}
-              onSelect={handleSelect}
-            />
-          </div>
+      {/* 選択バー */}
+      <AnimatePresence>
+        {isSelectionMode && !isTagEditMode && (
+          <SelectionBar
+            count={selected.length}
+            totalCount={filteredNodes.length}
+            onSelectAll={handleSelectAll}
+            onClose={handleCloseSelectionBar}
+            actions={
+              <>
+                <Button
+                  size="sm"
+                  onClick={handleOpenTagEditor}
+                  disabled={selected.length === 0}
+                >
+                  <TagIcon />
+                  タグ表示
+                </Button>
+              </>
+            }
+          />
         )}
+      </AnimatePresence>
 
-        {/* タグエディター */}
-        <AnimatePresence>
-          {isTagEditMode && (
-            <TagEditSheet
-              targetNodes={selected}
-              onClose={handleCloseTagEditor}
-              mode={tagEditMode}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* 選択バー */}
-        <AnimatePresence>
-          {isSelectionMode && !isTagEditMode && (
-            <SelectionBar
-              count={selected.length}
-              totalCount={filteredNodes.length}
-              onSelectAll={handleSelectAll}
-              onClose={handleCloseSelectionBar}
-              actions={
-                <>
-                  <Button
-                    size="sm"
-                    onClick={handleOpenTagEditor}
-                    disabled={selected.length === 0}
-                  >
-                    <TagIcon />
-                    タグ表示
-                  </Button>
-                </>
-              }
-            />
-          )}
-        </AnimatePresence>
-
-        {/* ビューワ */}
-        {isViewMode && (
-          <ScrollLockProvider>
-            <MediaViewer
-              allNodes={mediaOnly}
-              initialIndex={viewerIndex}
-              onIndexChange={handleViewerIndexChange}
-              onClose={closeViewer}
-              onOpenFolder={openFolder}
-              onTags={handleToggleTagEditor}
-            />
-          </ScrollLockProvider>
-        )}
-      </FavoritesProvider>
+      {/* ビューワ */}
+      {isViewMode && (
+        <ScrollLockProvider>
+          <MediaViewer
+            allNodes={mediaOnly}
+            initialIndex={viewerIndex}
+            onIndexChange={handleViewerIndexChange}
+            onClose={closeViewer}
+            onOpenFolder={openFolder}
+            onTags={handleToggleTagEditor}
+          />
+        </ScrollLockProvider>
+      )}
     </div>
   );
 }

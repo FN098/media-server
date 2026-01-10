@@ -1,6 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/pages/explorer";
+import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
@@ -8,6 +9,7 @@ import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { MediaFsNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
+import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import {
   getDbFavoriteCount,
@@ -79,6 +81,11 @@ export default async function Page(props: ExplorerPageProps) {
   // フォーマット
   const formatted = formatNodes(merged);
 
+  // お気に入り
+  const favorites: FavoritesRecord = Object.fromEntries(
+    formatted.map((n) => [n.path, n.isFavorite])
+  );
+
   const listing = {
     ...fsListing,
     nodes: formatted,
@@ -86,9 +93,11 @@ export default async function Page(props: ExplorerPageProps) {
 
   return (
     <ExplorerProvider listing={listing}>
-      <PathSelectionProvider>
-        <Explorer />
-      </PathSelectionProvider>
+      <FavoritesProvider favorites={favorites}>
+        <PathSelectionProvider>
+          <Explorer />
+        </PathSelectionProvider>
+      </FavoritesProvider>
     </ExplorerProvider>
   );
 }
