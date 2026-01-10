@@ -308,7 +308,7 @@ function Cell({
           </div>
 
           {/* Actions */}
-          <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+          <div className="absolute top-2 right-2 flex flex-col gap-2">
             {!selectCtx.isSelectionMode && isMediaNode && (
               <FavoriteButton
                 variant="grid"
@@ -337,9 +337,9 @@ function Cell({
           </div>
 
           {/* Badges */}
-          <div className="absolute bottom-8 right-2 flex flex-col gap-1 items-end">
+          <div className="absolute bottom-8 right-2 flex gap-1 items-end">
             {node.isDirectory && <FolderStatusBadge date={node.lastViewedAt} />}
-            {node.isDirectory && node.favoriteCount && (
+            {node.isDirectory && !!node.favoriteCount && (
               <FavoriteCountBadge count={node.favoriteCount} />
             )}
           </div>

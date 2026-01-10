@@ -21,8 +21,7 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   // 1. ボタン全体のスタイル定義
   const containerStyles = {
-    // grid: 8x8(32px)で固定し、flex centerでアイコンを中央に。
-    grid: "z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 border border-white/10 shadow-sm",
+    grid: "h-8 w-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-md hover:bg-black/50 border border-white/10 shadow-sm",
     list: "h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted focus-visible:outline-none",
     viewer:
       "h-11 w-11 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md hover:bg-white/20",
