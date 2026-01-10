@@ -29,7 +29,8 @@ import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
 import React, { useMemo, useRef } from "react";
 import { toast } from "sonner";
 
-export function GridView({
+// NOTE: 要素数が 1000 を超えだすと急激に重くなる
+export function VirtualGridView({
   allNodes,
   onOpen,
   onOpenFolder,
@@ -117,7 +118,7 @@ export function GridView({
                   onSelect={onSelect}
                   onRename={onRename}
                   onMove={onMove}
-                  onTagEdit={onEditTags}
+                  onEditTag={onEditTags}
                 />
               );
             })}
@@ -138,7 +139,7 @@ function Cell({
   onSelect,
   onRename,
   onMove,
-  onTagEdit,
+  onEditTag,
 }: {
   node: MediaNode;
   index: number;
@@ -149,7 +150,7 @@ function Cell({
   onSelect?: () => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
-  onTagEdit?: (node: MediaNode) => void;
+  onEditTag?: (node: MediaNode) => void;
 }) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
@@ -401,11 +402,11 @@ function Cell({
                       移動
                     </DropdownMenuItem>
                   )}
-                  {onTagEdit && (
+                  {onEditTag && (
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.stopPropagation();
-                        onTagEdit(node);
+                        onEditTag(node);
                       }}
                     >
                       <Tag className="mr-2 h-4 w-4" />

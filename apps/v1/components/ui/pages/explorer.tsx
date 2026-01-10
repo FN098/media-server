@@ -9,8 +9,8 @@ import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
-import { GridView } from "@/components/ui/views/grid-view";
-import { ListView } from "@/components/ui/views/list-view";
+import { PagingGridView } from "@/components/ui/views/paging-grid-view";
+import { ListView } from "@/components/ui/views/virtual-list-view";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
@@ -395,7 +395,7 @@ export function Explorer() {
       {/* グリッドビュー */}
       {viewMode === "grid" && !isViewMode && (
         <div>
-          <GridView
+          <PagingGridView
             allNodes={filteredNodes}
             onOpen={handleOpen}
             onRename={handleRenameSingle}
