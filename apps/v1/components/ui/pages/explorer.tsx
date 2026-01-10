@@ -459,7 +459,7 @@ export function Explorer() {
             totalCount={filteredNodes.length}
             onSelectAll={handleSelectAll}
             onClose={handleCloseSelectionBar}
-            className="z-10" // DropdownMenu より小さくする
+            className="z-40" // DropdownMenu より小さくする
             actions={
               <div className="flex gap-1 items-center">
                 {/* メインのアクション */}
