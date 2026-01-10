@@ -1,10 +1,12 @@
+import { MediaFsNode } from "@/lib/media/types";
 import { getMediaPath, getMediaThumbPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import { spawn } from "child_process";
 import { mkdir } from "fs/promises";
 import { dirname } from "path";
 import sharp from "sharp";
-import { MediaFsNode } from "../media/types";
+
+sharp.cache(false); // これでファイルハンドルを即座に解放するようになります
 
 export async function createImageThumb(
   imagePath: string,
@@ -33,6 +35,11 @@ export async function createVideoThumb(
       "80",
       thumbPath,
     ]);
+
+    // プロセスが起動できなかった場合などのエラー処理
+    ff.on("error", (err) => {
+      reject(new Error(`Failed to start ffmpeg: ${err.message}`));
+    });
 
     ff.on("close", (code) => {
       if (code === 0) resolve();
