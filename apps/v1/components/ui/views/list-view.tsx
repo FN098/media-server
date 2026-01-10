@@ -9,6 +9,8 @@ import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
+import { getParentDirPath } from "@/lib/path/helpers";
+import { IndexLike } from "@/lib/query/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
 import { useFavoritesContext } from "@/providers/favorites-provider";
@@ -31,6 +33,7 @@ import { toast } from "sonner";
 export function ListView({
   allNodes,
   onOpen,
+  onOpenFolder,
   onSelect,
   onRename,
   onMove,
@@ -38,6 +41,7 @@ export function ListView({
 }: {
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
+  onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelect?: () => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
@@ -85,6 +89,7 @@ export function ListView({
                   allNodes={allNodes}
                   isMobile={isMobile}
                   onOpen={onOpen}
+                  onOpenFolder={onOpenFolder}
                   onSelect={onSelect}
                   onRename={onRename}
                   onMove={onMove}
@@ -125,6 +130,7 @@ function DataRow({
   allNodes,
   isMobile,
   onOpen,
+  onOpenFolder,
   onSelect,
   onRename,
   onMove,
@@ -135,6 +141,7 @@ function DataRow({
   allNodes: MediaNode[];
   isMobile: boolean;
   onOpen?: (node: MediaNode) => void;
+  onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelect?: () => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
@@ -342,6 +349,18 @@ function DataRow({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {onOpenFolder && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const parent = getParentDirPath(node.path);
+                  onOpenFolder(parent);
+                }}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                フォルダを開く
+              </DropdownMenuItem>
+            )}
             {onRename && (
               <DropdownMenuItem
                 onClick={(e) => {

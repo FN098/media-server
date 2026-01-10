@@ -10,6 +10,8 @@ import { useGridConfig } from "@/hooks/use-grid-config";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
+import { getParentDirPath } from "@/lib/path/helpers";
+import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -30,6 +32,7 @@ import { toast } from "sonner";
 export function GridView({
   allNodes,
   onOpen,
+  onOpenFolder,
   onSelect,
   onRename,
   onMove,
@@ -37,6 +40,7 @@ export function GridView({
 }: {
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
+  onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelect?: () => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
@@ -118,6 +122,7 @@ export function GridView({
                   allNodes={allNodes}
                   isMobile={isMobile}
                   onOpen={onOpen}
+                  onOpenFolder={onOpenFolder}
                   onSelect={onSelect}
                   onRename={onRename}
                   onMove={onMove}
@@ -138,6 +143,7 @@ function Cell({
   allNodes,
   isMobile,
   onOpen,
+  onOpenFolder,
   onSelect,
   onRename,
   onMove,
@@ -148,6 +154,7 @@ function Cell({
   allNodes: MediaNode[];
   isMobile: boolean;
   onOpen?: (node: MediaNode) => void;
+  onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelect?: () => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
@@ -369,6 +376,18 @@ function Cell({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {onOpenFolder && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const parent = getParentDirPath(node.path);
+                        onOpenFolder(parent);
+                      }}
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      フォルダを開く
+                    </DropdownMenuItem>
+                  )}
                   {onRename && (
                     <DropdownMenuItem
                       onClick={(e) => {

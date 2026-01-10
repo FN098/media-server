@@ -322,6 +322,7 @@ export function FavoritesExplorer() {
           <GridView
             allNodes={filteredNodes}
             onOpen={handleOpen}
+            onOpenFolder={openFolder}
             onEditTags={(node) => {
               handleSelectOne(node);
               handleOpenTagEditor();
@@ -336,6 +337,7 @@ export function FavoritesExplorer() {
           <ListView
             allNodes={filteredNodes}
             onOpen={handleOpen}
+            onOpenFolder={openFolder}
             onEditTags={(node) => {
               handleSelectOne(node);
               handleOpenTagEditor();
