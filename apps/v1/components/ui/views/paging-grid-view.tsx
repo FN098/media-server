@@ -25,13 +25,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 interface PagingGridViewProps {
@@ -43,6 +37,7 @@ interface PagingGridViewProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
+  onPageChange: (page: number) => void;
 }
 
 export function PagingGridView({
@@ -54,9 +49,9 @@ export function PagingGridView({
   onRename,
   onMove,
   onEditTags,
+  onPageChange,
 }: PagingGridViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (currentPage !== 1) {
@@ -67,7 +62,7 @@ export function PagingGridView({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    scrollRef.current?.scrollTo({ top: 0, behavior: "instant" });
+    onPageChange(page);
   };
 
   const totalPages = Math.ceil(allNodes.length / pageSize);
@@ -80,10 +75,7 @@ export function PagingGridView({
 
   return (
     <div className="h-full flex flex-col overflow-hidden relative">
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 auto-rows-max"
-      >
+      <div className="flex-1 overflow-y-auto p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 auto-rows-max">
         {currentNodes.map((node, index) => (
           <Cell
             key={node.path}
@@ -115,11 +107,17 @@ export function PagingGridView({
 /* Sub Components (Cell, ActionMenu)                                          */
 /* -------------------------------------------------------------------------- */
 
-interface CellProps extends Omit<PagingGridViewProps, "allNodes"> {
+interface CellProps {
   node: MediaNode;
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
+  onOpen?: (node: MediaNode) => void;
+  onOpenFolder?: (path: string, at?: IndexLike) => void;
+  onSelect?: () => void;
+  onRename?: (node: MediaNode) => void;
+  onMove?: (node: MediaNode) => void;
+  onEditTags?: (node: MediaNode) => void;
 }
 
 function Cell({

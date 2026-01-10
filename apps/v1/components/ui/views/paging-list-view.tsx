@@ -26,13 +26,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 interface PagingListViewProps {
@@ -44,6 +38,7 @@ interface PagingListViewProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
+  onPageChange: (page: number) => void;
 }
 
 const GRID_TEMPLATE =
@@ -58,8 +53,8 @@ export function PagingListView({
   onRename,
   onMove,
   onEditTags,
+  onPageChange,
 }: PagingListViewProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -71,7 +66,7 @@ export function PagingListView({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    scrollRef.current?.scrollTo({ top: 0, behavior: "instant" });
+    onPageChange(page);
   };
 
   const totalPages = Math.ceil(allNodes.length / pageSize);
@@ -83,13 +78,10 @@ export function PagingListView({
   const isMobile = useIsMobile();
 
   return (
-    // レイアウト固定のためのラッパー
     <div className="w-full h-full flex flex-col overflow-hidden bg-background">
-      {/* ヘッダーは固定 */}
       <HeaderRow />
 
-      {/* データ行のみスクロール */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         {currentNodes.map((node, index) => (
           <DataRow
             key={node.path}
@@ -107,7 +99,6 @@ export function PagingListView({
         ))}
       </div>
 
-      {/* 共通ページネーションコンポーネント */}
       <PagingControl
         currentPage={currentPage}
         totalPages={totalPages}
@@ -143,11 +134,16 @@ function HeaderRow() {
   );
 }
 
-interface DataRowProps extends Omit<PagingListViewProps, "allNodes"> {
+interface DataRowProps {
   node: MediaNode;
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
+  onOpen?: (node: MediaNode) => void;
+  onOpenFolder?: (path: string) => void;
+  onSelect?: () => void;
+  onRename?: (node: MediaNode) => void;
+  onMove?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
 }
 
