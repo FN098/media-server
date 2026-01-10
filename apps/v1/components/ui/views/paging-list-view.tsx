@@ -109,7 +109,7 @@ export function PagingListView({
             onSelect={onSelect}
             onRename={onRename}
             onMove={onMove}
-            onEditTag={onEditTags}
+            onEditTags={onEditTags}
           />
         ))}
       </div>
@@ -170,7 +170,7 @@ interface DataRowProps extends Omit<PagingListViewProps, "allNodes"> {
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
-  onEditTag?: (node: MediaNode) => void;
+  onEditTags?: (node: MediaNode) => void;
 }
 
 function DataRow({
@@ -183,7 +183,7 @@ function DataRow({
   onSelect,
   onRename,
   onMove,
-  onEditTag,
+  onEditTags,
 }: DataRowProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const favCtx = useFavoritesContext();
@@ -358,7 +358,7 @@ function DataRow({
             node={node}
             onRename={onRename}
             onMove={onMove}
-            onEditTag={onEditTag}
+            onEditTags={onEditTags}
             onOpenFolder={onOpenFolder}
           />
         </div>
@@ -375,7 +375,7 @@ interface ActionMenuProps {
   node: MediaNode;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
-  onEditTag?: (node: MediaNode) => void;
+  onEditTags?: (node: MediaNode) => void;
   onOpenFolder?: (path: string) => void;
 }
 
@@ -383,7 +383,7 @@ function ActionMenu({
   node,
   onRename,
   onMove,
-  onEditTag,
+  onEditTags,
   onOpenFolder,
 }: ActionMenuProps) {
   return (
@@ -424,11 +424,11 @@ function ActionMenu({
             <FolderInput className="mr-2 h-4 w-4" /> 移動
           </DropdownMenuItem>
         )}
-        {onEditTag && (
+        {onEditTags && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              onEditTag(node);
+              onEditTags(node);
             }}
           >
             <Tag className="mr-2 h-4 w-4" /> タグの編集
