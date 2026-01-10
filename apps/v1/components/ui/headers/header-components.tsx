@@ -11,20 +11,25 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export function HeaderNavigation({ basePath }: { basePath?: string }) {
+  const searchParams = useSearchParams();
   const breadcrumbs = useBreadcrumbs(basePath ?? "");
   const isMobile = useIsMobile();
   const current = breadcrumbs.at(-1);
   const backHref = breadcrumbs.at(-2)?.href ?? null;
 
+  const withParams = (path: string) =>
+    searchParams.toString() ? `${path}?${searchParams.toString()}` : path;
+
   return (
     <>
       {backHref ? (
         <Link
-          href={backHref}
+          href={withParams(backHref)}
           className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -40,7 +45,12 @@ export function HeaderNavigation({ basePath }: { basePath?: string }) {
           {current?.label ?? ""}
         </div>
       ) : (
-        <DynamicBreadcrumbs items={breadcrumbs} />
+        <DynamicBreadcrumbs
+          items={breadcrumbs.map((b) => ({
+            ...b,
+            href: withParams(b.href),
+          }))}
+        />
       )}
     </>
   );
