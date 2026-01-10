@@ -66,7 +66,7 @@ export function MediaViewer({
   onOpenFolder,
   onNextFolder,
   onPrevFolder,
-  onTags,
+  onEditTags,
 }: {
   allNodes: MediaNode[];
   initialIndex: number;
@@ -75,7 +75,7 @@ export function MediaViewer({
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onNextFolder?: (at?: IndexLike) => void;
   onPrevFolder?: (at?: IndexLike) => void;
-  onTags?: () => void;
+  onEditTags?: () => void;
 }) {
   const { isHeaderPinned, toggleIsHeaderPinned } = useViewerContext();
   const hasPrevFolder = !!onPrevFolder;
@@ -398,9 +398,9 @@ export function MediaViewer({
                     )}
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={onTags}>
+                  <DropdownMenuItem onClick={onEditTags}>
                     <TagIcon className="mr-2 h-4 w-4" />
-                    <span>タグを表示</span>
+                    <span>タグを編集</span>
                     {!isMobile && (
                       <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
                         <kbd className="rounded border px-1.5 py-0.5">T</kbd>

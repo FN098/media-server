@@ -247,6 +247,7 @@ export function Explorer() {
     enterSelectionMode,
     exitSelectionMode,
     selectedPaths,
+    replaceSelection,
     selectPaths,
     clearSelection,
   } = usePathSelectionContext();
@@ -267,9 +268,9 @@ export function Explorer() {
   }, [pathToNodeMap, selectedPaths]);
 
   // 選択
-  const handleSelect = useCallback(() => {
-    // setIsTagEditorOpen(true);
-  }, []);
+  const handleSelectOne = (node: MediaNode) => {
+    replaceSelection(node.path);
+  };
 
   // 全選択
   const handleSelectAll = () => {
@@ -397,9 +398,12 @@ export function Explorer() {
           <GridView
             allNodes={filteredNodes}
             onOpen={handleOpen}
-            onSelect={handleSelect}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
+            onEditTags={(node) => {
+              handleSelectOne(node);
+              handleOpenTagEditor();
+            }}
           />
         </div>
       )}
@@ -410,9 +414,12 @@ export function Explorer() {
           <ListView
             allNodes={filteredNodes}
             onOpen={handleOpen}
-            onSelect={handleSelect}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
+            onEditTags={(node) => {
+              handleSelectOne(node);
+              handleOpenTagEditor();
+            }}
           />
         </div>
       )}
@@ -427,7 +434,7 @@ export function Explorer() {
             onClose={closeViewer}
             onPrevFolder={(at) => openPrevFolder(at ?? "last")}
             onNextFolder={(at) => openNextFolder(at ?? "first")}
-            onTags={handleToggleTagEditor}
+            onEditTags={handleToggleTagEditor}
           />
         </ScrollLockProvider>
       )}

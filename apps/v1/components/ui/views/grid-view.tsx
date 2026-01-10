@@ -23,7 +23,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { FolderInput, MoreVertical, Pencil } from "lucide-react";
+import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
 import React, { useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 
@@ -33,12 +33,14 @@ export function GridView({
   onSelect,
   onRename,
   onMove,
+  onEditTags,
 }: {
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
+  onEditTags?: (node: MediaNode) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -119,6 +121,7 @@ export function GridView({
                   onSelect={onSelect}
                   onRename={onRename}
                   onMove={onMove}
+                  onTagEdit={onEditTags}
                 />
               );
             })}
@@ -138,6 +141,7 @@ function Cell({
   onSelect,
   onRename,
   onMove,
+  onTagEdit,
 }: {
   node: MediaNode;
   index: number;
@@ -147,6 +151,7 @@ function Cell({
   onSelect?: () => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
+  onTagEdit?: (node: MediaNode) => void;
 }) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
@@ -384,6 +389,17 @@ function Cell({
                     >
                       <FolderInput className="mr-2 h-4 w-4" />
                       移動
+                    </DropdownMenuItem>
+                  )}
+                  {onTagEdit && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTagEdit(node);
+                      }}
+                    >
+                      <Tag className="mr-2 h-4 w-4" />
+                      タグの編集
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>

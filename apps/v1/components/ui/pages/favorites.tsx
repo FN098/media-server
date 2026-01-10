@@ -213,6 +213,7 @@ export function FavoritesExplorer() {
     enterSelectionMode,
     exitSelectionMode,
     selectedPaths,
+    replaceSelection,
     selectPaths,
     clearSelection,
   } = usePathSelectionContext();
@@ -233,9 +234,9 @@ export function FavoritesExplorer() {
   }, [pathToNodeMap, selectedPaths]);
 
   // 選択
-  const handleSelect = useCallback(() => {
-    // setIsTagEditorOpen(true);
-  }, []);
+  const handleSelectOne = (node: MediaNode) => {
+    replaceSelection(node.path);
+  };
 
   // 全選択
   const handleSelectAll = () => {
@@ -321,7 +322,10 @@ export function FavoritesExplorer() {
           <GridView
             allNodes={filteredNodes}
             onOpen={handleOpen}
-            onSelect={handleSelect}
+            onEditTags={(node) => {
+              handleSelectOne(node);
+              handleOpenTagEditor();
+            }}
           />
         </div>
       )}
@@ -332,7 +336,10 @@ export function FavoritesExplorer() {
           <ListView
             allNodes={filteredNodes}
             onOpen={handleOpen}
-            onSelect={handleSelect}
+            onEditTags={(node) => {
+              handleSelectOne(node);
+              handleOpenTagEditor();
+            }}
           />
         </div>
       )}
@@ -346,7 +353,7 @@ export function FavoritesExplorer() {
             onIndexChange={handleViewerIndexChange}
             onClose={closeViewer}
             onOpenFolder={openFolder}
-            onTags={handleToggleTagEditor}
+            onEditTags={handleToggleTagEditor}
           />
         </ScrollLockProvider>
       )}
