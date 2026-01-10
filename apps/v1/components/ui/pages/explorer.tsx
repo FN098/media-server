@@ -268,7 +268,7 @@ export function Explorer() {
   }, [pathToNodeMap, selectedPaths]);
 
   // 選択
-  const handleSelectOne = (node: MediaNode) => {
+  const handleSelectSingle = (node: MediaNode) => {
     replaceSelection(node.path);
   };
 
@@ -401,7 +401,7 @@ export function Explorer() {
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
             onEditTags={(node) => {
-              handleSelectOne(node);
+              handleSelectSingle(node);
               handleOpenTagEditor();
             }}
           />
@@ -417,7 +417,7 @@ export function Explorer() {
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
             onEditTags={(node) => {
-              handleSelectOne(node);
+              handleSelectSingle(node);
               handleOpenTagEditor();
             }}
           />

@@ -234,7 +234,7 @@ export function FavoritesExplorer() {
   }, [pathToNodeMap, selectedPaths]);
 
   // 選択
-  const handleSelectOne = (node: MediaNode) => {
+  const handleSelectSingle = (node: MediaNode) => {
     replaceSelection(node.path);
   };
 
@@ -324,7 +324,7 @@ export function FavoritesExplorer() {
             onOpen={handleOpen}
             onOpenFolder={openFolder}
             onEditTags={(node) => {
-              handleSelectOne(node);
+              handleSelectSingle(node);
               handleOpenTagEditor();
             }}
           />
@@ -339,7 +339,7 @@ export function FavoritesExplorer() {
             onOpen={handleOpen}
             onOpenFolder={openFolder}
             onEditTags={(node) => {
-              handleSelectOne(node);
+              handleSelectSingle(node);
               handleOpenTagEditor();
             }}
           />
