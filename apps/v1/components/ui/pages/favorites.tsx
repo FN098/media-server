@@ -302,23 +302,19 @@ export function FavoritesExplorer() {
   ]);
 
   return (
-    <div
-      className={cn(
-        "flex-1 overflow-auto",
-        viewMode === "grid" && "p-4",
-        viewMode === "list" && "px-4"
-      )}
-    >
-      {/* タグフィルター */}
-      <TagFilterDialog
-        tags={allTags}
-        selectedTags={selectedTags}
-        onApply={selectTags}
-      />
+    <div className={cn("flex-1 flex flex-col min-h-0")}>
+      <div className="flex flex-wrap items-center gap-1 px-4">
+        {/* タグフィルター */}
+        <TagFilterDialog
+          tags={allTags}
+          selectedTags={selectedTags}
+          onApply={selectTags}
+        />
+      </div>
 
       {/* グリッドビュー */}
       {viewMode === "grid" && !isViewMode && (
-        <div>
+        <div className="flex-1 min-h-0">
           <PagingGridView
             allNodes={filteredNodes}
             onOpen={handleOpen}
@@ -333,7 +329,7 @@ export function FavoritesExplorer() {
 
       {/* リストビュー */}
       {viewMode === "list" && !isViewMode && (
-        <div>
+        <div className="flex-1 min-h-0">
           <PagingListView
             allNodes={filteredNodes}
             onOpen={handleOpen}

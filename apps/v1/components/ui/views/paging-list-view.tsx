@@ -4,13 +4,13 @@ import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge"
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { LocalDate } from "@/components/ui/dates/local-date";
+import { PagingControl } from "@/components/ui/paginations/paging-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
-import { IndexLike } from "@/lib/query/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
 import { useFavoritesContext } from "@/providers/favorites-provider";
@@ -25,14 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  ChevronLeft,
-  ChevronRight,
-  FolderInput,
-  MoreVertical,
-  Pencil,
-  Tag,
-} from "lucide-react";
+import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
 import React, {
   useCallback,
   useEffect,
@@ -46,20 +39,19 @@ interface PagingListViewProps {
   allNodes: MediaNode[];
   pageSize?: number;
   onOpen?: (node: MediaNode) => void;
-  onOpenFolder?: (path: string, at?: IndexLike) => void;
+  onOpenFolder?: (path: string) => void;
   onSelect?: () => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
 }
 
-// カラム定義を一箇所に集約（ヘッダーとデータ行で共通）
 const GRID_TEMPLATE =
   "grid-cols-[40px_1fr_50px_50px] md:grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]";
 
 export function PagingListView({
   allNodes,
-  pageSize = 100, // リストは100件程度がスクロールしやすく丁度いい
+  pageSize = 100,
   onOpen,
   onOpenFolder,
   onSelect,
@@ -67,7 +59,7 @@ export function PagingListView({
   onMove,
   onEditTags,
 }: PagingListViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -79,10 +71,8 @@ export function PagingListView({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    containerRef.current?.scrollTo({ top: 0, behavior: "instant" });
+    scrollRef.current?.scrollTo({ top: 0, behavior: "instant" });
   };
-
-  pageSize = Math.min(Math.max(1, pageSize), allNodes.length); // 正規化
 
   const totalPages = Math.ceil(allNodes.length / pageSize);
   const currentNodes = useMemo(() => {
@@ -93,13 +83,13 @@ export function PagingListView({
   const isMobile = useIsMobile();
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full flex flex-col overflow-y-auto"
-    >
+    // レイアウト固定のためのラッパー
+    <div className="w-full h-full flex flex-col overflow-hidden bg-background">
+      {/* ヘッダーは固定 */}
       <HeaderRow />
 
-      <div className="flex-1">
+      {/* データ行のみスクロール */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {currentNodes.map((node, index) => (
           <DataRow
             key={node.path}
@@ -117,40 +107,25 @@ export function PagingListView({
         ))}
       </div>
 
-      {totalPages > 1 && (
-        <div className="sticky bottom-0 bg-background/95 backdrop-blur border-t p-2 flex items-center justify-center gap-6 z-20 shadow-md">
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(currentPage - 1)}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-
-          <div className="text-sm font-medium">
-            <span className="text-primary">{currentPage}</span> / {totalPages}
-          </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            disabled={currentPage === totalPages}
-            onClick={() => handlePageChange(currentPage + 1)}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+      {/* 共通ページネーションコンポーネント */}
+      <PagingControl
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/* Sub Components (HeaderRow, DataRow, ActionMenu)                            */
+/* -------------------------------------------------------------------------- */
 
 function HeaderRow() {
   return (
     <div
       className={cn(
-        "grid items-center h-10 border-b bg-muted/30 text-xs font-semibold text-muted-foreground sticky top-0 z-10 backdrop-blur",
+        "grid items-center h-10 border-b bg-muted/30 text-xs font-semibold text-muted-foreground z-10",
         GRID_TEMPLATE
       )}
     >
@@ -158,7 +133,6 @@ function HeaderRow() {
         <Checkbox disabled className="opacity-50" />
       </div>
       <div>Name</div>
-      {/* 2. デスクトップのみ表示するカラムに md:block / hidden を追加 */}
       <div className="hidden md:block">Type</div>
       <div className="hidden md:block">Updated</div>
       <div className="hidden md:block">Size</div>
@@ -230,10 +204,8 @@ function DataRow({
         const startIdx = Math.min(lastIdx, globalIndex);
         const endIdx = Math.max(lastIdx, globalIndex);
         const paths = allNodes.slice(startIdx, endIdx + 1).map((n) => n.path);
-
         if (e.ctrlKey || e.metaKey) selectCtx.deletePaths(paths);
         else selectCtx.addPaths(paths);
-
         onSelect?.();
         return;
       }
@@ -288,7 +260,6 @@ function DataRow({
           isSelected ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-muted/50"
         )}
       >
-        {/* Checkbox */}
         <div
           className="flex justify-center"
           onClick={(e) => e.stopPropagation()}
@@ -302,7 +273,6 @@ function DataRow({
           />
         </div>
 
-        {/* Name */}
         <div className="flex items-center gap-3 overflow-hidden pr-2">
           <MediaThumbIcon
             type={node.type}
@@ -320,7 +290,6 @@ function DataRow({
           </div>
         </div>
 
-        {/* デスクトップ専用カラム */}
         <div className="hidden md:block text-muted-foreground text-xs uppercase">
           {node.isDirectory
             ? "Folder"
@@ -341,7 +310,6 @@ function DataRow({
           )}
         </div>
 
-        {/* Favorite: モバイルでも表示 */}
         <div
           className="flex justify-center"
           onClick={(e) => e.stopPropagation()}
@@ -357,7 +325,6 @@ function DataRow({
           )}
         </div>
 
-        {/* Actions: モバイルでも表示 */}
         <div className="flex justify-center">
           <ActionMenu
             node={node}
@@ -371,10 +338,6 @@ function DataRow({
     </HoverPreviewPortal>
   );
 }
-
-/* -------------------------------------------------------------------------- */
-/* Action Menu Component                                                      */
-/* -------------------------------------------------------------------------- */
 
 interface ActionMenuProps {
   node: MediaNode;

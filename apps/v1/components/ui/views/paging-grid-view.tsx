@@ -3,6 +3,7 @@
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
+import { PagingControl } from "@/components/ui/paginations/paging-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
@@ -23,14 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  ChevronLeft,
-  ChevronRight,
-  FolderInput,
-  MoreVertical,
-  Pencil,
-  Tag,
-} from "lucide-react";
+import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
 import React, {
   useCallback,
   useEffect,
@@ -61,8 +55,8 @@ export function PagingGridView({
   onMove,
   onEditTags,
 }: PagingGridViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (currentPage !== 1) {
@@ -73,13 +67,10 @@ export function PagingGridView({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    containerRef.current?.scrollTo({ top: 0, behavior: "instant" });
+    scrollRef.current?.scrollTo({ top: 0, behavior: "instant" });
   };
 
-  pageSize = Math.min(Math.max(1, pageSize), allNodes.length); // 正規化
-
   const totalPages = Math.ceil(allNodes.length / pageSize);
-
   const currentNodes = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return allNodes.slice(start, start + pageSize);
@@ -88,11 +79,11 @@ export function PagingGridView({
   const isMobile = useIsMobile();
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full flex flex-col overflow-y-auto scroll-smooth"
-    >
-      <div className="flex-1 p-4 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 auto-rows-max">
+    <div className="h-full flex flex-col overflow-hidden relative">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto p-4 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 auto-rows-max"
+      >
         {currentNodes.map((node, index) => (
           <Cell
             key={node.path}
@@ -110,43 +101,18 @@ export function PagingGridView({
         ))}
       </div>
 
-      {totalPages > 1 && (
-        <div className="sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t p-3 flex items-center justify-center gap-6 z-20 shadow-lg">
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(currentPage - 1)}
-            className="h-8 w-8"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-primary">
-              {currentPage}
-            </span>
-            <span className="text-sm text-muted-foreground">/</span>
-            <span className="text-sm text-muted-foreground">{totalPages}</span>
-          </div>
-
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={currentPage === totalPages}
-            onClick={() => handlePageChange(currentPage + 1)}
-            className="h-8 w-8"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+      <PagingControl
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        className="shrink-0"
+      />
     </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* Cell Component                                                             */
+/* Sub Components (Cell, ActionMenu)                                          */
 /* -------------------------------------------------------------------------- */
 
 interface CellProps extends Omit<PagingGridViewProps, "allNodes"> {
@@ -348,10 +314,6 @@ function Cell({
     </div>
   );
 }
-
-/* -------------------------------------------------------------------------- */
-/* Action Menu Component                                                      */
-/* -------------------------------------------------------------------------- */
 
 interface ActionMenuProps {
   node: MediaNode;
