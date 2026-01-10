@@ -7,7 +7,7 @@ import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
-import { ListView } from "@/components/ui/views/virtual-list-view";
+import { PagingListView } from "@/components/ui/views/paging-list-view";
 import {
   useExplorerQuery,
   useNormalizeExplorerQuery,
@@ -334,7 +334,7 @@ export function FavoritesExplorer() {
       {/* リストビュー */}
       {viewMode === "list" && !isViewMode && (
         <div>
-          <ListView
+          <PagingListView
             allNodes={filteredNodes}
             onOpen={handleOpen}
             onOpenFolder={openFolder}

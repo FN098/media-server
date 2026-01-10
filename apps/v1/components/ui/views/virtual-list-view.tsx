@@ -31,7 +31,7 @@ import React, { useRef } from "react";
 import { toast } from "sonner";
 
 // NOTE: 要素数が 1000 を超えだすと急激に重くなる
-export function ListView({
+export function VirtualListView({
   allNodes,
   onOpen,
   onOpenFolder,
