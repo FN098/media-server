@@ -24,7 +24,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { MoreVertical, Move, Pencil } from "lucide-react";
+import { FolderInput, MoreVertical, Pencil } from "lucide-react";
 import React, { useRef } from "react";
 import { toast } from "sonner";
 
@@ -355,7 +355,7 @@ function DataRow({
                   onMove(node);
                 }}
               >
-                <Move className="mr-2 h-4 w-4" />
+                <FolderInput className="mr-2 h-4 w-4" />
                 移動
               </DropdownMenuItem>
             )}
