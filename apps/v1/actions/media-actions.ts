@@ -50,15 +50,24 @@ export async function renameNodeAction(
         ? `/${newName}`
         : join(oldVirtualDir, newName).replace(/\\/g, "/");
 
-    // リネーム実行
-    await rename(oldRealPath, newRealPath);
+    // 1. まずファイルシステムをリネーム (最も失敗しやすい & 戻しにくい)
+    try {
+      await rename(oldRealPath, newRealPath);
+    } catch (fsError) {
+      console.error("FS rename failed...", fsError);
+      return {
+        success: false,
+        error: "ファイルシステムのリネームに失敗しました。",
+      };
+    }
 
     // NOTE: サムネイルは再作成すればいいのでリネームしない
 
-    // DB更新 (トランザクション)
-    await prisma.$transaction(async (tx) => {
-      // 1. 自分自身の更新 (ファイルでもディレクトリでも共通)
-      await tx.$executeRaw`
+    // 2. FSが成功したらDBを更新 (トランザクション)
+    try {
+      await prisma.$transaction(async (tx) => {
+        // 1. 自分自身の更新 (ファイルでもディレクトリでも共通)
+        await tx.$executeRaw`
         UPDATE Media 
         SET path = ${newVirtualPath},
             dirPath = ${dirname(newVirtualPath).replace(/\\/g, "/")},
@@ -66,10 +75,10 @@ export async function renameNodeAction(
         WHERE path = ${oldVirtualPath}
       `;
 
-      // 2. ディレクトリの場合のみ、配下のリソースを更新
-      if (isDirectory) {
-        // Media配下
-        await tx.$executeRaw`
+        // 2. ディレクトリの場合のみ、配下のリソースを更新
+        if (isDirectory) {
+          // Media配下
+          await tx.$executeRaw`
           UPDATE Media 
           SET 
             path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
@@ -80,8 +89,8 @@ export async function renameNodeAction(
           WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
         `;
 
-        // 訪問履歴 (ディレクトリの場合のみ存在する可能性がある)
-        await tx.$executeRaw`
+          // 訪問履歴 (ディレクトリの場合のみ存在する可能性がある)
+          await tx.$executeRaw`
           UPDATE VisitedFolder 
           SET dirPath = CASE 
             WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
@@ -89,14 +98,33 @@ export async function renameNodeAction(
           END
           WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
         `;
-      } else {
-        // ファイルの場合でも、自分自身が VisitedFolder に登録されている可能性が万一あれば更新
-        // (通常はないはずですが、スキーマ的に dirPath をキーにしているので念のため)
-        await tx.$executeRaw`
+        } else {
+          // ファイルの場合でも、自分自身が VisitedFolder に登録されている可能性が万一あれば更新
+          // (通常はないはずですが、スキーマ的に dirPath をキーにしているので念のため)
+          await tx.$executeRaw`
           UPDATE VisitedFolder SET dirPath = ${newVirtualPath} WHERE dirPath = ${oldVirtualPath}
         `;
+        }
+      });
+    } catch (dbError) {
+      // 3. DB更新が失敗した場合、FSを元の名前に戻す (ロールバック)
+      console.error("DB update failed, rolling back FS rename...", dbError);
+
+      try {
+        await rename(newRealPath, oldRealPath);
+      } catch (fsRollbackError) {
+        // ここまで来ると致命的（FSも戻せなかった）なので、ログに最大級の警告を出す
+        console.error(
+          "CRITICAL: Failed to rollback FS rename!",
+          fsRollbackError
+        );
       }
-    });
+
+      return {
+        success: false,
+        error: "データベースの更新に失敗したため、変更をキャンセルしました。",
+      };
+    }
 
     // キャッシュの更新
     revalidatePath("/explorer");
