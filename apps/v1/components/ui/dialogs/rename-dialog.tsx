@@ -16,14 +16,14 @@ import { toast } from "sonner";
 interface RenameDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  oldPath: string;
+  sourcePath: string;
   currentName: string;
 }
 
 export function RenameDialog({
   open,
   onOpenChange,
-  oldPath,
+  sourcePath,
   currentName,
 }: RenameDialogProps) {
   const [newName, setNewName] = useState(currentName);
@@ -44,7 +44,7 @@ export function RenameDialog({
     }
 
     setIsPending(true);
-    const result = await renameNodeAction(oldPath, newName);
+    const result = await renameNodeAction(sourcePath, newName);
     setIsPending(false);
 
     if (result.success) {

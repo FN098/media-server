@@ -14,9 +14,17 @@ import { formatBytes } from "@/lib/utils/formatter";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
+import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { MoreVertical, Move, Pencil } from "lucide-react";
 import React, { useRef } from "react";
 import { toast } from "sonner";
 
@@ -24,10 +32,14 @@ export function ListView({
   allNodes,
   onOpen,
   onSelect,
+  onRename,
+  onMove,
 }: {
   allNodes: MediaNode[];
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
+  onRename?: (node: MediaNode) => void;
+  onMove?: (node: MediaNode) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -72,6 +84,8 @@ export function ListView({
                   isMobile={isMobile}
                   onOpen={onOpen}
                   onSelect={onSelect}
+                  onRename={onRename}
+                  onMove={onMove}
                 />
               </div>
             );
@@ -86,7 +100,7 @@ function HeaderRow() {
   return (
     <div
       className={cn(
-        "grid grid-cols-[40px_1fr_80px_140px_100px_140px_80px]",
+        "grid grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]",
         "h-10 items-center border-b bg-background px-2 text-sm font-medium"
       )}
     >
@@ -97,6 +111,7 @@ function HeaderRow() {
       <div>Size</div>
       <div>Last Viewed</div>
       <div>Favorite</div>
+      <div>Actions</div>
     </div>
   );
 }
@@ -108,6 +123,8 @@ function DataRow({
   isMobile,
   onOpen,
   onSelect,
+  onRename,
+  onMove,
 }: {
   node: MediaNode;
   index: number;
@@ -115,6 +132,8 @@ function DataRow({
   isMobile: boolean;
   onOpen?: (node: MediaNode) => void;
   onSelect?: () => void;
+  onRename?: (node: MediaNode) => void;
+  onMove?: (node: MediaNode) => void;
 }) {
   const isMediaNode = React.useMemo(() => isMedia(node.type), [node.type]);
 
@@ -251,7 +270,7 @@ function DataRow({
         onClick={isMobile ? handleTap : handleClick}
         onDoubleClick={isMobile ? undefined : handleDoubleClick}
         className={cn(
-          "grid grid-cols-[40px_1fr_80px_140px_100px_140px_80px]",
+          "grid grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]",
           "h-10 items-center px-2 border-b select-none cursor-pointer",
           isSelected ? "bg-primary/10 hover:bg-primary/20" : "hover:bg-muted/50"
         )}
@@ -304,6 +323,44 @@ function DataRow({
             />
           )}
         </div>
+
+        {/* アクション */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {onRename && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRename(node);
+                }}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                名前の変更
+              </DropdownMenuItem>
+            )}
+            {onMove && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMove(node);
+                }}
+              >
+                <Move className="mr-2 h-4 w-4" />
+                移動
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </HoverPreviewPortal>
   );

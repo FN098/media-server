@@ -4,6 +4,7 @@ import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
+import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
@@ -45,7 +46,7 @@ import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, TagIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, FolderInput, TagIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -314,13 +315,33 @@ export function Explorer() {
 
   // ===== リネーム =====
 
-  const [renameTarget, setRenameTarget] = useState<{
-    path: string;
-    name: string;
-  } | null>(null);
-
+  const [renameTarget, setRenameTarget] = useState<MediaNode | null>(null);
   const isRenameMode = !!renameTarget;
 
+  const handleRenameSingle = (node: MediaNode) => {
+    setRenameTarget(node);
+  };
+
+  // ===== 移動 (Move) =====
+
+  // 移動対象のノードリストを管理
+  const [moveTargets, setMoveTargets] = useState<MediaNode[]>([]);
+  const isMoveMode = moveTargets.length > 0;
+
+  const handleCloseMoveDialog = () => {
+    setMoveTargets([]);
+    if (isSelectionMode) handleClearSelection();
+  };
+
+  // 単体移動の呼び出し
+  const handleOpenMoveSingle = (node: MediaNode) => {
+    setMoveTargets([node]);
+  };
+
+  // 一括移動の呼び出し
+  const handleOpenMoveSelected = () => {
+    setMoveTargets(selected);
+  };
   // ===== サーバーアクション =====
 
   // サムネイル作成リクエスト送信
@@ -380,9 +401,8 @@ export function Explorer() {
               allNodes={filteredNodes}
               onOpen={handleOpen}
               onSelect={handleSelect}
-              onRename={(node) =>
-                setRenameTarget({ path: node.path, name: node.name })
-              }
+              onRename={handleRenameSingle}
+              onMove={handleOpenMoveSingle}
             />
           </div>
         )}
@@ -394,6 +414,8 @@ export function Explorer() {
               allNodes={filteredNodes}
               onOpen={handleOpen}
               onSelect={handleSelect}
+              onRename={handleRenameSingle}
+              onMove={handleOpenMoveSingle}
             />
           </div>
         )}
@@ -421,11 +443,20 @@ export function Explorer() {
                 <>
                   <Button
                     size="sm"
+                    variant="outline"
+                    onClick={handleOpenMoveSelected}
+                    disabled={selected.length === 0}
+                  >
+                    <FolderInput className="mr-2 h-4 w-4" /> 移動
+                  </Button>
+
+                  <Button
+                    size="sm"
                     onClick={handleOpenTagEditor}
                     disabled={selected.length === 0}
                   >
                     <TagIcon />
-                    タグ表示
+                    タグ編集
                   </Button>
                 </>
               }
@@ -452,8 +483,18 @@ export function Explorer() {
         <RenameDialog
           open={isRenameMode}
           onOpenChange={(open) => !open && setRenameTarget(null)}
-          oldPath={renameTarget?.path ?? ""}
+          sourcePath={renameTarget?.path ?? ""}
           currentName={renameTarget?.name ?? ""}
+        />
+
+        {/* 移動ダイアログ */}
+        <MoveDialog
+          open={isMoveMode}
+          onOpenChange={(open) => !open && handleCloseMoveDialog()}
+          sourceNodes={moveTargets.map((node) => ({
+            path: node.path,
+            name: node.name,
+          }))}
         />
       </FavoritesProvider>
 

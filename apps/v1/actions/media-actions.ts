@@ -4,7 +4,7 @@ import { renameSchema } from "@/lib/media/validation";
 import { getMediaPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
-import { lstat, rename } from "fs/promises";
+import { lstat, readdir, rename } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { dirname, join } from "path";
 
@@ -222,6 +222,7 @@ export async function moveNodesAction(
         });
       }
     } catch (error: unknown) {
+      console.error(error);
       results.failed++;
       results.errors.push((error as Error)?.message ?? "");
     }
@@ -231,4 +232,24 @@ export async function moveNodesAction(
   revalidatePath("/explorer");
 
   return results;
+}
+
+export async function getSubDirectoriesAction(dirPath: string) {
+  try {
+    const realPath = getMediaPath(dirPath);
+    const entries = await readdir(realPath, { withFileTypes: true });
+
+    return {
+      success: true,
+      directories: entries
+        .filter((e) => e.isDirectory())
+        .map((e) => ({
+          name: e.name,
+          path: join(dirPath, e.name).replace(/\\/g, "/"),
+        })),
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "フォルダ一覧の取得に失敗しました" };
+  }
 }
