@@ -37,7 +37,7 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
 import { TagIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function FavoritesExplorer() {
@@ -149,8 +149,8 @@ export function FavoritesExplorer() {
   // ビューア起動モード
   const isViewMode = modal && viewerIndex != null && !!mediaOnly[viewerIndex];
 
-  // 直前のインデックスを記憶するためのRef
-  const lastViewerIndexRef = useRef<number | null>(null);
+  // 直前のインデックス
+  const [lastIndex, setLastIndex] = useState<number | null>(null);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
@@ -162,30 +162,9 @@ export function FavoritesExplorer() {
 
     // インデックス位置を覚えておく
     if (index !== null) {
-      lastViewerIndexRef.current = index;
+      setLastIndex(index);
     }
   };
-
-  // ビューアが閉じられた瞬間にスクロールを実行（ブラウザバック、閉じるボタン両方対応）
-  useEffect(() => {
-    if (!isViewMode && lastViewerIndexRef.current !== null) {
-      const index = lastViewerIndexRef.current;
-
-      // 次のレンダリングサイクルで実行
-      const animationId = requestAnimationFrame(() => {
-        const element = document.getElementById(`media-item-${index}`);
-        if (element) {
-          element.scrollIntoView({
-            behavior: "instant",
-            block: "center",
-          });
-        }
-        lastViewerIndexRef.current = null;
-      });
-
-      return () => cancelAnimationFrame(animationId);
-    }
-  }, [isViewMode]);
 
   // ===== ナビゲーション =====
 
@@ -323,6 +302,7 @@ export function FavoritesExplorer() {
         <div className="flex-1">
           <PagingGridView
             allNodes={filteredNodes}
+            initialScrollIndex={lastIndex}
             onOpen={handleOpen}
             onOpenFolder={openFolder}
             onEditTags={(node) => {
@@ -332,6 +312,7 @@ export function FavoritesExplorer() {
             onPageChange={() =>
               scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
             }
+            onScrollRestored={() => setLastIndex(null)}
           />
         </div>
       )}
@@ -341,6 +322,7 @@ export function FavoritesExplorer() {
         <div className="flex-1">
           <PagingListView
             allNodes={filteredNodes}
+            initialScrollIndex={lastIndex}
             onOpen={handleOpen}
             onOpenFolder={openFolder}
             onEditTags={(node) => {
@@ -350,6 +332,7 @@ export function FavoritesExplorer() {
             onPageChange={() =>
               scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
             }
+            onScrollRestored={() => setLastIndex(null)}
           />
         </div>
       )}

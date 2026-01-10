@@ -31,6 +31,7 @@ import { toast } from "sonner";
 interface PagingGridViewProps {
   allNodes: MediaNode[];
   pageSize?: number;
+  initialScrollIndex?: number | null;
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelect?: () => void;
@@ -38,11 +39,13 @@ interface PagingGridViewProps {
   onMove?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
   onPageChange?: (page: number) => void;
+  onScrollRestored?: () => void;
 }
 
 export function PagingGridView({
   allNodes,
   pageSize = 60,
+  initialScrollIndex,
   onOpen,
   onOpenFolder,
   onSelect,
@@ -50,15 +53,49 @@ export function PagingGridView({
   onMove,
   onEditTags,
   onPageChange,
+  onScrollRestored,
 }: PagingGridViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
+  // フィルターなどで表示内容が変更されたらページをリセット
   useEffect(() => {
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allNodes.length]);
+
+  // initialScrollIndex がある場合、適切なページを計算して遷移する
+  useEffect(() => {
+    if (initialScrollIndex !== null && initialScrollIndex !== undefined) {
+      const targetPage = Math.floor(initialScrollIndex / pageSize) + 1;
+      if (targetPage !== currentPage) {
+        setCurrentPage(targetPage);
+      }
+    }
+  }, [currentPage, initialScrollIndex, pageSize]);
+
+  // ページが切り替わり、DOMが構築された後にスクロール実行
+  useEffect(() => {
+    if (initialScrollIndex === null || initialScrollIndex === undefined) return;
+
+    // 現在のページにそのアイテムが含まれているかチェック
+    const pageStart = (currentPage - 1) * pageSize;
+    const pageEnd = pageStart + pageSize;
+
+    if (initialScrollIndex >= pageStart && initialScrollIndex < pageEnd) {
+      // DOMが更新されるのを待つ
+      requestAnimationFrame(() => {
+        const element = document.getElementById(
+          `media-item-${initialScrollIndex}`
+        );
+        if (element) {
+          element.scrollIntoView({ behavior: "instant", block: "center" });
+          onScrollRestored?.();
+        }
+      });
+    }
+  }, [currentPage, initialScrollIndex, onScrollRestored, pageSize]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

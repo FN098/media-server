@@ -195,8 +195,8 @@ export function Explorer() {
   // ビューア起動モード
   const isViewMode = modal && viewerIndex != null && !!mediaOnly[viewerIndex];
 
-  // 直前のインデックスを記憶するためのRef
-  const lastViewerIndexRef = useRef<number | null>(null);
+  // 直前のインデックス
+  const [lastIndex, setLastIndex] = useState<number | null>(null);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
@@ -208,30 +208,9 @@ export function Explorer() {
 
     // インデックス位置を覚えておく
     if (index !== null) {
-      lastViewerIndexRef.current = index;
+      setLastIndex(index);
     }
   };
-
-  // ビューアが閉じられた瞬間にスクロールを実行（ブラウザバック、閉じるボタン両方対応）
-  useEffect(() => {
-    if (!isViewMode && lastViewerIndexRef.current !== null) {
-      const index = lastViewerIndexRef.current;
-
-      // 次のレンダリングサイクルで実行
-      const animationId = requestAnimationFrame(() => {
-        const element = document.getElementById(`media-item-${index}`);
-        if (element) {
-          element.scrollIntoView({
-            behavior: "instant",
-            block: "center",
-          });
-        }
-        lastViewerIndexRef.current = null;
-      });
-
-      return () => cancelAnimationFrame(animationId);
-    }
-  }, [isViewMode]);
 
   // ===== ナビゲーション =====
 
@@ -409,6 +388,7 @@ export function Explorer() {
         <div className="flex-1">
           <PagingGridView
             allNodes={filteredNodes}
+            initialScrollIndex={lastIndex}
             onOpen={handleOpen}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
@@ -419,6 +399,7 @@ export function Explorer() {
             onPageChange={() =>
               scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
             }
+            onScrollRestored={() => setLastIndex(null)}
           />
         </div>
       )}
@@ -428,6 +409,7 @@ export function Explorer() {
         <div className="flex-1">
           <PagingListView
             allNodes={filteredNodes}
+            initialScrollIndex={lastIndex}
             onOpen={handleOpen}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
@@ -438,6 +420,7 @@ export function Explorer() {
             onPageChange={() =>
               scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
             }
+            onScrollRestored={() => setLastIndex(null)}
           />
         </div>
       )}
