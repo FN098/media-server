@@ -516,7 +516,7 @@ export function Explorer() {
       />
 
       {/* フォルダナビゲーション */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 pb-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
         {/* 前のフォルダ */}
         <div className="w-full sm:flex-1">
           {listing.prev && (

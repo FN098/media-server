@@ -82,7 +82,7 @@ export function PagingGridView({
     <div className="h-full flex flex-col overflow-hidden relative">
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 auto-rows-max"
+        className="flex-1 overflow-y-auto p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 auto-rows-max"
       >
         {currentNodes.map((node, index) => (
           <Cell
