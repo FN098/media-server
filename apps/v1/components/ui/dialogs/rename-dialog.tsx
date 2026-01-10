@@ -31,7 +31,7 @@ export function RenameDialog({
 
   // ダイアログが開くたびに名前をリセット
   useEffect(() => {
-    if (open) setNewName(currentName);
+    if (open && currentName !== newName) setNewName(currentName);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
