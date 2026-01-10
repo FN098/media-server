@@ -25,7 +25,7 @@ export function Header({
   const viewMode = features?.viewMode ?? true;
 
   return (
-    <header className="sticky top-0 z-5 h-12 border-b bg-white dark:bg-gray-900">
+    <header className="sticky top-0 z-30 h-12 border-b bg-white dark:bg-gray-900">
       <div className="flex h-full items-center gap-2 px-2 md:px-3">
         <AppSidebarOpenButton />
 
