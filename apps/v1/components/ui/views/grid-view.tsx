@@ -26,7 +26,7 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { toast } from "sonner";
 
 export function GridView({
@@ -57,15 +57,6 @@ export function GridView({
     // columnCount は 1 以上なので 0 除算の心配はない
     () => Math.ceil(allNodes.length / columnCount),
     [columnCount, allNodes.length]
-  );
-
-  const getNode = useCallback(
-    (rowIndex: number, colIndex: number) => {
-      const index = rowIndex * columnCount + colIndex;
-      if (index < 0 || index >= allNodes.length) return null;
-      return allNodes[index];
-    },
-    [columnCount, allNodes]
   );
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -110,7 +101,7 @@ export function GridView({
             {/* セル */}
             {Array.from({ length: columnCount }).map((_, colIndex) => {
               const globalIndex = row.index * columnCount + colIndex; // 全体でのインデックス
-              const node = getNode(row.index, colIndex);
+              const node = allNodes[globalIndex];
 
               if (!node) return <div key={`empty-${globalIndex}`} />;
 
