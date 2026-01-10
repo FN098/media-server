@@ -50,6 +50,11 @@ export async function renameNodeAction(
         ? `/${newName}`
         : join(oldVirtualDir, newName).replace(/\\/g, "/");
 
+    // リネーム実行
+    await rename(oldRealPath, newRealPath);
+
+    // NOTE: サムネイルは再作成すればいいのでリネームしない
+
     // DB更新 (トランザクション)
     await prisma.$transaction(async (tx) => {
       // 1. 自分自身の更新 (ファイルでもディレクトリでも共通)
@@ -92,11 +97,6 @@ export async function renameNodeAction(
         `;
       }
     });
-
-    // リネーム実行
-    await rename(oldRealPath, newRealPath);
-
-    // NOTE: サムネイルは再作成すればいいのでリネームしない
 
     // キャッシュの更新
     revalidatePath("/explorer");
