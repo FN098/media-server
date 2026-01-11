@@ -77,15 +77,6 @@ export function ActionMenu({
             <FolderInput className="mr-2 h-4 w-4" /> 移動
           </DropdownMenuItem>
         )}
-        {onDelete && (
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onClick={() => onDelete(node)}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            削除
-          </DropdownMenuItem>
-        )}
         {onEditTags && (
           <DropdownMenuItem
             onClick={(e) => {
@@ -94,6 +85,15 @@ export function ActionMenu({
             }}
           >
             <Tag className="mr-2 h-4 w-4" /> タグの編集
+          </DropdownMenuItem>
+        )}
+        {onDelete && (
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={() => onDelete(node)}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            削除
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
