@@ -4,7 +4,7 @@ import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge"
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
-import { PagingControl } from "@/components/ui/paginations/paging-control";
+import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";

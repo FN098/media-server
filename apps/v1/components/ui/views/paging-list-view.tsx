@@ -5,7 +5,7 @@ import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
-import { PagingControl } from "@/components/ui/paginations/paging-control";
+import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
