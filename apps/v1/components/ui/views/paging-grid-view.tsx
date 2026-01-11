@@ -37,7 +37,7 @@ interface PagingGridViewProps {
 
 export function PagingGridView({
   allNodes,
-  pageSize = 60,
+  pageSize = 48, // 4行x12列
   initialScrollPath,
   onOpen,
   onOpenFolder,
