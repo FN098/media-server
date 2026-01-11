@@ -3,6 +3,7 @@ import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { FallbackImage } from "@/components/ui/images/fallback-image";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
 import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
+import { encodePath } from "@/lib/path/encoder";
 import { getParentDirPath, getThumbUrl } from "@/lib/path/helpers";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, ReactNode, useCallback, useState } from "react";
@@ -93,10 +94,7 @@ function MediaThumbImage({
     }
   }, [node.path, requested]);
 
-  const thumbSrc = getThumbUrl(node.path)
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
+  const thumbSrc = encodePath(getThumbUrl(node.path));
 
   return (
     <FallbackImage

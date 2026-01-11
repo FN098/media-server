@@ -1,5 +1,6 @@
 "use client";
 
+import { encodePath } from "@/lib/path/encoder";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { normalizeExplorerQuery } from "@/lib/query/normalize";
 import { toSearchParams } from "@/lib/query/search-params";
@@ -55,10 +56,7 @@ export function useSetExplorerQuery() {
       const search = toSearchParams(normalized);
 
       const basePath = options.path
-        ? getClientExplorerPath(options.path)
-            .split("/")
-            .map((segment) => encodeURIComponent(segment))
-            .join("/")
+        ? encodePath(getClientExplorerPath(options.path))
         : pathname;
 
       const url = search ? `${basePath}?${search}` : basePath;

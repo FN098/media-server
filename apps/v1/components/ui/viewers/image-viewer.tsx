@@ -1,5 +1,6 @@
 import { LoadingSpinner } from "@/components/ui/spinners/spinners";
 import { MediaFsNode } from "@/lib/media/types";
+import { encodePath } from "@/lib/path/encoder";
 import { getMediaUrl, getThumbUrl } from "@/lib/path/helpers";
 import { cn } from "@/shadcn/lib/utils";
 import Image from "next/image";
@@ -21,7 +22,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
       {/* サムネイル */}
       {!isLoaded && (
         <Image
-          src={getThumbUrl(media.path)}
+          src={encodePath(getThumbUrl(media.path))}
           alt={media.name}
           fill
           className="absolute inset-0 object-contain opacity-50"
@@ -31,7 +32,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
 
       {/* メイン画像 */}
       <Image
-        src={getMediaUrl(media.path)}
+        src={encodePath(getMediaUrl(media.path))}
         alt={media.name}
         fill
         className={cn(
