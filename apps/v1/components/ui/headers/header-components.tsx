@@ -4,6 +4,7 @@ import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs/dynamic-breadcru
 import { ViewModeSwitch } from "@/components/ui/buttons/view-mode-switch";
 import { Search } from "@/components/ui/inputs/search";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
+import { useMounted } from "@/hooks/use-mounted";
 import { useSearchContext } from "@/providers/search-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -61,6 +62,7 @@ export function HeaderSearch() {
   const [input, setInput] = useState(query);
   const [focused, setFocused] = useState(false);
   const isMobile = useIsMobile();
+  const mounted = useMounted();
 
   const placeholder = isMobile ? "" : undefined;
   const collapsedWidth = isMobile ? 36 : 180;
@@ -88,9 +90,23 @@ export function HeaderSearch() {
 
   const isExpanded = focused || input.length > 0;
 
+  // マウント前のプレースホルダー
+  if (!mounted) {
+    return (
+      <div
+        className="shrink-0 h-9 w-20"
+        style={{
+          maxWidth: "calc(100vw - 2rem)",
+        }}
+      >
+        <div className="w-full h-full bg-muted/50 animate-pulse rounded-md" />
+      </div>
+    );
+  }
+
   return (
     <motion.div
-      initial={{ width: collapsedWidth }}
+      initial={false}
       animate={{
         width: isExpanded ? expandedWidth : collapsedWidth,
         zIndex: focused ? 50 : 1,
