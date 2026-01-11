@@ -48,7 +48,7 @@ export function DeleteConfirmDialog({
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
             {isPending ? "削除中..." : "削除する"}
           </AlertDialogAction>
