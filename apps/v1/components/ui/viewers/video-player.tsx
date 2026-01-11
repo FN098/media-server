@@ -43,16 +43,16 @@ export const VideoPlayer = memo(function VideoPlayer({
     localStorage.removeItem(storageKey);
   };
 
-  const togglePlay = () => {
-    const video = playerRef.current;
-    if (!video) return;
+  // const togglePlay = () => {
+  //   const video = playerRef.current;
+  //   if (!video) return;
 
-    if (video.paused) {
-      video.play().catch((e) => console.error(e));
-    } else {
-      video.pause();
-    }
-  };
+  //   if (video.paused) {
+  //     video.play().catch((e) => console.error(e));
+  //   } else {
+  //     video.pause();
+  //   }
+  // };
 
   const seek = (amount: number) => {
     const video = playerRef.current;
@@ -65,7 +65,7 @@ export const VideoPlayer = memo(function VideoPlayer({
   useShortcutKeys([
     { key: "Ctrl+ArrowRight", callback: () => seek(10) },
     { key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
-    { key: " ", callback: () => togglePlay() },
+    // { key: " ", callback: () => togglePlay() },
   ]);
 
   return (
