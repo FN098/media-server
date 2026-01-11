@@ -106,7 +106,14 @@ export function PagingGridView({
 
   return (
     <div className="h-full flex flex-col overflow-hidden relative">
-      <div className="flex-1 overflow-y-auto p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 auto-rows-max">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto p-4 grid gap-4 auto-rows-max",
+          isMobile
+            ? "grid-cols-[repeat(auto-fill,minmax(120px,1fr))]"
+            : "grid-cols-[repeat(auto-fill,minmax(180px,1fr))]"
+        )}
+      >
         {currentNodes.map((node, index) => (
           <Cell
             key={node.path}
