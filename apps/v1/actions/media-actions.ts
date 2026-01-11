@@ -6,7 +6,7 @@ import { PATHS } from "@/lib/path/paths";
 import { prisma } from "@/lib/prisma";
 import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
-import { lstat, mkdir, readdir, rename } from "fs/promises";
+import { lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { dirname, join } from "path";
 
@@ -258,16 +258,10 @@ export async function deleteNodesAction(sourcePaths: string[]) {
       const newRealPath = getMediaPath(newVirtualPath);
 
       // 移動先の親ディレクトリを物理的に作成
-      const newRealDir = dirname(newRealPath);
-      await mkdir(newRealDir, { recursive: true });
+      await mkdir(dirname(newRealPath), { recursive: true });
 
-      // 同名パスの存在チェック
-      if (await existsPath(newRealPath)) {
-        throw new Error(`ゴミ箱内に既に同名のパスが存在します。`);
-      }
-
-      // FS更新
-      await rename(oldRealPath, newRealPath);
+      // 再帰的に移動（ファイルなら上書き、フォルダならマージ）
+      await recursiveMergeMove(oldRealPath, newRealPath);
 
       // DB更新
       try {
@@ -317,4 +311,33 @@ export async function deleteNodesAction(sourcePaths: string[]) {
 
   revalidatePath("/explorer");
   return results;
+}
+
+async function recursiveMergeMove(src: string, dest: string) {
+  const stats = await lstat(src);
+
+  if (!stats.isDirectory()) {
+    // ファイルの場合は単純に移動（上書き）
+    // 移動先に同名ファイルがあれば先に消す（上書きのため）
+    if (await existsPath(dest)) {
+      await rm(dest, { force: true });
+    }
+    await rename(src, dest);
+    return;
+  }
+
+  // ディレクトリの場合
+  if (!(await existsPath(dest))) {
+    await mkdir(dest, { recursive: true });
+  }
+
+  const entries = await readdir(src);
+  for (const entry of entries) {
+    const srcPath = join(src, entry);
+    const destPath = join(dest, entry);
+    await recursiveMergeMove(srcPath, destPath);
+  }
+
+  // 中身をすべて移動し終えたら、空になったソースディレクトリを削除
+  await rm(src, { recursive: true, force: true });
 }

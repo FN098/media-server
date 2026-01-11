@@ -13,12 +13,8 @@ export const PATHS = {
     },
   },
   virtual: {
-    root: "/",
-    thumb: {
-      root: "/.thumb",
-    },
     trash: {
-      root: "/.trash",
+      root: ".trash",
     },
   },
   client: {
