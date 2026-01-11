@@ -382,6 +382,7 @@ export function Explorer() {
     { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
     { key: "Escape", callback: () => handleClearSelection() },
+    { key: "F2", callback: () => setRenameTarget(selected[0] ?? null) },
   ]);
 
   // スクロール対象のref
