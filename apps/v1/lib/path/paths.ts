@@ -24,8 +24,8 @@ export const PATHS = {
     explorer: {
       root: "/explorer",
     },
-    experimental: {
-      root: "/experimental",
+    sandbox: {
+      root: "/sandbox",
     },
     favorites: {
       root: "/favorites",

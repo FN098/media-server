@@ -16,9 +16,9 @@ import {
 } from "@/shadcn-overrides/components/ui/sidebar";
 import { Button } from "@/shadcn/components/ui/button";
 import {
-  Flame,
   LayoutDashboard,
   Menu,
+  PackageOpen,
   Search,
   Settings,
   Star,
@@ -40,11 +40,6 @@ const items = [
     icon: Search,
   },
   {
-    title: "Experimental",
-    url: PATHS.client.experimental.root,
-    icon: Flame,
-  },
-  {
     title: "Favorites",
     url: PATHS.client.favorites.root,
     icon: Star,
@@ -53,6 +48,11 @@ const items = [
     title: "Settings",
     url: PATHS.client.settings.root,
     icon: Settings,
+  },
+  {
+    title: "Sandbox",
+    url: PATHS.client.sandbox.root,
+    icon: PackageOpen,
   },
 ];
 

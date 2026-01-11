@@ -3,9 +3,9 @@ import SwiperFadeDemo from "@/components/ui/demo/caroucel-demo";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: `Experimental | ${APP_CONFIG.meta.title}`,
+  title: `Sandbox | ${APP_CONFIG.meta.title}`,
 };
 
-export default function Page() {
+export default function SandboxPage() {
   return <SwiperFadeDemo />;
 }
