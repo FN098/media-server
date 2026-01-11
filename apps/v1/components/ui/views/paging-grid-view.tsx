@@ -23,7 +23,7 @@ import { toast } from "sonner";
 interface PagingGridViewProps {
   allNodes: MediaNode[];
   pageSize?: number;
-  initialScrollIndex?: number | null;
+  initialScrollPath?: string | null;
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelect?: () => void;
@@ -38,7 +38,7 @@ interface PagingGridViewProps {
 export function PagingGridView({
   allNodes,
   pageSize = 60,
-  initialScrollIndex,
+  initialScrollPath,
   onOpen,
   onOpenFolder,
   onSelect,
@@ -59,37 +59,40 @@ export function PagingGridView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allNodes.length]);
 
-  // initialScrollIndex がある場合、適切なページを計算して遷移する
+  // パスからグローバルインデックスを特定する
+  const targetIndex = useMemo(() => {
+    if (!initialScrollPath) return null;
+    const index = allNodes.findIndex((n) => n.path === initialScrollPath);
+    return index !== -1 ? index : null;
+  }, [allNodes, initialScrollPath]);
+
+  // 1. ターゲットが含まれるページへ移動
   useEffect(() => {
-    if (initialScrollIndex !== null && initialScrollIndex !== undefined) {
-      const targetPage = Math.floor(initialScrollIndex / pageSize) + 1;
+    if (targetIndex !== null) {
+      const targetPage = Math.floor(targetIndex / pageSize) + 1;
       if (targetPage !== currentPage) {
         setCurrentPage(targetPage);
       }
     }
-  }, [currentPage, initialScrollIndex, pageSize]);
+  }, [targetIndex, pageSize, currentPage]);
 
-  // ページが切り替わり、DOMが構築された後にスクロール実行
+  // 2. DOM構築後にスクロール
   useEffect(() => {
-    if (initialScrollIndex === null || initialScrollIndex === undefined) return;
+    if (targetIndex === null) return;
 
-    // 現在のページにそのアイテムが含まれているかチェック
     const pageStart = (currentPage - 1) * pageSize;
     const pageEnd = pageStart + pageSize;
 
-    if (initialScrollIndex >= pageStart && initialScrollIndex < pageEnd) {
-      // DOMが更新されるのを待つ
+    if (targetIndex >= pageStart && targetIndex < pageEnd) {
       requestAnimationFrame(() => {
-        const element = document.getElementById(
-          `media-item-${initialScrollIndex}`
-        );
+        const element = document.getElementById(`media-item-${targetIndex}`);
         if (element) {
           element.scrollIntoView({ behavior: "instant", block: "center" });
-          onScrollRestored?.();
+          onScrollRestored?.(); // 親に通知してパスをクリアさせる
         }
       });
     }
-  }, [currentPage, initialScrollIndex, onScrollRestored, pageSize]);
+  }, [currentPage, targetIndex, pageSize, onScrollRestored]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

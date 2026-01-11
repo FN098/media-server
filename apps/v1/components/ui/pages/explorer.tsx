@@ -200,20 +200,14 @@ export function Explorer() {
   const isViewMode = modal && viewerIndex != null && !!mediaOnly[viewerIndex];
 
   // 直前のインデックス
-  const [lastIndex, setLastIndex] = useState<number | null>(null);
+  const [lastPath, setLastPath] = useState<string | null>(null);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
     const media = mediaOnly[index];
     if (!media) return;
-
-    // 選択状態の更新
     selectPaths([media.path]);
-
-    // インデックス位置を覚えておく
-    if (index !== null) {
-      setLastIndex(index);
-    }
+    setLastPath(media.path);
   };
 
   // ===== ナビゲーション =====
@@ -420,7 +414,7 @@ export function Explorer() {
         <div className="flex-1">
           <PagingGridView
             allNodes={filteredNodes}
-            initialScrollIndex={lastIndex}
+            initialScrollPath={lastPath}
             onOpen={handleOpen}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
@@ -432,7 +426,7 @@ export function Explorer() {
             onPageChange={() =>
               scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
             }
-            onScrollRestored={() => setLastIndex(null)}
+            onScrollRestored={() => setLastPath(null)}
           />
         </div>
       )}
@@ -442,7 +436,7 @@ export function Explorer() {
         <div className="flex-1">
           <PagingListView
             allNodes={filteredNodes}
-            initialScrollIndex={lastIndex}
+            initialScrollPath={lastPath}
             onOpen={handleOpen}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
@@ -454,7 +448,7 @@ export function Explorer() {
             onPageChange={() =>
               scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
             }
-            onScrollRestored={() => setLastIndex(null)}
+            onScrollRestored={() => setLastPath(null)}
           />
         </div>
       )}
