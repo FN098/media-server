@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: `Dashboard | ${APP_CONFIG.meta.title}`,
 };
 
-export default async function Page() {
+export default async function DashboardPage() {
   // TODO: ユーザー認証機能実装後に差し替える
   const folders = await getRecentFolders(USER, RECENT_FOLDERS_LIMIT);
   const hasHistory = folders.length > 0;

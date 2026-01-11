@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: `Favorites | ${APP_CONFIG.meta.title}`,
 };
 
-export default async function Page(props: FavoritePageProps) {
+export default async function FavoritePage(props: FavoritePageProps) {
   const { sort: sortKey = "path", order: sortOrder = "asc" } =
     await props.params;
 

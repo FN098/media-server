@@ -43,7 +43,7 @@ export async function generateMetadata(
   };
 }
 
-export default async function Page(props: ExplorerPageProps) {
+export default async function ExplorerPage(props: ExplorerPageProps) {
   const {
     path: pathParts = [],
     sort: sortKey = "name",
