@@ -29,7 +29,9 @@ export function FavoritesProvider({
 export function useFavoritesContext() {
   const context = useContext(FavoritesContext);
   if (context === undefined) {
-    throw new Error("useFavoritesContext must be used within FavoriteProvider");
+    throw new Error(
+      "useFavoritesContext must be used within FavoritesProvider"
+    );
   }
   return context;
 }
