@@ -84,13 +84,15 @@ export function HeaderSearch() {
     };
   }, [debouncedSetQuery, input]);
 
-  const isMobileBlur = isMobile && !focused;
+  const isMobileBlur = isMobile && !focused && input === "";
+
+  const isExpanded = focused || input.length > 0;
 
   return (
     <motion.div
       initial={{ width: collapsedWidth }}
       animate={{
-        width: focused ? expandedWidth : collapsedWidth,
+        width: isExpanded ? expandedWidth : collapsedWidth,
         zIndex: focused ? 50 : 1,
       }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
