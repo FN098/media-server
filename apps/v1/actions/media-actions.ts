@@ -25,8 +25,8 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     const oldVirtualPath = sourcePath;
     const newVirtualPath =
       oldVirtualPath === "/"
-        ? `/${newName}`
-        : join(dirname(oldVirtualPath), newName).replace(/\\/g, "/");
+        ? `/${newName.trim()}`
+        : join(dirname(oldVirtualPath), newName.trim()).replace(/\\/g, "/");
 
     const oldRealPath = getMediaPath(oldVirtualPath);
     const newRealPath = getMediaPath(newVirtualPath);
