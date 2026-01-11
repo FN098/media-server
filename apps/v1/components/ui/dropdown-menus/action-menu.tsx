@@ -1,5 +1,6 @@
 "use client";
 
+import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { Button } from "@/shadcn/components/ui/button";
@@ -31,6 +32,9 @@ export function ActionMenu({
   onDelete,
   onEditTags,
 }: ActionMenuProps) {
+  const mounted = useMounted();
+  if (!mounted) return null;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
