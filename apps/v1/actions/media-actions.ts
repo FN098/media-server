@@ -2,9 +2,11 @@
 
 import { renameSchema } from "@/lib/media/validation";
 import { getMediaPath } from "@/lib/path/helpers";
+import { PATHS } from "@/lib/path/paths";
 import { prisma } from "@/lib/prisma";
+import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
-import { lstat, readdir, rename } from "fs/promises";
+import { lstat, mkdir, readdir, rename } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { dirname, join } from "path";
 
@@ -113,9 +115,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       };
     }
 
-    // キャッシュの更新
     revalidatePath("/explorer");
-
     return {
       success: true,
       newPath: newVirtualPath,
@@ -148,19 +148,11 @@ export async function moveNodesAction(
 
       // 同名パスの存在チェック
       if (await existsPath(newRealPath)) {
-        // 次のファイルを処理継続
         throw new Error(`移動先に同名の項目が存在します: ${fileName}`);
       }
 
       // FS更新
-      try {
-        await rename(oldRealPath, newRealPath);
-      } catch (fsError) {
-        // 次のファイルを処理継続
-        throw new Error("ファイルシステムのリネームに失敗しました。", {
-          cause: fsError,
-        });
-      }
+      await rename(oldRealPath, newRealPath);
 
       // NOTE: サムネイルは再作成すればいいので更新しない
 
@@ -170,7 +162,7 @@ export async function moveNodesAction(
         const isDirectory = stats.isDirectory();
 
         await prisma.$transaction(async (tx) => {
-          // 自分自身のパス更新
+          // 自分自身の更新
           await tx.$executeRaw`
             UPDATE Media SET 
               path = ${newVirtualPath}, 
@@ -216,21 +208,18 @@ export async function moveNodesAction(
           );
         }
 
-        // 次のファイルを処理継続
         throw new Error("データベースの更新に失敗しました。", {
           cause: dbError,
         });
       }
     } catch (error: unknown) {
-      console.error(error);
+      console.error(`Move Error [${oldVirtualPath}]:`, error);
       results.failed++;
-      results.errors.push((error as Error)?.message ?? "");
+      results.errors.push(getErrorMessage(error));
     }
   }
 
-  // キャッシュの更新
   revalidatePath("/explorer");
-
   return results;
 }
 
@@ -249,7 +238,83 @@ export async function getSubDirectoriesAction(dirPath: string) {
         })),
     };
   } catch (error) {
-    console.error(error);
+    console.error(`Sub Directories Error [${dirPath}]:`, error);
     return { success: false, error: "フォルダ一覧の取得に失敗しました" };
   }
+}
+
+export async function deleteNodesAction(sourcePaths: string[]) {
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+  const targetDirPath = PATHS.virtual.trash.root;
+
+  for (const oldVirtualPath of sourcePaths) {
+    try {
+      const newVirtualPath = `${targetDirPath}/${oldVirtualPath}`.replace(
+        /\/+/g,
+        "/"
+      );
+
+      const oldRealPath = getMediaPath(oldVirtualPath);
+      const newRealPath = getMediaPath(newVirtualPath);
+
+      // 移動先の親ディレクトリを物理的に作成
+      const newRealDir = dirname(newRealPath);
+      await mkdir(newRealDir, { recursive: true });
+
+      // 同名パスの存在チェック
+      if (await existsPath(newRealPath)) {
+        throw new Error(`ゴミ箱内に既に同名のパスが存在します。`);
+      }
+
+      // FS更新
+      await rename(oldRealPath, newRealPath);
+
+      // DB更新
+      try {
+        const stats = await lstat(newRealPath);
+        const isDirectory = stats.isDirectory();
+
+        await prisma.$transaction(async (tx) => {
+          // 自分自身の更新
+          await tx.$executeRaw`
+            UPDATE Media SET 
+              path = ${newVirtualPath}, 
+              dirPath = ${dirname(newVirtualPath).replace(/\\/g, "/")}
+            WHERE path = ${oldVirtualPath}
+          `;
+
+          if (isDirectory) {
+            // 配下の子要素をすべて置換（移動ロジックと同じ）
+            await tx.$executeRaw`
+              UPDATE Media SET 
+                path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
+                dirPath = CASE 
+                  WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
+                  ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+                END
+              WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
+            `;
+          }
+
+          // 訪問履歴からは削除（ゴミ箱の中身は履歴に出さない）
+          await tx.$executeRaw`
+            DELETE FROM VisitedFolder 
+            WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
+          `;
+        });
+        results.success++;
+      } catch (dbError) {
+        // DB失敗時はFSを元に戻す
+        await rename(newRealPath, oldRealPath);
+        throw dbError;
+      }
+    } catch (error) {
+      console.error(`Delete Error [${oldVirtualPath}]:`, error);
+      results.failed++;
+      results.errors.push(getErrorMessage(error));
+    }
+  }
+
+  revalidatePath("/explorer");
+  return results;
 }

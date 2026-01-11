@@ -23,24 +23,24 @@ interface MoveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sourceNodes: { path: string; name: string }[];
-  initialCurrentPath?: string;
+  initialDirPath?: string;
 }
 
 export function MoveDialog({
   open,
   onOpenChange,
   sourceNodes,
-  initialCurrentPath = "/",
+  initialDirPath = "/",
 }: MoveDialogProps) {
-  const [currentPath, setCurrentPath] = useState(initialCurrentPath);
+  const [targetDirPath, setTargetDirPath] = useState(initialDirPath);
   const [dirs, setDirs] = useState<{ name: string; path: string }[]>([]);
   const [isNavigating, startNavigating] = useTransition();
   const [isMoving, startMoving] = useTransition();
 
   // ダイアログを開いたときに初期パスをリセット
   useEffect(() => {
-    if (open && initialCurrentPath !== currentPath) {
-      fetchDirs(initialCurrentPath);
+    if (open && initialDirPath !== targetDirPath) {
+      fetchDirs(initialDirPath);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -58,7 +58,7 @@ export function MoveDialog({
             )
         );
         setDirs(filtered);
-        setCurrentPath(path);
+        setTargetDirPath(path);
       } else {
         toast.error(result.error);
       }
@@ -69,7 +69,7 @@ export function MoveDialog({
   const handleMove = () => {
     startMoving(async () => {
       const paths = sourceNodes.map((n) => n.path);
-      const result = await moveNodesAction(paths, currentPath);
+      const result = await moveNodesAction(paths, targetDirPath);
 
       if (result.failed === 0) {
         toast.success(`${result.success}件のアイテムを移動しました`);
@@ -89,7 +89,7 @@ export function MoveDialog({
 
   // 親フォルダに戻る
   const handleBack = () => {
-    const parent = dirname(currentPath).replace(/\\/g, "/");
+    const parent = dirname(targetDirPath).replace(/\\/g, "/");
     fetchDirs(parent === "." ? "/" : parent);
   };
 
@@ -100,12 +100,12 @@ export function MoveDialog({
           <DialogTitle>移動先を選択</DialogTitle>
           <div className="flex items-center gap-2 text-sm text-muted-foreground break-all bg-muted p-2 rounded">
             <Folder className="h-4 w-4 shrink-0" />
-            {currentPath}
+            {targetDirPath}
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-auto flex flex-col gap-2">
-          {currentPath !== "/" && (
+          {targetDirPath !== "/" && (
             <Button
               variant="ghost"
               className="w-full justify-start text-primary"

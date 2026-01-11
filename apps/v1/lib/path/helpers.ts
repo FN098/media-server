@@ -29,6 +29,10 @@ export function getMediaThumbPath(mediaPath: string): string {
   );
 }
 
+export function getMediaTrashPath(mediaPath: string): string {
+  return path.join(PATHS.server.media.trash.root, mediaPath);
+}
+
 export function getClientExplorerPath(mediaPath: string): string {
   return path.join(PATHS.client.explorer.root, mediaPath);
 }

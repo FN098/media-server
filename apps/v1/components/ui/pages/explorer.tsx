@@ -1,9 +1,11 @@
 "use client";
 
 import { visitFolderAction } from "@/actions/folder-actions";
+import { deleteNodesAction } from "@/actions/media-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
+import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
@@ -56,6 +58,7 @@ import {
   FolderInput,
   MoreVertical,
   TagIcon,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -315,7 +318,7 @@ export function Explorer() {
   // 移動対象のノードリストを管理
   const [moveTargets, setMoveTargets] = useState<MediaNode[]>([]);
   const isMoveMode = moveTargets.length > 0;
-  const initialCurrentPath =
+  const initialDirPath =
     moveTargets.length > 0 ? dirname(moveTargets[0]?.path) : undefined;
 
   const handleCloseMoveDialog = () => {
@@ -331,6 +334,34 @@ export function Explorer() {
   // 一括移動の呼び出し
   const handleOpenMoveSelected = () => {
     setMoveTargets(selected);
+  };
+
+  // ===== 削除 (Delete) =====
+
+  const [deleteTargets, setDeleteTargets] = useState<MediaNode[]>([]);
+  const isDeleteMode = deleteTargets.length > 0;
+
+  // 削除実行
+  const handleDeleteConfirm = async () => {
+    const paths = deleteTargets.map((n) => n.path);
+    const result = await deleteNodesAction(paths);
+
+    if (result.failed === 0) {
+      toast.success(`${result.success}件のアイテムをゴミ箱に移動しました`);
+      clearSelection(); // 選択中だった場合は解除
+    } else {
+      toast.error(`${result.failed}件の削除に失敗しました`);
+    }
+  };
+
+  // 単体削除の呼び出し用
+  const handleOpenDeleteSingle = (node: MediaNode) => {
+    setDeleteTargets([node]);
+  };
+
+  // 一括削除の呼び出し用 (SelectionBarから)
+  const handleOpenDeleteSelected = () => {
+    setDeleteTargets(selected);
   };
 
   // ===== サーバーアクション =====
@@ -393,6 +424,7 @@ export function Explorer() {
             onOpen={handleOpen}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
+            onDelete={handleOpenDeleteSingle}
             onEditTags={(node) => {
               handleSelectSingle(node);
               handleOpenTagEditor();
@@ -414,6 +446,7 @@ export function Explorer() {
             onOpen={handleOpen}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
+            onDelete={handleOpenDeleteSingle}
             onEditTags={(node) => {
               handleSelectSingle(node);
               handleOpenTagEditor();
@@ -473,6 +506,12 @@ export function Explorer() {
                     <DropdownMenuItem onClick={handleOpenMoveSelected}>
                       <FolderInput className="mr-2 h-4 w-4" /> 移動
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={handleOpenDeleteSelected}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> 削除
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -508,7 +547,15 @@ export function Explorer() {
           path: node.path,
           name: node.name,
         }))}
-        initialCurrentPath={initialCurrentPath}
+        initialDirPath={initialDirPath}
+      />
+
+      {/* 削除確認ダイアログ */}
+      <DeleteConfirmDialog
+        open={isDeleteMode}
+        onOpenChange={(open) => !open && setDeleteTargets([])}
+        count={deleteTargets.length}
+        onConfirm={handleDeleteConfirm}
       />
 
       {/* フォルダナビゲーション */}

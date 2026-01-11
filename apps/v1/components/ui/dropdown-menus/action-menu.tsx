@@ -10,24 +10,26 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import { FolderInput, MoreVertical, Pencil, Tag } from "lucide-react";
+import { FolderInput, MoreVertical, Pencil, Tag, Trash2 } from "lucide-react";
 
 interface ActionMenuProps {
   node: MediaNode;
+  className?: string;
+  onOpenFolder?: (path: string) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
+  onDelete?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
-  onOpenFolder?: (path: string) => void;
-  className?: string;
 }
 
 export function ActionMenu({
   node,
+  className,
+  onOpenFolder,
   onRename,
   onMove,
+  onDelete,
   onEditTags,
-  onOpenFolder,
-  className,
 }: ActionMenuProps) {
   return (
     <DropdownMenu>
@@ -68,7 +70,16 @@ export function ActionMenu({
               onMove(node);
             }}
           >
-            <FolderInput className="mr-2 h-4 w-4" /> 他のフォルダに移動
+            <FolderInput className="mr-2 h-4 w-4" /> 移動
+          </DropdownMenuItem>
+        )}
+        {onDelete && (
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={() => onDelete(node)}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            削除
           </DropdownMenuItem>
         )}
         {onEditTags && (

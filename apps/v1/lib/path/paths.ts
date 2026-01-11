@@ -5,8 +5,20 @@ export const PATHS = {
     media: {
       root: MEDIA_ROOT,
       thumb: {
-        root: `${MEDIA_ROOT}/.thumb/`,
+        root: `${MEDIA_ROOT}/.thumb`,
       },
+      trash: {
+        root: `${MEDIA_ROOT}/.trash`,
+      },
+    },
+  },
+  virtual: {
+    root: "/",
+    thumb: {
+      root: "/.thumb",
+    },
+    trash: {
+      root: "/.trash",
     },
   },
   client: {
