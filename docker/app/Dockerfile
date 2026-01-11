@@ -69,7 +69,7 @@ RUN apk add --no-cache ffmpeg
 
 # セキュリティのため非ルートユーザーを作成
 RUN addgroup --system --gid 1001 nodejs && \
-  adduser --system --uid 1001 nextjs
+  adduser --system --uid 1001 --ingroup nodejs nextjs
 
 # build 成果物と必要ファイルをコピー
 # ※ next.config.js で output: 'standalone' を設定している前提
@@ -125,6 +125,5 @@ COPY --from=deps /app/package.json ./
 
 # prisma 関連ファイルをコピー
 COPY apps/v1/prisma ./prisma
-# COPY apps/v1/prisma.config.ts ./ # v7 以上の場合
 
 CMD ["pnpm", "prisma", "migrate", "deploy"]
