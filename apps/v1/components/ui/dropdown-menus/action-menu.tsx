@@ -90,7 +90,10 @@ export function ActionMenu({
         {onDelete && (
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
-            onClick={() => onDelete(node)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(node);
+            }}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             削除
