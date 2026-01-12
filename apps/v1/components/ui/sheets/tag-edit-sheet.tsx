@@ -105,7 +105,7 @@ export function TagEditSheet({
   // 保存処理
   const [isLoading, setIsLoading] = useState(false);
   const handleApply = async () => {
-    if (isLoading) return;
+    if (isLoading || !editor.hasChanges) return;
     setIsLoading(true);
 
     try {
@@ -465,6 +465,73 @@ function TagInput({
     () => new Map(suggestions.map((s) => [s.name, s])),
     [suggestions]
   );
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const selectIndex = (index: number) => {
+    const nextIndex = Math.max(0, Math.min(index, suggestions.length - 1));
+    setActiveIndex(nextIndex);
+
+    const el = itemRefs.current[nextIndex];
+    if (el) {
+      el?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        selectIndex(activeIndex + 1);
+        break;
+
+      case "ArrowUp":
+        e.preventDefault();
+        selectIndex(activeIndex - 1);
+        break;
+
+      case "Escape":
+        e.preventDefault();
+        setActiveIndex(-1);
+        break;
+
+      case "Enter":
+        e.preventDefault();
+
+        // タグが選択されていればそれを入力
+        if (activeIndex >= 0) {
+          const tag = suggestions[activeIndex];
+          if (!tag) return;
+          onSelectSuggestion(tag);
+          inputRef.current?.focus();
+          setActiveIndex(-1);
+          return;
+        }
+
+        // 何も入力されていない場合は確定操作とみなす
+        if (!value.trim()) {
+          onApply();
+          setActiveIndex(-1);
+          return;
+        }
+
+        // サジェストに一致する場合は選択
+        const normalized = normalizeTagName(value);
+        if (suggests.has(normalized)) {
+          onSelectSuggestion(suggests.get(value)!);
+          setActiveIndex(-1);
+          return;
+        }
+
+        // 新規作成
+        onAdd();
+        onChange("");
+        setActiveIndex(-1);
+    }
+  };
 
   return (
     <div className="relative">
@@ -476,26 +543,7 @@ function TagInput({
           placeholder="新しいタグを入力..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.nativeEvent.isComposing) {
-              e.preventDefault();
-
-              // 何も入力されていない場合は確定操作とみなす
-              if (!value.trim()) {
-                onApply();
-              }
-
-              const normalized = normalizeTagName(value);
-
-              // サジェストに一致する場合は選択、なければ新規作成
-              if (suggests.has(normalized)) {
-                onSelectSuggestion(suggests.get(value)!);
-              } else {
-                onAdd();
-                onChange("");
-              }
-            }
-          }}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
         />
         <Plus
@@ -537,22 +585,37 @@ function TagInput({
               <p className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 既存のタグから選択
               </p>
-              {suggestions.map((tag) => (
-                <button
-                  key={tag.id}
-                  onClick={() => {
-                    onSelectSuggestion(tag);
-                    inputRef.current?.focus();
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-primary-foreground-foreground rounded-lg transition-colors flex items-center justify-between group"
-                >
-                  <span>{tag.name}</span>
-                  <Check
-                    size={14}
-                    className="opacity-0 group-hover:opacity-100 text-primary"
-                  />
-                </button>
-              ))}
+              {suggestions.map((tag, index) => {
+                const active = index === activeIndex;
+
+                return (
+                  <button
+                    key={tag.id}
+                    ref={(el) => {
+                      itemRefs.current[index] = el;
+                    }}
+                    type="button"
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onClick={() => {
+                      onSelectSuggestion(tag);
+                      inputRef.current?.focus();
+                    }}
+                    className={cn(
+                      "w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between",
+                      active ? "bg-accent" : "hover:bg-accent"
+                    )}
+                  >
+                    <span>{tag.name}</span>
+                    <Check
+                      size={14}
+                      className={cn(
+                        "text-primary transition-opacity",
+                        active ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
         )}
