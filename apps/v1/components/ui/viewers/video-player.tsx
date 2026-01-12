@@ -44,17 +44,6 @@ export const VideoPlayer = memo(function VideoPlayer({
     localStorage.removeItem(storageKey);
   };
 
-  // const togglePlay = () => {
-  //   const video = playerRef.current;
-  //   if (!video) return;
-
-  //   if (video.paused) {
-  //     video.play().catch((e) => console.error(e));
-  //   } else {
-  //     video.pause();
-  //   }
-  // };
-
   const seek = (amount: number) => {
     const video = playerRef.current;
     if (video) {
@@ -66,7 +55,6 @@ export const VideoPlayer = memo(function VideoPlayer({
   useShortcutKeys([
     { key: "Ctrl+ArrowRight", callback: () => seek(10) },
     { key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
-    // { key: " ", callback: () => togglePlay() },
   ]);
 
   return (
@@ -79,7 +67,7 @@ export const VideoPlayer = memo(function VideoPlayer({
         )}
       >
         <Image
-          src={encodePath(getThumbUrl(media.path))}
+          src={getThumbUrl(encodePath(media.path))}
           alt={media.name}
           fill
           className="object-contain select-none"
@@ -98,7 +86,7 @@ export const VideoPlayer = memo(function VideoPlayer({
         {active && (
           <MuxPlayer
             ref={playerRef}
-            src={encodePath(getAbsoluteMediaUrl(media.path))}
+            src={getAbsoluteMediaUrl(encodePath(media.path))}
             autoPlay
             streamType="on-demand"
             onLoadedData={handleLoadedData}

@@ -22,7 +22,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
       {/* サムネイル */}
       {!isLoaded && (
         <Image
-          src={encodePath(getThumbUrl(media.path))}
+          src={getThumbUrl(encodePath(media.path))}
           alt={media.name}
           fill
           className="absolute inset-0 object-contain opacity-50"
@@ -32,7 +32,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
 
       {/* メイン画像 */}
       <Image
-        src={encodePath(getMediaUrl(media.path))}
+        src={getMediaUrl(encodePath(media.path))}
         alt={media.name}
         fill
         className={cn(

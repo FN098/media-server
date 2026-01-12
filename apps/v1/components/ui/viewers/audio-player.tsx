@@ -214,7 +214,7 @@ export function AudioPlayer({
         {active && (
           <audio
             ref={playerRef}
-            src={encodePath(getAbsoluteMediaUrl(media.path))}
+            src={getAbsoluteMediaUrl(encodePath(media.path))}
             autoPlay
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}

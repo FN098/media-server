@@ -94,7 +94,7 @@ function MediaThumbImage({
     }
   }, [node.path, requested]);
 
-  const thumbSrc = encodePath(getThumbUrl(node.path));
+  const thumbSrc = getThumbUrl(encodePath(node.path));
 
   return (
     <FallbackImage

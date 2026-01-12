@@ -56,7 +56,7 @@ export function useSetExplorerQuery() {
       const search = toSearchParams(normalized);
 
       const basePath = options.path
-        ? encodePath(getClientExplorerPath(options.path))
+        ? getClientExplorerPath(encodePath(options.path))
         : pathname;
 
       const url = search ? `${basePath}?${search}` : basePath;
