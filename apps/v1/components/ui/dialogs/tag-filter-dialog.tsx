@@ -1,4 +1,5 @@
 import { useMounted } from "@/hooks/use-mounted";
+import { TagFilterMode } from "@/hooks/use-tag-filter";
 import { isMatchJapanese } from "@/lib/utils/search";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
@@ -16,22 +17,31 @@ import { cn } from "@/shadcn/lib/utils";
 import { ListFilter, RotateCcw, Search, X } from "lucide-react"; // Searchを追加
 import { useMemo, useState } from "react"; // useMemoを追加
 
+const modeTexts = {
+  AND: "すべて含む",
+  OR: "いずれか",
+  NOT: "含まない",
+} as const;
+
 interface TagFilterDialogProps {
   tags: string[];
   selectedTags: Set<string>;
-  onApply: (tags: Set<string>) => void;
+  currentMode: TagFilterMode;
+  onApply: (tags: Set<string>, mode: TagFilterMode) => void;
 }
 
 export function TagFilterDialog({
   tags,
   selectedTags,
+  currentMode,
   onApply,
 }: TagFilterDialogProps) {
   const [tempSelected, setTempSelected] = useState<Set<string>>(
     new Set(selectedTags)
   );
+  const [mode, setMode] = useState<TagFilterMode>(currentMode);
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // 検索用ステート
+  const [searchQuery, setSearchQuery] = useState("");
 
   // 検索クエリに基づいてタグをフィルタリング
   const filteredTags = useMemo(() => {
@@ -61,8 +71,12 @@ export function TagFilterDialog({
   };
 
   const handleApply = () => {
-    onApply(tempSelected);
+    onApply(tempSelected, mode);
     setOpen(false);
+  };
+
+  const handleReset = () => {
+    onApply(new Set(), mode);
   };
 
   const hasSelection = selectedTags.size > 0;
@@ -109,8 +123,28 @@ export function TagFilterDialog({
             </DialogTitle>
           </DialogHeader>
 
-          {/* 検索ボックスの追加 */}
-          <div className="px-6 pb-4">
+          {/* モード切り替え */}
+          <div className="px-6 pb-2">
+            <div className="flex bg-muted rounded-lg p-1">
+              {(["AND", "OR", "NOT"] as TagFilterMode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={cn(
+                    "flex-1 text-xs font-medium py-1.5 rounded-md transition-all",
+                    mode === m
+                      ? "bg-background shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {modeTexts[m]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 検索ボックス */}
+          <div className="px-6 pb-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -130,7 +164,12 @@ export function TagFilterDialog({
             </div>
           </div>
 
-          <div className="flex-1 flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto border-t border-b border-muted/50">
+          {/* タグ一覧 */}
+          <div
+            className={cn(
+              "flex-1 flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto border-t border-b border-muted/50"
+            )}
+          >
             {filteredTags.length > 0 ? (
               filteredTags.map((tag) => {
                 const isSelected = tempSelected.has(tag);
@@ -158,6 +197,7 @@ export function TagFilterDialog({
             )}
           </div>
 
+          {/* 操作ボタン */}
           <DialogFooter className="flex flex-row items-center justify-between p-6 bg-muted/20">
             <Button
               variant="ghost"
@@ -186,7 +226,7 @@ export function TagFilterDialog({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onApply(new Set())}
+          onClick={handleReset}
           className="h-8 text-xs text-muted-foreground hover:text-destructive"
         >
           リセット

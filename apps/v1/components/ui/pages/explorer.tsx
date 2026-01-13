@@ -19,7 +19,7 @@ import {
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { useTagFilter } from "@/hooks/use-tag-filter";
+import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
 import {
   createFavoriteFilter,
   createSearchFilter,
@@ -112,20 +112,28 @@ export function Explorer() {
 
   // ===== フィルタリング =====
 
-  // フィルタリング対象タグ
-  const { selectedTags, selectTags } = useTagFilter();
+  // タグフィルタ
+  const tagFilter = useTagFilter();
+
+  const handleApplyTagFilter = (
+    tags: Iterable<string>,
+    mode: TagFilterMode
+  ) => {
+    tagFilter.selectTags(tags);
+    tagFilter.setMode(mode);
+  };
 
   // お気に入りのみ有効フラグ
   const [isFavoriteOnly, setIsFavoriteOnly] = useState(false);
   const toggleIsFavoriteOnly = () => setIsFavoriteOnly((prev) => !prev);
 
   // フィルタ関数
-  const searchFilter = useMemo(() => createSearchFilter(query), [query]);
-  const tagFilter = useMemo(
-    () => createTagFilter(Array.from(selectedTags)),
-    [selectedTags]
+  const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
+  const tagFilterFn = useMemo(
+    () => createTagFilter(Array.from(tagFilter.selectedTags), tagFilter.mode),
+    [tagFilter]
   );
-  const favoriteFilter = useMemo(
+  const favoriteFilterFn = useMemo(
     () => createFavoriteFilter(isFavoriteOnly),
     [isFavoriteOnly]
   );
@@ -134,25 +142,24 @@ export function Explorer() {
   const filteredNodes = useMemo(() => {
     const { nodes: allNodes } = listing;
 
-    // 1. 各フィルタの生成
+    // 各フィルタの生成
     const filters: MediaNodeFilter[] = [
-      searchFilter,
-      tagFilter,
-      favoriteFilter,
+      searchFilterFn,
+      tagFilterFn,
+      favoriteFilterFn,
     ];
 
-    // 2. フィルタの適用
+    // フィルタの適用
     return allNodes.filter((node) => {
-      // フォルダは常に表示する場合 (検索にはヒットさせたい場合は条件を調整)
       if (node.isDirectory) {
-        // 例: フォルダは検索クエリには反応させるが、タグやお気に入りフィルタからは除外する
-        return searchFilter(node);
+        // フォルダは検索クエリには反応させるが、タグやお気に入りフィルタからは除外する
+        return searchFilterFn(node);
       }
 
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, searchFilter, tagFilter, favoriteFilter]);
+  }, [listing, searchFilterFn, tagFilterFn, favoriteFilterFn]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -165,12 +172,12 @@ export function Explorer() {
     () =>
       sortNames(
         unique(
-          mediaOnly
+          listing.nodes
             .filter((n) => n.tags && n.tags.length > 0)
             .flatMap((n) => n.tags!.map((t) => t.name))
         )
       ),
-    [mediaOnly]
+    [listing.nodes]
   );
 
   // ===== ビューア =====
@@ -397,8 +404,9 @@ export function Explorer() {
         {/* タグフィルター */}
         <TagFilterDialog
           tags={allTags}
-          selectedTags={selectedTags}
-          onApply={selectTags}
+          selectedTags={tagFilter.selectedTags}
+          currentMode={tagFilter.mode}
+          onApply={handleApplyTagFilter}
         />
 
         {/* お気に入りフィルター */}

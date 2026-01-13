@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 
+export type TagFilterMode = "AND" | "OR" | "NOT";
+
 export function useTagFilter() {
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [mode, setMode] = useState<TagFilterMode>("AND");
 
   const toggleTag = (tag: string) => {
     const next = new Set(selectedTags);
@@ -21,6 +24,8 @@ export function useTagFilter() {
 
   return {
     selectedTags,
+    mode,
+    setMode,
     toggleTag,
     resetTags,
     selectTags,

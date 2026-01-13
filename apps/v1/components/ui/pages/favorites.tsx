@@ -14,7 +14,7 @@ import {
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { useTagFilter } from "@/hooks/use-tag-filter";
+import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
 import { createSearchFilter, createTagFilter } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
 import { sortNames } from "@/lib/media/sort";
@@ -79,34 +79,42 @@ export function FavoritesExplorer() {
 
   // ===== フィルタリング =====
 
-  // フィルタリング対象タグ
-  const { selectedTags, selectTags } = useTagFilter();
+  // タグフィルタ
+  const tagFilter = useTagFilter();
+
+  const handleApplyTagFilter = (
+    tags: Iterable<string>,
+    mode: TagFilterMode
+  ) => {
+    tagFilter.selectTags(tags);
+    tagFilter.setMode(mode);
+  };
 
   // フィルタ関数
-  const searchFilter = useMemo(() => createSearchFilter(query), [query]);
-  const tagFilter = useMemo(
-    () => createTagFilter(Array.from(selectedTags)),
-    [selectedTags]
+  const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
+  const tagFilterFn = useMemo(
+    () => createTagFilter(Array.from(tagFilter.selectedTags), tagFilter.mode),
+    [tagFilter]
   );
 
+  // フィルタリング結果
   const filteredNodes = useMemo(() => {
     const { nodes: allNodes } = listing;
 
-    // 1. 各フィルタの生成
-    const filters: MediaNodeFilter[] = [searchFilter, tagFilter];
+    // 各フィルタの生成
+    const filters: MediaNodeFilter[] = [searchFilterFn, tagFilterFn];
 
-    // 2. フィルタの適用
+    // フィルタの適用
     return allNodes.filter((node) => {
-      // フォルダは常に表示する場合 (検索にはヒットさせたい場合は条件を調整)
       if (node.isDirectory) {
-        // 例: フォルダは検索クエリには反応させるが、タグやお気に入りフィルタからは除外する
-        return searchFilter(node);
+        // フォルダは検索クエリには反応させるが、タグやお気に入りフィルタからは除外する
+        return searchFilterFn(node);
       }
 
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, searchFilter, tagFilter]);
+  }, [listing, searchFilterFn, tagFilterFn]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -115,12 +123,16 @@ export function FavoritesExplorer() {
   );
 
   // すべてのタグ
-  const allTags = sortNames(
-    unique(
-      mediaOnly
-        .filter((n) => n.tags && n.tags.length > 0)
-        .flatMap((n) => n.tags!.map((t) => t.name))
-    )
+  const allTags = useMemo(
+    () =>
+      sortNames(
+        unique(
+          listing.nodes
+            .filter((n) => n.tags && n.tags.length > 0)
+            .flatMap((n) => n.tags!.map((t) => t.name))
+        )
+      ),
+    [listing.nodes]
   );
 
   // ===== ビューア =====
@@ -286,8 +298,9 @@ export function FavoritesExplorer() {
         {/* タグフィルター */}
         <TagFilterDialog
           tags={allTags}
-          selectedTags={selectedTags}
-          onApply={selectTags}
+          selectedTags={tagFilter.selectedTags}
+          currentMode={tagFilter.mode}
+          onApply={handleApplyTagFilter}
         />
       </div>
 
@@ -365,22 +378,6 @@ export function FavoritesExplorer() {
                 >
                   <TagIcon size={18} />
                 </Button>
-
-                {/* NOTE: 追加のアクション必要になったら以下を使用 */}
-
-                {/* その他 */}
-                {/* <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost">
-                      <MoreVertical size={18} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => console.log("clicked")}>
-                      <FolderInput className="mr-2 h-4 w-4" /> サンプル
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu> */}
               </div>
             }
           />

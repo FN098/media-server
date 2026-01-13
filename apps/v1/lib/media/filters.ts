@@ -1,3 +1,4 @@
+import { TagFilterMode } from "@/hooks/use-tag-filter";
 import { MediaNodeFilter } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/search";
 
@@ -14,13 +15,26 @@ export const createSearchFilter = (query: string): MediaNodeFilter => {
   return (node) => !trimmed || isMatchJapanese(node.name, trimmed);
 };
 
-export const createTagFilter = (selectedTags: string[]): MediaNodeFilter => {
+export const createTagFilter = (
+  selectedTags: string[],
+  mode: TagFilterMode = "AND"
+): MediaNodeFilter => {
   return (node) => {
     if (selectedTags.length === 0) return true;
-    if (!node.tags) return false;
-    return selectedTags.every((tag) =>
-      node.tags?.map((t) => t.name)?.includes(tag)
-    );
+    const nodeTagNames = node.tags?.map((t) => t.name) || [];
+
+    switch (mode) {
+      case "OR":
+        // 選択したタグのいずれか1つでも含まれていればOK
+        return selectedTags.some((tag) => nodeTagNames.includes(tag));
+      case "NOT":
+        // 選択したタグがいずれも含まれていない場合のみOK
+        return !selectedTags.some((tag) => nodeTagNames.includes(tag));
+      case "AND":
+      default:
+        // すべて含まれている場合のみOK
+        return selectedTags.every((tag) => nodeTagNames.includes(tag));
+    }
   };
 };
 
