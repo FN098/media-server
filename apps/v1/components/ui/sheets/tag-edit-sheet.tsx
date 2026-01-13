@@ -27,7 +27,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 export type TagEditMode = "default" | "single" | "none";
@@ -59,20 +59,19 @@ export function TagEditSheet({
   // 編集モード
   const [isEditing, setIsEditing] = useState(edit ?? false);
   const toggleIsEditing = () => setIsEditing((prev) => !prev);
-  useEffect(() => {
-    if (edit !== undefined) {
-      setIsEditing(edit);
-    }
-  }, [edit]);
+  // useEffect(() => {
+  //   if (edit !== undefined) {
+  //     setIsEditing(edit);
+  //   }
+  // }, [edit]);
 
   // 透明モード
   const [opacity, setOpacity] = useState(initialOpacity ?? editor.opacity);
-
-  useEffect(() => {
-    if (initialOpacity !== undefined) {
-      setOpacity(initialOpacity);
-    }
-  }, [initialOpacity]);
+  // useEffect(() => {
+  //   if (initialOpacity !== undefined) {
+  //     setOpacity(initialOpacity);
+  //   }
+  // }, [initialOpacity]);
 
   const handleChangeOpacity = (opacity: number) => {
     setOpacity(opacity);
@@ -103,12 +102,11 @@ export function TagEditSheet({
   };
 
   // 保存処理
-  const [isLoading, setIsLoading] = useState(false);
-  const handleApply = async () => {
-    if (isLoading || !editor.hasChanges) return;
-    setIsLoading(true);
+  const [isLoading, startTransition] = useTransition();
+  const handleApply = () => {
+    startTransition(async () => {
+      if (isLoading || !editor.hasChanges) return;
 
-    try {
       // 仮タグを DB 作成
       const created = await createTagsAction(
         editor.pendingNewTags.map((t) => t.name)
@@ -148,9 +146,7 @@ export function TagEditSheet({
 
         handleTerminate();
       }
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   // 終了処理
@@ -297,12 +293,13 @@ export function TagEditSheet({
                     value={editor.newTagName}
                     opacity={opacity}
                     disabled={isLoading}
+                    autoFocus={isMobile ? false : true}
                     suggestions={editor.suggestedTags}
                     onChange={editor.setNewTagName}
                     onAdd={() => handleNewAdd(editor.newTagName)}
                     onSelectSuggestion={editor.selectSuggestion}
-                    onApply={() => void handleApply()}
-                    autoFocus={isMobile ? false : true}
+                    onApply={handleApply}
+                    onCancel={handleTerminate}
                   />
                   <TagList
                     isEditing={true}
@@ -315,7 +312,7 @@ export function TagEditSheet({
                   />
                   <SheetFooter
                     onReset={editor.resetChanges}
-                    onApply={() => void handleApply()}
+                    onApply={handleApply}
                     hasChanges={editor.hasChanges}
                     isLoading={isLoading}
                     opacity={opacity}
@@ -449,6 +446,7 @@ function TagInput({
   onAdd,
   onSelectSuggestion,
   onApply,
+  onCancel,
 }: {
   value: string;
   disabled: boolean;
@@ -459,6 +457,7 @@ function TagInput({
   onAdd: () => void;
   onSelectSuggestion: (tag: Tag) => void;
   onApply: () => void;
+  onCancel: () => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggests = useMemo(
@@ -496,6 +495,10 @@ function TagInput({
       case "Escape":
         e.preventDefault();
         setActiveIndex(-1);
+
+        if (!value) {
+          onCancel();
+        }
         break;
 
       case "Enter":
