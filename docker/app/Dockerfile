@@ -125,5 +125,6 @@ COPY --from=deps /app/package.json ./
 
 # prisma 関連ファイルをコピー
 COPY apps/v1/prisma ./prisma
+COPY apps/v1/prisma.config.ts ./
 
 CMD ["pnpm", "prisma", "migrate", "deploy"]
