@@ -10,6 +10,7 @@ interface TagFilterBarProps {
   onClear: () => void;
 }
 
+/** @deprecated 使用されていない */
 export function TagFilterBar({
   tags,
   selectedTags,

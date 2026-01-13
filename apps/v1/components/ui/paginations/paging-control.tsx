@@ -9,6 +9,7 @@ interface PagingControlProps {
   className?: string;
 }
 
+/** @deprecated 使用されていない */
 export function PagingControl({
   currentPage,
   totalPages,

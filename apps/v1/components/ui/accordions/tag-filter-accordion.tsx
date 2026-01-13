@@ -16,6 +16,7 @@ interface TagFilterAccordionProps {
   onClear: () => void;
 }
 
+/** @deprecated 使用されていない */
 export function TagFilterAccordion({
   tags,
   selectedTags,

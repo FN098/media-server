@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@/components/ui/spinners/spinners";
+import { LoadingSpinner } from "@/components/ui/spinners/loading-spinner";
 import { MediaFsNode } from "@/lib/media/types";
 import { encodePath } from "@/lib/path/encoder";
 import { getMediaUrl, getThumbUrl } from "@/lib/path/helpers";

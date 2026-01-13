@@ -19,8 +19,12 @@ import { HomeIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-// 固定レイアウトのぱんくず
-// しきい値を超えた場合に最初と最後の中間の要素を省略
+/**
+ * 固定レイアウトのぱんくず
+ *
+ * しきい値を超えた場合に最初と最後の中間の要素を省略
+ * @deprecated 使用されていない
+ */
 export function Breadcrumbs({
   items,
   threshold,

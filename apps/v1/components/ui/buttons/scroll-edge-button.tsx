@@ -5,6 +5,7 @@ import { Button } from "@/shadcn/components/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
+/** @deprecated 使用されていない */
 export function ScrollEdgeButtons() {
   const direction = useScrollDirection(5);
 
