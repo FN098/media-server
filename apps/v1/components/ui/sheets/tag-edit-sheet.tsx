@@ -59,20 +59,9 @@ export function TagEditSheet({
   // 編集モード
   const [isEditing, setIsEditing] = useState(edit ?? false);
   const toggleIsEditing = () => setIsEditing((prev) => !prev);
-  // useEffect(() => {
-  //   if (edit !== undefined) {
-  //     setIsEditing(edit);
-  //   }
-  // }, [edit]);
 
   // 透明モード
   const [opacity, setOpacity] = useState(initialOpacity ?? editor.opacity);
-  // useEffect(() => {
-  //   if (initialOpacity !== undefined) {
-  //     setOpacity(initialOpacity);
-  //   }
-  // }, [initialOpacity]);
-
   const handleChangeOpacity = (opacity: number) => {
     setOpacity(opacity);
     editor.setOpacity(opacity);
