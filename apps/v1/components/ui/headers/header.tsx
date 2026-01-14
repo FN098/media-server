@@ -29,9 +29,7 @@ export function Header({
       <div className="flex h-full items-center gap-2 px-2 md:px-3">
         <AppSidebarOpenButton />
 
-        <div className="text-lg font-semibold mx-2 hidden sm:block">
-          {title}
-        </div>
+        <div className="text-lg font-semibold mx-2">{title}</div>
 
         {navigation && <HeaderNavigation basePath={basePath} />}
 
