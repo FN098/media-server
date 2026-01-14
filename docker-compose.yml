@@ -82,6 +82,21 @@ services:
     depends_on:
       - db
 
+  caddy:
+    image: caddy:2
+    container_name: media-server-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    depends_on:
+      - app
+    profiles:
+      - public
+
 volumes:
   db_data:
   redis_data:
+  caddy_data:
