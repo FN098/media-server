@@ -4,6 +4,7 @@ import { ThumbEventProvider } from "@/providers/thumb-event-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
 import { TooltipProvider } from "@/shadcn/components/ui/tooltip";
 import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -28,13 +29,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppQueryClientProvider>
           <TooltipProvider>
-            <ThumbEventProvider>{children}</ThumbEventProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <ThumbEventProvider>{children}</ThumbEventProvider>
+            </ThemeProvider>
           </TooltipProvider>
         </AppQueryClientProvider>
         <Toaster duration={1000} />

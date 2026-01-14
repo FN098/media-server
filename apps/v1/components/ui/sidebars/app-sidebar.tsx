@@ -1,9 +1,11 @@
 "use client";
 
+import { ThemeSelect } from "@/components/ui/selects/theme-select";
 import { PATHS } from "@/lib/path/paths";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -68,6 +70,7 @@ export function AppSidebar() {
           </SidebarMenuButton>
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>App Menu</SidebarGroupLabel>
@@ -87,6 +90,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="p-4">
+        <ThemeSelect />
+      </SidebarFooter>
     </Sidebar>
   );
 }
