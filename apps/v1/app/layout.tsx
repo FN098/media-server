@@ -37,7 +37,7 @@ export default function RootLayout({
             <ThumbEventProvider>{children}</ThumbEventProvider>
           </TooltipProvider>
         </AppQueryClientProvider>
-        <Toaster />
+        <Toaster duration={1000} />
       </body>
     </html>
   );
