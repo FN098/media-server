@@ -15,6 +15,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Header
                 title="Favorites"
                 basePath={PATHS.client.favorites.root}
+                features={{
+                  navigation: false,
+                }}
               />
               <main className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 {children}
