@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import SwiperFadeDemo from "@/components/ui/demo/caroucel-demo";
+import { CarouselDemo } from "@/components/ui/demo/caroucel-demo";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SandboxPage() {
-  return <SwiperFadeDemo />;
+  return <CarouselDemo />;
 }

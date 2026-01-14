@@ -11,7 +11,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/zoom";
 
-const ImageZoomSwiper = () => {
+export const ImageZoomSwiper = () => {
   const swiperRef = useRef<SwiperClass | null>(null);
 
   // マウスホイールイベントでズームを制御する関数
@@ -63,5 +63,3 @@ const ImageZoomSwiper = () => {
     </div>
   );
 };
-
-export default ImageZoomSwiper;
