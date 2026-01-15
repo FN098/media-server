@@ -1,6 +1,7 @@
 import { useMounted } from "@/hooks/use-mounted";
 import { TagFilterMode } from "@/hooks/use-tag-filter";
 import { isMatchJapanese } from "@/lib/utils/search";
+import { unique } from "@/lib/utils/unique";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -43,10 +44,15 @@ export function TagFilterDialog({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const allTags = useMemo(
+    () => unique([...tempSelected, ...tags]),
+    [tags, tempSelected]
+  );
+
   // 検索クエリに基づいてタグをフィルタリング
   const filteredTags = useMemo(() => {
-    return tags.filter((tag) => isMatchJapanese(tag, searchQuery));
-  }, [tags, searchQuery]);
+    return allTags.filter((tag) => isMatchJapanese(tag, searchQuery));
+  }, [allTags, searchQuery]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {

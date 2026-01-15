@@ -167,17 +167,17 @@ export function Explorer() {
     [filteredNodes]
   );
 
-  // すべてのタグ
-  const allTags = useMemo(
+  // 「メディアのみ」のタグリスト
+  const mediaOnlyTags = useMemo(
     () =>
       sortNames(
         unique(
-          listing.nodes
+          mediaOnly
             .filter((n) => n.tags && n.tags.length > 0)
             .flatMap((n) => n.tags!.map((t) => t.name))
         )
       ),
-    [listing.nodes]
+    [mediaOnly]
   );
 
   // ===== ビューア =====
@@ -403,7 +403,7 @@ export function Explorer() {
       <div className="flex flex-wrap items-center gap-1 px-4">
         {/* タグフィルター */}
         <TagFilterDialog
-          tags={allTags}
+          tags={mediaOnlyTags}
           selectedTags={tagFilter.selectedTags}
           currentMode={tagFilter.mode}
           onApply={handleApplyTagFilter}
