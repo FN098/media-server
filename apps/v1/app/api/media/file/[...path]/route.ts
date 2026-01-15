@@ -1,5 +1,5 @@
 import { getMimetype } from "@/lib/media/mimetype";
-import { getMediaPath } from "@/lib/path/helpers";
+import { getServerMediaPath } from "@/lib/path/helpers";
 import { isErrnoException } from "@/lib/utils/error";
 import fsSync from "fs";
 import fs from "fs/promises";
@@ -13,7 +13,7 @@ export async function GET(
   try {
     const { path: p } = await context.params;
     const rel = p.join("/");
-    const filePath = getMediaPath(rel);
+    const filePath = getServerMediaPath(rel);
 
     let stat;
     try {

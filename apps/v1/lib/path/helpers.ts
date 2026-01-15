@@ -3,33 +3,37 @@ import { PATHS } from "@/lib/path/paths";
 import { getAbsoluteUrl } from "@/lib/utils/url";
 import path from "path";
 
-export function getAbsoluteMediaUrl(mediaPath: string) {
-  return getAbsoluteUrl(getMediaUrl(mediaPath));
+export function getAbsoluteApiMediaUrl(mediaPath: string) {
+  return getAbsoluteUrl(getApiMediaUrl(mediaPath));
 }
 
-export function getMediaUrl(mediaPath: string) {
+export function getApiMediaUrl(mediaPath: string) {
   return path.join(PATHS.api.media.file.root, mediaPath);
 }
 
-export function getThumbUrl(mediaPath: string) {
+export function getApiThumbUrl(mediaPath: string) {
   return path.join(
     PATHS.api.media.file.thumb.root,
     mediaPath + APP_CONFIG.thumb.extension
   );
 }
 
-export function getMediaPath(mediaPath: string): string {
+export function getApiThumbEventsUrl() {
+  return PATHS.api.thumb.events.root;
+}
+
+export function getServerMediaPath(mediaPath: string): string {
   return path.join(PATHS.server.media.root, mediaPath);
 }
 
-export function getMediaThumbPath(mediaPath: string): string {
+export function getServerMediaThumbPath(mediaPath: string): string {
   return path.join(
     PATHS.server.media.thumb.root,
     mediaPath + APP_CONFIG.thumb.extension
   );
 }
 
-export function getMediaTrashPath(mediaPath: string): string {
+export function getServerMediaTrashPath(mediaPath: string): string {
   return path.join(PATHS.server.media.trash.root, mediaPath);
 }
 
@@ -43,8 +47,4 @@ export function getParentDirPath(filePath: string): string {
   // path.dirname はルート付近で "." を返すことがあるため、
   // アプリケーションの仕様に合わせて調整（空文字にする等）
   return dir === "." ? "" : dir.replace(/\\/g, "/");
-}
-
-export function getThumbEventsUrl() {
-  return PATHS.api.thumb.events.root;
 }

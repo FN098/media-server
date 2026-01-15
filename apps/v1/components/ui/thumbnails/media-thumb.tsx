@@ -4,7 +4,7 @@ import { FallbackImage } from "@/components/ui/images/fallback-image";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
 import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
 import { encodePath } from "@/lib/path/encoder";
-import { getParentDirPath, getThumbUrl } from "@/lib/path/helpers";
+import { getApiThumbUrl, getParentDirPath } from "@/lib/path/helpers";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, ReactNode, useCallback, useState } from "react";
 
@@ -94,7 +94,7 @@ function MediaThumbImage({
     }
   }, [node.path, requested]);
 
-  const thumbSrc = getThumbUrl(encodePath(node.path));
+  const thumbSrc = getApiThumbUrl(encodePath(node.path));
 
   return (
     <FallbackImage

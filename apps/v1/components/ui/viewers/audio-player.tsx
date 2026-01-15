@@ -2,7 +2,7 @@ import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { encodePath } from "@/lib/path/encoder";
-import { getAbsoluteMediaUrl } from "@/lib/path/helpers";
+import { getAbsoluteApiMediaUrl } from "@/lib/path/helpers";
 import {
   Tooltip,
   TooltipContent,
@@ -214,7 +214,7 @@ export function AudioPlayer({
         {active && (
           <audio
             ref={playerRef}
-            src={getAbsoluteMediaUrl(encodePath(media.path))}
+            src={getAbsoluteApiMediaUrl(encodePath(media.path))}
             autoPlay
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}

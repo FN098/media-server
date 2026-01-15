@@ -1,13 +1,13 @@
 import { detectMediaType, isMedia } from "@/lib/media/media-types";
 import { sortNames } from "@/lib/media/sort";
-import { getMediaPath } from "@/lib/path/helpers";
+import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
 
 // そのディレクトリ「直下」にメディアがあるかチェック
 async function hasDirectMedia(dirPath: string): Promise<boolean> {
-  const absolutePath = getMediaPath(dirPath);
+  const absolutePath = getServerMediaPath(dirPath);
   if (!(await existsPath(absolutePath))) return false;
 
   const dirents = await fs.readdir(absolutePath, { withFileTypes: true });
@@ -28,7 +28,7 @@ async function findDeepestMediaFolder(
   }
 
   // 2. 直下にないなら、子フォルダを探索
-  const absolutePath = getMediaPath(dirPath);
+  const absolutePath = getServerMediaPath(dirPath);
   const dirents = await fs.readdir(absolutePath, { withFileTypes: true });
 
   // フォルダのみ抽出し、自然順でソート
@@ -84,7 +84,7 @@ export async function findGlobalAdjacentFolder(
   if (currentPath === "") return null; // ルートまで到達したら終了
 
   const parentPath = currentPath.split("/").slice(0, -1).join("/") || "";
-  const parentTargetDir = getMediaPath(parentPath);
+  const parentTargetDir = getServerMediaPath(parentPath);
 
   if (!(await existsPath(parentTargetDir))) return null;
 

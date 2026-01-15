@@ -1,7 +1,7 @@
 "use server";
 
 import { renameSchema } from "@/lib/media/validation";
-import { getMediaPath } from "@/lib/path/helpers";
+import { getServerMediaPath } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
 import { prisma } from "@/lib/prisma";
 import { getErrorMessage } from "@/lib/utils/error";
@@ -28,8 +28,8 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         ? `/${newName.trim()}`
         : join(dirname(oldVirtualPath), newName.trim()).replace(/\\/g, "/");
 
-    const oldRealPath = getMediaPath(oldVirtualPath);
-    const newRealPath = getMediaPath(newVirtualPath);
+    const oldRealPath = getServerMediaPath(oldVirtualPath);
+    const newRealPath = getServerMediaPath(newVirtualPath);
 
     // 同名パスの存在チェック
     if (await existsPath(newRealPath)) {
@@ -143,8 +143,8 @@ export async function moveNodesAction(
           ? `/${fileName}`
           : `${targetDirPath}/${fileName}`.replace(/\/+/g, "/");
 
-      const oldRealPath = getMediaPath(oldVirtualPath);
-      const newRealPath = getMediaPath(newVirtualPath);
+      const oldRealPath = getServerMediaPath(oldVirtualPath);
+      const newRealPath = getServerMediaPath(newVirtualPath);
 
       // 同名パスの存在チェック
       if (await existsPath(newRealPath)) {
@@ -225,7 +225,7 @@ export async function moveNodesAction(
 
 export async function getSubDirectoriesAction(dirPath: string) {
   try {
-    const realPath = getMediaPath(dirPath);
+    const realPath = getServerMediaPath(dirPath);
     const entries = await readdir(realPath, { withFileTypes: true });
 
     return {
@@ -254,8 +254,8 @@ export async function deleteNodesAction(sourcePaths: string[]) {
         "/"
       );
 
-      const oldRealPath = getMediaPath(oldVirtualPath);
-      const newRealPath = getMediaPath(newVirtualPath);
+      const oldRealPath = getServerMediaPath(oldVirtualPath);
+      const newRealPath = getServerMediaPath(newVirtualPath);
 
       // 移動先の親ディレクトリを物理的に作成
       await mkdir(dirname(newRealPath), { recursive: true });

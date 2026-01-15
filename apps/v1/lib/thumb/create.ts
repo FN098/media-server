@@ -1,5 +1,8 @@
 import { MediaFsNode } from "@/lib/media/types";
-import { getMediaPath, getMediaThumbPath } from "@/lib/path/helpers";
+import {
+  getServerMediaPath,
+  getServerMediaThumbPath,
+} from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import { spawn } from "child_process";
 import { mkdir } from "fs/promises";
@@ -66,17 +69,17 @@ export async function createThumbsIfNotExists(
 
   // サムネイルのディレクトリを一括作成
   const thumbDirs = Array.from(
-    new Set(filtered.map((n) => dirname(getMediaThumbPath(n.path))))
+    new Set(filtered.map((n) => dirname(getServerMediaThumbPath(n.path))))
   );
   await Promise.all(thumbDirs.map((dir) => mkdir(dir, { recursive: true })));
 
   // サムネイルがまだ存在しない場合のみ生成
   await Promise.all(
     filtered.map(async (n) => {
-      const thumb = getMediaThumbPath(n.path);
+      const thumb = getServerMediaThumbPath(n.path);
       if (await existsPath(thumb)) return;
 
-      const media = getMediaPath(n.path);
+      const media = getServerMediaPath(n.path);
 
       if (n.type === "video") {
         await createVideoThumb(media, thumb);

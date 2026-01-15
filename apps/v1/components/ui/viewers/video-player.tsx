@@ -2,7 +2,7 @@ import { LoadingSpinner } from "@/components/ui/spinners/loading-spinner";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/lib/media/types";
 import { encodePath } from "@/lib/path/encoder";
-import { getAbsoluteMediaUrl, getThumbUrl } from "@/lib/path/helpers";
+import { getAbsoluteApiMediaUrl, getApiThumbUrl } from "@/lib/path/helpers";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
@@ -67,7 +67,7 @@ export const VideoPlayer = memo(function VideoPlayer({
         )}
       >
         <Image
-          src={getThumbUrl(encodePath(media.path))}
+          src={getApiThumbUrl(encodePath(media.path))}
           alt={media.name}
           fill
           className="object-contain select-none"
@@ -86,7 +86,7 @@ export const VideoPlayer = memo(function VideoPlayer({
         {active && (
           <MuxPlayer
             ref={playerRef}
-            src={getAbsoluteMediaUrl(encodePath(media.path))}
+            src={getAbsoluteApiMediaUrl(encodePath(media.path))}
             autoPlay
             streamType="on-demand"
             onLoadedData={handleLoadedData}
