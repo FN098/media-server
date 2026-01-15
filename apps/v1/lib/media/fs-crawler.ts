@@ -18,6 +18,22 @@ async function hasDirectMedia(dirPath: string): Promise<boolean> {
   );
 }
 
+// そのディレクトリ直下のサブディレクトリを名前順に取得
+async function getSubDirs(dirPath: string): Promise<string[]> {
+  const absolutePath = getServerMediaPath(dirPath);
+  if (!(await existsPath(absolutePath))) return [];
+  const dirents = await fs.readdir(absolutePath, { withFileTypes: true });
+  return sortNames(
+    dirents
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter(
+        (name) =>
+          !isBlockedVirtualPath(path.join(dirPath, name).replace(/\\/g, "/"))
+      )
+  );
+}
+
 // 隣の有効なフォルダを探し、さらにその中を深く探索して「最初のメディアがあるフォルダ」を特定する
 async function findDeepestMediaFolder(
   dirPath: string,
@@ -26,28 +42,14 @@ async function findDeepestMediaFolder(
   // ブラックリストは探索しない
   if (isBlockedVirtualPath(dirPath)) return null;
 
-  // 1. まずそのディレクトリ直下にメディアがあるか？
-  if (await hasDirectMedia(dirPath)) {
-    return dirPath;
+  // 1. Next(first)なら、まず自分自身の直下をチェック
+  if (priority === "first") {
+    if (await hasDirectMedia(dirPath)) return dirPath;
   }
 
-  // 2. 直下にないなら、子フォルダを探索
-  const absolutePath = getServerMediaPath(dirPath);
-  const dirents = await fs.readdir(absolutePath, { withFileTypes: true });
-
-  // フォルダのみ抽出し、自然順でソート
-  const subDirs = sortNames(
-    dirents
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
-      .filter((name) => {
-        const subPath = path.join(dirPath, name).replace(/\\/g, "/");
-        return !isBlockedVirtualPath(subPath);
-      })
-  );
-
-  // 前に戻る時は「最後の子」から、次に進む時は「最初の子」から探す
-  const targetDirs = priority === "last" ? subDirs.reverse() : subDirs;
+  // 2. 子フォルダを探索
+  const subDirs = await getSubDirs(dirPath);
+  const targetDirs = priority === "last" ? [...subDirs].reverse() : subDirs;
 
   for (const name of targetDirs) {
     const subPath = path.join(dirPath, name).replace(/\\/g, "/");
@@ -55,34 +57,76 @@ async function findDeepestMediaFolder(
     if (found) return found;
   }
 
-  return null;
-}
-
-// メインの探索ロジック
-async function findAdjacentMediaFolder(
-  parentPath: string,
-  currentIndex: number,
-  siblingDirNames: string[],
-  direction: "prev" | "next"
-): Promise<string | null> {
-  const step = direction === "prev" ? -1 : 1;
-  let i = currentIndex + step;
-
-  while (i >= 0 && i < siblingDirNames.length) {
-    const targetDirName = siblingDirNames[i];
-    const targetPath = path.join(parentPath, targetDirName).replace(/\\/g, "/");
-
-    // そのフォルダ配下で、最初に（または最後に）メディアが見つかる具体的なパスを探す
-    const foundPath = await findDeepestMediaFolder(
-      targetPath,
-      direction === "prev" ? "last" : "first"
-    );
-
-    if (foundPath) return foundPath;
-    i += step;
+  // 3. Prev(last)なら、子を全部見た後に自分自身をチェック
+  if (priority === "last") {
+    if (await hasDirectMedia(dirPath)) return dirPath;
   }
 
   return null;
+}
+
+export async function findGlobalNextFolder(
+  currentPath: string
+): Promise<string | null> {
+  // 1. まず、自分の「子」の中にメディアがないか探す
+  const subDirs = await getSubDirs(currentPath);
+  for (const name of subDirs) {
+    const subPath = path.join(currentPath, name).replace(/\\/g, "/");
+    const found = await findDeepestMediaFolder(subPath, "first");
+    if (found) return found;
+  }
+
+  // 2. 子になければ、「親の階層」に上がって、自分の「次の兄弟」を探す
+  return findNextStepUpward(currentPath);
+}
+
+async function findNextStepUpward(currentPath: string): Promise<string | null> {
+  const parentPath =
+    currentPath.split("/").slice(0, -1).join("/") ||
+    (currentPath === "" ? null : "");
+  if (parentPath === null) return null;
+
+  const siblings = await getSubDirs(parentPath);
+  const currentDirName = currentPath.split("/").pop();
+  const currentIndex = siblings.indexOf(currentDirName!);
+
+  // 自分の次の兄弟から順に探索
+  for (let i = currentIndex + 1; i < siblings.length; i++) {
+    const targetPath = path.join(parentPath, siblings[i]).replace(/\\/g, "/");
+    const found = await findDeepestMediaFolder(targetPath, "first");
+    if (found) return found;
+  }
+
+  // 自分の兄弟にもいなければ、さらに親の階層へ
+  return findNextStepUpward(parentPath);
+}
+
+export async function findGlobalPrevFolder(
+  currentPath: string
+): Promise<string | null> {
+  const parentPath =
+    currentPath.split("/").slice(0, -1).join("/") ||
+    (currentPath === "" ? null : "");
+  if (parentPath === null) return null;
+
+  const siblings = await getSubDirs(parentPath);
+  const currentDirName = currentPath.split("/").pop();
+  const currentIndex = siblings.indexOf(currentDirName!);
+
+  // 1. 自分の「前の兄弟」がいれば、その中の「最後(last)」のメディアを探す
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const targetPath = path.join(parentPath, siblings[i]).replace(/\\/g, "/");
+    const found = await findDeepestMediaFolder(targetPath, "last");
+    if (found) return found;
+  }
+
+  // 2. 前の兄弟がいなければ、「親自身」がメディアを持っているか確認
+  if (parentPath !== "" && (await hasDirectMedia(parentPath))) {
+    return parentPath;
+  }
+
+  // 3. 親もダメなら、さらに親の階層へ
+  return findGlobalPrevFolder(parentPath);
 }
 
 // 指定されたフォルダの「次」または「前」にある、メディアを持つフォルダを
@@ -91,44 +135,6 @@ export async function findGlobalAdjacentFolder(
   currentPath: string,
   direction: "prev" | "next"
 ): Promise<string | null> {
-  if (currentPath === "") return null; // ルートまで到達したら終了
-
-  // ブラックリストに居たら即終了
-  if (isBlockedVirtualPath(currentPath)) return null;
-
-  const parentPath = currentPath.split("/").slice(0, -1).join("/") || "";
-  const parentTargetDir = getServerMediaPath(parentPath);
-
-  if (!(await existsPath(parentTargetDir))) return null;
-
-  const parentDirents = await fs.readdir(parentTargetDir, {
-    withFileTypes: true,
-  });
-
-  // 兄弟フォルダを自然順でソート
-  const siblingDirs = sortNames(
-    parentDirents
-      .filter((d) => d.isDirectory())
-      .map((d) => d.name)
-      .filter((name) => {
-        const siblingPath = path.join(parentPath, name).replace(/\\/g, "/");
-        return !isBlockedVirtualPath(siblingPath);
-      })
-  );
-
-  const currentDirName = currentPath.split("/").pop();
-  const currentIndex = siblingDirs.indexOf(currentDirName!);
-
-  // 1. まず同じ階層の兄弟から探す
-  const foundInSiblings = await findAdjacentMediaFolder(
-    parentPath,
-    currentIndex,
-    siblingDirs,
-    direction
-  );
-
-  if (foundInSiblings) return foundInSiblings;
-
-  // 2. 兄弟に見つからなければ、さらに上の階層（親の隣）を探しに行く
-  return findGlobalAdjacentFolder(parentPath, direction);
+  if (direction === "next") return findGlobalNextFolder(currentPath);
+  return findGlobalPrevFolder(currentPath);
 }
