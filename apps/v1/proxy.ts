@@ -1,5 +1,5 @@
 import { PASS, USER } from "@/basic-auth";
-import { blackListPrefixes } from "@/lib/path/blacklist";
+import { isBlockedClientPath } from "@/lib/path/blacklist";
 import { NextRequest, NextResponse } from "next/server";
 
 // TODO: BASIC認証以外を実装
@@ -43,9 +43,7 @@ export function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   // ブラックリスト判定
-  const isBlocked = blackListPrefixes.some(
-    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
-  );
+  const isBlocked = isBlockedClientPath(pathname);
 
   if (isBlocked) {
     // 404 に見せる
