@@ -1,5 +1,6 @@
 import { detectMediaType, isMedia } from "@/lib/media/media-types";
 import { sortNames } from "@/lib/media/sort";
+import { isBlockedVirtualPath } from "@/lib/path/blacklist";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
@@ -22,6 +23,9 @@ async function findDeepestMediaFolder(
   dirPath: string,
   priority: "first" | "last"
 ): Promise<string | null> {
+  // ブラックリストは探索しない
+  if (isBlockedVirtualPath(dirPath)) return null;
+
   // 1. まずそのディレクトリ直下にメディアがあるか？
   if (await hasDirectMedia(dirPath)) {
     return dirPath;
@@ -33,7 +37,13 @@ async function findDeepestMediaFolder(
 
   // フォルダのみ抽出し、自然順でソート
   const subDirs = sortNames(
-    dirents.filter((e) => e.isDirectory()).map((e) => e.name)
+    dirents
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter((name) => {
+        const subPath = path.join(dirPath, name).replace(/\\/g, "/");
+        return !isBlockedVirtualPath(subPath);
+      })
   );
 
   // 前に戻る時は「最後の子」から、次に進む時は「最初の子」から探す
@@ -83,6 +93,9 @@ export async function findGlobalAdjacentFolder(
 ): Promise<string | null> {
   if (currentPath === "") return null; // ルートまで到達したら終了
 
+  // ブラックリストに居たら即終了
+  if (isBlockedVirtualPath(currentPath)) return null;
+
   const parentPath = currentPath.split("/").slice(0, -1).join("/") || "";
   const parentTargetDir = getServerMediaPath(parentPath);
 
@@ -94,7 +107,13 @@ export async function findGlobalAdjacentFolder(
 
   // 兄弟フォルダを自然順でソート
   const siblingDirs = sortNames(
-    parentDirents.filter((d) => d.isDirectory()).map((d) => d.name)
+    parentDirents
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name)
+      .filter((name) => {
+        const siblingPath = path.join(parentPath, name).replace(/\\/g, "/");
+        return !isBlockedVirtualPath(siblingPath);
+      })
   );
 
   const currentDirName = currentPath.split("/").pop();

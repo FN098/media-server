@@ -2,27 +2,25 @@ import { getClientExplorerPath, getServerMediaPath } from "@/lib/path/helpers";
 
 export const blackListInExplorer = [".thumb", ".trash"];
 
-export const blackListVirtualPaths = [...blackListInExplorer];
-
-export const blackListServerPaths = [
-  ...blackListInExplorer.map((p) => getServerMediaPath(p)),
-];
-
-export const blackListClientPaths = [
-  ...blackListInExplorer.map((p) => getClientExplorerPath(p)),
-];
-
 const isBlockedPath = (pathname: string, blacklist: string[]) => {
   return blacklist.some(
     (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
   );
 };
 
-export const isBlockedVirtualPath = (pathname: string) =>
-  isBlockedPath(pathname, blackListVirtualPaths);
+export const isBlockedVirtualPath = (pathname: string) => {
+  const blacklist = [...blackListInExplorer];
+  return isBlockedPath(pathname, blacklist);
+};
 
-export const isBlockedServerPath = (pathname: string) =>
-  isBlockedPath(pathname, blackListServerPaths);
+export const isBlockedServerPath = (pathname: string) => {
+  const blacklist = [...blackListInExplorer.map((p) => getServerMediaPath(p))];
+  return isBlockedPath(pathname, blacklist);
+};
 
-export const isBlockedClientPath = (pathname: string) =>
-  isBlockedPath(pathname, blackListClientPaths);
+export const isBlockedClientPath = (pathname: string) => {
+  const blacklist = [
+    ...blackListInExplorer.map((p) => getClientExplorerPath(p)),
+  ];
+  return isBlockedPath(pathname, blacklist);
+};

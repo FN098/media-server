@@ -1,5 +1,6 @@
-import { findGlobalAdjacentFolder } from "@/lib/media/fs-route";
+import { findGlobalAdjacentFolder } from "@/lib/media/fs-crawler";
 import { detectMediaType } from "@/lib/media/media-types";
+import { isBlockedVirtualPath } from "@/lib/path/blacklist";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
@@ -10,8 +11,13 @@ export async function getMediaFsNodes(dirPath: string): Promise<MediaFsNode[]> {
   const targetDir = getServerMediaPath(dirPath);
   const dirents = await fs.readdir(targetDir, { withFileTypes: true });
 
+  const filtered = dirents.filter((item) => {
+    const relativePath = path.join(dirPath, item.name).replace(/\\/g, "/");
+    return !isBlockedVirtualPath(relativePath);
+  });
+
   const nodes: MediaFsNode[] = await Promise.all(
-    dirents.map(async (item) => {
+    filtered.map(async (item) => {
       const relativePath = path.join(dirPath, item.name).replace(/\\/g, "/");
       const absolutePath = path.join(targetDir, item.name);
       const stat = await fs.stat(absolutePath);
