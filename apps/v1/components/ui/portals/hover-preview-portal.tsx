@@ -38,6 +38,8 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
   const [hasEverHovered, setHasEverHovered] = useState(false); // 一度でもホバーしたか
   const [imageSize, setImageSize] = useState<Size | null>(null);
 
+  const tagAreaHeight = node.tags && node.tags.length > 0 ? 44 : 0;
+
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!enabled) return;
@@ -47,7 +49,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
         : 16 / 9;
 
       const width = Math.min(maxWidth, maxWidth * aspectRatio);
-      const height = width / aspectRatio;
+      const height = width / aspectRatio + tagAreaHeight;
 
       let x = e.clientX + 20;
       let y = e.clientY + 20;
@@ -61,7 +63,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
 
       setCoords({ x, y, width, height });
     },
-    [enabled, imageSize, maxWidth]
+    [enabled, imageSize, maxWidth, tagAreaHeight]
   );
 
   const handleMouseEnter = useCallback(() => {
@@ -119,18 +121,42 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
               height: `${coords.height}px`,
             }}
           >
-            <motion.div
-              className="w-full h-full relative"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.05, duration: 0.2 }}
-            >
+            <div className="relative flex-1 bg-black overflow-hidden">
               <MediaThumb
                 node={node}
                 className="w-full h-full object-contain bg-black"
                 onLoad={handleImageLoad}
               />
-            </motion.div>
+            </div>
+
+            {node.tags && node.tags.length > 0 && (
+              <div className="relative border-t border-primary/10 bg-background/95 backdrop-blur">
+                {/* 右側のフェードエフェクト */}
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+
+                <div
+                  className="flex flex-nowrap gap-1.5 p-2 overflow-x-auto no-scrollbar"
+                  style={{
+                    // スクロールバーを隠す
+                    msOverflowStyle: "none",
+                    scrollbarWidth: "none",
+                  }}
+                >
+                  {node.tags.map((tag, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-0.5 text-[10px] font-medium bg-secondary text-secondary-foreground rounded-md border border-primary/5 whitespace-nowrap flex-shrink-0"
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
+                  {/* 最後のタグがグラデーションに被りすぎないための余白 */}
+                  <div className="w-4 flex-shrink-0" />
+                </div>
+              </div>
+            )}
+
+            <div className="w-4 flex-shrink-0" />
           </motion.div>
         )}
       </AnimatePresence>
