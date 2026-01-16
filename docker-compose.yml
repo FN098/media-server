@@ -83,7 +83,9 @@ services:
       - db
 
   caddy:
-    image: caddy:2
+    build:
+      context: .
+      dockerfile: ./docker/caddy/Dockerfile
     container_name: media-server-caddy
     ports:
       - "80:80"
