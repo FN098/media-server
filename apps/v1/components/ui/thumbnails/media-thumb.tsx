@@ -150,7 +150,7 @@ const mediaThumbIcons: Record<MediaFsNodeType, ReactNode> = {
     <img
       width="50"
       height="50"
-      src="https://img.icons8.com/ios/50/file--v1.png"
+      src="https://img.icons8.com/?size=100&id=12053&format=png&color=000000"
       alt="file--v1"
     />
   ),
