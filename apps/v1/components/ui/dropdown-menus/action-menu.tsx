@@ -12,6 +12,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { FolderInput, MoreVertical, Pencil, Tag, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 interface ActionMenuProps {
   node: MediaNode;
@@ -32,16 +33,20 @@ export function ActionMenu({
   onDelete,
   onEditTags,
 }: ActionMenuProps) {
+  const [open, setOpen] = useState(false);
+
   const mounted = useMounted();
   if (!mounted) return null;
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
         <Button
           variant="ghost"
           size="icon"
           className={cn("h-8 w-8 rounded-full", className)}
+          onPointerDown={(e) => e.preventDefault()}
+          onClick={() => setOpen((prev) => !prev)}
         >
           <MoreVertical className="h-4 w-4" />
         </Button>
