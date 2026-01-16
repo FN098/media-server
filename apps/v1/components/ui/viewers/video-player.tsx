@@ -54,14 +54,14 @@ export const VideoPlayer = memo(function VideoPlayer({
   // ショートカット
   useShortcutKeys([
     {
-      key: "Ctrl+ArrowRight",
+      key: "ArrowUp",
       callback: (e: KeyboardEvent) => {
         if (e.repeat) return;
         seek(10);
       },
     },
     {
-      key: "Ctrl+ArrowLeft",
+      key: "ArrowDown",
       callback: (e: KeyboardEvent) => {
         if (e.repeat) return;
         seek(-10);
