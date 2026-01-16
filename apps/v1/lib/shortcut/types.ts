@@ -19,13 +19,13 @@ export type Modifiers = {
 
 export type KeyAction = {
   key: Shortcut | Shortcut[];
-  callback: () => void;
+  callback: (e: KeyboardEvent) => void;
   condition?: boolean | (() => boolean);
 };
 
 export type ParsedKeyAction = {
   key: string;
   modifiers: Modifiers;
-  callback: () => void;
+  callback: (e: KeyboardEvent) => void;
   condition?: boolean | (() => boolean);
 };

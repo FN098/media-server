@@ -3,7 +3,7 @@
 import { KeyAction, ParsedKeyAction } from "@/lib/shortcut/types";
 import { matchModifiers, parseShortcut } from "@/lib/shortcut/utils";
 import { castArray } from "@/lib/utils/cast-array";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export function useShortcutKeys(actions: KeyAction[]) {
   const stack = useRef<ParsedKeyAction[]>([]);
@@ -71,7 +71,7 @@ export function useShortcutKeys(actions: KeyAction[]) {
         if (!matchModifiers(e, modifiers)) continue;
 
         e.preventDefault();
-        callback();
+        callback(e);
         break;
       }
     };
@@ -85,30 +85,7 @@ export function useShortcutKeys(actions: KeyAction[]) {
     return register(actions);
   }, [actions, register]);
 
-  return useMemo(
-    () => ({
-      /**
-       * @example
-       * ```tsx
-       * const { register } = useShortcutContext();
-       *
-       * useEffect(() => {
-       *   return register([
-       *     {
-       *       key: ["i", "Ctrl+i"],
-       *       callback: openInput,
-       *     },
-       *     {
-       *       key: "Escape",
-       *       callback: close,
-       *       condition: isOpen,
-       *     },
-       *   ]);
-       * }, [register]);
-       * ```
-       */
-      register,
-    }),
-    [register]
-  );
+  return {
+    register,
+  };
 }
