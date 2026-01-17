@@ -52,15 +52,18 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     order: sortOrder = "asc",
   } = await props.params;
 
-  const virtualDirPath = pathParts.map(decodeURIComponent).join("/");
+  const currentVirtualPath = pathParts.map(decodeURIComponent).join("/");
 
-  const context: MediaFsContext = {
+  const explorerContext: MediaFsContext = {
     resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),
     filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
   };
 
   // 取得
-  const fsListing = await getMediaFsListing(virtualDirPath, context);
+  const fsListing = await getMediaFsListing(
+    currentVirtualPath,
+    explorerContext
+  );
   if (!fsListing) notFound();
 
   const allNodes = fsListing.nodes;
@@ -75,9 +78,9 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   // DB クエリ
   // TODO: USER をユーザー認証機能実装後に差し替える
-  await syncMediaDir(virtualDirPath, allNodes);
+  await syncMediaDir(currentVirtualPath, allNodes);
   const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
-    getDbMedia(virtualDirPath, USER),
+    getDbMedia(currentVirtualPath, USER),
     getDbVisitedInfoDeeply(dirPaths, USER),
     getDbFavoriteCount(dirPaths, USER),
   ]);
