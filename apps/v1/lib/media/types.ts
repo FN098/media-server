@@ -71,3 +71,11 @@ export type MediaPathToIndexMap = Map<PathType, number>;
 export type MediaPathToNodeMap = Map<PathType, MediaNode>;
 
 export type MediaNodeFilter = (node: MediaNode) => boolean;
+
+export interface MediaFsContext {
+  /** 物理ルートパスの解決関数 */
+  resolveRealPath: (virtualPath: string) => string;
+
+  /** 仮想パスのフィルタリング関数（ブラックリストなど） */
+  filterVirtualPath?: (virtualPath: string) => boolean;
+}

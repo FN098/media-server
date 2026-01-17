@@ -1,33 +1,41 @@
 import { findGlobalAdjacentFolder } from "@/lib/media/fs-crawler";
 import { detectMediaType } from "@/lib/media/media-types";
-import { isBlockedVirtualPath } from "@/lib/path/blacklist";
-import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
-import { MediaFsListing, MediaFsNode } from "./types";
+import { MediaFsContext, MediaFsListing, MediaFsNode } from "./types";
 
-export async function getMediaFsNodes(dirPath: string): Promise<MediaFsNode[]> {
-  const targetDir = getServerMediaPath(dirPath);
-  const dirents = await fs.readdir(targetDir, { withFileTypes: true });
+export async function getMediaFsNodes(
+  virtualDirPath: string,
+  context: MediaFsContext
+): Promise<MediaFsNode[]> {
+  const realDirPath = context.resolveRealPath(virtualDirPath);
+  const dirents = await fs.readdir(realDirPath, { withFileTypes: true });
 
   const filtered = dirents.filter((item) => {
-    const relativePath = path.join(dirPath, item.name).replace(/\\/g, "/");
-    return !isBlockedVirtualPath(relativePath);
+    const virtualPath = path
+      .join(virtualDirPath, item.name)
+      .replace(/\\/g, "/");
+    return context.filterVirtualPath
+      ? context.filterVirtualPath(virtualPath)
+      : true;
   });
 
   const nodes: MediaFsNode[] = await Promise.all(
     filtered.map(async (item) => {
-      const relativePath = path.join(dirPath, item.name).replace(/\\/g, "/");
-      const absolutePath = path.join(targetDir, item.name);
-      const stat = await fs.stat(absolutePath);
+      const virtualPath = path
+        .join(virtualDirPath, item.name)
+        .replace(/\\/g, "/");
+      const realPath = path.join(realDirPath, item.name);
+      const stat = await fs.stat(realPath);
+      const isDirectory = stat.isDirectory();
 
       return {
         name: item.name,
-        path: relativePath,
-        isDirectory: item.isDirectory(),
-        type: item.isDirectory() ? "directory" : detectMediaType(item.name),
-        size: item.isDirectory() ? undefined : stat.size,
+        path: virtualPath,
+        isDirectory: isDirectory,
+        type: isDirectory ? "directory" : detectMediaType(item.name),
+        size: isDirectory ? undefined : stat.size,
         mtime: stat.mtime,
       };
     })
@@ -36,15 +44,19 @@ export async function getMediaFsNodes(dirPath: string): Promise<MediaFsNode[]> {
   return nodes;
 }
 
-export async function getMediaFsNode(filePath: string): Promise<MediaFsNode> {
-  const absolutePath = getServerMediaPath(filePath);
-  const stat = await fs.stat(absolutePath);
+export async function getMediaFsNode(
+  virtualFilePath: string,
+  context: MediaFsContext
+): Promise<MediaFsNode> {
+  const virtualPath = virtualFilePath.replace(/\\/g, "/");
+  const realPath = context.resolveRealPath(virtualPath);
+  const stat = await fs.stat(realPath);
   const isDirectory = stat.isDirectory();
-  const fileName = path.basename(filePath);
+  const fileName = path.basename(virtualPath);
 
   return {
     name: fileName,
-    path: filePath.replace(/\\/g, "/"),
+    path: virtualPath,
     isDirectory: isDirectory,
     type: isDirectory ? "directory" : detectMediaType(fileName),
     size: isDirectory ? undefined : stat.size,
@@ -53,28 +65,31 @@ export async function getMediaFsNode(filePath: string): Promise<MediaFsNode> {
 }
 
 export async function getMediaFsListing(
-  dirPath: string
+  virtualDirPath: string,
+  context: MediaFsContext
 ): Promise<MediaFsListing | null> {
-  const targetDir = getServerMediaPath(dirPath);
-  if (!(await existsPath(targetDir))) return null;
+  const realDirPath = context.resolveRealPath(virtualDirPath);
+  if (!(await existsPath(realDirPath))) return null;
 
   // --- 現在のディレクトリのノード取得 ---
-  const nodes = await getMediaFsNodes(dirPath);
+  const nodes = await getMediaFsNodes(virtualDirPath, context);
 
   // --- 前後のディレクトリパスを取得 ---
   let prev: string | null = null;
   let next: string | null = null;
 
-  if (dirPath !== "") {
-    prev = await findGlobalAdjacentFolder(dirPath, "prev");
-    next = await findGlobalAdjacentFolder(dirPath, "next");
+  if (virtualDirPath !== "") {
+    prev = await findGlobalAdjacentFolder(virtualDirPath, "prev", context);
+    next = await findGlobalAdjacentFolder(virtualDirPath, "next", context);
   }
 
   const parent =
-    dirPath === "" ? null : dirPath.split("/").slice(0, -1).join("/") || "";
+    virtualDirPath === ""
+      ? null
+      : virtualDirPath.split("/").slice(0, -1).join("/") || "";
 
   const listing: MediaFsListing = {
-    path: dirPath,
+    path: virtualDirPath,
     nodes,
     parent,
     prev,

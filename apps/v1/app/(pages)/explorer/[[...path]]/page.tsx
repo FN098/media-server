@@ -7,7 +7,9 @@ import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaFsContext, MediaFsNode } from "@/lib/media/types";
+import { isBlockedVirtualPath } from "@/lib/path/blacklist";
+import { getServerMediaPath } from "@/lib/path/helpers";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
@@ -50,10 +52,15 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     order: sortOrder = "asc",
   } = await props.params;
 
-  const currentDirPath = pathParts.map(decodeURIComponent).join("/");
+  const virtualDirPath = pathParts.map(decodeURIComponent).join("/");
+
+  const context: MediaFsContext = {
+    resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),
+    filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
+  };
 
   // 取得
-  const fsListing = await getMediaFsListing(currentDirPath);
+  const fsListing = await getMediaFsListing(virtualDirPath, context);
   if (!fsListing) notFound();
 
   const allNodes = fsListing.nodes;
@@ -67,10 +74,10 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
 
   // DB クエリ
-  // TODO: ユーザー認証機能実装後に差し替える
-  await syncMediaDir(currentDirPath, allNodes); // TODO: クローラーワーカージョブに移動
+  // TODO: USER をユーザー認証機能実装後に差し替える
+  await syncMediaDir(virtualDirPath, allNodes);
   const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
-    getDbMedia(currentDirPath, USER),
+    getDbMedia(virtualDirPath, USER),
     getDbVisitedInfoDeeply(dirPaths, USER),
     getDbFavoriteCount(dirPaths, USER),
   ]);
