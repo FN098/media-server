@@ -19,7 +19,6 @@ import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 
 interface PagingListViewProps {
   allNodes: MediaNode[];
@@ -27,7 +26,8 @@ interface PagingListViewProps {
   initialScrollPath?: string | null;
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string) => void;
-  onSelect?: () => void;
+  onSelectChange?: () => void;
+  onFavorite?: (node: MediaNode) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -47,7 +47,8 @@ export function PagingListView({
   initialScrollPath,
   onOpen,
   onOpenFolder,
-  onSelect,
+  onSelectChange,
+  onFavorite,
   onRename,
   onMove,
   onDelete,
@@ -129,7 +130,8 @@ export function PagingListView({
             isMobile={isMobile}
             onOpen={onOpen}
             onOpenFolder={onOpenFolder}
-            onSelect={onSelect}
+            onSelectChange={onSelectChange}
+            onFavorite={onFavorite}
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
@@ -178,7 +180,8 @@ interface DataRowProps {
   isMobile: boolean;
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string) => void;
-  onSelect?: () => void;
+  onSelectChange?: () => void;
+  onFavorite?: (node: MediaNode) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -194,7 +197,8 @@ function DataRow({
   isMobile,
   onOpen,
   onOpenFolder,
-  onSelect,
+  onSelectChange,
+  onFavorite,
   onRename,
   onMove,
   onDelete,
@@ -209,24 +213,12 @@ function DataRow({
   const isFavorite = favCtx.isFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
 
-  const toggleFavorite = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      try {
-        void favCtx.toggleFavorite(node.path);
-      } catch {
-        toast.error("お気に入りの更新に失敗しました");
-      }
-    },
-    [favCtx, node.path]
-  );
-
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
     selectCtx.setLastSelectedPath(node.path);
-    onSelect?.();
-  }, [selectCtx, node.path, onSelect]);
+    onSelectChange?.();
+  }, [selectCtx, node.path, onSelectChange]);
 
   const { start, stop, isLongPressed } = useLongPress(handleLongPress, 600);
 
@@ -245,7 +237,7 @@ function DataRow({
         const paths = allNodes.slice(startIdx, endIdx + 1).map((n) => n.path);
         if (e.ctrlKey || e.metaKey) selectCtx.deletePaths(paths);
         else selectCtx.addPaths(paths);
-        onSelect?.();
+        onSelectChange?.();
         return;
       }
     }
@@ -258,7 +250,7 @@ function DataRow({
       selectCtx.replaceSelection(node.path);
     }
     selectCtx.setLastSelectedPath(node.path);
-    onSelect?.();
+    onSelectChange?.();
   };
 
   const handleTap = (e: React.MouseEvent) => {
@@ -275,7 +267,7 @@ function DataRow({
           selectCtx.exitSelectionMode();
         }
       }
-      onSelect?.();
+      onSelectChange?.();
     } else {
       onOpen?.(node);
     }
@@ -308,7 +300,7 @@ function DataRow({
             checked={isSelected}
             onCheckedChange={() => {
               selectCtx.togglePath(node.path);
-              onSelect?.();
+              onSelectChange?.();
             }}
           />
         </div>
@@ -356,13 +348,16 @@ function DataRow({
         >
           {node.isDirectory ? (
             <FavoriteCountBadge count={node.favoriteCount ?? 0} />
-          ) : (
+          ) : onFavorite ? (
             <FavoriteButton
               variant="list"
               active={isFavorite}
-              onClick={toggleFavorite}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFavorite(node);
+              }}
             />
-          )}
+          ) : null}
         </div>
 
         <div className="flex justify-center">

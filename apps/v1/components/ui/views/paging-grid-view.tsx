@@ -18,7 +18,6 @@ import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 
 interface PagingGridViewProps {
   allNodes: MediaNode[];
@@ -26,7 +25,8 @@ interface PagingGridViewProps {
   initialScrollPath?: string | null;
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
-  onSelect?: () => void;
+  onSelectChange?: () => void;
+  onFavorite?: (node: MediaNode) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -43,7 +43,8 @@ export function PagingGridView({
   initialScrollPath,
   onOpen,
   onOpenFolder,
-  onSelect,
+  onSelectChange,
+  onFavorite,
   onRename,
   onMove,
   onDelete,
@@ -130,7 +131,8 @@ export function PagingGridView({
             isMobile={isMobile}
             onOpen={onOpen}
             onOpenFolder={onOpenFolder}
-            onSelect={onSelect}
+            onSelectChange={onSelectChange}
+            onFavorite={onFavorite}
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
@@ -158,7 +160,8 @@ interface CellProps {
   isMobile: boolean;
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
-  onSelect?: () => void;
+  onSelectChange?: () => void;
+  onFavorite?: (node: MediaNode) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -174,7 +177,8 @@ function Cell({
   isMobile,
   onOpen,
   onOpenFolder,
-  onSelect,
+  onSelectChange,
+  onFavorite,
   onRename,
   onMove,
   onDelete,
@@ -189,24 +193,12 @@ function Cell({
   const isFavorite = favCtx.isFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
 
-  const handleToggleFavorite = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      try {
-        void favCtx.toggleFavorite(node.path);
-      } catch {
-        toast.error("お気に入りの更新に失敗しました");
-      }
-    },
-    [favCtx, node.path]
-  );
-
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
     selectCtx.setLastSelectedPath(node.path);
-    onSelect?.();
-  }, [selectCtx, node.path, onSelect]);
+    onSelectChange?.();
+  }, [selectCtx, node.path, onSelectChange]);
 
   const { start, stop, isLongPressed } = useLongPress(handleLongPress, 600);
 
@@ -233,7 +225,7 @@ function Cell({
         } else {
           selectCtx.addPaths(paths);
         }
-        onSelect?.();
+        onSelectChange?.();
         return;
       }
     }
@@ -246,7 +238,7 @@ function Cell({
       selectCtx.replaceSelection(node.path);
     }
     selectCtx.setLastSelectedPath(node.path);
-    onSelect?.();
+    onSelectChange?.();
   };
 
   const handleTap = (e: React.MouseEvent) => {
@@ -265,7 +257,7 @@ function Cell({
           selectCtx.exitSelectionMode();
         }
       }
-      onSelect?.();
+      onSelectChange?.();
       return;
     }
     onOpen?.(node);
@@ -325,11 +317,14 @@ function Cell({
 
           {/* Actions */}
           <div className="absolute top-2 right-2 flex flex-col gap-2">
-            {!selectCtx.isSelectionMode && isMediaNode && (
+            {!selectCtx.isSelectionMode && isMediaNode && onFavorite && (
               <FavoriteButton
                 variant="grid"
                 active={isFavorite}
-                onClick={handleToggleFavorite}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFavorite(node);
+                }}
                 className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white"
               />
             )}

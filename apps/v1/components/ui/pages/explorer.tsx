@@ -38,6 +38,7 @@ import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
+import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -236,6 +237,18 @@ export function Explorer() {
     toast.warning("このファイル形式は対応していません");
   };
 
+  // ===== お気に入り =====
+
+  const favCtx = useFavoritesContext();
+
+  const handleToggleFavorite = (node: MediaNode) => {
+    try {
+      void favCtx.toggleFavorite(node.path);
+    } catch {
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  };
+
   // ===== 選択機能 =====
 
   const {
@@ -425,6 +438,7 @@ export function Explorer() {
             allNodes={filteredNodes}
             initialScrollPath={lastPath}
             onOpen={handleOpen}
+            onFavorite={handleToggleFavorite}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
             onDelete={handleOpenDeleteSingle}
@@ -447,6 +461,7 @@ export function Explorer() {
             allNodes={filteredNodes}
             initialScrollPath={lastPath}
             onOpen={handleOpen}
+            onFavorite={handleToggleFavorite}
             onRename={handleRenameSingle}
             onMove={handleOpenMoveSingle}
             onDelete={handleOpenDeleteSingle}
