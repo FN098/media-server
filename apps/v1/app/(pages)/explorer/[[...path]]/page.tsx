@@ -7,9 +7,7 @@ import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
-import { MediaFsContext, MediaFsNode } from "@/lib/media/types";
-import { isBlockedVirtualPath } from "@/lib/path/blacklist";
-import { getServerMediaPath } from "@/lib/path/helpers";
+import { MediaFsNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
@@ -54,16 +52,8 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   const currentVirtualPath = pathParts.map(decodeURIComponent).join("/");
 
-  const explorerContext: MediaFsContext = {
-    resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),
-    filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
-  };
-
   // 取得
-  const fsListing = await getMediaFsListing(
-    currentVirtualPath,
-    explorerContext
-  );
+  const fsListing = await getMediaFsListing(currentVirtualPath);
   if (!fsListing) notFound();
 
   const allNodes = fsListing.nodes;

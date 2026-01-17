@@ -7,7 +7,7 @@ import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
-import { MediaFsContext, MediaFsNode } from "@/lib/media/types";
+import { MediaFsNode } from "@/lib/media/types";
 import { isBlockedVirtualPath } from "@/lib/path/blacklist";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { FavoritesProvider } from "@/providers/favorites-provider";
@@ -54,16 +54,11 @@ export default async function TrashPage(props: TrashPageProps) {
 
   const currentVirtualDirPath = pathParts.map(decodeURIComponent).join("/");
 
-  const trashContext: MediaFsContext = {
+  // 取得
+  const fsListing = await getMediaFsListing(currentVirtualDirPath, {
     resolveRealPath: (virtualPath) => getServerMediaTrashPath(virtualPath),
     filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
-  };
-
-  // 取得
-  const fsListing = await getMediaFsListing(
-    currentVirtualDirPath,
-    trashContext
-  );
+  });
   if (!fsListing) notFound();
 
   const allNodes = fsListing.nodes;

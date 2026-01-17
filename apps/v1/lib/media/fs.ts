@@ -1,13 +1,20 @@
 import { findGlobalAdjacentFolder } from "@/lib/media/fs-crawler";
 import { detectMediaType } from "@/lib/media/media-types";
+import { isBlockedVirtualPath } from "@/lib/path/blacklist";
+import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
 import { MediaFsContext, MediaFsListing, MediaFsNode } from "./types";
 
+const defaultContext: MediaFsContext = {
+  resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),
+  filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
+};
+
 export async function getMediaFsNodes(
   virtualDirPath: string,
-  context: MediaFsContext
+  context: MediaFsContext = defaultContext
 ): Promise<MediaFsNode[]> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
   const dirents = await fs.readdir(realDirPath, { withFileTypes: true });
@@ -46,7 +53,7 @@ export async function getMediaFsNodes(
 
 export async function getMediaFsNode(
   virtualFilePath: string,
-  context: MediaFsContext
+  context: MediaFsContext = defaultContext
 ): Promise<MediaFsNode> {
   const virtualPath = virtualFilePath.replace(/\\/g, "/");
   const realPath = context.resolveRealPath(virtualPath);
@@ -66,7 +73,7 @@ export async function getMediaFsNode(
 
 export async function getMediaFsListing(
   virtualDirPath: string,
-  context: MediaFsContext
+  context: MediaFsContext = defaultContext
 ): Promise<MediaFsListing | null> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
   if (!(await existsPath(realDirPath))) return null;
