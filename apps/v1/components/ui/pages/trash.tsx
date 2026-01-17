@@ -1,11 +1,15 @@
 "use client";
 
 import { visitFolderAction } from "@/actions/folder-actions";
-import { deleteNodesPermanentlyAction } from "@/actions/media-actions";
+import {
+  deleteNodesPermanentlyAction,
+  restoreNodesAction,
+} from "@/actions/media-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
+import { RestoreConfirmDialog } from "@/components/ui/dialogs/restore-confirm-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -54,6 +58,7 @@ import {
   ArrowLeft,
   ArrowRight,
   MoreVertical,
+  RotateCcw,
   TagIcon,
   Trash2,
 } from "lucide-react";
@@ -301,6 +306,34 @@ export function Trash() {
     return "default";
   }, [isViewMode]);
 
+  // ===== 復元 (Restore) =====
+
+  const [restoreTargets, setRestoreTargets] = useState<MediaNode[]>([]);
+  const isRestoreMode = restoreTargets.length > 0;
+
+  // 復元実行
+  const handleRestoreConfirm = async () => {
+    const paths = restoreTargets.map((n) => n.path);
+    const result = await restoreNodesAction(paths);
+
+    if (result.failed === 0) {
+      toast.success(`${result.success}件のアイテムを復元しました`);
+      clearSelection(); // 選択中だった場合は解除
+    } else {
+      toast.error(`${result.failed}件の復元に失敗しました`);
+    }
+  };
+
+  // 単体復元の呼び出し用
+  const handleOpenRestoreSingle = (node: MediaNode) => {
+    setRestoreTargets([node]);
+  };
+
+  // 一括復元の呼び出し用 (SelectionBarから)
+  const handleOpenRestoreSelected = () => {
+    setRestoreTargets(selected);
+  };
+
   // ===== 削除 (Delete) =====
 
   const [deleteTargets, setDeleteTargets] = useState<MediaNode[]>([]);
@@ -389,7 +422,8 @@ export function Trash() {
             allNodes={filteredNodes}
             initialScrollPath={lastPath}
             onOpen={handleOpen}
-            onDelete={handleOpenDeleteSingle}
+            onDeletePermanently={handleOpenDeleteSingle}
+            onRestore={handleOpenRestoreSingle}
             onEditTags={(node) => {
               handleSelectSingle(node);
               handleOpenTagEditor();
@@ -409,7 +443,8 @@ export function Trash() {
             allNodes={filteredNodes}
             initialScrollPath={lastPath}
             onOpen={handleOpen}
-            onDelete={handleOpenDeleteSingle}
+            onDeletePermanently={handleOpenDeleteSingle}
+            onRestore={handleOpenRestoreSingle}
             onEditTags={(node) => {
               handleSelectSingle(node);
               handleOpenTagEditor();
@@ -471,6 +506,12 @@ export function Trash() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
+                      variant="default"
+                      onClick={handleOpenRestoreSelected}
+                    >
+                      <RotateCcw className="mr-2 h-4 w-4" /> 復元
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       variant="destructive"
                       onClick={handleOpenDeleteSelected}
                     >
@@ -503,6 +544,14 @@ export function Trash() {
         count={deleteTargets.length}
         onConfirm={handleDeleteConfirm}
         permanent
+      />
+
+      {/* 復元確認ダイアログ */}
+      <RestoreConfirmDialog
+        open={isRestoreMode}
+        onOpenChange={(open) => !open && setRestoreTargets([])}
+        count={restoreTargets.length}
+        onConfirm={handleRestoreConfirm}
       />
 
       {/* フォルダナビゲーション */}

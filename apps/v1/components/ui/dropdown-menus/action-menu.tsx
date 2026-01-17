@@ -11,7 +11,14 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import { FolderInput, MoreVertical, Pencil, Tag, Trash2 } from "lucide-react";
+import {
+  FolderInput,
+  MoreVertical,
+  Pencil,
+  RotateCcw,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 
 interface ActionMenuProps {
@@ -21,6 +28,8 @@ interface ActionMenuProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
+  onDeletePermanently?: (node: MediaNode) => void;
+  onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
 }
 
@@ -31,6 +40,8 @@ export function ActionMenu({
   onRename,
   onMove,
   onDelete,
+  onDeletePermanently,
+  onRestore,
   onEditTags,
 }: ActionMenuProps) {
   const [open, setOpen] = useState(false);
@@ -92,6 +103,18 @@ export function ActionMenu({
             <Tag className="mr-2 h-4 w-4" /> タグの編集
           </DropdownMenuItem>
         )}
+        {onRestore && (
+          <DropdownMenuItem
+            className="text-success focus:text-success"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRestore(node);
+            }}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            復元
+          </DropdownMenuItem>
+        )}
         {onDelete && (
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
@@ -104,8 +127,18 @@ export function ActionMenu({
             削除
           </DropdownMenuItem>
         )}
-        {/* TODO: 復元 */}
-        {/* TODO: 完全に削除 */}
+        {onDeletePermanently && (
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeletePermanently(node);
+            }}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            完全に削除
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

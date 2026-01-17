@@ -31,6 +31,8 @@ interface PagingListViewProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
+  onDeletePermanently?: (node: MediaNode) => void;
+  onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
@@ -49,6 +51,8 @@ export function PagingListView({
   onRename,
   onMove,
   onDelete,
+  onDeletePermanently,
+  onRestore,
   onEditTags,
   onPageChange,
   onScrollRestored,
@@ -129,6 +133,8 @@ export function PagingListView({
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
+            onDeletePermanently={onDeletePermanently}
+            onRestore={onRestore}
             onEditTags={onEditTags}
           />
         ))}
@@ -176,6 +182,8 @@ interface DataRowProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
+  onDeletePermanently?: (node: MediaNode) => void;
+  onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
 }
 
@@ -190,6 +198,8 @@ function DataRow({
   onRename,
   onMove,
   onDelete,
+  onDeletePermanently,
+  onRestore,
   onEditTags,
 }: DataRowProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
@@ -361,6 +371,8 @@ function DataRow({
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
+            onDeletePermanently={onDeletePermanently}
+            onRestore={onRestore}
             onEditTags={onEditTags}
             onOpenFolder={onOpenFolder}
           />

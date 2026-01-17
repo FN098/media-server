@@ -11,7 +11,7 @@ import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
 import { lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import { dirname, join } from "path";
+import { basename, dirname, join } from "path";
 
 export async function renameNodeAction(sourcePath: string, newName: string) {
   const result = renameSchema.safeParse({ newName });
@@ -24,7 +24,6 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   }
 
   try {
-    // 仮想パス上での新パス（DB更新用）
     const oldVirtualPath = sourcePath;
     const newVirtualPath =
       oldVirtualPath === "/"
@@ -34,95 +33,56 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     const oldRealPath = getServerMediaPath(oldVirtualPath);
     const newRealPath = getServerMediaPath(newVirtualPath);
 
-    // 同名パスの存在チェック
+    // 存在確認
     if (await existsPath(newRealPath)) {
-      return {
-        success: false,
-        error: "同名のファイルまたはフォルダが既に存在します。",
-      };
+      throw new Error(
+        `同名のファイルまたはフォルダが既に存在します。: ${basename(newRealPath)}`
+      );
     }
 
     // FS更新
-    try {
-      await rename(oldRealPath, newRealPath);
-    } catch (fsError) {
-      console.error("FS rename failed...", fsError);
-      return {
-        success: false,
-        error: "ファイルシステムのリネームに失敗しました。",
-      };
-    }
+    await rename(oldRealPath, newRealPath);
 
     // NOTE: サムネイルは再作成すればいいので更新しない
 
-    // DB更新
-    try {
-      const stats = await lstat(newRealPath);
-      const isDirectory = stats.isDirectory();
+    const stats = await lstat(newRealPath);
+    const isDirectory = stats.isDirectory();
 
-      await prisma.$transaction(async (tx) => {
-        // 自分自身のパス更新
+    // DB更新
+    await prisma.$transaction(async (tx) => {
+      // 自分自身の更新
+      await tx.$executeRaw`
+        UPDATE Media 
+        SET path = ${newVirtualPath},
+            dirPath = ${dirname(newVirtualPath).replace(/\\/g, "/")},
+            title = ${newName}
+        WHERE path = ${oldVirtualPath}
+      `;
+
+      if (isDirectory) {
+        // 配下の更新
         await tx.$executeRaw`
           UPDATE Media 
-          SET path = ${newVirtualPath},
-              dirPath = ${dirname(newVirtualPath).replace(/\\/g, "/")},
-              title = ${newName}
-          WHERE path = ${oldVirtualPath}
-        `;
-
-        if (isDirectory) {
-          // 配下の更新
-          await tx.$executeRaw`
-            UPDATE Media 
-            SET 
-              path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
-              dirPath = CASE 
-                WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
-                ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
-              END
-            WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
-          `;
-
-          // 訪問履歴の更新
-          await tx.$executeRaw`
-            UPDATE VisitedFolder 
-            SET dirPath = CASE 
+          SET 
+            path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
+            dirPath = CASE 
               WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
               ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
             END
-            WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
-          `;
-        } else {
-          await tx.$executeRaw`
-            UPDATE VisitedFolder SET dirPath = ${newVirtualPath} WHERE dirPath = ${oldVirtualPath}
-          `;
-        }
-      });
-    } catch (dbError) {
-      // DB失敗時のFSロールバック
-      console.error("DB update failed, rolling back FS rename...", dbError);
-
-      try {
-        await rename(newRealPath, oldRealPath);
-      } catch (fsRollbackError) {
-        // ここまで来ると致命的（FSも戻せなかった）なので、ログに最大級の警告を出す
-        console.error(
-          "CRITICAL: Failed to rollback FS rename!",
-          fsRollbackError
-        );
+          WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
+        `;
       }
 
-      return {
-        success: false,
-        error: "データベースの更新に失敗したため、変更をキャンセルしました。",
-      };
-    }
-
-    revalidatePath("/explorer");
-    return {
-      success: true,
-      newPath: newVirtualPath,
-    };
+      // 訪問履歴の更新
+      await tx.$executeRaw`
+        UPDATE VisitedFolder 
+        SET dirPath = CASE 
+          WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
+          ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+        END
+        WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
+      `;
+    });
   } catch (error) {
     console.error("Rename Error:", error);
     return {
@@ -130,6 +90,11 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       error: "リネーム中にエラーが発生しました。権限などを確認してください。",
     };
   }
+
+  revalidatePath("/explorer");
+  return {
+    success: true,
+  };
 }
 
 export async function moveNodesAction(
@@ -140,18 +105,20 @@ export async function moveNodesAction(
 
   for (const oldVirtualPath of sourcePaths) {
     try {
-      const fileName = oldVirtualPath.split("/").pop() || "";
+      const newName = oldVirtualPath.split("/").pop() || "";
       const newVirtualPath =
         targetDirPath === "/"
-          ? `/${fileName}`
-          : `${targetDirPath}/${fileName}`.replace(/\/+/g, "/");
+          ? `/${newName}`
+          : `${targetDirPath}/${newName}`.replace(/\/+/g, "/");
 
       const oldRealPath = getServerMediaPath(oldVirtualPath);
       const newRealPath = getServerMediaPath(newVirtualPath);
 
-      // 同名パスの存在チェック
+      // 存在確認
       if (await existsPath(newRealPath)) {
-        throw new Error(`移動先に同名の項目が存在します: ${fileName}`);
+        throw new Error(
+          `移動先に同名の項目が存在します: ${basename(newRealPath)}`
+        );
       }
 
       // FS更新
@@ -159,63 +126,45 @@ export async function moveNodesAction(
 
       // NOTE: サムネイルは再作成すればいいので更新しない
 
-      // DB更新
-      try {
-        const stats = await lstat(newRealPath);
-        const isDirectory = stats.isDirectory();
+      const stats = await lstat(newRealPath);
+      const isDirectory = stats.isDirectory();
 
-        await prisma.$transaction(async (tx) => {
-          // 自分自身の更新
+      // DB更新
+      await prisma.$transaction(async (tx) => {
+        // 自分自身の更新
+        await tx.$executeRaw`
+          UPDATE Media SET 
+            path = ${newVirtualPath}, 
+            dirPath = ${targetDirPath} 
+          WHERE path = ${oldVirtualPath}
+        `;
+
+        if (isDirectory) {
+          // 配下の更新
           await tx.$executeRaw`
             UPDATE Media SET 
-              path = ${newVirtualPath}, 
-              dirPath = ${targetDirPath} 
-            WHERE path = ${oldVirtualPath}
-          `;
-
-          if (isDirectory) {
-            // 配下の更新
-            await tx.$executeRaw`
-              UPDATE Media SET 
-                path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
-                dirPath = CASE 
-                  WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
-                  ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
-                END
-              WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
-            `;
-
-            // 訪問履歴の更新
-            await tx.$executeRaw`
-              UPDATE VisitedFolder 
-              SET dirPath = CASE 
+              path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
+              dirPath = CASE 
                 WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
                 ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
               END
-              WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
-            `;
-          }
-        });
-        results.success++;
-      } catch (dbError) {
-        // DB失敗時のFSロールバック
-        console.error("DB update failed, rolling back FS rename...", dbError);
-
-        try {
-          await rename(newRealPath, oldRealPath);
-        } catch (fsRollbackError) {
-          // ここまで来ると致命的（FSも戻せなかった）なので、ログに最大級の警告を出す
-          console.error(
-            "CRITICAL: Failed to rollback FS rename!",
-            fsRollbackError
-          );
+            WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
+          `;
         }
 
-        throw new Error("データベースの更新に失敗しました。", {
-          cause: dbError,
-        });
-      }
-    } catch (error: unknown) {
+        // 訪問履歴の更新
+        await tx.$executeRaw`
+          UPDATE VisitedFolder 
+          SET dirPath = CASE 
+            WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
+            ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+          END
+          WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
+        `;
+      });
+
+      results.success++;
+    } catch (error) {
       console.error(`Move Error [${oldVirtualPath}]:`, error);
       results.failed++;
       results.errors.push(getErrorMessage(error));
@@ -248,63 +197,52 @@ export async function getSubDirectoriesAction(dirPath: string) {
 
 export async function deleteNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
-  const targetDirPath = PATHS.virtual.trash.root;
 
   for (const oldVirtualPath of sourcePaths) {
     try {
-      const newVirtualPath = `${targetDirPath}/${oldVirtualPath}`.replace(
-        /\/+/g,
-        "/"
-      );
+      const newVirtualPath = oldVirtualPath;
 
       const oldRealPath = getServerMediaPath(oldVirtualPath);
-      const newRealPath = getServerMediaPath(newVirtualPath);
+      const newRealPath = getServerMediaTrashPath(newVirtualPath);
 
-      // 移動先の親ディレクトリを物理的に作成
+      // FS更新
       await mkdir(dirname(newRealPath), { recursive: true });
-
-      // 再帰的に移動（ファイルなら上書き、フォルダならマージ）
       await recursiveMergeMove(oldRealPath, newRealPath);
 
-      // DB更新
-      try {
-        const stats = await lstat(newRealPath);
-        const isDirectory = stats.isDirectory();
+      const stats = await lstat(newRealPath);
+      const isDirectory = stats.isDirectory();
 
-        await prisma.$transaction(async (tx) => {
-          // 自分自身の更新
+      // DB更新
+      await prisma.$transaction(async (tx) => {
+        // 自分自身の更新
+        await tx.$executeRaw`
+          UPDATE Media SET 
+            path = ${newVirtualPath}, 
+            dirPath = ${dirname(newVirtualPath).replace(/\\/g, "/")}
+          WHERE path = ${oldVirtualPath}
+        `;
+
+        if (isDirectory) {
+          // 配下の更新
           await tx.$executeRaw`
             UPDATE Media SET 
-              path = ${newVirtualPath}, 
-              dirPath = ${dirname(newVirtualPath).replace(/\\/g, "/")}
-            WHERE path = ${oldVirtualPath}
+              path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
+              dirPath = CASE 
+                WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
+                ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+              END
+            WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
           `;
+        }
 
-          if (isDirectory) {
-            // 配下の子要素をすべて置換（移動ロジックと同じ）
-            await tx.$executeRaw`
-              UPDATE Media SET 
-                path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
-                dirPath = CASE 
-                  WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
-                  ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
-                END
-              WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
-            `;
-          }
+        // 訪問履歴の削除
+        await tx.$executeRaw`
+          DELETE FROM VisitedFolder 
+          WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
+        `;
+      });
 
-          // 訪問履歴からは削除（ゴミ箱の中身は履歴に出さない）
-          await tx.$executeRaw`
-            DELETE FROM VisitedFolder 
-            WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
-          `;
-        });
-        results.success++;
-      } catch (dbError) {
-        // DB失敗時はFSを元に戻す
-        await rename(newRealPath, oldRealPath);
-        throw dbError;
-      }
+      results.success++;
     } catch (error) {
       console.error(`Delete Error [${oldVirtualPath}]:`, error);
       results.failed++;
@@ -313,36 +251,34 @@ export async function deleteNodesAction(sourcePaths: string[]) {
   }
 
   revalidatePath("/explorer");
+  revalidatePath("/trash");
   return results;
 }
 
 async function recursiveMergeMove(src: string, dest: string) {
   const stats = await lstat(src);
-
   if (!stats.isDirectory()) {
-    // ファイルの場合は単純に移動（上書き）
-    // 移動先に同名ファイルがあれば先に消す（上書きのため）
+    // ファイルの場合
     if (await existsPath(dest)) {
       await rm(dest, { force: true });
     }
     await rename(src, dest);
-    return;
-  }
+  } else {
+    // ディレクトリの場合
+    if (!(await existsPath(dest))) {
+      await mkdir(dest, { recursive: true });
+    }
 
-  // ディレクトリの場合
-  if (!(await existsPath(dest))) {
-    await mkdir(dest, { recursive: true });
-  }
+    const entries = await readdir(src);
+    for (const entry of entries) {
+      const srcPath = join(src, entry);
+      const destPath = join(dest, entry);
+      await recursiveMergeMove(srcPath, destPath);
+    }
 
-  const entries = await readdir(src);
-  for (const entry of entries) {
-    const srcPath = join(src, entry);
-    const destPath = join(dest, entry);
-    await recursiveMergeMove(srcPath, destPath);
+    // 空になったソースディレクトリを削除
+    await rm(src, { recursive: true, force: true });
   }
-
-  // 中身をすべて移動し終えたら、空になったソースディレクトリを削除
-  await rm(src, { recursive: true, force: true });
 }
 
 export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
@@ -352,15 +288,15 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     try {
       const realPath = getServerMediaTrashPath(virtualPath);
 
-      // 1. 存在確認
+      // 存在確認
       if (!(await existsPath(realPath))) {
-        throw new Error(`Path not found: ${virtualPath}`);
+        throw new Error(`削除対象の項目が存在しません: ${basename(realPath)}`);
       }
 
       const stats = await lstat(realPath);
       const isDirectory = stats.isDirectory();
 
-      // 2. DBから削除（子要素も含めてトランザクションで実行）
+      // DB削除
       await prisma.$transaction(async (tx) => {
         if (isDirectory) {
           // フォルダ配下の子要素をすべて削除
@@ -382,8 +318,7 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
         `;
       });
 
-      // 3. 物理ファイルの削除（DB削除が成功した後に行う）
-      // recursive: true により、ディレクトリの場合は中身もろとも削除されます
+      // FS削除
       await rm(realPath, { recursive: true, force: true });
 
       results.success++;
@@ -394,6 +329,63 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     }
   }
 
+  revalidatePath("/trash");
+  return results;
+}
+
+export async function restoreNodesAction(sourcePaths: string[]) {
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+  const trashRoot = PATHS.virtual.trash.root;
+
+  for (const oldVirtualPath of sourcePaths) {
+    try {
+      const newVirtualPath = oldVirtualPath.startsWith(trashRoot)
+        ? oldVirtualPath.replace(trashRoot, "")
+        : oldVirtualPath;
+
+      const oldRealPath = getServerMediaTrashPath(oldVirtualPath);
+      const newRealPath = getServerMediaPath(newVirtualPath);
+
+      // FS更新
+      await mkdir(dirname(newRealPath), { recursive: true });
+      await recursiveMergeMove(oldRealPath, newRealPath);
+
+      const stats = await lstat(newRealPath);
+      const isDirectory = stats.isDirectory();
+
+      // DB更新
+      await prisma.$transaction(async (tx) => {
+        // 自分自身の更新
+        await tx.$executeRaw`
+          UPDATE Media SET 
+            path = ${newVirtualPath}, 
+            dirPath = ${dirname(newVirtualPath).replace(/\\/g, "/")}
+          WHERE path = ${oldVirtualPath}
+        `;
+
+        if (isDirectory) {
+          // 配下の更新
+          await tx.$executeRaw`
+            UPDATE Media SET 
+              path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
+              dirPath = CASE 
+                WHEN dirPath = ${oldVirtualPath} THEN ${newVirtualPath}
+                ELSE REPLACE(dirPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+              END
+            WHERE path LIKE CONCAT(${oldVirtualPath}, '/%')
+          `;
+        }
+      });
+
+      results.success++;
+    } catch (error) {
+      console.error(`Restore Error [${oldVirtualPath}]:`, error);
+      results.failed++;
+      results.errors.push(getErrorMessage(error));
+    }
+  }
+
+  revalidatePath("/explorer");
   revalidatePath("/trash");
   return results;
 }

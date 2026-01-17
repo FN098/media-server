@@ -30,6 +30,8 @@ interface PagingGridViewProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
+  onDeletePermanently?: (node: MediaNode) => void;
+  onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
@@ -45,6 +47,8 @@ export function PagingGridView({
   onRename,
   onMove,
   onDelete,
+  onDeletePermanently,
+  onRestore,
   onEditTags,
   onPageChange,
   onScrollRestored,
@@ -130,6 +134,8 @@ export function PagingGridView({
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
+            onDeletePermanently={onDeletePermanently}
+            onRestore={onRestore}
             onEditTags={onEditTags}
           />
         ))}
@@ -156,6 +162,8 @@ interface CellProps {
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
+  onDeletePermanently?: (node: MediaNode) => void;
+  onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
 }
 
@@ -170,6 +178,8 @@ function Cell({
   onRename,
   onMove,
   onDelete,
+  onDeletePermanently,
+  onRestore,
   onEditTags,
 }: CellProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
@@ -336,6 +346,8 @@ function Cell({
                   onRename={onRename}
                   onMove={onMove}
                   onDelete={onDelete}
+                  onDeletePermanently={onDeletePermanently}
+                  onRestore={onRestore}
                   onEditTags={onEditTags}
                   onOpenFolder={onOpenFolder}
                   className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white rounded-full"
