@@ -6,7 +6,6 @@ import {
 } from "@/actions/media-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { RestoreConfirmDialog } from "@/components/ui/dialogs/restore-confirm-dialog";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -19,11 +18,7 @@ import {
   useSetTrashQuery,
   useTrashQuery,
 } from "@/hooks/use-trash-query";
-import {
-  createFavoriteFilter,
-  createSearchFilter,
-  createTagFilter,
-} from "@/lib/media/filters";
+import { createSearchFilter, createTagFilter } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
 import {
   MediaNode,
@@ -109,19 +104,11 @@ export function Trash() {
   // タグフィルタ
   const tagFilter = useTagFilter();
 
-  // お気に入りのみ有効フラグ
-  const [isFavoriteOnly, setIsFavoriteOnly] = useState(false);
-  const toggleIsFavoriteOnly = () => setIsFavoriteOnly((prev) => !prev);
-
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
   const tagFilterFn = useMemo(
     () => createTagFilter(Array.from(tagFilter.selectedTags), tagFilter.mode),
     [tagFilter]
-  );
-  const favoriteFilterFn = useMemo(
-    () => createFavoriteFilter(isFavoriteOnly),
-    [isFavoriteOnly]
   );
 
   // フィルタリング結果
@@ -129,11 +116,7 @@ export function Trash() {
     const { nodes: allNodes } = listing;
 
     // 各フィルタの生成
-    const filters: MediaNodeFilter[] = [
-      searchFilterFn,
-      tagFilterFn,
-      favoriteFilterFn,
-    ];
+    const filters: MediaNodeFilter[] = [searchFilterFn, tagFilterFn];
 
     // フィルタの適用
     return allNodes.filter((node) => {
@@ -145,7 +128,7 @@ export function Trash() {
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, searchFilterFn, tagFilterFn, favoriteFilterFn]);
+  }, [listing, searchFilterFn, tagFilterFn]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -335,16 +318,6 @@ export function Trash() {
       className={cn("flex-1 flex flex-col min-h-0 overflow-auto")}
       ref={scrollRef}
     >
-      <div className="flex flex-wrap items-center gap-1 px-4">
-        {/* お気に入りフィルター */}
-        <FavoriteFilterButton
-          isActive={isFavoriteOnly}
-          onClick={toggleIsFavoriteOnly}
-          showCount
-          count={mediaOnly.length}
-        />
-      </div>
-
       {/* グリッドビュー */}
       {viewMode === "grid" && !isViewMode && (
         <div className="flex-1">
