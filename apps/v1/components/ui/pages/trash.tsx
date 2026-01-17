@@ -1,7 +1,7 @@
 "use client";
 
 import { visitFolderAction } from "@/actions/folder-actions";
-import { deleteNodesAction } from "@/actions/media-actions";
+import { deleteNodesPermanentlyAction } from "@/actions/media-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
@@ -309,10 +309,10 @@ export function Trash() {
   // 削除実行
   const handleDeleteConfirm = async () => {
     const paths = deleteTargets.map((n) => n.path);
-    const result = await deleteNodesAction(paths);
+    const result = await deleteNodesPermanentlyAction(paths);
 
     if (result.failed === 0) {
-      toast.success(`${result.success}件のアイテムをゴミ箱に移動しました`);
+      toast.success(`${result.success}件のアイテムを完全に削除しました`);
       clearSelection(); // 選択中だった場合は解除
     } else {
       toast.error(`${result.failed}件の削除に失敗しました`);
@@ -502,6 +502,7 @@ export function Trash() {
         onOpenChange={(open) => !open && setDeleteTargets([])}
         count={deleteTargets.length}
         onConfirm={handleDeleteConfirm}
+        permanent
       />
 
       {/* フォルダナビゲーション */}

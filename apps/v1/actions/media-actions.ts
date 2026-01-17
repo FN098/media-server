@@ -1,7 +1,10 @@
 "use server";
 
 import { renameSchema } from "@/lib/media/validation";
-import { getServerMediaPath } from "@/lib/path/helpers";
+import {
+  getServerMediaPath,
+  getServerMediaTrashPath,
+} from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
 import { prisma } from "@/lib/prisma";
 import { getErrorMessage } from "@/lib/utils/error";
@@ -340,4 +343,57 @@ async function recursiveMergeMove(src: string, dest: string) {
 
   // 中身をすべて移動し終えたら、空になったソースディレクトリを削除
   await rm(src, { recursive: true, force: true });
+}
+
+export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+
+  for (const virtualPath of sourcePaths) {
+    try {
+      const realPath = getServerMediaTrashPath(virtualPath);
+
+      // 1. 存在確認
+      if (!(await existsPath(realPath))) {
+        throw new Error(`Path not found: ${virtualPath}`);
+      }
+
+      const stats = await lstat(realPath);
+      const isDirectory = stats.isDirectory();
+
+      // 2. DBから削除（子要素も含めてトランザクションで実行）
+      await prisma.$transaction(async (tx) => {
+        if (isDirectory) {
+          // フォルダ配下の子要素をすべて削除
+          await tx.$executeRaw`
+            DELETE FROM Media 
+            WHERE path LIKE CONCAT(${virtualPath}, '/%')
+          `;
+        }
+
+        // 自分自身のレコードを削除
+        await tx.$executeRaw`
+          DELETE FROM Media WHERE path = ${virtualPath}
+        `;
+
+        // 訪問履歴からも完全に削除
+        await tx.$executeRaw`
+          DELETE FROM VisitedFolder 
+          WHERE dirPath = ${virtualPath} OR dirPath LIKE CONCAT(${virtualPath}, '/%')
+        `;
+      });
+
+      // 3. 物理ファイルの削除（DB削除が成功した後に行う）
+      // recursive: true により、ディレクトリの場合は中身もろとも削除されます
+      await rm(realPath, { recursive: true, force: true });
+
+      results.success++;
+    } catch (error) {
+      console.error(`Permanent Delete Error [${virtualPath}]:`, error);
+      results.failed++;
+      results.errors.push(getErrorMessage(error));
+    }
+  }
+
+  revalidatePath("/trash");
+  return results;
 }

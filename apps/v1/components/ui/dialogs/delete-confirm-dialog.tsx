@@ -15,6 +15,7 @@ interface DeleteConfirmDialogProps {
   onOpenChange: (open: boolean) => void;
   count: number;
   onConfirm: () => Promise<void>;
+  permanent?: boolean;
 }
 
 export function DeleteConfirmDialog({
@@ -22,6 +23,7 @@ export function DeleteConfirmDialog({
   onOpenChange,
   count,
   onConfirm,
+  permanent = false,
 }: DeleteConfirmDialogProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -36,11 +38,25 @@ export function DeleteConfirmDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>アイテムの削除</AlertDialogTitle>
+          <AlertDialogTitle>
+            {permanent ? "アイテムの完全削除" : "アイテムの削除"}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            選択された {count} 件のアイテムをゴミ箱に移動しますか？
-            <br />
-            この操作は後でゴミ箱フォルダから戻すことができます。
+            {permanent ? (
+              <>
+                選択された {count} 件のアイテムを完全に削除します。
+                <br />
+                <span className="text-destructive font-semibold">
+                  この操作は取り消せません。
+                </span>
+              </>
+            ) : (
+              <>
+                選択された {count} 件のアイテムをゴミ箱に移動しますか？
+                <br />
+                この操作は後でゴミ箱フォルダから戻すことができます。
+              </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -50,7 +66,13 @@ export function DeleteConfirmDialog({
             disabled={isPending}
             className="bg-destructive text-white hover:bg-destructive/90"
           >
-            {isPending ? "削除中..." : "削除する"}
+            {isPending
+              ? permanent
+                ? "完全削除中..."
+                : "削除中..."
+              : permanent
+                ? "完全に削除する"
+                : "削除する"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
