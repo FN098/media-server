@@ -6,7 +6,6 @@ import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
-import { syncMediaDir } from "@/lib/media/sync";
 import { MediaFsNode } from "@/lib/media/types";
 import { isBlockedVirtualPath } from "@/lib/path/blacklist";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
@@ -73,7 +72,6 @@ export default async function TrashPage(props: TrashPageProps) {
 
   // DB クエリ
   // TODO: ユーザー認証機能実装後に差し替える
-  await syncMediaDir(currentVirtualDirPath, allNodes);
   const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
     getDbMedia(currentVirtualDirPath, USER),
     getDbVisitedInfoDeeply(dirPaths, USER),

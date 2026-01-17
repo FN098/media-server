@@ -1,6 +1,5 @@
 "use client";
 
-import { visitFolderAction } from "@/actions/folder-actions";
 import {
   deleteNodesPermanentlyAction,
   restoreNodesAction,
@@ -371,14 +370,6 @@ export function Trash() {
     }
   }, [listing.path]);
 
-  // 訪問済みフォルダ更新リクエスト送信
-  useEffect(() => {
-    if (listing.path) {
-      console.log(listing.path);
-      void visitFolderAction(listing.path);
-    }
-  }, [listing.path]);
-
   // ===== その他 =====
 
   // ショートカット
@@ -509,13 +500,14 @@ export function Trash() {
                       variant="default"
                       onClick={handleOpenRestoreSelected}
                     >
-                      <RotateCcw className="mr-2 h-4 w-4" /> 復元
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      復元
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       variant="destructive"
                       onClick={handleOpenDeleteSelected}
                     >
-                      <Trash2 className="mr-2 h-4 w-4" /> 削除
+                      <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
