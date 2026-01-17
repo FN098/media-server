@@ -9,13 +9,11 @@ import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { RestoreConfirmDialog } from "@/components/ui/dialogs/restore-confirm-dialog";
-import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
-import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
-import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
+import { useTagFilter } from "@/hooks/use-tag-filter";
 import {
   useNormalizeTrashQuery,
   useSetTrashQuery,
@@ -27,7 +25,6 @@ import {
   createTagFilter,
 } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
-import { sortNames } from "@/lib/media/sort";
 import {
   MediaNode,
   MediaNodeFilter,
@@ -37,11 +34,9 @@ import {
 import { getClientTrashPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
-import { unique } from "@/lib/utils/unique";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
-import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useTrashContext } from "@/providers/trash-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
@@ -58,7 +53,6 @@ import {
   ArrowRight,
   MoreVertical,
   RotateCcw,
-  TagIcon,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
@@ -115,14 +109,6 @@ export function Trash() {
   // タグフィルタ
   const tagFilter = useTagFilter();
 
-  const handleApplyTagFilter = (
-    tags: Iterable<string>,
-    mode: TagFilterMode
-  ) => {
-    tagFilter.selectTags(tags);
-    tagFilter.setMode(mode);
-  };
-
   // お気に入りのみ有効フラグ
   const [isFavoriteOnly, setIsFavoriteOnly] = useState(false);
   const toggleIsFavoriteOnly = () => setIsFavoriteOnly((prev) => !prev);
@@ -165,19 +151,6 @@ export function Trash() {
   const mediaOnly = useMemo(
     () => filteredNodes.filter((n) => isMedia(n.type)),
     [filteredNodes]
-  );
-
-  // 「メディアのみ」のタグリスト
-  const mediaOnlyTags = useMemo(
-    () =>
-      sortNames(
-        unique(
-          mediaOnly
-            .filter((n) => n.tags && n.tags.length > 0)
-            .flatMap((n) => n.tags!.map((t) => t.name))
-        )
-      ),
-    [mediaOnly]
   );
 
   // ===== ビューア =====
@@ -243,7 +216,6 @@ export function Trash() {
     enterSelectionMode,
     exitSelectionMode,
     selectedPaths,
-    replaceSelection,
     selectPaths,
     clearSelection,
   } = usePathSelectionContext();
@@ -263,11 +235,6 @@ export function Trash() {
     return result;
   }, [pathToNodeMap, selectedPaths]);
 
-  // 選択
-  const handleSelectSingle = (node: MediaNode) => {
-    replaceSelection(node.path);
-  };
-
   // 全選択
   const handleSelectAll = () => {
     selectPaths(filteredNodes.map((n) => n.path));
@@ -285,25 +252,6 @@ export function Trash() {
     clearSelection();
     exitSelectionMode();
   };
-
-  // ===== タグエディタ =====
-
-  const { isTagEditMode, setIsTagEditMode } = useTagEditorContext();
-  const handleOpenTagEditor = () => {
-    setIsTagEditMode(true);
-  };
-  const handleCloseTagEditor = () => {
-    setIsTagEditMode(false);
-  };
-  const handleToggleTagEditor = () => {
-    setIsTagEditMode((prev) => !prev);
-  };
-
-  // タグエディタの起動モード
-  const tagEditMode = useMemo(() => {
-    if (isViewMode) return "single";
-    return "default";
-  }, [isViewMode]);
 
   // ===== 復元 (Restore) =====
 
@@ -374,7 +322,6 @@ export function Trash() {
 
   // ショートカット
   useShortcutKeys([
-    { key: "t", callback: () => handleToggleTagEditor() },
     { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
     { key: "Escape", callback: () => handleClearSelection() },
@@ -389,14 +336,6 @@ export function Trash() {
       ref={scrollRef}
     >
       <div className="flex flex-wrap items-center gap-1 px-4">
-        {/* タグフィルター */}
-        <TagFilterDialog
-          tags={mediaOnlyTags}
-          selectedTags={tagFilter.selectedTags}
-          currentMode={tagFilter.mode}
-          onApply={handleApplyTagFilter}
-        />
-
         {/* お気に入りフィルター */}
         <FavoriteFilterButton
           isActive={isFavoriteOnly}
@@ -415,10 +354,6 @@ export function Trash() {
             onOpen={handleOpen}
             onDeletePermanently={handleOpenDeleteSingle}
             onRestore={handleOpenRestoreSingle}
-            onEditTags={(node) => {
-              handleSelectSingle(node);
-              handleOpenTagEditor();
-            }}
             onPageChange={() =>
               scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
             }
@@ -436,10 +371,6 @@ export function Trash() {
             onOpen={handleOpen}
             onDeletePermanently={handleOpenDeleteSingle}
             onRestore={handleOpenRestoreSingle}
-            onEditTags={(node) => {
-              handleSelectSingle(node);
-              handleOpenTagEditor();
-            }}
             onPageChange={() =>
               scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
             }
@@ -462,14 +393,13 @@ export function Trash() {
             onNextFolder={
               listing.next ? (at) => openNextFolder(at ?? "first") : undefined
             }
-            onEditTags={handleToggleTagEditor}
           />
         </ScrollLockProvider>
       )}
 
       {/* 選択バー */}
       <AnimatePresence>
-        {isSelectionMode && !isTagEditMode && (
+        {isSelectionMode && (
           <SelectionBar
             count={selected.length}
             totalCount={filteredNodes.length}
@@ -478,16 +408,6 @@ export function Trash() {
             className="z-40" // DropdownMenu より小さくする
             actions={
               <div className="flex gap-1 items-center">
-                {/* メインのアクション */}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleOpenTagEditor}
-                  disabled={selected.length === 0}
-                >
-                  <TagIcon size={18} />
-                </Button>
-
                 {/* その他 */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -513,18 +433,6 @@ export function Trash() {
                 </DropdownMenu>
               </div>
             }
-          />
-        )}
-      </AnimatePresence>
-
-      {/* タグエディター */}
-      <AnimatePresence>
-        {isTagEditMode && (
-          <TagEditSheet
-            targetNodes={selected}
-            onClose={handleCloseTagEditor}
-            mode={tagEditMode}
-            opacity={tagEditMode === "default" ? 100 : 0}
           />
         )}
       </AnimatePresence>
