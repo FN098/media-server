@@ -47,24 +47,36 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
 
   const tagAreaHeight = node.tags && node.tags.length > 0 ? 44 : 0;
 
-  const [shouldScroll, setShouldScroll] = useState(true);
+  const [shouldScroll, setShouldScroll] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null); // ResizeObserver を使って表示された瞬間のサイズを正確に測る
 
-  // 幅を測定してスクロールが必要か判定する
   useEffect(() => {
-    if (visible && containerRef.current && contentRef.current) {
-      const containerWidth = containerRef.current.offsetWidth;
-      const contentWidth = contentRef.current.scrollWidth;
+    const container = containerRef.current;
+    const content = contentRef.current;
+    if (!container || !content) return;
 
-      // コンテナより中身が広ければスクロール有効
-      setShouldScroll(contentWidth > containerWidth);
-    }
+    const observer = new ResizeObserver(() => {
+      const containerWidth = container.offsetWidth;
+      // contentの中には 2つのdiv(origとcopy) が入る可能性があるため
+      // 最初の1つのユニット分の幅を計測する
+      const firstUnit = content.children[0] as HTMLElement;
+      if (firstUnit) {
+        // ユニット幅 + gap(6px) がコンテナより大きければスクロール
+        setShouldScroll(firstUnit.offsetWidth + 6 > containerWidth);
+      }
+    });
+
+    observer.observe(container);
+    // 子要素のサイズ変更も監視（画像読み込み等でレイアウトが変わる場合のため）
+    observer.observe(content);
+
+    return () => observer.disconnect();
   }, [visible, node.tags]);
 
   // アニメーション速度の計算 (1タグあたり約2秒など)
   const duration = useMemo(() => {
-    return (node.tags?.length ?? 0) * 2;
+    return Math.max(4, (node.tags?.length ?? 0) * 1.5);
   }, [node.tags]);
 
   const handleMouseMove = useCallback(
@@ -148,6 +160,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
               height: `${coords.height}px`,
             }}
           >
+            {/* メディア部分 */}
             <div className="relative flex-1 bg-black overflow-hidden">
               <MediaThumb
                 node={node}
@@ -156,14 +169,15 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
               />
             </div>
 
+            {/* タグ部分 */}
             {node.tags && node.tags.length > 0 && (
               <div
                 ref={containerRef}
                 className="relative border-t border-primary/10 bg-background/95 backdrop-blur overflow-hidden"
               >
                 {/* 左右のフェードエフェクト */}
-                <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+                <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-background to-transparent z-10" />
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10" />
 
                 <motion.div
                   ref={contentRef}
@@ -176,13 +190,21 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
                     repeatType: "loop",
                   }}
                 >
-                  {shouldScroll
-                    ? [...node.tags, ...node.tags].map((tag, i) => (
-                        <TagItem key={i} name={tag.name} />
-                      ))
-                    : node.tags.map((tag, i) => (
-                        <TagItem key={i} name={tag.name} />
+                  {/* 1ユニット目 */}
+                  <div className="flex gap-1.5">
+                    {node.tags.map((tag, i) => (
+                      <TagItem key={`orig-${i}`} name={tag.name} />
+                    ))}
+                  </div>
+
+                  {/* 2ユニット目（スクロール時のみ表示） */}
+                  {shouldScroll && (
+                    <div className="flex gap-1.5">
+                      {node.tags.map((tag, i) => (
+                        <TagItem key={`copy-${i}`} name={tag.name} />
                       ))}
+                    </div>
+                  )}
                 </motion.div>
               </div>
             )}
