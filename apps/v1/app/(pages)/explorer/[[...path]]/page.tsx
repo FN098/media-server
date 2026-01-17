@@ -19,14 +19,6 @@ import { getDbMedia } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-interface ExplorerPageProps {
-  params: Promise<{
-    path?: string[];
-    sort?: SortKeyOf<MediaFsNode>;
-    order?: SortOrderOf<MediaFsNode>;
-  }>;
-}
-
 // 動的ページとしてレンダリング
 export const dynamic = "force-dynamic";
 
@@ -41,6 +33,14 @@ export async function generateMetadata(
   return {
     title: `${decodedPart} | ${APP_CONFIG.meta.title}`,
   };
+}
+
+interface ExplorerPageProps {
+  params: Promise<{
+    path?: string[];
+    sort?: SortKeyOf<MediaFsNode>;
+    order?: SortOrderOf<MediaFsNode>;
+  }>;
 }
 
 export default async function ExplorerPage(props: ExplorerPageProps) {
