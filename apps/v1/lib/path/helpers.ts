@@ -41,6 +41,10 @@ export function getClientExplorerPath(mediaPath: string): string {
   return path.join(PATHS.client.explorer.root, mediaPath);
 }
 
+export function getClientTrashPath(mediaPath: string): string {
+  return path.join(PATHS.client.trash.root, mediaPath);
+}
+
 export function getParentDirPath(filePath: string): string {
   const dir = path.dirname(filePath);
 

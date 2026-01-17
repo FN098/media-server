@@ -104,6 +104,8 @@ export function ActionMenu({
             削除
           </DropdownMenuItem>
         )}
+        {/* TODO: 復元 */}
+        {/* TODO: 完全に削除 */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

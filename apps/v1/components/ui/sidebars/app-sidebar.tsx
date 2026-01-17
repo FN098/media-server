@@ -24,6 +24,7 @@ import {
   Search,
   Settings,
   Star,
+  Trash2,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -45,6 +46,11 @@ const items = [
     title: "Favorites",
     url: PATHS.client.favorites.root,
     icon: Star,
+  },
+  {
+    title: "Trash",
+    url: PATHS.client.trash.root,
+    icon: Trash2,
   },
   {
     title: "Settings",

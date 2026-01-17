@@ -33,6 +33,9 @@ export const PATHS = {
     settings: {
       root: "/settings",
     },
+    trash: {
+      root: "/trash",
+    },
   },
   api: {
     root: "/api",
