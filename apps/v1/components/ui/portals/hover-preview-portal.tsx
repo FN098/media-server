@@ -4,7 +4,14 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
 interface Coords {
@@ -39,6 +46,26 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
   const [imageSize, setImageSize] = useState<Size | null>(null);
 
   const tagAreaHeight = node.tags && node.tags.length > 0 ? 44 : 0;
+
+  const [shouldScroll, setShouldScroll] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // 幅を測定してスクロールが必要か判定する
+  useEffect(() => {
+    if (visible && containerRef.current && contentRef.current) {
+      const containerWidth = containerRef.current.offsetWidth;
+      const contentWidth = contentRef.current.scrollWidth;
+
+      // コンテナより中身が広ければスクロール有効
+      setShouldScroll(contentWidth > containerWidth);
+    }
+  }, [visible, node.tags]);
+
+  // アニメーション速度の計算 (1タグあたり約2秒など)
+  const duration = useMemo(() => {
+    return (node.tags?.length ?? 0) * 2;
+  }, [node.tags]);
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
@@ -124,39 +151,41 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
             <div className="relative flex-1 bg-black overflow-hidden">
               <MediaThumb
                 node={node}
-                className="w-full h-full object-contain bg-black"
+                className="w-full h-full object-contain"
                 onLoad={handleImageLoad}
               />
             </div>
 
             {node.tags && node.tags.length > 0 && (
-              <div className="relative border-t border-primary/10 bg-background/95 backdrop-blur">
-                {/* 右側のフェードエフェクト */}
+              <div
+                ref={containerRef}
+                className="relative border-t border-primary/10 bg-background/95 backdrop-blur overflow-hidden"
+              >
+                {/* 左右のフェードエフェクト */}
+                <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
-                <div
-                  className="flex flex-nowrap gap-1.5 p-2 overflow-x-auto no-scrollbar"
-                  style={{
-                    // スクロールバーを隠す
-                    msOverflowStyle: "none",
-                    scrollbarWidth: "none",
+                <motion.div
+                  ref={contentRef}
+                  className="flex gap-1.5 p-2 w-max"
+                  animate={shouldScroll ? { x: [0, "-49%"] } : { x: 0 }}
+                  transition={{
+                    duration: duration,
+                    ease: "linear",
+                    repeat: Infinity,
+                    repeatType: "loop",
                   }}
                 >
-                  {node.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-2 py-0.5 text-[10px] font-medium bg-secondary text-secondary-foreground rounded-md border border-primary/5 whitespace-nowrap flex-shrink-0"
-                    >
-                      {tag.name}
-                    </span>
-                  ))}
-                  {/* 最後のタグがグラデーションに被りすぎないための余白 */}
-                  <div className="w-4 flex-shrink-0" />
-                </div>
+                  {shouldScroll
+                    ? [...node.tags, ...node.tags].map((tag, i) => (
+                        <TagItem key={i} name={tag.name} />
+                      ))
+                    : node.tags.map((tag, i) => (
+                        <TagItem key={i} name={tag.name} />
+                      ))}
+                </motion.div>
               </div>
             )}
-
-            <div className="w-4 flex-shrink-0" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -169,6 +198,8 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
     visible,
     node,
     handleImageLoad,
+    shouldScroll,
+    duration,
   ]);
 
   return (
@@ -183,3 +214,9 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
     </div>
   );
 });
+
+const TagItem = ({ name }: { name: string }) => (
+  <span className="px-2 py-0.5 text-[10px] font-medium bg-secondary text-secondary-foreground rounded-md border border-primary/5 whitespace-nowrap flex-shrink-0">
+    {name}
+  </span>
+);
