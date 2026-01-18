@@ -1,15 +1,12 @@
 "use server";
 
-import {
-  enqueueSingleThumbJob,
-  enqueueThumbJob,
-} from "@/actions/thumb-actions";
 import { renameSchema } from "@/lib/media/validation";
 import {
   getServerMediaPath,
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
+import { deleteThumb } from "@/lib/thumb/delete";
 import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
 import { lstat, mkdir, readdir, rename, rm } from "fs/promises";
@@ -46,15 +43,12 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     // FS更新
     await rename(oldRealPath, newRealPath);
 
+    // サムネイル削除
+    await deleteThumb(oldVirtualPath);
+    await deleteThumb(newVirtualPath);
+
     const stats = await lstat(newRealPath);
     const isDirectory = stats.isDirectory();
-
-    // サムネイル作成
-    if (!isDirectory) {
-      await enqueueSingleThumbJob(newVirtualPath, true);
-    } else {
-      await enqueueThumbJob(newVirtualPath, true);
-    }
 
     // DB更新
     await prisma.$transaction(async (tx) => {
