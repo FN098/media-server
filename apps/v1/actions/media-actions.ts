@@ -351,8 +351,6 @@ export async function cleanupMediaAction(dirPath: string) {
       // 必要に応じてサムネイルのクリーンアップ処理もここに追加
     }
 
-    revalidatePath("/explorer");
-
     return {
       success: true,
       deletedCount: missingMediaIds.length,
@@ -369,7 +367,6 @@ export async function cleanupMediaAction(dirPath: string) {
 export async function cleanupGhostMediaAction() {
   try {
     // 1. 重複を除いた dirPath の一覧を取得
-    // select distinct dirPath from Media
     const folders = await prisma.media.groupBy({
       by: ["dirPath"],
     });
@@ -378,9 +375,7 @@ export async function cleanupGhostMediaAction() {
 
     // 2. 各ディレクトリの実在確認
     for (const folder of folders) {
-      // ルートディレクトリ ("/") はスキップ、または処理
       const realPath = getServerMediaPath(folder.dirPath);
-
       try {
         await access(realPath, constants.F_OK);
       } catch {
@@ -389,32 +384,62 @@ export async function cleanupGhostMediaAction() {
       }
     }
 
-    let totalDeleted = 0;
+    if (missingFolders.length === 0)
+      return { success: true, deletedRecords: 0 };
 
     // 3. 存在しないディレクトリに属するレコードを一括削除
-    if (missingFolders.length > 0) {
-      const deleteResult = await prisma.media.deleteMany({
-        where: {
-          dirPath: {
-            in: missingFolders,
-          },
+    const deleteResult = await prisma.media.deleteMany({
+      where: {
+        dirPath: {
+          in: missingFolders,
         },
-      });
-      totalDeleted = deleteResult.count;
-    }
-
-    revalidatePath("/explorer");
+      },
+    });
 
     return {
       success: true,
       removedFolders: missingFolders.length,
-      deletedRecords: totalDeleted,
+      deletedRecords: deleteResult.count,
     };
   } catch (error) {
-    console.error("Global Cleanup Error:", error);
+    console.error("Cleanup Ghost Media Error:", error);
     return {
       success: false,
       error: "クリーンアップ中に予期せぬエラーが発生しました。",
     };
+  }
+}
+
+export async function scanGhostMediaAction() {
+  try {
+    const folders = await prisma.media.groupBy({
+      by: ["dirPath"],
+    });
+
+    const missingFolders: string[] = [];
+    for (const folder of folders) {
+      const realPath = getServerMediaPath(folder.dirPath);
+      try {
+        await access(realPath, constants.F_OK);
+      } catch {
+        missingFolders.push(folder.dirPath);
+      }
+    }
+
+    // 削除対象のレコード総数をカウント
+    const count = await prisma.media.count({
+      where: {
+        dirPath: { in: missingFolders },
+      },
+    });
+
+    return {
+      success: true,
+      missingFolderCount: missingFolders.length,
+      recordCount: count,
+    };
+  } catch (error) {
+    console.error("Scan Ghost Media Error:", error);
+    return { success: false, error: "スキャン中にエラーが発生しました。" };
   }
 }
