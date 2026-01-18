@@ -1,5 +1,9 @@
 "use server";
 
+import {
+  enqueueSingleThumbJob,
+  enqueueThumbJob,
+} from "@/actions/thumb-actions";
 import { renameSchema } from "@/lib/media/validation";
 import {
   getServerMediaPath,
@@ -35,17 +39,22 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     // 存在確認
     if (await existsPath(newRealPath)) {
       throw new Error(
-        `同名のファイルまたはフォルダが既に存在します。: ${basename(newRealPath)}`
+        `同名のファイルまたはフォルダが既に存在します。: ${basename(newRealPath)}`,
       );
     }
 
     // FS更新
     await rename(oldRealPath, newRealPath);
 
-    // NOTE: サムネイルは再作成すればいいので更新しない
-
     const stats = await lstat(newRealPath);
     const isDirectory = stats.isDirectory();
+
+    // サムネイル作成
+    if (!isDirectory) {
+      await enqueueSingleThumbJob(newVirtualPath, true);
+    } else {
+      await enqueueThumbJob(newVirtualPath, true);
+    }
 
     // DB更新
     await prisma.$transaction(async (tx) => {
@@ -98,7 +107,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
 export async function moveNodesAction(
   sourcePaths: string[],
-  targetDirPath: string
+  targetDirPath: string,
 ) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
@@ -116,7 +125,7 @@ export async function moveNodesAction(
       // 存在確認
       if (await existsPath(newRealPath)) {
         throw new Error(
-          `移動先に同名の項目が存在します: ${basename(newRealPath)}`
+          `移動先に同名の項目が存在します: ${basename(newRealPath)}`,
         );
       }
 

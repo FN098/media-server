@@ -1,6 +1,6 @@
 import { getMediaFsNode, getMediaFsNodes } from "@/lib/media/fs";
 import { sortMediaFsNodes } from "@/lib/media/sort";
-import { createThumbsIfNotExists } from "@/lib/thumb/create";
+import { createThumbs } from "@/lib/thumb/create";
 import { chunk } from "@/lib/utils/chunk";
 import { ThumbJobData } from "@/workers/thumb/types";
 import { Worker } from "bullmq";
@@ -14,7 +14,7 @@ export const startThumbWorker = () => {
   const worker = new Worker<ThumbJobData>(
     "thumbs",
     async (job) => {
-      const { dirPath, filePath, createdAt } = job.data;
+      const { dirPath, filePath, createdAt, forceCreate } = job.data;
 
       // 発行から時間が経ちすぎたジョブは処理せず破棄
       if (Date.now() - createdAt > EXPIRE_MS) {
@@ -41,28 +41,28 @@ export const startThumbWorker = () => {
             let completed = 0;
             for (const chunk of chunks) {
               // サムネイル作成（このチャンク分が完了するまで待つ）
-              await createThumbsIfNotExists(chunk);
+              await createThumbs(chunk, { force: forceCreate });
 
               // 2. ファイル単位での完了通知を発行
               await Promise.all(
                 chunk.map((node) =>
                   connection.publish(
                     "thumb-completed",
-                    JSON.stringify({ filePath: node.path })
-                  )
-                )
+                    JSON.stringify({ filePath: node.path }),
+                  ),
+                ),
               ).catch((err) => console.error("Publish error:", err));
 
               completed += chunk.length;
               console.log(
-                `[Job ${job.id}] Progress: ${completed}/${nodes.length}`
+                `[Job ${job.id}] Progress: ${completed}/${nodes.length}`,
               );
             }
 
             // 3. 最後にディレクトリ単位での完了通知を発行（念のためのバックアップ）
             await connection.publish(
               "thumb-completed",
-              JSON.stringify({ dirPath })
+              JSON.stringify({ dirPath }),
             );
 
             console.log(`[Job ${job.id}] Notified completion for: ${dirPath}`);
@@ -82,12 +82,12 @@ export const startThumbWorker = () => {
           try {
             console.log(`[Job ${job.id}] Single Processing: ${filePath}`);
             const node = await getMediaFsNode(filePath);
-            await createThumbsIfNotExists([node]);
+            await createThumbs([node], { force: forceCreate });
 
             // 完了通知イベントを発行
             await connection.publish(
               "thumb-completed",
-              JSON.stringify({ filePath })
+              JSON.stringify({ filePath }),
             );
 
             console.log(`[Job ${job.id}] Notified completion for: ${filePath}`);
@@ -103,7 +103,7 @@ export const startThumbWorker = () => {
           console.warn(`Unknown job name: ${job.name}`);
       }
     },
-    { connection }
+    { connection },
   );
 
   worker.on("failed", (job, err) => {

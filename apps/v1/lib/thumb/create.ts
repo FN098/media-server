@@ -13,7 +13,7 @@ sharp.cache(false); // これでファイルハンドルを即座に解放する
 
 export async function createImageThumb(
   imagePath: string,
-  thumbPath: string
+  thumbPath: string,
 ): Promise<void> {
   await sharp(imagePath)
     .resize(400, 400, { fit: "inside" })
@@ -23,7 +23,7 @@ export async function createImageThumb(
 
 export async function createVideoThumb(
   videoPath: string,
-  thumbPath: string
+  thumbPath: string,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const ff = spawn("ffmpeg", [
@@ -49,27 +49,30 @@ export async function createVideoThumb(
       else
         reject(
           new Error(
-            `Error creating '${thumbPath}'. ffmpeg exited with code ${code}`
-          )
+            `Error creating '${thumbPath}'. ffmpeg exited with code ${code}`,
+          ),
         );
     });
   });
 }
 
-export async function createThumbsIfNotExists(
-  nodes: MediaFsNode[]
+export async function createThumbs(
+  nodes: MediaFsNode[],
+  options?: {
+    force?: boolean;
+  },
 ): Promise<void> {
   if (nodes.length === 0) return;
 
   // ビデオまたは画像ファイルを取得
   const filtered = nodes.filter(
-    (n) => n.type === "video" || n.type === "image"
+    (n) => n.type === "video" || n.type === "image",
   );
   if (filtered.length === 0) return;
 
   // サムネイルのディレクトリを一括作成
   const thumbDirs = Array.from(
-    new Set(filtered.map((n) => dirname(getServerMediaThumbPath(n.path))))
+    new Set(filtered.map((n) => dirname(getServerMediaThumbPath(n.path)))),
   );
   await Promise.all(thumbDirs.map((dir) => mkdir(dir, { recursive: true })));
 
@@ -77,7 +80,7 @@ export async function createThumbsIfNotExists(
   await Promise.all(
     filtered.map(async (n) => {
       const thumb = getServerMediaThumbPath(n.path);
-      if (await existsPath(thumb)) return;
+      if ((await existsPath(thumb)) && !options?.force) return;
 
       const media = getServerMediaPath(n.path);
 
@@ -86,6 +89,6 @@ export async function createThumbsIfNotExists(
       } else if (n.type === "image") {
         await createImageThumb(media, thumb); // 画像処理を追加
       }
-    })
+    }),
   );
 }

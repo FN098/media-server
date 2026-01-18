@@ -15,7 +15,7 @@ async function acquireLock(key: string, ttlMs: number): Promise<boolean> {
   return res === "OK";
 }
 
-export async function enqueueThumbJob(dirPath: string) {
+export async function enqueueThumbJob(dirPath: string, forceCreate = false) {
   const lockKey = `thumb-lock:dir:${hashPath(dirPath)}`;
   const locked = await acquireLock(lockKey, LOCK_TTL);
 
@@ -30,16 +30,20 @@ export async function enqueueThumbJob(dirPath: string) {
       dirPath,
       createdAt: Date.now(),
       lockKey,
+      forceCreate,
     },
     {
       removeOnComplete: true,
       removeOnFail: true,
       lifo: true,
-    }
+    },
   );
 }
 
-export async function enqueueSingleThumbJob(filePath: string) {
+export async function enqueueSingleThumbJob(
+  filePath: string,
+  forceCreate = false,
+) {
   const lockKey = `thumb-lock:dir:${hashPath(filePath)}`;
   const locked = await acquireLock(lockKey, LOCK_TTL);
 
@@ -54,11 +58,12 @@ export async function enqueueSingleThumbJob(filePath: string) {
       filePath,
       createdAt: Date.now(),
       lockKey,
+      forceCreate,
     },
     {
       removeOnComplete: true,
       removeOnFail: true,
       lifo: true,
-    }
+    },
   );
 }

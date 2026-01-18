@@ -3,6 +3,7 @@ export interface ThumbJobData {
   filePath?: string;
   createdAt: number; // ジョブのタイムスタンプ
   lockKey: string;
+  forceCreate?: boolean;
 }
 
 export interface ThumbCompletedEvent {
