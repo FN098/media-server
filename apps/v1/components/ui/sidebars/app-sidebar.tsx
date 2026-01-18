@@ -25,6 +25,7 @@ import {
   Settings,
   Star,
   Trash2,
+  Wrench,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -61,6 +62,11 @@ const items = [
     title: "Sandbox",
     url: PATHS.client.sandbox.root,
     icon: PackageOpen,
+  },
+  {
+    title: "Maintenance",
+    url: PATHS.client.maintenance.root,
+    icon: Wrench,
   },
 ];
 
@@ -105,13 +111,13 @@ export function AppSidebar() {
 }
 
 export function AppSidebarOpenButton(
-  props: React.ComponentProps<typeof Button>
+  props: React.ComponentProps<typeof Button>,
 ) {
   return <SidebarTrigger icon={Menu} {...props} open={true} />;
 }
 
 export function AppSidebarCloseButton(
-  props: React.ComponentProps<typeof Button>
+  props: React.ComponentProps<typeof Button>,
 ) {
   return <SidebarTrigger icon={X} {...props} open={false} />;
 }

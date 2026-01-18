@@ -36,6 +36,9 @@ export const PATHS = {
     trash: {
       root: "/trash",
     },
+    maintenance: {
+      root: "/maintenance",
+    },
   },
   api: {
     root: "/api",

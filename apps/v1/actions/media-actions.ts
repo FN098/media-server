@@ -9,7 +9,9 @@ import { prisma } from "@/lib/prisma";
 import { deleteThumb } from "@/lib/thumb/delete";
 import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
-import { lstat, mkdir, readdir, rename, rm } from "fs/promises";
+import { sleep } from "@/lib/utils/sleep";
+import { constants } from "fs";
+import { access, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { basename, dirname, join } from "path";
 
@@ -303,4 +305,120 @@ export async function restoreNodesAction(sourcePaths: string[]) {
   revalidatePath("/explorer");
   revalidatePath("/trash");
   return results;
+}
+
+export async function cleanupMediaAction(dirPath: string) {
+  try {
+    // 1. 指定された dirPath 内のメディアをDBから取得
+    const mediaList = await prisma.media.findMany({
+      where: {
+        dirPath: dirPath,
+      },
+      select: {
+        id: true,
+        path: true,
+      },
+    });
+
+    if (mediaList.length === 0) {
+      return { success: true, deletedCount: 0 };
+    }
+
+    // 2. 実体が存在するか確認
+    const missingMediaIds: string[] = [];
+
+    for (const media of mediaList) {
+      const realPath = getServerMediaPath(media.path);
+
+      try {
+        // ファイルにアクセスできるか確認
+        await access(realPath, constants.F_OK);
+      } catch {
+        // アクセスできない（存在しない）場合は削除対象リストに追加
+        missingMediaIds.push(media.id);
+      }
+    }
+
+    // 3. DBから削除
+    if (missingMediaIds.length > 0) {
+      await prisma.media.deleteMany({
+        where: {
+          id: {
+            in: missingMediaIds,
+          },
+        },
+      });
+
+      // 必要に応じてサムネイルのクリーンアップ処理もここに追加
+    }
+
+    revalidatePath("/explorer");
+
+    return {
+      success: true,
+      deletedCount: missingMediaIds.length,
+    };
+  } catch (error) {
+    console.error("Cleanup Media Error:", error);
+    return {
+      success: false,
+      error: "クリーンアップ中にエラーが発生しました。",
+    };
+  }
+}
+
+export async function cleanupGhostMediaAction() {
+  await sleep(1000);
+  if (1 === 1) return { success: true, removedFolders: 0, deletedRecords: 0 }; // テスト用ダミーコード、後で削除してください
+
+  try {
+    // 1. 重複を除いた dirPath の一覧を取得
+    // select distinct dirPath from Media
+    const folders = await prisma.media.groupBy({
+      by: ["dirPath"],
+    });
+
+    const missingFolders: string[] = [];
+
+    // 2. 各ディレクトリの実在確認
+    for (const folder of folders) {
+      // ルートディレクトリ ("/") はスキップ、または処理
+      const realPath = getServerMediaPath(folder.dirPath);
+
+      try {
+        await access(realPath, constants.F_OK);
+      } catch {
+        // フォルダにアクセスできない場合、削除対象リストに追加
+        missingFolders.push(folder.dirPath);
+      }
+    }
+
+    let totalDeleted = 0;
+
+    // 3. 存在しないディレクトリに属するレコードを一括削除
+    if (missingFolders.length > 0) {
+      const deleteResult = await prisma.media.deleteMany({
+        where: {
+          dirPath: {
+            in: missingFolders,
+          },
+        },
+      });
+      totalDeleted = deleteResult.count;
+    }
+
+    revalidatePath("/explorer");
+
+    return {
+      success: true,
+      removedFolders: missingFolders.length,
+      deletedRecords: totalDeleted,
+    };
+  } catch (error) {
+    console.error("Global Cleanup Error:", error);
+    return {
+      success: false,
+      error: "クリーンアップ中に予期せぬエラーが発生しました。",
+    };
+  }
 }
