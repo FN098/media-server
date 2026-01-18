@@ -1,6 +1,17 @@
 "use client";
 
 import { cleanupGhostMediaAction } from "@/actions/media-actions"; // パスは適宜調整
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shadcn/components/ui/alert-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,
@@ -18,11 +29,6 @@ export default function MaintenancePage() {
 
   const handleCleanup = () => {
     startTransition(async () => {
-      const confirmed = confirm(
-        "実在しないフォルダのDBレコードを削除します。よろしいですか？",
-      );
-      if (!confirmed) return;
-
       const result = await cleanupGhostMediaAction();
       if (result.success) {
         toast.success(
@@ -49,14 +55,33 @@ export default function MaintenancePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button
-              variant="destructive"
-              onClick={handleCleanup}
-              disabled={isPending}
-            >
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              ゴーストデータを削除する
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={isPending}>
+                  {isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  ゴーストデータを削除する
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>本当に実行しますか？</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    この操作は取り消せません。実在しないフォルダに関連付けられたすべてのメディア情報、お気に入り、タグ付けがデータベースから完全に削除されます。
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleCleanup}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    実行する
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
 
