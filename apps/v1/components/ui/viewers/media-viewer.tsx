@@ -85,7 +85,7 @@ export function MediaViewer({
   const { toggleFavorite, isFavorite } = useFavoritesContext();
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
   const [currentNode, setCurrentNode] = useState<MediaNode | null>(
-    allNodes[initialIndex] ?? null
+    allNodes[initialIndex] ?? null,
   );
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,7 +99,7 @@ export function MediaViewer({
   });
   const swiperRef = useRef<SwiperClass | null>(null);
   const lastViewedPathRef = useRef<string | null>(
-    allNodes[initialIndex]?.path ?? null
+    allNodes[initialIndex]?.path ?? null,
   );
 
   // 仮想スライド構成
@@ -134,7 +134,7 @@ export function MediaViewer({
   };
 
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(
-    getSlideIndex(initialIndex)
+    getSlideIndex(initialIndex),
   );
 
   // タイトル設定
@@ -155,7 +155,7 @@ export function MediaViewer({
       const message = nextIsFavorite
         ? "⭐お気に入りに登録しました"
         : "お気に入りを解除しました";
-      toast.info(message);
+      toast.info(message, { duration: 1000 });
 
       interactHeader();
     } catch (e) {

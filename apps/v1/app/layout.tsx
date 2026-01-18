@@ -45,7 +45,7 @@ export default function RootLayout({
             </ThemeProvider>
           </TooltipProvider>
         </AppQueryClientProvider>
-        <Toaster duration={1000} />
+        <Toaster />
       </body>
     </html>
   );
