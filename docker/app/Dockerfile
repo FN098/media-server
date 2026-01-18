@@ -100,11 +100,17 @@ WORKDIR /app
 # ffmpeg のインストール
 RUN apk add --no-cache ffmpeg
 
+# セキュリティのため非ルートユーザーを作成
+RUN addgroup --system --gid 1001 nodejs && \
+  adduser --system --uid 1001 --ingroup nodejs nextjs
+
 # 依存ファイルをコピー
 COPY --from=deps /app/node_modules ./node_modules
 
 # ソースコードのコピー
 COPY apps/v1 ./
+
+USER nextjs
 
 # サムネイル作成ワーカープロセスを起動
 CMD ["pnpm", "thumb"]
