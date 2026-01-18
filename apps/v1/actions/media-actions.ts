@@ -9,7 +9,6 @@ import { prisma } from "@/lib/prisma";
 import { deleteThumb } from "@/lib/thumb/delete";
 import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
-import { sleep } from "@/lib/utils/sleep";
 import { constants } from "fs";
 import { access, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -368,9 +367,6 @@ export async function cleanupMediaAction(dirPath: string) {
 }
 
 export async function cleanupGhostMediaAction() {
-  await sleep(1000);
-  if (1 === 1) return { success: true, removedFolders: 0, deletedRecords: 0 }; // テスト用ダミーコード、後で削除してください
-
   try {
     // 1. 重複を除いた dirPath の一覧を取得
     // select distinct dirPath from Media
