@@ -118,7 +118,7 @@ export function Explorer() {
 
   const handleApplyTagFilter = (
     tags: Iterable<string>,
-    mode: TagFilterMode
+    mode: TagFilterMode,
   ) => {
     tagFilter.selectTags(tags);
     tagFilter.setMode(mode);
@@ -132,11 +132,11 @@ export function Explorer() {
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
   const tagFilterFn = useMemo(
     () => createTagFilter(Array.from(tagFilter.selectedTags), tagFilter.mode),
-    [tagFilter]
+    [tagFilter],
   );
   const favoriteFilterFn = useMemo(
     () => createFavoriteFilter(isFavoriteOnly),
-    [isFavoriteOnly]
+    [isFavoriteOnly],
   );
 
   // フィルタリング結果
@@ -165,7 +165,7 @@ export function Explorer() {
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
     () => filteredNodes.filter((n) => isMedia(n.type)),
-    [filteredNodes]
+    [filteredNodes],
   );
 
   // 「メディアのみ」のタグリスト
@@ -175,10 +175,10 @@ export function Explorer() {
         unique(
           mediaOnly
             .filter((n) => n.tags && n.tags.length > 0)
-            .flatMap((n) => n.tags!.map((t) => t.name))
-        )
+            .flatMap((n) => n.tags!.map((t) => t.name)),
+        ),
       ),
-    [mediaOnly]
+    [mediaOnly],
   );
 
   // ===== ビューア =====
@@ -186,7 +186,7 @@ export function Explorer() {
   // ビューア用インデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
     () => new Map(mediaOnly.map((n, index) => [n.path, index])),
-    [mediaOnly]
+    [mediaOnly],
   );
 
   // ビューア用インデックスを取得
@@ -195,13 +195,13 @@ export function Explorer() {
       if (viewerIndexMap.has(path)) return viewerIndexMap.get(path)!;
       return null;
     },
-    [viewerIndexMap]
+    [viewerIndexMap],
   );
 
   // ビューア用インデックス
   const viewerIndex = useMemo(
     () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
-    [at, mediaOnly.length]
+    [at, mediaOnly.length],
   );
 
   // ビューア起動モード
@@ -492,6 +492,7 @@ export function Explorer() {
               listing.next ? (at) => openNextFolder(at ?? "first") : undefined
             }
             onEditTags={handleToggleTagEditor}
+            onDelete={handleOpenDeleteSelected}
           />
         </ScrollLockProvider>
       )}

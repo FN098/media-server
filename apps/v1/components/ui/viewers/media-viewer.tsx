@@ -37,6 +37,7 @@ import {
   Pin,
   PinOff,
   TagIcon,
+  Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -67,6 +68,7 @@ export function MediaViewer({
   onNextFolder,
   onPrevFolder,
   onEditTags,
+  onDelete,
 }: {
   allNodes: MediaNode[];
   initialIndex: number;
@@ -76,6 +78,7 @@ export function MediaViewer({
   onNextFolder?: (at?: IndexLike) => void;
   onPrevFolder?: (at?: IndexLike) => void;
   onEditTags?: () => void;
+  onDelete?: () => void;
 }) {
   const { isHeaderPinned, toggleIsHeaderPinned } = useViewerContext();
   const hasPrevFolder = !!onPrevFolder;
@@ -250,6 +253,7 @@ export function MediaViewer({
   // ショートカット
   useShortcutKeys([
     { key: "Escape", callback: () => onClose() },
+    { key: "Delete", callback: () => onDelete?.() },
     { key: "Enter", callback: () => toggleHeaderVisibility() },
     { key: " ", callback: () => toggleHeaderVisibility() },
     { key: "ArrowLeft", callback: () => swiperRef.current?.slidePrev() },
@@ -404,6 +408,16 @@ export function MediaViewer({
                     {!isMobile && (
                       <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
                         <kbd className="rounded border px-1.5 py-0.5">T</kbd>
+                      </div>
+                    )}
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={onDelete}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span className="text-destructive">削除</span>
+                    {!isMobile && (
+                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                        <kbd className="rounded border px-1.5 py-0.5">DEL</kbd>
                       </div>
                     )}
                   </DropdownMenuItem>
