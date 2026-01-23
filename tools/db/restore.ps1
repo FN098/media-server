@@ -7,7 +7,7 @@
 # ===== 設定 =====
 $Container = "media-server-db"        # docker ps で見えるコンテナ名
 $User = "root"
-$SourceDir = Join-Path $HOME "media-server" "backups" # 保存先
+$SourceDir = Join-Path $HOME "media-server/backups" # 保存先
 $TargetDB = "media_server_restore_test" # 復元先DB（既存 or 新規）
 # =================
 
