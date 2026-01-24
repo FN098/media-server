@@ -127,7 +127,7 @@ export function TagEditSheet({
       });
 
       if (result.success) {
-        toast.success("保存しました");
+        toast.success("保存しました", { duration: 1000 });
         editor.resetChanges();
 
         await editor.invalidateTags();
