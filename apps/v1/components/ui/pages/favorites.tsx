@@ -297,7 +297,11 @@ export function FavoritesExplorer() {
     { key: "t", callback: () => handleToggleTagEditor() },
     { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
-    { key: "Escape", callback: () => handleClearSelection() },
+    {
+      key: "Escape",
+      callback: () => handleClearSelection(),
+      condition: () => !isTagEditMode,
+    },
   ]);
 
   // スクロール対象のref

@@ -393,7 +393,11 @@ export function Explorer() {
     { key: "t", callback: () => handleToggleTagEditor() },
     { key: "Ctrl+a", callback: () => handleSelectAll() },
     { key: "Ctrl+k", callback: () => focusSearch() },
-    { key: "Escape", callback: () => handleClearSelection() },
+    {
+      key: "Escape",
+      callback: () => handleClearSelection(),
+      condition: () => !isTagEditMode,
+    },
     { key: "F2", callback: () => setRenameTarget(selected[0] ?? null) },
   ]);
 
