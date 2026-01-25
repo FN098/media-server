@@ -566,10 +566,7 @@ export function Explorer() {
       <MoveDialog
         open={isMoveMode}
         onOpenChange={(open) => !open && handleCloseMoveDialog()}
-        sourceNodes={moveTargets.map((node) => ({
-          path: node.path,
-          name: node.name,
-        }))}
+        sourceNodes={moveTargets}
         initialDirPath={initialDirPath}
       />
 
