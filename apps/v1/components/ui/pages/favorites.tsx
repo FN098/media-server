@@ -29,6 +29,7 @@ import { normalizeIndex } from "@/lib/query/utils";
 import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -319,44 +320,48 @@ export function FavoritesExplorer() {
 
       {/* グリッドビュー */}
       {viewMode === "grid" && !isViewMode && (
-        <div className="flex-1">
-          <PagingGridView
-            allNodes={filteredNodes}
-            initialScrollPath={lastPath}
-            onOpen={handleOpen}
-            onOpenFolder={openFolder}
-            onFavorite={handleToggleFavorite}
-            onEditTags={(node) => {
-              handleSelectSingle(node);
-              handleOpenTagEditor();
-            }}
-            onPageChange={() =>
-              scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-            }
-            onScrollRestored={() => setLastPath(null)}
-          />
-        </div>
+        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
+          <div className="flex-1">
+            <PagingGridView
+              allNodes={filteredNodes}
+              initialScrollPath={lastPath}
+              onOpen={handleOpen}
+              onOpenFolder={openFolder}
+              onFavorite={handleToggleFavorite}
+              onEditTags={(node) => {
+                handleSelectSingle(node);
+                handleOpenTagEditor();
+              }}
+              onPageChange={() =>
+                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+              }
+              onScrollRestored={() => setLastPath(null)}
+            />
+          </div>
+        </PagingProvider>
       )}
 
       {/* リストビュー */}
       {viewMode === "list" && !isViewMode && (
-        <div className="flex-1">
-          <PagingListView
-            allNodes={filteredNodes}
-            initialScrollPath={lastPath}
-            onOpen={handleOpen}
-            onOpenFolder={openFolder}
-            onFavorite={handleToggleFavorite}
-            onEditTags={(node) => {
-              handleSelectSingle(node);
-              handleOpenTagEditor();
-            }}
-            onPageChange={() =>
-              scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-            }
-            onScrollRestored={() => setLastPath(null)}
-          />
-        </div>
+        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={100}>
+          <div className="flex-1">
+            <PagingListView
+              allNodes={filteredNodes}
+              initialScrollPath={lastPath}
+              onOpen={handleOpen}
+              onOpenFolder={openFolder}
+              onFavorite={handleToggleFavorite}
+              onEditTags={(node) => {
+                handleSelectSingle(node);
+                handleOpenTagEditor();
+              }}
+              onPageChange={() =>
+                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+              }
+              onScrollRestored={() => setLastPath(null)}
+            />
+          </div>
+        </PagingProvider>
       )}
 
       {/* ビューワ */}

@@ -39,6 +39,7 @@ import { normalizeIndex } from "@/lib/query/utils";
 import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -118,7 +119,7 @@ export function Explorer() {
 
   const handleApplyTagFilter = (
     tags: Iterable<string>,
-    mode: TagFilterMode,
+    mode: TagFilterMode
   ) => {
     tagFilter.selectTags(tags);
     tagFilter.setMode(mode);
@@ -132,11 +133,11 @@ export function Explorer() {
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
   const tagFilterFn = useMemo(
     () => createTagFilter(Array.from(tagFilter.selectedTags), tagFilter.mode),
-    [tagFilter],
+    [tagFilter]
   );
   const favoriteFilterFn = useMemo(
     () => createFavoriteFilter(isFavoriteOnly),
-    [isFavoriteOnly],
+    [isFavoriteOnly]
   );
 
   // フィルタリング結果
@@ -165,7 +166,7 @@ export function Explorer() {
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
     () => filteredNodes.filter((n) => isMedia(n.type)),
-    [filteredNodes],
+    [filteredNodes]
   );
 
   // 「メディアのみ」のタグリスト
@@ -175,10 +176,10 @@ export function Explorer() {
         unique(
           mediaOnly
             .filter((n) => n.tags && n.tags.length > 0)
-            .flatMap((n) => n.tags!.map((t) => t.name)),
-        ),
+            .flatMap((n) => n.tags!.map((t) => t.name))
+        )
       ),
-    [mediaOnly],
+    [mediaOnly]
   );
 
   // ===== ビューア =====
@@ -186,7 +187,7 @@ export function Explorer() {
   // ビューア用インデックスを計算するためのマップ
   const viewerIndexMap: MediaPathToIndexMap = useMemo(
     () => new Map(mediaOnly.map((n, index) => [n.path, index])),
-    [mediaOnly],
+    [mediaOnly]
   );
 
   // ビューア用インデックスを取得
@@ -195,13 +196,13 @@ export function Explorer() {
       if (viewerIndexMap.has(path)) return viewerIndexMap.get(path)!;
       return null;
     },
-    [viewerIndexMap],
+    [viewerIndexMap]
   );
 
   // ビューア用インデックス
   const viewerIndex = useMemo(
     () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
-    [at, mediaOnly.length],
+    [at, mediaOnly.length]
   );
 
   // ビューア起動モード
@@ -433,48 +434,52 @@ export function Explorer() {
 
       {/* グリッドビュー */}
       {viewMode === "grid" && !isViewMode && (
-        <div className="flex-1">
-          <PagingGridView
-            allNodes={filteredNodes}
-            initialScrollPath={lastPath}
-            onOpen={handleOpen}
-            onFavorite={handleToggleFavorite}
-            onRename={handleRenameSingle}
-            onMove={handleOpenMoveSingle}
-            onDelete={handleOpenDeleteSingle}
-            onEditTags={(node) => {
-              handleSelectSingle(node);
-              handleOpenTagEditor();
-            }}
-            onPageChange={() =>
-              scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-            }
-            onScrollRestored={() => setLastPath(null)}
-          />
-        </div>
+        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
+          <div className="flex-1">
+            <PagingGridView
+              allNodes={filteredNodes}
+              initialScrollPath={lastPath}
+              onOpen={handleOpen}
+              onFavorite={handleToggleFavorite}
+              onRename={handleRenameSingle}
+              onMove={handleOpenMoveSingle}
+              onDelete={handleOpenDeleteSingle}
+              onEditTags={(node) => {
+                handleSelectSingle(node);
+                handleOpenTagEditor();
+              }}
+              onPageChange={() =>
+                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+              }
+              onScrollRestored={() => setLastPath(null)}
+            />
+          </div>
+        </PagingProvider>
       )}
 
       {/* リストビュー */}
       {viewMode === "list" && !isViewMode && (
-        <div className="flex-1">
-          <PagingListView
-            allNodes={filteredNodes}
-            initialScrollPath={lastPath}
-            onOpen={handleOpen}
-            onFavorite={handleToggleFavorite}
-            onRename={handleRenameSingle}
-            onMove={handleOpenMoveSingle}
-            onDelete={handleOpenDeleteSingle}
-            onEditTags={(node) => {
-              handleSelectSingle(node);
-              handleOpenTagEditor();
-            }}
-            onPageChange={() =>
-              scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-            }
-            onScrollRestored={() => setLastPath(null)}
-          />
-        </div>
+        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={100}>
+          <div className="flex-1">
+            <PagingListView
+              allNodes={filteredNodes}
+              initialScrollPath={lastPath}
+              onOpen={handleOpen}
+              onFavorite={handleToggleFavorite}
+              onRename={handleRenameSingle}
+              onMove={handleOpenMoveSingle}
+              onDelete={handleOpenDeleteSingle}
+              onEditTags={(node) => {
+                handleSelectSingle(node);
+                handleOpenTagEditor();
+              }}
+              onPageChange={() =>
+                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+              }
+              onScrollRestored={() => setLastPath(null)}
+            />
+          </div>
+        </PagingProvider>
       )}
 
       {/* ビューワ */}

@@ -24,6 +24,7 @@ import {
 } from "@/lib/media/types";
 import { getClientTrashPath } from "@/lib/path/helpers";
 import { ExplorerQuery } from "@/lib/query/types";
+import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTrashContext } from "@/providers/trash-provider";
@@ -246,32 +247,36 @@ export function Trash() {
     >
       {/* グリッドビュー */}
       {viewMode === "grid" && (
-        <div className="flex-1">
-          <PagingGridView
-            allNodes={filteredNodes}
-            onOpen={handleOpen}
-            onDeletePermanently={handleOpenDeleteSingle}
-            onRestore={handleOpenRestoreSingle}
-            onPageChange={() =>
-              scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-            }
-          />
-        </div>
+        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
+          <div className="flex-1">
+            <PagingGridView
+              allNodes={filteredNodes}
+              onOpen={handleOpen}
+              onDeletePermanently={handleOpenDeleteSingle}
+              onRestore={handleOpenRestoreSingle}
+              onPageChange={() =>
+                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+              }
+            />
+          </div>
+        </PagingProvider>
       )}
 
       {/* リストビュー */}
       {viewMode === "list" && (
-        <div className="flex-1">
-          <PagingListView
-            allNodes={filteredNodes}
-            onOpen={handleOpen}
-            onDeletePermanently={handleOpenDeleteSingle}
-            onRestore={handleOpenRestoreSingle}
-            onPageChange={() =>
-              scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-            }
-          />
-        </div>
+        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={100}>
+          <div className="flex-1">
+            <PagingListView
+              allNodes={filteredNodes}
+              onOpen={handleOpen}
+              onDeletePermanently={handleOpenDeleteSingle}
+              onRestore={handleOpenRestoreSingle}
+              onPageChange={() =>
+                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
+              }
+            />
+          </div>
+        </PagingProvider>
       )}
 
       {/* 選択バー */}

@@ -28,7 +28,7 @@ export function useNormalizeExplorerQuery() {
 
   useEffect(() => {
     const normalized = normalizeExplorerQuery(query);
-    const next = toSearchParams(normalized);
+    const next = toSearchParams(normalized, searchParams);
     const current = searchParams.toString();
 
     if (next !== current) {

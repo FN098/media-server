@@ -14,15 +14,15 @@ import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 
 interface PagingListViewProps {
   allNodes: MediaNode[];
-  pageSize?: number;
   initialScrollPath?: string | null;
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string) => void;
@@ -43,7 +43,6 @@ const GRID_TEMPLATE =
 
 export function PagingListView({
   allNodes,
-  pageSize = 100,
   initialScrollPath,
   onOpen,
   onOpenFolder,
@@ -58,15 +57,11 @@ export function PagingListView({
   onPageChange,
   onScrollRestored,
 }: PagingListViewProps) {
-  const [currentPage, setCurrentPage] = useState(1);
+  const { currentPage, pageSize, totalPages, setPage, paginate } =
+    usePagingContext();
 
-  // フィルターなどで表示内容が変更されたらページをリセット
-  useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allNodes.length]);
+  // 現在のページのノードを取得
+  const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
 
   // パスからグローバルインデックスを特定する
   const targetIndex = useMemo(() => {
@@ -75,15 +70,27 @@ export function PagingListView({
     return index !== -1 ? index : null;
   }, [allNodes, initialScrollPath]);
 
-  // 1. ターゲットが含まれるページへ移動
+  // グローバルページを特定する
+  const targetPage = useMemo(() => {
+    if (!targetIndex) return null;
+    return Math.floor(targetIndex / pageSize) + 1;
+  }, [pageSize, targetIndex]);
+
+  // ページ自動遷移
   useEffect(() => {
-    if (targetIndex !== null) {
-      const targetPage = Math.floor(targetIndex / pageSize) + 1;
-      if (targetPage !== currentPage) {
-        setCurrentPage(targetPage);
+    if (!targetPage || targetPage === currentPage) return;
+    setPage(targetPage);
+  }, [currentPage, setPage, targetPage]);
+
+  // フィルターなどで件数が変わったら1ページ目に戻す
+  useEffect(() => {
+    if (currentPage > 1 && allNodes.length > 0) {
+      const maxPage = Math.ceil(allNodes.length / pageSize);
+      if (currentPage > maxPage) {
+        setPage(1);
       }
     }
-  }, [targetIndex, pageSize, currentPage]);
+  }, [allNodes.length, pageSize, currentPage, setPage]);
 
   // 2. DOM構築後にスクロール
   useEffect(() => {
@@ -104,15 +111,9 @@ export function PagingListView({
   }, [currentPage, targetIndex, pageSize, onScrollRestored]);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    setPage(page);
     onPageChange?.(page);
   };
-
-  const totalPages = Math.ceil(allNodes.length / pageSize);
-  const currentNodes = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return allNodes.slice(start, start + pageSize);
-  }, [allNodes, currentPage, pageSize]);
 
   const isMobile = useIsMobile();
 
