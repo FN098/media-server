@@ -9,7 +9,6 @@ import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitleControl } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
@@ -40,6 +39,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -251,28 +251,30 @@ export function MediaViewer({
   };
 
   // ショートカット
-  useShortcutKeys([
-    { key: "Escape", callback: () => onClose() },
-    { key: "Delete", callback: () => onDelete?.() },
-    { key: "Enter", callback: () => toggleHeaderVisibility() },
-    { key: " ", callback: () => toggleHeaderVisibility() },
-    { key: "ArrowLeft", callback: () => swiperRef.current?.slidePrev() },
-    { key: "ArrowRight", callback: () => swiperRef.current?.slideNext() },
-    { key: "a", callback: () => swiperRef.current?.slidePrev() },
-    { key: "s", callback: () => void handleToggleFavorite() },
-    { key: "d", callback: () => swiperRef.current?.slideNext() },
-    { key: "f", callback: () => toggleFullscreen() },
-    { key: "p", callback: () => onPrevFolder?.("first") },
-    { key: "n", callback: () => onNextFolder?.("first") },
-    { key: "o", callback: () => handleOpenFolder() },
-    {
-      key: "h",
-      callback: () => {
-        toggleIsHeaderPinned();
-        interactHeader();
-      },
+  useHotkeys("escape", () => onClose(), { scopes: "viewer" });
+  useHotkeys("delete", () => onDelete?.(), { scopes: "viewer" });
+  useHotkeys(["enter", "space"], () => toggleHeaderVisibility(), {
+    scopes: "viewer",
+  }); // 配列で複数キー指定可能
+  useHotkeys(["arrowleft", "a"], () => swiperRef.current?.slidePrev(), {
+    scopes: "viewer",
+  });
+  useHotkeys(["arrowright", "d"], () => swiperRef.current?.slideNext(), {
+    scopes: "viewer",
+  });
+  useHotkeys("s", () => void handleToggleFavorite(), { scopes: "viewer" });
+  useHotkeys("f", () => toggleFullscreen(), { scopes: "viewer" });
+  useHotkeys("p", () => onPrevFolder?.("first"), { scopes: "viewer" });
+  useHotkeys("n", () => onNextFolder?.("first"), { scopes: "viewer" });
+  useHotkeys("o", () => handleOpenFolder(), { scopes: "viewer" });
+  useHotkeys(
+    "h",
+    () => {
+      toggleIsHeaderPinned();
+      interactHeader();
     },
-  ]);
+    { scopes: "viewer" }
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black">

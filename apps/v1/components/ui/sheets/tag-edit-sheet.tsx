@@ -1,5 +1,4 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import {
@@ -28,6 +27,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export type TagEditMode = "default" | "single" | "none";
@@ -151,17 +151,8 @@ export function TagEditSheet({
   };
 
   // ショートカット
-  useShortcutKeys([
-    {
-      key: "Escape",
-      callback: () => handleTerminate(),
-    },
-    {
-      key: "e",
-      callback: () => toggleIsEditing(),
-      condition: () => canEdit,
-    },
-  ]);
+  useHotkeys("escape", () => handleTerminate(), { scopes: "tag-editor" });
+  useHotkeys("e", () => toggleIsEditing(), { scopes: "tag-editor" });
 
   return (
     <>

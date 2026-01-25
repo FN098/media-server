@@ -1,5 +1,4 @@
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaNode } from "@/lib/media/types";
 import { encodePath } from "@/lib/path/encoder";
 import { getAbsoluteApiMediaUrl } from "@/lib/path/helpers";
@@ -18,6 +17,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export function AudioPlayer({
   media,
@@ -104,12 +104,33 @@ export function AudioPlayer({
   }, []);
 
   // ショートカット
-  useShortcutKeys([
-    { key: "Ctrl+ArrowRight", callback: () => seek(10) },
-    { key: "Ctrl+ArrowLeft", callback: () => seek(-10) },
-    { key: " ", callback: () => togglePlaying() },
-    { key: "r", callback: () => toggleRepeating() },
-  ]);
+  useHotkeys(
+    "space",
+    (e) => {
+      e.preventDefault(); // 親のビューア側などのイベント伝播を阻止
+      togglePlaying();
+    },
+    { scopes: "viewer" }
+  );
+  useHotkeys(
+    "arrowup",
+    (e) => {
+      // 長押し（連打）を無視
+      if (e.repeat) return;
+      seek(10);
+    },
+    { scopes: "viewer" }
+  );
+  useHotkeys(
+    "arrowdown",
+    (e) => {
+      // 長押し（連打）を無視
+      if (e.repeat) return;
+      seek(-10);
+    },
+    { scopes: "viewer" }
+  );
+  useHotkeys("r", () => toggleRepeating(), { scopes: "viewer" });
 
   return (
     <div className="w-full h-full flex items-center justify-center">

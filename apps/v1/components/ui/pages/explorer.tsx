@@ -19,7 +19,6 @@ import {
   useNormalizeExplorerQuery,
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
 import {
   createFavoriteFilter,
@@ -57,6 +56,7 @@ import { AnimatePresence } from "framer-motion";
 import { FolderInput, MoreVertical, TagIcon, Trash2 } from "lucide-react";
 import { dirname } from "path";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function Explorer() {
@@ -386,20 +386,62 @@ export function Explorer() {
     }
   }, [listing.path]);
 
-  // ===== その他 =====
+  // ===== ショートカット =====
 
-  // ショートカット
-  useShortcutKeys([
-    { key: "t", callback: () => handleToggleTagEditor() },
-    { key: "Ctrl+a", callback: () => handleSelectAll() },
-    { key: "Ctrl+k", callback: () => focusSearch() },
-    {
-      key: "Escape",
-      callback: () => handleClearSelection(),
-      condition: () => !isTagEditMode,
+  const { enableScope, disableScope } = useHotkeysContext();
+
+  const allScopes = useMemo(
+    () => ["explorer-main", "tag-editor", "viewer", "dialog"] as const,
+    []
+  );
+
+  const activeScope = useMemo<(typeof allScopes)[number]>(() => {
+    if (isRenameMode || isMoveMode || isDeleteMode) return "dialog";
+    else if (isTagEditMode) return "tag-editor";
+    else if (isViewMode) return "viewer";
+    else return "explorer-main";
+  }, [isDeleteMode, isMoveMode, isRenameMode, isTagEditMode, isViewMode]);
+
+  // スコープの排他的制御
+  useEffect(() => {
+    // 該当スコープを有効にし、それ以外を無効にする
+    allScopes.forEach((s) => {
+      if (s === activeScope) {
+        enableScope(s);
+      } else {
+        disableScope(s);
+      }
+    });
+  }, [activeScope, allScopes, disableScope, enableScope]);
+
+  // ショートカットの定義
+  useHotkeys("t", () => handleToggleTagEditor(), {
+    scopes: ["explorer-main", "viewer"],
+  });
+  useHotkeys(
+    "ctrl+a",
+    (e) => {
+      e.preventDefault();
+      handleSelectAll();
     },
-    { key: "F2", callback: () => setRenameTarget(selected[0] ?? null) },
-  ]);
+    { scopes: "explorer-main" }
+  );
+  useHotkeys(
+    "ctrl+k",
+    (e) => {
+      e.preventDefault();
+      focusSearch();
+    },
+    { scopes: "explorer-main" }
+  );
+  useHotkeys("f2", () => setRenameTarget(selected[0] ?? null), {
+    scopes: ["explorer-main", "viewer"],
+  });
+  useHotkeys("escape", () => handleClearSelection(), {
+    scopes: "explorer-main",
+  });
+
+  // ===== その他 =====
 
   // スクロール対象のref
   const scrollRef = useRef<HTMLDivElement>(null);

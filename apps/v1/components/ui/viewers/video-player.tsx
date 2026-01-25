@@ -1,5 +1,4 @@
 import { LoadingSpinner } from "@/components/ui/spinners/loading-spinner";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { MediaFsNode } from "@/lib/media/types";
 import { encodePath } from "@/lib/path/encoder";
 import { getAbsoluteApiMediaUrl, getApiThumbUrl } from "@/lib/path/helpers";
@@ -7,6 +6,7 @@ import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
 import { memo, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 type VideoPlayerProps = {
   media: MediaFsNode;
@@ -51,23 +51,44 @@ export const VideoPlayer = memo(function VideoPlayer({
     }
   };
 
+  const togglePlaying = () => {
+    const video = playerRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.play().catch((e) => console.error(e));
+    } else {
+      video.pause();
+    }
+  };
+
   // ショートカット
-  useShortcutKeys([
-    {
-      key: "ArrowUp",
-      callback: (e: KeyboardEvent) => {
-        if (e.repeat) return;
-        seek(10);
-      },
+  useHotkeys(
+    "space",
+    (e) => {
+      e.preventDefault(); // 親のビューア側などのイベント伝播を阻止
+      togglePlaying();
     },
-    {
-      key: "ArrowDown",
-      callback: (e: KeyboardEvent) => {
-        if (e.repeat) return;
-        seek(-10);
-      },
+    { scopes: "viewer" }
+  );
+  useHotkeys(
+    "arrowup",
+    (e) => {
+      // 長押し（連打）を無視
+      if (e.repeat) return;
+      seek(10);
     },
-  ]);
+    { scopes: "viewer" }
+  );
+  useHotkeys(
+    "arrowdown",
+    (e) => {
+      // 長押し（連打）を無視
+      if (e.repeat) return;
+      seek(-10);
+    },
+    { scopes: "viewer" }
+  );
 
   return (
     <div className="relative group overflow-hidden bg-black aspect-video w-full max-w-4xl mx-auto shadow-lg">
@@ -101,6 +122,7 @@ export const VideoPlayer = memo(function VideoPlayer({
             src={getAbsoluteApiMediaUrl(encodePath(media.path))}
             autoPlay
             streamType="on-demand"
+            nohotkeys={true}
             onLoadedData={handleLoadedData}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}

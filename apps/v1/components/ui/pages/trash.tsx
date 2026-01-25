@@ -10,7 +10,6 @@ import { RestoreConfirmDialog } from "@/components/ui/dialogs/restore-confirm-di
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import {
   useNormalizeTrashQuery,
@@ -40,6 +39,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
 import { MoreVertical, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function Trash() {
@@ -220,14 +220,53 @@ export function Trash() {
     setDeleteTargets(selected);
   };
 
-  // ===== その他 =====
+  // ===== ショートカット =====
 
-  // ショートカット
-  useShortcutKeys([
-    { key: "Ctrl+a", callback: () => handleSelectAll() },
-    { key: "Ctrl+k", callback: () => focusSearch() },
-    { key: "Escape", callback: () => handleClearSelection() },
-  ]);
+  const { enableScope, disableScope } = useHotkeysContext();
+
+  const allScopes = useMemo(
+    () => ["trash-main", "tag-editor", "viewer", "dialog"] as const,
+    []
+  );
+
+  const activeScope = useMemo<(typeof allScopes)[number]>(() => {
+    return "trash-main";
+  }, []);
+
+  // スコープの排他的制御
+  useEffect(() => {
+    // 該当スコープを有効にし、それ以外を無効にする
+    allScopes.forEach((s) => {
+      if (s === activeScope) {
+        enableScope(s);
+      } else {
+        disableScope(s);
+      }
+    });
+  }, [activeScope, allScopes, disableScope, enableScope]);
+
+  // ショートカットの定義
+  useHotkeys(
+    "ctrl+a",
+    (e) => {
+      e.preventDefault();
+      handleSelectAll();
+    },
+    { scopes: "trash-main" }
+  );
+  useHotkeys(
+    "ctrl+k",
+    (e) => {
+      e.preventDefault();
+      focusSearch();
+    },
+    { scopes: "trash-main" }
+  );
+  useHotkeys("escape", () => handleClearSelection(), {
+    scopes: "trash-main",
+  });
+
+  // ===== その他 =====
 
   // スクロール対象のref
   const scrollRef = useRef<HTMLDivElement>(null);

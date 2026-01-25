@@ -1,5 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { AppQueryClientProvider } from "@/providers/app-query-client-provider";
+import { HotkeysClientProvider } from "@/providers/hotkeys-client-provider";
 import { ThumbEventProvider } from "@/providers/thumb-event-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
 import { TooltipProvider } from "@/shadcn/components/ui/tooltip";
@@ -41,7 +42,9 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <ThumbEventProvider>{children}</ThumbEventProvider>
+              <HotkeysClientProvider>
+                <ThumbEventProvider>{children}</ThumbEventProvider>
+              </HotkeysClientProvider>
             </ThemeProvider>
           </TooltipProvider>
         </AppQueryClientProvider>

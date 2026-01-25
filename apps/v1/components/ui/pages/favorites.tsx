@@ -13,7 +13,6 @@ import {
   useNormalizeExplorerQuery,
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
-import { useShortcutKeys } from "@/hooks/use-shortcut-keys";
 import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
 import { createSearchFilter, createTagFilter } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
@@ -40,6 +39,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
 import { TagIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function FavoritesExplorer() {
@@ -290,19 +290,56 @@ export function FavoritesExplorer() {
     }
   }, [listing.path]);
 
-  // ===== その他 =====
+  // ===== ショートカット =====
 
-  // ショートカット
-  useShortcutKeys([
-    { key: "t", callback: () => handleToggleTagEditor() },
-    { key: "Ctrl+a", callback: () => handleSelectAll() },
-    { key: "Ctrl+k", callback: () => focusSearch() },
-    {
-      key: "Escape",
-      callback: () => handleClearSelection(),
-      condition: () => !isTagEditMode,
+  const { enableScope, disableScope } = useHotkeysContext();
+
+  const allScopes = useMemo(
+    () => ["favorites-main", "tag-editor", "viewer", "dialog"] as const,
+    []
+  );
+
+  const activeScope = useMemo<(typeof allScopes)[number]>(() => {
+    if (isViewMode) return "viewer";
+    else if (isTagEditMode) return "tag-editor";
+    else return "favorites-main";
+  }, [isTagEditMode, isViewMode]);
+
+  // スコープの排他的制御
+  useEffect(() => {
+    // 該当スコープを有効にし、それ以外を無効にする
+    allScopes.forEach((s) => {
+      if (s === activeScope) {
+        enableScope(s);
+      } else {
+        disableScope(s);
+      }
+    });
+  }, [activeScope, allScopes, disableScope, enableScope]);
+
+  // ショートカットの定義
+  useHotkeys("t", () => handleToggleTagEditor(), { scopes: "favorites-main" });
+  useHotkeys(
+    "ctrl+a",
+    (e) => {
+      e.preventDefault();
+      handleSelectAll();
     },
-  ]);
+    { scopes: "favorites-main" }
+  );
+  useHotkeys(
+    "ctrl+k",
+    (e) => {
+      e.preventDefault();
+      focusSearch();
+    },
+    { scopes: "favorites-main" }
+  );
+  useHotkeys("escape", () => handleClearSelection(), {
+    scopes: "favorites-main",
+  });
+
+  // ===== その他 =====
 
   // スクロール対象のref
   const scrollRef = useRef<HTMLDivElement>(null);
