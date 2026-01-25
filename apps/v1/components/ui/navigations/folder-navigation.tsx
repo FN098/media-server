@@ -1,6 +1,7 @@
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { Button } from "@/shadcn/components/ui/button";
-import { ArrowLeft, ArrowRight, Link } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 export function FolderNavigation({
