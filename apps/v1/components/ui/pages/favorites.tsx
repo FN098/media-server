@@ -300,10 +300,12 @@ export function FavoritesExplorer() {
   );
 
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
-    if (isViewMode) return "viewer";
-    else if (isTagEditMode) return "tag-editor";
+    if (isTagEditMode) return "tag-editor";
+    else if (isViewMode) return "viewer";
     else return "favorites-main";
   }, [isTagEditMode, isViewMode]);
+
+  console.log({ activeScope });
 
   // スコープの排他的制御
   useEffect(() => {
@@ -318,7 +320,12 @@ export function FavoritesExplorer() {
   }, [activeScope, allScopes, disableScope, enableScope]);
 
   // ショートカットの定義
-  useHotkeys("t", () => handleToggleTagEditor(), { scopes: "favorites-main" });
+  useHotkeys("escape", () => handleClearSelection(), {
+    scopes: "favorites-main",
+  });
+  useHotkeys("t", () => handleToggleTagEditor(), {
+    scopes: ["favorites-main", "viewer", "tag-editor"],
+  });
   useHotkeys(
     "ctrl+a",
     (e) => {
@@ -335,9 +342,6 @@ export function FavoritesExplorer() {
     },
     { scopes: "favorites-main" }
   );
-  useHotkeys("escape", () => handleClearSelection(), {
-    scopes: "favorites-main",
-  });
 
   // ===== その他 =====
 

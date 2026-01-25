@@ -402,6 +402,8 @@ export function Explorer() {
     else return "explorer-main";
   }, [isDeleteMode, isMoveMode, isRenameMode, isTagEditMode, isViewMode]);
 
+  console.log({ activeScope });
+
   // スコープの排他的制御
   useEffect(() => {
     // 該当スコープを有効にし、それ以外を無効にする
@@ -415,8 +417,11 @@ export function Explorer() {
   }, [activeScope, allScopes, disableScope, enableScope]);
 
   // ショートカットの定義
+  useHotkeys("escape", () => handleClearSelection(), {
+    scopes: "explorer-main",
+  });
   useHotkeys("t", () => handleToggleTagEditor(), {
-    scopes: ["explorer-main", "viewer"],
+    scopes: ["explorer-main", "viewer", "tag-editor"],
   });
   useHotkeys(
     "ctrl+a",
@@ -436,9 +441,6 @@ export function Explorer() {
   );
   useHotkeys("f2", () => setRenameTarget(selected[0] ?? null), {
     scopes: ["explorer-main", "viewer"],
-  });
-  useHotkeys("escape", () => handleClearSelection(), {
-    scopes: "explorer-main",
   });
 
   // ===== その他 =====
