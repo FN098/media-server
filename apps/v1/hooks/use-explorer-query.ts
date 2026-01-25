@@ -62,9 +62,9 @@ export function useSetExplorerQuery() {
       const url = search ? `${basePath}?${search}` : basePath;
 
       if (options.history === "push") {
-        router.push(url);
+        router.push(url, { scroll: false });
       } else {
-        router.replace(url);
+        router.replace(url, { scroll: false });
       }
     },
     [current, pathname, router]
