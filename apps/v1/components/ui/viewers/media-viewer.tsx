@@ -252,28 +252,42 @@ export function MediaViewer({
 
   // ショートカット
   useHotkeys("escape", () => onClose(), { scopes: "viewer" });
-  useHotkeys("delete", () => onDelete?.(), { scopes: "viewer" });
+  useHotkeys("delete", () => onDelete?.(), {
+    scopes: ["viewer", "tag-editor"],
+  });
   useHotkeys(["enter", "space"], () => toggleHeaderVisibility(), {
-    scopes: "viewer",
-  }); // 配列で複数キー指定可能
+    scopes: ["viewer", "tag-editor"],
+  });
   useHotkeys(["arrowleft", "a"], () => swiperRef.current?.slidePrev(), {
-    scopes: "viewer",
+    scopes: ["viewer", "tag-editor"],
   });
   useHotkeys(["arrowright", "d"], () => swiperRef.current?.slideNext(), {
-    scopes: "viewer",
+    scopes: ["viewer", "tag-editor"],
   });
-  useHotkeys("s", () => void handleToggleFavorite(), { scopes: "viewer" });
-  useHotkeys("f", () => toggleFullscreen(), { scopes: "viewer" });
-  useHotkeys("p", () => onPrevFolder?.("first"), { scopes: "viewer" });
-  useHotkeys("n", () => onNextFolder?.("first"), { scopes: "viewer" });
-  useHotkeys("o", () => handleOpenFolder(), { scopes: "viewer" });
+  useHotkeys("s", () => void handleToggleFavorite(), {
+    scopes: ["viewer", "tag-editor"],
+  });
+  useHotkeys("f", () => toggleFullscreen(), {
+    scopes: ["viewer", "tag-editor"],
+  });
+  useHotkeys("p", () => onPrevFolder?.("first"), {
+    scopes: ["viewer", "tag-editor"],
+  });
+  useHotkeys("n", () => onNextFolder?.("first"), {
+    scopes: ["viewer", "tag-editor"],
+  });
+  useHotkeys("o", () => handleOpenFolder(), {
+    scopes: ["viewer", "tag-editor"],
+  });
   useHotkeys(
     "h",
     () => {
       toggleIsHeaderPinned();
       interactHeader();
     },
-    { scopes: "viewer" }
+    {
+      scopes: ["viewer", "tag-editor"],
+    }
   );
 
   return (

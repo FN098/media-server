@@ -69,7 +69,7 @@ export const VideoPlayer = memo(function VideoPlayer({
       e.preventDefault(); // 親のビューア側などのイベント伝播を阻止
       togglePlaying();
     },
-    { scopes: "viewer" }
+    { scopes: ["viewer", "tag-editor"] }
   );
   useHotkeys(
     "arrowup",
@@ -78,7 +78,7 @@ export const VideoPlayer = memo(function VideoPlayer({
       if (e.repeat) return;
       seek(10);
     },
-    { scopes: "viewer" }
+    { scopes: ["viewer", "tag-editor"] }
   );
   useHotkeys(
     "arrowdown",
@@ -87,7 +87,7 @@ export const VideoPlayer = memo(function VideoPlayer({
       if (e.repeat) return;
       seek(-10);
     },
-    { scopes: "viewer" }
+    { scopes: ["viewer", "tag-editor"] }
   );
 
   return (

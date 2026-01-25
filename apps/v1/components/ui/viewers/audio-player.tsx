@@ -110,7 +110,7 @@ export function AudioPlayer({
       e.preventDefault(); // 親のビューア側などのイベント伝播を阻止
       togglePlaying();
     },
-    { scopes: "viewer" }
+    { scopes: ["viewer", "tag-editor"] }
   );
   useHotkeys(
     "arrowup",
@@ -119,7 +119,7 @@ export function AudioPlayer({
       if (e.repeat) return;
       seek(10);
     },
-    { scopes: "viewer" }
+    { scopes: ["viewer", "tag-editor"] }
   );
   useHotkeys(
     "arrowdown",
@@ -128,9 +128,11 @@ export function AudioPlayer({
       if (e.repeat) return;
       seek(-10);
     },
-    { scopes: "viewer" }
+    { scopes: ["viewer", "tag-editor"] }
   );
-  useHotkeys("r", () => toggleRepeating(), { scopes: "viewer" });
+  useHotkeys("r", () => toggleRepeating(), {
+    scopes: ["viewer", "tag-editor"],
+  });
 
   return (
     <div className="w-full h-full flex items-center justify-center">
