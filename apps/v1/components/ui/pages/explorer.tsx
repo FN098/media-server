@@ -411,8 +411,11 @@ export function Explorer() {
 
   return (
     <div
-      className={cn("flex-1 flex flex-col min-h-0 overflow-auto")}
+      className={cn(
+        "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
+      )}
       ref={scrollRef}
+      tabIndex={-1}
     >
       <div className="flex flex-wrap items-center gap-1 px-4">
         {/* タグフィルター */}

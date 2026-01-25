@@ -242,8 +242,11 @@ export function Trash() {
 
   return (
     <div
-      className={cn("flex-1 flex flex-col min-h-0 overflow-auto")}
+      className={cn(
+        "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
+      )}
       ref={scrollRef}
+      tabIndex={-1}
     >
       {/* グリッドビュー */}
       {viewMode === "grid" && (
