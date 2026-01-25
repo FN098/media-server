@@ -291,7 +291,7 @@ export function MediaViewer({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black">
+    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
       {/* ヘッダーエリア（インタラクション検知用） */}
       <div
         className="absolute top-0 left-0 right-0 h-24 z-40"
