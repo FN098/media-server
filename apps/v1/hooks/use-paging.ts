@@ -1,50 +1,36 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export function usePaging(totalItems: number, defaultPageSize = 48) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  // URLから現在のページとページサイズを取得
-  const currentPage = useMemo(() => {
-    const p = searchParams.get("p");
-    return p ? Math.max(1, parseInt(p)) : 1;
-  }, [searchParams]);
-
-  const pageSize = useMemo(() => {
-    const ps = searchParams.get("ps");
-    return ps ? Math.max(1, parseInt(ps)) : defaultPageSize;
-  }, [searchParams, defaultPageSize]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSizeState] = useState(defaultPageSize);
 
   const totalPages = useMemo(
     () => Math.ceil(totalItems / pageSize),
     [totalItems, pageSize]
   );
 
-  // URL更新ロジック
+  // アイテム総数が減って、現在のページが最大ページを超えてしまった時の補正
+  const fixedCurrentPage = useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      return totalPages;
+    }
+    return currentPage;
+  }, [currentPage, totalPages]);
+
   const setPage = useCallback(
     (page: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("p", page.toString());
-      router.push(`${pathname}?${params.toString()}`);
+      setCurrentPage(Math.max(1, Math.min(page, totalPages || 1)));
     },
-    [router, pathname, searchParams]
+    [totalPages]
   );
 
-  const setPageSize = useCallback(
-    (size: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("ps", size.toString());
-      params.set("p", "1"); // サイズ変更時は1ページ目へ
-      router.push(`${pathname}?${params.toString()}`);
-    },
-    [router, pathname, searchParams]
-  );
+  const setPageSize = useCallback((size: number) => {
+    setPageSizeState(size);
+    setCurrentPage(1); // サイズ変更時は1ページ目へ
+  }, []);
 
-  // データを現在のページ分に切り出す関数
   const paginate = useCallback(
     <T>(items: T[]): T[] => {
       const start = (currentPage - 1) * pageSize;
@@ -54,7 +40,7 @@ export function usePaging(totalItems: number, defaultPageSize = 48) {
   );
 
   return {
-    currentPage,
+    currentPage: fixedCurrentPage,
     pageSize,
     totalPages,
     setPage,
