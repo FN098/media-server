@@ -49,7 +49,7 @@ export function TagEditSheet({
   const editor = useTagEditorContext();
   const controls = useDragControls();
   const isMobile = useIsMobile();
-  const canEdit = targetNodes.length > 0;
+  const canEdit = mode !== "none" && targetNodes.length > 0;
 
   // 対象が変更されたらコンテキストに反映
   useEffect(() => {
