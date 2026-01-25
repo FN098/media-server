@@ -31,7 +31,7 @@ export function useFavorites(initialFavorites?: FavoritesRecord) {
   const { broadcast } = useFavoriteChannel(setFavorite);
 
   const toggleFavorite = useCallback(
-    async (path: string): Promise<boolean | undefined> => {
+    async (path: PathType): Promise<boolean | undefined> => {
       if (isInFlight(path)) return;
 
       const prev = isFavorite(path);
