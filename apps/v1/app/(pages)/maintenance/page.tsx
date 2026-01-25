@@ -55,7 +55,7 @@ export default function MaintenancePage() {
       const result = await cleanupGhostMediaAction();
       if (result.success) {
         toast.success(
-          `削除完了: ${result.deletedRecords}件のデータをクリーンアップしました。`,
+          `削除完了: ${result.deletedRecords}件のデータをクリーンアップしました。`
         );
         setScanResult(null);
       } else {
@@ -87,7 +87,7 @@ export default function MaintenancePage() {
               ) : scanResult && scanResult.recordCount > 0 ? (
                 <div className="flex items-center gap-2 text-sm font-medium text-orange-600 animate-in zoom-in-95">
                   <AlertCircle className="w-4 h-4" />
-                  {scanResult.missingFolderCount} 個の消滅したフォルダ内に{" "}
+                  {scanResult.missingFolderCount} 個の消滅したフォルダ内に
                   {scanResult.recordCount} 件のデータが見つかりました。
                 </div>
               ) : (
@@ -117,7 +117,7 @@ export default function MaintenancePage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>最終確認</AlertDialogTitle>
                   <AlertDialogDescription>
-                    見つかった {scanResult?.recordCount}{" "}
+                    見つかった {scanResult?.recordCount}
                     件のレコードを削除します。この操作は元に戻せません。
                   </AlertDialogDescription>
                 </AlertDialogHeader>
