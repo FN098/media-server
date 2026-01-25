@@ -33,10 +33,10 @@ export function usePaging(totalItems: number, defaultPageSize = 48) {
 
   const paginate = useCallback(
     <T>(items: T[]): T[] => {
-      const start = (currentPage - 1) * pageSize;
+      const start = (fixedCurrentPage - 1) * pageSize;
       return items.slice(start, start + pageSize);
     },
-    [currentPage, pageSize]
+    [fixedCurrentPage, pageSize]
   );
 
   return {
