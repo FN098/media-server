@@ -11,9 +11,9 @@ export const MIME_MAP: Record<MediaExt, string> = {
 
   // videos
   ".mp4": "video/mp4",
-  ".mov": "video/mp4",
-  ".mkv": "video/mp4",
-  ".avi": "video/mp4",
+  ".mov": "video/quicktime",
+  ".mkv": "video/x-matroska",
+  ".avi": "video/x-msvideo",
   ".webm": "video/webm",
 
   // audio
@@ -23,6 +23,7 @@ export const MIME_MAP: Record<MediaExt, string> = {
   ".m4a": "audio/mp4",
   ".aac": "audio/aac",
   ".ogg": "audio/ogg",
+  ".opus": "audio/opus",
 };
 
 export function getMimetype(filePath: string): string {
