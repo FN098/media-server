@@ -31,6 +31,7 @@ export const MediaThumb = memo(function MediaThumb1({
         <div
           className={cn(
             "flex h-full w-full items-center justify-center",
+            "w-full h-full",
             className
           )}
         >
@@ -180,5 +181,9 @@ export function MediaThumbIcon({
   className?: string;
 }) {
   const img = mediaThumbIcons[type];
-  return <div className={className}>{img}</div>;
+  return (
+    <div className={cn("inline-flex items-center justify-center", className)}>
+      {img}
+    </div>
+  );
 }

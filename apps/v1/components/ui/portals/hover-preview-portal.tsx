@@ -131,7 +131,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
       <AnimatePresence>
         {visible && (
           <motion.div
-            className="fixed z-[50] pointer-events-none overflow-hidden rounded-xl border-2 border-primary/20 bg-background shadow-2xl"
+            className="fixed z-[50] pointer-events-none overflow-hidden rounded-xl border-2 border-primary/20 bg-background shadow-2xl flex flex-col"
             initial={{
               opacity: 0,
               scale: 0.85,
@@ -161,7 +161,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
             }}
           >
             {/* メディア部分 */}
-            <div className="relative flex-1 bg-black overflow-hidden">
+            <div className="relative flex-1 bg-black overflow-hidden flex items-center justify-center">
               <MediaThumb
                 node={node}
                 className="w-full h-full object-contain"
