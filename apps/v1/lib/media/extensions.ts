@@ -22,6 +22,7 @@ export const audioExtensions = [
   ".m4a",
   ".aac",
   ".ogg",
+  ".opus",
 ] as const;
 
 export const mediaExtensions = {
