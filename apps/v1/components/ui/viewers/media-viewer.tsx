@@ -255,9 +255,13 @@ export function MediaViewer({
   useHotkeys("delete", () => onDelete?.(), {
     scopes: ["viewer", "tag-editor"],
   });
-  useHotkeys(["enter", "space"], () => toggleHeaderVisibility(), {
-    scopes: ["viewer", "tag-editor"],
-  });
+  useHotkeys(
+    ["enter", "space"],
+    () => !isHeaderPinned && toggleHeaderVisibility(),
+    {
+      scopes: ["viewer", "tag-editor"],
+    }
+  );
   useHotkeys(["arrowleft", "a"], () => swiperRef.current?.slidePrev(), {
     scopes: ["viewer", "tag-editor"],
   });
