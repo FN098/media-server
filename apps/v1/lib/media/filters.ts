@@ -20,7 +20,6 @@ export const createTagFilter = (
   mode: TagFilterMode = "AND"
 ): MediaNodeFilter => {
   return (node) => {
-    if (selectedTags.length === 0) return true;
     const nodeTagNames = node.tags?.map((t) => t.name) || [];
 
     switch (mode) {
@@ -31,9 +30,13 @@ export const createTagFilter = (
         // 選択したタグがいずれも含まれていない場合のみOK
         return !selectedTags.some((tag) => nodeTagNames.includes(tag));
       case "AND":
-      default:
         // すべて含まれている場合のみOK
         return selectedTags.every((tag) => nodeTagNames.includes(tag));
+      case "EMPTY":
+        // 1つもタグを含まなければOK
+        return nodeTagNames.length === 0;
+      default:
+        return true;
     }
   };
 };

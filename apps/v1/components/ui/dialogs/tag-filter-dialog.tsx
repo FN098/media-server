@@ -22,6 +22,7 @@ const modeTexts = {
   AND: "すべて含む",
   OR: "いずれか",
   NOT: "含まない",
+  EMPTY: "タグなし",
 } as const;
 
 interface TagFilterDialogProps {
@@ -77,7 +78,9 @@ export function TagFilterDialog({
   };
 
   const handleApply = () => {
-    onApply(tempSelected, mode);
+    const finalTags = mode === "EMPTY" ? new Set<string>() : tempSelected;
+    setTempSelected(finalTags);
+    onApply(finalTags, mode);
     setOpen(false);
   };
 
@@ -95,6 +98,8 @@ export function TagFilterDialog({
       </div>
     );
   }
+
+  const isEmptyMode = mode === "EMPTY";
 
   return (
     <div className="flex items-center gap-2 py-2">
@@ -132,7 +137,7 @@ export function TagFilterDialog({
           {/* モード切り替え */}
           <div className="px-6 pb-2">
             <div className="flex bg-muted rounded-lg p-1">
-              {(["AND", "OR", "NOT"] as TagFilterMode[]).map((m) => (
+              {(["AND", "OR", "NOT", "EMPTY"] as TagFilterMode[]).map((m) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
@@ -187,9 +192,10 @@ export function TagFilterDialog({
                       "cursor-pointer px-4 h-9 text-sm transition-all select-none border-transparent inline-flex items-center justify-center",
                       isSelected
                         ? "ring-2 ring-primary shadow-sm"
-                        : "hover:bg-secondary/80"
+                        : "hover:bg-secondary/80",
+                      isEmptyMode && "opacity-40 pointer-events-none"
                     )}
-                    onClick={() => handleToggle(tag)}
+                    onClick={() => !isEmptyMode && handleToggle(tag)}
                   >
                     {tag}
                     {isSelected && <X className="ml-2 h-3.5 w-3.5" />}

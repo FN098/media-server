@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export type TagFilterMode = "AND" | "OR" | "NOT";
+export type TagFilterMode = "AND" | "OR" | "NOT" | "EMPTY";
 
 export function useTagFilter() {
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
