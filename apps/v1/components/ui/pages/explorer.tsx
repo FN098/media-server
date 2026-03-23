@@ -402,8 +402,6 @@ export function Explorer() {
     else return "explorer-main";
   }, [isDeleteMode, isMoveMode, isRenameMode, isTagEditMode, isViewMode]);
 
-  console.log({ activeScope });
-
   // スコープの排他的制御
   useEffect(() => {
     // 該当スコープを有効にし、それ以外を無効にする
@@ -429,7 +427,7 @@ export function Explorer() {
       e.preventDefault();
       handleSelectAll();
     },
-    { scopes: "explorer-main" }
+    { scopes: ["explorer-main", "tag-editor"] }
   );
   useHotkeys(
     "ctrl+k",

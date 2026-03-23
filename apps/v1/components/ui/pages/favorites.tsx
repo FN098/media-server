@@ -332,7 +332,7 @@ export function FavoritesExplorer() {
       e.preventDefault();
       handleSelectAll();
     },
-    { scopes: "favorites-main" }
+    { scopes: ["favorites-main", "tag-editor"] }
   );
   useHotkeys(
     "ctrl+k",
