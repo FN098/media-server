@@ -246,6 +246,13 @@ export function Trash() {
   }, [activeScope, allScopes, disableScope, enableScope]);
 
   // ショートカットの定義
+
+  // Escape: 選択解除
+  useHotkeys("escape", () => handleClearSelection(), {
+    scopes: "trash-main",
+  });
+
+  // Ctrl + A: 全選択
   useHotkeys(
     "ctrl+a",
     (e) => {
@@ -254,6 +261,8 @@ export function Trash() {
     },
     { scopes: "trash-main" }
   );
+
+  // Ctrl + K: 検索
   useHotkeys(
     "ctrl+k",
     (e) => {
@@ -262,9 +271,6 @@ export function Trash() {
     },
     { scopes: "trash-main" }
   );
-  useHotkeys("escape", () => handleClearSelection(), {
-    scopes: "trash-main",
-  });
 
   // ===== その他 =====
 
