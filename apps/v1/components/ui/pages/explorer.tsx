@@ -421,6 +421,11 @@ export function Explorer() {
     scopes: "explorer-main",
   });
 
+  // Delete: 削除
+  useHotkeys("delete", () => handleOpenDeleteSelected(), {
+    scopes: "explorer-main",
+  });
+
   // T: タグエディタ
   useHotkeys("t", () => handleToggleTagEditor(), {
     scopes: ["explorer-main", "viewer", "tag-editor"],

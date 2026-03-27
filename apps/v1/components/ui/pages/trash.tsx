@@ -252,6 +252,11 @@ export function Trash() {
     scopes: "trash-main",
   });
 
+  // Delete: 削除
+  useHotkeys("delete", () => handleOpenDeleteSelected(), {
+    scopes: "trash-main",
+  });
+
   // Ctrl + A: 全選択
   useHotkeys(
     "ctrl+a",
