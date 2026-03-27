@@ -227,6 +227,7 @@ function DataRow({
     if (isLongPressed || isMobile) return;
     e.preventDefault();
 
+    // 範囲選択
     if (e.shiftKey && selectCtx.lastSelectedPath !== null) {
       selectCtx.enterSelectionMode();
       const lastIdx = allNodes.findIndex(
@@ -236,13 +237,19 @@ function DataRow({
         const startIdx = Math.min(lastIdx, globalIndex);
         const endIdx = Math.max(lastIdx, globalIndex);
         const paths = allNodes.slice(startIdx, endIdx + 1).map((n) => n.path);
-        if (e.ctrlKey || e.metaKey) selectCtx.deletePaths(paths);
-        else selectCtx.addPaths(paths);
+
+        if (e.ctrlKey || e.metaKey) {
+          selectCtx.deletePaths(paths);
+        } else {
+          selectCtx.addPaths(paths);
+        }
+
         onSelectChange?.();
         return;
       }
     }
 
+    // 選択追加 or 選択解除
     if (e.ctrlKey || e.metaKey) {
       selectCtx.enterSelectionMode();
       selectCtx.togglePath(node.path);
@@ -250,6 +257,7 @@ function DataRow({
       selectCtx.exitSelectionMode();
       selectCtx.replaceSelection(node.path);
     }
+
     selectCtx.setLastSelectedPath(node.path);
     onSelectChange?.();
   };
@@ -258,8 +266,9 @@ function DataRow({
     if (isLongPressed || !isMobile) return;
     e.preventDefault();
     if (selectCtx.isSelectionMode) {
-      if (!isSelected) selectCtx.selectPath(node.path);
-      else {
+      if (!isSelected) {
+        selectCtx.selectPath(node.path);
+      } else {
         selectCtx.unselectPath(node.path);
         if (
           selectCtx.selectedPaths.size === 1 &&
