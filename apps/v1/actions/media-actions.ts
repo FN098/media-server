@@ -227,7 +227,6 @@ export async function deleteNodesAction(sourcePaths: string[]) {
 
 async function recursiveMergeMove(src: string, dest: string) {
   const stats = await lstat(src);
-  debugger;
   if (!stats.isDirectory()) {
     // ファイルの場合
     // 移動先に同名ファイルがあれば上書き
