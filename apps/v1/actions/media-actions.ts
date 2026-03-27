@@ -37,7 +37,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     // 存在確認
     if (await existsPath(newRealPath)) {
       throw new Error(
-        `同名のファイルまたはフォルダが既に存在します。: ${basename(newRealPath)}`,
+        `同名のファイルまたはフォルダが既に存在します。: ${basename(newRealPath)}`
       );
     }
 
@@ -102,7 +102,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
 export async function moveNodesAction(
   sourcePaths: string[],
-  targetDirPath: string,
+  targetDirPath: string
 ) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
@@ -120,7 +120,7 @@ export async function moveNodesAction(
       // 存在確認
       if (await existsPath(newRealPath)) {
         throw new Error(
-          `移動先に同名の項目が存在します: ${basename(newRealPath)}`,
+          `移動先に同名の項目が存在します: ${basename(newRealPath)}`
         );
       }
 
@@ -227,6 +227,7 @@ export async function deleteNodesAction(sourcePaths: string[]) {
 
 async function recursiveMergeMove(src: string, dest: string) {
   const stats = await lstat(src);
+  debugger;
   if (!stats.isDirectory()) {
     // ファイルの場合
     // 移動先に同名ファイルがあれば上書き
@@ -237,7 +238,8 @@ async function recursiveMergeMove(src: string, dest: string) {
   } else {
     // ディレクトリの場合
     if (!(await existsPath(dest))) {
-      await mkdir(dest, { recursive: true });
+      await rename(src, dest);
+      return;
     }
 
     const entries = await readdir(src);
