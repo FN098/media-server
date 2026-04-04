@@ -328,7 +328,7 @@ export function MediaViewer({
             </button>
 
             {/* ファイル情報 */}
-            <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0">
+            <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0 select-text">
               <span className="text-white md:text-lg font-medium drop-shadow-md">
                 <MarqueeText
                   key={currentIndex}
