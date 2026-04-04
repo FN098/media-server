@@ -14,6 +14,7 @@ import {
 import { isMatchJapanese } from "@/lib/utils/search";
 import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
+import { useDebounce } from "use-debounce";
 import { v4 } from "uuid";
 
 export function useTagEditor(initialTargetNodes?: MediaNode[]) {
@@ -28,6 +29,8 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     useState<SearchTagStrategy>("default");
   const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
   const [opacity, setOpacity] = useState<number>(0);
+  const query = useMemo(() => newTagName.trim().toLowerCase(), [newTagName]);
+  const [debouncedQuery] = useDebounce(query, 300);
 
   const hasChanges = useMemo(
     () => Object.keys(pendingChanges).length > 0 || pendingNewTags.length > 0,
@@ -40,16 +43,31 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     [targetNodes]
   );
 
-  // マスターデータ
+  // マスターデータの取得 (queryなし)
   const {
-    tags: masterTags,
+    tags: baseTags,
     refreshTags,
     invalidateTags,
-    isLoading: isLoadingTags,
+    isLoading: isLoadingBase,
   } = useTags({
     paths: targetPaths,
     strategy: searchStrategy,
   });
+
+  // 検索用データの取得 (queryあり)
+  const { tags: searchedTags, isLoading: isLoadingSearch } = useTags({
+    query: debouncedQuery,
+    // クエリが空ならリクエストしない、または入力がある時だけ実行
+    triggered: debouncedQuery !== "",
+  });
+
+  // 合体マスターデータ
+  const masterTags = useMemo(() => {
+    return uniqueBy([...baseTags, ...searchedTags], "id");
+  }, [baseTags, searchedTags]);
+
+  const isLoadingTags = isLoadingBase || isLoadingSearch;
+
   const tagStates = useTagStates(targetNodes, masterTags);
 
   // 編集用
@@ -85,7 +103,6 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
 
   // サジェスト用
   const suggestedTags = useMemo(() => {
-    const query = newTagName.trim().toLowerCase();
     if (!query) return [];
 
     return masterTags.filter((tag) => {
@@ -96,7 +113,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
 
       return isMatch && !isAlreadyApplied && !isPending && !isPendingNew;
     });
-  }, [newTagName, masterTags, tagStates, pendingChanges, pendingNewTags]);
+  }, [query, masterTags, tagStates, pendingChanges, pendingNewTags]);
 
   const toggleTagChange = useCallback(
     (tag: Tag) => {

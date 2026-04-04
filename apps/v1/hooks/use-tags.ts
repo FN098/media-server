@@ -8,20 +8,25 @@ import {
 } from "@tanstack/react-query";
 import { useCallback } from "react";
 
-export function useTags(params: SearchTagsRequestParams) {
+export function useTags(
+  params: SearchTagsRequestParams & { triggered?: boolean }
+) {
   const queryClient = useQueryClient();
 
-  const { data, refetch, isLoading, isPlaceholderData } = useQuery({
-    queryKey: ["tags", params],
+  const { triggered = true, ...apiRequestParams } = params;
+
+  const { data, refetch, isLoading, isPlaceholderData, isFetching } = useQuery({
+    queryKey: ["tags", apiRequestParams],
     queryFn: async () => {
       const res = await fetch("/api/tags", {
         method: "POST", // GET だと URL の長さに制約があるので POST を使う
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(params),
+        body: JSON.stringify(apiRequestParams),
       });
       if (!res.ok) throw new Error("Failed to fetch tags");
       return res.json() as Promise<Tag[]>;
     },
+    enabled: triggered,
     // staleTime: 1000 * 60 * 5, // 5分間はキャッシュを利用
     placeholderData: keepPreviousData,
   });
@@ -36,6 +41,6 @@ export function useTags(params: SearchTagsRequestParams) {
     tags: data ?? [],
     refreshTags: refetch, // 特定のこのクエリだけをリフェッチ
     invalidateTags, // タグ関連の全キャッシュを無効化（保存後などに使用）
-    isLoading: isLoading || isPlaceholderData,
+    isLoading: (isLoading && triggered) || isPlaceholderData || isFetching,
   };
 }
