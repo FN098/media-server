@@ -61,6 +61,19 @@ async function searchRecentlyUsedTags({
   limit,
   query,
 }: SearchTagsOptions): Promise<Tag[]> {
+  // 1. まず、名前が一致するタグをマスターから直接検索 (queryがある場合)
+  let matchedTags: Tag[] = [];
+  if (query) {
+    matchedTags = await prisma.tag.findMany({
+      where: {
+        name: { contains: query },
+        id: excludeIds?.length ? { notIn: excludeIds } : undefined,
+      },
+      take: limit,
+    });
+  }
+
+  // 2. 最近使用された履歴を取得
   const rows = await prisma.mediaTag.groupBy({
     by: ["tagId"],
     _max: { createdAt: true },
@@ -70,20 +83,25 @@ async function searchRecentlyUsedTags({
     take: limit,
     where: {
       tagId: excludeIds?.length ? { notIn: excludeIds } : undefined,
-      tag: query
-        ? {
-            name: { contains: query },
-          }
-        : undefined,
+      tag: query ? { name: { contains: query } } : undefined,
     },
   });
 
-  const tags = await prisma.tag.findMany({
+  // 3. 履歴にあるタグの詳細を取得
+  const historyTags = await prisma.tag.findMany({
     where: {
       id: { in: rows.map((r) => r.tagId) },
     },
-    select: { id: true, name: true },
   });
 
-  return rows.map((r) => tags.find((t) => t.id === r.tagId)!);
+  // 4. マッチしたタグと履歴のタグを結合して重複排除
+  // queryがある場合は matchedTags を優先し、その後に履歴を並べる
+  const combined = [...matchedTags, ...historyTags];
+
+  // IDでユニークにする
+  const uniqueTags = Array.from(
+    new Map(combined.map((t) => [t.id, t])).values()
+  );
+
+  return uniqueTags.slice(0, limit);
 }
