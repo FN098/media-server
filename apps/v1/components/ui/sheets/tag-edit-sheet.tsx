@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
+import { useDebouncedCallback } from "use-debounce";
 
 export type TagEditMode = "default" | "single" | "none";
 
@@ -440,10 +441,23 @@ function TagInput({
   onCancel: () => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // 入力遅延
+  const [inputValue, setInputValue] = useState(value);
+  const debouncedOnChange = useDebouncedCallback((val: string) => {
+    onChange(val);
+  }, 300);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextValue = e.target.value;
+    setInputValue(nextValue); // 表示は即座に更新
+    debouncedOnChange(nextValue); // 親への通知は遅延
+  };
+
   const suggests = useMemo(
     () => new Map(suggestions.map((s) => [s.name, s])),
     [suggestions]
   );
+
   const [activeIndex, setActiveIndex] = useState(-1);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -524,8 +538,8 @@ function TagInput({
           autoFocus={autoFocus}
           className="w-full bg-muted/50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 ring-primary/20 outline-none"
           placeholder="新しいタグを入力..."
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={inputValue}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           disabled={disabled}
         />
