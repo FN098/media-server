@@ -13,17 +13,20 @@ sharp.cache(false); // これでファイルハンドルを即座に解放する
 
 export async function createImageThumb(
   imagePath: string,
-  thumbPath: string,
+  thumbPath: string
 ): Promise<void> {
-  await sharp(imagePath)
+  const pipeline = sharp(imagePath)
     .resize(400, 400, { fit: "inside" })
-    .webp({ quality: 80 })
-    .toFile(thumbPath);
+    .webp({ quality: 80 });
+
+  await pipeline.toFile(thumbPath);
+
+  pipeline.destroy();
 }
 
 export async function createVideoThumb(
   videoPath: string,
-  thumbPath: string,
+  thumbPath: string
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const ff = spawn("ffmpeg", [
@@ -49,8 +52,8 @@ export async function createVideoThumb(
       else
         reject(
           new Error(
-            `Error creating '${thumbPath}'. ffmpeg exited with code ${code}`,
-          ),
+            `Error creating '${thumbPath}'. ffmpeg exited with code ${code}`
+          )
         );
     });
   });
@@ -60,19 +63,19 @@ export async function createThumbs(
   nodes: MediaFsNode[],
   options?: {
     force?: boolean;
-  },
+  }
 ): Promise<void> {
   if (nodes.length === 0) return;
 
   // ビデオまたは画像ファイルを取得
   const filtered = nodes.filter(
-    (n) => n.type === "video" || n.type === "image",
+    (n) => n.type === "video" || n.type === "image"
   );
   if (filtered.length === 0) return;
 
   // サムネイルのディレクトリを一括作成
   const thumbDirs = Array.from(
-    new Set(filtered.map((n) => dirname(getServerMediaThumbPath(n.path)))),
+    new Set(filtered.map((n) => dirname(getServerMediaThumbPath(n.path))))
   );
   await Promise.all(thumbDirs.map((dir) => mkdir(dir, { recursive: true })));
 
@@ -84,11 +87,16 @@ export async function createThumbs(
 
       const media = getServerMediaPath(n.path);
 
-      if (n.type === "video") {
-        await createVideoThumb(media, thumb);
-      } else if (n.type === "image") {
-        await createImageThumb(media, thumb); // 画像処理を追加
+      try {
+        if (n.type === "video") {
+          await createVideoThumb(media, thumb);
+        } else if (n.type === "image") {
+          await createImageThumb(media, thumb);
+        }
+      } catch (err) {
+        console.error(`Thumbnail creation failed for ${media}:`, err);
+        // 個別の失敗で全体を止めないよう、ここではエラーを握り潰すかログに留める
       }
-    }),
+    })
   );
 }
