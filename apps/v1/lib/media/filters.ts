@@ -1,3 +1,4 @@
+import { FavoriteFilterMode } from "@/components/ui/buttons/favorite-filter-button";
 import { TagFilterMode } from "@/hooks/use-tag-filter";
 import { MediaNodeFilter } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/search";
@@ -41,6 +42,18 @@ export const createTagFilter = (
   };
 };
 
-export const createFavoriteFilter = (isActive: boolean): MediaNodeFilter => {
-  return (node) => !isActive || !!node.isFavorite;
+export const createFavoriteFilter = (
+  mode: FavoriteFilterMode
+): MediaNodeFilter => {
+  return (node) => {
+    switch (mode) {
+      case "only_favorites":
+        return node.isFavorite;
+      case "exclude_favorites":
+        return !node.isFavorite;
+      case "all":
+      default:
+        return true;
+    }
+  };
 };

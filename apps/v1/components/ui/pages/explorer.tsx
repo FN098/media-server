@@ -4,7 +4,10 @@ import { visitFolderAction } from "@/actions/folder-actions";
 import { deleteNodesAction } from "@/actions/media-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
+import {
+  FavoriteFilterButton,
+  FavoriteFilterMode,
+} from "@/components/ui/buttons/favorite-filter-button";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
@@ -116,9 +119,8 @@ export function Explorer() {
     tagFilter.setMode(mode);
   };
 
-  // お気に入りのみ有効フラグ
-  const [isFavoriteOnly, setIsFavoriteOnly] = useState(false);
-  const toggleIsFavoriteOnly = () => setIsFavoriteOnly((prev) => !prev);
+  // お気に入りフィルターモード
+  const [filterMode, setFilterMode] = useState<FavoriteFilterMode>("all");
 
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
@@ -127,8 +129,8 @@ export function Explorer() {
     [tagFilter]
   );
   const favoriteFilterFn = useMemo(
-    () => createFavoriteFilter(isFavoriteOnly),
-    [isFavoriteOnly]
+    () => createFavoriteFilter(filterMode),
+    [filterMode]
   );
 
   // フィルタリング結果
@@ -474,10 +476,10 @@ export function Explorer() {
 
         {/* お気に入りフィルター */}
         <FavoriteFilterButton
-          isActive={isFavoriteOnly}
-          onClick={toggleIsFavoriteOnly}
-          showCount
+          mode={filterMode}
+          onChange={setFilterMode}
           count={mediaOnly.length}
+          showCount
         />
       </div>
 
