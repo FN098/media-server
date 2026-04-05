@@ -251,6 +251,15 @@ export function MediaViewer({
   };
 
   // ショートカット
+  // Escape: 閉じる
+  // Delete: 削除
+  // Enter / Space: ヘッダーの表示切替（固定されていない場合のみ）
+  // 左右キー / A, D: 前後のメディアに移動
+  // S: お気に入りの切り替え
+  // F: 全画面表示
+  // P/N: 前/次のフォルダを開く
+  // O: フォルダを開く
+  // H: ヘッダーの固定切り替え
   useHotkeys("escape", () => onClose(), { scopes: "viewer" });
   useHotkeys("delete", () => onDelete?.(), {
     scopes: ["viewer", "tag-editor"],

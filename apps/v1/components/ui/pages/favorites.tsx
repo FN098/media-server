@@ -320,18 +320,16 @@ export function FavoritesExplorer() {
   }, [activeScope, allScopes, disableScope, enableScope]);
 
   // ショートカットの定義
-
   // Escape: 選択解除
+  // T: タグエディタ
+  // Ctrl + A: 全選択
+  // Ctrl + K: 検索
   useHotkeys("escape", () => handleClearSelection(), {
     scopes: "favorites-main",
   });
-
-  // T: タグエディタ
   useHotkeys("t", () => handleToggleTagEditor(), {
     scopes: ["favorites-main", "viewer", "tag-editor"],
   });
-
-  // Ctrl + A: 全選択
   useHotkeys(
     "ctrl+a",
     (e) => {
@@ -340,8 +338,6 @@ export function FavoritesExplorer() {
     },
     { scopes: ["favorites-main", "tag-editor"] }
   );
-
-  // Ctrl + K: 検索
   useHotkeys(
     "ctrl+k",
     (e) => {

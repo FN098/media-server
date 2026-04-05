@@ -415,23 +415,21 @@ export function Explorer() {
   }, [activeScope, allScopes, disableScope, enableScope]);
 
   // ショートカットの定義
-
   // Escape: 選択解除
+  // Delete: 削除
+  // T: タグエディタ
+  // Ctrl + A: 全選択
+  // Ctrl + K: 検索
+  // F2: リネーム
   useHotkeys("escape", () => handleClearSelection(), {
     scopes: "explorer-main",
   });
-
-  // Delete: 削除
   useHotkeys("delete", () => handleOpenDeleteSelected(), {
     scopes: "explorer-main",
   });
-
-  // T: タグエディタ
   useHotkeys("t", () => handleToggleTagEditor(), {
     scopes: ["explorer-main", "viewer", "tag-editor"],
   });
-
-  // Ctrl + A: 全選択
   useHotkeys(
     "ctrl+a",
     (e) => {
@@ -440,8 +438,6 @@ export function Explorer() {
     },
     { scopes: ["explorer-main", "tag-editor"] }
   );
-
-  // Ctrl + K: 検索
   useHotkeys(
     "ctrl+k",
     (e) => {
@@ -450,8 +446,6 @@ export function Explorer() {
     },
     { scopes: "explorer-main" }
   );
-
-  // F2: リネーム
   useHotkeys("f2", () => setRenameTarget(selected[0] ?? null), {
     scopes: ["explorer-main", "viewer"],
   });
