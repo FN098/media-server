@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface UsePagingOptions {
   defaultPageSize?: number;
@@ -16,50 +16,59 @@ export function usePaging(totalItems: number, options: UsePagingOptions = {}) {
     paramName = "page",
   } = options;
 
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // 内部ステート（URLを使わない場合のフォールバック）
-  const [internalPage, setInternalPage] = useState(1);
-  const [pageSize, setPageSizeState] = useState(defaultPageSize);
-
-  // 現在のページ番号をどこから取得するか決定
-  const currentPage = useMemo(() => {
+  // 初回マウント時のみURLからページ番号を読み取る
+  const getInitialPage = () => {
     if (useUrlParams) {
       const p = searchParams.get(paramName);
-      return p ? parseInt(p, 10) || 1 : 1;
+      return p ? Math.max(1, parseInt(p, 10) || 1) : 1;
     }
-    return internalPage;
-  }, [useUrlParams, searchParams, paramName, internalPage]);
+    return 1;
+  };
+
+  // 内部ステート（URLを使わない場合のフォールバック）
+  const [currentPage, setCurrentPage] = useState(getInitialPage);
+  const [pageSize, setPageSizeState] = useState(defaultPageSize);
 
   const totalPages = useMemo(
     () => Math.ceil(totalItems / pageSize),
     [totalItems, pageSize]
   );
 
-  // アイテム総数が減って、現在のページが最大ページを超えてしまった時の補正
+  // ページ番号の補正ロジック
   const fixedCurrentPage = useMemo(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      return totalPages;
-    }
-    return currentPage;
+    if (totalPages > 0 && currentPage > totalPages) return totalPages;
+    return Math.max(1, currentPage);
   }, [currentPage, totalPages]);
+
+  // URLを履歴に残しつつ同期する（Next.jsのrouterを介さずブラウザAPIを使用）
+  const updateUrl = useCallback(
+    (page: number) => {
+      if (!useUrlParams) return;
+
+      const params = new URLSearchParams(window.location.search);
+      params.set(paramName, page.toString());
+
+      // pushState で履歴に追加、replaceState なら上書き（戻るボタンを汚さない）
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.pushState(null, "", newUrl);
+    },
+    [useUrlParams, paramName]
+  );
 
   // ページ更新関数
   const setPage = useCallback(
     (page: number) => {
       const targetPage = Math.max(1, Math.min(page, totalPages || 1));
 
-      if (useUrlParams) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set(paramName, targetPage.toString());
-        router.push(`${pathname}?${params.toString()}`);
-      } else {
-        setInternalPage(targetPage);
-      }
+      // 先にステートを更新して即座に再レンダリング（高速化の肝）
+      setCurrentPage(targetPage);
+
+      // 裏でURLを更新
+      updateUrl(targetPage);
     },
-    [useUrlParams, totalPages, searchParams, paramName, router, pathname]
+    [totalPages, updateUrl]
   );
 
   const setPageSize = useCallback(
@@ -77,6 +86,20 @@ export function usePaging(totalItems: number, options: UsePagingOptions = {}) {
     },
     [fixedCurrentPage, pageSize]
   );
+
+  // ブラウザの「戻る・進む」ボタンに対応するための処理
+  useEffect(() => {
+    if (!useUrlParams) return;
+
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const p = params.get(paramName);
+      if (p) setCurrentPage(parseInt(p, 10) || 1);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [useUrlParams, paramName]);
 
   return {
     currentPage: fixedCurrentPage,
