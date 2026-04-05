@@ -19,34 +19,55 @@ export const MediaThumb = memo(function MediaThumb1({
   className,
   onLoad,
 }: MediaThumbProps) {
-  switch (node.type) {
-    case "image":
-    case "video":
-      return (
-        <MediaThumbImage node={node} className={className} onLoad={onLoad} />
-      );
-
-    default:
-      return (
-        <div
-          className={cn(
-            "flex h-full w-full items-center justify-center",
-            "w-full h-full",
-            className
-          )}
-        >
-          <MediaThumbIcon type={node.type} />
-        </div>
-      );
+  if (node.type === "image" || node.type === "video") {
+    return (
+      <MediaThumbImage node={node} className={className} onLoad={onLoad} />
+    );
   }
+
+  if (node.type === "directory" && node.previewPath) {
+    return (
+      <div className="relative w-full h-full">
+        {/* メインのプレビュー画像 */}
+        <MediaThumbImage
+          node={node}
+          previewPath={node.previewPath}
+          className={className}
+          onLoad={onLoad}
+        />
+
+        {/* 左下のフォルダバッジ: 背景を白ではなく、黒透過 + ぼかしに */}
+        <div className="absolute bottom-2 left-2 z-20 flex items-center justify-center p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 shadow-lg">
+          <MediaThumbIcon
+            type="directory"
+            className="w-4 h-4 brightness-0 invert opacity-90" // アイコンを白抜きにする
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // デフォルト（プレビューがないフォルダや、その他ファイル）
+  return (
+    <div
+      className={cn(
+        "flex h-full w-full items-center justify-center",
+        className
+      )}
+    >
+      <MediaThumbIcon type={node.type} />
+    </div>
+  );
 });
 
 function MediaThumbImage({
   node,
   className,
+  previewPath,
   onLoad,
 }: {
   node: MediaNode;
+  previewPath?: string;
   className?: string;
   onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 }) {
@@ -62,21 +83,13 @@ function MediaThumbImage({
 
   // サムネイル作成完了イベントの監視
   useThumbEventObserver((event) => {
-    if (!isProcessing) return; // イベント発行していない場合は無視
+    if (!isProcessing) return;
+    const targetPath = previewPath || node.path; // プレビュー中ならそのパスを優先
 
-    console.log("Event received:", event, "Node path:", node.path);
-
-    const { filePath, dirPath } = event;
-
-    if (filePath && filePath === node.path) {
-      // ファイル一致なら即時
+    if (event.filePath === targetPath) {
       update();
-      return; // 処理完了したので抜ける
-    }
-
-    if (dirPath && dirPath === getParentDirPath(node.path)) {
-      // ディレクトリ一致なら少し待つ
-      setTimeout(update, 300); // 念のため少し長めに
+    } else if (event.dirPath === getParentDirPath(targetPath)) {
+      setTimeout(update, 300);
     }
   });
 
@@ -87,19 +100,26 @@ function MediaThumbImage({
     setIsProcessing(true);
 
     try {
-      await enqueueThumbJob(getParentDirPath(node.path));
+      // フォルダ自体のサムネ生成が必要な場合は node.path、
+      // フォルダ内の特定ファイルのサムネが必要な場合はその親ディレクトリを enqueue
+      const targetDir = previewPath
+        ? getParentDirPath(previewPath)
+        : getParentDirPath(node.path);
+      await enqueueThumbJob(targetDir);
     } catch (e) {
       console.error("Failed to enqueue thumb job", e);
       setIsProcessing(false);
       setRequested(false); // 失敗時は再試行可能にする
     }
-  }, [node.path, requested]);
+  }, [node.path, previewPath, requested]);
 
-  const thumbSrc = getApiThumbUrl(encodePath(node.path));
+  // 表示するソースの決定
+  const displayPath = previewPath || node.path;
+  const thumbSrc = getApiThumbUrl(encodePath(displayPath));
 
   return (
     <FallbackImage
-      key={`${node.path}-${version}`}
+      key={`${displayPath}-${version}`}
       src={thumbSrc}
       alt={node.name}
       width={200}

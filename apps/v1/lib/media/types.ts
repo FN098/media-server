@@ -37,6 +37,7 @@ export type MediaNode = MediaFsNode & {
   lastViewedAt?: Date;
   favoriteCount?: number;
   tags?: MediaNodeTag[];
+  previewPath?: string; // サムネイルやプレビュー画像のパス
 };
 
 export type MediaListing = {
