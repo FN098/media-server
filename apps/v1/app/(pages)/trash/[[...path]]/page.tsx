@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
-import { USER } from "@/basic-auth";
 import { Trash } from "@/components/ui/pages/trash";
+import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
@@ -70,12 +70,13 @@ export default async function TrashPage(props: TrashPageProps) {
 
   const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
 
+  const user = await resolveCurrentUser();
+
   // DB クエリ
-  // TODO: ユーザー認証機能実装後に差し替える
   const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
-    getDbMedia(currentVirtualDirPath, USER),
-    getDbVisitedInfoDeeply(dirPaths, USER),
-    getDbFavoriteCount(dirPaths, USER),
+    getDbMedia(currentVirtualDirPath, user.id),
+    getDbVisitedInfoDeeply(dirPaths, user.id),
+    getDbFavoriteCount(dirPaths, user.id),
   ]);
 
   // マージ

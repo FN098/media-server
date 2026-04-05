@@ -1,4 +1,4 @@
-import { PASS, USER } from "@/basic-auth";
+import { PASS, USER } from "@/lib/auth/basic-auth";
 import { isBlockedClientPath } from "@/lib/path/blacklist";
 import { NextRequest, NextResponse } from "next/server";
 

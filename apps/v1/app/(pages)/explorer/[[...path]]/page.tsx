@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
-import { USER } from "@/basic-auth";
 import { Explorer } from "@/components/ui/pages/explorer";
+import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
@@ -66,13 +66,14 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
 
+  const user = await resolveCurrentUser();
+
   // DB クエリ
-  // TODO: USER をユーザー認証機能実装後に差し替える
   await syncMediaDir(currentVirtualPath, allNodes);
   const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
-    getDbMedia(currentVirtualPath, USER),
-    getDbVisitedInfoDeeply(dirPaths, USER),
-    getDbFavoriteCount(dirPaths, USER),
+    getDbMedia(currentVirtualPath, user.id),
+    getDbVisitedInfoDeeply(dirPaths, user.id),
+    getDbFavoriteCount(dirPaths, user.id),
   ]);
 
   // マージ

@@ -1,6 +1,7 @@
 "use server";
 
-import { USER } from "@/basic-auth";
+import { USER } from "@/lib/auth/basic-auth";
+import { resolveCurrentUser } from "@/lib/auth/resolver";
 import {
   createFavorite,
   deleteFavorite,
@@ -11,7 +12,8 @@ import { findMediaByPath } from "@/repositories/media-repository";
 export async function updateFavorite(path: string) {
   try {
     // TODO: ユーザー認証機能実装後に差し替える
-    const userId = USER;
+    const user = await resolveCurrentUser();
+    const userId = user.id;
 
     const media = await findMediaByPath(path);
     if (!media) return { success: false, error: "メディアがありません" };

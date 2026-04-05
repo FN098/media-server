@@ -1,13 +1,13 @@
 "use server";
 
-import { USER } from "@/basic-auth";
+import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { PATHS } from "@/lib/path/paths";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function visitFolderAction(dirPath: string): Promise<void> {
-  // TODO: ユーザー認証機能実装後に差し替える
-  await visitFolderByUser(dirPath, USER);
+  const user = await resolveCurrentUser();
+  await visitFolderByUser(dirPath, user.id);
 
   // ダッシュボードの履歴キャッシュをクリア
   revalidatePath(PATHS.client.dashboard.root);
