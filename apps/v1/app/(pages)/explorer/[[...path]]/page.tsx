@@ -15,6 +15,7 @@ import {
   getDbFavoriteCount,
   getDbFolderMetas,
   getDbVisitedInfoDeeply,
+  upsertFolderMetas,
 } from "@/repositories/folder-repository";
 import { getDbMedia } from "@/repositories/media-repository";
 import { Metadata } from "next";
@@ -65,12 +66,30 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     order: sortOrder,
   });
 
-  const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
+  // 今開いている「このフォルダ」自体のプレビューを決定
+  // ソート済みノードから最初に見つかった画像/動画をこのフォルダの顔にする
+  const firstMedia = sorted.find(
+    (n) => !n.isDirectory && (n.type === "image" || n.type === "video")
+  );
 
+  if (firstMedia) {
+    // currentVirtualPath がこのディレクトリ自体のパス
+    void upsertFolderMetas([
+      {
+        path: currentVirtualPath,
+        previewPath: firstMedia.path,
+      },
+    ]).catch(console.error);
+    // ※ await せずに流しっぱなしでも、次にこの親ディレクトリに戻った時には DB に反映されている
+  }
+
+  const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
   const user = await resolveCurrentUser();
 
-  // DB クエリ
+  // DBクエリの前にファイルシステムとDBの同期を取る（新規追加されたメディアをDBに反映）
   await syncMediaDir(currentVirtualPath, allNodes);
+
+  // DB クエリ
   const [dbMedia, dbVisited, dbFavorites, dbFolderMetas] = await Promise.all([
     getDbMedia(currentVirtualPath, user.id),
     getDbVisitedInfoDeeply(dirPaths, user.id),

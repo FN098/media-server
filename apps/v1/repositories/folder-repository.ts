@@ -206,3 +206,20 @@ export async function getDbFolderMetas(
     previewPath: m.previewPath,
   }));
 }
+
+export async function upsertFolderMetas(payloads: DbFolderMeta[]) {
+  if (payloads.length === 0) return;
+
+  // MySQL / Prisma での一括処理
+  // 個別に upsert を回すより、可能であれば createMany (skipDuplicates) などが効率的ですが、
+  // previewPath の更新も考慮するなら Promise.all での upsert になります。
+  await Promise.all(
+    payloads.map((data) =>
+      prisma.folderMeta.upsert({
+        where: { path: data.path },
+        update: { previewPath: data.previewPath },
+        create: { path: data.path, previewPath: data.previewPath },
+      })
+    )
+  );
+}
