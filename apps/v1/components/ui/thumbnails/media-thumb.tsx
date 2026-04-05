@@ -37,10 +37,10 @@ export const MediaThumb = memo(function MediaThumb1({
         />
 
         {/* 左下のフォルダバッジ: 背景を白ではなく、黒透過 + ぼかしに */}
-        <div className="absolute bottom-2 left-2 z-20 flex items-center justify-center p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 shadow-lg">
+        <div className="absolute bottom-8 left-2 z-20 flex items-center justify-center p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 shadow-lg">
           <MediaThumbIcon
             type="directory"
-            className="w-4 h-4 brightness-0 invert opacity-90" // アイコンを白抜きにする
+            className="w-4 h-4 opacity-90" // アイコンを白抜きにする
           />
         </div>
       </div>
