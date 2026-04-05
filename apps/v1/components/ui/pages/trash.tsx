@@ -302,9 +302,6 @@ export function Trash() {
               onOpen={handleOpen}
               onDeletePermanently={handleOpenDeleteSingle}
               onRestore={handleOpenRestoreSingle}
-              onPageChange={() =>
-                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-              }
             />
           </div>
         </PagingProvider>
@@ -322,9 +319,6 @@ export function Trash() {
               onOpen={handleOpen}
               onDeletePermanently={handleOpenDeleteSingle}
               onRestore={handleOpenRestoreSingle}
-              onPageChange={() =>
-                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-              }
             />
           </div>
         </PagingProvider>

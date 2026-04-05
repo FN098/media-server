@@ -391,9 +391,6 @@ export function FavoritesExplorer() {
                 handleSelectSingle(node);
                 handleOpenTagEditor();
               }}
-              onPageChange={() =>
-                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-              }
               onScrollRestored={() => setLastPath(null)}
             />
           </div>
@@ -417,9 +414,6 @@ export function FavoritesExplorer() {
                 handleSelectSingle(node);
                 handleOpenTagEditor();
               }}
-              onPageChange={() =>
-                scrollRef.current?.scrollTo({ top: 0, behavior: "instant" })
-              }
               onScrollRestored={() => setLastPath(null)}
             />
           </div>
