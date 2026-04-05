@@ -292,7 +292,10 @@ export function Trash() {
     >
       {/* グリッドビュー */}
       {viewMode === "grid" && (
-        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
+        <PagingProvider
+          totalItems={filteredNodes.length}
+          options={{ defaultPageSize: 48, useUrlParams: true }}
+        >
           <div className="flex-1">
             <PagingGridView
               allNodes={filteredNodes}
@@ -309,7 +312,10 @@ export function Trash() {
 
       {/* リストビュー */}
       {viewMode === "list" && (
-        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={100}>
+        <PagingProvider
+          totalItems={filteredNodes.length}
+          options={{ defaultPageSize: 100, useUrlParams: true }}
+        >
           <div className="flex-1">
             <PagingListView
               allNodes={filteredNodes}

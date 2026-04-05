@@ -1,6 +1,6 @@
 "use client";
 
-import { usePaging } from "@/hooks/use-paging";
+import { usePaging, UsePagingOptions } from "@/hooks/use-paging";
 import { createContext, ReactNode, useContext } from "react";
 
 type PagingContextType = ReturnType<typeof usePaging>;
@@ -10,14 +10,14 @@ const PagingContext = createContext<PagingContextType | undefined>(undefined);
 export function PagingProvider({
   children,
   totalItems,
-  defaultPageSize = 48,
+  options,
 }: {
   children: ReactNode;
   totalItems: number;
-  defaultPageSize?: number;
+  options?: UsePagingOptions;
 }) {
   // フックを呼び出し
-  const value = usePaging(totalItems, defaultPageSize);
+  const value = usePaging(totalItems, options);
 
   return (
     <PagingContext.Provider value={value}>{children}</PagingContext.Provider>

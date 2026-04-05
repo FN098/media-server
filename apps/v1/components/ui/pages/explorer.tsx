@@ -489,7 +489,10 @@ export function Explorer() {
 
       {/* グリッドビュー */}
       {viewMode === "grid" && !isViewMode && (
-        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
+        <PagingProvider
+          totalItems={filteredNodes.length}
+          options={{ defaultPageSize: 48, useUrlParams: true }}
+        >
           <div className="flex-1">
             <PagingGridView
               allNodes={filteredNodes}
@@ -514,7 +517,10 @@ export function Explorer() {
 
       {/* リストビュー */}
       {viewMode === "list" && !isViewMode && (
-        <PagingProvider totalItems={filteredNodes.length} defaultPageSize={100}>
+        <PagingProvider
+          totalItems={filteredNodes.length}
+          options={{ defaultPageSize: 100, useUrlParams: true }}
+        >
           <div className="flex-1">
             <PagingListView
               allNodes={filteredNodes}
