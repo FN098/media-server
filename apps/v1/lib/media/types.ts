@@ -37,7 +37,7 @@ export type MediaNode = MediaFsNode & {
   lastViewedAt?: Date;
   favoriteCount?: number;
   tags?: MediaNodeTag[];
-  previewPath?: string; // サムネイルやプレビュー画像のパス
+  previewPath?: string | null; // サムネイルやプレビュー画像のパス
 };
 
 export type MediaListing = {
@@ -80,3 +80,8 @@ export interface MediaFsContext {
   /** 仮想パスのフィルタリング関数（ブラックリストなど） */
   filterVirtualPath?: (virtualPath: string) => boolean;
 }
+
+export type DbFolderMeta = {
+  path: string;
+  previewPath: string | null;
+};

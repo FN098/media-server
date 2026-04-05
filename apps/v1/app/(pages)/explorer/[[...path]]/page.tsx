@@ -13,6 +13,7 @@ import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import {
   getDbFavoriteCount,
+  getDbFolderMetas,
   getDbVisitedInfoDeeply,
 } from "@/repositories/folder-repository";
 import { getDbMedia } from "@/repositories/media-repository";
@@ -70,14 +71,21 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   // DB クエリ
   await syncMediaDir(currentVirtualPath, allNodes);
-  const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
+  const [dbMedia, dbVisited, dbFavorites, dbFolderMetas] = await Promise.all([
     getDbMedia(currentVirtualPath, user.id),
     getDbVisitedInfoDeeply(dirPaths, user.id),
     getDbFavoriteCount(dirPaths, user.id),
+    getDbFolderMetas(dirPaths),
   ]);
 
   // マージ
-  const merged = mergeFsWithDb(sorted, dbMedia, dbVisited, dbFavorites);
+  const merged = mergeFsWithDb(
+    sorted,
+    dbMedia,
+    dbVisited,
+    dbFavorites,
+    dbFolderMetas
+  );
 
   // フォーマット
   const formatted = formatNodes(merged);

@@ -1,5 +1,5 @@
 import type { VisitedFolder } from "@/generated/prisma/client";
-import { DbFavoriteInfo, DbVisitedInfo } from "@/lib/media/types";
+import { DbFavoriteInfo, DbFolderMeta, DbVisitedInfo } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import { benchmark } from "@/lib/utils/benchmark";
 
@@ -185,5 +185,24 @@ export async function getDbFavoriteCount(
   return dirPaths.map((d, index) => ({
     path: d,
     favoriteCountInFolder: counts[index],
+  }));
+}
+
+export async function getDbFolderMetas(
+  dirPaths: string[]
+): Promise<DbFolderMeta[]> {
+  const metas = await prisma.folderMeta.findMany({
+    where: {
+      path: { in: dirPaths },
+    },
+    select: {
+      path: true,
+      previewPath: true,
+    },
+  });
+
+  return metas.map((m) => ({
+    path: m.path,
+    previewPath: m.previewPath,
   }));
 }
