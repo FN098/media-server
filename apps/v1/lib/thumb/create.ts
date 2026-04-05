@@ -19,9 +19,12 @@ export async function createImageThumb(
     .resize(400, 400, { fit: "inside" })
     .webp({ quality: 80 });
 
-  await pipeline.toFile(thumbPath);
-
-  pipeline.destroy();
+  try {
+    await pipeline.toFile(thumbPath);
+  } finally {
+    // 成功・失敗に関わらず、明示的にリソースを解放する
+    pipeline.destroy();
+  }
 }
 
 export async function createVideoThumb(
