@@ -80,7 +80,12 @@ export default async function TrashPage(props: TrashPageProps) {
   ]);
 
   // マージ
-  const merged = mergeFsWithDb(sorted, dbMedia, dbVisited, dbFavorites);
+  const merged = mergeFsWithDb({
+    fsMedia: sorted,
+    dbMedia,
+    dbVisited,
+    dbFavorites,
+  });
 
   // フォーマット
   const formatted = formatNodes(merged);

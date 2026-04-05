@@ -98,13 +98,13 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   ]);
 
   // マージ
-  const merged = mergeFsWithDb(
-    sorted,
+  const merged = mergeFsWithDb({
+    fsMedia: sorted,
     dbMedia,
     dbVisited,
     dbFavorites,
-    dbFolderMetas
-  );
+    dbFolderMetas,
+  });
 
   // フォーマット
   const formatted = formatNodes(merged);
