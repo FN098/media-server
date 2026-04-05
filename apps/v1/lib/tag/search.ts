@@ -89,14 +89,21 @@ async function searchRecentlyUsedTags({
 
   // 3. 履歴にあるタグの詳細を取得
   const historyTags = await prisma.tag.findMany({
+    select: { id: true, name: true },
     where: {
       id: { in: rows.map((r) => r.tagId) },
     },
   });
 
+  // 重要：historyTagDetailsをIDをキーにしたMapに変換し、rowsの順番通りに配列を再構成する
+  const tagMap = new Map(historyTags.map((t) => [t.id, t]));
+  const sortedHistoryTags = rows
+    .map((r) => tagMap.get(r.tagId))
+    .filter((t): t is Tag => !!t);
+
   // 4. マッチしたタグと履歴のタグを結合して重複排除
   // queryがある場合は matchedTags を優先し、その後に履歴を並べる
-  const combined = [...matchedTags, ...historyTags];
+  const combined = [...matchedTags, ...sortedHistoryTags];
 
   // IDでユニークにする
   const uniqueTags = Array.from(
