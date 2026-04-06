@@ -1,7 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUser } from "@/lib/auth/resolver";
-import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
 import { MediaFsNode } from "@/lib/media/types";
@@ -43,11 +42,6 @@ export default async function FavoritePage(props: FavoritePageProps) {
   // フォーマット
   const formatted = formatNodes(sorted);
 
-  // お気に入り
-  const favorites: FavoritesRecord = Object.fromEntries(
-    formatted.map((n) => [n.path, n.isFavorite])
-  );
-
   const listing = {
     nodes: formatted,
     path: "",
@@ -58,7 +52,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
 
   return (
     <ExplorerProvider listing={listing}>
-      <FavoritesProvider favorites={favorites}>
+      <FavoritesProvider favorites={listing.nodes}>
         <PathSelectionProvider>
           <Favorites />
         </PathSelectionProvider>

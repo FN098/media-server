@@ -1,7 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Explorer } from "@/components/ui/pages/explorer";
 import { resolveCurrentUser } from "@/lib/auth/resolver";
-import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
@@ -109,11 +108,6 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   // フォーマット
   const formatted = formatNodes(merged);
 
-  // お気に入り
-  const favorites: FavoritesRecord = Object.fromEntries(
-    formatted.map((n) => [n.path, n.isFavorite])
-  );
-
   const listing = {
     ...fsListing,
     nodes: formatted,
@@ -121,7 +115,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   return (
     <ExplorerProvider listing={listing}>
-      <FavoritesProvider favorites={favorites}>
+      <FavoritesProvider favorites={listing.nodes}>
         <PathSelectionProvider>
           <Explorer />
         </PathSelectionProvider>

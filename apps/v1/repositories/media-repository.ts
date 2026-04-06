@@ -42,7 +42,7 @@ export async function getDbMedia(
       fileSize: true,
       favorites: {
         where: { userId },
-        select: { mediaId: true },
+        select: { mediaId: true, rating: true },
       },
       mediaTags: {
         select: {
@@ -66,6 +66,7 @@ export async function getDbMedia(
     tags: m.mediaTags.map((t) => ({
       name: t.tag.name,
     })),
+    rating: m.favorites[0]?.rating ?? undefined,
   }));
 }
 

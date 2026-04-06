@@ -2,7 +2,7 @@
 
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
-import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
+import { FloatingFavoriteButton } from "@/components/ui/buttons/floating-favorite-button";
 import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
@@ -26,7 +26,7 @@ interface PagingGridViewProps {
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelectChange?: () => void;
-  onFavorite?: (node: MediaNode) => void;
+  onFavoriteChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -43,7 +43,7 @@ export function PagingGridView({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onFavorite,
+  onFavoriteChange,
   onRename,
   onMove,
   onDelete,
@@ -133,7 +133,7 @@ export function PagingGridView({
             onOpen={onOpen}
             onOpenFolder={onOpenFolder}
             onSelectChange={onSelectChange}
-            onFavorite={onFavorite}
+            onFavoriteChange={onFavoriteChange}
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
@@ -162,7 +162,7 @@ interface CellProps {
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelectChange?: () => void;
-  onFavorite?: (node: MediaNode) => void;
+  onFavoriteChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -179,7 +179,7 @@ function Cell({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onFavorite,
+  onFavoriteChange,
   onRename,
   onMove,
   onDelete,
@@ -191,7 +191,7 @@ function Cell({
   const favCtx = useFavoritesContext();
   const selectCtx = usePathSelectionContext();
 
-  const isFavorite = favCtx.isFavorite(node.path);
+  const rating = favCtx.getFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
 
   const handleLongPress = useCallback(() => {
@@ -317,15 +317,11 @@ function Cell({
 
           {/* Actions */}
           <div className="absolute top-2 right-2 flex flex-col gap-2">
-            {!selectCtx.isSelectionMode && isMediaNode && onFavorite && (
-              <FavoriteButton
+            {!selectCtx.isSelectionMode && isMediaNode && onFavoriteChange && (
+              <FloatingFavoriteButton
                 variant="grid"
-                active={isFavorite}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onFavorite(node);
-                }}
-                className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white"
+                rating={rating}
+                onRatingChange={(rating) => onFavoriteChange(node, rating)}
               />
             )}
 

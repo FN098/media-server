@@ -1,7 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Trash } from "@/components/ui/pages/trash";
 import { resolveCurrentUser } from "@/lib/auth/resolver";
-import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
@@ -90,11 +89,6 @@ export default async function TrashPage(props: TrashPageProps) {
   // フォーマット
   const formatted = formatNodes(merged);
 
-  // お気に入り
-  const favorites: FavoritesRecord = Object.fromEntries(
-    formatted.map((n) => [n.path, n.isFavorite])
-  );
-
   const listing = {
     ...fsListing,
     nodes: formatted,
@@ -102,7 +96,7 @@ export default async function TrashPage(props: TrashPageProps) {
 
   return (
     <TrashProvider listing={listing}>
-      <FavoritesProvider favorites={favorites}>
+      <FavoritesProvider favorites={listing.nodes}>
         <PathSelectionProvider>
           <Trash />
         </PathSelectionProvider>

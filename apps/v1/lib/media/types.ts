@@ -33,11 +33,11 @@ export type MediaNodeTag = {
 export type MediaNode = MediaFsNode & {
   id?: string;
   title?: string;
-  isFavorite: boolean;
   lastViewedAt?: Date;
   favoriteCount?: number;
   tags?: MediaNodeTag[];
   previewPath?: string | null; // サムネイルやプレビュー画像のパス
+  rating: number; // 1-5の整数
 };
 
 export type MediaListing = {
@@ -56,6 +56,7 @@ export type DbMedia = {
   fileMtime: Date;
   fileSize?: number;
   tags?: MediaNodeTag[];
+  rating?: number;
 };
 
 export type DbVisitedInfo = {

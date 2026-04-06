@@ -1,7 +1,7 @@
 "use client";
 
 import { APP_CONFIG } from "@/app.config";
-import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
+import { FloatingFavoriteButton } from "@/components/ui/buttons/floating-favorite-button";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
@@ -85,7 +85,7 @@ export function MediaViewer({
   const hasNextFolder = !!onNextFolder;
   const isMobile = useIsMobile();
   const { toggleFullscreen } = useFullscreen();
-  const { toggleFavorite, isFavorite } = useFavoritesContext();
+  const { toggleFavorite, updateFavorite, getFavorite } = useFavoritesContext();
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
   const [currentNode, setCurrentNode] = useState<MediaNode | null>(
     allNodes[initialIndex] ?? null
@@ -104,6 +104,7 @@ export function MediaViewer({
   const lastViewedPathRef = useRef<string | null>(
     allNodes[initialIndex]?.path ?? null
   );
+  const rating = currentNode ? getFavorite(currentNode.path) : null;
 
   // 仮想スライド構成
   // [最初のページダミー] → [前のフォルダナビ] → [メディア配列] → [次のフォルダナビ] → [最後のページダミー]
@@ -152,7 +153,31 @@ export function MediaViewer({
     try {
       if (!currentNode) return;
 
-      const nextIsFavorite = await toggleFavorite(currentNode.path);
+      await toggleFavorite(currentNode.path);
+
+      const nextIsFavorite = getFavorite(currentNode.path);
+      if (nextIsFavorite === undefined) return;
+
+      const message = nextIsFavorite
+        ? "⭐お気に入りに登録しました"
+        : "お気に入りを解除しました";
+      toast.info(message, { duration: 1000 });
+
+      interactHeader();
+    } catch (e) {
+      console.error(e);
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  };
+
+  const handleFavoriteChange = async (
+    node: MediaNode,
+    rating: number | null
+  ) => {
+    try {
+      await updateFavorite(node.path, rating);
+
+      const nextIsFavorite = getFavorite(node.path);
       if (nextIsFavorite === undefined) return;
 
       const message = nextIsFavorite
@@ -363,10 +388,12 @@ export function MediaViewer({
 
               {/* お気に入りボタン */}
               {!!currentNode && isMedia(currentNode.type) && (
-                <FavoriteButton
+                <FloatingFavoriteButton
                   variant="viewer"
-                  active={!!currentNode && isFavorite(currentNode.path)}
-                  onClick={() => void handleToggleFavorite()}
+                  rating={rating}
+                  onRatingChange={(rating) =>
+                    void handleFavoriteChange(currentNode, rating)
+                  }
                 />
               )}
 

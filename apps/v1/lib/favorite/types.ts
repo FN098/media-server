@@ -1,5 +1,6 @@
-import { PathType } from "@/lib/path/types";
+export type FavoriteStatus = {
+  path: string;
+  rating: number;
+};
 
-export type IsFavoriteType = boolean;
-export type FavoritesRecord = Record<PathType, IsFavoriteType>;
-export type FavoritesMap = Map<PathType, IsFavoriteType>;
+export type FavoritesMap = Map<string, number | null>;

@@ -1,80 +1,77 @@
 "use client";
 
-import { revalidateFavorite, updateFavorite } from "@/actions/favorite-actions";
 import {
-  FavoritesMap,
-  FavoritesRecord,
-  IsFavoriteType,
-} from "@/lib/favorite/types";
-import { PathSet, PathType } from "@/lib/path/types";
+  revalidateFavoriteAction,
+  updateFavoriteAction,
+} from "@/actions/favorite-actions";
+import { FavoritesMap, FavoriteStatus } from "@/lib/favorite/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export function useFavorites(initialFavorites?: FavoritesRecord) {
+type Msg = { path: string; rating: number | null };
+
+export function useFavorites(initialData?: FavoriteStatus[]) {
   const [favorites, setFavorites] = useState<FavoritesMap>(
-    // 再レンダリングによる Map の再インスタンス化を防ぐためラムダ式を使う
-    () => new Map(Object.entries(initialFavorites ?? {}))
-  );
-
-  const setFavorite = useCallback((path: PathType, value: IsFavoriteType) => {
-    setFavorites((m) => {
-      if (m.get(path) === value) return m; // 参照を変えないことで再レンダリング抑制
-      return new Map(m).set(path, value);
-    });
-  }, []);
-
-  const isFavorite: (path: PathType) => IsFavoriteType = useCallback(
-    (path) => favorites.get(path) ?? false,
-    [favorites]
+    () => new Map(initialData?.map((f) => [f.path, f.rating]) ?? [])
   );
 
   const { startFlight, finishFlight, isInFlight } = useInFlight();
-  const { broadcast } = useFavoriteChannel(setFavorite);
+  const { broadcast } = useFavoriteChannel((path, rating) => {
+    setFavorites((m) => new Map(m).set(path, rating));
+  });
 
-  const toggleFavorite = useCallback(
-    async (path: PathType): Promise<boolean | undefined> => {
+  // 現在の状態を取得 (0やnullならfalse、1以上ならratingを返す)
+  const getFavorite = useCallback(
+    (path: string) => favorites.get(path) ?? null,
+    [favorites]
+  );
+
+  const updateFavorite = useCallback(
+    async (path: string, nextRating: number | null) => {
       if (isInFlight(path)) return;
-
-      const prev = isFavorite(path);
-      const current = !prev;
 
       // 1. 楽観的アップデート
       startFlight(path);
-      setFavorite(path, current);
-      broadcast(path, current);
+      setFavorites((m) => new Map(m).set(path, nextRating));
+      broadcast(path, nextRating);
 
       try {
-        // 2. サーバー更新
-        const { success } = await updateFavorite(path);
-        if (success) {
-          return current; // 成功時の状態を返す
-        }
+        // 2. サーバー更新 (rating: null なら削除、数値ならupsert)
+        const { success } = await updateFavoriteAction(path, nextRating);
 
-        // 3. 失敗時のロールバック（再同期）
-        const revalidated = await revalidateFavorite(path);
-        if (revalidated.success) {
-          const actual = revalidated.favorite!;
-          setFavorite(path, actual);
+        if (!success) {
+          // 3. 失敗時のロールバック
+          const { favorite } = await revalidateFavoriteAction(path);
+          const actual = favorite?.rating ?? null;
+          setFavorites((m) => new Map(m).set(path, actual));
           broadcast(path, actual);
-          return actual; // 最終的な状態を返す
         }
       } finally {
         finishFlight(path);
       }
     },
-    [broadcast, finishFlight, isFavorite, isInFlight, setFavorite, startFlight]
+    [broadcast, finishFlight, isInFlight, startFlight]
+  );
+
+  // トグル動作 (デフォルト値を 3 とする)
+  const toggleFavorite = useCallback(
+    (path: string) => {
+      const current = getFavorite(path);
+      return updateFavorite(path, current ? null : 3);
+    },
+    [updateFavorite, getFavorite]
   );
 
   return {
     favorites,
-    isFavorite,
-    setFavorite,
+    getFavorite,
+    updateFavorite,
     toggleFavorite,
   };
 }
 
 // 複数タブ同期（BroadcastChannel）
 function useFavoriteChannel(
-  onMessage: (path: PathType, value: IsFavoriteType) => void
+  onMessage: (path: string, rating: number | null) => void
 ) {
   const channelRef = useRef<BroadcastChannel | null>(null);
 
@@ -82,24 +79,13 @@ function useFavoriteChannel(
     // クライアントサイドでのみ初期化
     const channel = new BroadcastChannel("favorite_sync");
     channelRef.current = channel;
-
-    const handler = (e: MessageEvent) => {
-      const { path, value } = e.data as {
-        path: PathType;
-        value: IsFavoriteType;
-      };
-      onMessage(path, value);
-    };
-
-    channel.addEventListener("message", handler);
-    return () => {
-      channel.removeEventListener("message", handler);
-      channel.close();
-    };
+    channel.onmessage = (e: MessageEvent<Msg>) =>
+      onMessage(e.data.path, e.data.rating);
+    return () => channel.close();
   }, [onMessage]);
 
-  const broadcast = useCallback((path: PathType, value: IsFavoriteType) => {
-    channelRef.current?.postMessage({ path, value });
+  const broadcast = useCallback((path: string, rating: number | null) => {
+    channelRef.current?.postMessage({ path, rating });
   }, []);
 
   return { broadcast };
@@ -107,16 +93,13 @@ function useFavoriteChannel(
 
 // 同時連打防止（in-flight 管理）
 function useInFlight() {
-  // 再レンダリングによる Set の再インスタンス化を防ぐためラムダ式を使う
-  const [inFlight, setInFlight] = useState<PathSet>(() => new Set());
-
+  const [inFlight, setInFlight] = useState<Set<string>>(() => new Set());
   const startFlight = useCallback(
-    (path: PathType) => setInFlight((s) => new Set(s).add(path)),
+    (path: string) => setInFlight((s) => new Set(s).add(path)),
     []
   );
-
   const finishFlight = useCallback(
-    (path: PathType) =>
+    (path: string) =>
       setInFlight((prev) => {
         const next = new Set(prev);
         next.delete(path);
@@ -124,11 +107,9 @@ function useInFlight() {
       }),
     []
   );
-
   const isInFlight = useCallback(
-    (path: PathType) => inFlight.has(path),
+    (path: string) => inFlight.has(path),
     [inFlight]
   );
-
   return { startFlight, finishFlight, isInFlight };
 }

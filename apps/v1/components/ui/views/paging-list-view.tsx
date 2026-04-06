@@ -2,7 +2,7 @@
 
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
-import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
+import { ListFavoriteRating } from "@/components/ui/buttons/list-favorite-rating";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
@@ -27,7 +27,7 @@ interface PagingListViewProps {
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string) => void;
   onSelectChange?: () => void;
-  onFavorite?: (node: MediaNode) => void;
+  onFavoriteChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -47,7 +47,7 @@ export function PagingListView({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onFavorite,
+  onFavoriteChange: onFavoriteChange,
   onRename,
   onMove,
   onDelete,
@@ -132,7 +132,7 @@ export function PagingListView({
             onOpen={onOpen}
             onOpenFolder={onOpenFolder}
             onSelectChange={onSelectChange}
-            onFavorite={onFavorite}
+            onFavoriteChange={onFavoriteChange}
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
@@ -168,7 +168,7 @@ function HeaderRow() {
       <div className="hidden md:block">Updated</div>
       <div className="hidden md:block">Size</div>
       <div className="hidden md:block">Last Viewed</div>
-      <div className="text-center">Favorite</div>
+      <div className="text-center">Rating</div>
       <div className="text-center">Actions</div>
     </div>
   );
@@ -182,7 +182,7 @@ interface DataRowProps {
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string) => void;
   onSelectChange?: () => void;
-  onFavorite?: (node: MediaNode) => void;
+  onFavoriteChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -199,7 +199,7 @@ function DataRow({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onFavorite,
+  onFavoriteChange,
   onRename,
   onMove,
   onDelete,
@@ -211,7 +211,7 @@ function DataRow({
   const favCtx = useFavoritesContext();
   const selectCtx = usePathSelectionContext();
 
-  const isFavorite = favCtx.isFavorite(node.path);
+  const rating = favCtx.getFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
 
   const handleLongPress = useCallback(() => {
@@ -358,14 +358,10 @@ function DataRow({
         >
           {node.isDirectory ? (
             <FavoriteCountBadge count={node.favoriteCount ?? 0} />
-          ) : onFavorite ? (
-            <FavoriteButton
-              variant="list"
-              active={isFavorite}
-              onClick={(e) => {
-                e.stopPropagation();
-                onFavorite(node);
-              }}
+          ) : onFavoriteChange ? (
+            <ListFavoriteRating
+              rating={rating}
+              onRatingChange={(rating) => onFavoriteChange(node, rating)}
             />
           ) : null}
         </div>
