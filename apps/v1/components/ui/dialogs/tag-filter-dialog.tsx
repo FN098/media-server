@@ -84,11 +84,6 @@ export function TagFilterDialog({
     setOpen(false);
   };
 
-  const handleReset = () => {
-    setMode("AND");
-    onApply(new Set(), "AND");
-  };
-
   const hasSelection = selectedTags.size > 0;
 
   const mounted = useMounted();
@@ -234,17 +229,6 @@ export function TagFilterDialog({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {(hasSelection || mode !== "AND") && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleReset}
-          className="h-8 text-xs text-muted-foreground hover:text-destructive"
-        >
-          リセット
-        </Button>
-      )}
     </div>
   );
 }

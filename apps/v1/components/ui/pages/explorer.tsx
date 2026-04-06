@@ -8,6 +8,7 @@ import {
   FavoriteFilterButton,
   FavoriteFilterMode,
 } from "@/components/ui/buttons/favorite-filter-button";
+import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
@@ -127,6 +128,21 @@ export function Explorer() {
 
   // 最小レーティングフィルタ
   const [minRating, setMinRating] = useState<number>(0);
+
+  // フィルタリセット
+  const handleResetFilters = () => {
+    tagFilter.selectTags([]);
+    tagFilter.setMode("AND");
+    setFilterMode("all");
+    setMinRating(0);
+  };
+
+  // フィルターが一つでも適用されているかチェック
+  const isFiltered =
+    tagFilter.selectedTags.size > 0 ||
+    tagFilter.mode !== "AND" ||
+    filterMode !== "all" ||
+    minRating > 0;
 
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
@@ -490,6 +506,12 @@ export function Explorer() {
 
         {/* 評価フィルター */}
         <RatingFilterSelect value={minRating} onChange={setMinRating} />
+
+        {/* リセットボタン */}
+        <FilterResetButton
+          onReset={handleResetFilters}
+          isVisible={isFiltered}
+        />
 
         {/* フィルター結果 */}
         <FilterResultText

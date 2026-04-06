@@ -3,6 +3,7 @@
 import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
+import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { RatingFilterSelect } from "@/components/ui/selects/rating-filter-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
@@ -100,6 +101,19 @@ export function Favorites() {
 
   // 最小レーティングフィルタ
   const [minRating, setMinRating] = useState<number>(0);
+
+  // フィルタリセット
+  const handleResetFilters = () => {
+    tagFilter.selectTags([]);
+    tagFilter.setMode("AND");
+    setMinRating(0);
+  };
+
+  // フィルターが一つでも適用されているかチェック
+  const isFiltered =
+    tagFilter.selectedTags.size > 0 ||
+    tagFilter.mode !== "AND" ||
+    minRating > 0;
 
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
@@ -388,6 +402,12 @@ export function Favorites() {
 
         {/* 評価フィルター */}
         <RatingFilterSelect value={minRating} onChange={setMinRating} />
+
+        {/* リセットボタン */}
+        <FilterResetButton
+          onReset={handleResetFilters}
+          isVisible={isFiltered}
+        />
 
         {/* フィルター結果 */}
         <FilterResultText
