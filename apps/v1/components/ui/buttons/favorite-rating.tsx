@@ -2,17 +2,18 @@ import { cn } from "@/shadcn/lib/utils";
 import { Star } from "lucide-react";
 import React from "react";
 
-type ListFavoriteRatingProps = {
+type FavoriteRatingProps = {
   rating: number | null;
   onRatingChange: (newRating: number | null) => void;
+  variant?: "list" | "menu";
   className?: string;
 };
 
-export function ListFavoriteRating({
+export function FavoriteRating({
   rating,
   onRatingChange,
   className,
-}: ListFavoriteRatingProps) {
+}: FavoriteRatingProps) {
   const [hoverRating, setHoverRating] = React.useState<number | null>(null);
 
   return (
@@ -50,7 +51,6 @@ export function ListFavoriteRating({
                   : "opacity-0"
               )}
             />
-
             {/* メインの星 */}
             <Star
               className={cn(

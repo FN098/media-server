@@ -1,5 +1,6 @@
 "use client";
 
+import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
@@ -31,6 +32,7 @@ interface ActionMenuProps {
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
+  onRatingChange?: (node: MediaNode, rating: number | null) => void;
 }
 
 export function ActionMenu({
@@ -43,6 +45,7 @@ export function ActionMenu({
   onDeletePermanently,
   onRestore,
   onEditTags,
+  onRatingChange,
 }: ActionMenuProps) {
   const [open, setOpen] = useState(false);
 
@@ -62,7 +65,16 @@ export function ActionMenu({
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="min-w-48">
+        {onRatingChange && (
+          <DropdownMenuItem className="flex justify-center">
+            <FavoriteRating
+              rating={node.rating}
+              onRatingChange={(rating) => onRatingChange(node, rating)}
+              variant="menu"
+            />
+          </DropdownMenuItem>
+        )}
         {onOpenFolder && (
           <DropdownMenuItem
             onClick={(e) => {

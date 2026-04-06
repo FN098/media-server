@@ -2,7 +2,7 @@
 
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
-import { ListFavoriteRating } from "@/components/ui/buttons/list-favorite-rating";
+import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
@@ -27,7 +27,7 @@ interface PagingListViewProps {
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string) => void;
   onSelectChange?: () => void;
-  onFavoriteChange?: (node: MediaNode, rating: number | null) => void;
+  onRatingChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -47,7 +47,7 @@ export function PagingListView({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onFavoriteChange: onFavoriteChange,
+  onRatingChange,
   onRename,
   onMove,
   onDelete,
@@ -132,7 +132,7 @@ export function PagingListView({
             onOpen={onOpen}
             onOpenFolder={onOpenFolder}
             onSelectChange={onSelectChange}
-            onFavoriteChange={onFavoriteChange}
+            onRatingChange={onRatingChange}
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
@@ -182,7 +182,7 @@ interface DataRowProps {
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string) => void;
   onSelectChange?: () => void;
-  onFavoriteChange?: (node: MediaNode, rating: number | null) => void;
+  onRatingChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -199,7 +199,7 @@ function DataRow({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onFavoriteChange,
+  onRatingChange,
   onRename,
   onMove,
   onDelete,
@@ -367,10 +367,10 @@ function DataRow({
         >
           {node.isDirectory ? (
             <FavoriteCountBadge count={node.favoriteCount ?? 0} />
-          ) : onFavoriteChange ? (
-            <ListFavoriteRating
+          ) : onRatingChange ? (
+            <FavoriteRating
               rating={rating}
-              onRatingChange={(rating) => onFavoriteChange(node, rating)}
+              onRatingChange={(rating) => onRatingChange(node, rating)}
             />
           ) : null}
         </div>

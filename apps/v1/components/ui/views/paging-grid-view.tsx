@@ -2,7 +2,7 @@
 
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
-import { FloatingFavoriteButton } from "@/components/ui/buttons/floating-favorite-button";
+import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
 import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
@@ -26,7 +26,7 @@ interface PagingGridViewProps {
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelectChange?: () => void;
-  onFavoriteChange?: (node: MediaNode, rating: number | null) => void;
+  onRatingChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -43,7 +43,7 @@ export function PagingGridView({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onFavoriteChange,
+  onRatingChange,
   onRename,
   onMove,
   onDelete,
@@ -133,7 +133,7 @@ export function PagingGridView({
             onOpen={onOpen}
             onOpenFolder={onOpenFolder}
             onSelectChange={onSelectChange}
-            onFavoriteChange={onFavoriteChange}
+            onRatingChange={onRatingChange}
             onRename={onRename}
             onMove={onMove}
             onDelete={onDelete}
@@ -162,7 +162,7 @@ interface CellProps {
   onOpen?: (node: MediaNode) => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
   onSelectChange?: () => void;
-  onFavoriteChange?: (node: MediaNode, rating: number | null) => void;
+  onRatingChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
@@ -179,7 +179,7 @@ function Cell({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onFavoriteChange,
+  onRatingChange: onRatingChange,
   onRename,
   onMove,
   onDelete,
@@ -317,11 +317,11 @@ function Cell({
 
           {/* Actions */}
           <div className="absolute top-2 right-2 flex flex-col gap-2">
-            {!selectCtx.isSelectionMode && isMediaNode && onFavoriteChange && (
-              <FloatingFavoriteButton
+            {!selectCtx.isSelectionMode && isMediaNode && onRatingChange && (
+              <ToggleFavoriteButton
                 variant="grid"
                 rating={rating}
-                onRatingChange={(rating) => onFavoriteChange(node, rating)}
+                onRatingChange={(rating) => onRatingChange(node, rating)}
               />
             )}
 
@@ -334,6 +334,7 @@ function Cell({
               >
                 <ActionMenu
                   node={node}
+                  onRatingChange={onRatingChange}
                   onRename={onRename}
                   onMove={onMove}
                   onDelete={onDelete}

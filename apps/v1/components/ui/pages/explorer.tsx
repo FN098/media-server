@@ -235,7 +235,7 @@ export function Explorer() {
 
   const favCtx = useFavoritesContext();
 
-  const handleFavoriteChange = (node: MediaNode, rating: number | null) => {
+  const handleRatingChange = (node: MediaNode, rating: number | null) => {
     try {
       void favCtx.updateFavorite(node.path, rating);
     } catch {
@@ -494,7 +494,7 @@ export function Explorer() {
               allNodes={filteredNodes}
               initialScrollPath={lastPath}
               onOpen={handleOpen}
-              onFavoriteChange={handleFavoriteChange}
+              onRatingChange={handleRatingChange}
               onRename={handleRenameSingle}
               onMove={handleOpenMoveSingle}
               onDelete={handleOpenDeleteSingle}
@@ -519,7 +519,7 @@ export function Explorer() {
               allNodes={filteredNodes}
               initialScrollPath={lastPath}
               onOpen={handleOpen}
-              onFavoriteChange={handleFavoriteChange}
+              onRatingChange={handleRatingChange}
               onRename={handleRenameSingle}
               onMove={handleOpenMoveSingle}
               onDelete={handleOpenDeleteSingle}

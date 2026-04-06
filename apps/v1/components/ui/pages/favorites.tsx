@@ -382,7 +382,7 @@ export function Favorites() {
               initialScrollPath={lastPath}
               onOpen={handleOpen}
               onOpenFolder={openFolder}
-              onFavoriteChange={handleFavoriteChange}
+              onRatingChange={handleFavoriteChange}
               onEditTags={(node) => {
                 handleSelectSingle(node);
                 handleOpenTagEditor();
@@ -405,7 +405,7 @@ export function Favorites() {
               initialScrollPath={lastPath}
               onOpen={handleOpen}
               onOpenFolder={openFolder}
-              onFavoriteChange={handleFavoriteChange}
+              onRatingChange={handleFavoriteChange}
               onEditTags={(node) => {
                 handleSelectSingle(node);
                 handleOpenTagEditor();

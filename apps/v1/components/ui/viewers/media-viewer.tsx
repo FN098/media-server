@@ -1,7 +1,8 @@
 "use client";
 
 import { APP_CONFIG } from "@/app.config";
-import { FloatingFavoriteButton } from "@/components/ui/buttons/floating-favorite-button";
+import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
+import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
@@ -169,11 +170,10 @@ export function MediaViewer({
     }
   };
 
-  const handleFavoriteChange = async (
-    node: MediaNode,
-    rating: number | null
-  ) => {
+  const handleRatingChange = async (rating: number | null) => {
     try {
+      if (!currentNode) return;
+      const node = currentNode;
       const currentRating = getFavorite(node.path);
 
       await updateFavorite(node.path, rating);
@@ -387,12 +387,10 @@ export function MediaViewer({
 
               {/* お気に入りボタン */}
               {!!currentNode && isMedia(currentNode.type) && (
-                <FloatingFavoriteButton
+                <ToggleFavoriteButton
                   variant="viewer"
                   rating={rating}
-                  onRatingChange={(rating) =>
-                    void handleFavoriteChange(currentNode, rating)
-                  }
+                  onRatingChange={(rating) => void handleRatingChange(rating)}
                 />
               )}
 
@@ -409,8 +407,18 @@ export function MediaViewer({
 
                 <DropdownMenuContent
                   align="end"
-                  className="flex flex-col w-48 gap-2"
+                  className="flex flex-col min-w-48 gap-2"
                 >
+                  <DropdownMenuItem className="flex justify-center">
+                    <FavoriteRating
+                      rating={rating}
+                      onRatingChange={(rating) =>
+                        void handleRatingChange(rating)
+                      }
+                      variant="menu"
+                    />
+                  </DropdownMenuItem>
+
                   {onOpenFolder && (
                     <DropdownMenuItem onClick={() => handleOpenFolder()}>
                       <Folder className="mr-2 h-4 w-4" />
