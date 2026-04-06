@@ -25,18 +25,19 @@ export function useFavorites(initialData?: FavoriteStatus[]) {
     [favorites]
   );
 
+  // お気に入り状態を更新
   const updateFavorite = useCallback(
-    async (path: string, nextRating: number | null) => {
+    async (path: string, rating: number | null) => {
       if (isInFlight(path)) return;
 
       // 1. 楽観的アップデート
       startFlight(path);
-      setFavorites((m) => new Map(m).set(path, nextRating));
-      broadcast(path, nextRating);
+      setFavorites((m) => new Map(m).set(path, rating));
+      broadcast(path, rating);
 
       try {
         // 2. サーバー更新 (rating: null なら削除、数値ならupsert)
-        const { success } = await updateFavoriteAction(path, nextRating);
+        const { success } = await updateFavoriteAction(path, rating);
 
         if (!success) {
           // 3. 失敗時のロールバック
