@@ -4,7 +4,12 @@ import {
   cleanupGhostMediaAction,
   scanGhostMediaAction,
 } from "@/actions/media-actions";
+import {
+  deleteSelectedTagsAction,
+  scanUnusedTagsAction,
+} from "@/actions/tag-actions";
 import { GhostMediaCleanupCard } from "@/components/ui/cards/ghost-media-cleanup-card";
+import { UnusedTagsCleanupCard } from "@/components/ui/cards/unused-tags-cleanup-card";
 import {
   Card,
   CardContent,
@@ -22,6 +27,11 @@ export function Maintenance() {
           autoScan={true}
           onScan={scanGhostMediaAction}
           onExecute={cleanupGhostMediaAction}
+        />
+
+        <UnusedTagsCleanupCard
+          onScan={scanUnusedTagsAction}
+          onExecute={deleteSelectedTagsAction}
         />
 
         {/* システム情報（プレースホルダー） */}

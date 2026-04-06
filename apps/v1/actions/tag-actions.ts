@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; // Prismaクライアントのパス
+import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
 
@@ -140,5 +140,58 @@ export async function createTagsAction(
   } catch (error) {
     console.error("Create tags error:", error);
     return { success: false, error: "タグの作成に失敗しました" };
+  }
+}
+
+export async function scanUnusedTagsAction() {
+  try {
+    // どの MediaTag にも紐付いていないタグを取得
+    const unusedTags = await prisma.tag.findMany({
+      where: {
+        mediaTags: {
+          none: {}, // リレーションが空のもの
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: { mediaTags: true },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return {
+      success: true,
+      tags: unusedTags.map((t) => ({
+        id: t.id,
+        name: t.name,
+        usageCount: t._count.mediaTags,
+      })),
+    };
+  } catch (error) {
+    console.error("Scan Unused Tags Error:", error);
+    return { success: false, error: "タグのスキャンに失敗しました。" };
+  }
+}
+
+export async function deleteSelectedTagsAction(ids: string[]) {
+  try {
+    if (ids.length === 0) return { success: true, deletedCount: 0 };
+
+    const deleteResult = await prisma.tag.deleteMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+
+    return {
+      success: true,
+      deletedCount: deleteResult.count,
+    };
+  } catch (error) {
+    console.error("Delete Tags Error:", error);
+    return { success: false, error: "タグの削除中にエラーが発生しました。" };
   }
 }
