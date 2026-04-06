@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Favorite` ADD COLUMN `rating` INTEGER NOT NULL DEFAULT 3;
