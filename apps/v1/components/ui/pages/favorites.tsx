@@ -413,6 +413,7 @@ export function Favorites() {
         <FilterResultText
           totalCount={allNodes.length}
           filteredCount={mediaOnly.length}
+          isFiltered={isFiltered}
         />
       </div>
 

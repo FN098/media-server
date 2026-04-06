@@ -517,6 +517,7 @@ export function Explorer() {
         <FilterResultText
           totalCount={allNodes.length}
           filteredCount={mediaOnly.length}
+          isFiltered={isFiltered}
         />
       </div>
 
