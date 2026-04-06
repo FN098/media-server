@@ -39,7 +39,7 @@ interface PagingListViewProps {
 }
 
 const GRID_TEMPLATE =
-  "grid-cols-[40px_1fr_50px_50px] md:grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]";
+  "grid-cols-[40px_1fr_80px_80px] md:grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]";
 
 export function PagingListView({
   allNodes,
