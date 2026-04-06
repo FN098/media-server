@@ -118,7 +118,7 @@ export function PagingListView({
   const isMobile = useIsMobile();
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden bg-background">
+    <div className="w-full h-full flex flex-col bg-background">
       <HeaderRow />
 
       <div className="flex-1 overflow-y-auto">

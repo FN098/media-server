@@ -114,7 +114,7 @@ export function PagingGridView({
   const isMobile = useIsMobile();
 
   return (
-    <div className="h-full flex flex-col overflow-hidden relative">
+    <div className="h-full flex flex-col relative">
       <div
         className={cn(
           "flex-1 overflow-y-auto p-4 grid gap-4 auto-rows-max",
