@@ -1,6 +1,14 @@
 "use client";
 
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shadcn-overrides/components/ui/table";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -20,14 +28,6 @@ import {
   CardTitle,
 } from "@/shadcn/components/ui/card";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shadcn/components/ui/table";
 import { CheckCircle2, Loader2, Search, Tag } from "lucide-react";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -144,18 +144,24 @@ export function UnusedTagsCleanupCard({
                 : "スキャンを実行して未使用タグを確認"}
             </div>
           ) : tags.length > 0 ? (
-            <div className="max-h-[300px] overflow-y-auto">
-              <Table>
-                <TableHeader className="sticky top-0 bg-background shadow-sm">
-                  <TableRow>
-                    <TableHead className="w-[50px]">
+            <div className="max-h-[300px] overflow-y-auto border-t">
+              <Table noWrapper>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[50px] sticky top-0 bg-background z-10 shadow-[sm]">
                       <Checkbox
-                        checked={selectedIds.size === tags.length}
+                        checked={
+                          selectedIds.size === tags.length && tags.length > 0
+                        }
                         onCheckedChange={toggleSelectAll}
                       />
                     </TableHead>
-                    <TableHead>タグ名</TableHead>
-                    <TableHead className="text-right">使用数</TableHead>
+                    <TableHead className="sticky top-0 bg-background z-10 shadow-[sm]">
+                      タグ名
+                    </TableHead>
+                    <TableHead className="text-right sticky top-0 bg-background z-10 shadow-[sm]">
+                      ID
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -168,8 +174,8 @@ export function UnusedTagsCleanupCard({
                         />
                       </TableCell>
                       <TableCell className="font-medium">{tag.name}</TableCell>
-                      <TableCell className="text-right text-muted-foreground">
-                        {tag.usageCount}
+                      <TableCell className="text-right text-xs text-muted-foreground font-mono">
+                        {tag.id.split("-")[0]}...
                       </TableCell>
                     </TableRow>
                   ))}
