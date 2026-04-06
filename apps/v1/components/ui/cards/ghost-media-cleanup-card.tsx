@@ -76,8 +76,8 @@ export function GhostMediaCleanupCard({
     });
   }, [onScan]);
 
-  // 実行処理
-  const handleExecute = useCallback(() => {
+  // 削除処理
+  const handleDelete = useCallback(() => {
     startTransition(async () => {
       const result = await onExecute();
       if (result.success) {
@@ -180,7 +180,7 @@ export function GhostMediaCleanupCard({
               <AlertDialogFooter>
                 <AlertDialogCancel>キャンセル</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleExecute}
+                  onClick={handleDelete}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
                   削除
