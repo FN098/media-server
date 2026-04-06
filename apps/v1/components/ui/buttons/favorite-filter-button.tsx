@@ -1,4 +1,3 @@
-import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { LayoutGrid, Star, StarOff } from "lucide-react";
@@ -8,15 +7,11 @@ export type FavoriteFilterMode = "all" | "only_favorites" | "exclude_favorites";
 interface FavoriteFilterButtonProps {
   mode: FavoriteFilterMode;
   onChange: (nextMode: FavoriteFilterMode) => void;
-  count?: number; // お気に入り件数（任意）
-  showCount?: boolean; // 件数を表示するかどうか
 }
 
 export const FavoriteFilterButton = ({
   mode,
   onChange,
-  count = 0,
-  showCount = false,
 }: FavoriteFilterButtonProps) => {
   // ループのロジック
   const handleToggle = () => {
@@ -60,17 +55,6 @@ export const FavoriteFilterButton = ({
     >
       {current.icon}
       <span>{current.label}</span>
-
-      {showCount && count > 0 && (
-        <Badge
-          variant={"default"}
-          className={cn(
-            "ml-1 px-1.5 h-5 min-w-[20px] justify-center transition-colors font-normal"
-          )}
-        >
-          {count}
-        </Badge>
-      )}
     </Button>
   );
 };

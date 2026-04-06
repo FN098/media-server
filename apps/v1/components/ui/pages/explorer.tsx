@@ -15,6 +15,7 @@ import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { RatingFilterSelect } from "@/components/ui/selects/rating-filter-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
+import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
@@ -142,10 +143,10 @@ export function Explorer() {
     [minRating]
   );
 
+  const allNodes = listing.nodes;
+
   // フィルタリング結果
   const filteredNodes = useMemo(() => {
-    const { nodes: allNodes } = listing;
-
     // 各フィルタの生成
     const filters: MediaNodeFilter[] = [
       searchFilterFn,
@@ -164,7 +165,7 @@ export function Explorer() {
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, searchFilterFn, tagFilterFn, favoriteFilterFn, ratingFilterFn]);
+  }, [allNodes, searchFilterFn, tagFilterFn, favoriteFilterFn, ratingFilterFn]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -485,15 +486,16 @@ export function Explorer() {
         />
 
         {/* お気に入りフィルター */}
-        <FavoriteFilterButton
-          mode={filterMode}
-          onChange={setFilterMode}
-          count={mediaOnly.length}
-          showCount
-        />
+        <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />
 
         {/* 評価フィルター */}
         <RatingFilterSelect value={minRating} onChange={setMinRating} />
+
+        {/* フィルター結果 */}
+        <FilterResultText
+          totalCount={allNodes.length}
+          filteredCount={mediaOnly.length}
+        />
       </div>
 
       {/* グリッドビュー */}
