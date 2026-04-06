@@ -152,15 +152,14 @@ export function MediaViewer({
   const handleToggleFavorite = async () => {
     try {
       if (!currentNode) return;
+      const currentRating = getFavorite(currentNode.path);
 
       await toggleFavorite(currentNode.path);
 
-      const nextIsFavorite = getFavorite(currentNode.path);
-      if (nextIsFavorite === undefined) return;
-
-      const message = nextIsFavorite
-        ? "⭐お気に入りに登録しました"
-        : "お気に入りを解除しました";
+      const message =
+        currentRating == null
+          ? "⭐お気に入りに登録しました"
+          : "お気に入りを解除しました";
       toast.info(message, { duration: 1000 });
 
       interactHeader();
@@ -175,14 +174,14 @@ export function MediaViewer({
     rating: number | null
   ) => {
     try {
+      const currentRating = getFavorite(node.path);
+
       await updateFavorite(node.path, rating);
 
-      const nextIsFavorite = getFavorite(node.path);
-      if (nextIsFavorite === undefined) return;
-
-      const message = nextIsFavorite
-        ? "⭐お気に入りに登録しました"
-        : "お気に入りを解除しました";
+      const message =
+        currentRating == null
+          ? "⭐お気に入りに登録しました"
+          : "お気に入りを解除しました";
       toast.info(message, { duration: 1000 });
 
       interactHeader();
