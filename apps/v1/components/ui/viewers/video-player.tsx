@@ -66,7 +66,7 @@ export const VideoPlayer = memo(function VideoPlayer({
   // Space: 再生/一時停止
   // ↑: 10秒進む
   // ↓: 10秒戻る
-  // F: フルスクリーン
+  // F11: フルスクリーン
   useHotkeys(
     "space",
     (e) => {
@@ -93,20 +93,19 @@ export const VideoPlayer = memo(function VideoPlayer({
     },
     { scopes: ["viewer", "tag-editor"] }
   );
-  // TODO: Media Viewer のショートカットとの干渉修正
-  // useHotkeys(
-  //   "f",
-  //   (e) => {
-  //     e.preventDefault();
-  //     const video = playerRef.current;
-  //     if (video) {
-  //       if (video.requestFullscreen) {
-  //         void video.requestFullscreen();
-  //       }
-  //     }
-  //   },
-  //   { scopes: ["viewer", "tag-editor"] }
-  // );
+  useHotkeys(
+    "f11",
+    (e) => {
+      e.preventDefault();
+      const video = playerRef.current;
+      if (video) {
+        if (video.requestFullscreen) {
+          void video.requestFullscreen();
+        }
+      }
+    },
+    { scopes: ["viewer", "tag-editor"] }
+  );
 
   return (
     <div className="relative group overflow-hidden bg-black aspect-video w-full max-w-4xl mx-auto shadow-lg">
