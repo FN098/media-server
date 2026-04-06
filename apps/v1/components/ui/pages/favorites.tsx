@@ -4,6 +4,7 @@ import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
+import { RatingFilterSelect } from "@/components/ui/selects/rating-filter-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
@@ -14,7 +15,11 @@ import {
   useSetExplorerQuery,
 } from "@/hooks/use-explorer-query";
 import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
-import { createSearchFilter, createTagFilter } from "@/lib/media/filters";
+import {
+  createRatingFilter,
+  createSearchFilter,
+  createTagFilter,
+} from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
 import { sortNames } from "@/lib/media/sort";
 import {
@@ -92,11 +97,18 @@ export function Favorites() {
     tagFilter.setMode(mode);
   };
 
+  // 最小レーティングフィルタ
+  const [minRating, setMinRating] = useState<number>(0);
+
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
   const tagFilterFn = useMemo(
     () => createTagFilter(Array.from(tagFilter.selectedTags), tagFilter.mode),
     [tagFilter]
+  );
+  const ratingFilterFn = useMemo(
+    () => createRatingFilter(minRating),
+    [minRating]
   );
 
   // フィルタリング結果
@@ -104,7 +116,11 @@ export function Favorites() {
     const { nodes: allNodes } = listing;
 
     // 各フィルタの生成
-    const filters: MediaNodeFilter[] = [searchFilterFn, tagFilterFn];
+    const filters: MediaNodeFilter[] = [
+      searchFilterFn,
+      tagFilterFn,
+      ratingFilterFn,
+    ];
 
     // フィルタの適用
     return allNodes.filter((node) => {
@@ -116,7 +132,7 @@ export function Favorites() {
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, searchFilterFn, tagFilterFn]);
+  }, [listing, searchFilterFn, tagFilterFn, ratingFilterFn]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -368,6 +384,9 @@ export function Favorites() {
           currentMode={tagFilter.mode}
           onApply={handleApplyTagFilter}
         />
+
+        {/* 評価フィルター */}
+        <RatingFilterSelect value={minRating} onChange={setMinRating} />
       </div>
 
       {/* グリッドビュー */}
