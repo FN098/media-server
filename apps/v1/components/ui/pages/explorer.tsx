@@ -13,6 +13,7 @@ import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
+import { RatingFilterSelect } from "@/components/ui/selects/rating-filter-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
@@ -25,6 +26,7 @@ import {
 import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
 import {
   createFavoriteFilter,
+  createRatingFilter,
   createSearchFilter,
   createTagFilter,
 } from "@/lib/media/filters";
@@ -122,6 +124,9 @@ export function Explorer() {
   // お気に入りフィルターモード
   const [filterMode, setFilterMode] = useState<FavoriteFilterMode>("all");
 
+  // 最小レーティングフィルタ
+  const [minRating, setMinRating] = useState<number>(0);
+
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
   const tagFilterFn = useMemo(
@@ -131,6 +136,10 @@ export function Explorer() {
   const favoriteFilterFn = useMemo(
     () => createFavoriteFilter(filterMode),
     [filterMode]
+  );
+  const ratingFilterFn = useMemo(
+    () => createRatingFilter(minRating),
+    [minRating]
   );
 
   // フィルタリング結果
@@ -142,6 +151,7 @@ export function Explorer() {
       searchFilterFn,
       tagFilterFn,
       favoriteFilterFn,
+      ratingFilterFn,
     ];
 
     // フィルタの適用
@@ -154,7 +164,7 @@ export function Explorer() {
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [listing, searchFilterFn, tagFilterFn, favoriteFilterFn]);
+  }, [listing, searchFilterFn, tagFilterFn, favoriteFilterFn, ratingFilterFn]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -481,6 +491,9 @@ export function Explorer() {
           count={mediaOnly.length}
           showCount
         />
+
+        {/* 評価フィルター */}
+        <RatingFilterSelect value={minRating} onChange={setMinRating} />
       </div>
 
       {/* グリッドビュー */}

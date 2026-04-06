@@ -59,3 +59,11 @@ export const createFavoriteFilter = (
     }
   };
 };
+
+export const createRatingFilter = (minRating: number): MediaNodeFilter => {
+  return (node) => {
+    if (node.isDirectory) return true; // フォルダは常にパス
+    const rating = node.rating ?? 0;
+    return rating >= minRating;
+  };
+};
