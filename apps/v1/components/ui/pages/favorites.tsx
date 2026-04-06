@@ -42,7 +42,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
-export function FavoritesExplorer() {
+export function Favorites() {
   const { listing, openViewer, closeViewer, openFolder } = useExplorerContext();
 
   // ===== URL ステート =====

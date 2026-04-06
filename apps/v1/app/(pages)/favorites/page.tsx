@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { FavoritesExplorer } from "@/components/ui/pages/favorites";
+import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { FavoritesRecord } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
@@ -60,7 +60,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
     <ExplorerProvider listing={listing}>
       <FavoritesProvider favorites={favorites}>
         <PathSelectionProvider>
-          <FavoritesExplorer />
+          <Favorites />
         </PathSelectionProvider>
       </FavoritesProvider>
     </ExplorerProvider>
