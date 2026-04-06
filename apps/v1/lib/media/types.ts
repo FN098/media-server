@@ -52,7 +52,6 @@ export type DbMedia = {
   id: string;
   path: string;
   title?: string;
-  isFavorite: boolean;
   fileMtime: Date;
   fileSize?: number;
   tags?: MediaNodeTag[];

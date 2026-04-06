@@ -48,9 +48,9 @@ export const createFavoriteFilter = (
   return (node) => {
     switch (mode) {
       case "only_favorites":
-        return node.isFavorite;
+        return node.rating != null;
       case "exclude_favorites":
-        return !node.isFavorite;
+        return node.rating == null;
       case "all":
       default:
         return true;

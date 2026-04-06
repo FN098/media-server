@@ -35,14 +35,13 @@ export function mergeFsWithDb({
       ...fsNode,
       id: dbMediaEntry?.id,
       title: dbMediaEntry?.title ?? fsNode.name,
-      isFavorite: dbMediaEntry?.isFavorite ?? false,
       lastViewedAt: dbVisitedEntry?.lastViewedAt ?? undefined,
       favoriteCount: dbFavoriteEntry?.favoriteCountInFolder,
       tags: dbMediaEntry?.tags,
       previewPath: fsNode.isDirectory
         ? dbFolderMetaEntry?.previewPath
         : undefined,
-      rating: dbMediaEntry?.rating,
+      rating: dbMediaEntry?.rating ?? 0,
     } satisfies MediaNode;
   });
 }

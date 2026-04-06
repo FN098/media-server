@@ -59,7 +59,6 @@ export async function getDbMedia(
   return dbMedia.map((m) => ({
     id: m.id,
     fileMtime: m.fileMtime,
-    isFavorite: m.favorites.length > 0,
     path: m.path,
     fileSize: Number(m.fileSize),
     title: m.title ?? undefined,
@@ -76,6 +75,7 @@ export async function getFavoriteMediaNodes(
   const favorites = await prisma.favorite.findMany({
     where: { userId },
     select: {
+      rating: true,
       media: {
         select: {
           id: true,
@@ -109,10 +109,10 @@ export async function getFavoriteMediaNodes(
     size: Number(f.media.fileSize),
     mtime: f.media.fileMtime,
     title: f.media.title ?? undefined,
-    isFavorite: true,
     tags: f.media.mediaTags.map((t) => ({
       name: t.tag.name,
     })),
+    rating: f.rating ?? 0,
   }));
 }
 
