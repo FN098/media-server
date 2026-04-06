@@ -82,7 +82,7 @@ export function GhostMediaCleanupCard({
       const result = await onExecute();
       if (result.success) {
         toast.success(
-          `完了: ${result.deletedRecords} 件のデータを処理しました。`
+          `完了: ${result.deletedRecords} 件のデータを削除しました。`
         );
         setScanResult(null);
         setHasScanned(false); // 実行後は再度スキャンが必要な状態にする
@@ -166,7 +166,7 @@ export function GhostMediaCleanupCard({
                 {isPending && hasScanned && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                実行する
+                削除する
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -174,7 +174,7 @@ export function GhostMediaCleanupCard({
                 <AlertDialogTitle>最終確認</AlertDialogTitle>
                 <AlertDialogDescription>
                   対象の {scanResult?.recordCount}{" "}
-                  件のデータを処理します。この操作は元に戻せません。
+                  件のデータを削除します。この操作は元に戻せません。
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -183,7 +183,7 @@ export function GhostMediaCleanupCard({
                   onClick={handleExecute}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  実行
+                  削除
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
