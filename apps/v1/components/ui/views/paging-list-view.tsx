@@ -315,6 +315,7 @@ function DataRow({
           />
         </div>
 
+        {/* Icon + Name */}
         <div className="flex items-center gap-3 overflow-hidden pr-2">
           <MediaThumbIcon
             type={node.type}
@@ -332,17 +333,24 @@ function DataRow({
           </div>
         </div>
 
+        {/* Type */}
         <div className="hidden md:block text-muted-foreground text-xs uppercase">
           {node.isDirectory
             ? "Folder"
             : getExtension(node.name, { withDot: false })}
         </div>
+
+        {/* Updated */}
         <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
           <LocalDate value={node.mtime} />
         </div>
+
+        {/* Size */}
         <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
           {node.isDirectory ? "-" : formatBytes(node.size)}
         </div>
+
+        {/* Last Viewed */}
         <div className="hidden md:block flex items-center overflow-hidden">
           {node.isDirectory && (
             <FolderStatusBadge
@@ -352,6 +360,7 @@ function DataRow({
           )}
         </div>
 
+        {/* Rating */}
         <div
           className="flex justify-center"
           onClick={(e) => e.stopPropagation()}
@@ -366,6 +375,7 @@ function DataRow({
           ) : null}
         </div>
 
+        {/* Actions */}
         <div className="flex justify-center">
           <ActionMenu
             node={node}
