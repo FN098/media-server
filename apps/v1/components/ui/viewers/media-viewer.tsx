@@ -284,6 +284,7 @@ export function MediaViewer({
   // P/N: 前/次のフォルダを開く
   // O: フォルダを開く
   // H: ヘッダーの固定切り替え
+  // 0~5: お気に入り評価の設定
   useHotkeys("escape", () => onClose(), { scopes: "viewer" });
   useHotkeys("delete", () => onDelete?.(), {
     scopes: ["viewer", "tag-editor"],
@@ -321,6 +322,16 @@ export function MediaViewer({
     () => {
       toggleIsHeaderPinned();
       interactHeader();
+    },
+    {
+      scopes: ["viewer", "tag-editor"],
+    }
+  );
+  useHotkeys(
+    "0,1,2,3,4,5",
+    (event) => {
+      const rating = parseInt(event.key);
+      void handleRatingChange(rating === 0 ? null : rating);
     },
     {
       scopes: ["viewer", "tag-editor"],
