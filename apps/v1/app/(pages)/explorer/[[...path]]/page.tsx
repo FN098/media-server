@@ -71,16 +71,14 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     (n) => !n.isDirectory && (n.type === "image" || n.type === "video")
   );
 
-  if (firstMedia) {
-    // currentVirtualPath がこのディレクトリ自体のパス
-    void upsertFolderMetas([
-      {
-        path: currentVirtualPath,
-        previewPath: firstMedia.path,
-      },
-    ]).catch(console.error);
-    // ※ await せずに流しっぱなしでも、次にこの親ディレクトリに戻った時には DB に反映されている
-  }
+  // currentVirtualPath がこのディレクトリ自体のパス
+  void upsertFolderMetas([
+    {
+      path: currentVirtualPath,
+      previewPath: firstMedia?.path ?? null,
+    },
+  ]).catch(console.error);
+  // ※ await せずに流しっぱなしでも、次にこの親ディレクトリに戻った時には DB に反映されている
 
   const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
   const user = await resolveCurrentUser();
