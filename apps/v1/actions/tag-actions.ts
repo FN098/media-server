@@ -195,3 +195,71 @@ export async function deleteSelectedTagsAction(ids: string[]) {
     return { success: false, error: "タグの削除中にエラーが発生しました。" };
   }
 }
+
+export async function getTagsInfiniteAction({
+  cursor,
+  query,
+  limit = 50,
+}: {
+  cursor?: string;
+  query?: string;
+  limit?: number;
+}) {
+  try {
+    const tags = await prisma.tag.findMany({
+      take: limit,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
+      where: query ? { name: { contains: query } } : undefined,
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        _count: { select: { mediaTags: true } },
+      },
+    });
+
+    const nextCursor =
+      tags.length === limit ? tags[tags.length - 1].id : undefined;
+
+    return { success: true, tags, nextCursor };
+  } catch (error) {
+    console.error("Get Tags Error:", error);
+    return { success: false, error: "タグの取得に失敗しました。" };
+  }
+}
+
+export async function renameTagAction(id: string, newName: string) {
+  try {
+    const tag = await prisma.tag.update({
+      where: { id },
+      data: { name: newName },
+    });
+    return { success: true, tag };
+  } catch (error) {
+    console.error("Rename Tag Error:", error);
+    return { success: false, error: "タグの名前変更に失敗しました。" };
+  }
+}
+
+export async function deleteTagAction(id: string) {
+  try {
+    const tag = await prisma.tag.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return {
+      success: true,
+      tag,
+      message: `タグ「${tag.name}」を削除しました。`,
+    };
+  } catch (error) {
+    console.error("Delete Tag Error:", error);
+    return {
+      success: false,
+      error: "タグの削除に失敗しました。既に削除されている可能性があります。",
+    };
+  }
+}

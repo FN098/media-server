@@ -3,7 +3,7 @@ import { PATHS } from "@/lib/path/paths";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full h-svh flex flex-col overflow-hidden">
+    <div className="w-full h-svh flex flex-col">
       <Header
         title="Maintenance"
         basePath={PATHS.client.favorites.root}
@@ -13,9 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           viewMode: false,
         }}
       />
-      <main className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        {children}
-      </main>
+      <main className="flex flex-col flex-1 min-h-0">{children}</main>
     </div>
   );
 }
