@@ -66,7 +66,7 @@ export function ActionMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-48">
-        {onRatingChange && (
+        {onRatingChange && !node.isDirectory && (
           <DropdownMenuItem className="flex justify-center">
             <FavoriteRating
               rating={node.rating}
