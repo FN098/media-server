@@ -174,14 +174,13 @@ export function MediaViewer({
     try {
       if (!currentNode) return;
       const node = currentNode;
-      const currentRating = getFavorite(node.path);
 
       await updateFavorite(node.path, rating);
 
       const message =
-        currentRating == null
-          ? "⭐お気に入りに登録しました"
-          : "お気に入りを解除しました";
+        rating != null && rating > 0
+          ? "⭐レーティングを更新しました"
+          : "レーティングを解除しました";
       toast.info(message, { duration: 1000 });
 
       interactHeader();
