@@ -14,6 +14,7 @@ import { access, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { basename, dirname, join } from "path";
 
+// リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
   const result = renameSchema.safeParse({ newName });
 
@@ -100,6 +101,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   };
 }
 
+// 移動
 export async function moveNodesAction(
   sourcePaths: string[],
   targetDirPath: string
@@ -178,6 +180,7 @@ export async function moveNodesAction(
   return results;
 }
 
+// フォルダ一覧
 export async function getSubDirectoriesAction(dirPath: string) {
   try {
     const realPath = getServerMediaPath(dirPath);
@@ -198,6 +201,7 @@ export async function getSubDirectoriesAction(dirPath: string) {
   }
 }
 
+// 削除
 export async function deleteNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
@@ -253,6 +257,7 @@ async function recursiveMergeMove(src: string, dest: string) {
   }
 }
 
+// 完全に削除
 export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
@@ -280,6 +285,7 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
   return results;
 }
 
+// 復元
 export async function restoreNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
@@ -307,6 +313,7 @@ export async function restoreNodesAction(sourcePaths: string[]) {
   return results;
 }
 
+// クリーンアップ
 export async function cleanupMediaAction(dirPath: string) {
   try {
     // 1. 指定された dirPath 内のメディアをDBから取得
@@ -348,8 +355,6 @@ export async function cleanupMediaAction(dirPath: string) {
           },
         },
       });
-
-      // 必要に応じてサムネイルのクリーンアップ処理もここに追加
     }
 
     return {
@@ -365,6 +370,7 @@ export async function cleanupMediaAction(dirPath: string) {
   }
 }
 
+// クリーンアップ（ゴーストデータ）
 export async function cleanupGhostMediaAction() {
   try {
     // 1. 重複を除いた dirPath の一覧を取得
@@ -411,6 +417,7 @@ export async function cleanupGhostMediaAction() {
   }
 }
 
+// スキャン（ゴーストデータ）
 export async function scanGhostMediaAction() {
   try {
     const folders = await prisma.media.groupBy({
