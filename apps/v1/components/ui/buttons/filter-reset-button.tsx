@@ -1,5 +1,6 @@
 import { Button } from "@/shadcn/components/ui/button";
-import { X } from "lucide-react";
+import { cn } from "@/shadcn/lib/utils";
+import { RotateCcw } from "lucide-react";
 
 interface FilterResetButtonProps {
   onReset: () => void;
@@ -10,17 +11,22 @@ export const FilterResetButton = ({
   onReset,
   isVisible,
 }: FilterResetButtonProps) => {
-  if (!isVisible) return null;
-
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={onReset}
-      className="h-8 px-2 text-muted-foreground hover:text-destructive flex items-center gap-1 transition-all animate-in fade-in zoom-in duration-200"
+    <div
+      className={cn(
+        "overflow-hidden transition-all duration-300 ease-in-out flex items-center",
+        isVisible ? "max-w-[100px] opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"
+      )}
     >
-      <X className="h-3.5 w-3.5" />
-      <span className="text-xs font-medium">リセット</span>
-    </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onReset}
+        className="h-7 px-2 text-[11px] font-bold tracking-tighter text-muted-foreground hover:text-destructive hover:bg-destructive/5 gap-1 rounded-md"
+      >
+        <RotateCcw className="h-3 w-3" />
+        RESET
+      </Button>
+    </div>
   );
 };
