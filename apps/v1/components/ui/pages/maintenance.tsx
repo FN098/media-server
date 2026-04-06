@@ -1,5 +1,3 @@
-"use client";
-
 import {
   cleanupGhostMediaAction,
   scanGhostMediaAction,
@@ -10,14 +8,6 @@ import {
 } from "@/actions/tag-actions";
 import { GhostMediaCleanupCard } from "@/components/ui/cards/ghost-media-cleanup-card";
 import { UnusedTagsCleanupCard } from "@/components/ui/cards/unused-tags-cleanup-card";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shadcn/components/ui/card";
-import { Info } from "lucide-react";
 
 export function Maintenance() {
   return (
@@ -33,24 +23,6 @@ export function Maintenance() {
           onScan={scanUnusedTagsAction}
           onExecute={deleteSelectedTagsAction}
         />
-
-        {/* システム情報（プレースホルダー） */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Info className="w-5 h-5" />
-              システム情報
-            </CardTitle>
-            <CardDescription>
-              DBの状態やインデックスの再構築など（予定）
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              現在実装されている項目はありません。
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
