@@ -7,7 +7,7 @@ import React from "react";
 type ToggleFavoriteButtonProps = {
   rating: number | null;
   onRatingChange: (rating: number | null) => void;
-  variant?: "grid" | "viewer";
+  variant?: "grid" | "viewer" | "list"; // list を追加
   className?: string;
 };
 
@@ -19,55 +19,66 @@ export function ToggleFavoriteButton({
 }: ToggleFavoriteButtonProps) {
   const isFavorite = rating !== null;
 
-  // 親（Cell）のクリックイベントや長押しイベントへの伝播を止める
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
   };
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // すでにお気に入りなら解除、未設定なら★3をデフォルトで付与
     onRatingChange(isFavorite ? null : 3);
   };
 
-  const containerStyles = {
-    grid: "h-8 min-w-[32px] px-2 bg-black/60",
-    viewer: "h-11 min-w-[44px] px-3 bg-white/10",
-  };
+  // スタイル設定の定義
+  const styles = {
+    grid: {
+      container:
+        "h-8 min-w-[32px] px-2 bg-black/60 rounded-full backdrop-blur-md border border-white/10 shadow-lg",
+      star: "h-4 w-4",
+      text: "text-[10px]",
+    },
+    viewer: {
+      container:
+        "h-11 min-w-[44px] px-3 bg-white/10 rounded-full backdrop-blur-md border border-white/10 shadow-lg",
+      star: "h-6 w-6",
+      text: "text-sm",
+    },
+    list: {
+      // リスト用：背景なし、タップしやすいようにパディング広め、アイコンやや大きめ
+      container: "h-9 w-9 p-0 bg-transparent hover:bg-muted/50",
+      star: "h-5 w-5",
+      text: "text-[11px]", // アイコンに重ねるか、横に並べるかですが、今回は既存ロジック通り横並び想定
+    },
+  }[variant];
 
   return (
     <button
       type="button"
       onClick={toggleFavorite}
-      // 親の長押し（選択モード）などが発火しないようガード
       onMouseDown={handleInteraction}
       onMouseUp={handleInteraction}
       onTouchStart={handleInteraction}
       onTouchEnd={handleInteraction}
       className={cn(
-        "flex items-center gap-1.5 justify-center transition-all active:scale-90 group/fav",
-        "rounded-full backdrop-blur-md border border-white/10 shadow-lg",
-        containerStyles[variant],
+        "flex items-center gap-1 justify-center transition-all active:scale-75 group/fav outline-none",
+        styles.container,
         className
       )}
     >
       <Star
         className={cn(
-          variant === "grid" ? "h-4 w-4" : "h-6 w-6",
+          styles.star,
           "transition-colors",
           isFavorite
             ? "fill-yellow-400 text-yellow-400"
-            : "text-white opacity-70 group-hover/fav:opacity-100"
+            : variant === "list"
+              ? "text-muted-foreground opacity-40" // リストの未設定時は控えめに
+              : "text-white opacity-70 group-hover/fav:opacity-100"
         )}
       />
 
-      {/* 評価がある場合は数字を表示 */}
       {isFavorite && (
         <span
-          className={cn(
-            "font-bold text-yellow-400 tabular-nums",
-            variant === "grid" ? "text-[10px]" : "text-sm"
-          )}
+          className={cn("font-bold text-yellow-400 tabular-nums", styles.text)}
         >
           {rating}
         </span>

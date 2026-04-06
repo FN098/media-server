@@ -3,6 +3,7 @@
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
+import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
@@ -39,7 +40,7 @@ interface PagingListViewProps {
 }
 
 const GRID_TEMPLATE =
-  "grid-cols-[40px_1fr_80px_80px] md:grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]";
+  "grid-cols-[40px_1fr_40px_80px] md:grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]";
 
 export function PagingListView({
   allNodes,
@@ -210,7 +211,6 @@ function DataRow({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const favCtx = useFavoritesContext();
   const selectCtx = usePathSelectionContext();
-
   const rating = favCtx.getFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
 
@@ -367,6 +367,12 @@ function DataRow({
         >
           {node.isDirectory ? (
             <FavoriteCountBadge count={node.favoriteCount ?? 0} />
+          ) : isMobile && onRatingChange ? (
+            <ToggleFavoriteButton
+              rating={rating}
+              variant="list"
+              onRatingChange={(rating) => onRatingChange(node, rating)}
+            />
           ) : onRatingChange ? (
             <FavoriteRating
               rating={rating}
@@ -386,6 +392,7 @@ function DataRow({
             onRestore={onRestore}
             onEditTags={onEditTags}
             onOpenFolder={onOpenFolder}
+            onRatingChange={onRatingChange}
           />
         </div>
       </div>
