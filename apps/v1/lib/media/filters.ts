@@ -45,12 +45,14 @@ export const createTagFilter = (
 export const createFavoriteFilter = (
   mode: FavoriteFilterMode
 ): MediaNodeFilter => {
+  const isFavorite = (rating: number | null) => rating != null && rating > 0;
+
   return (node) => {
     switch (mode) {
       case "only_favorites":
-        return node.rating != null;
+        return isFavorite(node.rating);
       case "exclude_favorites":
-        return node.rating == null;
+        return !isFavorite(node.rating);
       case "all":
       default:
         return true;

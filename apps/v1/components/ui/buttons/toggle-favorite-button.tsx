@@ -17,7 +17,7 @@ export function ToggleFavoriteButton({
   variant = "grid",
   className,
 }: ToggleFavoriteButtonProps) {
-  const isFavorite = rating !== null;
+  const isFavorite = rating != null && rating > 0;
 
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
