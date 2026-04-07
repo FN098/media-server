@@ -3,8 +3,8 @@ import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { FallbackImage } from "@/components/ui/images/fallback-image";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
 import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
-import { encodePath } from "@/lib/path/encoder";
-import { getApiThumbUrl, getParentDirPath } from "@/lib/path/helpers";
+import { getParentDirPath } from "@/lib/path/helpers";
+import { resolveMediaThumbUrl } from "@/lib/url/resolver";
 import { cn } from "@/shadcn/lib/utils";
 import { memo, ReactNode, useCallback, useState } from "react";
 
@@ -115,7 +115,7 @@ function MediaThumbImage({
 
   // 表示するソースの決定
   const displayPath = previewPath || node.path;
-  const thumbSrc = getApiThumbUrl(encodePath(displayPath));
+  const thumbSrc = resolveMediaThumbUrl({ path: displayPath });
 
   return (
     <FallbackImage

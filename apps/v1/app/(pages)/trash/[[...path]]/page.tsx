@@ -57,7 +57,6 @@ export default async function TrashPage(props: TrashPageProps) {
   if (!fsListing) notFound();
 
   const allNodes = fsListing.nodes;
-  console.log({ allNodes });
 
   // ソート
   const sorted = sortMediaFsNodes(allNodes, {
@@ -87,7 +86,10 @@ export default async function TrashPage(props: TrashPageProps) {
 
   const listing = {
     ...fsListing,
-    nodes: formatted,
+    nodes: formatted.map((n) => ({
+      ...n,
+      isDeleted: true,
+    })),
   };
 
   return (

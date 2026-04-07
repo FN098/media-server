@@ -38,6 +38,7 @@ export type MediaNode = MediaFsNode & {
   tags?: MediaNodeTag[];
   previewPath?: string | null; // サムネイルやプレビュー画像のパス
   rating: number; // 1-5の整数
+  isDeleted?: boolean;
 };
 
 export type MediaListing = {

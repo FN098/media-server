@@ -8,6 +8,7 @@ import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { RestoreConfirmDialog } from "@/components/ui/dialogs/restore-confirm-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
+import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useTagFilter } from "@/hooks/use-tag-filter";
@@ -17,14 +18,18 @@ import {
   useTrashQuery,
 } from "@/hooks/use-trash-query";
 import { createSearchFilter, createTagFilter } from "@/lib/media/filters";
+import { isMedia } from "@/lib/media/media-types";
 import {
   MediaNode,
   MediaNodeFilter,
+  MediaPathToIndexMap,
   MediaPathToNodeMap,
 } from "@/lib/media/types";
 import { ExplorerQuery } from "@/lib/query/types";
+import { normalizeIndex } from "@/lib/query/utils";
 import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
+import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTrashContext } from "@/providers/trash-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
@@ -38,18 +43,25 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
 import { MoreVertical, RotateCcw, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function Trash() {
-  const { listing, openFolder } = useTrashContext();
+  const {
+    listing,
+    openViewer,
+    closeViewer,
+    openFolder,
+    openNextFolder,
+    openPrevFolder,
+  } = useTrashContext();
 
   // ===== URL ステート =====
 
   // URLファーストのステート管理
   const setTrashQuery = useSetTrashQuery();
-  const { view, q } = useTrashQuery(); // URL
+  const { view, q, at, modal } = useTrashQuery(); // URL
   const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
 
@@ -110,6 +122,51 @@ export function Trash() {
     });
   }, [listing, searchFilterFn, tagFilterFn]);
 
+  // 「メディアのみ」のリスト
+  const mediaOnly = useMemo(
+    () => filteredNodes.filter((n) => isMedia(n.type)),
+    [filteredNodes]
+  );
+
+  // ===== ビューア =====
+
+  // ビューア用インデックスを計算するためのマップ
+  const viewerIndexMap: MediaPathToIndexMap = useMemo(
+    () => new Map(mediaOnly.map((n, index) => [n.path, index])),
+    [mediaOnly]
+  );
+
+  // ビューア用インデックスを取得
+  const getViewerIndex = useCallback(
+    (path: string) => {
+      if (viewerIndexMap.has(path)) return viewerIndexMap.get(path)!;
+      return null;
+    },
+    [viewerIndexMap]
+  );
+
+  // ビューア用インデックス
+  const viewerIndex = useMemo(
+    () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
+    [at, mediaOnly.length]
+  );
+
+  // ビューア起動モード
+  const isViewMode = modal && viewerIndex != null && !!mediaOnly[viewerIndex];
+
+  // 直前のインデックス
+  const [lastPath, setLastPath] = useState<string | null>(null);
+
+  // ビューアスライド移動時の処理
+  const handleViewerIndexChange = (index: number) => {
+    const media = mediaOnly[index];
+    if (!media) return;
+    selectPaths([media.path]);
+    setLastPath(media.path);
+  };
+
+  // ===== ナビゲーション =====
+
   // ===== ナビゲーション =====
 
   // ファイル/フォルダオープン
@@ -118,6 +175,15 @@ export function Trash() {
       openFolder(node.path);
       return;
     }
+
+    if (isMedia(node.type)) {
+      const index = getViewerIndex(node.path);
+      if (index == null) return;
+      openViewer(index);
+      return;
+    }
+
+    toast.warning("このファイル形式は対応していません");
   };
 
   // ===== 選択機能 =====
@@ -295,6 +361,7 @@ export function Trash() {
           <div className="flex-1">
             <PagingGridView
               allNodes={filteredNodes}
+              initialScrollPath={lastPath}
               onOpen={handleOpen}
               onDeletePermanently={handleOpenDeleteSingle}
               onRestore={handleOpenRestoreSingle}
@@ -312,12 +379,32 @@ export function Trash() {
           <div className="flex-1">
             <PagingListView
               allNodes={filteredNodes}
+              initialScrollPath={lastPath}
               onOpen={handleOpen}
               onDeletePermanently={handleOpenDeleteSingle}
               onRestore={handleOpenRestoreSingle}
             />
           </div>
         </PagingProvider>
+      )}
+
+      {/* ビューワ */}
+      {isViewMode && (
+        <ScrollLockProvider>
+          <MediaViewer
+            allNodes={mediaOnly}
+            initialIndex={viewerIndex}
+            onIndexChange={handleViewerIndexChange}
+            onClose={closeViewer}
+            onPrevFolder={
+              listing.prev ? (at) => openPrevFolder(at ?? "last") : undefined
+            }
+            onNextFolder={
+              listing.next ? (at) => openNextFolder(at ?? "first") : undefined
+            }
+            onDelete={handleOpenDeleteSelected}
+          />
+        </ScrollLockProvider>
       )}
 
       {/* 選択バー */}
