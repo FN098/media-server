@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
-import { SortDirectionOf, SortKeyOf, sortMediaNodes } from "@/lib/media/sort";
+import { SortDirection, SortKeyOf, sortMediaNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
@@ -21,7 +21,7 @@ interface FavoritePageProps {
   // URLクエリパラメータ: ?sort=name&direction=asc
   searchParams: Promise<{
     sort?: SortKeyOf<MediaNode>;
-    direction?: SortDirectionOf<MediaNode>;
+    direction?: SortDirection;
   }>;
 }
 

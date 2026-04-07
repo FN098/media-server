@@ -1,14 +1,13 @@
 import { MediaFsNode, MediaNode } from "./types";
 
-export type SortOrder = "asc" | "desc";
+export type SortDirection = "asc" | "desc";
 
 export type SortOptions<T> = {
   key: keyof T;
-  direction?: SortOrder;
+  direction?: SortDirection;
 };
 
 export type SortKeyOf<T> = SortOptions<T>["key"];
-export type SortDirectionOf<T> = SortOptions<T>["direction"];
 
 export const collator = new Intl.Collator("ja-JP", {
   numeric: true, // 10 を 2 の後ろにする
