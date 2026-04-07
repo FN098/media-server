@@ -6,14 +6,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 export interface UsePagingOptions {
   defaultPageSize?: number;
   useUrlParams?: boolean; // URL同期を有効にするか
-  pageKey?: string; // パラメータ名（デフォルト "page"）
+  paramName?: string; // パラメータ名（デフォルト "page"）
 }
 
 export function usePaging(totalItems: number, options: UsePagingOptions = {}) {
   const {
     defaultPageSize = 48,
     useUrlParams = false,
-    pageKey = "page",
+    paramName = "page",
   } = options;
 
   const searchParams = useSearchParams();
@@ -21,7 +21,7 @@ export function usePaging(totalItems: number, options: UsePagingOptions = {}) {
   // 初回マウント時のみURLからページ番号を読み取る
   const getInitialPage = () => {
     if (useUrlParams) {
-      const p = searchParams.get(pageKey);
+      const p = searchParams.get(paramName);
       return p ? Math.max(1, parseInt(p, 10) || 1) : 1;
     }
     return 1;
@@ -48,13 +48,13 @@ export function usePaging(totalItems: number, options: UsePagingOptions = {}) {
       if (!useUrlParams) return;
 
       const params = new URLSearchParams(window.location.search);
-      params.set(pageKey, page.toString());
+      params.set(paramName, page.toString());
 
       // pushState で履歴に追加、replaceState なら上書き（戻るボタンを汚さない）
       const newUrl = `${window.location.pathname}?${params.toString()}`;
       window.history.pushState(null, "", newUrl);
     },
-    [useUrlParams, pageKey]
+    [useUrlParams, paramName]
   );
 
   // ページ更新関数
@@ -93,13 +93,13 @@ export function usePaging(totalItems: number, options: UsePagingOptions = {}) {
 
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
-      const p = params.get(pageKey);
+      const p = params.get(paramName);
       if (p) setCurrentPage(parseInt(p, 10) || 1);
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [useUrlParams, pageKey]);
+  }, [useUrlParams, paramName]);
 
   return {
     currentPage: fixedCurrentPage,
