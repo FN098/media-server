@@ -51,8 +51,7 @@ export default async function TrashPage(props: TrashPageProps) {
   ]);
 
   const { path: pathParts = [] } = params;
-  const { sort: sortKey = "name", direction: sortDirection = "asc" } =
-    searchParams;
+  const { sort: sortKey, direction: sortDirection = "asc" } = searchParams;
 
   const currentVirtualDirPath = pathParts.map(decodeURIComponent).join("/");
 
@@ -83,10 +82,12 @@ export default async function TrashPage(props: TrashPageProps) {
   });
 
   // ソート
-  const sorted = sortMediaNodes(merged, {
-    key: sortKey,
-    direction: sortDirection,
-  });
+  const sorted = sortKey
+    ? sortMediaNodes(merged, {
+        key: sortKey,
+        direction: sortDirection,
+      })
+    : merged;
 
   // フォーマット
   const formatted = formatNodes(sorted);
