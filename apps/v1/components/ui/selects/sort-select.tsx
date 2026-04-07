@@ -1,5 +1,6 @@
 "use client";
 
+import { useSort } from "@/hooks/use-sort";
 import {
   Select,
   SelectContent,
@@ -9,10 +10,7 @@ import {
 } from "@/shadcn/components/ui/select";
 import { cn } from "@/shadcn/lib/utils";
 import { LucideSortAsc } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useTransition } from "react";
 
-// 型定義をエクスポートして親コンポーネントで使いやすくする
 export interface SortOption {
   key: string;
   direction: "asc" | "desc";
@@ -30,57 +28,38 @@ export function SortSelect({
   placeholder = "並び替え",
   emptyLabel = "ソートなし",
 }: SortSelectProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const { sort, direction, setSort, isPending } = useSort();
 
-  const currentSort = searchParams.get("sort");
-  const currentDirection = searchParams.get("direction");
+  const selectValue = sort && direction ? `${sort}-${direction}` : "none";
 
-  // 現在の URL パラメータに一致するオプションがあるか確認
-  const currentValue =
-    currentSort && currentDirection
-      ? `${currentSort}-${currentDirection}`
-      : "none";
-
-  const handleValueChange = useCallback(
-    (value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (value === "none") {
-        params.delete("sort");
-        params.delete("direction");
-      } else {
-        const [key, direction] = value.split("-");
-        params.set("sort", key);
-        params.set("direction", direction);
-      }
-
-      startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-      });
-    },
-    [pathname, router, searchParams]
-  );
+  const handleValueChange = (value: string) => {
+    if (value === "none") {
+      setSort(null, null);
+    } else {
+      const [key, dir] = value.split("-");
+      setSort(key, dir);
+    }
+  };
 
   return (
-    <div className={cn(isPending ? "opacity-70" : "")}>
-      <Select value={currentValue} onValueChange={handleValueChange}>
+    <div className={cn(isPending && "opacity-70 transition-opacity")}>
+      <Select value={selectValue} onValueChange={handleValueChange}>
         <SelectTrigger className="bg-background">
-          <LucideSortAsc className="h-4 w-4 text-muted-foreground" />
-          <SelectValue placeholder={placeholder} />
+          <div className="flex items-center gap-2">
+            <LucideSortAsc className="h-4 w-4 text-muted-foreground" />
+            <SelectValue placeholder={placeholder} />
+          </div>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">{emptyLabel}</SelectItem>
-          {options.map((opt) => (
-            <SelectItem
-              key={`${opt.key}-${opt.direction}`}
-              value={`${opt.key}-${opt.direction}`}
-            >
-              {opt.label}
-            </SelectItem>
-          ))}
+          {options.map((opt) => {
+            const combined = `${opt.key}-${opt.direction}`;
+            return (
+              <SelectItem key={combined} value={combined}>
+                {opt.label}
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </Select>
     </div>
