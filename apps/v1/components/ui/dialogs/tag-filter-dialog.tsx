@@ -89,7 +89,7 @@ export function TagFilterDialog({
   const mounted = useMounted();
   if (!mounted) {
     return (
-      <div className="flex items-center gap-2 py-2">
+      <div className="flex items-center">
         <Skeleton className="h-9 w-[140px] rounded-md" />
       </div>
     );
