@@ -61,7 +61,16 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
-import { FolderInput, MoreVertical, TagIcon, Trash2 } from "lucide-react";
+import {
+  ArrowDown10,
+  ArrowDownAz,
+  ArrowDownZa,
+  CalendarArrowDown,
+  FolderInput,
+  MoreVertical,
+  TagIcon,
+  Trash2,
+} from "lucide-react";
 import { dirname } from "path";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
@@ -526,10 +535,30 @@ export function Explorer() {
         {/* ソート順 */}
         <SortSelect
           options={[
-            { key: "name", direction: "asc", label: "名前順 (A-Z)" },
-            { key: "name", direction: "desc", label: "名前順 (Z-A)" },
-            { key: "rating", direction: "desc", label: "評価が高い順" },
-            { key: "mtime", direction: "desc", label: "更新日が新しい順" },
+            {
+              key: "name",
+              direction: "asc",
+              label: "名前順 (A-Z)",
+              icon: ArrowDownAz,
+            },
+            {
+              key: "name",
+              direction: "desc",
+              label: "名前順 (Z-A)",
+              icon: ArrowDownZa,
+            },
+            {
+              key: "rating",
+              direction: "desc",
+              label: "評価が高い順",
+              icon: ArrowDown10,
+            },
+            {
+              key: "mtime",
+              direction: "desc",
+              label: "更新日が新しい順",
+              icon: CalendarArrowDown,
+            },
           ]}
         />
       </div>

@@ -9,12 +9,13 @@ import {
   SelectValue,
 } from "@/shadcn/components/ui/select";
 import { cn } from "@/shadcn/lib/utils";
-import { LucideSortAsc } from "lucide-react";
+import { ArrowUpDown, LucideIcon } from "lucide-react";
 
 export interface SortOption {
   key: string;
   direction: "asc" | "desc";
   label: string;
+  icon?: LucideIcon;
 }
 
 interface SortSelectProps {
@@ -44,19 +45,32 @@ export function SortSelect({
   return (
     <div className={cn(isPending && "opacity-70 transition-opacity")}>
       <Select value={selectValue} onValueChange={handleValueChange}>
-        <SelectTrigger className="bg-background">
-          <div className="flex items-center gap-2">
-            <LucideSortAsc className="h-4 w-4 text-muted-foreground" />
-            <SelectValue placeholder={placeholder} />
+        <SelectTrigger className="bg-background focus:ring-1">
+          <div className="flex items-center gap-2 overflow-hidden text-sm">
+            <div className="truncate">
+              <SelectValue placeholder={placeholder} />
+            </div>
           </div>
         </SelectTrigger>
+
         <SelectContent>
-          <SelectItem value="none">{emptyLabel}</SelectItem>
+          <SelectItem value="none">
+            <div className="flex items-center gap-2">
+              <ArrowUpDown className="h-4 w-4 text-muted-foreground/50" />
+              <span>{emptyLabel}</span>
+            </div>
+          </SelectItem>
+
           {options.map((opt) => {
             const combined = `${opt.key}-${opt.direction}`;
+            const ItemIcon = opt.icon || ArrowUpDown; // オプションごとのアイコン
+
             return (
               <SelectItem key={combined} value={combined}>
-                {opt.label}
+                <div className="flex items-center gap-2">
+                  <ItemIcon className="h-4 w-4 text-muted-foreground" />
+                  <span>{opt.label}</span>
+                </div>
               </SelectItem>
             );
           })}

@@ -45,7 +45,13 @@ import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
-import { TagIcon } from "lucide-react";
+import {
+  ArrowDown10,
+  ArrowDownAz,
+  ArrowDownZa,
+  CalendarArrowDown,
+  TagIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
@@ -422,10 +428,30 @@ export function Favorites() {
         {/* ソート順 */}
         <SortSelect
           options={[
-            { key: "path", direction: "asc", label: "名前順 (A-Z)" },
-            { key: "path", direction: "desc", label: "名前順 (Z-A)" },
-            { key: "rating", direction: "desc", label: "評価が高い順" },
-            { key: "mtime", direction: "desc", label: "更新日が新しい順" },
+            {
+              key: "path",
+              direction: "asc",
+              label: "名前順 (A-Z)",
+              icon: ArrowDownAz,
+            },
+            {
+              key: "path",
+              direction: "desc",
+              label: "名前順 (Z-A)",
+              icon: ArrowDownZa,
+            },
+            {
+              key: "rating",
+              direction: "desc",
+              label: "評価が高い順",
+              icon: ArrowDown10,
+            },
+            {
+              key: "mtime",
+              direction: "desc",
+              label: "更新日が新しい順",
+              icon: CalendarArrowDown,
+            },
           ]}
         />
       </div>
