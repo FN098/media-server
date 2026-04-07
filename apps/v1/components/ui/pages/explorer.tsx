@@ -441,6 +441,9 @@ export function Explorer() {
     else return "explorer-main";
   }, [isDeleteMode, isMoveMode, isRenameMode, isTagEditMode, isViewMode]);
 
+  // デバッグ用
+  useEffect(() => console.log({ activeScope }), [activeScope]);
+
   // スコープの排他的制御
   useEffect(() => {
     // 該当スコープを有効にし、それ以外を無効にする

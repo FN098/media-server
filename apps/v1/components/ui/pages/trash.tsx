@@ -296,8 +296,12 @@ export function Trash() {
   );
 
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
+    if (isViewMode) return "viewer";
     return "trash-main";
-  }, []);
+  }, [isViewMode]);
+
+  // デバッグ用
+  useEffect(() => console.log({ activeScope }), [activeScope]);
 
   // スコープの排他的制御
   useEffect(() => {

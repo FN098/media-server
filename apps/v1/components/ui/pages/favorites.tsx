@@ -343,7 +343,8 @@ export function Favorites() {
     else return "favorites-main";
   }, [isTagEditMode, isViewMode]);
 
-  console.log({ activeScope });
+  // デバッグ用
+  useEffect(() => console.log({ activeScope }), [activeScope]);
 
   // スコープの排他的制御
   useEffect(() => {
