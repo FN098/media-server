@@ -1,9 +1,7 @@
-import {
-  HeaderNavigation,
-  HeaderSearch,
-  HeaderViewModeSwitch,
-} from "@/components/ui/headers/header-components";
+import { HeaderNavigation } from "@/components/ui/headers/header-navigation";
+import { HeaderSearch } from "@/components/ui/headers/header-search";
 import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-sidebar";
+import { HeaderViewModeSwitch } from "./header-view-mode-switch";
 
 type HeaderFeatures = {
   navigation?: boolean;
