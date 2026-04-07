@@ -1,6 +1,6 @@
 import { LoadingSpinner } from "@/components/ui/spinners/loading-spinner";
 import { MediaFsNode } from "@/lib/media/types";
-import { resolveMediaUrl } from "@/lib/url/resolver";
+import { resolveMediaThumbUrl, resolveMediaUrl } from "@/lib/url/resolver";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
@@ -116,7 +116,7 @@ export const VideoPlayer = memo(function VideoPlayer({
         )}
       >
         <Image
-          src={resolveMediaUrl(media)}
+          src={resolveMediaThumbUrl(media)}
           alt={media.name}
           fill
           className="object-contain select-none"
@@ -135,7 +135,7 @@ export const VideoPlayer = memo(function VideoPlayer({
         {active && (
           <MuxPlayer
             ref={playerRef}
-            src={resolveMediaUrl(media)}
+            src={resolveMediaUrl(media, { absolute: true })}
             autoPlay
             streamType="on-demand"
             nohotkeys={true}
