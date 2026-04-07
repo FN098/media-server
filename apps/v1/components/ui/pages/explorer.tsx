@@ -498,80 +498,83 @@ export function Explorer() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      className={cn(
-        "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
-      )}
-      ref={scrollRef}
-      tabIndex={-1}
+    <PagingProvider
+      totalItems={filteredNodes.length}
+      options={{
+        defaultPageSize: viewMode === "grid" ? 48 : 100,
+        useUrlParams: true,
+      }}
     >
-      <div className="flex flex-wrap items-center gap-1 px-4 pt-2">
-        {/* ソート順 */}
-        <SortSelect
-          options={[
-            {
-              key: "name",
-              direction: "asc",
-              label: "名前順 (A-Z)",
-              icon: ArrowDownAz,
-            },
-            {
-              key: "name",
-              direction: "desc",
-              label: "名前順 (Z-A)",
-              icon: ArrowDownZa,
-            },
-            {
-              key: "rating",
-              direction: "desc",
-              label: "評価が高い順",
-              icon: ArrowDown10,
-            },
-            {
-              key: "mtime",
-              direction: "desc",
-              label: "更新日が新しい順",
-              icon: CalendarArrowDown,
-            },
-          ]}
-        />
+      <div
+        className={cn(
+          "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
+        )}
+        ref={scrollRef}
+        tabIndex={-1}
+      >
+        <div className="flex flex-wrap items-center gap-1 px-4 pt-2">
+          {/* ソート順 */}
+          <SortSelect
+            options={[
+              {
+                key: "name",
+                direction: "asc",
+                label: "名前順 (A-Z)",
+                icon: ArrowDownAz,
+              },
+              {
+                key: "name",
+                direction: "desc",
+                label: "名前順 (Z-A)",
+                icon: ArrowDownZa,
+              },
+              {
+                key: "rating",
+                direction: "desc",
+                label: "評価が高い順",
+                icon: ArrowDown10,
+              },
+              {
+                key: "mtime",
+                direction: "desc",
+                label: "更新日が新しい順",
+                icon: CalendarArrowDown,
+              },
+            ]}
+          />
 
-        {/* 評価フィルター */}
-        <RatingFilterSelect value={minRating} onChange={setMinRating} />
+          {/* 評価フィルター */}
+          <RatingFilterSelect value={minRating} onChange={setMinRating} />
 
-        {/* タグフィルター */}
-        <TagFilterDialog
-          tags={mediaOnlyTags}
-          selectedTags={tagFilter.selectedTags}
-          currentMode={tagFilter.mode}
-          onApply={handleApplyTagFilter}
-        />
+          {/* タグフィルター */}
+          <TagFilterDialog
+            tags={mediaOnlyTags}
+            selectedTags={tagFilter.selectedTags}
+            currentMode={tagFilter.mode}
+            onApply={handleApplyTagFilter}
+          />
 
-        {/* お気に入りフィルター */}
-        <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />
+          {/* お気に入りフィルター */}
+          <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />
 
-        {/* リセットボタン */}
-        <FilterResetButton
-          onReset={handleResetFilters}
-          isVisible={isFiltered}
-        />
+          {/* リセットボタン */}
+          <FilterResetButton
+            onReset={handleResetFilters}
+            isVisible={isFiltered}
+          />
 
-        <div className="flex flex-grow" />
+          <div className="flex flex-grow" />
 
-        {/* フィルター結果 */}
-        <FilterResultText
-          totalCount={allNodes.length}
-          filteredCount={filteredNodes.length}
-          isFiltered={isFiltered}
-        />
-      </div>
+          {/* フィルター結果 */}
+          <FilterResultText
+            totalCount={allNodes.length}
+            filteredCount={filteredNodes.length}
+            isFiltered={isFiltered}
+          />
+        </div>
 
-      {/* グリッドビュー */}
-      {viewMode === "grid" && !isViewMode && (
-        <PagingProvider
-          totalItems={filteredNodes.length}
-          options={{ defaultPageSize: 48, useUrlParams: true }}
-        >
+        {/* グリッドビュー */}
+        {viewMode === "grid" && !isViewMode && (
           <div className="flex-1">
             <PagingGridView
               allNodes={filteredNodes}
@@ -588,15 +591,10 @@ export function Explorer() {
               onScrollRestored={() => setLastPath(null)}
             />
           </div>
-        </PagingProvider>
-      )}
+        )}
 
-      {/* リストビュー */}
-      {viewMode === "list" && !isViewMode && (
-        <PagingProvider
-          totalItems={filteredNodes.length}
-          options={{ defaultPageSize: 100, useUrlParams: true }}
-        >
+        {/* リストビュー */}
+        {viewMode === "list" && !isViewMode && (
           <div className="flex-1">
             <PagingListView
               allNodes={filteredNodes}
@@ -613,113 +611,113 @@ export function Explorer() {
               onScrollRestored={() => setLastPath(null)}
             />
           </div>
-        </PagingProvider>
-      )}
-
-      {/* ビューワ */}
-      {isViewMode && (
-        <ScrollLockProvider>
-          <MediaViewer
-            allNodes={mediaOnly}
-            initialIndex={viewerIndex}
-            onIndexChange={handleViewerIndexChange}
-            onClose={closeViewer}
-            onPrevFolder={
-              listing.prev ? (at) => openPrevFolder(at ?? "last") : undefined
-            }
-            onNextFolder={
-              listing.next ? (at) => openNextFolder(at ?? "first") : undefined
-            }
-            onEditTags={handleToggleTagEditor}
-            onDelete={handleOpenDeleteSelected}
-          />
-        </ScrollLockProvider>
-      )}
-
-      {/* 選択バー */}
-      <AnimatePresence>
-        {isSelectionMode && !isTagEditMode && !isMoveMode && (
-          <SelectionBar
-            count={selected.length}
-            totalCount={filteredNodes.length}
-            onSelectAll={handleSelectAll}
-            onClose={handleCloseSelectionBar}
-            className="z-40" // DropdownMenu より小さくする
-            actions={
-              <div className="flex gap-1 items-center">
-                {/* メインのアクション */}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleOpenTagEditor}
-                  disabled={selected.length === 0}
-                >
-                  <TagIcon size={18} />
-                </Button>
-
-                {/* その他 */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost">
-                      <MoreVertical size={18} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleOpenMoveSelected}>
-                      <FolderInput className="mr-2 h-4 w-4" /> 移動
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={handleOpenDeleteSelected}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> 削除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            }
-          />
         )}
-      </AnimatePresence>
 
-      {/* タグエディター */}
-      <AnimatePresence>
-        {isTagEditMode && (
-          <TagEditSheet
-            targetNodes={selected}
-            onClose={handleCloseTagEditor}
-            mode={tagEditMode}
-            opacity={tagEditMode === "default" ? 100 : 0}
-          />
+        {/* ビューワ */}
+        {isViewMode && (
+          <ScrollLockProvider>
+            <MediaViewer
+              allNodes={mediaOnly}
+              initialIndex={viewerIndex}
+              onIndexChange={handleViewerIndexChange}
+              onClose={closeViewer}
+              onPrevFolder={
+                listing.prev ? (at) => openPrevFolder(at ?? "last") : undefined
+              }
+              onNextFolder={
+                listing.next ? (at) => openNextFolder(at ?? "first") : undefined
+              }
+              onEditTags={handleToggleTagEditor}
+              onDelete={handleOpenDeleteSelected}
+            />
+          </ScrollLockProvider>
         )}
-      </AnimatePresence>
 
-      {/* リネームダイアログ */}
-      <RenameDialog
-        open={isRenameMode}
-        onOpenChange={(open) => !open && setRenameTarget(null)}
-        sourcePath={renameTarget?.path ?? ""}
-        currentName={renameTarget?.name ?? ""}
-      />
+        {/* 選択バー */}
+        <AnimatePresence>
+          {isSelectionMode && !isTagEditMode && !isMoveMode && (
+            <SelectionBar
+              count={selected.length}
+              totalCount={filteredNodes.length}
+              onSelectAll={handleSelectAll}
+              onClose={handleCloseSelectionBar}
+              className="z-40" // DropdownMenu より小さくする
+              actions={
+                <div className="flex gap-1 items-center">
+                  {/* メインのアクション */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleOpenTagEditor}
+                    disabled={selected.length === 0}
+                  >
+                    <TagIcon size={18} />
+                  </Button>
 
-      {/* 移動ダイアログ */}
-      <MoveDialog
-        open={isMoveMode}
-        onOpenChange={(open) => !open && handleCloseMoveDialog()}
-        sourceNodes={moveTargets}
-        initialDirPath={initialDirPath}
-      />
+                  {/* その他 */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost">
+                        <MoreVertical size={18} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleOpenMoveSelected}>
+                        <FolderInput className="mr-2 h-4 w-4" /> 移動
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={handleOpenDeleteSelected}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> 削除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              }
+            />
+          )}
+        </AnimatePresence>
 
-      {/* 削除確認ダイアログ */}
-      <DeleteConfirmDialog
-        open={isDeleteMode}
-        onOpenChange={(open) => !open && setDeleteTargets([])}
-        count={deleteTargets.length}
-        onConfirm={handleDeleteConfirm}
-      />
+        {/* タグエディター */}
+        <AnimatePresence>
+          {isTagEditMode && (
+            <TagEditSheet
+              targetNodes={selected}
+              onClose={handleCloseTagEditor}
+              mode={tagEditMode}
+              opacity={tagEditMode === "default" ? 100 : 0}
+            />
+          )}
+        </AnimatePresence>
 
-      {/* フォルダナビゲーション */}
-      <FolderNavigation prevHref={listing.prev} nextHref={listing.next} />
-    </div>
+        {/* リネームダイアログ */}
+        <RenameDialog
+          open={isRenameMode}
+          onOpenChange={(open) => !open && setRenameTarget(null)}
+          sourcePath={renameTarget?.path ?? ""}
+          currentName={renameTarget?.name ?? ""}
+        />
+
+        {/* 移動ダイアログ */}
+        <MoveDialog
+          open={isMoveMode}
+          onOpenChange={(open) => !open && handleCloseMoveDialog()}
+          sourceNodes={moveTargets}
+          initialDirPath={initialDirPath}
+        />
+
+        {/* 削除確認ダイアログ */}
+        <DeleteConfirmDialog
+          open={isDeleteMode}
+          onOpenChange={(open) => !open && setDeleteTargets([])}
+          count={deleteTargets.length}
+          onConfirm={handleDeleteConfirm}
+        />
+
+        {/* フォルダナビゲーション */}
+        <FolderNavigation prevHref={listing.prev} nextHref={listing.next} />
+      </div>
+    </PagingProvider>
   );
 }

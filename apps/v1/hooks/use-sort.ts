@@ -22,8 +22,6 @@ export function useSort(options?: UseSortOptions) {
     (key: string | null, dir: string | null) => {
       const params = new URLSearchParams(searchParams.toString());
 
-      params.delete("page");
-
       if (!key || !dir) {
         params.delete("sort");
         params.delete("direction");

@@ -392,83 +392,86 @@ export function Favorites() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      className={cn(
-        "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
-      )}
-      ref={scrollRef}
-      tabIndex={-1}
+    <PagingProvider
+      totalItems={filteredNodes.length}
+      options={{
+        defaultPageSize: viewMode === "grid" ? 48 : 100,
+        useUrlParams: true,
+      }}
     >
-      <div className="flex flex-wrap items-center gap-1 px-4 pt-2">
-        {/* ソート順 */}
-        <SortSelect
-          options={[
-            {
-              key: "path",
-              direction: "asc",
-              label: "パス順 (A-Z)",
-              icon: ArrowDownAz,
-            },
-            {
-              key: "path",
-              direction: "desc",
-              label: "パス順 (Z-A)",
-              icon: ArrowDownZa,
-            },
-            {
-              key: "rating",
-              direction: "desc",
-              label: "評価が高い順",
-              icon: ArrowDown10,
-            },
-            {
-              key: "favoritedAt",
-              direction: "desc",
-              label: "登録日が新しい順",
-              icon: CalendarArrowDown,
-            },
-            {
-              key: "mtime",
-              direction: "desc",
-              label: "更新日が新しい順",
-              icon: CalendarArrowDown,
-            },
-          ]}
-        />
+      <div
+        className={cn(
+          "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
+        )}
+        ref={scrollRef}
+        tabIndex={-1}
+      >
+        <div className="flex flex-wrap items-center gap-1 px-4 pt-2">
+          {/* ソート順 */}
+          <SortSelect
+            options={[
+              {
+                key: "path",
+                direction: "asc",
+                label: "パス順 (A-Z)",
+                icon: ArrowDownAz,
+              },
+              {
+                key: "path",
+                direction: "desc",
+                label: "パス順 (Z-A)",
+                icon: ArrowDownZa,
+              },
+              {
+                key: "rating",
+                direction: "desc",
+                label: "評価が高い順",
+                icon: ArrowDown10,
+              },
+              {
+                key: "favoritedAt",
+                direction: "desc",
+                label: "登録日が新しい順",
+                icon: CalendarArrowDown,
+              },
+              {
+                key: "mtime",
+                direction: "desc",
+                label: "更新日が新しい順",
+                icon: CalendarArrowDown,
+              },
+            ]}
+          />
 
-        {/* 評価フィルター */}
-        <RatingFilterSelect value={minRating} onChange={setMinRating} />
+          {/* 評価フィルター */}
+          <RatingFilterSelect value={minRating} onChange={setMinRating} />
 
-        {/* タグフィルター */}
-        <TagFilterDialog
-          tags={mediaOnlyTags}
-          selectedTags={tagFilter.selectedTags}
-          currentMode={tagFilter.mode}
-          onApply={handleApplyTagFilter}
-        />
+          {/* タグフィルター */}
+          <TagFilterDialog
+            tags={mediaOnlyTags}
+            selectedTags={tagFilter.selectedTags}
+            currentMode={tagFilter.mode}
+            onApply={handleApplyTagFilter}
+          />
 
-        {/* リセットボタン */}
-        <FilterResetButton
-          onReset={handleResetFilters}
-          isVisible={isFiltered}
-        />
+          {/* リセットボタン */}
+          <FilterResetButton
+            onReset={handleResetFilters}
+            isVisible={isFiltered}
+          />
 
-        <div className="flex flex-grow" />
+          <div className="flex flex-grow" />
 
-        {/* フィルター結果 */}
-        <FilterResultText
-          totalCount={allNodes.length}
-          filteredCount={filteredNodes.length}
-          isFiltered={isFiltered}
-        />
-      </div>
+          {/* フィルター結果 */}
+          <FilterResultText
+            totalCount={allNodes.length}
+            filteredCount={filteredNodes.length}
+            isFiltered={isFiltered}
+          />
+        </div>
 
-      {/* グリッドビュー */}
-      {viewMode === "grid" && !isViewMode && (
-        <PagingProvider
-          totalItems={filteredNodes.length}
-          options={{ defaultPageSize: 48, useUrlParams: true }}
-        >
+        {/* グリッドビュー */}
+        {viewMode === "grid" && !isViewMode && (
           <div className="flex-1">
             <PagingGridView
               allNodes={filteredNodes}
@@ -483,15 +486,10 @@ export function Favorites() {
               onScrollRestored={() => setLastPath(null)}
             />
           </div>
-        </PagingProvider>
-      )}
+        )}
 
-      {/* リストビュー */}
-      {viewMode === "list" && !isViewMode && (
-        <PagingProvider
-          totalItems={filteredNodes.length}
-          options={{ defaultPageSize: 100, useUrlParams: true }}
-        >
+        {/* リストビュー */}
+        {viewMode === "list" && !isViewMode && (
           <div className="flex-1">
             <PagingListView
               allNodes={filteredNodes}
@@ -506,60 +504,60 @@ export function Favorites() {
               onScrollRestored={() => setLastPath(null)}
             />
           </div>
-        </PagingProvider>
-      )}
-
-      {/* ビューワ */}
-      {isViewMode && (
-        <ScrollLockProvider>
-          <MediaViewer
-            allNodes={mediaOnly}
-            initialIndex={viewerIndex}
-            onIndexChange={handleViewerIndexChange}
-            onClose={closeViewer}
-            onOpenFolder={openFolder}
-            onEditTags={handleToggleTagEditor}
-          />
-        </ScrollLockProvider>
-      )}
-
-      {/* 選択バー */}
-      <AnimatePresence>
-        {isSelectionMode && !isTagEditMode && (
-          <SelectionBar
-            count={selected.length}
-            totalCount={filteredNodes.length}
-            onSelectAll={handleSelectAll}
-            onClose={handleCloseSelectionBar}
-            className="z-40" // DropdownMenu より小さくする
-            actions={
-              <div className="flex gap-1 items-center">
-                {/* メインのアクション */}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleOpenTagEditor}
-                  disabled={selected.length === 0}
-                >
-                  <TagIcon size={18} />
-                </Button>
-              </div>
-            }
-          />
         )}
-      </AnimatePresence>
 
-      {/* タグエディター */}
-      <AnimatePresence>
-        {isTagEditMode && (
-          <TagEditSheet
-            targetNodes={selected}
-            onClose={handleCloseTagEditor}
-            mode={tagEditMode}
-            opacity={tagEditMode === "default" ? 100 : 0}
-          />
+        {/* ビューワ */}
+        {isViewMode && (
+          <ScrollLockProvider>
+            <MediaViewer
+              allNodes={mediaOnly}
+              initialIndex={viewerIndex}
+              onIndexChange={handleViewerIndexChange}
+              onClose={closeViewer}
+              onOpenFolder={openFolder}
+              onEditTags={handleToggleTagEditor}
+            />
+          </ScrollLockProvider>
         )}
-      </AnimatePresence>
-    </div>
+
+        {/* 選択バー */}
+        <AnimatePresence>
+          {isSelectionMode && !isTagEditMode && (
+            <SelectionBar
+              count={selected.length}
+              totalCount={filteredNodes.length}
+              onSelectAll={handleSelectAll}
+              onClose={handleCloseSelectionBar}
+              className="z-40" // DropdownMenu より小さくする
+              actions={
+                <div className="flex gap-1 items-center">
+                  {/* メインのアクション */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleOpenTagEditor}
+                    disabled={selected.length === 0}
+                  >
+                    <TagIcon size={18} />
+                  </Button>
+                </div>
+              }
+            />
+          )}
+        </AnimatePresence>
+
+        {/* タグエディター */}
+        <AnimatePresence>
+          {isTagEditMode && (
+            <TagEditSheet
+              targetNodes={selected}
+              onClose={handleCloseTagEditor}
+              mode={tagEditMode}
+              opacity={tagEditMode === "default" ? 100 : 0}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+    </PagingProvider>
   );
 }

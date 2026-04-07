@@ -349,19 +349,22 @@ export function Trash() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div
-      className={cn(
-        "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
-      )}
-      ref={scrollRef}
-      tabIndex={-1}
+    <PagingProvider
+      totalItems={filteredNodes.length}
+      options={{
+        defaultPageSize: viewMode === "grid" ? 48 : 100,
+        useUrlParams: true,
+      }}
     >
-      {/* グリッドビュー */}
-      {viewMode === "grid" && (
-        <PagingProvider
-          totalItems={filteredNodes.length}
-          options={{ defaultPageSize: 48, useUrlParams: true }}
-        >
+      <div
+        className={cn(
+          "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
+        )}
+        ref={scrollRef}
+        tabIndex={-1}
+      >
+        {/* グリッドビュー */}
+        {viewMode === "grid" && (
           <div className="flex-1">
             <PagingGridView
               allNodes={filteredNodes}
@@ -371,15 +374,10 @@ export function Trash() {
               onRestore={handleOpenRestoreSingle}
             />
           </div>
-        </PagingProvider>
-      )}
+        )}
 
-      {/* リストビュー */}
-      {viewMode === "list" && (
-        <PagingProvider
-          totalItems={filteredNodes.length}
-          options={{ defaultPageSize: 100, useUrlParams: true }}
-        >
+        {/* リストビュー */}
+        {viewMode === "list" && (
           <div className="flex-1">
             <PagingListView
               allNodes={filteredNodes}
@@ -389,87 +387,87 @@ export function Trash() {
               onRestore={handleOpenRestoreSingle}
             />
           </div>
-        </PagingProvider>
-      )}
-
-      {/* ビューワ */}
-      {isViewMode && (
-        <ScrollLockProvider>
-          <MediaViewer
-            allNodes={mediaOnly}
-            initialIndex={viewerIndex}
-            onIndexChange={handleViewerIndexChange}
-            onClose={closeViewer}
-            onPrevFolder={
-              listing.prev ? (at) => openPrevFolder(at ?? "last") : undefined
-            }
-            onNextFolder={
-              listing.next ? (at) => openNextFolder(at ?? "first") : undefined
-            }
-            onDelete={handleOpenDeleteSelected}
-          />
-        </ScrollLockProvider>
-      )}
-
-      {/* 選択バー */}
-      <AnimatePresence>
-        {isSelectionMode && (
-          <SelectionBar
-            count={selected.length}
-            totalCount={filteredNodes.length}
-            onSelectAll={handleSelectAll}
-            onClose={handleCloseSelectionBar}
-            className="z-40" // DropdownMenu より小さくする
-            actions={
-              <div className="flex gap-1 items-center">
-                {/* その他 */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost">
-                      <MoreVertical size={18} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      variant="default"
-                      onClick={handleOpenRestoreSelected}
-                    >
-                      <RotateCcw className="mr-2 h-4 w-4" />
-                      復元
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={handleOpenDeleteSelected}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            }
-          />
         )}
-      </AnimatePresence>
 
-      {/* 削除確認ダイアログ */}
-      <DeleteConfirmDialog
-        open={isDeleteMode}
-        onOpenChange={(open) => !open && setDeleteTargets([])}
-        count={deleteTargets.length}
-        onConfirm={handleDeleteConfirm}
-        permanent
-      />
+        {/* ビューワ */}
+        {isViewMode && (
+          <ScrollLockProvider>
+            <MediaViewer
+              allNodes={mediaOnly}
+              initialIndex={viewerIndex}
+              onIndexChange={handleViewerIndexChange}
+              onClose={closeViewer}
+              onPrevFolder={
+                listing.prev ? (at) => openPrevFolder(at ?? "last") : undefined
+              }
+              onNextFolder={
+                listing.next ? (at) => openNextFolder(at ?? "first") : undefined
+              }
+              onDelete={handleOpenDeleteSelected}
+            />
+          </ScrollLockProvider>
+        )}
 
-      {/* 復元確認ダイアログ */}
-      <RestoreConfirmDialog
-        open={isRestoreMode}
-        onOpenChange={(open) => !open && setRestoreTargets([])}
-        count={restoreTargets.length}
-        onConfirm={handleRestoreConfirm}
-      />
+        {/* 選択バー */}
+        <AnimatePresence>
+          {isSelectionMode && (
+            <SelectionBar
+              count={selected.length}
+              totalCount={filteredNodes.length}
+              onSelectAll={handleSelectAll}
+              onClose={handleCloseSelectionBar}
+              className="z-40" // DropdownMenu より小さくする
+              actions={
+                <div className="flex gap-1 items-center">
+                  {/* その他 */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost">
+                        <MoreVertical size={18} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        variant="default"
+                        onClick={handleOpenRestoreSelected}
+                      >
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        復元
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={handleOpenDeleteSelected}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              }
+            />
+          )}
+        </AnimatePresence>
 
-      {/* フォルダナビゲーション */}
-      <FolderNavigation prevHref={listing.prev} nextHref={listing.next} />
-    </div>
+        {/* 削除確認ダイアログ */}
+        <DeleteConfirmDialog
+          open={isDeleteMode}
+          onOpenChange={(open) => !open && setDeleteTargets([])}
+          count={deleteTargets.length}
+          onConfirm={handleDeleteConfirm}
+          permanent
+        />
+
+        {/* 復元確認ダイアログ */}
+        <RestoreConfirmDialog
+          open={isRestoreMode}
+          onOpenChange={(open) => !open && setRestoreTargets([])}
+          count={restoreTargets.length}
+          onConfirm={handleRestoreConfirm}
+        />
+
+        {/* フォルダナビゲーション */}
+        <FolderNavigation prevHref={listing.prev} nextHref={listing.next} />
+      </div>
+    </PagingProvider>
   );
 }

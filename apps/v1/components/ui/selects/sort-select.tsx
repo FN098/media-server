@@ -1,6 +1,7 @@
 "use client";
 
 import { useSort } from "@/hooks/use-sort";
+import { usePagingContext } from "@/providers/paging-provider";
 import {
   Select,
   SelectContent,
@@ -22,24 +23,32 @@ interface SortSelectProps {
   options: SortOption[];
   placeholder?: string;
   emptyLabel?: string;
+  onChange?: (key: string | null, dir: string | null) => void;
 }
 
 export function SortSelect({
   options,
   placeholder = "並び替え",
   emptyLabel = "ソートなし",
+  onChange,
 }: SortSelectProps) {
   const { sort, direction, setSort, isPending } = useSort();
+  const { setPage } = usePagingContext();
 
   const selectValue = sort && direction ? `${sort}-${direction}` : "none";
 
   const handleValueChange = (value: string) => {
-    if (value === "none") {
-      setSort(null, null);
-    } else {
-      const [key, dir] = value.split("-");
-      setSort(key, dir);
+    let newKey: string | null = null;
+    let newDir: string | null = null;
+
+    if (value !== "none") {
+      [newKey, newDir] = value.split("-");
     }
+
+    setSort(newKey, newDir);
+    setPage(1);
+
+    onChange?.(newKey, newDir);
   };
 
   return (
