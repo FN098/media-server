@@ -38,9 +38,7 @@ export const FilterResultText = ({
   }, [filteredCount, springCount]);
 
   return (
-    <div
-      className={cn("flex items-center gap-3 ml-auto select-none", className)}
-    >
+    <div className={cn("flex items-center gap-3 mx-2 select-none", className)}>
       <div className="h-4 w-[1px] bg-border/60" />
 
       <div className="flex flex-col items-end gap-0">

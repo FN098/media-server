@@ -98,7 +98,7 @@ export function TagFilterDialog({
   const isEmptyMode = mode === "EMPTY";
 
   return (
-    <div className="flex items-center gap-2 py-2">
+    <div className="flex items-center gap-2">
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button

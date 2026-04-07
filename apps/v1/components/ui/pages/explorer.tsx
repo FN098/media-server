@@ -15,6 +15,7 @@ import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { RatingFilterSelect } from "@/components/ui/selects/rating-filter-select";
+import { SortSelect } from "@/components/ui/selects/sort-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -492,7 +493,7 @@ export function Explorer() {
       ref={scrollRef}
       tabIndex={-1}
     >
-      <div className="flex flex-wrap items-center gap-1 px-4">
+      <div className="flex flex-wrap items-center gap-1 px-4 pt-2">
         {/* タグフィルター */}
         <TagFilterDialog
           tags={mediaOnlyTags}
@@ -513,11 +514,23 @@ export function Explorer() {
           isVisible={isFiltered}
         />
 
+        <div className="flex flex-grow" />
+
         {/* フィルター結果 */}
         <FilterResultText
           totalCount={allNodes.length}
           filteredCount={filteredNodes.length}
           isFiltered={isFiltered}
+        />
+
+        {/* ソート順 */}
+        <SortSelect
+          options={[
+            { key: "name", direction: "asc", label: "名前順 (A-Z)" },
+            { key: "name", direction: "desc", label: "名前順 (Z-A)" },
+            { key: "rating", direction: "desc", label: "評価が高い順" },
+            { key: "mtime", direction: "desc", label: "更新日が新しい順" },
+          ]}
         />
       </div>
 
