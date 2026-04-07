@@ -13,9 +13,14 @@ export function HeaderNavigation({ basePath }: { basePath?: string }) {
   const isMobile = useIsMobile();
   const current = breadcrumbs.at(-1);
   const backHref = breadcrumbs.at(-2)?.href ?? null;
+  const params = new URLSearchParams(searchParams);
+
+  // 不要なパラメータを削除
+  params.delete("page");
+  params.delete("q");
 
   const withParams = (path: string) =>
-    searchParams.toString() ? `${path}?${searchParams.toString()}` : path;
+    params.toString() ? `${path}?${params.toString()}` : path;
 
   return (
     <>
