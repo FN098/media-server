@@ -15,7 +15,7 @@ import {
 import { Input } from "@/shadcn/components/ui/input"; // 追加
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
-import { ListFilter, RotateCcw, Search, X } from "lucide-react"; // Searchを追加
+import { RotateCcw, Search, Tag, X } from "lucide-react"; // Searchを追加
 import { useMemo, useState } from "react"; // useMemoを追加
 
 const modeTexts = {
@@ -110,7 +110,7 @@ export function TagFilterDialog({
                 "border-primary bg-primary/5 text-primary hover:bg-primary/10"
             )}
           >
-            <ListFilter className="h-4 w-4" />
+            <Tag className="h-4 w-4" />
             <span>タグで絞り込む</span>
             {hasSelection && (
               <Badge

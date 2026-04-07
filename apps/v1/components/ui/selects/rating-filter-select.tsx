@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/shadcn/components/ui/select";
 import { cn } from "@/shadcn/lib/utils";
-import { Filter, Star } from "lucide-react"; // Filterアイコンを追加
+import { Star } from "lucide-react"; // Filterアイコンを追加
 
 interface RatingFilterSelectProps {
   value: number;
@@ -30,7 +30,7 @@ export function RatingFilterSelect({
         {/* valueが0の時はカスタムのプレースホルダーを表示 */}
         {value === 0 ? (
           <div className="flex items-center gap-2">
-            <Filter size={14} />
+            <Star size={14} />
             <span>評価で絞り込む</span>
           </div>
         ) : (
