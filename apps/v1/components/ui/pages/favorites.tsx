@@ -4,6 +4,7 @@ import { visitFolderAction } from "@/actions/folder-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
+import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { RatingFilterSelect } from "@/components/ui/selects/rating-filter-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -442,6 +443,9 @@ export function Favorites() {
               },
             ]}
           />
+
+          {/* シャッフルボタン */}
+          <ShuffleButton />
 
           {/* 評価フィルター */}
           <RatingFilterSelect value={minRating} onChange={setMinRating} />

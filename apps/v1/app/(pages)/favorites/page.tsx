@@ -29,11 +29,7 @@ interface FavoritePageProps {
 export default async function FavoritePage(props: FavoritePageProps) {
   const [searchParams] = await Promise.all([props.searchParams]);
 
-  const {
-    sort: sortKey,
-    direction: sortDirection = "asc",
-    seed,
-  } = searchParams;
+  const { sort: sortKey, direction: sortDirection, seed } = searchParams;
 
   const user = await resolveCurrentUser();
 
@@ -41,13 +37,14 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const allNodes = await getFavoriteMediaNodes(user.id);
 
   // ソート
-  const sorted = sortKey
-    ? sortMediaNodes(allNodes, {
-        key: sortKey,
-        direction: sortDirection,
-        seed,
-      })
-    : allNodes;
+  const sorted =
+    sortKey || sortDirection
+      ? sortMediaNodes(allNodes, {
+          key: sortKey,
+          direction: sortDirection,
+          seed,
+        })
+      : allNodes;
 
   // フォーマット
   const formatted = formatNodes(sorted);

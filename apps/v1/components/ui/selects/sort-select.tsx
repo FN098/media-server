@@ -1,7 +1,6 @@
 "use client";
 
 import { useSort } from "@/hooks/use-sort";
-import { usePagingContext } from "@/providers/paging-provider";
 import {
   Select,
   SelectContent,
@@ -13,9 +12,9 @@ import { cn } from "@/shadcn/lib/utils";
 import { ArrowUpDown, LucideIcon } from "lucide-react";
 
 export interface SortOption {
-  key: string;
-  direction: "asc" | "desc";
-  label: string;
+  key?: string;
+  direction?: string;
+  label?: string;
   icon?: LucideIcon;
 }
 
@@ -33,7 +32,6 @@ export function SortSelect({
   onChange,
 }: SortSelectProps) {
   const { sort, direction, setSort, isPending } = useSort();
-  const { setPage } = usePagingContext();
 
   const selectValue = sort && direction ? `${sort}-${direction}` : "none";
 
@@ -46,8 +44,6 @@ export function SortSelect({
     }
 
     setSort(newKey, newDir);
-    setPage(1);
-
     onChange?.(newKey, newDir);
   };
 
@@ -78,7 +74,7 @@ export function SortSelect({
               <SelectItem key={combined} value={combined}>
                 <div className="flex items-center gap-2">
                   <ItemIcon className="h-4 w-4 text-muted-foreground" />
-                  <span>{opt.label}</span>
+                  <span>{opt.label || "ソート"}</span>
                 </div>
               </SelectItem>
             );

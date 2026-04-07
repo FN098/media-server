@@ -55,7 +55,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   ]);
 
   const { path: pathParts = [] } = params;
-  const { sort: sortKey, direction: sortDirection = "asc" } = searchParams;
+  const { sort: sortKey, direction: sortDirection } = searchParams;
 
   const currentVirtualPath = pathParts.map(decodeURIComponent).join("/");
 
@@ -104,12 +104,13 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   });
 
   // ソート
-  const sorted = sortKey
-    ? sortMediaNodes(merged, {
-        key: sortKey,
-        direction: sortDirection,
-      })
-    : merged;
+  const sorted =
+    sortKey || sortDirection
+      ? sortMediaNodes(merged, {
+          key: sortKey,
+          direction: sortDirection,
+        })
+      : merged;
 
   // フォーマット
   const formatted = formatNodes(sorted);

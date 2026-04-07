@@ -1,10 +1,12 @@
+import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/random";
 import { MediaFsNode, MediaNode } from "./types";
 
-export type SortDirection = "asc" | "desc";
+export type SortDirection = "asc" | "desc" | "random";
 
 export type SortOptions<T> = {
-  key: keyof T;
+  key?: keyof T;
   direction?: SortDirection;
+  seed?: string;
 };
 
 export type SortKeyOf<T> = SortOptions<T>["key"];
@@ -23,7 +25,15 @@ export function sortMediaFsNodes<T extends MediaFsNode>(
   nodes: T[],
   options?: SortOptions<T>
 ): T[] {
-  const { key = "name", direction: order = "asc" } = options ?? {};
+  const { key = "name", direction: order = "asc", seed } = options ?? {};
+
+  if (order === "random") {
+    if (seed && seed.trim() != "") {
+      return shuffleArrayWithSeed(nodes, seed);
+    }
+    return shuffleArray(nodes);
+  }
+
   const modifier = order === "asc" ? 1 : -1;
 
   return [...nodes].sort((a, b) => {
