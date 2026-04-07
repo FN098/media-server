@@ -4,6 +4,7 @@ import { useCallback, useTransition } from "react";
 interface UseSortOptions {
   sortKey?: string; // デフォルト: "sort"
   directionKey?: string; // デフォルト: "direction"
+  pageKey?: string; // デフォルト: "page"
 }
 
 export function useSort(options?: UseSortOptions) {
@@ -13,7 +14,11 @@ export function useSort(options?: UseSortOptions) {
   const [isPending, startTransition] = useTransition();
 
   // キー名のマッピング（デフォルト値を設定）
-  const { sortKey = "sort", directionKey = "direction" } = options || {};
+  const {
+    sortKey = "sort",
+    directionKey = "direction",
+    pageKey = "page",
+  } = options || {};
 
   const sort = searchParams.get(sortKey);
   const direction = searchParams.get(directionKey);
@@ -22,19 +27,22 @@ export function useSort(options?: UseSortOptions) {
     (key: string | null, dir: string | null) => {
       const params = new URLSearchParams(searchParams.toString());
 
+      // ソート変更時にページングリセット
+      params.delete(pageKey);
+
       if (!key || !dir) {
-        params.delete("sort");
-        params.delete("direction");
+        params.delete(sortKey);
+        params.delete(directionKey);
       } else {
-        params.set("sort", key);
-        params.set("direction", dir);
+        params.set(sortKey, key);
+        params.set(directionKey, dir);
       }
 
       startTransition(() => {
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
       });
     },
-    [pathname, router, searchParams]
+    [directionKey, pageKey, pathname, router, searchParams, sortKey]
   );
 
   return {
