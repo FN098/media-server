@@ -349,11 +349,11 @@ function Cell({
           </div>
 
           {/* Badges */}
-          <div className="absolute bottom-8 right-2 flex gap-1 items-end">
-            {node.isDirectory && <FolderStatusBadge date={node.lastViewedAt} />}
+          <div className="absolute flex flex-col bottom-8 right-2 gap-1 items-end">
             {node.isDirectory && !!node.favoriteCount && (
               <FavoriteCountBadge count={node.favoriteCount} />
             )}
+            {node.isDirectory && <FolderStatusBadge date={node.lastViewedAt} />}
           </div>
         </div>
       </HoverPreviewPortal>
