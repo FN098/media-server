@@ -67,7 +67,7 @@ export const FilterResultText = ({
         </div>
 
         {/* 下部の "Filtered" ラベルもフワッと出す */}
-        <div className="h-3 overflow-hidden">
+        <div className="overflow-hidden">
           {isFiltered && (
             <motion.span
               initial={{ y: 10, opacity: 0 }}
