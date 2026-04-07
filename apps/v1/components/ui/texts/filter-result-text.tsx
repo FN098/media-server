@@ -47,9 +47,7 @@ export const FilterResultText = ({
           <span
             className={cn(
               "tabular-nums font-bold tracking-tight transition-all duration-500",
-              isFiltered
-                ? "text-primary text-xl scale-110"
-                : "text-foreground text-sm scale-100"
+              isFiltered ? "text-primary" : "text-foreground"
             )}
           >
             {displayCount.toLocaleString()}
