@@ -6,13 +6,11 @@ import {
 } from "@/hooks/use-explorer-query";
 import { encodePath } from "@/lib/path/encoder";
 import { getClientTrashPath } from "@/lib/path/helpers";
-import { normalizeExplorerQuery } from "@/lib/query/normalize";
-import { toSearchParams } from "@/lib/query/search-params";
+import { overrideSearchParams } from "@/lib/query/search-params";
 import type { ExplorerQuery, SetExplorerQueryOptions } from "@/lib/query/types";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-const normalizeTrashQuery = normalizeExplorerQuery;
 const useNormalizeTrashQuery = useNormalizeExplorerQuery;
 const useTrashQuery = useExplorerQuery;
 
@@ -21,6 +19,7 @@ export { useNormalizeTrashQuery, useTrashQuery };
 export function useSetTrashQuery() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const current = useExplorerQuery();
 
   return useCallback(
@@ -33,8 +32,7 @@ export function useSetTrashQuery() {
         ...partial,
       };
 
-      const normalized = normalizeTrashQuery(merged);
-      const search = toSearchParams(normalized);
+      const search = overrideSearchParams(merged, searchParams).toString();
 
       const basePath = options.path
         ? getClientTrashPath(encodePath(options.path)) // Changed line
@@ -48,6 +46,6 @@ export function useSetTrashQuery() {
         router.replace(url);
       }
     },
-    [current, pathname, router]
+    [current, pathname, router, searchParams]
   );
 }

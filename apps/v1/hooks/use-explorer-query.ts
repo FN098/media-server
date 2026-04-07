@@ -3,7 +3,7 @@
 import { encodePath } from "@/lib/path/encoder";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { normalizeExplorerQuery } from "@/lib/query/normalize";
-import { toSearchParams } from "@/lib/query/search-params";
+import { overrideSearchParams } from "@/lib/query/search-params";
 import type { ExplorerQuery, SetExplorerQueryOptions } from "@/lib/query/types";
 import { explorerQuerySchema } from "@/lib/query/validation";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -28,7 +28,7 @@ export function useNormalizeExplorerQuery() {
 
   useEffect(() => {
     const normalized = normalizeExplorerQuery(query);
-    const next = toSearchParams(normalized, searchParams);
+    const next = overrideSearchParams(normalized, searchParams).toString();
     const current = searchParams.toString();
 
     if (next !== current) {
@@ -40,6 +40,7 @@ export function useNormalizeExplorerQuery() {
 export function useSetExplorerQuery() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const current = useExplorerQuery();
 
   return useCallback(
@@ -52,8 +53,7 @@ export function useSetExplorerQuery() {
         ...partial,
       };
 
-      const normalized = normalizeExplorerQuery(merged);
-      const search = toSearchParams(normalized);
+      const search = overrideSearchParams(merged, searchParams).toString();
 
       const basePath = options.path
         ? getClientExplorerPath(encodePath(options.path))
@@ -67,6 +67,6 @@ export function useSetExplorerQuery() {
         router.replace(url, { scroll: false });
       }
     },
-    [current, pathname, router]
+    [current, pathname, router, searchParams]
   );
 }
