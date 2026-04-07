@@ -76,6 +76,7 @@ export async function getFavoriteMediaNodes(
     where: { userId },
     select: {
       rating: true,
+      createdAt: true,
       media: {
         select: {
           id: true,
@@ -113,6 +114,7 @@ export async function getFavoriteMediaNodes(
       name: t.tag.name,
     })),
     rating: f.rating ?? 0,
+    favoritedAt: f.createdAt,
   }));
 }
 

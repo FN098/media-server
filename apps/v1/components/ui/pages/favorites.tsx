@@ -405,13 +405,13 @@ export function Favorites() {
             {
               key: "path",
               direction: "asc",
-              label: "名前順 (A-Z)",
+              label: "パス順 (A-Z)",
               icon: ArrowDownAz,
             },
             {
               key: "path",
               direction: "desc",
-              label: "名前順 (Z-A)",
+              label: "パス順 (Z-A)",
               icon: ArrowDownZa,
             },
             {
@@ -419,6 +419,12 @@ export function Favorites() {
               direction: "desc",
               label: "評価が高い順",
               icon: ArrowDown10,
+            },
+            {
+              key: "favoritedAt",
+              direction: "desc",
+              label: "登録日が新しい順",
+              icon: CalendarArrowDown,
             },
             {
               key: "mtime",
