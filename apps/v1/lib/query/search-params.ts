@@ -9,7 +9,8 @@ export function overrideSearchParams(
   const params = new URLSearchParams(current);
 
   for (const [key, value] of Object.entries(overrides)) {
-    if (!value) params.delete(key);
+    if (value === null || value === undefined || value === false)
+      params.delete(key);
     else params.set(key, String(value));
   }
 
