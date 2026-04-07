@@ -503,35 +503,6 @@ export function Explorer() {
       tabIndex={-1}
     >
       <div className="flex flex-wrap items-center gap-1 px-4 pt-2">
-        {/* タグフィルター */}
-        <TagFilterDialog
-          tags={mediaOnlyTags}
-          selectedTags={tagFilter.selectedTags}
-          currentMode={tagFilter.mode}
-          onApply={handleApplyTagFilter}
-        />
-
-        {/* お気に入りフィルター */}
-        <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />
-
-        {/* 評価フィルター */}
-        <RatingFilterSelect value={minRating} onChange={setMinRating} />
-
-        {/* リセットボタン */}
-        <FilterResetButton
-          onReset={handleResetFilters}
-          isVisible={isFiltered}
-        />
-
-        <div className="flex flex-grow" />
-
-        {/* フィルター結果 */}
-        <FilterResultText
-          totalCount={allNodes.length}
-          filteredCount={filteredNodes.length}
-          isFiltered={isFiltered}
-        />
-
         {/* ソート順 */}
         <SortSelect
           options={[
@@ -560,6 +531,35 @@ export function Explorer() {
               icon: CalendarArrowDown,
             },
           ]}
+        />
+
+        {/* 評価フィルター */}
+        <RatingFilterSelect value={minRating} onChange={setMinRating} />
+
+        {/* タグフィルター */}
+        <TagFilterDialog
+          tags={mediaOnlyTags}
+          selectedTags={tagFilter.selectedTags}
+          currentMode={tagFilter.mode}
+          onApply={handleApplyTagFilter}
+        />
+
+        {/* お気に入りフィルター */}
+        <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />
+
+        {/* リセットボタン */}
+        <FilterResetButton
+          onReset={handleResetFilters}
+          isVisible={isFiltered}
+        />
+
+        <div className="flex flex-grow" />
+
+        {/* フィルター結果 */}
+        <FilterResultText
+          totalCount={allNodes.length}
+          filteredCount={filteredNodes.length}
+          isFiltered={isFiltered}
         />
       </div>
 
