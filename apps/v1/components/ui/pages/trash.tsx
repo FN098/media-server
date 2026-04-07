@@ -352,7 +352,7 @@ export function Trash() {
     <PagingProvider
       totalItems={filteredNodes.length}
       options={{
-        defaultPageSize: viewMode === "grid" ? 48 : 100,
+        defaultPageSize: 48,
         useUrlParams: true,
       }}
     >

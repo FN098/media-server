@@ -501,7 +501,7 @@ export function Explorer() {
     <PagingProvider
       totalItems={filteredNodes.length}
       options={{
-        defaultPageSize: viewMode === "grid" ? 48 : 100,
+        defaultPageSize: 48,
         useUrlParams: true,
       }}
     >
@@ -512,7 +512,7 @@ export function Explorer() {
         ref={scrollRef}
         tabIndex={-1}
       >
-        <div className="flex flex-wrap items-center gap-1 px-4 pt-2">
+        <div className="flex flex-wrap items-center gap-1 px-4 py-2">
           {/* ソート順 */}
           <SortSelect
             options={[
