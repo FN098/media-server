@@ -12,8 +12,14 @@ export function FolderNavigation({
   nextHref?: string | null;
 }) {
   const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
+
+  // 不要なパラメータを削除
+  params.delete("page");
+  params.delete("q");
+
   const withParams = (path: string) =>
-    searchParams.toString() ? `${path}?${searchParams.toString()}` : path;
+    params.toString() ? `${path}?${params.toString()}` : path;
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
