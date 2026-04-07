@@ -48,12 +48,15 @@ export function useSetExplorerQuery() {
       partial: Partial<ExplorerQuery>,
       options: SetExplorerQueryOptions = {}
     ) => {
-      const merged: ExplorerQuery = {
+      const overrides = {
         ...current,
         ...partial,
+        // フォルダ移動時にページングとクエリをリセット
+        page: null,
+        q: null,
       };
 
-      const search = overrideSearchParams(merged, searchParams).toString();
+      const search = overrideSearchParams(overrides, searchParams).toString();
 
       const basePath = options.path
         ? getClientExplorerPath(encodePath(options.path))
