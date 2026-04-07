@@ -11,10 +11,7 @@ import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { TrashProvider } from "@/providers/trash-provider";
-import {
-  getDbFavoriteCount,
-  getDbVisitedInfoDeeply,
-} from "@/repositories/folder-repository";
+import { getDbVisitedInfoDeeply } from "@/repositories/folder-repository";
 import { getDbMedia } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -60,6 +57,7 @@ export default async function TrashPage(props: TrashPageProps) {
   if (!fsListing) notFound();
 
   const allNodes = fsListing.nodes;
+  console.log({ allNodes });
 
   // ソート
   const sorted = sortMediaFsNodes(allNodes, {
@@ -72,10 +70,9 @@ export default async function TrashPage(props: TrashPageProps) {
   const user = await resolveCurrentUser();
 
   // DB クエリ
-  const [dbMedia, dbVisited, dbFavorites] = await Promise.all([
+  const [dbMedia, dbVisited] = await Promise.all([
     getDbMedia(currentVirtualDirPath, user.id),
     getDbVisitedInfoDeeply(dirPaths, user.id),
-    getDbFavoriteCount(dirPaths, user.id),
   ]);
 
   // マージ
@@ -83,7 +80,6 @@ export default async function TrashPage(props: TrashPageProps) {
     fsMedia: sorted,
     dbMedia,
     dbVisited,
-    dbFavorites,
   });
 
   // フォーマット
