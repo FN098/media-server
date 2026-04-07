@@ -2,8 +2,8 @@ import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
-import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
-import { MediaFsNode } from "@/lib/media/types";
+import { SortDirectionOf, SortKeyOf, sortMediaNodes } from "@/lib/media/sort";
+import { MediaNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
@@ -18,15 +18,18 @@ export const metadata: Metadata = {
 };
 
 interface FavoritePageProps {
-  params: Promise<{
-    sort?: SortKeyOf<MediaFsNode>;
-    order?: SortOrderOf<MediaFsNode>;
+  // URLクエリパラメータ: ?sort=name&direction=asc
+  searchParams: Promise<{
+    sort?: SortKeyOf<MediaNode>;
+    direction?: SortDirectionOf<MediaNode>;
   }>;
 }
 
 export default async function FavoritePage(props: FavoritePageProps) {
-  const { sort: sortKey = "path", order: sortOrder = "asc" } =
-    await props.params;
+  const [searchParams] = await Promise.all([props.searchParams]);
+
+  const { sort: sortKey = "name", direction: sortDirection = "asc" } =
+    searchParams;
 
   const user = await resolveCurrentUser();
 
@@ -34,9 +37,9 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const allNodes = await getFavoriteMediaNodes(user.id);
 
   // ソート
-  const sorted = sortMediaFsNodes(allNodes, {
+  const sorted = sortMediaNodes(allNodes, {
     key: sortKey,
-    order: sortOrder,
+    direction: sortDirection,
   });
 
   // フォーマット

@@ -4,9 +4,9 @@ import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
-import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
+import { SortDirectionOf, SortKeyOf, sortMediaNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
@@ -37,19 +37,26 @@ export async function generateMetadata(
 }
 
 interface ExplorerPageProps {
+  // パスパラメータ: /explorer/[...path]
   params: Promise<{
     path?: string[];
-    sort?: SortKeyOf<MediaFsNode>;
-    order?: SortOrderOf<MediaFsNode>;
+  }>;
+  // URLクエリパラメータ: ?sort=name&direction=asc
+  searchParams: Promise<{
+    sort?: SortKeyOf<MediaNode>;
+    direction?: SortDirectionOf<MediaNode>;
   }>;
 }
 
 export default async function ExplorerPage(props: ExplorerPageProps) {
-  const {
-    path: pathParts = [],
-    sort: sortKey = "name",
-    order: sortOrder = "asc",
-  } = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+
+  const { path: pathParts = [] } = params;
+  const { sort: sortKey = "name", direction: sortDirection = "asc" } =
+    searchParams;
 
   const currentVirtualPath = pathParts.map(decodeURIComponent).join("/");
 
@@ -59,15 +66,9 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   const allNodes = fsListing.nodes;
 
-  // ソート
-  const sorted = sortMediaFsNodes(allNodes, {
-    key: sortKey,
-    order: sortOrder,
-  });
-
   // 今開いている「このフォルダ」自体のプレビューを決定
   // ソート済みノードから最初に見つかった画像/動画をこのフォルダの顔にする
-  const firstMedia = sorted.find(
+  const firstMedia = allNodes.find(
     (n) => !n.isDirectory && (n.type === "image" || n.type === "video")
   );
 
@@ -80,7 +81,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   ]).catch(console.error);
   // ※ await せずに流しっぱなしでも、次にこの親ディレクトリに戻った時には DB に反映されている
 
-  const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
+  const dirPaths = allNodes.filter((e) => e.isDirectory).map((e) => e.path);
   const user = await resolveCurrentUser();
 
   // DBクエリの前にファイルシステムとDBの同期を取る（新規追加されたメディアをDBに反映）
@@ -96,15 +97,21 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   // マージ
   const merged = mergeFsWithDb({
-    fsMedia: sorted,
+    fsMedia: allNodes,
     dbMedia,
     dbVisited,
     dbFavorites,
     dbFolderMetas,
   });
 
+  // ソート
+  const sorted = sortMediaNodes(merged, {
+    key: sortKey,
+    direction: sortDirection,
+  });
+
   // フォーマット
-  const formatted = formatNodes(merged);
+  const formatted = formatNodes(sorted);
 
   const listing = {
     ...fsListing,

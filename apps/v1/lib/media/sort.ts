@@ -1,14 +1,14 @@
-import { MediaFsNode } from "./types";
+import { MediaFsNode, MediaNode } from "./types";
 
 export type SortOrder = "asc" | "desc";
 
 export type SortOptions<T> = {
   key: keyof T;
-  order?: SortOrder;
+  direction?: SortOrder;
 };
 
 export type SortKeyOf<T> = SortOptions<T>["key"];
-export type SortOrderOf<T> = SortOptions<T>["order"];
+export type SortDirectionOf<T> = SortOptions<T>["direction"];
 
 export const collator = new Intl.Collator("ja-JP", {
   numeric: true, // 10 を 2 の後ろにする
@@ -24,7 +24,7 @@ export function sortMediaFsNodes<T extends MediaFsNode>(
   nodes: T[],
   options?: SortOptions<T>
 ): T[] {
-  const { key = "name", order = "asc" } = options ?? {};
+  const { key = "name", direction: order = "asc" } = options ?? {};
   const modifier = order === "asc" ? 1 : -1;
 
   return [...nodes].sort((a, b) => {
@@ -46,4 +46,11 @@ export function sortMediaFsNodes<T extends MediaFsNode>(
 
     return 0;
   });
+}
+
+export function sortMediaNodes<T extends MediaNode>(
+  nodes: T[],
+  options?: SortOptions<T>
+): T[] {
+  return sortMediaFsNodes(nodes, options);
 }

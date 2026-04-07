@@ -4,8 +4,8 @@ import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
-import { SortKeyOf, sortMediaFsNodes, SortOrderOf } from "@/lib/media/sort";
-import { MediaFsNode } from "@/lib/media/types";
+import { SortDirectionOf, SortKeyOf, sortMediaNodes } from "@/lib/media/sort";
+import { MediaNode } from "@/lib/media/types";
 import { isBlockedVirtualPath } from "@/lib/path/blacklist";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { FavoritesProvider } from "@/providers/favorites-provider";
@@ -33,19 +33,26 @@ export async function generateMetadata(
 }
 
 interface TrashPageProps {
+  // パスパラメータ: /trash/[...path]
   params: Promise<{
     path?: string[];
-    sort?: SortKeyOf<MediaFsNode>;
-    order?: SortOrderOf<MediaFsNode>;
+  }>;
+  // URLクエリパラメータ: ?sort=name&direction=asc
+  searchParams: Promise<{
+    sort?: SortKeyOf<MediaNode>;
+    direction?: SortDirectionOf<MediaNode>;
   }>;
 }
 
 export default async function TrashPage(props: TrashPageProps) {
-  const {
-    path: pathParts = [],
-    sort: sortKey = "name",
-    order: sortOrder = "asc",
-  } = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+
+  const { path: pathParts = [] } = params;
+  const { sort: sortKey = "name", direction: sortDirection = "asc" } =
+    searchParams;
 
   const currentVirtualDirPath = pathParts.map(decodeURIComponent).join("/");
 
@@ -58,13 +65,7 @@ export default async function TrashPage(props: TrashPageProps) {
 
   const allNodes = fsListing.nodes;
 
-  // ソート
-  const sorted = sortMediaFsNodes(allNodes, {
-    key: sortKey,
-    order: sortOrder,
-  });
-
-  const dirPaths = sorted.filter((e) => e.isDirectory).map((e) => e.path);
+  const dirPaths = allNodes.filter((e) => e.isDirectory).map((e) => e.path);
 
   const user = await resolveCurrentUser();
 
@@ -76,20 +77,23 @@ export default async function TrashPage(props: TrashPageProps) {
 
   // マージ
   const merged = mergeFsWithDb({
-    fsMedia: sorted,
+    fsMedia: allNodes,
     dbMedia,
     dbVisited,
   });
 
+  // ソート
+  const sorted = sortMediaNodes(merged, {
+    key: sortKey,
+    direction: sortDirection,
+  });
+
   // フォーマット
-  const formatted = formatNodes(merged);
+  const formatted = formatNodes(sorted);
 
   const listing = {
     ...fsListing,
-    nodes: formatted.map((n) => ({
-      ...n,
-      isDeleted: true,
-    })),
+    nodes: withDeleted(formatted),
   };
 
   return (
@@ -102,3 +106,8 @@ export default async function TrashPage(props: TrashPageProps) {
     </TrashProvider>
   );
 }
+
+const withDeleted = <T extends object>(n: T): T & { isDeleted: true } => ({
+  ...n,
+  isDeleted: true,
+});
