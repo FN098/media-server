@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import {
@@ -16,10 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/shadcn-overrides/components/ui/table";
-import {
-  AlertDialogFooter,
-  AlertDialogHeader,
-} from "@/shadcn/components/ui/alert-dialog";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -31,17 +26,13 @@ import {
 } from "@/shadcn/components/ui/card";
 import { Input } from "@/shadcn/components/ui/input";
 import { Label } from "@/shadcn/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shadcn/components/ui/popover";
 import { Switch } from "@/shadcn/components/ui/switch";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@radix-ui/react-alert-dialog";
 import {
   useInfiniteQuery,
   useMutation,
@@ -61,6 +52,7 @@ import {
   X,
 } from "lucide-react";
 import * as React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 
@@ -311,7 +303,8 @@ export function TagMasterManagerCard() {
                       key={virtualRow.key}
                       className={cn(
                         GRID_STYLE,
-                        "group absolute w-full items-center border-b hover:bg-muted/30"
+                        "group absolute w-full items-center border-b hover:bg-muted/30",
+                        "has-[:focus]:opacity-100"
                       )}
                       style={{
                         height: `${virtualRow.size}px`,
@@ -360,14 +353,13 @@ export function TagMasterManagerCard() {
                           />
                         ) : (
                           <div className="flex items-center gap-2 overflow-hidden">
-                            <span className="truncate">{tag.name}</span>
-
                             {tag.isNew && (
-                              <div className="flex items-center gap-1 bg-yellow-500 text-black font-black px-1.5 py-0.5 rounded-sm text-[9px] shadow-sm animate-in fade-in zoom-in duration-300 w-fit shrink-0">
+                              <div className="flex items-center gap-1 bg-yellow-500 text-black font-bold px-2 py-0.5 rounded-sm text-[10px] shadow-sm animate-pulse w-fit">
                                 <Sparkles size={8} fill="currentColor" />
                                 <span>NEW</span>
                               </div>
                             )}
+                            <span className="truncate">{tag.name}</span>
                           </div>
                         )}
                       </TableCell>
@@ -443,49 +435,12 @@ export function TagMasterManagerCard() {
                             </Button>
 
                             {/* 削除ボタン */}
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                                  disabled={isDeleting}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    タグを完全に削除しますか？
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    タグ「
-                                    <span className="font-bold text-foreground">
-                                      {tag.name}
-                                    </span>
-                                    」を削除します。
-                                    <br />
-                                    この操作により、現在このタグが付与されている
-                                    <span className="font-semibold text-foreground">
-                                      {tag._count.mediaTags} 件
-                                    </span>
-                                    のメディアから設定が解除されます。
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>
-                                    キャンセル
-                                  </AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => void performDelete(tag.id)}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  >
-                                    削除を実行
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            <TagDeleteButton
+                              tagName={tag.name}
+                              mediaCount={tag._count.mediaTags}
+                              onDelete={() => performDelete(tag.id)}
+                              isDeleting={isDeleting}
+                            />
                           </div>
                         )}
                       </TableCell>
@@ -498,5 +453,93 @@ export function TagMasterManagerCard() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function TagDeleteButton({
+  tagName,
+  mediaCount,
+  onDelete,
+  isDeleting,
+}: {
+  tagName: string;
+  mediaCount: number;
+  onDelete: () => void | Promise<void>;
+  isDeleting: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const handleDelete = async () => {
+    await onDelete();
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          disabled={isDeleting} // 外からの状態を反映
+          className={cn(
+            "h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity",
+            open
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+          )}
+        >
+          {isDeleting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent
+        side="left"
+        align="center"
+        className="z-50 w-72 p-4 shadow-xl"
+      >
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <p className="text-sm font-bold text-destructive flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              タグを完全に削除しますか？
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              「<span className="font-semibold text-foreground">{tagName}</span>
+              」を削除します。 現在このタグが付与されている{" "}
+              <span className="font-semibold text-foreground">
+                {mediaCount} 件
+              </span>{" "}
+              のメディアから設定が解除されます。
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={() => setOpen(false)}
+              disabled={isDeleting}
+            >
+              キャンセル
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="h-8 text-xs font-bold"
+              onClick={() => void handleDelete()}
+              disabled={isDeleting}
+            >
+              {isDeleting && <Loader2 className="h-3 w-3 animate-spin mr-2" />}
+              削除を実行
+            </Button>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
