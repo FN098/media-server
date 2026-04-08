@@ -10,6 +10,7 @@ import {
 } from "@/shadcn/components/ui/select";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowUpDown, LucideIcon, RotateCcw } from "lucide-react";
+import { useEffect } from "react";
 
 export interface SortOption {
   key?: string;
@@ -32,6 +33,21 @@ export function SortSelect({
   onChange,
 }: SortSelectProps) {
   const { sort, direction, setSort, isPending } = useSort();
+
+  // 現在の選択値が options の中に存在するかチェックし、なければリセット
+  useEffect(() => {
+    // 値がセットされていない場合は何もしない
+    if (!sort || !direction) return;
+
+    const isValid = options.some(
+      (opt) => opt.key === sort && opt.direction === direction
+    );
+
+    if (!isValid) {
+      setSort(null, null);
+      onChange?.(null, null);
+    }
+  }, [sort, direction, options, setSort, onChange]);
 
   // ソートが適用されているか判定
   const isSorted = !!(sort && direction && sort !== "none");
