@@ -52,26 +52,30 @@ export function useExplorerQuery() {
     (query: Partial<ExplorerQuery>, options: ExplorerQueryOptions = {}) => {
       const parsed = explorerQuerySchema.parse(query);
 
-      const merged: ExplorerQuery = {
-        ...query,
-        ...parsed,
-      };
+      // 既存のパラメータに新しい値をマージ
+      const search = overrideSearchParams(parsed, searchParams).toString();
 
-      const search = overrideSearchParams(merged, searchParams).toString();
-
-      // クエリ内容が変わらなければ何もしない
-      if (search === searchParams.toString()) return;
-
+      // ベースパスの決定
       const basePath = options.path
         ? getClientExplorerPath(encodePath(options.path))
         : pathname;
 
-      const url = search ? `${basePath}?${search}` : basePath;
+      // 遷移先のフルURLを作成
+      const nextUrl = search ? `${basePath}?${search}` : basePath;
+
+      // 現在のフルURLを作成（比較用）
+      const currentSearch = searchParams.toString();
+      const currentUrl = currentSearch
+        ? `${pathname}?${currentSearch}`
+        : pathname;
+
+      // URLが変わらなければ何もしない
+      if (nextUrl === currentUrl) return;
 
       if (options.history === "push") {
-        router.push(url, { scroll: false });
+        router.push(nextUrl, { scroll: false });
       } else {
-        router.replace(url, { scroll: false });
+        router.replace(nextUrl, { scroll: false });
       }
     },
     [pathname, router, searchParams]
