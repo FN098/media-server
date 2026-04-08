@@ -559,6 +559,7 @@ export function Explorer() {
             totalCount={allNodes.length}
             filteredCount={filteredNodes.length}
             isFiltered={isFiltered}
+            className="ml-auto"
           />
         </div>
 

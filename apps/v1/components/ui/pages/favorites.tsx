@@ -442,6 +442,7 @@ export function Favorites() {
             totalCount={allNodes.length}
             filteredCount={filteredNodes.length}
             isFiltered={isFiltered}
+            className="ml-auto"
           />
         </div>
 
