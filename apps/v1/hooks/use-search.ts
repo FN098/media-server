@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export function useSearch(initialQuery?: string) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -10,13 +10,10 @@ export function useSearch(initialQuery?: string) {
     inputRef.current?.focus();
   }, []);
 
-  return useMemo(
-    () => ({
-      inputRef,
-      query,
-      setQuery,
-      focus,
-    }),
-    [focus, query]
-  );
+  return {
+    inputRef,
+    query,
+    setQuery,
+    focus,
+  };
 }
