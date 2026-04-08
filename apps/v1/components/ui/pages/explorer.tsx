@@ -99,7 +99,7 @@ export function Explorer() {
   // UI操作：Context → URL
   useEffect(() => {
     setExplorerQuery({
-      q: query === "" ? null : query,
+      q: query.trim() === "" ? null : query,
       view: viewMode === "grid" ? null : viewMode,
     });
   }, [setExplorerQuery, query, viewMode]);
