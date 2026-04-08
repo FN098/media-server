@@ -71,8 +71,8 @@ export function Favorites() {
 
     if (hasChanged) {
       setExplorerQuery({
-        q: query.trim() === "" ? null : query,
-        view: viewMode === "grid" ? null : viewMode,
+        q: query.trim() === "" ? undefined : query,
+        view: viewMode === "grid" ? undefined : viewMode,
       });
     }
   }, [setExplorerQuery, query, viewMode, q, view]);

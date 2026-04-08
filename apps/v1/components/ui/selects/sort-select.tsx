@@ -10,7 +10,6 @@ import {
 } from "@/shadcn/components/ui/select";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowUpDown, LucideIcon, RotateCcw } from "lucide-react";
-import { useEffect } from "react";
 
 export interface SortOption {
   key?: string;
@@ -34,24 +33,19 @@ export function SortSelect({
 }: SortSelectProps) {
   const { sort, direction, setSort, isPending } = useSort();
 
-  // 現在の選択値が options の中に存在するかチェックし、なければリセット
-  useEffect(() => {
-    // 値がセットされていない場合は何もしない
-    if (!sort || !direction) return;
+  // 現在の URL パラメータの組み合わせ
+  const currentKeyDir = sort && direction ? `${sort}-${direction}` : null;
 
-    const isValid = options.some(
-      (opt) => opt.key === sort && opt.direction === direction
-    );
+  // options の中に現在の値が存在するかチェック
+  const isValidOption = options.some(
+    (opt) => `${opt.key}-${opt.direction}` === currentKeyDir
+  );
 
-    if (!isValid) {
-      setSort(null, null);
-      onChange?.(null, null);
-    }
-  }, [sort, direction, options, setSort, onChange]);
+  // 有効なオプションがある場合のみ値をセット。なければ undefined (placeholder表示)
+  const selectValue = isValidOption ? (currentKeyDir as string) : undefined;
 
-  // ソートが適用されているか判定
-  const isSorted = !!(sort && direction && sort !== "none");
-  const selectValue = sort && direction ? `${sort}-${direction}` : undefined;
+  // ソートが適用されているか判定（リセットボタンの表示用）
+  const isSorted = !!selectValue;
 
   const handleValueChange = (value: string) => {
     let newKey: string | null = null;
@@ -68,6 +62,7 @@ export function SortSelect({
   return (
     <div className={cn(isPending && "opacity-70 transition-opacity")}>
       <Select
+        // selectValue が変わった時にコンポーネントを正しく再描画させる
         key={selectValue || "reset"}
         value={selectValue}
         onValueChange={handleValueChange}
@@ -105,7 +100,7 @@ export function SortSelect({
 
           {options.map((opt) => {
             const combined = `${opt.key}-${opt.direction}`;
-            const ItemIcon = opt.icon || ArrowUpDown; // オプションごとのアイコン
+            const ItemIcon = opt.icon || ArrowUpDown;
 
             return (
               <SelectItem key={combined} value={combined}>
