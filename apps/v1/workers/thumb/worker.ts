@@ -1,5 +1,5 @@
 import { getMediaFsNode, getMediaFsNodes } from "@/lib/media/fs";
-import { sortMediaFsNodes } from "@/lib/media/sort";
+import { sortNodes } from "@/lib/media/sort";
 import { createThumbs } from "@/lib/thumb/create";
 import { chunk } from "@/lib/utils/chunk";
 import { ThumbJobData } from "@/workers/thumb/types";
@@ -34,7 +34,7 @@ export const startThumbWorker = () => {
             const nodes = await getMediaFsNodes(dirPath);
 
             // 名前順（表示順）に処理するためにソート
-            const sorted = sortMediaFsNodes(nodes);
+            const sorted = sortNodes(nodes);
 
             // 1. チャンク分けして処理（例: 10枚ずつ）
             const chunks = chunk(sorted, 10);
@@ -48,21 +48,21 @@ export const startThumbWorker = () => {
                 chunk.map((node) =>
                   connection.publish(
                     "thumb-completed",
-                    JSON.stringify({ filePath: node.path }),
-                  ),
-                ),
+                    JSON.stringify({ filePath: node.path })
+                  )
+                )
               ).catch((err) => console.error("Publish error:", err));
 
               completed += chunk.length;
               console.log(
-                `[Job ${job.id}] Progress: ${completed}/${nodes.length}`,
+                `[Job ${job.id}] Progress: ${completed}/${nodes.length}`
               );
             }
 
             // 3. 最後にディレクトリ単位での完了通知を発行（念のためのバックアップ）
             await connection.publish(
               "thumb-completed",
-              JSON.stringify({ dirPath }),
+              JSON.stringify({ dirPath })
             );
 
             console.log(`[Job ${job.id}] Notified completion for: ${dirPath}`);
@@ -87,7 +87,7 @@ export const startThumbWorker = () => {
             // 完了通知イベントを発行
             await connection.publish(
               "thumb-completed",
-              JSON.stringify({ filePath }),
+              JSON.stringify({ filePath })
             );
 
             console.log(`[Job ${job.id}] Notified completion for: ${filePath}`);
@@ -103,7 +103,7 @@ export const startThumbWorker = () => {
           console.warn(`Unknown job name: ${job.name}`);
       }
     },
-    { connection },
+    { connection }
   );
 
   worker.on("failed", (job, err) => {
