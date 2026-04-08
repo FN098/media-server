@@ -4,6 +4,7 @@ export const searchTagStrategies = [
   "recently-created",
   "recently-used",
   "related-only",
+  "favorite-only",
 ] as const;
 
 export const sortTagStrategies = ["default", "by-name"] as const;

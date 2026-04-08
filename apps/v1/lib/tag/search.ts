@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { SearchTagsOptions, Tag } from "@/lib/tag/types";
+import { uniqueBy } from "@/lib/utils/unique";
 
 export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {
   const strategy = options?.strategy ?? "most-related";
@@ -106,9 +107,7 @@ async function searchRecentlyUsedTags({
   const combined = [...matchedTags, ...sortedHistoryTags];
 
   // IDでユニークにする
-  const uniqueTags = Array.from(
-    new Map(combined.map((t) => [t.id, t])).values()
-  );
+  const uniqueTags = uniqueBy(combined, "id");
 
   return uniqueTags.slice(0, limit);
 }

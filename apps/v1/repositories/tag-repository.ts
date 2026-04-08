@@ -56,3 +56,12 @@ export async function getRelatedTags(
 
   return [];
 }
+
+export async function getFavoriteTags(options?: { limit?: number }) {
+  return await prisma.tag.findMany({
+    where: { isFavorite: true },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+    take: options?.limit,
+  });
+}
