@@ -16,7 +16,7 @@ import { Input } from "@/shadcn/components/ui/input"; // 追加
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
 import { RotateCcw, Search, Tag, X } from "lucide-react"; // Searchを追加
-import { useMemo, useState } from "react"; // useMemoを追加
+import { useMemo, useRef, useState } from "react"; // useMemoを追加
 
 const modeTexts = {
   AND: "すべて含む",
@@ -44,6 +44,7 @@ export function TagFilterDialog({
   const [mode, setMode] = useState<TagFilterMode>(currentMode);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const allTags = useMemo(
     () => unique([...tempSelected, ...tags]),
@@ -59,6 +60,7 @@ export function TagFilterDialog({
     if (nextOpen) {
       setTempSelected(new Set(selectedTags));
       setSearchQuery(""); // 開くときは検索をリセット
+      // setTimeout(() => inputRef.current?.focus(), 500);
     }
     setOpen(nextOpen);
   };
@@ -123,7 +125,13 @@ export function TagFilterDialog({
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-[450px] h-[550px] flex flex-col p-0 overflow-hidden">
+        <DialogContent
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            inputRef.current?.focus();
+          }}
+          className="sm:max-w-[450px] h-[550px] flex flex-col p-0 overflow-hidden"
+        >
           <DialogHeader className="p-6 pb-2">
             <DialogTitle className="text-xl font-semibold">
               タグを選択
@@ -133,20 +141,22 @@ export function TagFilterDialog({
           {/* モード切り替え */}
           <div className="px-6 pb-2">
             <div className="flex bg-muted rounded-lg p-1">
-              {(["AND", "OR", "NOT", "EMPTY"] as TagFilterMode[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={cn(
-                    "flex-1 text-xs font-medium py-1.5 rounded-md transition-all",
-                    mode === m
-                      ? "bg-background shadow-sm text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {modeTexts[m]}
-                </button>
-              ))}
+              {(["AND", "OR", "NOT", "EMPTY"] satisfies TagFilterMode[]).map(
+                (m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className={cn(
+                      "flex-1 text-xs font-medium py-1.5 rounded-md transition-all",
+                      mode === m
+                        ? "bg-background shadow-sm text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {modeTexts[m]}
+                  </button>
+                )
+              )}
             </div>
           </div>
 
@@ -155,6 +165,7 @@ export function TagFilterDialog({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                ref={inputRef}
                 placeholder="タグを検索..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
