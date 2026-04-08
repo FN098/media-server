@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  UnusedTagDeleteResult,
+  UnusedTagItem,
+  UnusedTagScanResult,
+} from "@/lib/tag/types";
+import {
   Table,
   TableBody,
   TableCell,
@@ -32,39 +37,20 @@ import { CheckCircle2, Loader2, Search, Tag } from "lucide-react";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-// 型定義
-export type TagItem = {
-  id: string;
-  name: string;
-  usageCount: number; // 0件のはずだが確認用に
-};
-
-export type TagScanResult = {
-  success: boolean;
-  tags?: TagItem[];
-  error?: string;
-};
-
-export type TagExecuteResult = {
-  success: boolean;
-  deletedCount?: number;
-  error?: string;
-};
-
 interface UnusedTagsCleanupCardProps {
-  onScan: () => Promise<TagScanResult>;
-  onExecute: (ids: string[]) => Promise<TagExecuteResult>;
+  onScan: () => Promise<UnusedTagScanResult>;
+  onDelete: (ids: string[]) => Promise<UnusedTagDeleteResult>;
   autoScan?: boolean;
 }
 
 export function UnusedTagsCleanupCard({
   onScan,
-  onExecute,
+  onDelete,
   autoScan = false,
 }: UnusedTagsCleanupCardProps) {
   const [isPending, startTransition] = useTransition();
   const [hasScanned, setHasScanned] = useState(false);
-  const [tags, setTags] = useState<TagItem[]>([]);
+  const [tags, setTags] = useState<UnusedTagItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // スキャン処理
@@ -77,16 +63,17 @@ export function UnusedTagsCleanupCard({
         setSelectedIds(new Set(result.tags.map((t) => t.id)));
         setHasScanned(true);
       } else {
-        toast.error(result.error || "タグの取得に失敗しました");
+        toast.error(result.error || "スキャン中にエラーが発生しました");
       }
     });
   }, [onScan]);
 
   // 削除処理
   const handleDelete = useCallback(() => {
-    const idsToPreview = Array.from(selectedIds);
+    if (selectedIds.size === 0) return;
+    const ids = Array.from(selectedIds);
     startTransition(async () => {
-      const result = await onExecute(idsToPreview);
+      const result = await onDelete(ids);
       if (result.success) {
         toast.success(`完了: ${result.deletedCount} 件のタグを削除しました。`);
         setTags([]);
@@ -96,11 +83,13 @@ export function UnusedTagsCleanupCard({
         toast.error(result.error || "削除中にエラーが発生しました");
       }
     });
-  }, [onExecute, selectedIds]);
+  }, [onDelete, selectedIds]);
 
+  // 初回のみ自動スキャン
   useEffect(() => {
     if (autoScan) handleScan();
-  }, [autoScan, handleScan]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 選択制御
   const toggleSelectAll = () => {

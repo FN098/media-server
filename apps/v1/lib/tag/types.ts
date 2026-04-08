@@ -55,3 +55,21 @@ export type SortTagStrategy = (typeof sortTagStrategies)[number];
 
 export type TagIdType = string;
 export type PendingChangesType = Record<TagIdType, TagOperator>;
+
+export type UnusedTagItem = {
+  id: string;
+  name: string;
+  usageCount: number;
+};
+
+export type UnusedTagScanResult = {
+  success: boolean;
+  tags?: UnusedTagItem[];
+  error?: string;
+};
+
+export type UnusedTagDeleteResult = {
+  success: boolean;
+  deletedCount?: number;
+  error?: string;
+};

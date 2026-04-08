@@ -14,14 +14,13 @@ export function Maintenance() {
   return (
     <div className="p-8 space-y-6 grid gap-6 md:grid-cols-2">
       <GhostMediaCleanupCard
-        autoScan={true}
         onScan={scanGhostMediaAction}
-        onExecute={cleanupGhostMediaAction}
+        onDelete={cleanupGhostMediaAction}
       />
 
       <UnusedTagsCleanupCard
         onScan={scanUnusedTagsAction}
-        onExecute={deleteSelectedTagsAction}
+        onDelete={deleteSelectedTagsAction}
       />
 
       <TagRenameEditorCard />

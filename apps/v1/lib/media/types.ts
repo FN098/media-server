@@ -85,3 +85,25 @@ export type DbFolderMeta = {
   path: string;
   previewPath: string | null;
 };
+
+export type GhostMediaItem = {
+  id: string;
+  title: string | null;
+  path: string;
+};
+
+export type GhostMediaScanOptions = {
+  fullScan: boolean;
+};
+
+export type GhostMediaScanResult = {
+  success: boolean;
+  items?: GhostMediaItem[];
+  error?: string;
+};
+
+export type GhostMediaDeleteResult = {
+  success: boolean;
+  deletedCount?: number;
+  error?: string;
+};
