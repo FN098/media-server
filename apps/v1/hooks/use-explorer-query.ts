@@ -2,58 +2,65 @@
 
 import { encodePath } from "@/lib/path/encoder";
 import { getClientExplorerPath } from "@/lib/path/helpers";
-import { normalizeExplorerQuery } from "@/lib/query/normalize";
 import { overrideSearchParams } from "@/lib/query/search-params";
-import type { ExplorerQuery, SetExplorerQueryOptions } from "@/lib/query/types";
-import { explorerQuerySchema } from "@/lib/query/validation";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
+import z from "zod";
+
+export const explorerQuerySchema = z.object({
+  q: z.string().optional().nullable().default(null),
+
+  modal: z
+    .literal("true")
+    .transform(() => true)
+    .optional()
+    .default(false),
+
+  view: z.enum(["grid", "list"]).optional().nullable().default(null),
+
+  at: z
+    .union([z.coerce.number().int().nonnegative(), z.enum(["first", "last"])])
+    .optional()
+    .nullable()
+    .default(null),
+
+  sort: z.string().optional().nullable().default(null),
+
+  direction: z
+    .enum(["asc", "desc", "random"])
+    .optional()
+    .nullable()
+    .default(null),
+});
+
+export type ExplorerQuery = z.infer<typeof explorerQuerySchema>;
+
+export type ExplorerQueryOptions = {
+  history?: "replace" | "push";
+  path?: string;
+};
 
 export function useExplorerQuery() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const params = Object.fromEntries(searchParams);
-  const query = explorerQuerySchema.parse(params);
+  const explorerQuery = explorerQuerySchema.parse(params);
 
-  return {
-    ...query,
-  };
-}
+  const setExplorerQuery = useCallback(
+    (query: Partial<ExplorerQuery>, options: ExplorerQueryOptions = {}) => {
+      const parsed = explorerQuerySchema.parse(query);
 
-export function useNormalizeExplorerQuery() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const query = useExplorerQuery();
-
-  useEffect(() => {
-    const normalized = normalizeExplorerQuery(query);
-    const next = overrideSearchParams(normalized, searchParams).toString();
-    const current = searchParams.toString();
-
-    if (next !== current) {
-      router.replace(next ? `${pathname}?${next}` : pathname);
-    }
-  }, [query, pathname, router, searchParams]);
-}
-
-export function useSetExplorerQuery() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const current = useExplorerQuery();
-
-  return useCallback(
-    (
-      partial: Partial<ExplorerQuery>,
-      options: SetExplorerQueryOptions = {}
-    ) => {
       const merged: ExplorerQuery = {
-        ...current,
-        ...partial,
+        ...query,
+        ...parsed,
       };
 
       const search = overrideSearchParams(merged, searchParams).toString();
+
+      // クエリ内容が変わらなければ何もしない
+      if (search === searchParams.toString()) return;
 
       const basePath = options.path
         ? getClientExplorerPath(encodePath(options.path))
@@ -67,6 +74,11 @@ export function useSetExplorerQuery() {
         router.replace(url, { scroll: false });
       }
     },
-    [current, pathname, router, searchParams]
+    [pathname, router, searchParams]
   );
+
+  return {
+    explorerQuery,
+    setExplorerQuery,
+  };
 }

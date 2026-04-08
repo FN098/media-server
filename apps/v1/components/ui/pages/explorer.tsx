@@ -21,11 +21,7 @@ import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import {
-  useExplorerQuery,
-  useNormalizeExplorerQuery,
-  useSetExplorerQuery,
-} from "@/hooks/use-explorer-query";
+import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
 import {
   createFavoriteFilter,
@@ -41,7 +37,6 @@ import {
   MediaPathToIndexMap,
   MediaPathToNodeMap,
 } from "@/lib/media/types";
-import { ExplorerQuery } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
@@ -89,36 +84,25 @@ export function Explorer() {
   // ===== URL ステート =====
 
   // URLファーストのステート管理
-  const setExplorerQuery = useSetExplorerQuery();
-  const { view, q, at, modal } = useExplorerQuery(); // URL
+  const { explorerQuery, setExplorerQuery } = useExplorerQuery();
+  const { view, q, at, modal } = explorerQuery; // URL
   const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
 
   // 初期同期：URL → Context（1回だけ）
   useEffect(() => {
-    if (view !== viewMode) setViewMode(view);
+    if (view !== viewMode) setViewMode(view ?? "grid");
     if (q !== query) setQuery(q ?? "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // UI操作：Context → URL
   useEffect(() => {
-    const patch: Partial<ExplorerQuery> = {};
-
-    // undefined と空文字列の比較にならないように normalize しておく
-    const nq = q ?? "";
-    const nQuery = query ?? "";
-
-    if (view !== viewMode) patch.view = viewMode;
-    if (nq !== nQuery) patch.q = nQuery || undefined;
-
-    if (Object.keys(patch).length === 0) return;
-
-    setExplorerQuery(patch);
-  }, [setExplorerQuery, q, query, view, viewMode]);
-
-  // クエリパラメータ正規化
-  useNormalizeExplorerQuery();
+    setExplorerQuery({
+      q: query === "" ? null : query,
+      view: viewMode === "grid" ? null : viewMode,
+    });
+  }, [setExplorerQuery, query, viewMode]);
 
   // ===== フィルタリング =====
 
