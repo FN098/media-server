@@ -4,6 +4,7 @@
 import {
   deleteTagAction,
   getTagsInfiniteAction,
+  markTagsAsReadAction,
   renameTagAction,
   updateTagFavoriteAction,
 } from "@/actions/tag-actions";
@@ -29,6 +30,9 @@ import {
   CardTitle,
 } from "@/shadcn/components/ui/card";
 import { Input } from "@/shadcn/components/ui/input";
+import { Label } from "@/shadcn/components/ui/label";
+import { Switch } from "@/shadcn/components/ui/switch";
+import { cn } from "@/shadcn/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,9 +50,11 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   Check,
+  CheckCheck,
   Edit2,
   Loader2,
   Search,
+  Sparkles,
   Star,
   Tags,
   Trash2,
@@ -63,6 +69,7 @@ export type TagItem = {
   name: string;
   kana: string | null;
   isFavorite: boolean;
+  isNew: boolean;
   _count: { mediaTags: number };
 };
 
@@ -74,15 +81,17 @@ export function TagMasterManagerCard() {
   const [debouncedFilter] = useDebounce(filter, 500);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editValue, setEditValue] = React.useState({ name: "", kana: "" });
+  const [showNewOnly, setShowNewOnly] = React.useState(false);
 
   // データ取得
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["tags", debouncedFilter],
+      queryKey: ["tags", debouncedFilter, showNewOnly],
       queryFn: async ({ pageParam }) => {
         const res = await getTagsInfiniteAction({
           cursor: pageParam,
           query: debouncedFilter,
+          onlyNew: showNewOnly,
         });
         if (!res.success) throw new Error(res.error);
         return res;
@@ -93,6 +102,11 @@ export function TagMasterManagerCard() {
 
   const allTags =
     data?.pages.flatMap((page) => (page.tags as TagItem[]) ?? []) ?? [];
+
+  const newTags = allTags.filter((tag) => tag.isNew);
+  const newTagIds = newTags.map((tag) => tag.id);
+  const newTagsCount = newTags.length;
+  const hasNewTags = newTagsCount > 0;
 
   // 仮想化設定
   const parentRef = React.useRef<HTMLDivElement>(null);
@@ -162,6 +176,16 @@ export function TagMasterManagerCard() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  // ミューテーション: すべて既読
+  const { mutate: markAllAsRead, isPending: isMarking } = useMutation({
+    mutationFn: () => markTagsAsReadAction(newTagIds),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["tags"] });
+      toast.success("すべての新規タグを既読にしました");
+    },
+    onError: () => toast.error("処理に失敗しました"),
+  });
+
   const handleStartEdit = (tag: TagItem) => {
     setEditingId(tag.id);
     setEditValue({ name: tag.name, kana: tag.kana ?? "" });
@@ -174,9 +198,10 @@ export function TagMasterManagerCard() {
 
   return (
     <Card className="shadow-sm">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-center">
-          <div>
+      <CardHeader className="pb-4 space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          {/* タイトル＋説明 */}
+          <div className="space-y-1">
             <CardTitle className="flex items-center gap-2 text-primary">
               <Tags className="w-5 h-5" />
               タグマスター管理
@@ -185,15 +210,61 @@ export function TagMasterManagerCard() {
               読み順（五十音順）で表示されます。ピン留めして優先表示も可能です。
             </CardDescription>
           </div>
+
+          {/* すべて既読にするボタン */}
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "flex items-center gap-2 h-9 border-dashed transition-all",
+              hasNewTags
+                ? "border-dashed hover:border-primary hover:text-primary hover:bg-primary/5"
+                : "bg-muted/30 text-muted-foreground border-none opacity-70"
+            )}
+            onClick={() => hasNewTags && markAllAsRead()}
+            disabled={isMarking || !hasNewTags}
+          >
+            {isMarking ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : hasNewTags ? (
+              <CheckCheck className="h-4 w-4" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
+            <span className="font-medium">
+              {hasNewTags
+                ? `未読 ${newTagsCount} 件を既読にする`
+                : "すべて既読済み"}
+            </span>
+          </Button>
         </div>
-        <div className="relative mt-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="タグ名または読みで検索..."
-            className="pl-9"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* 検索バー */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="タグ名または読みで検索..."
+              className="pl-9 h-10 bg-muted/5 border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/50"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
+
+          {/* 新規のみスイッチ */}
+          <div className="flex items-center justify-between sm:justify-start gap-3 border rounded-md px-3 h-10 bg-background shadow-sm min-w-[130px]">
+            <Label
+              htmlFor="new-only"
+              className="text-xs font-medium cursor-pointer whitespace-nowrap text-muted-foreground"
+            >
+              新規のみ
+            </Label>
+            <Switch
+              id="new-only"
+              checked={showNewOnly}
+              onCheckedChange={setShowNewOnly}
+            />
+          </div>
         </div>
       </CardHeader>
 
@@ -202,7 +273,7 @@ export function TagMasterManagerCard() {
           {/* 固定ヘッダー */}
           <Table>
             <TableHeader className="bg-muted/50 sticky top-0 z-10">
-              <TableRow className={`${GRID_STYLE} w-full border-b-0`}>
+              <TableRow className={cn(GRID_STYLE, "w-full border-b-0")}>
                 <TableHead className="flex items-center justify-center">
                   固定
                 </TableHead>
@@ -238,7 +309,10 @@ export function TagMasterManagerCard() {
                   return (
                     <TableRow
                       key={virtualRow.key}
-                      className={`${GRID_STYLE} group absolute w-full items-center border-b hover:bg-muted/30`}
+                      className={cn(
+                        GRID_STYLE,
+                        "group absolute w-full items-center border-b hover:bg-muted/30"
+                      )}
                       style={{
                         height: `${virtualRow.size}px`,
                         transform: `translateY(${virtualRow.start}px)`,
@@ -249,7 +323,12 @@ export function TagMasterManagerCard() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className={`h-8 w-8 ${tag.isFavorite ? "text-yellow-500" : "text-muted-foreground/30 hover:text-yellow-500"}`}
+                          className={cn(
+                            "h-8 w-8",
+                            tag.isFavorite
+                              ? "text-yellow-500"
+                              : "text-muted-foreground/30 hover:text-yellow-500"
+                          )}
                           onClick={() =>
                             toggleFavorite({
                               id: tag.id,
@@ -258,7 +337,10 @@ export function TagMasterManagerCard() {
                           }
                         >
                           <Star
-                            className={`h-4 w-4 ${tag.isFavorite ? "fill-current" : ""}`}
+                            className={cn(
+                              "h-4 w-4",
+                              tag.isFavorite ? "fill-current" : ""
+                            )}
                           />
                         </Button>
                       </TableCell>
@@ -277,7 +359,16 @@ export function TagMasterManagerCard() {
                             className="h-8"
                           />
                         ) : (
-                          <span className="truncate">{tag.name}</span>
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="truncate">{tag.name}</span>
+
+                            {tag.isNew && (
+                              <div className="flex items-center gap-1 bg-yellow-500 text-black font-black px-1.5 py-0.5 rounded-sm text-[9px] shadow-sm animate-in fade-in zoom-in duration-300 w-fit shrink-0">
+                                <Sparkles size={8} fill="currentColor" />
+                                <span>NEW</span>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </TableCell>
 

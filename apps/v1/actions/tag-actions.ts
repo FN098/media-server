@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
@@ -212,31 +213,36 @@ export async function getTagsInfiniteAction({
   query,
   limit = 50,
   onlyFavorites = false,
+  onlyNew = false,
 }: {
   cursor?: string;
   query?: string;
   limit?: number;
   onlyFavorites?: boolean;
+  onlyNew?: boolean;
 }) {
   try {
+    const where: Prisma.TagWhereInput = {
+      isActive: true,
+    };
+
+    if (query) {
+      where.OR = [{ name: { contains: query } }, { kana: { contains: query } }];
+    }
+
+    if (onlyFavorites) {
+      where.isFavorite = true;
+    }
+
+    if (onlyNew) {
+      where.isNew = true;
+    }
+
     const tags = await prisma.tag.findMany({
       take: limit,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
-      where: {
-        isActive: true,
-        AND: [
-          query
-            ? {
-                OR: [
-                  { name: { contains: query } },
-                  { kana: { contains: query } }, // 読みでも検索可能に
-                ],
-              }
-            : {},
-          onlyFavorites ? { isFavorite: true } : {},
-        ],
-      },
+      where,
       // 読み(kana)順、次に名前(name)順でソート
       orderBy: [{ kana: "asc" }, { name: "asc" }],
       select: {
@@ -244,6 +250,7 @@ export async function getTagsInfiniteAction({
         name: true,
         kana: true,
         isFavorite: true,
+        isNew: true,
         _count: { select: { mediaTags: true } },
       },
     });
@@ -255,6 +262,28 @@ export async function getTagsInfiniteAction({
   } catch (error) {
     console.error("Get Tags Error:", error);
     return { success: false, error: "タグの取得に失敗しました。" };
+  }
+}
+
+export async function markTagsAsReadAction(ids: string[]) {
+  try {
+    if (ids.length === 0) return { success: true };
+
+    await prisma.tag.updateMany({
+      where: {
+        id: { in: ids },
+        isNew: true, // 念のため新規のものだけに限定
+        isActive: true,
+      },
+      data: {
+        isNew: false,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Mark Tags As Read Error:", error);
+    return { success: false, error: "タグの更新に失敗しました。" };
   }
 }
 
