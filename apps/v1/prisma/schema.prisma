@@ -50,12 +50,18 @@ model Media {
 }
 
 model Tag {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  name       String   @unique
+  kana       String?
+  isFavorite Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   mediaTags MediaTag[]
+
+  @@index([kana])
+  @@index([isFavorite])
 }
 
 model MediaTag {
