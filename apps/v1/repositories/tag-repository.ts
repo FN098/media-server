@@ -48,7 +48,7 @@ export async function getRelatedTags(
           some: { media: { path: { in: paths } } },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: [{ kana: "asc" }, { name: "asc" }],
       select: { id: true, name: true },
       take: options?.limit,
     });
@@ -60,7 +60,7 @@ export async function getRelatedTags(
 export async function getFavoriteTags(options?: { limit?: number }) {
   return await prisma.tag.findMany({
     where: { isFavorite: true },
-    orderBy: { name: "asc" },
+    orderBy: [{ kana: "asc" }, { name: "asc" }],
     select: { id: true, name: true },
     take: options?.limit,
   });

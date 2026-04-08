@@ -13,8 +13,10 @@ export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {
       return searchRecentlyCreatedTags(options);
 
     case "recently-used":
-    default:
       return searchRecentlyUsedTags(options);
+
+    default:
+      return [];
   }
 }
 
