@@ -96,6 +96,11 @@ export type GhostMediaScanOptions = {
   fullScan: boolean;
 };
 
+export type GhostMediaScanEventArgs =
+  | { type: "progress"; current: number; total: number; found: number }
+  | { type: "complete"; items: GhostMediaItem[] }
+  | { type: "error"; message: string };
+
 export type GhostMediaScanResult = {
   success: boolean;
   items?: GhostMediaItem[];

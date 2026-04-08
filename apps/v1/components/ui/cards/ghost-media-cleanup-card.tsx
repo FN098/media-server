@@ -3,8 +3,7 @@
 import {
   GhostMediaDeleteResult,
   GhostMediaItem,
-  GhostMediaScanOptions,
-  GhostMediaScanResult,
+  GhostMediaScanEventArgs,
 } from "@/lib/media/types";
 import {
   AlertDialog,
@@ -26,6 +25,7 @@ import {
   CardTitle,
 } from "@/shadcn/components/ui/card";
 import { Label } from "@/shadcn/components/ui/label";
+import { Progress } from "@/shadcn/components/ui/progress";
 import { Switch } from "@/shadcn/components/ui/switch";
 import {
   AlertCircle,
@@ -34,35 +34,108 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface GhostMediaCleanupCardProps {
-  onScan: (options?: GhostMediaScanOptions) => Promise<GhostMediaScanResult>;
   onDelete: (ids: string[]) => Promise<GhostMediaDeleteResult>;
   autoScan?: boolean;
 }
 
 export function GhostMediaCleanupCard({
-  onScan,
   onDelete,
   autoScan = false,
 }: GhostMediaCleanupCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isFullScan, setIsFullScan] = useState(false);
   const [items, setItems] = useState<GhostMediaItem[] | null>(null);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const startTimeRef = useRef<number | null>(null);
+  const [elapsedDisplay, setElapsedDisplay] = useState(0);
+  const [eta, setEta] = useState<number | null>(null);
+
+  // EventSourceを保持するためのref（中断用）
+  const esRef = useRef<EventSource | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [foundCount, setFoundCount] = useState(0);
 
   // スキャン実行
   const handleScan = useCallback(() => {
-    startTransition(async () => {
-      const result = await onScan({ fullScan: isFullScan });
-      if (result.success) {
-        setItems(result.items ?? []);
-      } else {
-        toast.error(result.error || "スキャン中にエラーが発生しました");
+    // 既存のスキャンがあれば閉じる
+    if (esRef.current) esRef.current.close();
+
+    setItems(null);
+    setFoundCount(0);
+    setProgress({ current: 0, total: 0 });
+    setEta(null);
+    startTimeRef.current = Date.now();
+    setIsScanning(true);
+
+    const eventSource = new EventSource(`/api/media/scan?full=${isFullScan}`);
+    esRef.current = eventSource;
+
+    eventSource.onmessage = (event: MessageEvent) => {
+      if (typeof event.data !== "string") return;
+      const data = JSON.parse(event.data) as GhostMediaScanEventArgs;
+
+      switch (data.type) {
+        case "progress":
+          setProgress({ current: data.current, total: data.total });
+          setFoundCount(data.found);
+
+          if (startTimeRef.current) {
+            const elapsed = (Date.now() - startTimeRef.current) / 1000;
+            setElapsedDisplay(Math.floor(elapsed)); // UI表示用
+
+            // 10秒経過かつ進捗がある場合のみETA計算
+            if (data.current > 0 && elapsed > 10) {
+              const remainingTime = elapsed * (data.total / data.current - 1);
+              setEta(remainingTime);
+            }
+          }
+          break;
+
+        case "complete":
+          setItems(data.items);
+          setFoundCount(data.items.length);
+          setIsScanning(false);
+          eventSource.close();
+          esRef.current = null;
+          toast.success("スキャンが完了しました");
+          break;
+
+        case "error":
+          setIsScanning(false);
+          eventSource.close();
+          esRef.current = null;
+          toast.error(data.message);
+          break;
       }
-    });
-  }, [onScan, isFullScan]);
+    };
+
+    eventSource.onerror = () => {
+      // ユーザーによる中断でない場合のみエラー表示
+      if (esRef.current) {
+        setIsScanning(false);
+        eventSource.close();
+        esRef.current = null;
+        toast.error("接続エラーが発生しました");
+      }
+    };
+  }, [isFullScan, startTimeRef]);
+
+  // 中断処理
+  const handleAbort = () => {
+    if (esRef.current) {
+      setIsScanning(false);
+      setEta(null);
+      esRef.current.close();
+      esRef.current = null;
+      toast.info("スキャンを中断しました。");
+      // 注意: API側の signal.aborted ロジックにより、
+      // サーバーが最後に送ったデータがあれば complete 分岐で items がセットされます
+    }
+  };
 
   // 削除実行
   const handleDelete = useCallback(() => {
@@ -82,54 +155,93 @@ export function GhostMediaCleanupCard({
   // 初回のみ自動スキャン
   useEffect(() => {
     if (autoScan) handleScan();
+    return () => esRef.current?.close(); // アンマウント時に掃除
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Card className="border-destructive/50">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <div>
-          <CardTitle className="flex items-center gap-2 text-destructive text-lg">
-            <Trash2 className="w-5 h-5" /> ゴーストデータ削除
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Trash2 className="w-5 h-5" />
+            ゴーストデータ削除
           </CardTitle>
-          <CardDescription>
-            実体のないメディアレコードを掃除します
-          </CardDescription>
+          <div className="flex items-center gap-2 border p-2 rounded-md bg-muted/50">
+            <Switch
+              id="scan-mode"
+              checked={isFullScan}
+              onCheckedChange={(checked) => {
+                setIsFullScan(checked);
+                setItems(null);
+              }}
+              disabled={isScanning}
+            />
+            <Label
+              htmlFor="scan-mode"
+              className="text-xs font-bold cursor-pointer"
+            >
+              フルスキャン
+            </Label>
+          </div>
         </div>
-        <div className="flex items-center gap-2 border p-2 rounded-md bg-muted/50">
-          <Switch
-            id="scan-mode"
-            checked={isFullScan}
-            onCheckedChange={(checked) => {
-              setIsFullScan(checked);
-              setItems(null); // モードを変えたら結果をクリアしてスキャンを促す
-            }}
-          />
-          <Label
-            htmlFor="scan-mode"
-            className="text-xs font-bold cursor-pointer"
-          >
-            フルスキャン
-          </Label>
-        </div>
+        <CardDescription>
+          実体のないメディアレコードを掃除します
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* ステータス表示 */}
+        {/* 進捗表示 */}
+        {isScanning && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>
+                スキャン中...{" "}
+                {Math.floor((progress.current / progress.total) * 100)} % (
+                {progress.current} / {progress.total})
+              </span>
+              <div className="flex gap-4">
+                <span>
+                  {elapsedDisplay ? Math.ceil(elapsedDisplay) : "--"} 秒経過
+                </span>
+                <span>残り約 {eta ? Math.ceil(eta) : "--"} 秒</span>
+              </div>
+            </div>
+            <Progress
+              value={
+                progress.total > 0
+                  ? (progress.current / progress.total) * 100
+                  : 0
+              }
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleAbort}
+              className="w-full text-xs text-destructive hover:bg-destructive/10"
+            >
+              スキャンを中断
+            </Button>
+          </div>
+        )}
+
         <div className="flex items-center h-10 px-3 border rounded bg-muted/20 text-sm">
           {isPending ? (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="w-4 h-4 animate-spin" />{" "}
-              {items ? "削除中..." : "スキャン中..."}
+              <Loader2 className="w-4 h-4 animate-spin" /> 削除中...
+            </div>
+          ) : isScanning ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" /> 探索中... (
+              {foundCount}件発見)
             </div>
           ) : items === null ? (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Search className="w-4 h-4" />{" "}
-              モードを選択してスキャンしてください
+              <Search className="w-4 h-4" /> スキャンしてください
             </div>
           ) : items.length > 0 ? (
             <div className="flex items-center gap-2 text-orange-600 font-medium">
-              <AlertCircle className="w-4 h-4" /> {items.length}
+              <AlertCircle className="w-4 h-4" /> {items.length}{" "}
               件の不要データを発見
             </div>
           ) : (
@@ -140,16 +252,15 @@ export function GhostMediaCleanupCard({
         </div>
 
         <div className="flex gap-2">
-          {/* スキャンボタン：フルスキャン時のみダイアログを出す */}
           {isFullScan && items === null ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="outline"
                   className="flex-1"
-                  disabled={isPending}
+                  disabled={isScanning || isPending}
                 >
-                  フルスキャン実行
+                  スキャン
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -174,19 +285,20 @@ export function GhostMediaCleanupCard({
               variant="outline"
               className="flex-1"
               onClick={handleScan}
-              disabled={isPending}
+              disabled={isScanning || isPending}
             >
               {items === null ? "スキャン" : "再スキャン"}
             </Button>
           )}
 
-          {/* 削除ボタン */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
                 variant="destructive"
                 className="flex-[2]"
-                disabled={isPending || !items || items.length === 0}
+                disabled={
+                  isScanning || isPending || !items || items.length === 0
+                }
               >
                 削除を実行
               </Button>
@@ -195,8 +307,7 @@ export function GhostMediaCleanupCard({
               <AlertDialogHeader>
                 <AlertDialogTitle>本当に削除しますか？</AlertDialogTitle>
                 <AlertDialogDescription>
-                  検出された {items?.length}{" "}
-                  件のレコードをDBから削除します。この操作は取り消せません。
+                  検出された {items?.length} 件をDBから削除します。
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
