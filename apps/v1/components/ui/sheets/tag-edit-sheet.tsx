@@ -118,7 +118,7 @@ export function TagEditSheet({
         await editor.invalidateTags();
         router.refresh();
 
-        if (editingMode === "edit") handleTerminate();
+        handleTerminate();
       }
     });
   };
