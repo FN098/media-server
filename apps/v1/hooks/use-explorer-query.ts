@@ -11,8 +11,7 @@ export const explorerQuerySchema = z.object({
   q: z.string().optional().nullable().default(null),
 
   modal: z
-    .literal("true")
-    .transform(() => true)
+    .union([z.boolean(), z.literal("true").transform(() => true)])
     .optional()
     .default(false),
 
