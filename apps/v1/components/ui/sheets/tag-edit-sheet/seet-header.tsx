@@ -1,8 +1,9 @@
 import { EditingMode, TagEditMode } from "@/components/ui/sheets/types";
 import { Button } from "@/shadcn/components/ui/button";
-import { Slider } from "@/shadcn/components/ui/slider";
+import { Label } from "@/shadcn/components/ui/label";
+import { Switch } from "@/shadcn/components/ui/switch";
 import { cn } from "@/shadcn/lib/utils";
-import { Edit2, Eye, TagIcon, X } from "lucide-react";
+import { Circle, CircleDashed, Edit2, TagIcon, X } from "lucide-react";
 
 interface SheetHeaderProps {
   mode: TagEditMode;
@@ -48,6 +49,8 @@ export function SheetHeader({
   const title =
     textMap[mode][editingMode !== "view" ? "edit-title" : "view-title"];
   const selection = textMap[mode]["selection"];
+
+  const isOpaque = opacity > 50;
 
   return (
     <div
@@ -106,29 +109,35 @@ export function SheetHeader({
         ))}
       </div>
 
-      {/* 透過スライダー */}
-      <div
-        className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-border/40 flex-1 max-w-[120px] ml-auto"
-        style={{
-          backgroundColor: `color-mix(in oklch, var(--muted) 5%, transparent)`,
-        }}
-      >
-        <Eye size={12} className="text-muted-foreground/60 shrink-0" />
-        <Slider
-          value={[opacity]}
-          min={0}
-          max={100}
-          onValueChange={(vals) => onOpacityChange(vals[0])}
-          className={cn(
-            "flex-1 cursor-pointer",
-            "[&_[data-slot=slider-track]]:bg-muted/30",
-            "[&_[data-slot=slider-range]]:bg-transparent",
-            "[&_[data-slot=slider-thumb]]:size-3 [&_[data-slot=slider-thumb]]:bg-muted-foreground/80 [&_[data-slot=slider-thumb]]:border-none"
-          )}
+      {/* 透過スイッチ */}
+      <div className="flex items-center gap-3 ml-auto">
+        <div className="flex items-center gap-2.5">
+          <Label
+            htmlFor="opacity-switch"
+            className={cn(
+              "flex items-center gap-2 cursor-pointer transition-colors",
+              isOpaque ? "text-foreground" : "text-muted-foreground/80"
+            )}
+          >
+            {isOpaque ? (
+              <Circle className="size-3.5 fill-current text-sky-500" />
+            ) : (
+              <CircleDashed className="size-3.5 text-muted-foreground/60" />
+            )}
+            <span className="text-[11px] font-medium leading-none select-none">
+              {isOpaque ? "不透明" : "半透明"}
+            </span>
+          </Label>
+        </div>
+
+        <Switch
+          id="opacity-switch"
+          checked={isOpaque}
+          onCheckedChange={(checked) => {
+            onOpacityChange(checked ? 100 : 50);
+          }}
+          className={cn("scale-90", "data-[state=checked]:bg-sky-600")}
         />
-        <span className="text-[9px] font-mono text-muted-foreground/80 tabular-nums shrink-0">
-          {opacity}
-        </span>
       </div>
 
       {/* 閉じるボタン */}
