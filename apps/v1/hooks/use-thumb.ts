@@ -1,7 +1,7 @@
 "use client";
 
 import { enqueueThumbJob } from "@/actions/thumb-actions";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 export function useThumb() {
   // サムネイル作成リクエスト送信
@@ -9,10 +9,7 @@ export function useThumb() {
     await enqueueThumbJob(path);
   }, []);
 
-  return useMemo(
-    () => ({
-      sendCreateThumbRequest,
-    }),
-    [sendCreateThumbRequest]
-  );
+  return {
+    sendCreateThumbRequest,
+  };
 }

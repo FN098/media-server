@@ -1,14 +1,12 @@
 "use client";
 
 import { useSelection } from "@/hooks/use-selection";
-import { PathType } from "@/lib/path/types";
 
-export function usePathSelection(initialSelectedPaths?: Iterable<PathType>) {
+export function usePathSelection(initialSelectedPaths?: Iterable<string>) {
   const {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-
     selectedCount,
     selectedKeys,
     isSelected,
@@ -20,16 +18,14 @@ export function usePathSelection(initialSelectedPaths?: Iterable<PathType>) {
     addKeys,
     deleteKeys,
     replaceSelection,
-
     lastSelectedKey,
     setLastSelectedKey,
-  } = useSelection<PathType>(initialSelectedPaths);
+  } = useSelection<string>(initialSelectedPaths);
 
   return {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-
     selectedCount,
     selectedPaths: selectedKeys,
     isSelectedPath: isSelected,
@@ -41,7 +37,6 @@ export function usePathSelection(initialSelectedPaths?: Iterable<PathType>) {
     addPaths: addKeys,
     deletePaths: deleteKeys,
     replaceSelection,
-
     lastSelectedPath: lastSelectedKey,
     setLastSelectedPath: setLastSelectedKey,
   };

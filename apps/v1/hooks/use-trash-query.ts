@@ -1,51 +1,59 @@
 "use client";
 
 import {
-  useExplorerQuery,
-  useNormalizeExplorerQuery,
+  ExplorerQuery,
+  ExplorerQueryOptions,
+  explorerQuerySchema,
 } from "@/hooks/use-explorer-query";
 import { encodePath } from "@/lib/path/encoder";
 import { getClientTrashPath } from "@/lib/path/helpers";
 import { overrideSearchParams } from "@/lib/query/search-params";
-import type { ExplorerQuery, SetExplorerQueryOptions } from "@/lib/query/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-const useNormalizeTrashQuery = useNormalizeExplorerQuery;
-const useTrashQuery = useExplorerQuery;
-
-export { useNormalizeTrashQuery, useTrashQuery };
-
-export function useSetTrashQuery() {
+export function useTrashQuery() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const current = useExplorerQuery();
 
-  return useCallback(
-    (
-      partial: Partial<ExplorerQuery>,
-      options: SetExplorerQueryOptions = {}
-    ) => {
-      const merged: ExplorerQuery = {
-        ...current,
-        ...partial,
-      };
+  const params = Object.fromEntries(searchParams);
+  const explorerQuery = explorerQuerySchema.parse(params);
 
-      const search = overrideSearchParams(merged, searchParams).toString();
+  const setExplorerQuery = useCallback(
+    (query: Partial<ExplorerQuery>, options: ExplorerQueryOptions = {}) => {
+      const parsed = explorerQuerySchema.parse(query);
 
+      // 既存のパラメータに新しい値をマージ
+      const search = overrideSearchParams(parsed, searchParams).toString();
+
+      // ベースパスの決定
       const basePath = options.path
-        ? getClientTrashPath(encodePath(options.path)) // Changed line
+        ? getClientTrashPath(encodePath(options.path)) // ★ ここが違う
         : pathname;
 
-      const url = search ? `${basePath}?${search}` : basePath;
+      // 遷移先のフルURLを作成
+      const nextUrl = search ? `${basePath}?${search}` : basePath;
+
+      // 現在のフルURLを作成（比較用）
+      const currentSearch = searchParams.toString();
+      const currentUrl = currentSearch
+        ? `${pathname}?${currentSearch}`
+        : pathname;
+
+      // URLが変わらなければ何もしない
+      if (nextUrl === currentUrl) return;
 
       if (options.history === "push") {
-        router.push(url);
+        router.push(nextUrl, { scroll: false });
       } else {
-        router.replace(url);
+        router.replace(nextUrl, { scroll: false });
       }
     },
-    [current, pathname, router, searchParams]
+    [pathname, router, searchParams]
   );
+
+  return {
+    explorerQuery,
+    setExplorerQuery,
+  };
 }
