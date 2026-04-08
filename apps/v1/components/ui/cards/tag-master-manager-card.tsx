@@ -200,7 +200,7 @@ export function TagMasterManagerCard() {
               タグマスター管理
             </CardTitle>
             <CardDescription>
-              読み順（五十音順）で表示されます。ピン留めして優先表示も可能です。
+              カナ順（五十音順）で表示されます。ピン留めして優先表示も可能です。
             </CardDescription>
           </div>
 
