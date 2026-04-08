@@ -11,8 +11,8 @@ import { FolderNavigation } from "@/components/ui/navigations/folder-navigation"
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
+import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import { useTagFilter } from "@/hooks/use-tag-filter";
-import { useTrashQuery } from "@/hooks/use-trash-query";
 import { createSearchFilter, createTagFilter } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
 import {
@@ -55,7 +55,7 @@ export function Trash() {
   // ===== URL ステート =====
 
   // URLファーストのステート管理
-  const { explorerQuery, setExplorerQuery } = useTrashQuery();
+  const { explorerQuery, setExplorerQuery } = useExplorerQuery();
   const { view, q, at, modal } = explorerQuery; // URL
   const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
   const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
@@ -73,10 +73,15 @@ export function Trash() {
       query.trim() !== (q || "") || viewMode !== (view || "grid");
 
     if (hasChanged) {
-      setExplorerQuery({
-        q: query.trim() === "" ? undefined : query,
-        view: viewMode === "grid" ? undefined : viewMode,
-      });
+      setExplorerQuery(
+        {
+          q: query.trim() === "" ? undefined : query,
+          view: viewMode === "grid" ? undefined : viewMode,
+        },
+        {
+          deleted: true,
+        }
+      );
     }
   }, [setExplorerQuery, query, viewMode, q, view]);
 

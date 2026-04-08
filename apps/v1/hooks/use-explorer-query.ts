@@ -1,7 +1,7 @@
 "use client";
 
 import { encodePath } from "@/lib/path/encoder";
-import { getClientExplorerPath } from "@/lib/path/helpers";
+import { getClientExplorerPath, getClientTrashPath } from "@/lib/path/helpers";
 import { overrideSearchParams } from "@/lib/query/search-params";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
@@ -30,6 +30,7 @@ export type ExplorerQuery = z.infer<typeof explorerQuerySchema>;
 export type ExplorerQueryOptions = {
   history?: "replace" | "push";
   path?: string;
+  deleted?: boolean;
 };
 
 export function useExplorerQuery() {
@@ -42,15 +43,14 @@ export function useExplorerQuery() {
 
   const setExplorerQuery = useCallback(
     (query: Partial<ExplorerQuery>, options: ExplorerQueryOptions = {}) => {
+      debugger;
       const parsed = explorerQuerySchema.parse(query);
 
       // 既存のパラメータに新しい値をマージ
       const search = overrideSearchParams(parsed, searchParams).toString();
 
       // ベースパスの決定
-      const basePath = options.path
-        ? getClientExplorerPath(encodePath(options.path))
-        : pathname;
+      const basePath = resolveClientPath(options) || pathname;
 
       // 遷移先のフルURLを作成
       const nextUrl = search ? `${basePath}?${search}` : basePath;
@@ -77,4 +77,14 @@ export function useExplorerQuery() {
     explorerQuery,
     setExplorerQuery,
   };
+}
+
+function resolveClientPath(options: ExplorerQueryOptions) {
+  if (!options.path) return null;
+
+  const encoded = encodePath(options.path);
+
+  if (options.deleted) return getClientTrashPath(encoded);
+
+  return getClientExplorerPath(encoded);
 }

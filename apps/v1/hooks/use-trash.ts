@@ -1,27 +1,27 @@
 "use client";
 
-import { useTrashQuery } from "@/hooks/use-trash-query";
+import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import { MediaListing } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { useCallback } from "react";
 
 export function useTrash(listing: MediaListing) {
-  const { setExplorerQuery } = useTrashQuery();
+  const { setExplorerQuery } = useExplorerQuery();
 
   const openViewer = useCallback(
     (at: IndexLike) => {
-      setExplorerQuery({ modal: true, at }, { history: "push" });
+      setExplorerQuery({ modal: true, at }, { history: "push", deleted: true });
     },
     [setExplorerQuery]
   );
 
   const closeViewer = useCallback(() => {
-    setExplorerQuery({}, { history: "push" });
+    setExplorerQuery({}, { history: "push", deleted: true });
   }, [setExplorerQuery]);
 
   const openFolder = useCallback(
     (path: string, at?: IndexLike) => {
-      setExplorerQuery({ at }, { path, history: "push" });
+      setExplorerQuery({ at }, { path, history: "push", deleted: true });
     },
     [setExplorerQuery]
   );
