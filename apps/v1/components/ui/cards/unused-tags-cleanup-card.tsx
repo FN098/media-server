@@ -188,7 +188,7 @@ export function UnusedTagsCleanupCard({
             disabled={isPending}
             className="flex-1"
           >
-            再スキャン
+            {!hasScanned ? "スキャン" : "再スキャン"}
           </Button>
 
           <AlertDialog>
