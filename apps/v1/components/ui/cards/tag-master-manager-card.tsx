@@ -66,6 +66,8 @@ export type TagItem = {
   _count: { mediaTags: number };
 };
 
+const GRID_STYLE = "grid grid-cols-[50px_2fr_2fr_80px_100px]";
+
 export function TagMasterManagerCard() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = React.useState("");
@@ -123,10 +125,18 @@ export function TagMasterManagerCard() {
     onError: () => toast.error("更新に失敗しました"),
   });
 
-  // ミューテーション: 名前更新
-  const { mutate: updateTag, isPending: isUpdating } = useMutation({
-    mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      const res = await renameTagAction(id, name);
+  // ミューテーション: リネーム
+  const { mutate: renameTag, isPending: isUpdating } = useMutation({
+    mutationFn: async ({
+      id,
+      name,
+      kana,
+    }: {
+      id: string;
+      name: string;
+      kana?: string;
+    }) => {
+      const res = await renameTagAction(id, name, kana);
       if (!res.success) throw new Error(res.error);
       return res;
     },
@@ -159,7 +169,7 @@ export function TagMasterManagerCard() {
 
   const handleSaveEdit = (id: string) => {
     if (!editValue.name.trim()) return toast.error("名前は必須です");
-    updateTag({ id, ...editValue });
+    renameTag({ id, ...editValue });
   };
 
   return (
@@ -191,21 +201,19 @@ export function TagMasterManagerCard() {
         <div className="border rounded-lg overflow-hidden bg-background">
           {/* 固定ヘッダー */}
           <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow className="flex w-full">
-                <TableHead className="w-[50px] flex items-center justify-center">
+            <TableHeader className="bg-muted/50 sticky top-0 z-10">
+              <TableRow className={`${GRID_STYLE} w-full border-b-0`}>
+                <TableHead className="flex items-center justify-center">
                   固定
                 </TableHead>
-                <TableHead className="flex-[2] flex items-center">
-                  タグ名
-                </TableHead>
-                <TableHead className="flex-[2] flex items-center">
+                <TableHead className="flex items-center">タグ名</TableHead>
+                <TableHead className="flex items-center">
                   読み（カナ）
                 </TableHead>
-                <TableHead className="w-[80px] flex items-center justify-center">
+                <TableHead className="flex items-center justify-center">
                   使用数
                 </TableHead>
-                <TableHead className="w-[150px] flex items-center justify-end pr-4">
+                <TableHead className="flex items-center justify-end pr-4">
                   操作
                 </TableHead>
               </TableRow>
@@ -230,14 +238,14 @@ export function TagMasterManagerCard() {
                   return (
                     <TableRow
                       key={virtualRow.key}
-                      className={`group absolute w-full flex items-center border-b hover:bg-muted/30 ${tag.isFavorite ? "bg-yellow-50/30" : ""}`}
+                      className={`${GRID_STYLE} group absolute w-full items-center border-b hover:bg-muted/30`}
                       style={{
                         height: `${virtualRow.size}px`,
                         transform: `translateY(${virtualRow.start}px)`,
                       }}
                     >
                       {/* お気に入り */}
-                      <TableCell className="w-[50px] flex justify-center">
+                      <TableCell className="flex justify-center">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -256,7 +264,7 @@ export function TagMasterManagerCard() {
                       </TableCell>
 
                       {/* タグ名 */}
-                      <TableCell className="flex-[2] min-w-0 font-medium">
+                      <TableCell className="min-w-0 font-medium">
                         {editingId === tag.id ? (
                           <Input
                             value={editValue.name}
@@ -274,7 +282,7 @@ export function TagMasterManagerCard() {
                       </TableCell>
 
                       {/* 読み（カナ） */}
-                      <TableCell className="flex-[2] min-w-0 text-muted-foreground">
+                      <TableCell className="min-w-0 text-muted-foreground">
                         {editingId === tag.id ? (
                           <Input
                             value={editValue.kana}
@@ -293,7 +301,7 @@ export function TagMasterManagerCard() {
                       </TableCell>
 
                       {/* 使用数 */}
-                      <TableCell className="w-[80px] flex justify-center">
+                      <TableCell className="flex justify-center">
                         <Badge
                           variant="outline"
                           className="font-mono text-[10px]"
@@ -303,7 +311,7 @@ export function TagMasterManagerCard() {
                       </TableCell>
 
                       {/* アクション */}
-                      <TableCell className="w-[100px] flex justify-end gap-1 pr-4">
+                      <TableCell className="flex justify-end gap-1 pr-4">
                         {editingId === tag.id ? (
                           <>
                             {/* 変更確定ボタン */}

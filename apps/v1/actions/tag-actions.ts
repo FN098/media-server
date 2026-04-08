@@ -271,12 +271,16 @@ export async function updateTagFavoriteAction(id: string, isFavorite: boolean) {
   }
 }
 
-export async function renameTagAction(id: string, newName: string) {
+export async function renameTagAction(
+  id: string,
+  newName: string,
+  newKana?: string
+) {
   try {
     const normalizedName = normalizeTagName(newName);
     if (!normalizedName) throw new Error("Invalid name");
 
-    const kana = await generateKana(normalizedName);
+    const kana = newKana || (await generateKana(normalizedName));
 
     const tag = await prisma.tag.update({
       where: { id },
