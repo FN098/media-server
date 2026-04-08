@@ -93,7 +93,10 @@ export default async function TrashPage(props: TrashPageProps) {
 
   const listing = {
     ...fsListing,
-    nodes: withDeleted(formatted),
+    nodes: formatted.map((n) => ({
+      ...n,
+      isDeleted: true,
+    })),
   };
 
   return (
@@ -106,8 +109,3 @@ export default async function TrashPage(props: TrashPageProps) {
     </TrashProvider>
   );
 }
-
-const withDeleted = <T extends object>(n: T): T & { isDeleted: true } => ({
-  ...n,
-  isDeleted: true,
-});
