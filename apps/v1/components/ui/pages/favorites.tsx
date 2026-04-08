@@ -435,12 +435,6 @@ export function Favorites() {
                 label: "登録日が新しい順",
                 icon: CalendarArrowDown,
               },
-              {
-                key: "mtime",
-                direction: "desc",
-                label: "更新日が新しい順",
-                icon: CalendarArrowDown,
-              },
             ]}
           />
 
