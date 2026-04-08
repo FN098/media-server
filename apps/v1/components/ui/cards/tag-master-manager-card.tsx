@@ -46,7 +46,6 @@ import {
   Edit2,
   Loader2,
   Search,
-  Sparkles,
   Star,
   Tags,
   Trash2,
@@ -65,8 +64,6 @@ export type TagItem = {
   isNew: boolean;
   _count: { mediaTags: number };
 };
-
-const GRID_STYLE = "grid grid-cols-[50px_2fr_2fr_80px_100px]";
 
 export function TagMasterManagerCard() {
   const queryClient = useQueryClient();
@@ -190,65 +187,60 @@ export function TagMasterManagerCard() {
   };
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-md border-muted/60">
       <CardHeader className="pb-4 space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          {/* タイトル＋説明 */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
-            <CardTitle className="flex items-center gap-2 text-primary">
-              <Tags className="w-5 h-5" />
+            <CardTitle className="flex items-center gap-2 text-primary text-xl">
+              <Tags className="w-6 h-6" />
               タグマスター管理
             </CardTitle>
             <CardDescription>
-              カナ順（五十音順）で表示されます。ピン留めして優先表示も可能です。
+              五十音順で表示。ピン留めや検索、一括既読管理が可能です。
             </CardDescription>
           </div>
 
-          {/* すべて既読にするボタン */}
+          {/* 既読ボタン */}
           <Button
-            variant="outline"
+            variant={hasNewTags ? "default" : "secondary"}
             size="sm"
             className={cn(
-              "flex items-center gap-2 h-9 border-dashed transition-all",
-              hasNewTags
-                ? "border-dashed hover:border-primary hover:text-primary hover:bg-primary/5"
-                : "bg-muted/30 text-muted-foreground border-none opacity-70"
+              "transition-all shrink-0",
+              hasNewTags ? "shadow-sm" : "opacity-60"
             )}
             onClick={() => hasNewTags && markAllAsRead()}
             disabled={isMarking || !hasNewTags}
           >
             {isMarking ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : hasNewTags ? (
-              <CheckCheck className="h-4 w-4" />
+              <CheckCheck className="h-4 w-4 mr-2" />
             ) : (
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4 mr-2" />
             )}
-            <span className="font-medium">
-              {hasNewTags
-                ? `未読 ${newTagsCount} 件を既読にする`
-                : "すべて既読済み"}
+            <span className="font-semibold">
+              {hasNewTags ? `${newTagsCount} 件を既読にする` : "すべて既読済み"}
             </span>
           </Button>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
           {/* 検索バー */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="タグ名または読みで検索..."
-              className="pl-9 h-10 bg-muted/5 border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/50"
+              className="pl-9 h-11 bg-muted/20 border-muted focus-visible:ring-primary/30"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             />
           </div>
 
-          {/* 新規のみスイッチ */}
-          <div className="flex items-center justify-between sm:justify-start gap-3 border rounded-md px-3 h-10 bg-background shadow-sm min-w-[130px]">
+          {/* スイッチ類 */}
+          <div className="flex items-center gap-3 border rounded-lg px-4 h-11 bg-card shadow-sm shrink-0">
             <Label
               htmlFor="new-only"
-              className="text-xs font-medium cursor-pointer whitespace-nowrap text-muted-foreground"
+              className="text-sm font-medium cursor-pointer text-muted-foreground"
             >
               新規のみ
             </Label>
@@ -261,34 +253,26 @@ export function TagMasterManagerCard() {
         </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="border rounded-lg overflow-hidden bg-background">
-          {/* 固定ヘッダー */}
-          <Table>
-            <TableHeader className="bg-muted/50 sticky top-0 z-10">
-              <TableRow className={cn(GRID_STYLE, "w-full border-b-0")}>
-                <TableHead className="flex items-center justify-center">
-                  固定
-                </TableHead>
-                <TableHead className="flex items-center">タグ名</TableHead>
-                <TableHead className="flex items-center">
-                  読み（カナ）
-                </TableHead>
-                <TableHead className="flex items-center justify-center">
-                  使用数
-                </TableHead>
-                <TableHead className="flex items-center justify-end pr-4">
-                  操作
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-          </Table>
-
+      <CardContent className="p-0 sm:p-6 sm:pt-0">
+        <div className="border sm:rounded-lg overflow-hidden bg-background">
+          {/* スクロールコンテナ */}
           <div
             ref={parentRef}
-            className="h-[500px] overflow-y-auto relative scrollbar-thin"
+            className="h-[600px] overflow-auto scrollbar-thin"
           >
-            <Table noWrapper>
+            <Table className="relative table-fixed w-full">
+              <TableHeader className="sticky top-0 z-20 bg-muted/90 backdrop-blur-sm shadow-sm">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[60px] text-center">固定</TableHead>
+                  <TableHead className="w-[40%]">タグ名</TableHead>
+                  <TableHead className="w-[25%]">カナ</TableHead>
+                  <TableHead className="w-[100px]">使用数</TableHead>
+                  <TableHead className="w-[120px] text-right pr-6">
+                    操作
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
               <TableBody
                 style={{
                   height: `${virtualizer.getTotalSize()}px`,
@@ -303,9 +287,8 @@ export function TagMasterManagerCard() {
                     <TableRow
                       key={virtualRow.key}
                       className={cn(
-                        GRID_STYLE,
-                        "group absolute w-full items-center border-b hover:bg-muted/30",
-                        "has-[:focus]:opacity-100"
+                        "group absolute w-full flex items-center border-b transition-colors hover:bg-muted/40",
+                        tag.isNew && "bg-yellow-50/30"
                       )}
                       style={{
                         height: `${virtualRow.size}px`,
@@ -313,14 +296,14 @@ export function TagMasterManagerCard() {
                       }}
                     >
                       {/* お気に入り */}
-                      <TableCell className="flex justify-center">
+                      <TableCell className="w-[60px] flex justify-center">
                         <Button
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            "h-8 w-8",
+                            "h-9 w-9 rounded-full",
                             tag.isFavorite
-                              ? "text-yellow-500"
+                              ? "text-yellow-500 hover:text-yellow-300"
                               : "text-muted-foreground/30 hover:text-yellow-500"
                           )}
                           onClick={() =>
@@ -332,17 +315,18 @@ export function TagMasterManagerCard() {
                         >
                           <Star
                             className={cn(
-                              "h-4 w-4",
-                              tag.isFavorite ? "fill-current" : ""
+                              "h-5 w-5",
+                              tag.isFavorite && "fill-current"
                             )}
                           />
                         </Button>
                       </TableCell>
 
                       {/* タグ名 */}
-                      <TableCell className="min-w-0 font-medium">
+                      <TableCell className="w-[40%] overflow-hidden">
                         {editingId === tag.id ? (
                           <Input
+                            autoFocus
                             value={editValue.name}
                             onChange={(e) =>
                               setEditValue((prev) => ({
@@ -350,23 +334,24 @@ export function TagMasterManagerCard() {
                                 name: e.target.value,
                               }))
                             }
-                            className="h-8"
+                            className="h-9"
                           />
                         ) : (
-                          <div className="flex items-center gap-2 overflow-hidden">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium truncate">
+                              {tag.name}
+                            </span>
                             {tag.isNew && (
-                              <div className="flex items-center gap-1 bg-yellow-500 text-black font-bold px-2 py-0.5 rounded-sm text-[10px] shadow-sm animate-pulse w-fit">
-                                <Sparkles size={8} fill="currentColor" />
-                                <span>NEW</span>
-                              </div>
+                              <Badge className="bg-yellow-400 hover:bg-yellow-400 text-black text-[10px] px-1.5 py-0 h-5 border-none">
+                                NEW
+                              </Badge>
                             )}
-                            <span className="truncate">{tag.name}</span>
                           </div>
                         )}
                       </TableCell>
 
-                      {/* 読み（カナ） */}
-                      <TableCell className="min-w-0 text-muted-foreground">
+                      {/* カナ */}
+                      <TableCell className="w-[25%]">
                         {editingId === tag.id ? (
                           <Input
                             value={editValue.kana}
@@ -376,35 +361,31 @@ export function TagMasterManagerCard() {
                                 kana: e.target.value,
                               }))
                             }
-                            className="h-8"
-                            placeholder="自動生成中..."
+                            className="h-9 text-xs"
                           />
                         ) : (
-                          <span className="text-xs">{tag.kana || "---"}</span>
+                          <span className="text-xs text-muted-foreground truncate block">
+                            {tag.kana || "---"}
+                          </span>
                         )}
                       </TableCell>
 
                       {/* 使用数 */}
-                      <TableCell className="flex justify-center">
-                        <Badge
-                          variant="outline"
-                          className="font-mono text-[10px]"
-                        >
-                          {tag._count.mediaTags}
-                        </Badge>
+                      <TableCell className="w-[100px]">
+                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full border text-[11px] font-mono bg-muted/30">
+                          {tag._count.mediaTags.toLocaleString()}
+                        </div>
                       </TableCell>
 
-                      {/* アクション */}
-                      <TableCell className="flex justify-end gap-1 pr-4">
+                      {/* 操作 */}
+                      <TableCell className="w-[120px] ml-auto flex justify-end pr-4">
                         {editingId === tag.id ? (
-                          <>
-                            {/* 変更確定ボタン */}
+                          <div className="flex gap-1">
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-8 w-8 text-green-600"
+                              className="h-8 w-8 text-green-600 hover:bg-green-50"
                               onClick={() => handleSaveEdit(tag.id)}
-                              disabled={isUpdating}
                             >
                               {isUpdating ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -412,30 +393,25 @@ export function TagMasterManagerCard() {
                                 <Check className="h-4 w-4" />
                               )}
                             </Button>
-
-                            {/* 変更キャンセルボタン */}
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-8 w-8 text-destructive"
+                              className="h-8 w-8 text-destructive hover:bg-red-50"
                               onClick={() => setEditingId(null)}
                             >
                               <X className="h-4 w-4" />
                             </Button>
-                          </>
+                          </div>
                         ) : (
-                          <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
-                            {/* 編集ボタン */}
+                          <div className="flex opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity gap-1">
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-8 w-8"
+                              className="h-9 w-9"
                               onClick={() => handleStartEdit(tag)}
                             >
                               <Edit2 className="h-4 w-4" />
                             </Button>
-
-                            {/* 削除ボタン */}
                             <TagDeleteButton
                               tagName={tag.name}
                               mediaCount={tag._count.mediaTags}
@@ -455,6 +431,264 @@ export function TagMasterManagerCard() {
       </CardContent>
     </Card>
   );
+
+  // return (
+  //   <Card className="shadow-sm">
+  //     <CardHeader className="pb-4 space-y-4">
+  //       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+  //         {/* タイトル＋説明 */}
+  //         <div className="space-y-1">
+  //           <CardTitle className="flex items-center gap-2 text-primary">
+  //             <Tags className="w-5 h-5" />
+  //             タグマスター管理
+  //           </CardTitle>
+  //           <CardDescription>
+  //             カナ順（五十音順）で表示されます。ピン留めして優先表示も可能です。
+  //           </CardDescription>
+  //         </div>
+
+  //         {/* すべて既読にするボタン */}
+  //         <Button
+  //           variant="outline"
+  //           size="sm"
+  //           className={cn(
+  //             "flex items-center gap-2 h-9 border-dashed transition-all",
+  //             hasNewTags
+  //               ? "border-dashed hover:border-primary hover:text-primary hover:bg-primary/5"
+  //               : "bg-muted/30 text-muted-foreground border-none opacity-70"
+  //           )}
+  //           onClick={() => hasNewTags && markAllAsRead()}
+  //           disabled={isMarking || !hasNewTags}
+  //         >
+  //           {isMarking ? (
+  //             <Loader2 className="h-4 w-4 animate-spin" />
+  //           ) : hasNewTags ? (
+  //             <CheckCheck className="h-4 w-4" />
+  //           ) : (
+  //             <Check className="h-4 w-4" />
+  //           )}
+  //           <span className="font-medium">
+  //             {hasNewTags
+  //               ? `未読 ${newTagsCount} 件を既読にする`
+  //               : "すべて既読済み"}
+  //           </span>
+  //         </Button>
+  //       </div>
+
+  //       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+  //         {/* 検索バー */}
+  //         <div className="relative flex-1">
+  //           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+  //           <Input
+  //             placeholder="タグ名または読みで検索..."
+  //             className="pl-9 h-10 bg-muted/5 border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/50"
+  //             value={filter}
+  //             onChange={(e) => setFilter(e.target.value)}
+  //           />
+  //         </div>
+
+  //         {/* 新規のみスイッチ */}
+  //         <div className="flex items-center sm:justify-start gap-3 border rounded-md px-3 h-10 bg-background shadow-sm min-w-[130px]">
+  //           <Label
+  //             htmlFor="new-only"
+  //             className="text-xs font-medium cursor-pointer whitespace-nowrap text-muted-foreground"
+  //           >
+  //             新規のみ
+  //           </Label>
+  //           <Switch
+  //             id="new-only"
+  //             checked={showNewOnly}
+  //             onCheckedChange={setShowNewOnly}
+  //           />
+  //         </div>
+  //       </div>
+  //     </CardHeader>
+
+  //     <CardContent>
+  //       <div className="border rounded-lg overflow-auto bg-background scrollbar-thin">
+  //         {/* 固定ヘッダー */}
+  //         <Table>
+  //           <TableHeader className="bg-muted/50 sticky top-0 z-10">
+  //             <TableRow className={cn("w-full border-b-0")}>
+  //               <TableHead>固定</TableHead>
+  //               <TableHead>タグ名</TableHead>
+  //               <TableHead>カナ</TableHead>
+  //               <TableHead>使用数</TableHead>
+  //               <TableHead>操作</TableHead>
+  //             </TableRow>
+  //           </TableHeader>
+  //         </Table>
+
+  //         <div
+  //           ref={parentRef}
+  //           className="h-[500px] overflow-y-auto relative scrollbar-thin"
+  //         >
+  //           <Table>
+  //             <TableBody
+  //               style={{
+  //                 height: `${virtualizer.getTotalSize()}px`,
+  //                 position: "relative",
+  //               }}
+  //             >
+  //               {virtualizer.getVirtualItems().map((virtualRow) => {
+  //                 const tag = allTags[virtualRow.index];
+  //                 if (!tag) return null;
+
+  //                 return (
+  //                   <TableRow
+  //                     key={virtualRow.key}
+  //                     className={cn(
+  //                       "group absolute w-full items-center border-b hover:bg-muted/30",
+  //                       "has-[:focus]:opacity-100"
+  //                     )}
+  //                     style={{
+  //                       height: `${virtualRow.size}px`,
+  //                       transform: `translateY(${virtualRow.start}px)`,
+  //                     }}
+  //                   >
+  //                     {/* お気に入り */}
+  //                     <TableCell>
+  //                       <Button
+  //                         variant="ghost"
+  //                         size="icon"
+  //                         className={cn(
+  //                           "h-8 w-8",
+  //                           tag.isFavorite
+  //                             ? "text-yellow-500"
+  //                             : "text-muted-foreground/30 hover:text-yellow-500"
+  //                         )}
+  //                         onClick={() =>
+  //                           toggleFavorite({
+  //                             id: tag.id,
+  //                             isFavorite: !tag.isFavorite,
+  //                           })
+  //                         }
+  //                       >
+  //                         <Star
+  //                           className={cn(
+  //                             "h-4 w-4",
+  //                             tag.isFavorite ? "fill-current" : ""
+  //                           )}
+  //                         />
+  //                       </Button>
+  //                     </TableCell>
+
+  //                     {/* タグ名 */}
+  //                     <TableCell>
+  //                       {editingId === tag.id ? (
+  //                         <Input
+  //                           value={editValue.name}
+  //                           onChange={(e) =>
+  //                             setEditValue((prev) => ({
+  //                               ...prev,
+  //                               name: e.target.value,
+  //                             }))
+  //                           }
+  //                           className="h-8"
+  //                         />
+  //                       ) : (
+  //                         <div className="flex items-center gap-2 overflow-hidden">
+  //                           {tag.isNew && (
+  //                             <div className="flex items-center gap-1 bg-yellow-500 text-black font-bold px-2 py-0.5 rounded-sm text-[10px] shadow-sm animate-pulse w-fit">
+  //                               <Sparkles size={8} fill="currentColor" />
+  //                               <span>NEW</span>
+  //                             </div>
+  //                           )}
+  //                           <span className="truncate">{tag.name}</span>
+  //                         </div>
+  //                       )}
+  //                     </TableCell>
+
+  //                     {/* カナ */}
+  //                     <TableCell className="text-muted-foreground">
+  //                       {editingId === tag.id ? (
+  //                         <Input
+  //                           value={editValue.kana}
+  //                           onChange={(e) =>
+  //                             setEditValue((prev) => ({
+  //                               ...prev,
+  //                               kana: e.target.value,
+  //                             }))
+  //                           }
+  //                           className="h-8"
+  //                           placeholder="自動生成中..."
+  //                         />
+  //                       ) : (
+  //                         <span className="text-xs">{tag.kana || "---"}</span>
+  //                       )}
+  //                     </TableCell>
+
+  //                     {/* 使用数 */}
+  //                     <TableCell>
+  //                       <Badge
+  //                         variant="outline"
+  //                         className="font-mono text-[10px]"
+  //                       >
+  //                         {tag._count.mediaTags}
+  //                       </Badge>
+  //                     </TableCell>
+
+  //                     {/* アクション */}
+  //                     <TableCell>
+  //                       {editingId === tag.id ? (
+  //                         <>
+  //                           {/* 変更確定ボタン */}
+  //                           <Button
+  //                             size="icon"
+  //                             variant="ghost"
+  //                             className="h-8 w-8 text-green-600"
+  //                             onClick={() => handleSaveEdit(tag.id)}
+  //                             disabled={isUpdating}
+  //                           >
+  //                             {isUpdating ? (
+  //                               <Loader2 className="h-4 w-4 animate-spin" />
+  //                             ) : (
+  //                               <Check className="h-4 w-4" />
+  //                             )}
+  //                           </Button>
+
+  //                           {/* 変更キャンセルボタン */}
+  //                           <Button
+  //                             size="icon"
+  //                             variant="ghost"
+  //                             className="h-8 w-8 text-destructive"
+  //                             onClick={() => setEditingId(null)}
+  //                           >
+  //                             <X className="h-4 w-4" />
+  //                           </Button>
+  //                         </>
+  //                       ) : (
+  //                         <div className="flex opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+  //                           {/* 編集ボタン */}
+  //                           <Button
+  //                             size="icon"
+  //                             variant="ghost"
+  //                             className="h-8 w-8"
+  //                             onClick={() => handleStartEdit(tag)}
+  //                           >
+  //                             <Edit2 className="h-4 w-4" />
+  //                           </Button>
+
+  //                           {/* 削除ボタン */}
+  //                           <TagDeleteButton
+  //                             tagName={tag.name}
+  //                             mediaCount={tag._count.mediaTags}
+  //                             onDelete={() => performDelete(tag.id)}
+  //                             isDeleting={isDeleting}
+  //                           />
+  //                         </div>
+  //                       )}
+  //                     </TableCell>
+  //                   </TableRow>
+  //                 );
+  //               })}
+  //             </TableBody>
+  //           </Table>
+  //         </div>
+  //       </div>
+  //     </CardContent>
+  //   </Card>
+  // );
 }
 
 function TagDeleteButton({
@@ -483,10 +717,7 @@ function TagDeleteButton({
           variant="ghost"
           disabled={isDeleting}
           className={cn(
-            "h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity",
-            open
-              ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100 focus:opacity-100"
+            "h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           )}
         >
           {isDeleting ? (

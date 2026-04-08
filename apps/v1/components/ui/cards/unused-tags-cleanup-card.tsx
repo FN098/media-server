@@ -120,17 +120,19 @@ export function UnusedTagsCleanupCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* ステータス & テーブルエリア */}
+        {/* <div className="flex items-center h-10 px-3 border rounded bg-muted/20 text-sm">
+          {!hasScanned ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+            </div> */}
         <div className="border rounded-md bg-muted/10 overflow-hidden">
           {!hasScanned ? (
-            <div className="h-[200px] flex flex-col items-center justify-center text-sm text-muted-foreground gap-2">
+            <div className="h-[200px] flex items-center justify-center text-sm text-muted-foreground gap-2">
               {isPending ? (
                 <Loader2 className="animate-spin" />
               ) : (
                 <Search className="w-5 h-5" />
               )}
-              {isPending
-                ? "スキャン中..."
-                : "スキャンを実行して未使用タグを確認"}
+              {isPending ? "スキャン中..." : "スキャンしてください"}
             </div>
           ) : tags.length > 0 ? (
             <div className="max-h-[300px] overflow-y-auto border-t">
@@ -148,9 +150,6 @@ export function UnusedTagsCleanupCard({
                     <TableHead className="sticky top-0 bg-background z-10 shadow-[sm]">
                       タグ名
                     </TableHead>
-                    <TableHead className="text-right sticky top-0 bg-background z-10 shadow-[sm]">
-                      ID
-                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -163,9 +162,6 @@ export function UnusedTagsCleanupCard({
                         />
                       </TableCell>
                       <TableCell className="font-medium">{tag.name}</TableCell>
-                      <TableCell className="text-right text-xs text-muted-foreground font-mono">
-                        {tag.id.split("-")[0]}...
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -205,7 +201,7 @@ export function UnusedTagsCleanupCard({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>タグの削除</AlertDialogTitle>
+                <AlertDialogTitle>本当に削除しますか？</AlertDialogTitle>
                 <AlertDialogDescription>
                   選択された {selectedIds.size} 件のタグを完全に削除します。
                   この操作は元に戻せませんが、よろしいですか？

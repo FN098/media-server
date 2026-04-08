@@ -162,29 +162,10 @@ export function GhostMediaCleanupCard({
   return (
     <Card className="border-destructive/50">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <Trash2 className="w-5 h-5" />
-            ゴーストデータ削除
-          </CardTitle>
-          <div className="flex items-center gap-2 border p-2 rounded-md bg-muted/50">
-            <Switch
-              id="scan-mode"
-              checked={isFullScan}
-              onCheckedChange={(checked) => {
-                setIsFullScan(checked);
-                setItems(null);
-              }}
-              disabled={isScanning}
-            />
-            <Label
-              htmlFor="scan-mode"
-              className="text-xs font-bold cursor-pointer"
-            >
-              フルスキャン
-            </Label>
-          </div>
-        </div>
+        <CardTitle className="flex items-center gap-2 text-destructive">
+          <Trash2 className="w-5 h-5" />
+          ゴーストデータ削除
+        </CardTitle>
         <CardDescription>
           実体のないメディアレコードを掃除します
         </CardDescription>
@@ -194,18 +175,16 @@ export function GhostMediaCleanupCard({
         {/* 進捗表示 */}
         {isScanning && (
           <div className="space-y-2">
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex flex-col text-xs text-muted-foreground">
               <span>
                 スキャン中...{" "}
                 {Math.floor((progress.current / progress.total) * 100)} % (
                 {progress.current} / {progress.total})
               </span>
-              <div className="flex gap-4">
-                <span>
-                  {elapsedDisplay ? Math.ceil(elapsedDisplay) : "--"} 秒経過
-                </span>
-                <span>残り約 {eta ? Math.ceil(eta) : "--"} 秒</span>
-              </div>
+              <span>
+                {elapsedDisplay ? Math.ceil(elapsedDisplay) : "--"} 秒経過
+              </span>
+              <span>残り約 {eta ? Math.ceil(eta) : "--"} 秒</span>
             </div>
             <Progress
               value={
@@ -225,6 +204,7 @@ export function GhostMediaCleanupCard({
           </div>
         )}
 
+        {/* ステータス */}
         <div className="flex items-center h-10 px-3 border rounded bg-muted/20 text-sm">
           {isPending ? (
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -251,6 +231,26 @@ export function GhostMediaCleanupCard({
           )}
         </div>
 
+        {/* オプション類 */}
+        <div className="flex items-center gap-2 p-2 rounded-md">
+          <Switch
+            id="scan-mode"
+            checked={isFullScan}
+            onCheckedChange={(checked) => {
+              setIsFullScan(checked);
+              setItems(null);
+            }}
+            disabled={isScanning}
+          />
+          <Label
+            htmlFor="scan-mode"
+            className="text-xs font-bold cursor-pointer"
+          >
+            フルスキャン
+          </Label>
+        </div>
+
+        {/* ボタン類 */}
         <div className="flex gap-2">
           {isFullScan && items === null ? (
             <AlertDialog>
@@ -311,12 +311,12 @@ export function GhostMediaCleanupCard({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>やめる</AlertDialogCancel>
+                <AlertDialogCancel>キャンセル</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
                   className="bg-destructive text-white hover:bg-destructive/90"
                 >
-                  削除する
+                  削除を実行
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
