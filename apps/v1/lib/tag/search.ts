@@ -16,7 +16,7 @@ export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {
       return searchRecentlyUsedTags(options);
 
     default:
-      return [];
+      return searchRecentlyUsedTags(options);
   }
 }
 
