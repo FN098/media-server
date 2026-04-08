@@ -105,7 +105,7 @@ export function TagFilterDialog({
             variant="outline"
             size="sm"
             className={cn(
-              "gap-2 h-9 transition-colors",
+              "gap-2 h-9 w-[180px] transition-colors",
               hasSelection &&
                 "border-primary bg-primary/5 text-primary hover:bg-primary/10"
             )}

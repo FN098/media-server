@@ -51,7 +51,7 @@ export const FavoriteFilterButton = ({
       onClick={handleToggle}
       variant="outline"
       size="sm"
-      className={cn("gap-2 h-9 transition-colors", current.className)}
+      className={cn("gap-2 h-9 w-[160px] transition-colors", current.className)}
     >
       {current.icon}
       <span>{current.label}</span>

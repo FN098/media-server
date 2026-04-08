@@ -30,7 +30,7 @@ export function ShuffleButton() {
             size="default"
             onClick={handleToggle}
             aria-label="シャッフル切り替え"
-            className="gap-2"
+            className="gap-2 h-9 w-[180px]"
           >
             <Shuffle className={`h-4 w-4 ${enabled ? "animate-pulse" : ""}`} />
             {enabled ? "シャッフル解除" : "シャッフル"}
