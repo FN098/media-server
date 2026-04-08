@@ -72,11 +72,16 @@ export function Favorites() {
 
   // UI操作：Context → URL
   useEffect(() => {
-    setExplorerQuery({
-      q: query === "" ? null : query,
-      view: viewMode === "grid" ? null : viewMode,
-    });
-  }, [setExplorerQuery, query, viewMode]);
+    const hasChanged =
+      query.trim() !== (q || "") || viewMode !== (view || "grid");
+
+    if (hasChanged) {
+      setExplorerQuery({
+        q: query.trim() === "" ? null : query,
+        view: viewMode === "grid" ? null : viewMode,
+      });
+    }
+  }, [setExplorerQuery, query, viewMode, q, view]);
 
   // ===== フィルタリング =====
 
