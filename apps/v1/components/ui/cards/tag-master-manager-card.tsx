@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import {
@@ -480,7 +481,7 @@ function TagDeleteButton({
         <Button
           size="icon"
           variant="ghost"
-          disabled={isDeleting} // 外からの状態を反映
+          disabled={isDeleting}
           className={cn(
             "h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity",
             open
