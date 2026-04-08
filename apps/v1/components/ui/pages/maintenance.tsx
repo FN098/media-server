@@ -4,7 +4,7 @@ import {
   scanUnusedTagsAction,
 } from "@/actions/tag-actions";
 import { GhostMediaCleanupCard } from "@/components/ui/cards/ghost-media-cleanup-card";
-import { TagRenameEditorCard } from "@/components/ui/cards/tag-rename-editor-card";
+import { TagMasterManagerCard } from "@/components/ui/cards/tag-master-manager-card";
 import { UnusedTagsCleanupCard } from "@/components/ui/cards/unused-tags-cleanup-card";
 
 export function Maintenance() {
@@ -17,7 +17,9 @@ export function Maintenance() {
         onDelete={deleteSelectedTagsAction}
       />
 
-      <TagRenameEditorCard />
+      <div className="md:col-span-2">
+        <TagMasterManagerCard />
+      </div>
     </div>
   );
 }

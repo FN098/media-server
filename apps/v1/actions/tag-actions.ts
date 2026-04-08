@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
+import { generateKana } from "@/lib/utils/kana";
 
 export async function updateMediaTagsAction(payload: {
   mediaPaths: string[];
@@ -79,18 +80,24 @@ export async function updateMediaTagsAction(payload: {
   }
 }
 
-export async function createTagAction(name: string) {
+export async function createTagAction(name: string, isFavorite = false) {
   try {
     const normalizedName = normalizeTagName(name);
     if (!normalizedName) {
       return { success: false, error: "タグ名が空です" };
     }
 
-    // 同じ名前のタグが既にあるか確認、なければ作成
+    const kana = await generateKana(normalizedName);
+
     const tag = await prisma.tag.upsert({
       where: { name: normalizedName },
-      update: {}, // 存在すれば何もしない
-      create: { name: normalizedName },
+      update: { isFavorite }, // すでに存在する場合、お気に入りフラグだけ更新する運用
+      create: {
+        name: normalizedName,
+        kana: kana,
+        isFavorite,
+        isActive: true,
+      },
     });
     return { success: true, tag };
   } catch (error) {
@@ -103,7 +110,6 @@ export async function createTagsAction(
   names: string[]
 ): Promise<CreateTagsResult> {
   try {
-    // 正規化 & 空除外 & 重複排除
     const normalizedNames = Array.from(
       new Set(names.map(normalizeTagName).filter((n): n is string => !!n))
     );
@@ -112,26 +118,31 @@ export async function createTagsAction(
       return { success: true, tags: [] };
     }
 
-    // 既存タグ取得
     const existingTags = await prisma.tag.findMany({
       where: { name: { in: normalizedNames } },
     });
 
     const existingNames = new Set(existingTags.map((t) => t.name));
 
-    // 未存在のみ作成
-    const toCreate = normalizedNames
-      .filter((name) => !existingNames.has(name))
-      .map((name) => ({ name }));
+    // 未存在のタグのみ、カナを含めてデータ作成
+    const toCreate = await Promise.all(
+      normalizedNames
+        .filter((name) => !existingNames.has(name))
+        .map(async (name) => ({
+          name,
+          kana: await generateKana(name),
+          isFavorite: false,
+          isActive: true,
+        }))
+    );
 
     if (toCreate.length > 0) {
       await prisma.tag.createMany({
         data: toCreate,
-        skipDuplicates: true, // 念のため
+        skipDuplicates: true,
       });
     }
 
-    // 改めて全タグ取得
     const tags = await prisma.tag.findMany({
       where: { name: { in: normalizedNames } },
     });
@@ -200,21 +211,39 @@ export async function getTagsInfiniteAction({
   cursor,
   query,
   limit = 50,
+  onlyFavorites = false,
 }: {
   cursor?: string;
   query?: string;
   limit?: number;
+  onlyFavorites?: boolean;
 }) {
   try {
     const tags = await prisma.tag.findMany({
       take: limit,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
-      where: query ? { name: { contains: query } } : undefined,
-      orderBy: { name: "asc" },
+      where: {
+        isActive: true,
+        AND: [
+          query
+            ? {
+                OR: [
+                  { name: { contains: query } },
+                  { kana: { contains: query } }, // 読みでも検索可能に
+                ],
+              }
+            : {},
+          onlyFavorites ? { isFavorite: true } : {},
+        ],
+      },
+      // 読み(kana)順、次に名前(name)順でソート
+      orderBy: [{ kana: "asc" }, { name: "asc" }],
       select: {
         id: true,
         name: true,
+        kana: true,
+        isFavorite: true,
         _count: { select: { mediaTags: true } },
       },
     });
@@ -229,11 +258,32 @@ export async function getTagsInfiniteAction({
   }
 }
 
-export async function renameTagAction(id: string, newName: string) {
+export async function updateTagFavoriteAction(id: string, isFavorite: boolean) {
   try {
     const tag = await prisma.tag.update({
       where: { id },
-      data: { name: newName },
+      data: { isFavorite },
+    });
+    return { success: true, tag };
+  } catch (error) {
+    console.error("Update Tag Favorite Error:", error);
+    return { success: false, error: "タグのお気に入り更新に失敗しました。" };
+  }
+}
+
+export async function renameTagAction(id: string, newName: string) {
+  try {
+    const normalizedName = normalizeTagName(newName);
+    if (!normalizedName) throw new Error("Invalid name");
+
+    const kana = await generateKana(normalizedName);
+
+    const tag = await prisma.tag.update({
+      where: { id },
+      data: {
+        name: normalizedName,
+        kana, // 名前が変わったら読みも更新
+      },
     });
     return { success: true, tag };
   } catch (error) {
