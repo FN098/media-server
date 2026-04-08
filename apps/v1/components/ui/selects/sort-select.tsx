@@ -33,7 +33,8 @@ export function SortSelect({
 }: SortSelectProps) {
   const { sort, direction, setSort, isPending } = useSort();
 
-  const selectValue = sort && direction ? `${sort}-${direction}` : "none";
+  const selectValue =
+    sort && direction && sort != "none" ? `${sort}-${direction}` : "none";
 
   const handleValueChange = (value: string) => {
     let newKey: string | null = null;

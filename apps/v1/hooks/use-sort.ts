@@ -5,6 +5,7 @@ interface UseSortOptions {
   sortKey?: string; // デフォルト: "sort"
   directionKey?: string; // デフォルト: "direction"
   pageKey?: string; // デフォルト: "page"
+  seedKey?: string; // デフォルト: "seed"
 }
 
 export function useSort(options?: UseSortOptions) {
@@ -18,6 +19,7 @@ export function useSort(options?: UseSortOptions) {
     sortKey = "sort",
     directionKey = "direction",
     pageKey = "page",
+    seedKey = "seed",
   } = options || {};
 
   const sort = searchParams.get(sortKey);
@@ -27,8 +29,9 @@ export function useSort(options?: UseSortOptions) {
     (key: string | null, dir: string | null) => {
       const params = new URLSearchParams(searchParams.toString());
 
-      // ソート変更時にページングリセット
+      // ソート変更時にページング/シャッフルをリセット
       params.delete(pageKey);
+      params.delete(seedKey);
 
       if (!key || !dir) {
         params.delete(sortKey);
@@ -42,7 +45,7 @@ export function useSort(options?: UseSortOptions) {
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
       });
     },
-    [directionKey, pageKey, pathname, router, searchParams, sortKey]
+    [directionKey, pageKey, pathname, router, searchParams, seedKey, sortKey]
   );
 
   return {

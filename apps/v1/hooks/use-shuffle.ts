@@ -9,20 +9,23 @@ type ShuffleOption = {
   seedKey?: string;
 };
 
-export function useShuffle(option: ShuffleOption = {}) {
+export function useShuffle(options: ShuffleOption = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const sortKey = option?.sortKey || "sort";
-  const directionKey = option?.directionKey || "direction";
-  const seedKey = option?.seedKey || "seed";
+  // キー名のマッピング（デフォルト値を設定）
+  const {
+    sortKey = "sort",
+    directionKey = "direction",
+    seedKey = "seed",
+  } = options || {};
 
   const sort = searchParams.get(sortKey);
   const direction = searchParams.get(directionKey);
   const seed = searchParams.get(seedKey);
 
-  const enabled = sort == null && direction == "random";
+  const enabled = sort == "none" || direction == "random" || seed != null;
 
   // 新しいシードを生成してURLを更新する
   const update = useCallback(() => {
