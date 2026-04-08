@@ -62,6 +62,7 @@ export function DeleteConfirmDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>キャンセル</AlertDialogCancel>
           <AlertDialogAction
+            autoFocus
             onClick={handleConfirm}
             disabled={isPending}
             className="bg-destructive text-white hover:bg-destructive/90"
