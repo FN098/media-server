@@ -41,13 +41,7 @@ import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence } from "framer-motion";
-import {
-  ArrowDown10,
-  ArrowDownAz,
-  ArrowDownZa,
-  CalendarArrowDown,
-  TagIcon,
-} from "lucide-react";
+import { ArrowDown10, ArrowDownAz, ArrowDownZa, TagIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
@@ -417,12 +411,6 @@ export function Favorites() {
                 direction: "desc",
                 label: "評価が高い順",
                 icon: ArrowDown10,
-              },
-              {
-                key: "favoritedAt",
-                direction: "desc",
-                label: "登録日が新しい順",
-                icon: CalendarArrowDown,
               },
             ]}
           />
