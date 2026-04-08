@@ -16,7 +16,7 @@ export function useExplorer(listing: MediaListing) {
   );
 
   const closeViewer = useCallback(() => {
-    setExplorerQuery({}, { history: "push" });
+    setExplorerQuery({ modal: false, at: null }, { history: "push" });
   }, [setExplorerQuery]);
 
   const openFolder = useCallback(

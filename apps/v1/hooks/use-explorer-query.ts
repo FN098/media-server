@@ -8,21 +8,25 @@ import { useCallback } from "react";
 import z from "zod";
 
 export const explorerQuerySchema = z.object({
-  q: z.string().optional(),
+  q: z.string().optional().nullable(),
 
   modal: z
     .union([z.boolean(), z.literal("true").transform(() => true)])
-    .optional(),
+    .optional()
+    .nullable(),
 
-  view: z.enum(["grid", "list"]).optional(),
+  view: z.enum(["grid", "list"]).optional().nullable(),
 
   at: z
     .union([z.coerce.number().int().nonnegative(), z.enum(["first", "last"])])
-    .optional(),
+    .optional()
+    .nullable(),
 
-  sort: z.string().optional(),
+  sort: z.string().optional().nullable(),
 
-  direction: z.enum(["asc", "desc", "random"]).optional(),
+  direction: z.enum(["asc", "desc", "random"]).optional().nullable(),
+
+  page: z.coerce.number().optional().nullable(),
 });
 
 export type ExplorerQuery = z.infer<typeof explorerQuerySchema>;

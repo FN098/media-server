@@ -16,7 +16,10 @@ export function useTrash(listing: MediaListing) {
   );
 
   const closeViewer = useCallback(() => {
-    setExplorerQuery({}, { history: "push", deleted: true });
+    setExplorerQuery(
+      { modal: false, at: null },
+      { history: "push", deleted: true }
+    );
   }, [setExplorerQuery]);
 
   const openFolder = useCallback(
