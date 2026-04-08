@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/shadcn/components/ui/select";
 import { cn } from "@/shadcn/lib/utils";
-import { ArrowUpDown, LucideIcon } from "lucide-react";
+import { ArrowUpDown, LucideIcon, RotateCcw } from "lucide-react";
 
 export interface SortOption {
   key?: string;
@@ -21,20 +21,21 @@ export interface SortOption {
 interface SortSelectProps {
   options: SortOption[];
   placeholder?: string;
-  emptyLabel?: string;
+  resetLabel?: string;
   onChange?: (key: string | null, dir: string | null) => void;
 }
 
 export function SortSelect({
   options,
   placeholder = "並び替え",
-  emptyLabel = "ソートなし",
+  resetLabel = "リセットする",
   onChange,
 }: SortSelectProps) {
   const { sort, direction, setSort, isPending } = useSort();
 
-  const selectValue =
-    sort && direction && sort != "none" ? `${sort}-${direction}` : "none";
+  // ソートが適用されているか判定
+  const isSorted = !!(sort && direction && sort !== "none");
+  const selectValue = sort && direction ? `${sort}-${direction}` : undefined;
 
   const handleValueChange = (value: string) => {
     let newKey: string | null = null;
@@ -50,22 +51,41 @@ export function SortSelect({
 
   return (
     <div className={cn(isPending && "opacity-70 transition-opacity")}>
-      <Select value={selectValue} onValueChange={handleValueChange}>
-        <SelectTrigger className="bg-background focus:ring-1">
+      <Select
+        key={selectValue || "reset"}
+        value={selectValue}
+        onValueChange={handleValueChange}
+      >
+        <SelectTrigger className="bg-background focus:ring-1 w-[180px]">
           <div className="flex items-center gap-2 overflow-hidden text-sm">
             <div className="truncate">
-              <SelectValue placeholder={placeholder} />
+              <SelectValue
+                placeholder={
+                  <div className="flex items-center gap-2">
+                    <ArrowUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span>{placeholder}</span>
+                  </div>
+                }
+              />
             </div>
           </div>
         </SelectTrigger>
 
         <SelectContent>
-          <SelectItem value="none">
-            <div className="flex items-center gap-2">
-              <ArrowUpDown className="h-4 w-4 text-muted-foreground/50" />
-              <span>{emptyLabel}</span>
-            </div>
-          </SelectItem>
+          {isSorted && (
+            <>
+              <SelectItem
+                value="none"
+                className="text-destructive focus:text-destructive"
+              >
+                <div className="flex items-center gap-2">
+                  <RotateCcw className="h-4 w-4" />
+                  <span>{resetLabel}</span>
+                </div>
+              </SelectItem>
+              <div className="my-1 h-px bg-muted" />
+            </>
+          )}
 
           {options.map((opt) => {
             const combined = `${opt.key}-${opt.direction}`;
