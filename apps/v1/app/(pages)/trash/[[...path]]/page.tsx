@@ -4,7 +4,7 @@ import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
-import { SortDirection, SortKeyOf, sortMediaNodes } from "@/lib/media/sort";
+import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
 import { isBlockedVirtualPath } from "@/lib/path/blacklist";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
@@ -83,7 +83,7 @@ export default async function TrashPage(props: TrashPageProps) {
   });
 
   // ソート
-  const sorted = sortMediaNodes(merged, {
+  const sorted = sortNodes(merged, {
     key: sortKey,
     direction: sortDirection,
   });

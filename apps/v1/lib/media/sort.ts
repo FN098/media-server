@@ -1,5 +1,5 @@
+import { MediaFsNode } from "@/lib/media/types";
 import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/random";
-import { MediaFsNode, MediaNode } from "./types";
 
 export type SortDirection = "asc" | "desc" | "random";
 
@@ -21,20 +21,22 @@ export function sortNames(names: string[]): string[] {
   return [...names].sort((a, b) => collator.compare(a, b));
 }
 
-export function sortMediaFsNodes<T extends MediaFsNode>(
+export function sortNodes<T extends MediaFsNode>(
   nodes: T[],
   options?: SortOptions<T>
 ): T[] {
-  const { key = "name", direction: order = "asc", seed } = options ?? {};
+  const { key = "name", direction = "asc", seed } = options ?? {};
 
-  if (order === "random") {
+  // ランダムシャッフル(random)
+  if (direction === "random") {
     if (seed && seed.trim() != "") {
       return shuffleArrayWithSeed(nodes, seed);
     }
     return shuffleArray(nodes);
   }
 
-  const modifier = order === "asc" ? 1 : -1;
+  // 昇順(asc) or 降順(desc)
+  const modifier = direction === "asc" ? 1 : -1;
 
   return [...nodes].sort((a, b) => {
     // 1. フォルダ優先
@@ -55,11 +57,4 @@ export function sortMediaFsNodes<T extends MediaFsNode>(
 
     return 0;
   });
-}
-
-export function sortMediaNodes<T extends MediaNode>(
-  nodes: T[],
-  options?: SortOptions<T>
-): T[] {
-  return sortMediaFsNodes(nodes, options);
 }

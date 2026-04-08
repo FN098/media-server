@@ -4,7 +4,7 @@ import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
-import { SortDirection, SortKeyOf, sortMediaNodes } from "@/lib/media/sort";
+import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { MediaNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
@@ -105,7 +105,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   });
 
   // ソート
-  const sorted = sortMediaNodes(merged, {
+  const sorted = sortNodes(merged, {
     key: sortKey,
     direction: sortDirection,
   });

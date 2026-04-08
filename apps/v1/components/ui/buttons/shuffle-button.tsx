@@ -1,6 +1,6 @@
 "use client";
 
-import { useSeed } from "@/hooks/use-seed";
+import { useShuffle } from "@/hooks/use-shuffle";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Tooltip,
@@ -11,24 +11,33 @@ import {
 import { Shuffle } from "lucide-react";
 
 export function ShuffleButton() {
-  const { updateSeed } = useSeed();
+  const { enabled, update, reset } = useShuffle();
+
+  const handleToggle = () => {
+    if (enabled) {
+      reset();
+    } else {
+      update();
+    }
+  };
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="outline"
+            variant={enabled ? "default" : "outline"}
             size="default"
-            onClick={() => updateSeed()}
-            aria-label="シャッフル"
+            onClick={handleToggle}
+            aria-label="シャッフル切り替え"
+            className="gap-2"
           >
-            <Shuffle className="h-4 w-4" />
-            シャッフル
+            <Shuffle className={`h-4 w-4 ${enabled ? "animate-pulse" : ""}`} />
+            {enabled ? "シャッフル解除" : "シャッフル"}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>シードを更新してシャッフル</p>
+          <p>{enabled ? "シャッフルを解除" : "シャッフルを有効化"}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
-import { SortDirection, SortKeyOf, sortMediaNodes } from "@/lib/media/sort";
+import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
@@ -41,7 +41,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const allNodes = await getFavoriteMediaNodes(user.id);
 
   // ソート
-  const sorted = sortMediaNodes(allNodes, {
+  const sorted = sortNodes(allNodes, {
     key: sortKey,
     direction: sortDirection,
     seed,
