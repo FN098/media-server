@@ -5,6 +5,7 @@ import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import {
   PendingChanges,
+  PendingNewTag,
   SearchTagStrategy,
   SortTagStrategy,
   Tag,
@@ -21,7 +22,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     initialTargetNodes ?? []
   );
   const [newTagName, setNewTagName] = useState("");
-  const [pendingNewTags, setPendingNewTags] = useState<Tag[]>([]);
+  const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
   const [pendingChangeTags, setPendingChangeTags] = useState<Tag[]>([]);
   const [searchStrategy, setSearchStrategy] =
@@ -75,8 +76,13 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
 
   // 編集用タグデータの作成
   const editModeTags = useMemo(() => {
+    const pendingNewAsTags: Tag[] = pendingNewTags.map((t) => ({
+      id: t.tempId, // 仮ID
+      name: t.name,
+    }));
+
     const combined = uniqueBy(
-      [...masterTags, ...pendingNewTags, ...pendingChangeTags],
+      [...masterTags, ...pendingNewAsTags, ...pendingChangeTags],
       "id"
     );
 
@@ -167,7 +173,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   const addPendingNewTag = useCallback((name: string) => {
     setPendingNewTags((prev) => {
       if (prev.some((t) => t.name === name)) return prev;
-      return [...prev, { id: v4(), name }];
+      return [...prev, { tempId: v4(), name }];
     });
   }, []);
 
