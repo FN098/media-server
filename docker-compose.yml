@@ -10,6 +10,7 @@ services:
       - ./docker/mysql-init:/docker-entrypoint-initdb.d
     ports:
       - "13306:3306"
+    command: --mysql-native-passwords=ON
 
   redis:
     image: redis:latest
