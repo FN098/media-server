@@ -36,7 +36,7 @@ async function searchMostRelatedTags({
     }
 
     if (excludeIds && excludeIds.length > 0) {
-      tagWhere.id = { notIn: excludeIds };
+      where.id = { notIn: excludeIds };
     }
 
     return where;
@@ -70,7 +70,7 @@ async function searchRecentlyCreatedTags({
     }
 
     if (excludeIds && excludeIds.length > 0) {
-      tagWhere.id = { notIn: excludeIds };
+      where.id = { notIn: excludeIds };
     }
 
     return where;
@@ -102,7 +102,7 @@ async function searchRecentlyUsedTags({
     }
 
     if (excludeIds && excludeIds.length > 0) {
-      tagWhere.id = { notIn: excludeIds };
+      where.id = { notIn: excludeIds };
     }
 
     return where;
