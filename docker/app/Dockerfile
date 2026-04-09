@@ -34,7 +34,7 @@ COPY apps/v1 ./
 # ビルド用環境変数
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 ENV NEXT_TELEMETRY_DISABLED 1
-# ダミー用の接続文字列を環境変数に設定（これがないと prisma generate に失敗する）
+# ダミー用の接続文字列（これがないと prisma generate に失敗する）
 ENV DATABASE_URL dummy
 ENV SHADOW_DATABASE_URL dummy
 
@@ -63,7 +63,7 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# build 成果物と必要ファイルをコピー
+# 成果物のコピー
 # ※ next.config.js で output: 'standalone' を設定している前提
 # ※ standalone では実行に必要なファイルのみを .next/standalone にまとめて出力する
 COPY --from=builder /app/public ./public
