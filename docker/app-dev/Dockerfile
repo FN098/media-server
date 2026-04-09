@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     ffmpeg \
     default-mysql-client \
+    ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
