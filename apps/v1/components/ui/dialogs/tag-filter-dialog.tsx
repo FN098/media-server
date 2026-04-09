@@ -93,144 +93,142 @@ export function TagFilterDialog() {
   const hasSelection = selectedTagIds.size > 0;
 
   return (
-    <div className="flex items-center gap-2">
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              "gap-2 h-9 w-full transition-colors",
-              hasSelection &&
-                "border-primary bg-primary/5 text-primary hover:bg-primary/10"
-            )}
-          >
-            <Tag className="h-4 w-4" />
-            <span>タグで絞り込む</span>
-            {hasSelection && (
-              <Badge
-                variant="default"
-                className="ml-1 px-1.5 h-5 min-w-[20px] justify-center"
-              >
-                {selectedTagIds.size}
-              </Badge>
-            )}
-          </Button>
-        </DialogTrigger>
-
-        <DialogContent
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            inputRef.current?.focus();
-          }}
-          className="sm:max-w-[450px] h-[550px] flex flex-col p-0 overflow-hidden"
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            "gap-2 h-9 w-full transition-colors",
+            hasSelection &&
+              "border-primary bg-primary/5 text-primary hover:bg-primary/10"
+          )}
         >
-          <DialogHeader className="p-6 pb-2">
-            <DialogTitle className="text-xl font-semibold">
-              タグを選択
-            </DialogTitle>
-          </DialogHeader>
+          <Tag className="h-4 w-4" />
+          <span>タグで絞り込む</span>
+          {hasSelection && (
+            <Badge
+              variant="default"
+              className="ml-1 px-1.5 h-5 min-w-[20px] justify-center"
+            >
+              {selectedTagIds.size}
+            </Badge>
+          )}
+        </Button>
+      </DialogTrigger>
 
-          {/* モード切り替え */}
-          <div className="px-6 pb-2">
-            <div className="flex bg-muted rounded-lg p-1">
-              {(["AND", "OR", "NOT", "EMPTY"] satisfies TagFilterMode[]).map(
-                (m) => (
-                  <button
-                    key={m}
-                    onClick={() => setTempMode(m)}
-                    className={cn(
-                      "flex-1 text-xs font-medium py-1.5 rounded-md transition-all",
-                      tempMode === m
-                        ? "bg-background shadow-sm text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {modeTexts[m]}
-                  </button>
-                )
-              )}
-            </div>
-          </div>
+      <DialogContent
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          inputRef.current?.focus();
+        }}
+        className="sm:max-w-[450px] h-[550px] flex flex-col p-0 overflow-hidden"
+      >
+        <DialogHeader className="p-6 pb-2">
+          <DialogTitle className="text-xl font-semibold">
+            タグを選択
+          </DialogTitle>
+        </DialogHeader>
 
-          {/* 検索ボックス（サーバー検索） */}
-          <div className="px-6 pb-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                ref={inputRef}
-                placeholder="タグを検索..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="pl-9 h-10 shadow-sm"
-              />
-              {isLoading ? (
-                <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-              ) : query ? (
+        {/* モード切り替え */}
+        <div className="px-6 pb-2">
+          <div className="flex bg-muted rounded-lg p-1">
+            {(["AND", "OR", "NOT", "EMPTY"] satisfies TagFilterMode[]).map(
+              (m) => (
                 <button
-                  onClick={() => setQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  key={m}
+                  onClick={() => setTempMode(m)}
+                  className={cn(
+                    "flex-1 text-xs font-medium py-1.5 rounded-md transition-all",
+                    tempMode === m
+                      ? "bg-background shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
                 >
-                  <X className="h-4 w-4" />
+                  {modeTexts[m]}
                 </button>
-              ) : null}
-            </div>
+              )
+            )}
           </div>
+        </div>
 
-          {/* タグ一覧 */}
-          <div className="flex-1 flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto border-t border-b border-muted/50">
-            {displayTags.length > 0 ? (
-              displayTags.map((tag) => {
-                const isTempSelected = tempSelectedIds.has(tag.id);
-                return (
-                  <Badge
-                    key={tag.id}
-                    variant={isTempSelected ? "default" : "secondary"}
-                    className={cn(
-                      "cursor-pointer px-4 h-9 text-sm transition-all select-none border-transparent inline-flex items-center justify-center",
-                      isTempSelected
-                        ? "ring-2 ring-primary shadow-sm"
-                        : "hover:bg-secondary/80",
-                      isEmptyMode && "opacity-40 pointer-events-none"
-                    )}
-                    onClick={() => !isEmptyMode && handleToggleTemp(tag)}
-                  >
-                    {tag.name}
-                    {isTempSelected && <X className="ml-2 h-3.5 w-3.5" />}
-                  </Badge>
-                );
-              })
-            ) : !isLoading ? (
-              <div className="w-full text-center py-10 text-muted-foreground">
-                <p>一致するタグが見つかりません</p>
-              </div>
+        {/* 検索ボックス（サーバー検索） */}
+        <div className="px-6 pb-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              ref={inputRef}
+              placeholder="タグを検索..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="pl-9 h-10 shadow-sm"
+            />
+            {isLoading ? (
+              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+            ) : query ? (
+              <button
+                onClick={() => setQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
             ) : null}
           </div>
+        </div>
 
-          {/* 操作ボタン */}
-          <DialogFooter className="flex flex-row items-center justify-between p-6 bg-muted/20">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClear}
-              disabled={tempSelectedIds.size === 0}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-            >
-              <RotateCcw className="mr-2 h-3.5 w-3.5" />
-              選択を解除
-            </Button>
+        {/* タグ一覧 */}
+        <div className="flex-1 flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto border-t border-b border-muted/50">
+          {displayTags.length > 0 ? (
+            displayTags.map((tag) => {
+              const isTempSelected = tempSelectedIds.has(tag.id);
+              return (
+                <Badge
+                  key={tag.id}
+                  variant={isTempSelected ? "default" : "secondary"}
+                  className={cn(
+                    "cursor-pointer px-4 h-9 text-sm transition-all select-none border-transparent inline-flex items-center justify-center",
+                    isTempSelected
+                      ? "ring-2 ring-primary shadow-sm"
+                      : "hover:bg-secondary/80",
+                    isEmptyMode && "opacity-40 pointer-events-none"
+                  )}
+                  onClick={() => !isEmptyMode && handleToggleTemp(tag)}
+                >
+                  {tag.name}
+                  {isTempSelected && <X className="ml-2 h-3.5 w-3.5" />}
+                </Badge>
+              );
+            })
+          ) : !isLoading ? (
+            <div className="w-full text-center py-10 text-muted-foreground">
+              <p>一致するタグが見つかりません</p>
+            </div>
+          ) : null}
+        </div>
 
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleApply}
-              className="px-8 shadow-md"
-            >
-              決定
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+        {/* 操作ボタン */}
+        <DialogFooter className="flex flex-row items-center justify-between p-6 bg-muted/20">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClear}
+            disabled={tempSelectedIds.size === 0}
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+          >
+            <RotateCcw className="mr-2 h-3.5 w-3.5" />
+            選択を解除
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleApply}
+            className="px-8 shadow-md"
+          >
+            決定
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
