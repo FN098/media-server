@@ -1,7 +1,9 @@
+"use client";
+
 import { useMounted } from "@/hooks/use-mounted";
 import { TagFilterMode } from "@/hooks/use-tag-filter";
-import { isMatchJapanese } from "@/lib/utils/search";
-import { unique } from "@/lib/utils/unique";
+import { Tag as TagType } from "@/lib/tag/types";
+import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -12,11 +14,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shadcn/components/ui/dialog";
-import { Input } from "@/shadcn/components/ui/input"; // 追加
+import { Input } from "@/shadcn/components/ui/input";
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
-import { RotateCcw, Search, Tag, X } from "lucide-react"; // Searchを追加
-import { useMemo, useRef, useState } from "react"; // useMemoを追加
+import { Loader2, RotateCcw, Search, Tag, X } from "lucide-react";
+import { useRef, useState } from "react";
 
 const modeTexts = {
   AND: "すべて含む",
@@ -25,79 +27,70 @@ const modeTexts = {
   EMPTY: "タグなし",
 } as const;
 
-interface TagFilterDialogProps {
-  tags: string[];
-  selectedTags: Set<string>;
-  currentMode: TagFilterMode;
-  onApply: (tags: Set<string>, mode: TagFilterMode) => void;
-}
+export function TagFilterDialog() {
+  const {
+    query,
+    setQuery,
+    displayTags,
+    isLoading,
+    selectedTagIds,
+    selectTags,
+    mode,
+    setMode,
+  } = useTagFilterContext();
 
-export function TagFilterDialog({
-  tags,
-  selectedTags,
-  currentMode,
-  onApply,
-}: TagFilterDialogProps) {
-  const [tempSelected, setTempSelected] = useState<Set<string>>(
-    new Set(selectedTags)
-  );
-  const [mode, setMode] = useState<TagFilterMode>(currentMode);
+  // ダイアログ内の一時状態
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const allTags = useMemo(
-    () => unique([...tempSelected, ...tags]),
-    [tags, tempSelected]
+  const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(
+    new Set()
   );
-
-  // 検索クエリに基づいてタグをフィルタリング
-  const filteredTags = useMemo(() => {
-    return allTags.filter((tag) => isMatchJapanese(tag, searchQuery));
-  }, [allTags, searchQuery]);
+  const [tempMode, setTempMode] = useState<TagFilterMode>(mode);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
-      setTempSelected(new Set(selectedTags));
-      setSearchQuery(""); // 開くときは検索をリセット
-      // setTimeout(() => inputRef.current?.focus(), 500);
+      // ダイアログを開くとき: 現在のコンテキスト状態を一時状態に同期
+      setTempSelectedIds(new Set(selectedTagIds));
+      setTempMode(mode);
+      setQuery("");
     }
     setOpen(nextOpen);
   };
 
-  const handleToggle = (tag: string) => {
-    const next = new Set(tempSelected);
-    if (next.has(tag)) {
-      next.delete(tag);
-    } else {
-      next.add(tag);
-    }
-    setTempSelected(next);
+  const handleToggleTemp = (tag: TagType) => {
+    setTempSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag.id)) {
+        next.delete(tag.id);
+      } else {
+        next.add(tag.id);
+      }
+      return next;
+    });
   };
 
-  const handleClear = () => {
-    setTempSelected(new Set());
-  };
+  const handleClear = () => setTempSelectedIds(new Set());
 
   const handleApply = () => {
-    const finalTags = mode === "EMPTY" ? new Set<string>() : tempSelected;
-    setTempSelected(finalTags);
-    onApply(finalTags, mode);
+    const finalIds = tempMode === "EMPTY" ? new Set<string>() : tempSelectedIds;
+    // displayTags から Tag オブジェクトを復元して Context に反映
+    const finalTags = displayTags.filter((t) => finalIds.has(t.id));
+    selectTags(finalTags);
+    setMode(tempMode);
     setOpen(false);
   };
-
-  const hasSelection = selectedTags.size > 0;
 
   const mounted = useMounted();
   if (!mounted) {
     return (
       <div className="flex items-center">
-        <Skeleton className="h-9 w-[140px] rounded-md" />
+        <Skeleton className="h-9 w-full rounded-md" />
       </div>
     );
   }
 
-  const isEmptyMode = mode === "EMPTY";
+  const isEmptyMode = tempMode === "EMPTY";
+  const hasSelection = selectedTagIds.size > 0;
 
   return (
     <div className="flex items-center gap-2">
@@ -119,7 +112,7 @@ export function TagFilterDialog({
                 variant="default"
                 className="ml-1 px-1.5 h-5 min-w-[20px] justify-center"
               >
-                {selectedTags.size}
+                {selectedTagIds.size}
               </Badge>
             )}
           </Button>
@@ -145,10 +138,10 @@ export function TagFilterDialog({
                 (m) => (
                   <button
                     key={m}
-                    onClick={() => setMode(m)}
+                    onClick={() => setTempMode(m)}
                     className={cn(
                       "flex-1 text-xs font-medium py-1.5 rounded-md transition-all",
-                      mode === m
+                      tempMode === m
                         ? "bg-background shadow-sm text-foreground"
                         : "text-muted-foreground hover:text-foreground"
                     )}
@@ -160,60 +153,58 @@ export function TagFilterDialog({
             </div>
           </div>
 
-          {/* 検索ボックス */}
+          {/* 検索ボックス（サーバー検索） */}
           <div className="px-6 pb-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 ref={inputRef}
                 placeholder="タグを検索..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 className="pl-9 h-10 shadow-sm"
               />
-              {searchQuery && (
+              {isLoading ? (
+                <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+              ) : query ? (
                 <button
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => setQuery("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 
           {/* タグ一覧 */}
-          <div
-            className={cn(
-              "flex-1 flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto border-t border-b border-muted/50"
-            )}
-          >
-            {filteredTags.length > 0 ? (
-              filteredTags.map((tag) => {
-                const isSelected = tempSelected.has(tag);
+          <div className="flex-1 flex flex-wrap items-start content-start gap-x-2 gap-y-3 p-6 overflow-y-auto border-t border-b border-muted/50">
+            {displayTags.length > 0 ? (
+              displayTags.map((tag) => {
+                const isTempSelected = tempSelectedIds.has(tag.id);
                 return (
                   <Badge
-                    key={tag}
-                    variant={isSelected ? "default" : "secondary"}
+                    key={tag.id}
+                    variant={isTempSelected ? "default" : "secondary"}
                     className={cn(
                       "cursor-pointer px-4 h-9 text-sm transition-all select-none border-transparent inline-flex items-center justify-center",
-                      isSelected
+                      isTempSelected
                         ? "ring-2 ring-primary shadow-sm"
                         : "hover:bg-secondary/80",
                       isEmptyMode && "opacity-40 pointer-events-none"
                     )}
-                    onClick={() => !isEmptyMode && handleToggle(tag)}
+                    onClick={() => !isEmptyMode && handleToggleTemp(tag)}
                   >
-                    {tag}
-                    {isSelected && <X className="ml-2 h-3.5 w-3.5" />}
+                    {tag.name}
+                    {isTempSelected && <X className="ml-2 h-3.5 w-3.5" />}
                   </Badge>
                 );
               })
-            ) : (
+            ) : !isLoading ? (
               <div className="w-full text-center py-10 text-muted-foreground">
                 <p>一致するタグが見つかりません</p>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* 操作ボタン */}
@@ -222,7 +213,7 @@ export function TagFilterDialog({
               variant="ghost"
               size="sm"
               onClick={handleClear}
-              disabled={tempSelected.size === 0}
+              disabled={tempSelectedIds.size === 0}
               className="text-muted-foreground hover:text-destructive hover:bg-destructive/5"
             >
               <RotateCcw className="mr-2 h-3.5 w-3.5" />

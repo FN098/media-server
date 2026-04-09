@@ -10,6 +10,7 @@ import { MediaNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
+import { TagFilterProvider } from "@/providers/tag-filter-provider";
 import {
   getDbFavoriteCount,
   getDbFolderMetas,
@@ -122,7 +123,9 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     <ExplorerProvider listing={listing}>
       <FavoritesProvider favorites={listing.nodes}>
         <PathSelectionProvider>
-          <Explorer />
+          <TagFilterProvider>
+            <Explorer />
+          </TagFilterProvider>
         </PathSelectionProvider>
       </FavoritesProvider>
     </ExplorerProvider>

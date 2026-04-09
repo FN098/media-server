@@ -22,7 +22,6 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
 import {
   createFavoriteFilter,
   createRatingFilter,
@@ -30,7 +29,6 @@ import {
   createTagFilter,
 } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
-import { sortNames } from "@/lib/media/sort";
 import {
   MediaNode,
   MediaNodeFilter,
@@ -38,7 +36,6 @@ import {
   MediaPathToNodeMap,
 } from "@/lib/media/types";
 import { normalizeIndex } from "@/lib/query/utils";
-import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { PagingProvider } from "@/providers/paging-provider";
@@ -46,6 +43,7 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
+import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -112,15 +110,7 @@ export function Explorer() {
   // ===== フィルタリング =====
 
   // タグフィルタ
-  const tagFilter = useTagFilter();
-
-  const handleApplyTagFilter = (
-    tags: Iterable<string>,
-    mode: TagFilterMode
-  ) => {
-    tagFilter.selectTags(tags);
-    tagFilter.setMode(mode);
-  };
+  const tagFilter = useTagFilterContext();
 
   // お気に入りフィルターモード
   const [filterMode, setFilterMode] = useState<FavoriteFilterMode>("all");
@@ -138,7 +128,7 @@ export function Explorer() {
 
   // フィルターが一つでも適用されているかチェック
   const isFiltered =
-    tagFilter.selectedTags.size > 0 ||
+    tagFilter.selectedTags.length > 0 ||
     tagFilter.mode !== "AND" ||
     filterMode !== "all" ||
     minRating > 0;
@@ -146,7 +136,11 @@ export function Explorer() {
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
   const tagFilterFn = useMemo(
-    () => createTagFilter(Array.from(tagFilter.selectedTags), tagFilter.mode),
+    () =>
+      createTagFilter(
+        tagFilter.selectedTags.map((t) => t.name),
+        tagFilter.mode
+      ),
     [tagFilter]
   );
   const favoriteFilterFn = useMemo(
@@ -186,19 +180,6 @@ export function Explorer() {
   const mediaOnly = useMemo(
     () => filteredNodes.filter((n) => isMedia(n.type)),
     [filteredNodes]
-  );
-
-  // 「メディアのみ」のタグリスト
-  const mediaOnlyTags = useMemo(
-    () =>
-      sortNames(
-        unique(
-          mediaOnly
-            .filter((n) => n.tags && n.tags.length > 0)
-            .flatMap((n) => n.tags!.map((t) => t.name))
-        )
-      ),
-    [mediaOnly]
   );
 
   // ===== ビューア =====
@@ -537,12 +518,7 @@ export function Explorer() {
             <RatingFilterSelect value={minRating} onChange={setMinRating} />
 
             {/* タグフィルター */}
-            <TagFilterDialog
-              tags={mediaOnlyTags}
-              selectedTags={tagFilter.selectedTags}
-              currentMode={tagFilter.mode}
-              onApply={handleApplyTagFilter}
-            />
+            <TagFilterDialog />
 
             {/* お気に入りフィルター */}
             <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />

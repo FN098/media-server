@@ -43,7 +43,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     [targetNodes]
   );
 
-  // ベースとなるマスタータグデータの取得
+  // ベースタグ（全件 or strategy 絞り込み）
   const {
     tags: baseTags,
     refreshTags,
@@ -54,18 +54,18 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     strategy: searchStrategy,
   });
 
-  // 検索タグデータの取得
+  // クエリ検索タグ
   const { tags: searchedTags, isLoading: isLoadingSearch } = useTags({
     query: debouncedQuery,
     triggered: debouncedQuery === query,
   });
 
-  // クイック編集用タグデータの取得
+  // クイック編集タグ
   const { tags: favoriteTags, isLoading: isLoadingFavorite } = useTags({
     strategy: "favorite-only",
   });
 
-  // マスターデータを合成
+  // マスタータグ
   const masterTags = useMemo(() => {
     return uniqueBy([...baseTags, ...searchedTags], "id");
   }, [baseTags, searchedTags]);
@@ -74,7 +74,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
 
   const tagStates = useTagStates(targetNodes, masterTags);
 
-  // 編集用タグデータの作成
+  // 編集タグ
   const editModeTags = useMemo(() => {
     const pendingNewAsTags: Tag[] = pendingNewTags.map((t) => ({
       id: t.tempId, // 仮ID
@@ -94,7 +94,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     }
   }, [pendingNewTags, pendingChangeTags, masterTags, sortStrategy]);
 
-  // 閲覧用タグデータの作成
+  // 閲覧タグ
   const viewModeTags = useMemo(() => {
     const relatedTags = masterTags.filter(
       (tag) => tagStates[tag.name] === "some" || tagStates[tag.name] === "all"
@@ -108,7 +108,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     }
   }, [masterTags, sortStrategy, tagStates]);
 
-  // サジェスト用タグデータの作成
+  // サジェストタグ
   const suggestedTags = useMemo(() => {
     if (!query) return [];
 

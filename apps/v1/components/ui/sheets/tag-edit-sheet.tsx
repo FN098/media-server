@@ -148,7 +148,6 @@ export function TagEditSheet({
 
   // 閉じる
   const handleClose = () => {
-    debugger;
     onClose?.();
   };
 

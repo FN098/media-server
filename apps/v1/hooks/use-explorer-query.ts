@@ -47,7 +47,6 @@ export function useExplorerQuery() {
 
   const setExplorerQuery = useCallback(
     (query: Partial<ExplorerQuery>, options: ExplorerQueryOptions = {}) => {
-      debugger;
       const parsed = explorerQuerySchema.parse(query);
 
       // 既存のパラメータに新しい値をマージ
