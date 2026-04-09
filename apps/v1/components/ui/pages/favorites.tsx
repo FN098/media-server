@@ -14,7 +14,6 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { useTagFilter } from "@/hooks/use-tag-filter";
 import {
   createRatingFilter,
   createSearchFilter,
@@ -35,6 +34,7 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
+import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -78,7 +78,7 @@ export function Favorites() {
   // ===== フィルタリング =====
 
   // タグフィルタ
-  const tagFilter = useTagFilter();
+  const tagFilter = useTagFilterContext();
 
   // 最小レーティングフィルタ
   const [minRating, setMinRating] = useState<number>(0);

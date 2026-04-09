@@ -113,7 +113,8 @@ export function Explorer() {
   const tagFilter = useTagFilterContext();
 
   // お気に入りフィルターモード
-  const [filterMode, setFilterMode] = useState<FavoriteFilterMode>("all");
+  const [favoriteFilterMode, setFavoriteFilterMode] =
+    useState<FavoriteFilterMode>("all");
 
   // 最小レーティングフィルタ
   const [minRating, setMinRating] = useState<number>(0);
@@ -122,7 +123,7 @@ export function Explorer() {
   const handleResetFilters = () => {
     tagFilter.selectTags([]);
     tagFilter.setMode("AND");
-    setFilterMode("all");
+    setFavoriteFilterMode("all");
     setMinRating(0);
   };
 
@@ -130,7 +131,7 @@ export function Explorer() {
   const isFiltered =
     tagFilter.selectedCount > 0 ||
     tagFilter.mode !== "AND" ||
-    filterMode !== "all" ||
+    favoriteFilterMode !== "all" ||
     minRating > 0;
 
   // フィルタ関数
@@ -144,8 +145,8 @@ export function Explorer() {
     [tagFilter]
   );
   const favoriteFilterFn = useMemo(
-    () => createFavoriteFilter(filterMode),
-    [filterMode]
+    () => createFavoriteFilter(favoriteFilterMode),
+    [favoriteFilterMode]
   );
   const ratingFilterFn = useMemo(
     () => createRatingFilter(minRating),
@@ -521,7 +522,10 @@ export function Explorer() {
             <TagFilterDialog />
 
             {/* お気に入りフィルター */}
-            <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />
+            <FavoriteFilterButton
+              mode={favoriteFilterMode}
+              onChange={setFavoriteFilterMode}
+            />
 
             {/* リセットボタン */}
             <FilterResetButton
