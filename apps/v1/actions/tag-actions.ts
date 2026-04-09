@@ -222,27 +222,36 @@ export async function getTagsInfiniteAction({
   onlyNew?: boolean;
 }) {
   try {
-    const where: Prisma.TagWhereInput = {
-      isActive: true,
+    const buildTagWhere = (): Prisma.TagWhereInput => {
+      const where: Prisma.TagWhereInput = {
+        isActive: true,
+      };
+
+      if (query) {
+        where.OR = [
+          { kana: { contains: query } },
+          { name: { contains: query } },
+        ];
+      }
+
+      if (onlyFavorites) {
+        where.isFavorite = true;
+      }
+
+      if (onlyNew) {
+        where.isNew = true;
+      }
+
+      return where;
     };
 
-    if (query) {
-      where.OR = [{ name: { contains: query } }, { kana: { contains: query } }];
-    }
-
-    if (onlyFavorites) {
-      where.isFavorite = true;
-    }
-
-    if (onlyNew) {
-      where.isNew = true;
-    }
+    const tagWhere = buildTagWhere();
 
     const tags = await prisma.tag.findMany({
       take: limit,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
-      where,
+      where: tagWhere,
       // 読み(kana)順、次に名前(name)順でソート
       orderBy: [{ kana: "asc" }, { name: "asc" }],
       select: {

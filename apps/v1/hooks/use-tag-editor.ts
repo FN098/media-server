@@ -11,7 +11,6 @@ import {
   Tag,
   TagOperator,
 } from "@/lib/tag/types";
-import { isMatchJapanese } from "@/lib/utils/search";
 import { uniqueBy } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
@@ -57,8 +56,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   // 検索タグデータの取得
   const { tags: searchedTags, isLoading: isLoadingSearch } = useTags({
     query: debouncedQuery,
-    // クエリが空ならリクエストしない、または入力がある時だけ実行
-    triggered: debouncedQuery !== "",
+    triggered: debouncedQuery === query,
   });
 
   // クイック編集用タグデータの取得
@@ -106,19 +104,18 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     }
   }, [masterTags, sortStrategy, tagStates]);
 
-  // サジェスト用
+  // サジェスト用タグデータの作成
   const suggestedTags = useMemo(() => {
     if (!query) return [];
 
-    return masterTags.filter((tag) => {
-      const isMatch = isMatchJapanese(tag.name, query);
+    return searchedTags.filter((tag) => {
       const isAlreadyApplied = tagStates[tag.name] === "all";
       const isPending = !!pendingChanges[tag.id];
       const isPendingNew = pendingNewTags.some((t) => t.name === tag.name);
 
-      return isMatch && !isAlreadyApplied && !isPending && !isPendingNew;
+      return !isAlreadyApplied && !isPending && !isPendingNew;
     });
-  }, [query, masterTags, tagStates, pendingChanges, pendingNewTags]);
+  }, [query, searchedTags, tagStates, pendingChanges, pendingNewTags]);
 
   const toggleTagChange = useCallback(
     (tag: Tag) => {
