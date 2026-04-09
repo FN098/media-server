@@ -1,6 +1,6 @@
 import { getClientExplorerPath, getServerMediaPath } from "@/lib/path/helpers";
 
-export const blackListInExplorer = [".thumb", ".trash"];
+export const blackListInExplorer = [".thumb", ".trash", ".db"];
 
 const isBlockedPath = (pathname: string, blacklist: string[]) => {
   return blacklist.some(

@@ -1,12 +1,11 @@
 "use server";
 
 import { getServerMediaDbPath } from "@/lib/path/helpers";
-import { exec } from "child_process";
+import { getDatabaseUrlInfo } from "@/lib/url/db";
+import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
-import { promisify } from "util";
 
-const execPromise = promisify(exec);
 const BACKUP_DIR = getServerMediaDbPath("");
 
 // バックアップ一覧の取得
@@ -31,29 +30,107 @@ export async function createBackupAction() {
   const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
   const fileName = `backup_${timestamp}.sql`;
   const filePath = path.join(BACKUP_DIR, fileName);
+  const db = getDatabaseUrlInfo();
+
+  let fileHandle: fs.FileHandle | null = null;
 
   try {
     await fs.mkdir(BACKUP_DIR, { recursive: true });
 
-    // 環境変数からDB情報を取得する想定
-    const cmd = `mysqldump -u ${process.env.MYSQL_USER} -p${process.env.MYSQL_PASSWORD} ${process.env.MYSQL_DATABASE} > ${filePath}`;
-    await execPromise(cmd);
+    fileHandle = await fs.open(filePath, "w");
+
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn("mariadb-dump", [
+        "-h",
+        db.host,
+        "-P",
+        db.port,
+        "-u",
+        db.user,
+        "-p",
+        db.password,
+        "--skip-ssl",
+        db.database,
+      ]);
+
+      child.stdout.pipe(fileHandle!.createWriteStream());
+      child.stderr.on("data", (data: Buffer) => {
+        console.error("mariadb-dump error:", data.toString());
+      });
+
+      child.on("close", (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`mariadb-dump exited with code ${code}`));
+      });
+
+      child.on("error", reject);
+    });
+
     return { success: true, fileName };
   } catch (error) {
     console.error("create db backup error", error);
+
+    // ゴミファイル削除
+    try {
+      await fs.unlink(filePath);
+    } catch {}
+
     return { success: false, error: "バックアップに失敗しました" };
+  } finally {
+    if (fileHandle) {
+      try {
+        await fileHandle.close();
+      } catch {}
+    }
   }
 }
 
 // リストアの実行
 export async function restoreBackupAction(fileName: string) {
   const filePath = path.join(BACKUP_DIR, fileName);
+  const db = getDatabaseUrlInfo();
+
+  let fileHandle: fs.FileHandle | null = null;
+
   try {
-    const cmd = `mysql -u ${process.env.MYSQL_USER} -p${process.env.MYSQL_PASSWORD} ${process.env.MYSQL_DB} < ${filePath}`;
-    await execPromise(cmd);
+    fileHandle = await fs.open(filePath, "r");
+
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn("mysql", [
+        "-h",
+        db.host,
+        "-P",
+        db.port,
+        "-u",
+        db.user,
+        "-p",
+        db.password,
+        "--skip-ssl",
+        db.database,
+      ]);
+
+      fileHandle!.createReadStream().pipe(child.stdin);
+      child.stderr.on("data", (data: Buffer) => {
+        console.error("mysql error:", data.toString());
+      });
+
+      child.on("close", (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`mysql exited with code ${code}`));
+      });
+
+      child.on("error", reject);
+    });
+
     return { success: true };
   } catch (error) {
     console.error("restore db backup error", error);
     return { success: false, error: "リストアに失敗しました" };
+  } finally {
+    if (fileHandle) {
+      try {
+        await fileHandle.close();
+      } catch {}
+    }
   }
 }
