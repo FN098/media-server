@@ -1,7 +1,11 @@
 # 開発用イメージ（軽量）
 FROM node:25-slim
 
-# 必須パッケージインストール
+# パッケージインストール
+# git: ソース管理
+# ffmpeg: 動画サムネイル生成
+# default-mysql-client: DB バックアップ・リストア
+# ca-certificates: github 公開キー検証
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     ffmpeg \
