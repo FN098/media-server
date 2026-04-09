@@ -23,7 +23,7 @@ export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {
 // 最も参照件数が多いタグ
 async function searchMostRelatedTags({
   excludeIds,
-  limit,
+  limit = 100,
   query,
 }: SearchTagsOptions): Promise<Tag[]> {
   const buildTagWhere = (): Prisma.TagWhereInput => {
@@ -57,7 +57,7 @@ async function searchMostRelatedTags({
 // 最も新しく作られたタグ
 async function searchRecentlyCreatedTags({
   excludeIds,
-  limit,
+  limit = 100,
   query,
 }: SearchTagsOptions): Promise<Tag[]> {
   const buildTagWhere = (): Prisma.TagWhereInput => {
@@ -89,53 +89,55 @@ async function searchRecentlyCreatedTags({
 // 最も最近使われたタグ
 async function searchRecentlyUsedTags({
   excludeIds,
-  limit,
+  limit = 100,
   query,
 }: SearchTagsOptions): Promise<Tag[]> {
-  const buildTagWhere = (): Prisma.TagWhereInput => {
-    const where: Prisma.TagWhereInput = {
-      isActive: true,
-    };
-
-    if (query) {
-      where.OR = [{ kana: { contains: query } }, { name: { contains: query } }];
-    }
-
-    if (excludeIds && excludeIds.length > 0) {
-      where.id = { notIn: excludeIds };
-    }
-
-    return where;
+  const baseWhere: Prisma.TagWhereInput = {
+    isActive: true,
+    ...(query && {
+      OR: [{ kana: { contains: query } }, { name: { contains: query } }],
+    }),
+    ...(excludeIds?.length && { id: { notIn: excludeIds } }),
   };
 
-  const tagWhere = buildTagWhere();
-
-  // 最近使用された履歴を取得
+  // 1. 履歴あり: 最近使用順
   const rows = await prisma.mediaTag.groupBy({
     by: ["tagId"],
     _max: { createdAt: true },
-    orderBy: {
-      _max: { createdAt: "desc" },
-    },
+    orderBy: { _max: { createdAt: "desc" } },
     take: limit,
-    where: {
-      tag: tagWhere,
-    },
+    where: { tag: baseWhere },
   });
 
-  // 履歴にあるタグの詳細を取得
-  const historyTags = await prisma.tag.findMany({
+  const historyTagIds = rows.map((r) => r.tagId);
+
+  const historyTagDetails = await prisma.tag.findMany({
     select: { id: true, name: true },
-    where: {
-      id: { in: rows.map((r) => r.tagId) },
-    },
+    where: { id: { in: historyTagIds } },
   });
 
-  // 重要：historyTagDetailsをIDをキーにしたMapに変換し、rowsの順番通りに配列を再構成する
-  const tagMap = new Map(historyTags.map((t) => [t.id, t]));
-  const sortedHistoryTags = rows
+  const tagMap = new Map(historyTagDetails.map((t) => [t.id, t]));
+  const historyTags = rows
     .map((r) => tagMap.get(r.tagId))
     .filter((t): t is Tag => !!t);
 
-  return sortedHistoryTags.slice(0, limit);
+  // limitに達していれば履歴だけで返す
+  if (historyTags.length >= limit) {
+    return historyTags.slice(0, limit);
+  }
+
+  // 2. 履歴なし: tag.updatedAt 降順で補完
+  const remainingLimit = limit - historyTags.length;
+
+  const noHistoryTags = await prisma.tag.findMany({
+    select: { id: true, name: true },
+    where: {
+      ...baseWhere,
+      id: { notIn: [...(excludeIds ?? []), ...historyTagIds] },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: remainingLimit,
+  });
+
+  return [...historyTags, ...noHistoryTags];
 }
