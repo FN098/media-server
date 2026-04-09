@@ -1,22 +1,14 @@
 # 開発用イメージ（軽量）
 FROM node:25-alpine
 
+# パッケージインストール
+RUN npm install -g pnpm && \
+    apk add --no-cache libc6-compat git ffmpeg mysql-client
+
 # セキュリティのため非ルートユーザーを作成
 # --system: VSCode でアタッチして開発するので不要
 RUN addgroup --gid 1001 nodejs && \
   adduser --uid 1001 --ingroup nodejs -s /bin/sh -D nextjs
-
-# Git のインストール
-RUN apk add --no-cache git
-
-# ffmpeg のインストール
-RUN apk add --no-cache ffmpeg
-
-# MySQL クライアントのインストール
-RUN apk add --no-cache mysql-client
-
-# pnpm をグローバルインストール
-RUN npm i -g pnpm
 
 # ユーザーを root -> nextjs に切り替え
 USER nextjs

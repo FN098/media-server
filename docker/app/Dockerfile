@@ -2,7 +2,7 @@
 
 FROM node:25-alpine AS base
 
-# pnpm と libc6-compat をインストール
+# パッケージインストール
 RUN npm install -g pnpm && \
     apk add --no-cache libc6-compat mysql-client
 
@@ -54,6 +54,9 @@ RUN pnpm build
 # ===============================
 
 FROM base AS runner
+
+# MySQL クライアントをインストール
+RUN apk add --no-cache mysql-client
 
 # コンテナ内の作業ディレクトリ
 WORKDIR /app
