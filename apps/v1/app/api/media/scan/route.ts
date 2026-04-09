@@ -86,7 +86,6 @@ export function GET(req: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
-      console.log("start");
       const send = (data: GhostMediaScanEventArgs) => {
         // クライアントが切断していたら enqueue しない
         if (!req.signal.aborted) {

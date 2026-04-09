@@ -307,7 +307,7 @@ export function Favorites() {
   }, [isTagEditMode, isViewMode]);
 
   // デバッグ用
-  useEffect(() => console.log({ activeScope }), [activeScope]);
+  useEffect(() => console.debug({ activeScope }), [activeScope]);
 
   // スコープの排他的制御
   useEffect(() => {

@@ -36,7 +36,7 @@ export function useDocumentTitleControl() {
     document.title = originalTitle.current;
     setTitleState(originalTitle.current);
 
-    console.log(document.title);
+    console.debug(document.title);
   }, []);
 
   return {
