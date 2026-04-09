@@ -83,6 +83,8 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     [selectedTagCache]
   );
 
+  const selectedCount = selectedTags.length;
+
   const resetTags = useCallback(() => setSelectedTagIds(new Set()), []);
 
   const selectTags = useCallback((tags: Tag[]) => {
@@ -103,6 +105,7 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     // フィルター状態
     selectedTags,
     selectedTagIds,
+    selectedCount,
     isSelected,
     mode,
     setMode,

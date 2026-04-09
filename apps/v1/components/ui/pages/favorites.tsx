@@ -14,14 +14,13 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { TagFilterMode, useTagFilter } from "@/hooks/use-tag-filter";
+import { useTagFilter } from "@/hooks/use-tag-filter";
 import {
   createRatingFilter,
   createSearchFilter,
   createTagFilter,
 } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
-import { sortNames } from "@/lib/media/sort";
 import {
   MediaNode,
   MediaNodeFilter,
@@ -29,7 +28,6 @@ import {
   MediaPathToNodeMap,
 } from "@/lib/media/types";
 import { normalizeIndex } from "@/lib/query/utils";
-import { unique } from "@/lib/utils/unique";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { PagingProvider } from "@/providers/paging-provider";
@@ -82,14 +80,6 @@ export function Favorites() {
   // タグフィルタ
   const tagFilter = useTagFilter();
 
-  const handleApplyTagFilter = (
-    tags: Iterable<string>,
-    mode: TagFilterMode
-  ) => {
-    tagFilter.selectTags(tags);
-    tagFilter.setMode(mode);
-  };
-
   // 最小レーティングフィルタ
   const [minRating, setMinRating] = useState<number>(0);
 
@@ -102,14 +92,16 @@ export function Favorites() {
 
   // フィルターが一つでも適用されているかチェック
   const isFiltered =
-    tagFilter.selectedTags.size > 0 ||
-    tagFilter.mode !== "AND" ||
-    minRating > 0;
+    tagFilter.selectedCount > 0 || tagFilter.mode !== "AND" || minRating > 0;
 
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
   const tagFilterFn = useMemo(
-    () => createTagFilter(Array.from(tagFilter.selectedTags), tagFilter.mode),
+    () =>
+      createTagFilter(
+        tagFilter.selectedTags.map((t) => t.name),
+        tagFilter.mode
+      ),
     [tagFilter]
   );
   const ratingFilterFn = useMemo(
@@ -144,19 +136,6 @@ export function Favorites() {
   const mediaOnly = useMemo(
     () => filteredNodes.filter((n) => isMedia(n.type)),
     [filteredNodes]
-  );
-
-  // 「メディアのみ」のタグリスト
-  const mediaOnlyTags = useMemo(
-    () =>
-      sortNames(
-        unique(
-          mediaOnly
-            .filter((n) => n.tags && n.tags.length > 0)
-            .flatMap((n) => n.tags!.map((t) => t.name))
-        )
-      ),
-    [mediaOnly]
   );
 
   // ===== ビューア =====
@@ -423,12 +402,7 @@ export function Favorites() {
             <RatingFilterSelect value={minRating} onChange={setMinRating} />
 
             {/* タグフィルター */}
-            <TagFilterDialog
-              tags={mediaOnlyTags}
-              selectedTags={tagFilter.selectedTags}
-              currentMode={tagFilter.mode}
-              onApply={handleApplyTagFilter}
-            />
+            <TagFilterDialog />
 
             {/* リセットボタン */}
             <FilterResetButton

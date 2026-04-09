@@ -128,7 +128,7 @@ export function Explorer() {
 
   // フィルターが一つでも適用されているかチェック
   const isFiltered =
-    tagFilter.selectedTags.length > 0 ||
+    tagFilter.selectedCount > 0 ||
     tagFilter.mode !== "AND" ||
     filterMode !== "all" ||
     minRating > 0;
