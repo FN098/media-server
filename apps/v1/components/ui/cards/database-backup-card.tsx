@@ -20,13 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shadcn/components/ui/select";
-import {
-  Database,
-  Download,
-  Loader2,
-  RefreshCcw,
-  RotateCcw,
-} from "lucide-react";
+import { Database, Download, Loader2, Plus, RotateCcw } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -89,7 +83,7 @@ export function DatabaseBackupCard() {
           {isCreating ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            <RefreshCcw className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
           )}
           新規バックアップ作成
         </Button>

@@ -30,6 +30,7 @@ import { Switch } from "@/shadcn/components/ui/switch";
 import {
   AlertCircle,
   CheckCircle2,
+  Ghost,
   Loader2,
   Search,
   Trash2,
@@ -163,7 +164,7 @@ export function GhostMediaCleanupCard({
     <Card className="border-destructive/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-destructive">
-          <Trash2 className="w-5 h-5" />
+          <Ghost className="w-5 h-5" />
           ゴーストデータ削除
         </CardTitle>
         <CardDescription>
@@ -260,6 +261,7 @@ export function GhostMediaCleanupCard({
                   className="flex-1"
                   disabled={isScanning || isPending}
                 >
+                  <Search className="mr-2 h-4 w-4" />
                   スキャン
                 </Button>
               </AlertDialogTrigger>
@@ -287,6 +289,7 @@ export function GhostMediaCleanupCard({
               onClick={handleScan}
               disabled={isScanning || isPending}
             >
+              <Search className="mr-2 h-4 w-4" />
               {items === null ? "スキャン" : "再スキャン"}
             </Button>
           )}
@@ -300,6 +303,7 @@ export function GhostMediaCleanupCard({
                   isScanning || isPending || !items || items.length === 0
                 }
               >
+                <Trash2 className="mr-2 h-4 w-4" />
                 削除を実行
               </Button>
             </AlertDialogTrigger>

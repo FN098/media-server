@@ -33,7 +33,7 @@ import {
   CardTitle,
 } from "@/shadcn/components/ui/card";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
-import { CheckCircle2, Loader2, Search, Tag } from "lucide-react";
+import { CheckCircle2, Loader2, Search, Tag, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -180,6 +180,7 @@ export function UnusedTagsCleanupCard({
             disabled={isPending}
             className="flex-1"
           >
+            <Search className="mr-2 h-4 w-4" />
             {!hasScanned ? "スキャン" : "再スキャン"}
           </Button>
 
@@ -191,7 +192,11 @@ export function UnusedTagsCleanupCard({
                 className="flex-[2]"
                 disabled={isPending || !hasScanned || selectedIds.size === 0}
               >
-                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="mr-2 h-4 w-4" />
+                )}
                 選択した {selectedIds.size} 件を削除
               </Button>
             </AlertDialogTrigger>
