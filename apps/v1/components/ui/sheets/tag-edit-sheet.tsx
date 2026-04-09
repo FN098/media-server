@@ -70,11 +70,6 @@ export function TagEditSheet({
     editor.setNewTagName("");
   };
 
-  // 編集モードに移行
-  const handleEdit = () => {
-    setEditingMode("edit");
-  };
-
   // 保存処理
   const [isLoading, startTransition] = useTransition();
   const handleApply = () => {
@@ -123,16 +118,32 @@ export function TagEditSheet({
     });
   };
 
-  // 終了処理
+  // 閲覧→クイック→詳細モードに移行
+  const handleEdit = () => {
+    const modeMap = {
+      view: "quick",
+      quick: "edit",
+      edit: "edit",
+    } as const;
+
+    const nextMode = modeMap[editingMode];
+    setEditingMode(nextMode);
+  };
+
+  // 詳細→クイック→閲覧→モードに移行 or 閉じる
   const handleTerminate = () => {
-    // 編集モードなら閲覧モードに移行（閉じない）
-    if (editingMode !== "view") {
-      setEditingMode("view");
+    const modeMap = {
+      edit: "quick",
+      quick: "view",
+      view: "close",
+    } as const;
+
+    const nextMode = modeMap[editingMode];
+    if (nextMode === "close") {
+      onClose?.();
       return;
     }
-
-    // 閲覧モードなら閉じる
-    onClose?.();
+    setEditingMode(nextMode);
   };
 
   // ショートカット
