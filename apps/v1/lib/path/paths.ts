@@ -10,6 +10,9 @@ export const PATHS = {
       trash: {
         root: `${MEDIA_ROOT}/.trash`,
       },
+      db: {
+        root: `${MEDIA_ROOT}/.db`,
+      },
     },
   },
   virtual: {

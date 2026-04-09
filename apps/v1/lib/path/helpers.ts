@@ -37,6 +37,10 @@ export function getServerMediaTrashPath(mediaPath: string): string {
   return path.join(PATHS.server.media.trash.root, mediaPath);
 }
 
+export function getServerMediaDbPath(mediaPath: string): string {
+  return path.join(PATHS.server.media.db.root, mediaPath);
+}
+
 export function getClientExplorerPath(mediaPath: string): string {
   return path.join(PATHS.client.explorer.root, mediaPath);
 }
