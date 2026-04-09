@@ -119,6 +119,8 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     query,
     setQuery,
     displayTags,
+    baseTags,
+    searchedTags,
     isLoading,
 
     // 戦略
