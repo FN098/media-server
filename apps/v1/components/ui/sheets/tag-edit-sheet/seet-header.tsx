@@ -81,7 +81,7 @@ export function SheetHeader({
                 "p-1.5 rounded-lg border transition-all shadow-sm",
                 isBlur
                   ? "bg-sky-500/10 border-sky-500/30 text-sky-500"
-                  : "bg-background border-border text-muted-foreground/60"
+                  : "bg-background/10 border-border text-muted-foreground/60"
               )}
             >
               {isBlur ? (
@@ -124,7 +124,7 @@ export function SheetHeader({
       </div>
 
       {/* モード切り替えスイッチ */}
-      <div className="flex w-full sm:w-auto gap-0.5 bg-background border border-border/60 rounded-full p-1 shadow-md">
+      <div className="flex w-full sm:w-auto gap-0.5 bg-background/10 border border-border/60 rounded-full p-1 shadow-md">
         {(["view", "quick", "edit"] as const).map((m) => {
           const isActive = editingMode === m;
           return (
