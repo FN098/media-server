@@ -113,13 +113,13 @@ export function TagEditSheet({
         await editor.invalidateTags();
         router.refresh();
 
-        handleTerminate();
+        handleModeChangeDown();
       }
     });
   };
 
   // 閲覧→クイック→詳細モードに移行
-  const handleEdit = () => {
+  const handleModeChangeUp = () => {
     const modeMap = {
       view: "quick",
       quick: "edit",
@@ -130,8 +130,8 @@ export function TagEditSheet({
     setEditingMode(nextMode);
   };
 
-  // 詳細→クイック→閲覧→モードに移行 or 閉じる
-  const handleTerminate = () => {
+  // 詳細→クイック→閲覧モードに移行 or 閉じる
+  const handleModeChangeDown = () => {
     const modeMap = {
       edit: "quick",
       quick: "view",
@@ -140,14 +140,20 @@ export function TagEditSheet({
 
     const nextMode = modeMap[editingMode];
     if (nextMode === "close") {
-      onClose?.();
+      handleClose();
       return;
     }
     setEditingMode(nextMode);
   };
 
+  // 閉じる
+  const handleClose = () => {
+    debugger;
+    onClose?.();
+  };
+
   // ショートカット
-  useHotkeys("escape", () => handleTerminate(), { scopes: "tag-editor" });
+  useHotkeys("escape", () => handleModeChangeDown(), { scopes: "tag-editor" });
   useHotkeys("e", () => setEditingMode("edit"), { scopes: "tag-editor" });
   useHotkeys("q", () => setEditingMode("quick"), { scopes: "tag-editor" });
   useHotkeys("v", () => setEditingMode("view"), { scopes: "tag-editor" });
@@ -161,7 +167,7 @@ export function TagEditSheet({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[60] bg-black/40"
-          onClick={handleTerminate}
+          onClick={handleModeChangeDown}
         />
       )}
 
@@ -176,12 +182,12 @@ export function TagEditSheet({
         onDragEnd={(_, info) => {
           // 下スワイプ: 終了
           if (info.velocity.y > 300 || info.offset.y > 100) {
-            handleTerminate();
+            handleModeChangeDown();
           }
           // 上スワイプ: 編集
           else if (info.velocity.y < -300 || info.offset.y < -100) {
             if (canEdit) {
-              handleEdit();
+              handleModeChangeUp();
             }
           }
         }}
@@ -235,8 +241,8 @@ export function TagEditSheet({
                     setEditingMode={setEditingMode}
                     opacity={opacity}
                     canEdit={canEdit}
-                    onClose={handleTerminate}
-                    onEditClick={handleEdit}
+                    onClose={handleClose}
+                    onEditClick={handleModeChangeUp}
                     onOpacityChange={handleChangeOpacity}
                   />
                   <TagList
@@ -267,8 +273,8 @@ export function TagEditSheet({
                     setEditingMode={setEditingMode}
                     opacity={opacity}
                     canEdit={canEdit}
-                    onClose={handleTerminate}
-                    onEditClick={handleEdit}
+                    onClose={handleClose}
+                    onEditClick={handleModeChangeUp}
                     onOpacityChange={handleChangeOpacity}
                   />
                   <TagList
@@ -314,7 +320,7 @@ export function TagEditSheet({
                     opacity={opacity}
                     canEdit={canEdit}
                     onEditClick={() => {}}
-                    onClose={handleTerminate}
+                    onClose={handleClose}
                     onOpacityChange={handleChangeOpacity}
                   />
                   <TagInput
@@ -327,7 +333,7 @@ export function TagEditSheet({
                     onAdd={() => handleNewAdd(editor.newTagName)}
                     onSelectSuggestion={editor.selectSuggestion}
                     onApply={handleApply}
-                    onCancel={handleTerminate}
+                    onCancel={handleModeChangeDown}
                   />
                   <TagList
                     isEditing={true}
