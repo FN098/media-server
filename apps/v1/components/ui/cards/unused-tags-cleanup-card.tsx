@@ -120,10 +120,6 @@ export function UnusedTagsCleanupCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* ステータス & テーブルエリア */}
-        {/* <div className="flex items-center h-10 px-3 border rounded bg-muted/20 text-sm">
-          {!hasScanned ? (
-            <div className="flex items-center gap-2 text-muted-foreground">
-            </div> */}
         <div className="border rounded-md bg-muted/10 overflow-hidden">
           {!hasScanned ? (
             <div className="h-[200px] flex items-center justify-center text-sm text-muted-foreground gap-2">
