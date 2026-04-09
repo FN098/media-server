@@ -7,6 +7,7 @@ import { MediaNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
+import { TagFilterProvider } from "@/providers/tag-filter-provider";
 import { getFavoriteMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 
@@ -62,7 +63,9 @@ export default async function FavoritePage(props: FavoritePageProps) {
     <ExplorerProvider listing={listing}>
       <FavoritesProvider favorites={listing.nodes}>
         <PathSelectionProvider>
-          <Favorites />
+          <TagFilterProvider>
+            <Favorites />
+          </TagFilterProvider>
         </PathSelectionProvider>
       </FavoritesProvider>
     </ExplorerProvider>
