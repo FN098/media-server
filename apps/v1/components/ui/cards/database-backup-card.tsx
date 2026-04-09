@@ -185,7 +185,10 @@ export function DatabaseBackupCard() {
             variant="secondary"
             className="flex-1"
             disabled={!selectedFile || isListing}
-            onClick={() => window.open(`/api/db/download?file=${selectedFile}`)}
+            onClick={() => {
+              const url = `/api/db/download?file=${encodeURIComponent(selectedFile)}`;
+              window.location.href = url;
+            }}
           >
             <Download className="mr-2 h-4 w-4" /> ダウンロード
           </Button>
