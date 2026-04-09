@@ -501,66 +501,66 @@ export function Explorer() {
         ref={scrollRef}
         tabIndex={-1}
       >
-        <div className="flex flex-wrap items-center gap-1 px-4 py-2">
-          {/* ソート順 */}
-          <SortSelect
-            options={[
-              {
-                key: "name",
-                direction: "asc",
-                label: "名前順 (A-Z)",
-                icon: ArrowDownAz,
-              },
-              {
-                key: "name",
-                direction: "desc",
-                label: "名前順 (Z-A)",
-                icon: ArrowDownZa,
-              },
-              {
-                key: "rating",
-                direction: "desc",
-                label: "評価が高い順",
-                icon: ArrowDown10,
-              },
-              {
-                key: "mtime",
-                direction: "desc",
-                label: "更新日が新しい順",
-                icon: CalendarArrowDown,
-              },
-            ]}
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2 flex-grow">
+            {/* ソート順 */}
+            <SortSelect
+              options={[
+                {
+                  key: "name",
+                  direction: "asc",
+                  label: "名前順 (A-Z)",
+                  icon: ArrowDownAz,
+                },
+                {
+                  key: "name",
+                  direction: "desc",
+                  label: "名前順 (Z-A)",
+                  icon: ArrowDownZa,
+                },
+                {
+                  key: "rating",
+                  direction: "desc",
+                  label: "評価が高い順",
+                  icon: ArrowDown10,
+                },
+                {
+                  key: "mtime",
+                  direction: "desc",
+                  label: "更新日が新しい順",
+                  icon: CalendarArrowDown,
+                },
+              ]}
+            />
 
-          {/* 評価フィルター */}
-          <RatingFilterSelect value={minRating} onChange={setMinRating} />
+            {/* 評価フィルター */}
+            <RatingFilterSelect value={minRating} onChange={setMinRating} />
 
-          {/* タグフィルター */}
-          <TagFilterDialog
-            tags={mediaOnlyTags}
-            selectedTags={tagFilter.selectedTags}
-            currentMode={tagFilter.mode}
-            onApply={handleApplyTagFilter}
-          />
+            {/* タグフィルター */}
+            <TagFilterDialog
+              tags={mediaOnlyTags}
+              selectedTags={tagFilter.selectedTags}
+              currentMode={tagFilter.mode}
+              onApply={handleApplyTagFilter}
+            />
 
-          {/* お気に入りフィルター */}
-          <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />
+            {/* お気に入りフィルター */}
+            <FavoriteFilterButton mode={filterMode} onChange={setFilterMode} />
 
-          {/* リセットボタン */}
-          <FilterResetButton
-            onReset={handleResetFilters}
-            isVisible={isFiltered}
-          />
+            {/* リセットボタン */}
+            <FilterResetButton
+              onReset={handleResetFilters}
+              isVisible={isFiltered}
+            />
 
-          <div className="flex flex-grow" />
-
-          {/* フィルター結果 */}
-          <FilterResultText
-            totalCount={allNodes.length}
-            filteredCount={filteredNodes.length}
-            isFiltered={isFiltered}
-            className="ml-auto"
-          />
+            {/* フィルター結果 */}
+            <FilterResultText
+              totalCount={allNodes.length}
+              filteredCount={filteredNodes.length}
+              isFiltered={isFiltered}
+              className="ml-auto"
+            />
+          </div>
         </div>
 
         {/* グリッドビュー */}

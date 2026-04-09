@@ -60,14 +60,14 @@ export function SortSelect({
   };
 
   return (
-    <div className={cn(isPending && "opacity-70 transition-opacity")}>
+    <div className={cn("w-full", isPending && "opacity-70 transition-opacity")}>
       <Select
         // selectValue が変わった時にコンポーネントを正しく再描画させる
         key={selectValue || "reset"}
         value={selectValue}
         onValueChange={handleValueChange}
       >
-        <SelectTrigger className="bg-background focus:ring-1 w-[180px]">
+        <SelectTrigger className="bg-background focus:ring-1 w-full">
           <div className="flex items-center gap-2 overflow-hidden text-sm">
             <div className="truncate">
               <SelectValue

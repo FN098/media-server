@@ -26,7 +26,7 @@ export function RatingFilterSelect({
       value={value.toString()}
       onValueChange={(v) => onChange(parseInt(v, 10))}
     >
-      <SelectTrigger className={cn("w-[160px] h-8", className)}>
+      <SelectTrigger className={cn("w-full h-9", className)}>
         {/* valueが0の時はカスタムのプレースホルダーを表示 */}
         {value === 0 ? (
           <div className="flex items-center gap-2">
