@@ -69,6 +69,8 @@ ENV HOSTNAME="0.0.0.0"
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# kuromoji の辞書ファイルを standalone 側の適切な位置にコピー
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/kuromoji/dict ./node_modules/kuromoji/dict
 
 USER nextjs
 EXPOSE 3000
