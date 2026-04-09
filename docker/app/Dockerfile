@@ -5,10 +5,8 @@
 # ===============================
 FROM node:25-slim AS base
 
-# パッケージインストール
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# pnpm をグローバルインストール
+RUN npm i -g pnpm
 
 # コンテナ内の作業ディレクトリ
 WORKDIR /app
