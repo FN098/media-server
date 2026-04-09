@@ -29,12 +29,12 @@ export function SheetHeader({
   const textMap = {
     single: {
       "edit-title": "タグを編集",
-      "view-title": "タグ",
+      "view-title": "タグ一覧",
       selection: "",
     },
     default: {
       "edit-title": "一括タグ編集",
-      "view-title": "タグ",
+      "view-title": "タグ一覧",
       selection: `${count}件を選択中`,
     },
     none: {
