@@ -14,10 +14,25 @@ export async function getBackupListAction() {
     await fs.mkdir(BACKUP_DIR, { recursive: true });
 
     const files = await fs.readdir(BACKUP_DIR);
-    return files
-      .filter((file) => file.endsWith(".sql"))
-      .sort()
-      .reverse(); // 新しい順
+
+    // 各ファイルの情報を取得
+    const backupList = await Promise.all(
+      files
+        .filter((file) => file.endsWith(".sql"))
+        .map(async (file) => {
+          const stats = await fs.stat(path.join(BACKUP_DIR, file));
+          return {
+            name: file,
+            createdAt: stats.mtime.toISOString(), // クライアントで扱うためにISO形式で送る
+          };
+        })
+    );
+
+    // 新しい順にソート
+    return backupList.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   } catch (error) {
     console.error("list db backup error", error);
     return [];

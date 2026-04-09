@@ -5,6 +5,17 @@ import {
   getBackupListAction,
   restoreBackupAction,
 } from "@/actions/db-actions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shadcn/components/ui/alert-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,
@@ -24,12 +35,31 @@ import { Database, Download, Loader2, Plus, RotateCcw } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
+type BackupInfo = {
+  name: string;
+  createdAt: string;
+};
+
 export function DatabaseBackupCard() {
   const [isListing, startList] = useTransition();
   const [isCreating, startCreate] = useTransition();
   const [isRestoring, startRestore] = useTransition();
-  const [backups, setBackups] = useState<string[]>([]);
+  const [backups, setBackups] = useState<BackupInfo[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>("");
+
+  const formatDateTime = (isoString: string) => {
+    const date = new Date(isoString);
+    const formatted = date.toLocaleString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    return `${formatted} (JST)`;
+  };
 
   const refreshList = () => {
     startList(async () => {
@@ -74,6 +104,7 @@ export function DatabaseBackupCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* 新規バックアップ作成ボタン */}
         <Button
           onClick={handleBackup}
           disabled={isCreating}
@@ -88,6 +119,7 @@ export function DatabaseBackupCard() {
           新規バックアップ作成
         </Button>
 
+        {/* 保存済みバックアップ選択 */}
         <div className="space-y-2">
           <label className="text-xs font-medium text-muted-foreground">
             保存済みバックアップ
@@ -97,28 +129,48 @@ export function DatabaseBackupCard() {
               onValueChange={setSelectedFile}
               value={selectedFile}
               onOpenChange={(open) => {
-                if (open) {
+                if (open && backups.length === 0) {
                   void refreshList();
                 }
               }}
             >
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="ファイルを選択" />
+              <SelectTrigger className="flex-1 h-auto py-3 [&>span]:line-clamp-none">
+                <SelectValue placeholder="ファイルを選択">
+                  {selectedFile && (
+                    <div className="flex w-full justify-between items-start gap-1">
+                      <span className="font-medium text-sm leading-none">
+                        {selectedFile}
+                      </span>
+                    </div>
+                  )}
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[400px]">
                 {isListing ? (
-                  <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
-                    <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  <div className="flex items-center justify-center p-6 text-xs text-muted-foreground">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     リストを取得中...
                   </div>
                 ) : backups.length === 0 ? (
-                  <div className="p-4 text-xs text-center text-muted-foreground">
-                    バックアップファイルが見つかりません
+                  <div className="p-6 text-xs text-center text-muted-foreground">
+                    バックアップが見つかりません
                   </div>
                 ) : (
                   backups.map((file) => (
-                    <SelectItem key={file} value={file}>
-                      {file}
+                    <SelectItem
+                      key={file.name}
+                      value={file.name}
+                      className="py-3 cursor-pointer"
+                    >
+                      <div className="flex flex-col items-start gap-1">
+                        <span className="font-medium leading-none">
+                          {file.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-1">
+                          <span className="inline-block w-2 h-2 rounded-full bg-blue-400/50" />
+                          作成日: {formatDateTime(file.createdAt)}
+                        </span>
+                      </div>
                     </SelectItem>
                   ))
                 )}
@@ -128,6 +180,7 @@ export function DatabaseBackupCard() {
         </div>
 
         <div className="flex gap-2">
+          {/* ダウンロードボタン */}
           <Button
             variant="secondary"
             className="flex-1"
@@ -137,14 +190,45 @@ export function DatabaseBackupCard() {
             <Download className="mr-2 h-4 w-4" /> ダウンロード
           </Button>
 
-          <Button
-            variant="destructive"
-            className="flex-1"
-            disabled={!selectedFile || isRestoring}
-            onClick={handleRestore}
-          >
-            <RotateCcw className="mr-2 h-4 w-4" /> リストア実行
-          </Button>
+          {/* リストア実行ボタン＋確認ダイアログ */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                disabled={!selectedFile || isRestoring}
+              >
+                {isRestoring ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                )}
+                リストア実行
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>本当にリストアしますか？</AlertDialogTitle>
+                <AlertDialogDescription>
+                  選択したバックアップファイル <strong>{selectedFile}</strong>{" "}
+                  を使用してデータベースを復元します。
+                  <br />
+                  <span className="text-destructive font-bold">
+                    現在のデータは上書きされ、元に戻すことはできません。
+                  </span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleRestore}
+                  className="bg-destructive text-white hover:bg-destructive/90"
+                >
+                  リストアを確定する
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardContent>
     </Card>
