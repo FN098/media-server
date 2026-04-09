@@ -278,7 +278,7 @@ export function TagEditSheet({
                     onOpacityChange={handleChangeOpacity}
                   />
                   <TagList
-                    isEditing={false}
+                    isEditing={true}
                     tags={editor.viewModeTags}
                     pendingChanges={editor.pendingChanges}
                     pendingNewTags={editor.pendingNewTags}
