@@ -4,8 +4,7 @@ import { useTagStates } from "@/hooks/use-tag-selection";
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import {
-  PendingChangesType,
-  PendingNewTag,
+  PendingChanges,
   SearchTagStrategy,
   SortTagStrategy,
   Tag,
@@ -22,8 +21,9 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     initialTargetNodes ?? []
   );
   const [newTagName, setNewTagName] = useState("");
-  const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
-  const [pendingChanges, setPendingChanges] = useState<PendingChangesType>({});
+  const [pendingNewTags, setPendingNewTags] = useState<Tag[]>([]);
+  const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
+  const [pendingChangeTags, setPendingChangeTags] = useState<Tag[]>([]);
   const [searchStrategy, setSearchStrategy] =
     useState<SearchTagStrategy>("default");
   const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
@@ -75,20 +75,18 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
 
   // 編集用タグデータの作成
   const editModeTags = useMemo(() => {
-    const pendingAsTags: Tag[] = pendingNewTags.map((t) => ({
-      id: t.tempId, // 仮ID
-      name: t.name,
-    }));
-
-    const unique = uniqueBy([...masterTags, ...pendingAsTags], "id");
+    const combined = uniqueBy(
+      [...masterTags, ...pendingNewTags, ...pendingChangeTags],
+      "id"
+    );
 
     switch (sortStrategy) {
       case "by-name":
-        return unique.sort((a, b) => a.name.localeCompare(b.name));
+        return combined.sort((a, b) => a.name.localeCompare(b.name));
       default:
-        return unique;
+        return combined;
     }
-  }, [masterTags, pendingNewTags, sortStrategy]);
+  }, [pendingNewTags, pendingChangeTags, masterTags, sortStrategy]);
 
   // 閲覧用タグデータの作成
   const viewModeTags = useMemo(() => {
@@ -125,25 +123,25 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
         const next = { ...prev };
         const current = prev[tag.id]; // "add" | "remove" | undefined
 
-        let nextState: "add" | "remove" | undefined;
+        let nextOp: "add" | "remove" | undefined;
 
         if (dbState === "all") {
           // none <-> remove
-          nextState = current === "remove" ? undefined : "remove";
+          nextOp = current === "remove" ? undefined : "remove";
         } else if (dbState === "none") {
           // none <-> add
-          nextState = current === "add" ? undefined : "add";
+          nextOp = current === "add" ? undefined : "add";
         } else {
           // some: none -> add -> remove -> none
-          if (current === undefined) nextState = "add";
-          else if (current === "add") nextState = "remove";
-          else nextState = undefined;
+          if (current === undefined) nextOp = "add";
+          else if (current === "add") nextOp = "remove";
+          else nextOp = undefined;
         }
 
-        if (nextState === undefined) {
+        if (nextOp === undefined) {
           delete next[tag.id];
         } else {
-          next[tag.id] = nextState;
+          next[tag.id] = nextOp;
         }
 
         return next;
@@ -152,9 +150,12 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     [tagStates]
   );
 
-  const setTagChange = useCallback((tag: Tag, op: TagOperator) => {
+  const setTagChange = useCallback((tag: Tag, operator: TagOperator) => {
     setPendingChanges((prev) => {
-      return { ...prev, [tag.id]: op };
+      return { ...prev, [tag.id]: operator };
+    });
+    setPendingChangeTags((prev) => {
+      return [...prev, { ...tag }];
     });
   }, []);
 
@@ -166,7 +167,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   const addPendingNewTag = useCallback((name: string) => {
     setPendingNewTags((prev) => {
       if (prev.some((t) => t.name === name)) return prev;
-      return [...prev, { tempId: v4(), name }];
+      return [...prev, { id: v4(), name }];
     });
   }, []);
 

@@ -53,8 +53,7 @@ export type SearchTagsRequestParams = {
 
 export type SortTagStrategy = (typeof sortTagStrategies)[number];
 
-export type TagIdType = string;
-export type PendingChangesType = Record<TagIdType, TagOperator>;
+export type PendingChanges = Record<string, TagOperator>;
 
 export type UnusedTagItem = {
   id: string;
