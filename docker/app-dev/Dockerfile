@@ -12,6 +12,9 @@ RUN apk add --no-cache git
 # ffmpeg のインストール
 RUN apk add --no-cache ffmpeg
 
+# MySQL クライアントのインストール
+RUN apk add --no-cache mysql-client
+
 # pnpm をグローバルインストール
 RUN npm i -g pnpm
 

@@ -4,7 +4,7 @@ FROM node:25-alpine AS base
 
 # pnpm と libc6-compat をインストール
 RUN npm install -g pnpm && \
-    apk add --no-cache libc6-compat
+    apk add --no-cache libc6-compat mysql-client
 
 # ===============================
 # 0. Deps Stage
