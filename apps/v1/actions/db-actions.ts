@@ -26,7 +26,6 @@ export async function getBackupListAction() {
 
 // バックアップの実行
 export async function createBackupAction() {
-  debugger;
   const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
   const fileName = `backup_${timestamp}.sql`;
   const filePath = path.join(BACKUP_DIR, fileName);
@@ -40,27 +39,25 @@ export async function createBackupAction() {
     fileHandle = await fs.open(filePath, "w");
 
     await new Promise<void>((resolve, reject) => {
-      const child = spawn("mariadb-dump", [
+      const child = spawn("mysqldump", [
         "-h",
         db.host,
         "-P",
         db.port,
         "-u",
         db.user,
-        "-p",
-        db.password,
-        "--skip-ssl",
+        `-p${db.password}`,
         db.database,
       ]);
 
       child.stdout.pipe(fileHandle!.createWriteStream());
       child.stderr.on("data", (data: Buffer) => {
-        console.error("mariadb-dump error:", data.toString());
+        console.error("mysqldump error:", data.toString());
       });
 
       child.on("close", (code) => {
         if (code === 0) resolve();
-        else reject(new Error(`mariadb-dump exited with code ${code}`));
+        else reject(new Error(`mysqldump exited with code ${code}`));
       });
 
       child.on("error", reject);
@@ -103,9 +100,7 @@ export async function restoreBackupAction(fileName: string) {
         db.port,
         "-u",
         db.user,
-        "-p",
-        db.password,
-        "--skip-ssl",
+        `-p${db.password}`,
         db.database,
       ]);
 
