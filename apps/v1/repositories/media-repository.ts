@@ -37,6 +37,7 @@ export async function getDbMediaNodes(
     select: {
       id: true,
       path: true,
+      previewPath: true,
       title: true,
       fileMtime: true,
       fileSize: true,
@@ -60,6 +61,7 @@ export async function getDbMediaNodes(
     id: m.id,
     fileMtime: m.fileMtime,
     path: m.path,
+    previewPath: m.previewPath ?? undefined,
     fileSize: Number(m.fileSize),
     title: m.title ?? undefined,
     tags: m.mediaTags.map((t) => ({
@@ -84,6 +86,7 @@ export async function getFavoriteMediaNodes(
           title: true,
           fileMtime: true,
           fileSize: true,
+          previewPath: true,
           mediaTags: {
             select: {
               tag: {
@@ -115,6 +118,7 @@ export async function getFavoriteMediaNodes(
     })),
     rating: f.rating ?? 0,
     favoritedAt: f.createdAt,
+    previewPath: f.media.previewPath,
   }));
 }
 

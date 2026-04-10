@@ -40,7 +40,7 @@ export function mergeFsWithDb({
       tags: dbMediaEntry?.tags,
       previewPath: fsNode.isDirectory
         ? dbFolderMetaEntry?.previewPath
-        : undefined,
+        : dbMediaEntry?.previewPath,
       rating: dbMediaEntry?.rating ?? 0,
     } satisfies MediaNode;
   });

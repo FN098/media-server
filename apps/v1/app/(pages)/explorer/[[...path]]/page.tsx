@@ -15,7 +15,6 @@ import {
   getDbFavoriteCount,
   getDbFolderMetas,
   getDbVisitedInfoDeeply,
-  upsertFolderMetas,
 } from "@/repositories/folder-repository";
 import { getDbMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
@@ -66,20 +65,6 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   if (!fsListing) notFound();
 
   const allNodes = fsListing.nodes;
-
-  // このフォルダ内の「顔」となるメディア（画像 or 動画）を探す
-  const firstMedia = allNodes.find(
-    (n) => !n.isDirectory && (n.type === "image" || n.type === "video")
-  );
-
-  // 今開いている「このフォルダ」自体のプレビューをDBに保存
-  void upsertFolderMetas([
-    {
-      path: currentVirtualPath,
-      previewPath: firstMedia?.path ?? null,
-    },
-  ]).catch(console.error);
-
   const dirPaths = allNodes.filter((e) => e.isDirectory).map((e) => e.path);
   const user = await resolveCurrentUser();
 
@@ -113,40 +98,9 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   // フォーマット
   const formatted = formatNodes(sorted);
 
-  // オーディオファイルに対して、プレビューパスを決定
-  const withPreviewForAudio = (nodes: MediaNode[]) => {
-    // 検索を高速化するために、画像・動画ノードの「拡張子なしの名前」をキーにしたマップを作成
-    const mediaMap = new Map<string, string>();
-    nodes.forEach((n) => {
-      if (!n.isDirectory && (n.type === "image" || n.type === "video")) {
-        // 例: "song.jpg" -> "song"
-        const baseName = n.name.replace(/\.[^/.]+$/, "");
-        if (!mediaMap.has(baseName)) {
-          mediaMap.set(baseName, n.path);
-        }
-      }
-    });
-
-    return nodes.map((node) => {
-      if (node.type === "audio") {
-        // 1. 同名のメディアファイルを探す
-        const baseName = node.name.replace(/\.[^/.]+$/, "");
-        const sameNameMediaPath = mediaMap.get(baseName);
-
-        // 2. 同名があればそれを、なければフォルダの代表(firstMedia)を使う
-        const previewPath = sameNameMediaPath ?? firstMedia?.path;
-
-        if (previewPath) {
-          return { ...node, previewPath };
-        }
-      }
-      return node;
-    });
-  };
-
   const listing = {
     ...fsListing,
-    nodes: withPreviewForAudio(formatted),
+    nodes: formatted,
   };
 
   return (

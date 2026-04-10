@@ -56,6 +56,7 @@ export type DbMediaNode = {
   fileSize?: number;
   tags?: MediaNodeTag[];
   rating?: number;
+  previewPath?: string;
 };
 
 export type DbVisitedInfo = {
