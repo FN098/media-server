@@ -130,6 +130,7 @@ export function Explorer() {
     tagFilter.selectedCount > 0 ||
     tagFilter.mode !== "AND" ||
     minRating > 0 ||
+    minRating === -1 ||
     mediaTypeFilterValue !== "all";
 
   // フィルタ関数
