@@ -458,7 +458,7 @@ export function Explorer() {
     },
     { scopes: "explorer-main" }
   );
-  useHotkeys("f2", () => setRenameTarget(selected[0] ?? null), {
+  useHotkeys("f2", () => setRenameTarget(selected[0]), {
     scopes: ["explorer-main", "viewer"],
   });
 
@@ -670,6 +670,7 @@ export function Explorer() {
 
         {/* リネームダイアログ */}
         <RenameDialog
+          key={renameTarget?.path}
           open={isRenameMode}
           onOpenChange={(open) => !open && setRenameTarget(null)}
           sourcePath={renameTarget?.path ?? ""}
