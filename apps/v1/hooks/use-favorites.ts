@@ -19,7 +19,7 @@ export function useFavorites(initialData?: FavoriteStatus[]) {
     setFavorites((m) => new Map(m).set(path, rating));
   });
 
-  // 現在の状態を取得 (0やnullならfalse、1以上ならratingを返す)
+  // 現在の状態を取得
   const getFavorite = useCallback(
     (path: string) => ({ rating: favorites.get(path) ?? null }),
     [favorites]
