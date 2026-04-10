@@ -49,7 +49,7 @@ export const MediaThumb = memo(function MediaThumb1({
     );
   }
 
-  // デフォルト（プレビューがない、またはその他のファイル）
+  // デフォルト（その他のファイル）
   return (
     <div
       className={cn(
