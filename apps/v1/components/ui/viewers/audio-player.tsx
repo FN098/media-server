@@ -8,7 +8,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/shadcn-overrides/components/ui/tooltip";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   Music,
   Pause,
@@ -139,73 +138,6 @@ export function AudioPlayer({
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      {/* ライブ演出背景 */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-black">
-        <AnimatePresence>
-          {media.previewPath && active && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 blur-[80px] scale-150"
-            >
-              {/* スポットライト 1 */}
-              <motion.div
-                animate={{
-                  x: ["-20%", "20%", "-10%"],
-                  y: ["-10%", "20%", "10%"],
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full"
-                style={{
-                  background: `radial-gradient(circle, ${colors[0]} 0%, transparent 70%)`,
-                }}
-              />
-
-              {/* スポットライト 2 */}
-              <motion.div
-                animate={{
-                  x: ["20%", "-20%", "10%"],
-                  y: ["20%", "-10%", "20%"],
-                  scale: [1.2, 1, 1.1],
-                }}
-                transition={{
-                  duration: 15,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                className="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full"
-                style={{
-                  background: `radial-gradient(circle, ${colors[1]} 0%, transparent 70%)`,
-                }}
-              />
-
-              {/* スポットライト 3 (中心付近で揺らめく) */}
-              <motion.div
-                animate={{
-                  opacity: [0.4, 0.8, 0.4],
-                  scale: [0.8, 1.3, 0.8],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full"
-                style={{
-                  background: `radial-gradient(circle, ${colors[2]} 0%, transparent 70%)`,
-                }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
       {/* プレーヤー本体 */}
       <div className="relative flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] border border-white/10 shadow-2xl">
         {/* リピートバッジ */}
@@ -222,6 +154,12 @@ export function AudioPlayer({
         >
           {isRepeating ? <Repeat1 size={20} /> : <Repeat size={20} />}
         </PlayerButton>
+
+        {media.previewPath && (
+          <div className="absolute inset-0 -z-10 opacity-20 blur-3xl scale-150">
+            <MediaThumb node={media} className="w-full h-full object-cover" />
+          </div>
+        )}
 
         {/* オーディオビジュアル / アルバムアート */}
         <div className="relative w-40 h-40 bg-linear-to-br from-indigo-500 to-purple-600 rounded-3xl overflow-hidden flex items-center justify-center shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
