@@ -1,6 +1,5 @@
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
-import { useImageColors } from "@/hooks/use-image-colors";
 import { MediaNode } from "@/lib/media/types";
 import { resolveMediaUrl } from "@/lib/url/resolver";
 import {
@@ -32,7 +31,6 @@ export function AudioPlayer({
   const [isRepeating, setIsRepeating] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const { colors, extractColors } = useImageColors();
 
   // 再生率を計算 (0 ~ 100)
   const progress = duration ? (currentTime / duration) * 100 : 0;
@@ -169,7 +167,6 @@ export function AudioPlayer({
               node={media}
               className="w-full h-full object-cover"
               showIcon={false}
-              onLoad={extractColors}
             />
           ) : (
             // ない場合はデフォルトのアイコンを表示
