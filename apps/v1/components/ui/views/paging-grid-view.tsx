@@ -179,7 +179,7 @@ function Cell({
   onOpen,
   onOpenFolder,
   onSelectChange,
-  onRatingChange: onRatingChange,
+  onRatingChange,
   onRename,
   onMove,
   onDelete,

@@ -242,9 +242,9 @@ export function Explorer() {
 
   const favCtx = useFavoritesContext();
 
-  const handleRatingChange = (node: MediaNode, rating: number | null) => {
+  const handleRatingChange = async (node: MediaNode, rating: number | null) => {
     try {
-      void favCtx.updateFavorite(node.path, rating);
+      await favCtx.updateFavorite(node.path, rating);
     } catch {
       toast.error("お気に入りの更新に失敗しました");
     }
@@ -553,7 +553,9 @@ export function Explorer() {
               allNodes={filteredNodes}
               initialScrollPath={lastPath}
               onOpen={handleOpen}
-              onRatingChange={handleRatingChange}
+              onRatingChange={(node, rating) =>
+                void handleRatingChange(node, rating)
+              }
               onRename={handleRenameSingle}
               onMove={handleOpenMoveSingle}
               onDelete={handleOpenDeleteSingle}
@@ -573,7 +575,9 @@ export function Explorer() {
               allNodes={filteredNodes}
               initialScrollPath={lastPath}
               onOpen={handleOpen}
-              onRatingChange={handleRatingChange}
+              onRatingChange={(node, rating) =>
+                void handleRatingChange(node, rating)
+              }
               onRename={handleRenameSingle}
               onMove={handleOpenMoveSingle}
               onDelete={handleOpenDeleteSingle}
