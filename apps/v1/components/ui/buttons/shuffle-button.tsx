@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/shadcn/components/ui/tooltip";
+import { cn } from "@/shadcn/lib/utils";
 import { Shuffle } from "lucide-react";
 
 export function ShuffleButton() {
@@ -30,7 +31,10 @@ export function ShuffleButton() {
             size="default"
             onClick={handleToggle}
             aria-label="シャッフル切り替え"
-            className="gap-2 h-9 w-full"
+            className={cn(
+              "gap-2 h-9 w-full",
+              !enabled && "text-muted-foreground"
+            )}
           >
             <Shuffle className={`h-4 w-4 ${enabled ? "animate-pulse" : ""}`} />
             {enabled ? "シャッフル解除" : "シャッフル"}
