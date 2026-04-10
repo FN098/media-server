@@ -12,30 +12,35 @@ type MediaUpdateItem = Pick<
 >;
 
 export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
-  const fileNodes = nodes.filter((n) => !n.isDirectory);
+  const files = nodes.filter((n) => !n.isDirectory);
   // ファイルが空でも、ディレクトリが存在するなら FolderMeta は更新したい場合があるため
   // 早期リターンはせず、ロジックを進めます。
 
   // --- 1. プレビュー候補の抽出 ---
-  const firstMedia = fileNodes.find(
+  const firstMedia = files.find(
     (f) => f.type === "image" || f.type === "video"
   );
 
-  const previewPathMap = new Map<string, string>();
-  fileNodes.forEach((f) => {
-    if (f.type === "image" || f.type === "video") {
+  const imageMap = new Map<string, string>();
+  files.forEach((f) => {
+    if (f.type === "image") {
       const baseName = f.name.replace(/\.[^/.]+$/, "");
-      if (!previewPathMap.has(baseName)) previewPathMap.set(baseName, f.path);
+      if (!imageMap.has(baseName)) imageMap.set(baseName, f.path);
     }
   });
 
   // --- 2. 各ファイルのメタデータ準備 ---
   const fsMap = new Map(
-    fileNodes.map((f) => {
+    files.map((f) => {
       let previewPath: string | null = null;
+      const baseName = f.name.replace(/\.[^/.]+$/, "");
+
       if (f.type === "audio") {
-        const baseName = f.name.replace(/\.[^/.]+$/, "");
-        previewPath = previewPathMap.get(baseName) ?? firstMedia?.path ?? null; // 同名ファイルを優先するが、なければフォルダ内のプレビュー候補を採用
+        // オーディオは「同名画像」があれば優先、なければ「フォルダの顔」
+        previewPath = imageMap.get(baseName) ?? firstMedia?.path ?? null;
+      } else if (f.type === "video") {
+        // 動画は「同名画像」がある場合のみ上書き（自分自身のパスは含めない）
+        previewPath = imageMap.get(baseName) ?? null;
       }
 
       return [

@@ -19,10 +19,22 @@ export const MediaThumb = memo(function MediaThumb1({
   className,
   onLoad,
 }: MediaThumbProps) {
-  // 画像 or 動画
-  if (node.type === "image" || node.type === "video") {
+  // 画像
+  if (node.type === "image") {
     return (
       <MediaThumbImage node={node} className={className} onLoad={onLoad} />
+    );
+  }
+
+  //  動画
+  if (node.type === "video") {
+    return (
+      <MediaThumbImage
+        node={node}
+        previewPath={node.previewPath}
+        className={className}
+        onLoad={onLoad}
+      />
     );
   }
 
@@ -76,7 +88,7 @@ function MediaThumbImage({
   onLoad,
 }: {
   node: MediaNode;
-  previewPath?: string;
+  previewPath?: string | null;
   className?: string;
   onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 }) {
