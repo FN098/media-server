@@ -539,7 +539,7 @@ export function Explorer() {
             totalCount={allNodes.length}
             filteredCount={filteredNodes.length}
             isFiltered={isFiltered}
-            className="ml-auto"
+            className="ml-auto min-w-[120px] text-right"
           />
         </div>
 
