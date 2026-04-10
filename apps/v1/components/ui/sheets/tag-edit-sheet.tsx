@@ -4,7 +4,10 @@ import { SheetFooter } from "@/components/ui/sheets/tag-edit-sheet/seet-footer";
 import { SheetHeader } from "@/components/ui/sheets/tag-edit-sheet/seet-header";
 import { TagInput } from "@/components/ui/sheets/tag-edit-sheet/tag-input";
 import { TagList } from "@/components/ui/sheets/tag-edit-sheet/tag-list";
-import { EditingMode, TagEditMode } from "@/components/ui/sheets/types";
+import {
+  EditingMode,
+  TagEditMode,
+} from "@/components/ui/sheets/tag-edit-sheet/types";
 import { MediaNode } from "@/lib/media/types";
 import { TagOperation } from "@/lib/tag/types";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
