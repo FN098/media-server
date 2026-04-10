@@ -19,27 +19,8 @@ export const MediaThumb = memo(function MediaThumb1({
   className,
   onLoad,
 }: MediaThumbProps) {
-  // 画像
-  if (node.type === "image") {
-    return (
-      <MediaThumbImage node={node} className={className} onLoad={onLoad} />
-    );
-  }
-
-  //  動画
-  if (node.type === "video") {
-    return (
-      <MediaThumbImage
-        node={node}
-        previewPath={node.previewPath}
-        className={className}
-        onLoad={onLoad}
-      />
-    );
-  }
-
-  // オーディオ
-  if (node.type === "audio" && node.previewPath) {
+  // メディア
+  if (node.type === "image" || node.type === "video" || node.type === "audio") {
     return (
       <MediaThumbImage
         node={node}
@@ -51,7 +32,7 @@ export const MediaThumb = memo(function MediaThumb1({
   }
 
   // ディレクトリ
-  if (node.type === "directory" && node.previewPath) {
+  if (node.type === "directory") {
     return (
       <div className="relative w-full h-full">
         <MediaThumbImage
