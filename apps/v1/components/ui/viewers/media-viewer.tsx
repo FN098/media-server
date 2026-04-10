@@ -105,7 +105,7 @@ export function MediaViewer({
   const lastViewedPathRef = useRef<string | null>(
     allNodes[initialIndex]?.path ?? null
   );
-  const rating = currentNode ? getFavorite(currentNode.path) : null;
+  const { rating = null } = currentNode ? getFavorite(currentNode.path) : {};
 
   // 仮想スライド構成
   // [最初のページダミー] → [前のフォルダナビ] → [メディア配列] → [次のフォルダナビ] → [最後のページダミー]
@@ -153,12 +153,12 @@ export function MediaViewer({
   const handleToggleFavorite = async () => {
     try {
       if (!currentNode) return;
-      const currentRating = getFavorite(currentNode.path);
+      const { rating } = getFavorite(currentNode.path);
 
       await toggleFavorite(currentNode.path);
 
       const message =
-        currentRating == null
+        rating == null
           ? "⭐お気に入りに登録しました"
           : "お気に入りを解除しました";
       toast.info(message, { duration: 1000 });

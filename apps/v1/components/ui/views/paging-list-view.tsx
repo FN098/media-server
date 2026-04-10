@@ -211,7 +211,7 @@ function DataRow({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const favCtx = useFavoritesContext();
   const selectCtx = usePathSelectionContext();
-  const rating = favCtx.getFavorite(node.path);
+  const { rating } = favCtx.getFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
 
   const handleLongPress = useCallback(() => {

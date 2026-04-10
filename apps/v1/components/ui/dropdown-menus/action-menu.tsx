@@ -54,7 +54,7 @@ export function ActionMenu({
   const mounted = useMounted();
   if (!mounted) return null;
 
-  const rating = getFavorite(node.path);
+  const { rating } = getFavorite(node.path);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

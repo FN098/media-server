@@ -21,7 +21,7 @@ export function useFavorites(initialData?: FavoriteStatus[]) {
 
   // 現在の状態を取得 (0やnullならfalse、1以上ならratingを返す)
   const getFavorite = useCallback(
-    (path: string) => favorites.get(path) ?? null,
+    (path: string) => ({ rating: favorites.get(path) ?? null }),
     [favorites]
   );
 
@@ -56,8 +56,8 @@ export function useFavorites(initialData?: FavoriteStatus[]) {
   // トグル動作 (デフォルト値を 3 とする)
   const toggleFavorite = useCallback(
     (path: string) => {
-      const current = getFavorite(path);
-      return updateFavorite(path, current ? null : 3);
+      const { rating } = getFavorite(path);
+      return updateFavorite(path, rating ?? 3);
     },
     [updateFavorite, getFavorite]
   );
