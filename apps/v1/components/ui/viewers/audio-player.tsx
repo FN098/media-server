@@ -1,4 +1,5 @@
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
+import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { MediaNode } from "@/lib/media/types";
 import { resolveMediaUrl } from "@/lib/url/resolver";
 import {
@@ -151,9 +152,24 @@ export function AudioPlayer({
           {isRepeating ? <Repeat1 size={20} /> : <Repeat size={20} />}
         </PlayerButton>
 
-        {/* オーディオビジュアル */}
-        <div className="w-40 h-40 bg-linear-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
-          <Music size={64} className="text-white" />
+        {/* オーディオビジュアル / アルバムアート */}
+        <div className="relative w-40 h-40 bg-linear-to-br from-indigo-500 to-purple-600 rounded-3xl overflow-hidden flex items-center justify-center shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+          {media.previewPath ? (
+            // プレビューパスがある場合はサムネイルを表示
+            <MediaThumb
+              node={media}
+              className="w-full h-full object-cover"
+              showIcon={false}
+            />
+          ) : (
+            // ない場合はデフォルトのアイコンを表示
+            <Music size={64} className="text-white" />
+          )}
+
+          {/* 装飾用のオーバーレイ（画像の上にかすかにグラデーションをのせる） */}
+          {media.previewPath && (
+            <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+          )}
         </div>
 
         {/* メタデータ */}
