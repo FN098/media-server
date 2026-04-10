@@ -6,7 +6,7 @@ import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { resolveMediaThumbUrl } from "@/lib/url/resolver";
 import { cn } from "@/shadcn/lib/utils";
-import { memo, ReactNode, useCallback, useState } from "react";
+import { ReactNode, useCallback, useState } from "react";
 
 type MediaThumbProps = {
   node: MediaNode;
@@ -14,31 +14,16 @@ type MediaThumbProps = {
   onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 };
 
-export const MediaThumb = memo(function MediaThumb1({
-  node,
-  className,
-  onLoad,
-}: MediaThumbProps) {
-  // メディア
-  if (
+export function MediaThumb({ node, className, onLoad }: MediaThumbProps) {
+  const hasPreview =
     node.type === "image" ||
     node.type === "video" ||
-    (node.type === "audio" && node.previewPath)
-  ) {
-    return (
-      <MediaThumbImage
-        node={node}
-        previewPath={node.previewPath}
-        className={className}
-        onLoad={onLoad}
-      />
-    );
-  }
+    (node.type === "audio" && node.previewPath) ||
+    (node.type === "directory" && node.previewPath);
 
-  // ディレクトリ
-  if (node.type === "directory" && node.previewPath) {
+  if (hasPreview) {
     return (
-      <div className="relative w-full h-full">
+      <div className="relative w-full h-full group">
         <MediaThumbImage
           node={node}
           previewPath={node.previewPath}
@@ -46,14 +31,15 @@ export const MediaThumb = memo(function MediaThumb1({
           onLoad={onLoad}
         />
 
-        <div className="absolute bottom-8 left-2 z-20 flex items-center justify-center p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 shadow-lg">
-          <MediaThumbIcon type="directory" className="w-4 h-4 opacity-90" />
+        {/* アイコンのオーバーレイ表示 */}
+        <div className="absolute bottom-8 left-2 z-20 flex items-center justify-center p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 shadow-lg pointer-events-none">
+          <MediaThumbIcon type={node.type} className="w-4 h-4 opacity-90" />
         </div>
       </div>
     );
   }
 
-  // デフォルト（その他のファイル）
+  // プレビューがない場合のデフォルト表示
   return (
     <div
       className={cn(
@@ -64,7 +50,7 @@ export const MediaThumb = memo(function MediaThumb1({
       <MediaThumbIcon type={node.type} />
     </div>
   );
-});
+}
 
 function MediaThumbImage({
   node,
