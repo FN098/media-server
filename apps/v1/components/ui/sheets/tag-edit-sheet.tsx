@@ -181,7 +181,7 @@ export function TagEditSheet({
       {open && (
         <>
           {/* 暗転オーバーレイ */}
-          {editingMode === "edit" && (
+          {(editingMode === "edit" || editingMode === "quick") && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
