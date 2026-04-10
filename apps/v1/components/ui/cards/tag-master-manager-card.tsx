@@ -9,15 +9,6 @@ import {
 } from "@/actions/tag-actions";
 import { TagDeleteButton } from "@/components/ui/buttons/tag-delete-button";
 import { TagMasterItem } from "@/lib/tag/types";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shadcn-overrides/components/ui/table";
-import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,
@@ -37,6 +28,7 @@ import {
 } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
+  Badge,
   Check,
   CheckCheck,
   Edit2,
@@ -49,6 +41,9 @@ import {
 import * as React from "react";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
+
+const COLS_HEADER = "grid-cols-[80px_1fr_25%_100px_120px]";
+const COLS_BODY = "grid-cols-[80px_1fr_25%_100px_120px]";
 
 export function TagMasterManagerCard() {
   const queryClient = useQueryClient();
@@ -241,177 +236,178 @@ export function TagMasterManagerCard() {
 
       <CardContent className="p-0 sm:p-6 sm:pt-0">
         <div className="border sm:rounded-lg overflow-hidden bg-background">
+          {/* ヘッダー */}
+          <div
+            className={cn(
+              "grid",
+              COLS_HEADER,
+              "pr-4 py-2 bg-muted/90 backdrop-blur-sm text-sm font-medium text-muted-foreground border-b sticky top-0 z-30"
+            )}
+          >
+            <div className="text-center">固定</div>
+            <div>タグ名</div>
+            <div>カナ</div>
+            <div>使用数</div>
+            <div className="text-right pr-2">操作</div>
+          </div>
+
           {/* スクロールコンテナ */}
           <div
             ref={parentRef}
             className="h-[600px] overflow-auto scrollbar-thin"
           >
-            <Table className="relative table-fixed w-full">
-              <TableHeader className="sticky top-0 z-20 bg-muted/90 backdrop-blur-sm shadow-sm">
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[60px] text-center">固定</TableHead>
-                  <TableHead className="w-[40%]">タグ名</TableHead>
-                  <TableHead className="w-[25%]">カナ</TableHead>
-                  <TableHead className="w-[100px]">使用数</TableHead>
-                  <TableHead className="w-[120px] text-right pr-6">
-                    操作
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody
-                style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                  position: "relative",
-                }}
-              >
-                {virtualizer.getVirtualItems().map((virtualRow) => {
-                  const tag = allTags[virtualRow.index];
-                  if (!tag) return null;
-
-                  return (
-                    <TableRow
-                      key={virtualRow.key}
-                      className={cn(
-                        "group absolute w-full flex items-center border-b transition-colors hover:bg-muted/40",
-                        tag.isNew && "bg-yellow-50/30"
-                      )}
-                      style={{
-                        height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                    >
-                      {/* お気に入り */}
-                      <TableCell className="w-[60px] flex justify-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
+            <div
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+                position: "relative",
+              }}
+            >
+              {virtualizer.getVirtualItems().map((virtualRow) => {
+                const tag = allTags[virtualRow.index];
+                if (!tag) return null;
+                return (
+                  <div
+                    key={virtualRow.key}
+                    className={cn(
+                      "grid absolute w-full border-b items-center hover:bg-muted/40 group transition-colors",
+                      COLS_BODY,
+                      tag.isNew && "bg-yellow-50/30"
+                    )}
+                    style={{
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    {/* お気に入り */}
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "h-9 w-9 rounded-full",
+                          tag.isFavorite
+                            ? "text-yellow-500 hover:text-yellow-300"
+                            : "text-muted-foreground/30 hover:text-yellow-500"
+                        )}
+                        onClick={() =>
+                          toggleFavorite({
+                            id: tag.id,
+                            isFavorite: !tag.isFavorite,
+                          })
+                        }
+                      >
+                        <Star
                           className={cn(
-                            "h-9 w-9 rounded-full",
-                            tag.isFavorite
-                              ? "text-yellow-500 hover:text-yellow-300"
-                              : "text-muted-foreground/30 hover:text-yellow-500"
+                            "h-5 w-5",
+                            tag.isFavorite && "fill-current"
                           )}
-                          onClick={() =>
-                            toggleFavorite({
-                              id: tag.id,
-                              isFavorite: !tag.isFavorite,
-                            })
+                        />
+                      </Button>
+                    </div>
+
+                    {/* タグ名 */}
+                    <div className="overflow-hidden">
+                      {editingId === tag.id ? (
+                        <Input
+                          autoFocus
+                          value={editValue.name}
+                          onChange={(e) =>
+                            setEditValue((prev) => ({
+                              ...prev,
+                              name: e.target.value,
+                            }))
                           }
-                        >
-                          <Star
-                            className={cn(
-                              "h-5 w-5",
-                              tag.isFavorite && "fill-current"
-                            )}
-                          />
-                        </Button>
-                      </TableCell>
-
-                      {/* タグ名 */}
-                      <TableCell className="w-[40%] overflow-hidden">
-                        {editingId === tag.id ? (
-                          <Input
-                            autoFocus
-                            value={editValue.name}
-                            onChange={(e) =>
-                              setEditValue((prev) => ({
-                                ...prev,
-                                name: e.target.value,
-                              }))
-                            }
-                            className="h-9"
-                          />
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium truncate">
-                              {tag.name}
-                            </span>
-                            {tag.isNew && (
-                              <Badge className="bg-yellow-400 hover:bg-yellow-400 text-black text-[10px] px-1.5 py-0 h-5 border-none">
-                                NEW
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                      </TableCell>
-
-                      {/* カナ */}
-                      <TableCell className="w-[25%]">
-                        {editingId === tag.id ? (
-                          <Input
-                            value={editValue.kana}
-                            onChange={(e) =>
-                              setEditValue((prev) => ({
-                                ...prev,
-                                kana: e.target.value,
-                              }))
-                            }
-                            className="h-9 text-xs"
-                          />
-                        ) : (
-                          <span className="text-xs text-muted-foreground truncate block">
-                            {tag.kana || "---"}
+                          className="h-9"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium truncate">
+                            {tag.name}
                           </span>
-                        )}
-                      </TableCell>
-
-                      {/* 使用数 */}
-                      <TableCell className="w-[100px]">
-                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full border text-[11px] font-mono bg-muted/30">
-                          {tag._count.mediaTags.toLocaleString()}
+                          {tag.isNew && (
+                            <Badge className="bg-yellow-400 hover:bg-yellow-400 text-black text-[10px] px-1.5 py-0 h-5 border-none">
+                              NEW
+                            </Badge>
+                          )}
                         </div>
-                      </TableCell>
+                      )}
+                    </div>
 
-                      {/* 操作 */}
-                      <TableCell className="w-[120px] ml-auto flex justify-end pr-4">
-                        {editingId === tag.id ? (
-                          <div className="flex gap-1">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8 text-green-600 hover:bg-green-50"
-                              onClick={() => handleSaveEdit(tag.id)}
-                            >
-                              {isUpdating ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Check className="h-4 w-4" />
-                              )}
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8 text-destructive hover:bg-red-50"
-                              onClick={() => setEditingId(null)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity gap-1">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-9 w-9"
-                              onClick={() => handleStartEdit(tag)}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <TagDeleteButton
-                              tagName={tag.name}
-                              mediaCount={tag._count.mediaTags}
-                              onDelete={() => performDelete(tag.id)}
-                              isDeleting={isDeleting}
-                            />
-                          </div>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                    {/* カナ */}
+                    <div>
+                      {editingId === tag.id ? (
+                        <Input
+                          value={editValue.kana}
+                          onChange={(e) =>
+                            setEditValue((prev) => ({
+                              ...prev,
+                              kana: e.target.value,
+                            }))
+                          }
+                          className="h-9 text-xs"
+                        />
+                      ) : (
+                        <span className="text-xs text-muted-foreground truncate block">
+                          {tag.kana || "---"}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 使用数 */}
+                    <div>
+                      <div className="inline-flex items-center px-2.5 py-0.5 rounded-full border text-[11px] font-mono bg-muted/30">
+                        {tag._count.mediaTags.toLocaleString()}
+                      </div>
+                    </div>
+
+                    {/* 操作 */}
+                    <div className="flex justify-end">
+                      {editingId === tag.id ? (
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-green-600 hover:bg-green-50"
+                            onClick={() => handleSaveEdit(tag.id)}
+                          >
+                            {isUpdating ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-destructive hover:bg-red-50"
+                            onClick={() => setEditingId(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-9 w-9"
+                            onClick={() => handleStartEdit(tag)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <TagDeleteButton
+                            tagName={tag.name}
+                            mediaCount={tag._count.mediaTags}
+                            onDelete={() => performDelete(tag.id)}
+                            isDeleting={isDeleting}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </CardContent>
