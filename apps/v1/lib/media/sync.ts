@@ -12,17 +12,17 @@ type MediaUpdateItem = Pick<
 >;
 
 export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
-  const files = nodes.filter((n) => !n.isDirectory);
+  const fileNodes = nodes.filter((n) => !n.isDirectory);
   // ファイルが空でも、ディレクトリが存在するなら FolderMeta は更新したい場合があるため
   // 早期リターンはせず、ロジックを進めます。
 
   // --- 1. プレビュー候補の抽出 ---
-  const firstMedia = files.find(
+  const firstMedia = fileNodes.find(
     (f) => f.type === "image" || f.type === "video"
   );
 
   const previewPathMap = new Map<string, string>();
-  files.forEach((f) => {
+  fileNodes.forEach((f) => {
     if (f.type === "image" || f.type === "video") {
       const baseName = f.name.replace(/\.[^/.]+$/, "");
       if (!previewPathMap.has(baseName)) previewPathMap.set(baseName, f.path);
@@ -31,11 +31,11 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
 
   // --- 2. 各ファイルのメタデータ準備 ---
   const fsMap = new Map(
-    files.map((f) => {
+    fileNodes.map((f) => {
       let previewPath: string | null = null;
       if (f.type === "audio") {
         const baseName = f.name.replace(/\.[^/.]+$/, "");
-        previewPath = previewPathMap.get(baseName) ?? firstMedia?.path ?? null;
+        previewPath = previewPathMap.get(baseName) ?? firstMedia?.path ?? null; // 同名ファイルを優先するが、なければフォルダ内のプレビュー候補を採用
       }
 
       return [
