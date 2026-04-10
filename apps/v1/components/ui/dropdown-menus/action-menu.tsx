@@ -4,6 +4,7 @@ import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
+import { useFavoritesContext } from "@/providers/favorites-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -47,13 +48,17 @@ export function ActionMenu({
   onEditTags,
   onRatingChange,
 }: ActionMenuProps) {
+  const { getFavorite } = useFavoritesContext();
   const [open, setOpen] = useState(false);
 
   const mounted = useMounted();
   if (!mounted) return null;
 
+  const rating = getFavorite(node.path);
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
+      {/* アクションメニュートリガーボタン */}
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
         <Button
           variant="ghost"
@@ -65,16 +70,19 @@ export function ActionMenu({
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
+
+      {/* アクションメニュー */}
       <DropdownMenuContent align="end" className="min-w-48">
         {onRatingChange && !node.isDirectory && (
           <DropdownMenuItem className="flex justify-center">
             <FavoriteRating
-              rating={node.rating}
+              rating={rating}
               onRatingChange={(rating) => onRatingChange(node, rating)}
               variant="menu"
             />
           </DropdownMenuItem>
         )}
+
         {onOpenFolder && (
           <DropdownMenuItem
             onClick={(e) => {
@@ -85,6 +93,7 @@ export function ActionMenu({
             <Pencil className="mr-2 h-4 w-4" /> フォルダを開く
           </DropdownMenuItem>
         )}
+
         {onRename && (
           <DropdownMenuItem
             onClick={(e) => {
@@ -95,6 +104,7 @@ export function ActionMenu({
             <Pencil className="mr-2 h-4 w-4" /> 名前の変更
           </DropdownMenuItem>
         )}
+
         {onMove && (
           <DropdownMenuItem
             onClick={(e) => {
@@ -105,6 +115,7 @@ export function ActionMenu({
             <FolderInput className="mr-2 h-4 w-4" /> 移動
           </DropdownMenuItem>
         )}
+
         {onEditTags && (
           <DropdownMenuItem
             onClick={(e) => {
@@ -115,6 +126,7 @@ export function ActionMenu({
             <Tag className="mr-2 h-4 w-4" /> タグの編集
           </DropdownMenuItem>
         )}
+
         {onRestore && (
           <DropdownMenuItem
             className="text-success focus:text-success"
@@ -127,6 +139,7 @@ export function ActionMenu({
             復元
           </DropdownMenuItem>
         )}
+
         {onDelete && (
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
@@ -139,6 +152,7 @@ export function ActionMenu({
             削除
           </DropdownMenuItem>
         )}
+
         {onDeletePermanently && (
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
