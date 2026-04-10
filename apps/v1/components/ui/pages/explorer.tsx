@@ -4,10 +4,6 @@ import { visitFolderAction } from "@/actions/folder-actions";
 import { deleteNodesAction } from "@/actions/media-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import {
-  FavoriteFilterButton,
-  FavoriteFilterMode,
-} from "@/components/ui/buttons/favorite-filter-button";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
@@ -23,7 +19,6 @@ import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import {
-  createFavoriteFilter,
   createRatingFilter,
   createSearchFilter,
   createTagFilter,
@@ -112,10 +107,6 @@ export function Explorer() {
   // タグフィルタ
   const tagFilter = useTagFilterContext();
 
-  // お気に入りフィルターモード
-  const [favoriteFilterMode, setFavoriteFilterMode] =
-    useState<FavoriteFilterMode>("all");
-
   // 最小レーティングフィルタ
   const [minRating, setMinRating] = useState<number>(0);
 
@@ -123,16 +114,12 @@ export function Explorer() {
   const handleResetFilters = () => {
     tagFilter.selectTags([]);
     tagFilter.setMode("AND");
-    setFavoriteFilterMode("all");
     setMinRating(0);
   };
 
   // フィルターが一つでも適用されているかチェック
   const isFiltered =
-    tagFilter.selectedCount > 0 ||
-    tagFilter.mode !== "AND" ||
-    favoriteFilterMode !== "all" ||
-    minRating > 0;
+    tagFilter.selectedCount > 0 || tagFilter.mode !== "AND" || minRating > 0;
 
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
@@ -143,10 +130,6 @@ export function Explorer() {
         tagFilter.mode
       ),
     [tagFilter]
-  );
-  const favoriteFilterFn = useMemo(
-    () => createFavoriteFilter(favoriteFilterMode),
-    [favoriteFilterMode]
   );
   const ratingFilterFn = useMemo(
     () => createRatingFilter(minRating),
@@ -161,7 +144,6 @@ export function Explorer() {
     const filters: MediaNodeFilter[] = [
       searchFilterFn,
       tagFilterFn,
-      favoriteFilterFn,
       ratingFilterFn,
     ];
 
@@ -175,7 +157,7 @@ export function Explorer() {
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [allNodes, searchFilterFn, tagFilterFn, favoriteFilterFn, ratingFilterFn]);
+  }, [allNodes, searchFilterFn, tagFilterFn, ratingFilterFn]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -524,12 +506,6 @@ export function Explorer() {
 
             {/* タグフィルター */}
             <TagFilterDialog />
-
-            {/* お気に入りフィルター */}
-            <FavoriteFilterButton
-              mode={favoriteFilterMode}
-              onChange={setFavoriteFilterMode}
-            />
 
             {/* リセットボタン */}
             <FilterResetButton
