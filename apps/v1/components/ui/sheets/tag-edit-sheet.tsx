@@ -51,6 +51,7 @@ export function TagEditSheet({
   const [editingMode, setEditingMode] = useState<EditingMode>(
     edit ? "edit" : "view"
   );
+  const resetEditingMode = () => setEditingMode("view");
 
   // 透明モード
   const [opacity, setOpacity] = useState(initialOpacity ?? editor.opacity);
@@ -155,6 +156,7 @@ export function TagEditSheet({
 
   // 閉じる
   const handleClose = () => {
+    setEditingMode("view");
     onClose?.();
   };
 
@@ -188,10 +190,11 @@ export function TagEditSheet({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[60] bg-black/40"
-              onClick={() => setEditingMode("view")}
+              onClick={resetEditingMode}
             />
           )}
-          e{/* メインコンテナ */}
+
+          {/* メインコンテナ */}
           <motion.div
             layout
             drag="y"
@@ -354,7 +357,7 @@ export function TagEditSheet({
                         onAdd={() => handleNewAdd(editor.newTagName)}
                         onSelectSuggestion={editor.selectSuggestion}
                         onApply={handleApply}
-                        onCancel={handleModeChangeDown}
+                        onCancel={resetEditingMode}
                       />
                       <TagList
                         isEditing={true}
