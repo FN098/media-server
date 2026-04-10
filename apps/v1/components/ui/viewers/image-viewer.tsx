@@ -7,11 +7,27 @@ import { useState } from "react";
 
 type ImageViewerProps = {
   media: MediaNode;
-  active: boolean;
+  active?: boolean;
 };
 
-export function ImageViewer({ media }: ImageViewerProps) {
+export function ImageViewer({ media, active = true }: ImageViewerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const thumbSrc = resolveMediaThumbUrl(media);
+  const src = resolveMediaUrl(media);
+
+  if (!active) {
+    return (
+      <div className="relative w-full h-full flex items-center justify-center">
+        <Image
+          src={thumbSrc}
+          alt={media.name}
+          fill
+          className="object-contain opacity-30 blur-sm"
+          draggable={false}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="swiper-zoom-container relative w-full h-full flex items-center justify-center">
@@ -21,7 +37,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
       {/* サムネイル */}
       {!isLoaded && (
         <Image
-          src={resolveMediaThumbUrl(media)}
+          src={thumbSrc}
           alt={media.name}
           fill
           className="absolute inset-0 object-contain opacity-50"
@@ -31,7 +47,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
 
       {/* メイン画像 */}
       <Image
-        src={resolveMediaUrl(media)}
+        src={src}
         alt={media.name}
         fill
         className={cn(
@@ -39,7 +55,7 @@ export function ImageViewer({ media }: ImageViewerProps) {
           isLoaded ? "opacity-100" : "opacity-0"
         )}
         onLoad={() => setIsLoaded(true)}
-        priority
+        priority={active}
         unoptimized
         draggable={false}
       />

@@ -19,13 +19,12 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-export function AudioPlayer({
-  media,
-  active,
-}: {
+interface AudioPlayerProps {
   media: MediaNode;
-  active: boolean;
-}) {
+  active?: boolean;
+}
+
+export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
   const playerRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isRepeating, setIsRepeating] = useState(false);
@@ -110,7 +109,7 @@ export function AudioPlayer({
       e.preventDefault(); // 親のビューア側などのイベント伝播を阻止
       togglePlaying();
     },
-    { scopes: ["viewer", "tag-editor"] }
+    { scopes: ["viewer", "tag-editor"], enabled: active }
   );
   useHotkeys(
     "arrowup",
@@ -119,7 +118,7 @@ export function AudioPlayer({
       if (e.repeat) return;
       seek(10);
     },
-    { scopes: ["viewer", "tag-editor"] }
+    { scopes: ["viewer", "tag-editor"], enabled: active }
   );
   useHotkeys(
     "arrowdown",
@@ -128,10 +127,11 @@ export function AudioPlayer({
       if (e.repeat) return;
       seek(-10);
     },
-    { scopes: ["viewer", "tag-editor"] }
+    { scopes: ["viewer", "tag-editor"], enabled: active }
   );
   useHotkeys("r", () => toggleRepeating(), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
 
   return (

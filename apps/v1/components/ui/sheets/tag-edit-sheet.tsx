@@ -154,10 +154,22 @@ export function TagEditSheet({
   };
 
   // ショートカット
-  useHotkeys("escape", () => handleModeChangeDown(), { scopes: "tag-editor" });
-  useHotkeys("e", () => setEditingMode("edit"), { scopes: "tag-editor" });
-  useHotkeys("q", () => setEditingMode("quick"), { scopes: "tag-editor" });
-  useHotkeys("v", () => setEditingMode("view"), { scopes: "tag-editor" });
+  useHotkeys("escape", () => handleModeChangeDown(), {
+    scopes: "tag-editor",
+    enabled: open,
+  });
+  useHotkeys("e", () => setEditingMode("edit"), {
+    scopes: "tag-editor",
+    enabled: open,
+  });
+  useHotkeys("q", () => setEditingMode("quick"), {
+    scopes: "tag-editor",
+    enabled: open,
+  });
+  useHotkeys("v", () => setEditingMode("view"), {
+    scopes: "tag-editor",
+    enabled: open,
+  });
 
   return (
     <AnimatePresence>

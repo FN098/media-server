@@ -4,18 +4,15 @@ import { resolveMediaThumbUrl, resolveMediaUrl } from "@/lib/url/resolver";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
-import { memo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 type VideoPlayerProps = {
   media: MediaFsNode;
-  active: boolean;
+  active?: boolean;
 };
 
-export const VideoPlayer = memo(function VideoPlayer({
-  media,
-  active,
-}: VideoPlayerProps) {
+export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
 
@@ -72,7 +69,7 @@ export const VideoPlayer = memo(function VideoPlayer({
       e.preventDefault(); // 親のビューア側などのイベント伝播を阻止
       togglePlaying();
     },
-    { scopes: ["viewer", "tag-editor"] }
+    { scopes: ["viewer", "tag-editor"], enabled: active }
   );
   useHotkeys(
     "arrowup",
@@ -81,7 +78,7 @@ export const VideoPlayer = memo(function VideoPlayer({
       if (e.repeat) return;
       seek(10);
     },
-    { scopes: ["viewer", "tag-editor"] }
+    { scopes: ["viewer", "tag-editor"], enabled: active }
   );
   useHotkeys(
     "arrowdown",
@@ -90,7 +87,7 @@ export const VideoPlayer = memo(function VideoPlayer({
       if (e.repeat) return;
       seek(-10);
     },
-    { scopes: ["viewer", "tag-editor"] }
+    { scopes: ["viewer", "tag-editor"], enabled: active }
   );
   useHotkeys(
     "f11",
@@ -103,7 +100,7 @@ export const VideoPlayer = memo(function VideoPlayer({
         }
       }
     },
-    { scopes: ["viewer", "tag-editor"] }
+    { scopes: ["viewer", "tag-editor"], enabled: active }
   );
 
   return (
@@ -148,4 +145,4 @@ export const VideoPlayer = memo(function VideoPlayer({
       </div>
     </div>
   );
-});
+}

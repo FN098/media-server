@@ -48,6 +48,19 @@ import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
+interface MediaViewerProps {
+  allNodes: MediaNode[];
+  initialIndex: number;
+  onIndexChange: (index: number) => void;
+  onClose: () => void;
+  onOpenFolder?: (path: string, at?: IndexLike) => void;
+  onNextFolder?: (at?: IndexLike) => void;
+  onPrevFolder?: (at?: IndexLike) => void;
+  onEditTags?: () => void;
+  onDelete?: () => void;
+  active?: boolean;
+}
+
 const firstPageDummy = { type: "dummy_first", path: "first-page" } as const;
 const prevFolderNav = { type: "nav_prev", path: "prev-loader" } as const;
 const nextFolderNav = { type: "nav_next", path: "next-loader" } as const;
@@ -70,17 +83,8 @@ export function MediaViewer({
   onPrevFolder,
   onEditTags,
   onDelete,
-}: {
-  allNodes: MediaNode[];
-  initialIndex: number;
-  onIndexChange: (index: number) => void;
-  onClose: () => void;
-  onOpenFolder?: (path: string, at?: IndexLike) => void;
-  onNextFolder?: (at?: IndexLike) => void;
-  onPrevFolder?: (at?: IndexLike) => void;
-  onEditTags?: () => void;
-  onDelete?: () => void;
-}) {
+  active = true,
+}: MediaViewerProps) {
   const { isHeaderPinned, toggleIsHeaderPinned } = useViewerContext();
   const hasPrevFolder = !!onPrevFolder;
   const hasNextFolder = !!onNextFolder;
@@ -284,37 +288,46 @@ export function MediaViewer({
   // O: フォルダを開く
   // H: ヘッダーの固定切り替え
   // 0~5: お気に入り評価の設定
-  useHotkeys("escape", () => onClose(), { scopes: "viewer" });
+  useHotkeys("escape", () => onClose(), { scopes: "viewer", enabled: active });
   useHotkeys("delete", () => onDelete?.(), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
   useHotkeys(
     ["enter", "space"],
     () => !isHeaderPinned && toggleHeaderVisibility(),
     {
       scopes: ["viewer", "tag-editor"],
+      enabled: active,
     }
   );
   useHotkeys(["arrowleft", "a"], () => swiperRef.current?.slidePrev(), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
   useHotkeys(["arrowright", "d"], () => swiperRef.current?.slideNext(), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
   useHotkeys("s", () => void handleToggleFavorite(), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
   useHotkeys("f", () => toggleFullscreen(), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
   useHotkeys("p", () => onPrevFolder?.("first"), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
   useHotkeys("n", () => onNextFolder?.("first"), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
   useHotkeys("o", () => handleOpenFolder(), {
     scopes: ["viewer", "tag-editor"],
+    enabled: active,
   });
   useHotkeys(
     "h",
@@ -324,6 +337,7 @@ export function MediaViewer({
     },
     {
       scopes: ["viewer", "tag-editor"],
+      enabled: active,
     }
   );
   useHotkeys(
@@ -334,6 +348,7 @@ export function MediaViewer({
     },
     {
       scopes: ["viewer", "tag-editor"],
+      enabled: active,
     }
   );
 
