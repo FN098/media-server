@@ -6,6 +6,7 @@ import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
+import { MediaTypeFilterSelect } from "@/components/ui/selects/media-type-filter-select";
 import { RatingFilterSelect } from "@/components/ui/selects/rating-filter-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
@@ -15,6 +16,7 @@ import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import {
+  createMediaTypeFilter,
   createRatingFilter,
   createSearchFilter,
   createTagFilter,
@@ -25,6 +27,7 @@ import {
   MediaNodeFilter,
   MediaPathToIndexMap,
   MediaPathToNodeMap,
+  MediaTypeFilterValue,
 } from "@/lib/media/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { useExplorerContext } from "@/providers/explorer-provider";
@@ -83,16 +86,24 @@ export function Favorites() {
   // 最小レーティングフィルタ
   const [minRating, setMinRating] = useState<number>(0);
 
+  // 種類フィルタ
+  const [mediaTypeFilterValue, setMediaTypeFilterValue] =
+    useState<MediaTypeFilterValue>("all");
+
   // フィルタリセット
   const handleResetFilters = () => {
     tagFilter.selectTags([]);
     tagFilter.setMode("AND");
     setMinRating(0);
+    setMediaTypeFilterValue("all");
   };
 
   // フィルターが一つでも適用されているかチェック
   const isFiltered =
-    tagFilter.selectedCount > 0 || tagFilter.mode !== "AND" || minRating > 0;
+    tagFilter.selectedCount > 0 ||
+    tagFilter.mode !== "AND" ||
+    minRating > 0 ||
+    mediaTypeFilterValue !== "all";
 
   // フィルタ関数
   const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
@@ -108,6 +119,10 @@ export function Favorites() {
     () => createRatingFilter(minRating),
     [minRating]
   );
+  const mediaTypeFilterFn = useMemo(
+    () => createMediaTypeFilter(mediaTypeFilterValue),
+    [mediaTypeFilterValue]
+  );
 
   const allNodes = listing.nodes;
 
@@ -115,9 +130,10 @@ export function Favorites() {
   const filteredNodes = useMemo(() => {
     // 各フィルタの生成
     const filters: MediaNodeFilter[] = [
+      mediaTypeFilterFn,
+      ratingFilterFn,
       searchFilterFn,
       tagFilterFn,
-      ratingFilterFn,
     ];
 
     // フィルタの適用
@@ -130,7 +146,13 @@ export function Favorites() {
       // メディアファイルは全てのフィルタを適用
       return filters.every((fn) => fn(node));
     });
-  }, [allNodes, searchFilterFn, tagFilterFn, ratingFilterFn]);
+  }, [
+    mediaTypeFilterFn,
+    ratingFilterFn,
+    searchFilterFn,
+    tagFilterFn,
+    allNodes,
+  ]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -397,6 +419,12 @@ export function Favorites() {
 
             {/* シャッフルボタン */}
             <ShuffleButton />
+
+            {/* ファイル種別フィルター */}
+            <MediaTypeFilterSelect
+              value={mediaTypeFilterValue}
+              onChange={setMediaTypeFilterValue}
+            />
 
             {/* 評価フィルター */}
             <RatingFilterSelect value={minRating} onChange={setMinRating} />

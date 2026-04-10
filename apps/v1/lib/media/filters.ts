@@ -1,6 +1,5 @@
-import { FavoriteFilterMode } from "@/components/ui/buttons/favorite-filter-button";
 import { TagFilterMode } from "@/hooks/use-tag-filter";
-import { MediaNodeFilter } from "@/lib/media/types";
+import { MediaNodeFilter, MediaTypeFilterValue } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/search";
 
 export const createLimitFilter = (limit: number): MediaNodeFilter => {
@@ -42,24 +41,6 @@ export const createTagFilter = (
   };
 };
 
-export const createFavoriteFilter = (
-  mode: FavoriteFilterMode
-): MediaNodeFilter => {
-  const isFavorite = (rating: number | null) => rating != null && rating > 0;
-
-  return (node) => {
-    switch (mode) {
-      case "only_favorites":
-        return isFavorite(node.rating);
-      case "exclude_favorites":
-        return !isFavorite(node.rating);
-      case "all":
-      default:
-        return true;
-    }
-  };
-};
-
 export const createRatingFilter = (minRating: number): MediaNodeFilter => {
   return (node) => {
     if (node.isDirectory) return true; // フォルダは常にパス
@@ -68,5 +49,14 @@ export const createRatingFilter = (minRating: number): MediaNodeFilter => {
 
     const rating = node.rating ?? 0;
     return rating >= minRating; // ★1~5 以上
+  };
+};
+
+export const createMediaTypeFilter = (
+  type: MediaTypeFilterValue
+): MediaNodeFilter => {
+  return (node) => {
+    if (type === "all") return true;
+    return node.type === type;
   };
 };

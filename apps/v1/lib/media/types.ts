@@ -113,3 +113,5 @@ export type GhostMediaDeleteResult = {
   deletedCount?: number;
   error?: string;
 };
+
+export type MediaTypeFilterValue = MediaFsNodeType | "all";
