@@ -11,11 +11,13 @@ import { ReactNode } from "react";
 
 // アイコンの定義を React コンポーネントに差し替え
 const mediaThumbIcons: Record<MediaFsNodeType, ReactNode> = {
-  audio: <Music className="w-full h-full" />,
-  directory: <Folder className="w-full h-full fill-current opacity-80" />,
+  audio: <Music className="w-full h-full text-purple-300" />,
+  directory: (
+    <Folder className="w-full h-full fill-current opacity-80 text-yellow-300" />
+  ),
   file: <FileText className="w-full h-full" />,
-  image: <ImageIcon className="w-full h-full" />,
-  video: <Film className="w-full h-full" />,
+  image: <ImageIcon className="w-full h-full text-green-300" />,
+  video: <Film className="w-full h-full text-blue-300" />,
 };
 
 export function MediaThumbIcon({
@@ -26,7 +28,7 @@ export function MediaThumbIcon({
   className?: string;
 }) {
   return (
-    <div className={cn("text-white/90 drop-shadow-sm", className)}>
+    <div className={cn("drop-shadow-sm", className)}>
       {mediaThumbIcons[type]}
     </div>
   );
