@@ -1,5 +1,6 @@
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
+import { useImageColors } from "@/hooks/use-image-colors";
 import { MediaNode } from "@/lib/media/types";
 import { resolveMediaUrl } from "@/lib/url/resolver";
 import {
@@ -7,6 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/shadcn-overrides/components/ui/tooltip";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Music,
   Pause,
@@ -31,6 +33,7 @@ export function AudioPlayer({
   const [isRepeating, setIsRepeating] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const { colors, extractColors } = useImageColors();
 
   // 再生率を計算 (0 ~ 100)
   const progress = duration ? (currentTime / duration) * 100 : 0;
@@ -136,6 +139,74 @@ export function AudioPlayer({
 
   return (
     <div className="w-full h-full flex items-center justify-center">
+      {/* ライブ演出背景 */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-black">
+        <AnimatePresence>
+          {media.previewPath && active && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 blur-[80px] scale-150"
+            >
+              {/* スポットライト 1 */}
+              <motion.div
+                animate={{
+                  x: ["-20%", "20%", "-10%"],
+                  y: ["-10%", "20%", "10%"],
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{
+                  duration: 10,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full"
+                style={{
+                  background: `radial-gradient(circle, ${colors[0]} 0%, transparent 70%)`,
+                }}
+              />
+
+              {/* スポットライト 2 */}
+              <motion.div
+                animate={{
+                  x: ["20%", "-20%", "10%"],
+                  y: ["20%", "-10%", "20%"],
+                  scale: [1.2, 1, 1.1],
+                }}
+                transition={{
+                  duration: 15,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full"
+                style={{
+                  background: `radial-gradient(circle, ${colors[1]} 0%, transparent 70%)`,
+                }}
+              />
+
+              {/* スポットライト 3 (中心付近で揺らめく) */}
+              <motion.div
+                animate={{
+                  opacity: [0.4, 0.8, 0.4],
+                  scale: [0.8, 1.3, 0.8],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full"
+                style={{
+                  background: `radial-gradient(circle, ${colors[2]} 0%, transparent 70%)`,
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* プレーヤー本体 */}
       <div className="relative flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] border border-white/10 shadow-2xl">
         {/* リピートバッジ */}
         <PlayerButton
@@ -160,6 +231,7 @@ export function AudioPlayer({
               node={media}
               className="w-full h-full object-cover"
               showIcon={false}
+              onLoad={extractColors}
             />
           ) : (
             // ない場合はデフォルトのアイコンを表示
