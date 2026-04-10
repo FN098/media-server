@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeSelect } from "@/components/ui/selects/theme-select";
-import { PATHS } from "@/lib/path/paths";
+import { pageMetas } from "@/lib/meta";
 import {
   Sidebar,
   SidebarContent,
@@ -17,57 +17,19 @@ import {
   useSidebar,
 } from "@/shadcn-overrides/components/ui/sidebar";
 import { Button } from "@/shadcn/components/ui/button";
-import {
-  LayoutDashboard,
-  Menu,
-  PackageOpen,
-  Search,
-  Settings,
-  Star,
-  Trash2,
-  Wrench,
-  X,
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
 // Menu items.
 const items = [
-  {
-    title: "Dashboard",
-    url: PATHS.client.dashboard.root,
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Explorer",
-    url: PATHS.client.explorer.root,
-    icon: Search,
-  },
-  {
-    title: "Favorites",
-    url: PATHS.client.favorites.root,
-    icon: Star,
-  },
-  {
-    title: "Trash",
-    url: PATHS.client.trash.root,
-    icon: Trash2,
-  },
-  {
-    title: "Settings",
-    url: PATHS.client.settings.root,
-    icon: Settings,
-  },
-  {
-    title: "Sandbox",
-    url: PATHS.client.sandbox.root,
-    icon: PackageOpen,
-  },
-  {
-    title: "Maintenance",
-    url: PATHS.client.maintenance.root,
-    icon: Wrench,
-  },
+  pageMetas["dashboard"],
+  pageMetas["explorer"],
+  pageMetas["favorites"],
+  pageMetas["trash"],
+  pageMetas["settings"],
+  pageMetas["sandbox"],
+  pageMetas["maintenance"],
 ];
 
 export function AppSidebar() {
@@ -111,13 +73,13 @@ export function AppSidebar() {
 }
 
 export function AppSidebarOpenButton(
-  props: React.ComponentProps<typeof Button>,
+  props: React.ComponentProps<typeof Button>
 ) {
   return <SidebarTrigger icon={Menu} {...props} open={true} />;
 }
 
 export function AppSidebarCloseButton(
-  props: React.ComponentProps<typeof Button>,
+  props: React.ComponentProps<typeof Button>
 ) {
   return <SidebarTrigger icon={X} {...props} open={false} />;
 }

@@ -1,12 +1,15 @@
 import { Header } from "@/components/ui/headers/header";
-import { PATHS } from "@/lib/path/paths";
+import { pageMetas } from "@/lib/meta";
+
+const meta = pageMetas["maintenance"];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="w-full h-svh flex flex-col">
       <Header
-        title="Maintenance"
-        basePath={PATHS.client.favorites.root}
+        title={meta.title}
+        icon={meta.icon}
+        basePath={meta.url}
         features={{
           navigation: false,
           search: false,

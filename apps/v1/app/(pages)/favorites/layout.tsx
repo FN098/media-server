@@ -1,9 +1,11 @@
 import { Header } from "@/components/ui/headers/header";
-import { PATHS } from "@/lib/path/paths";
+import { pageMetas } from "@/lib/meta";
 import { SearchProvider } from "@/providers/search-provider";
 import { TagEditorProvider } from "@/providers/tag-editor-provider";
 import { ViewModeProvider } from "@/providers/view-mode-provider";
 import { ViewerProvider } from "@/providers/viewer-provider";
+
+const meta = pageMetas["favorites"];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,8 +15,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <TagEditorProvider>
             <div className="w-full h-svh flex flex-col overflow-hidden">
               <Header
-                title="Favorites"
-                basePath={PATHS.client.favorites.root}
+                title={meta.title}
+                icon={meta.icon}
+                basePath={meta.url}
                 features={{
                   navigation: false,
                 }}

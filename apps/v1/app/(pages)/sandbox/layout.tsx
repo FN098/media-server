@@ -1,12 +1,15 @@
 import { Header } from "@/components/ui/headers/header";
-import { PATHS } from "@/lib/path/paths";
+import { pageMetas } from "@/lib/meta";
+
+const meta = pageMetas["sandbox"];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen">
       <Header
-        title="Sandbox"
-        basePath={PATHS.client.sandbox.root}
+        title={meta.title}
+        icon={meta.icon}
+        basePath={meta.url}
         features={{
           navigation: false,
           search: false,

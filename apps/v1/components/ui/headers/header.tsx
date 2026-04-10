@@ -1,6 +1,7 @@
 import { HeaderNavigation } from "@/components/ui/headers/header-navigation";
 import { HeaderSearch } from "@/components/ui/headers/header-search";
 import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-sidebar";
+import { LucideIcon } from "lucide-react";
 import { HeaderViewModeSwitch } from "./header-view-mode-switch";
 
 type HeaderFeatures = {
@@ -11,23 +12,26 @@ type HeaderFeatures = {
 
 export function Header({
   title,
+  icon: Icon,
   basePath,
   features,
 }: {
   title: string;
+  icon?: LucideIcon;
   basePath?: string;
   features?: HeaderFeatures;
 }) {
-  const navigation = features?.navigation ?? true;
-  const search = features?.search ?? true;
-  const viewMode = features?.viewMode ?? true;
+  const { navigation = true, search = true, viewMode = true } = features || {};
 
   return (
     <header className="sticky top-0 z-30 h-12 border-b bg-white dark:bg-gray-900">
       <div className="flex h-full items-center gap-2 px-2 md:px-3">
         <AppSidebarOpenButton />
 
-        <div className="text-lg font-semibold mx-2">{title}</div>
+        <div className="flex items-center gap-2 mx-2">
+          {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+          <span className="text-lg font-semibold hidden md:block">{title}</span>
+        </div>
 
         {navigation && <HeaderNavigation basePath={basePath} />}
 

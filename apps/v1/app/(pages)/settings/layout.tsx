@@ -1,12 +1,15 @@
 import { Header } from "@/components/ui/headers/header";
-import { PATHS } from "@/lib/path/paths";
+import { pageMetas } from "@/lib/meta";
+
+const meta = pageMetas["settings"];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen">
       <Header
-        title="Settings"
-        basePath={PATHS.client.settings.root}
+        title={meta.title}
+        icon={meta.icon}
+        basePath={meta.url}
         features={{
           navigation: false,
           search: false,
