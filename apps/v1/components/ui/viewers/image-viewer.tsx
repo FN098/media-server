@@ -15,20 +15,6 @@ export function ImageViewer({ media, active = true }: ImageViewerProps) {
   const thumbSrc = resolveMediaThumbUrl(media);
   const src = resolveMediaUrl(media);
 
-  if (!active) {
-    return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        <Image
-          src={thumbSrc}
-          alt={media.name}
-          fill
-          className="object-contain opacity-30 blur-sm"
-          draggable={false}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="swiper-zoom-container relative w-full h-full flex items-center justify-center">
       {/* スピナー */}
