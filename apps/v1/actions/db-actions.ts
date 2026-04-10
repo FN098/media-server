@@ -144,3 +144,73 @@ export async function restoreBackupAction(fileName: string) {
     }
   }
 }
+
+/**
+ * バックアップファイルの削除
+ */
+export async function deleteBackupAction(fileName: string) {
+  // セキュリティ対策: ファイル名にパス区切り文字が含まれていないかチェック
+  // (ディレクトリトラバーサル対策)
+  if (fileName.includes("/") || fileName.includes("\\")) {
+    return { success: false, error: "不正なファイル名です" };
+  }
+
+  const filePath = path.join(BACKUP_DIR, fileName);
+
+  try {
+    // ファイルの存在確認
+    await fs.access(filePath);
+
+    // 削除実行
+    await fs.unlink(filePath);
+
+    return { success: true };
+  } catch (error) {
+    console.error("delete db backup error", error);
+
+    // エラー内容に応じたメッセージ（ファイルが見つからない場合など）
+    const message =
+      (error as NodeJS.ErrnoException).code === "ENOENT"
+        ? "ファイルが見つかりませんでした"
+        : "削除に失敗しました";
+
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * バックアップの世代管理（内部用）
+ * @param keepCount 残す件数
+ */
+export async function cleanupOldBackupsAction(keepCount: number = 10) {
+  try {
+    const files = await fs.readdir(BACKUP_DIR);
+    const backupFiles = await Promise.all(
+      files
+        .filter((file) => file.endsWith(".sql"))
+        .map(async (file) => {
+          const stats = await fs.stat(path.join(BACKUP_DIR, file));
+          return { name: file, mtime: stats.mtime };
+        })
+    );
+
+    // 新しい順にソート
+    backupFiles.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+
+    // 規定数を超えたファイルを削除
+    const filesToDelete = backupFiles.slice(keepCount);
+    for (const file of filesToDelete) {
+      await fs.unlink(path.join(BACKUP_DIR, file.name));
+      console.log(`Deleted old backup: ${file.name}`);
+    }
+
+    return { success: true, deletedCount: filesToDelete.length };
+  } catch (error) {
+    console.error("Cleanup backups error:", error);
+
+    return {
+      success: false,
+      error: "古いバックアップの削除に失敗しました",
+    };
+  }
+}

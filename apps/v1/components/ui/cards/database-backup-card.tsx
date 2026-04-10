@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  cleanupOldBackupsAction,
   createBackupAction,
   getBackupListAction,
   restoreBackupAction,
@@ -24,6 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shadcn/components/ui/card";
+import { Input } from "@/shadcn/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -31,7 +33,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shadcn/components/ui/select";
-import { Database, Download, Loader2, Plus, RotateCcw } from "lucide-react";
+import { Switch } from "@/shadcn/components/ui/switch";
+import {
+  Database,
+  Download,
+  Loader2,
+  Plus,
+  RotateCcw,
+  Settings2,
+} from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -41,11 +51,13 @@ type BackupInfo = {
 };
 
 export function DatabaseBackupCard() {
-  const [isListing, startList] = useTransition();
-  const [isCreating, startCreate] = useTransition();
-  const [isRestoring, startRestore] = useTransition();
+  const [isListing, startListing] = useTransition();
+  const [isCreating, startCreating] = useTransition();
+  const [isRestoring, startRestoring] = useTransition();
   const [backups, setBackups] = useState<BackupInfo[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>("");
+  const [autoCleanup, setAutoCleanup] = useState(true);
+  const [keepCount, setKeepCount] = useState(5);
 
   const formatDateTime = (isoString: string) => {
     const date = new Date(isoString);
@@ -62,17 +74,28 @@ export function DatabaseBackupCard() {
   };
 
   const refreshList = () => {
-    startList(async () => {
+    startListing(async () => {
       const list = await getBackupListAction();
       setBackups(list);
     });
   };
 
   const handleBackup = () => {
-    startCreate(async () => {
+    startCreating(async () => {
       const res = await createBackupAction();
       if (res.success) {
         toast.success("バックアップを作成しました");
+
+        // 自動クリーンアップがONの場合のみ実行
+        if (autoCleanup) {
+          const cleanRes = await cleanupOldBackupsAction(keepCount);
+          if (cleanRes.success && cleanRes.deletedCount! > 0) {
+            toast.info(
+              `古いバックアップを ${cleanRes.deletedCount} 件削除しました`
+            );
+          }
+        }
+
         refreshList();
       } else {
         toast.error(res.error);
@@ -82,7 +105,7 @@ export function DatabaseBackupCard() {
 
   const handleRestore = () => {
     if (!selectedFile) return;
-    startRestore(async () => {
+    startRestoring(async () => {
       const res = await restoreBackupAction(selectedFile);
       if (res.success) {
         toast.success("リストアが完了しました");
@@ -118,6 +141,34 @@ export function DatabaseBackupCard() {
           )}
           新規バックアップ作成
         </Button>
+
+        {/* 設定セクション */}
+        <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Settings2 className="w-4 h-4 text-muted-foreground" />
+              自動クリーンアップ設定
+            </div>
+            <Switch checked={autoCleanup} onCheckedChange={setAutoCleanup} />
+          </div>
+
+          {autoCleanup && (
+            <div className="flex items-center gap-3 pl-6">
+              <label className="text-xs text-muted-foreground whitespace-nowrap">
+                保持する世代数:
+              </label>
+              <Input
+                type="number"
+                min={1}
+                max={50}
+                value={keepCount}
+                onChange={(e) => setKeepCount(Number(e.target.value))}
+                className="h-8 w-20"
+              />
+              <span className="text-xs text-muted-foreground">件</span>
+            </div>
+          )}
+        </div>
 
         {/* 保存済みバックアップ選択 */}
         <div className="space-y-2">
