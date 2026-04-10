@@ -516,7 +516,11 @@ export function Explorer() {
             />
 
             {/* 評価フィルター */}
-            <RatingFilterSelect value={minRating} onChange={setMinRating} />
+            <RatingFilterSelect
+              value={minRating}
+              onChange={setMinRating}
+              showUnrated
+            />
 
             {/* タグフィルター */}
             <TagFilterDialog />

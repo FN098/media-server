@@ -63,7 +63,10 @@ export const createFavoriteFilter = (
 export const createRatingFilter = (minRating: number): MediaNodeFilter => {
   return (node) => {
     if (node.isDirectory) return true; // フォルダは常にパス
+    if (minRating === 0) return true; // すべて
+    if (minRating === -1) return node.rating === 0; // 評価無し
+
     const rating = node.rating ?? 0;
-    return rating >= minRating;
+    return rating >= minRating; // ★1~5 以上
   };
 };
