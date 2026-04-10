@@ -113,16 +113,32 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   // フォーマット
   const formatted = formatNodes(sorted);
 
-  // オーディオファイルに対して、見つかったメディアを previewPath として設定
+  // オーディオファイルに対して、プレビューパスを決定
   const withPreviewForAudio = (nodes: MediaNode[]) => {
-    if (!firstMedia) return nodes;
+    // 検索を高速化するために、画像・動画ノードの「拡張子なしの名前」をキーにしたマップを作成
+    const mediaMap = new Map<string, string>();
+    nodes.forEach((n) => {
+      if (!n.isDirectory && (n.type === "image" || n.type === "video")) {
+        // 例: "song.jpg" -> "song"
+        const baseName = n.name.replace(/\.[^/.]+$/, "");
+        if (!mediaMap.has(baseName)) {
+          mediaMap.set(baseName, n.path);
+        }
+      }
+    });
 
     return nodes.map((node) => {
       if (node.type === "audio") {
-        return {
-          ...node,
-          previewPath: firstMedia.path,
-        };
+        // 1. 同名のメディアファイルを探す
+        const baseName = node.name.replace(/\.[^/.]+$/, "");
+        const sameNameMediaPath = mediaMap.get(baseName);
+
+        // 2. 同名があればそれを、なければフォルダの代表(firstMedia)を使う
+        const previewPath = sameNameMediaPath ?? firstMedia?.path;
+
+        if (previewPath) {
+          return { ...node, previewPath };
+        }
       }
       return node;
     });
