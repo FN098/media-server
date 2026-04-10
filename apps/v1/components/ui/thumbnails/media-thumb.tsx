@@ -36,7 +36,7 @@ export const MediaThumb = memo(function MediaThumb1({
   }
 
   // ディレクトリ
-  if (node.type === "directory") {
+  if (node.type === "directory" && node.previewPath) {
     return (
       <div className="relative w-full h-full">
         <MediaThumbImage
