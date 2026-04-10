@@ -20,7 +20,11 @@ export const MediaThumb = memo(function MediaThumb1({
   onLoad,
 }: MediaThumbProps) {
   // メディア
-  if (node.type === "image" || node.type === "video" || node.type === "audio") {
+  if (
+    node.type === "image" ||
+    node.type === "video" ||
+    (node.type === "audio" && node.previewPath)
+  ) {
     return (
       <MediaThumbImage
         node={node}
@@ -102,8 +106,7 @@ function MediaThumbImage({
     setIsProcessing(true);
 
     try {
-      // フォルダ自体のサムネ生成が必要な場合は node.path、
-      // フォルダ内の特定ファイルのサムネが必要な場合はその親ディレクトリを enqueue
+      // サムネイルを作成するディレクトリを enqueue
       const targetDir = previewPath
         ? getParentDirPath(previewPath)
         : getParentDirPath(node.path);
