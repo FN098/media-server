@@ -19,6 +19,15 @@ import { useEffect, useState, useTransition } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
+interface TagEditSheetProps {
+  open: boolean;
+  targetNodes: MediaNode[];
+  mode?: TagEditMode;
+  opacity?: number;
+  edit?: boolean;
+  onClose: () => void;
+}
+
 export function TagEditSheet({
   open,
   targetNodes,
@@ -26,14 +35,7 @@ export function TagEditSheet({
   opacity: initialOpacity,
   edit,
   onClose,
-}: {
-  open: boolean;
-  targetNodes: MediaNode[];
-  mode?: TagEditMode;
-  opacity?: number;
-  edit?: boolean;
-  onClose: () => void;
-}) {
+}: TagEditSheetProps) {
   const router = useRouter();
   const editor = useTagEditorContext();
   const controls = useDragControls();
