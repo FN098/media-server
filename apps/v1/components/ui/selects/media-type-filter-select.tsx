@@ -33,7 +33,7 @@ const TYPE_CONFIG: Record<
   directory: { label: "フォルダ", icon: Folder },
   image: { label: "画像", icon: ImageIcon },
   video: { label: "動画", icon: Film },
-  audio: { label: "音声", icon: Music },
+  audio: { label: "オーディオ", icon: Music },
   file: { label: "その他ファイル", icon: File },
 };
 
