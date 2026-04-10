@@ -6,6 +6,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/shadcn/components/ui/select";
 import { cn } from "@/shadcn/lib/utils";
 import {
@@ -57,23 +58,26 @@ export function MediaTypeFilterSelect({
       onValueChange={(v) => onChange(v as MediaFsNodeType | "all")}
     >
       <SelectTrigger className={cn("w-full h-9", className)}>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <SelectedIcon size={14} />
-          {value === "all" ? (
+        {value === "all" ? (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <SelectedIcon size={14} />
             <span>種別で絞り込む</span>
-          ) : (
-            <span>{TYPE_CONFIG[value].label}</span>
-          )}
-        </div>
+          </div>
+        ) : (
+          <SelectValue />
+        )}
       </SelectTrigger>
 
       <SelectContent>
+        {/* 種別選択リセット */}
         <SelectItem value="all">
-          <span className="text-muted-foreground">すべて</span>
+          <span className="text-muted-foreground">すべての種別</span>
         </SelectItem>
 
+        {/* セパレータ */}
         <div className="my-1 h-px bg-muted" />
 
+        {/* 種別選択オプション */}
         {displayTypes.map((type) => {
           const config = TYPE_CONFIG[type];
           const Icon = config.icon;

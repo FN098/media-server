@@ -187,7 +187,8 @@ export function TagFilterDialog() {
           className={cn(
             "gap-2 h-9 w-full transition-colors",
             hasSelection &&
-              "border-primary bg-primary/5 text-primary hover:bg-primary/10"
+              "border-primary bg-primary/5 text-primary hover:bg-primary/10",
+            !hasSelection && "text-muted-foreground"
           )}
         >
           <Tag className="h-4 w-4" />
