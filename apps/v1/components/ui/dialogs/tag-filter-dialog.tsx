@@ -274,6 +274,7 @@ export function TagFilterDialog() {
             <AnimatePresence>
               {suggestionOpen && (
                 <motion.div
+                  key="tag-suggestions"
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}

@@ -90,6 +90,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
       <AnimatePresence>
         {visible && (
           <motion.div
+            key="portal-main"
             className="fixed z-[50] pointer-events-none overflow-hidden rounded-xl border-2 border-primary/20 bg-background shadow-2xl flex flex-col"
             initial={{ opacity: 0, scale: 0.85, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

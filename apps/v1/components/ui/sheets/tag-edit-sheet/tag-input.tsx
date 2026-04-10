@@ -149,6 +149,7 @@ export function TagInput({
       <AnimatePresence>
         {suggestions.length > 0 && (
           <motion.div
+            key="tag-suggestions"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

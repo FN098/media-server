@@ -31,6 +31,7 @@ export function SelectionBar({
     <AnimatePresence>
       {open && (
         <motion.div
+          key="selection-bar"
           initial={{ y: 100, x: "-50%", opacity: 0 }}
           animate={{ y: 0, x: "-50%", opacity: 1 }}
           exit={{ y: 100, x: "-50%", opacity: 0 }}

@@ -196,6 +196,7 @@ export function TagEditSheet({
 
           {/* メインコンテナ */}
           <motion.div
+            key="main-sheet"
             layout
             drag="y"
             dragControls={controls}
@@ -252,7 +253,7 @@ export function TagEditSheet({
                   {/* 閲覧モード */}
                   {editingMode === "view" && (
                     <motion.div
-                      key="view-mode"
+                      key="view-mode-panel"
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
@@ -284,7 +285,7 @@ export function TagEditSheet({
                   {/* クイックモード */}
                   {editingMode === "quick" && (
                     <motion.div
-                      key="quick-mode"
+                      key="quick-mode-panel"
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
@@ -330,7 +331,7 @@ export function TagEditSheet({
                   {/* 詳細モード */}
                   {editingMode === "edit" && (
                     <motion.div
-                      key="edit-mode"
+                      key="edit-mode-panel"
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 5 }}
