@@ -183,15 +183,15 @@ export function TagEditSheet({
           {/* 暗転オーバーレイ */}
           {(editingMode === "edit" || editingMode === "quick") && (
             <motion.div
+              key="overlay"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[60] bg-black/40"
-              onClick={handleModeChangeDown}
+              onClick={() => setEditingMode("view")}
             />
           )}
-
-          {/* メインコンテナ */}
+          e{/* メインコンテナ */}
           <motion.div
             layout
             drag="y"
