@@ -1,6 +1,6 @@
 import type { Media } from "@/generated/prisma/client";
 import { detectMediaType } from "@/lib/media/media-types";
-import { DbMedia, MediaNode } from "@/lib/media/types";
+import { DbMediaNode, MediaNode } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import path from "path";
 
@@ -28,10 +28,10 @@ export async function getDbMediaCount(dirPath: string): Promise<number> {
   });
 }
 
-export async function getDbMedia(
+export async function getDbMediaNodes(
   dirPath: string,
   userId: string
-): Promise<DbMedia[]> {
+): Promise<DbMediaNode[]> {
   const dbMedia = await prisma.media.findMany({
     where: { dirPath },
     select: {

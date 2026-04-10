@@ -12,7 +12,7 @@ import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { TrashProvider } from "@/providers/trash-provider";
 import { getDbVisitedInfoDeeply } from "@/repositories/folder-repository";
-import { getDbMedia } from "@/repositories/media-repository";
+import { getDbMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -56,7 +56,7 @@ export default async function TrashPage(props: TrashPageProps) {
 
   const currentVirtualDirPath = pathParts.map(decodeURIComponent).join("/");
 
-  // 取得
+  // FileSystem からリスト取得
   const fsListing = await getMediaFsListing(currentVirtualDirPath, {
     resolveRealPath: (virtualPath) => getServerMediaTrashPath(virtualPath),
     filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
@@ -71,14 +71,14 @@ export default async function TrashPage(props: TrashPageProps) {
 
   // DB クエリ
   const [dbMedia, dbVisited] = await Promise.all([
-    getDbMedia(currentVirtualDirPath, user.id),
+    getDbMediaNodes(currentVirtualDirPath, user.id),
     getDbVisitedInfoDeeply(dirPaths, user.id),
   ]);
 
   // マージ
   const merged = mergeFsWithDb({
-    fsMedia: allNodes,
-    dbMedia,
+    fsMediaNodes: allNodes,
+    dbMediaNodes: dbMedia,
     dbVisited,
   });
 

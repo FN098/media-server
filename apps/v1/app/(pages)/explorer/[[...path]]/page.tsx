@@ -17,7 +17,7 @@ import {
   getDbVisitedInfoDeeply,
   upsertFolderMetas,
 } from "@/repositories/folder-repository";
-import { getDbMedia } from "@/repositories/media-repository";
+import { getDbMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -61,26 +61,24 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   const currentVirtualPath = pathParts.map(decodeURIComponent).join("/");
 
-  // 取得
+  // FileSystem からリスト取得
   const fsListing = await getMediaFsListing(currentVirtualPath);
   if (!fsListing) notFound();
 
   const allNodes = fsListing.nodes;
 
-  // 今開いている「このフォルダ」自体のプレビューを決定
-  // ソート済みノードから最初に見つかった画像/動画をこのフォルダの顔にする
+  // このフォルダ内の「顔」となるメディア（画像 or 動画）を探す
   const firstMedia = allNodes.find(
     (n) => !n.isDirectory && (n.type === "image" || n.type === "video")
   );
 
-  // currentVirtualPath がこのディレクトリ自体のパス
+  // 今開いている「このフォルダ」自体のプレビューをDBに保存
   void upsertFolderMetas([
     {
       path: currentVirtualPath,
       previewPath: firstMedia?.path ?? null,
     },
   ]).catch(console.error);
-  // ※ await せずに流しっぱなしでも、次にこの親ディレクトリに戻った時には DB に反映されている
 
   const dirPaths = allNodes.filter((e) => e.isDirectory).map((e) => e.path);
   const user = await resolveCurrentUser();
@@ -89,17 +87,18 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   await syncMediaDir(currentVirtualPath, allNodes);
 
   // DB クエリ
-  const [dbMedia, dbVisited, dbFavorites, dbFolderMetas] = await Promise.all([
-    getDbMedia(currentVirtualPath, user.id),
-    getDbVisitedInfoDeeply(dirPaths, user.id),
-    getDbFavoriteCount(dirPaths, user.id),
-    getDbFolderMetas(dirPaths),
-  ]);
+  const [dbMediaNodes, dbVisited, dbFavorites, dbFolderMetas] =
+    await Promise.all([
+      getDbMediaNodes(currentVirtualPath, user.id),
+      getDbVisitedInfoDeeply(dirPaths, user.id),
+      getDbFavoriteCount(dirPaths, user.id),
+      getDbFolderMetas(dirPaths),
+    ]);
 
   // マージ
   const merged = mergeFsWithDb({
-    fsMedia: allNodes,
-    dbMedia,
+    fsMediaNodes: allNodes,
+    dbMediaNodes,
     dbVisited,
     dbFavorites,
     dbFolderMetas,
@@ -114,9 +113,24 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   // フォーマット
   const formatted = formatNodes(sorted);
 
+  // オーディオファイルに対して、見つかったメディアを previewPath として設定
+  const withPreviewForAudio = (nodes: MediaNode[]) => {
+    if (!firstMedia) return nodes;
+
+    return nodes.map((node) => {
+      if (node.type === "audio") {
+        return {
+          ...node,
+          previewPath: firstMedia.path,
+        };
+      }
+      return node;
+    });
+  };
+
   const listing = {
     ...fsListing,
-    nodes: formatted,
+    nodes: withPreviewForAudio(formatted),
   };
 
   return (

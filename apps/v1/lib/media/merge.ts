@@ -1,31 +1,31 @@
 import {
   DbFavoriteInfo,
   DbFolderMeta,
-  DbMedia,
+  DbMediaNode,
   DbVisitedInfo,
   MediaFsNode,
   MediaNode,
 } from "@/lib/media/types";
 
 export function mergeFsWithDb({
-  fsMedia,
-  dbMedia = [],
+  fsMediaNodes,
+  dbMediaNodes = [],
   dbVisited = [],
   dbFavorites = [],
   dbFolderMetas = [],
 }: {
-  fsMedia: MediaFsNode[];
-  dbMedia?: DbMedia[];
+  fsMediaNodes: MediaFsNode[];
+  dbMediaNodes?: DbMediaNode[];
   dbVisited?: DbVisitedInfo[];
   dbFavorites?: DbFavoriteInfo[];
   dbFolderMetas?: DbFolderMeta[];
 }): MediaNode[] {
-  const dbMediaMap = new Map(dbMedia.map((e) => [e.path, e]));
+  const dbMediaMap = new Map(dbMediaNodes.map((e) => [e.path, e]));
   const dbVisitedMap = new Map(dbVisited.map((e) => [e.path, e]));
   const dbFavoriteMap = new Map(dbFavorites.map((e) => [e.path, e]));
   const dbFolderMetaMap = new Map(dbFolderMetas.map((e) => [e.path, e]));
 
-  return fsMedia.map((fsNode) => {
+  return fsMediaNodes.map((fsNode) => {
     const dbMediaEntry = dbMediaMap.get(fsNode.path);
     const dbVisitedEntry = dbVisitedMap.get(fsNode.path);
     const dbFavoriteEntry = dbFavoriteMap.get(fsNode.path);

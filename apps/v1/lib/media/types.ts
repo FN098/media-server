@@ -48,7 +48,7 @@ export type MediaListing = {
   next: string | null;
 };
 
-export type DbMedia = {
+export type DbMediaNode = {
   id: string;
   path: string;
   title?: string;

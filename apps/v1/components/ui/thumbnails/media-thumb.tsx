@@ -19,16 +19,29 @@ export const MediaThumb = memo(function MediaThumb1({
   className,
   onLoad,
 }: MediaThumbProps) {
+  // 画像 or 動画
   if (node.type === "image" || node.type === "video") {
     return (
       <MediaThumbImage node={node} className={className} onLoad={onLoad} />
     );
   }
 
+  // オーディオ
+  if (node.type === "audio" && node.previewPath) {
+    return (
+      <MediaThumbImage
+        node={node}
+        previewPath={node.previewPath}
+        className={className}
+        onLoad={onLoad}
+      />
+    );
+  }
+
+  // ディレクトリ
   if (node.type === "directory" && node.previewPath) {
     return (
       <div className="relative w-full h-full">
-        {/* メインのプレビュー画像 */}
         <MediaThumbImage
           node={node}
           previewPath={node.previewPath}
@@ -36,18 +49,14 @@ export const MediaThumb = memo(function MediaThumb1({
           onLoad={onLoad}
         />
 
-        {/* 左下のフォルダバッジ: 背景を白ではなく、黒透過 + ぼかしに */}
         <div className="absolute bottom-8 left-2 z-20 flex items-center justify-center p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 shadow-lg">
-          <MediaThumbIcon
-            type="directory"
-            className="w-4 h-4 opacity-90" // アイコンを白抜きにする
-          />
+          <MediaThumbIcon type="directory" className="w-4 h-4 opacity-90" />
         </div>
       </div>
     );
   }
 
-  // デフォルト（プレビューがないフォルダや、その他ファイル）
+  // デフォルト（プレビューがない、またはその他のファイル）
   return (
     <div
       className={cn(
