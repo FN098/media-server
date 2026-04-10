@@ -115,7 +115,7 @@ export function UnusedTagsCleanupCard({
           未使用タグ削除
         </CardTitle>
         <CardDescription>
-          どのファイルにも紐付いていないタグをスキャンして削除します。
+          どのメディアレコードにも紐付いていないタグをスキャンして削除します。
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
