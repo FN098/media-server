@@ -72,3 +72,12 @@ export type UnusedTagDeleteResult = {
   deletedCount?: number;
   error?: string;
 };
+
+export type TagMasterItem = {
+  id: string;
+  name: string;
+  kana: string | null;
+  isFavorite: boolean;
+  isNew: boolean;
+  _count: { mediaTags: number };
+};
