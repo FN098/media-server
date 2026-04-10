@@ -33,6 +33,7 @@ import {
   MediaPathToNodeMap,
   MediaTypeFilterValue,
 } from "@/lib/media/types";
+import { IndexLike } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
@@ -219,6 +220,16 @@ export function Explorer() {
     setLastPath(media.path);
   };
 
+  // 前のフォルダを開く
+  const handleOpenPrevFolder = (at: IndexLike = "last") => {
+    openPrevFolder(at);
+  };
+
+  // 次のフォルダを開く
+  const handleOpenNextFolder = (at: IndexLike = "first") => {
+    openNextFolder(at);
+  };
+
   // ===== ナビゲーション =====
 
   // ファイル/フォルダオープン
@@ -242,6 +253,7 @@ export function Explorer() {
 
   const favCtx = useFavoritesContext();
 
+  // レーティング更新
   const handleRatingChange = async (node: MediaNode, rating: number | null) => {
     try {
       await favCtx.updateFavorite(node.path, rating);
@@ -262,7 +274,7 @@ export function Explorer() {
     clearSelection,
   } = usePathSelectionContext();
 
-  // 処理高速化のため、path => node の Map を作成しておく
+  // O(1) で path => node を検索するための Map
   const pathToNodeMap: MediaPathToNodeMap = useMemo(() => {
     return new Map(listing.nodes.map((node) => [node.path, node]));
   }, [listing.nodes]);
@@ -303,15 +315,6 @@ export function Explorer() {
   // ===== タグエディタ =====
 
   const { isTagEditMode, setIsTagEditMode } = useTagEditorContext();
-  const handleOpenTagEditor = () => {
-    setIsTagEditMode(true);
-  };
-  const handleCloseTagEditor = () => {
-    setIsTagEditMode(false);
-  };
-  const handleToggleTagEditor = () => {
-    setIsTagEditMode((prev) => !prev);
-  };
 
   // タグエディタの起動モード
   const tagEditMode = useMemo(() => {
@@ -319,13 +322,36 @@ export function Explorer() {
     return "default";
   }, [isViewMode]);
 
+  // タグエディタを表示
+  const handleOpenTagEditor = () => {
+    setIsTagEditMode(true);
+  };
+
+  // タグエディタを非表示
+  const handleCloseTagEditor = () => {
+    setIsTagEditMode(false);
+  };
+
+  // タグエディタを表示/非表示
+  const handleToggleTagEditor = () => {
+    setIsTagEditMode((prev) => !prev);
+  };
+
   // ===== リネーム =====
 
   const [renameTarget, setRenameTarget] = useState<MediaNode | null>(null);
   const isRenameMode = !!renameTarget;
 
+  // 単体リネーム
   const handleRenameSingle = (node: MediaNode) => {
     setRenameTarget(node);
+  };
+
+  // 後始末
+  const handleRenameDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setRenameTarget(null);
+    }
   };
 
   // ===== 移動 (Move) =====
@@ -336,25 +362,38 @@ export function Explorer() {
   const initialDirPath =
     moveTargets.length > 0 ? dirname(moveTargets[0]?.path) : undefined;
 
-  const handleCloseMoveDialog = () => {
-    setMoveTargets([]);
-    if (isSelectionMode) handleClearSelection();
-  };
-
-  // 単体移動の呼び出し
+  // 単体移動
   const handleOpenMoveSingle = (node: MediaNode) => {
     setMoveTargets([node]);
   };
 
-  // 一括移動の呼び出し
+  // 一括移動
   const handleOpenMoveSelected = () => {
     setMoveTargets(selected);
+  };
+
+  // 後始末
+  const handleMoveDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setMoveTargets([]);
+      if (isSelectionMode) handleClearSelection();
+    }
   };
 
   // ===== 削除 (Delete) =====
 
   const [deleteTargets, setDeleteTargets] = useState<MediaNode[]>([]);
   const isDeleteMode = deleteTargets.length > 0;
+
+  // 単体削除
+  const handleOpenDeleteSingle = (node: MediaNode) => {
+    setDeleteTargets([node]);
+  };
+
+  // 一括削除
+  const handleOpenDeleteSelected = () => {
+    setDeleteTargets(selected);
+  };
 
   // 削除実行
   const handleDeleteConfirm = async () => {
@@ -363,20 +402,17 @@ export function Explorer() {
 
     if (result.failed === 0) {
       toast.success(`${result.success}件のアイテムをゴミ箱に移動しました`);
-      clearSelection(); // 選択中だった場合は解除
+      clearSelection();
     } else {
       toast.error(`${result.failed}件の削除に失敗しました`);
     }
   };
 
-  // 単体削除の呼び出し用
-  const handleOpenDeleteSingle = (node: MediaNode) => {
-    setDeleteTargets([node]);
-  };
-
-  // 一括削除の呼び出し用 (SelectionBarから)
-  const handleOpenDeleteSelected = () => {
-    setDeleteTargets(selected);
+  // 後始末
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setDeleteTargets([]);
+    }
   };
 
   // ===== サーバーアクション =====
@@ -397,13 +433,16 @@ export function Explorer() {
 
   // ===== ショートカット =====
 
+  // スコープ切り替えフック
   const { enableScope, disableScope } = useHotkeysContext();
 
+  // ショートカット利用可能スコープ
   const allScopes = useMemo(
     () => ["explorer-main", "tag-editor", "viewer", "dialog"] as const,
     []
   );
 
+  // 現在のスコープ
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
     if (isRenameMode || isMoveMode || isDeleteMode) return "dialog";
     else if (isTagEditMode) return "tag-editor";
@@ -598,12 +637,8 @@ export function Explorer() {
               initialIndex={viewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
-              onPrevFolder={
-                listing.prev ? (at) => openPrevFolder(at ?? "last") : undefined
-              }
-              onNextFolder={
-                listing.next ? (at) => openNextFolder(at ?? "first") : undefined
-              }
+              onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
+              onNextFolder={listing.next ? handleOpenNextFolder : undefined}
               onEditTags={handleToggleTagEditor}
               onDelete={handleOpenDeleteSelected}
             />
@@ -672,7 +707,7 @@ export function Explorer() {
         <RenameDialog
           key={renameTarget?.path}
           open={isRenameMode}
-          onOpenChange={(open) => !open && setRenameTarget(null)}
+          onOpenChange={handleRenameDialogOpenChange}
           sourcePath={renameTarget?.path ?? ""}
           currentName={renameTarget?.name ?? ""}
         />
@@ -680,7 +715,7 @@ export function Explorer() {
         {/* 移動ダイアログ */}
         <MoveDialog
           open={isMoveMode}
-          onOpenChange={(open) => !open && handleCloseMoveDialog()}
+          onOpenChange={handleMoveDialogOpenChange}
           sourceNodes={moveTargets}
           initialDirPath={initialDirPath}
         />
@@ -688,9 +723,9 @@ export function Explorer() {
         {/* 削除確認ダイアログ */}
         <DeleteConfirmDialog
           open={isDeleteMode}
-          onOpenChange={(open) => !open && setDeleteTargets([])}
-          count={deleteTargets.length}
           onConfirm={handleDeleteConfirm}
+          onOpenChange={handleDeleteDialogOpenChange}
+          count={deleteTargets.length}
         />
 
         {/* フォルダナビゲーション */}

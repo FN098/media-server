@@ -221,9 +221,10 @@ export function Favorites() {
 
   const favCtx = useFavoritesContext();
 
-  const handleFavoriteChange = (node: MediaNode, rating: number | null) => {
+  // レーティング更新
+  const handleRatingChange = async (node: MediaNode, rating: number | null) => {
     try {
-      void favCtx.updateFavorite(node.path, rating);
+      await favCtx.updateFavorite(node.path, rating);
     } catch {
       toast.error("お気に入りの更新に失敗しました");
     }
@@ -241,7 +242,7 @@ export function Favorites() {
     clearSelection,
   } = usePathSelectionContext();
 
-  // 処理高速化のため、path => node の Map を作成しておく
+  // O(1) で path => node を検索するための Map
   const pathToNodeMap: MediaPathToNodeMap = useMemo(() => {
     return new Map(listing.nodes.map((node) => [node.path, node]));
   }, [listing.nodes]);
@@ -282,21 +283,27 @@ export function Favorites() {
   // ===== タグエディタ =====
 
   const { isTagEditMode, setIsTagEditMode } = useTagEditorContext();
-  const handleOpenTagEditor = () => {
-    setIsTagEditMode(true);
-  };
-  const handleCloseTagEditor = () => {
-    setIsTagEditMode(false);
-  };
-  const handleToggleTagEditor = () => {
-    setIsTagEditMode((prev) => !prev);
-  };
 
   // タグエディタの起動モード
   const tagEditMode = useMemo(() => {
     if (isViewMode) return "single";
     return "default";
   }, [isViewMode]);
+
+  // タグエディタを表示
+  const handleOpenTagEditor = () => {
+    setIsTagEditMode(true);
+  };
+
+  // タグエディタを非表示
+  const handleCloseTagEditor = () => {
+    setIsTagEditMode(false);
+  };
+
+  // タグエディタを表示/非表示
+  const handleToggleTagEditor = () => {
+    setIsTagEditMode((prev) => !prev);
+  };
 
   // ===== サーバーアクション =====
 
@@ -316,13 +323,16 @@ export function Favorites() {
 
   // ===== ショートカット =====
 
+  // スコープ切り替えフック
   const { enableScope, disableScope } = useHotkeysContext();
 
+  // ショートカット利用可能スコープ
   const allScopes = useMemo(
     () => ["favorites-main", "tag-editor", "viewer", "dialog"] as const,
     []
   );
 
+  // 現在のスコープ
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
     if (isTagEditMode) return "tag-editor";
     else if (isViewMode) return "viewer";
@@ -457,7 +467,9 @@ export function Favorites() {
               initialScrollPath={lastPath}
               onOpen={handleOpen}
               onOpenFolder={openFolder}
-              onRatingChange={handleFavoriteChange}
+              onRatingChange={(node, rating) =>
+                void handleRatingChange(node, rating)
+              }
               onEditTags={(node) => {
                 handleSelectSingle(node);
                 handleOpenTagEditor();
@@ -475,7 +487,9 @@ export function Favorites() {
               initialScrollPath={lastPath}
               onOpen={handleOpen}
               onOpenFolder={openFolder}
-              onRatingChange={handleFavoriteChange}
+              onRatingChange={(node, rating) =>
+                void handleRatingChange(node, rating)
+              }
               onEditTags={(node) => {
                 handleSelectSingle(node);
                 handleOpenTagEditor();

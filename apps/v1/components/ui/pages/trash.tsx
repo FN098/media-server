@@ -20,6 +20,7 @@ import {
   MediaPathToIndexMap,
   MediaPathToNodeMap,
 } from "@/lib/media/types";
+import { IndexLike } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
 import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
@@ -151,7 +152,15 @@ export function Trash() {
     setLastPath(media.path);
   };
 
-  // ===== ナビゲーション =====
+  // 前のフォルダを開く
+  const handleOpenPrevFolder = (at: IndexLike = "last") => {
+    openPrevFolder(at);
+  };
+
+  // 次のフォルダを開く
+  const handleOpenNextFolder = (at: IndexLike = "first") => {
+    openNextFolder(at);
+  };
 
   // ===== ナビゲーション =====
 
@@ -228,26 +237,43 @@ export function Trash() {
 
     if (result.failed === 0) {
       toast.success(`${result.success}件のアイテムを復元しました`);
-      clearSelection(); // 選択中だった場合は解除
+      clearSelection();
     } else {
       toast.error(`${result.failed}件の復元に失敗しました`);
     }
   };
 
-  // 単体復元の呼び出し用
+  // 単体復元
   const handleOpenRestoreSingle = (node: MediaNode) => {
     setRestoreTargets([node]);
   };
 
-  // 一括復元の呼び出し用 (SelectionBarから)
+  // 一括復元
   const handleOpenRestoreSelected = () => {
     setRestoreTargets(selected);
   };
 
-  // ===== 削除 (Delete) =====
+  // 後始末
+  const handleRestoreDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setRestoreTargets([]);
+    }
+  };
+
+  // ===== 削除 =====
 
   const [deleteTargets, setDeleteTargets] = useState<MediaNode[]>([]);
   const isDeleteMode = deleteTargets.length > 0;
+
+  // 単体削除
+  const handleOpenDeleteSingle = (node: MediaNode) => {
+    setDeleteTargets([node]);
+  };
+
+  // 一括削除
+  const handleOpenDeleteSelected = () => {
+    setDeleteTargets(selected);
+  };
 
   // 削除実行
   const handleDeleteConfirm = async () => {
@@ -256,31 +282,31 @@ export function Trash() {
 
     if (result.failed === 0) {
       toast.success(`${result.success}件のアイテムを完全に削除しました`);
-      clearSelection(); // 選択中だった場合は解除
+      clearSelection();
     } else {
       toast.error(`${result.failed}件の削除に失敗しました`);
     }
   };
 
-  // 単体削除の呼び出し用
-  const handleOpenDeleteSingle = (node: MediaNode) => {
-    setDeleteTargets([node]);
-  };
-
-  // 一括削除の呼び出し用 (SelectionBarから)
-  const handleOpenDeleteSelected = () => {
-    setDeleteTargets(selected);
+  // 後始末
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setDeleteTargets([]);
+    }
   };
 
   // ===== ショートカット =====
 
+  // スコープを切り替えるフック
   const { enableScope, disableScope } = useHotkeysContext();
 
+  // ショートカットを利用可能なスコープ
   const allScopes = useMemo(
     () => ["trash-main", "tag-editor", "viewer", "dialog"] as const,
     []
   );
 
+  // 現在のスコープ
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
     if (isViewMode) return "viewer";
     return "trash-main";
@@ -383,12 +409,8 @@ export function Trash() {
               initialIndex={viewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
-              onPrevFolder={
-                listing.prev ? (at) => openPrevFolder(at ?? "last") : undefined
-              }
-              onNextFolder={
-                listing.next ? (at) => openNextFolder(at ?? "first") : undefined
-              }
+              onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
+              onNextFolder={listing.next ? handleOpenNextFolder : undefined}
               onDelete={handleOpenDeleteSelected}
             />
           </ScrollLockProvider>
@@ -402,7 +424,7 @@ export function Trash() {
               totalCount={filteredNodes.length}
               onSelectAll={handleSelectAll}
               onClose={handleCloseSelectionBar}
-              className="z-40" // DropdownMenu より小さくする
+              className="z-40"
               actions={
                 <div className="flex gap-1 items-center">
                   {/* その他 */}
@@ -437,18 +459,18 @@ export function Trash() {
         {/* 削除確認ダイアログ */}
         <DeleteConfirmDialog
           open={isDeleteMode}
-          onOpenChange={(open) => !open && setDeleteTargets([])}
-          count={deleteTargets.length}
           onConfirm={handleDeleteConfirm}
+          onOpenChange={handleDeleteDialogOpenChange}
+          count={deleteTargets.length}
           permanent
         />
 
         {/* 復元確認ダイアログ */}
         <RestoreConfirmDialog
           open={isRestoreMode}
-          onOpenChange={(open) => !open && setRestoreTargets([])}
-          count={restoreTargets.length}
           onConfirm={handleRestoreConfirm}
+          onOpenChange={handleRestoreDialogOpenChange}
+          count={restoreTargets.length}
         />
 
         {/* フォルダナビゲーション */}
