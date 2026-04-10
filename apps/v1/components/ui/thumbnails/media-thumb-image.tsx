@@ -1,6 +1,6 @@
 import { enqueueThumbJob } from "@/actions/thumb-actions";
-import { MediaThumbIcon } from "@/components/ui/icons/media-thumb-icons";
 import { FallbackImage } from "@/components/ui/images/fallback-image";
+import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";

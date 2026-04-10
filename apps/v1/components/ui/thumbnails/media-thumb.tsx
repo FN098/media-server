@@ -1,4 +1,4 @@
-import { MediaThumbIcon } from "@/components/ui/icons/media-thumb-icons";
+import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { MediaThumbImage } from "@/components/ui/thumbnails/media-thumb-image";
 import { MediaNode } from "@/lib/media/types";
 import { cn } from "@/shadcn/lib/utils";
