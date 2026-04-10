@@ -28,9 +28,9 @@ export function Header({
       <div className="flex h-full items-center gap-2 px-2 md:px-3">
         <AppSidebarOpenButton />
 
-        <div className="flex items-center gap-2 mx-2">
+        <div className="flex items-center gap-2 mx-2 hidden md:block">
           {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
-          <span className="text-lg font-semibold hidden md:block">{title}</span>
+          <span className="text-lg font-semibold">{title}</span>
         </div>
 
         {navigation && <HeaderNavigation basePath={basePath} />}
