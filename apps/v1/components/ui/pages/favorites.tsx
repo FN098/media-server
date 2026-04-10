@@ -41,7 +41,6 @@ import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import { AnimatePresence } from "framer-motion";
 import { ArrowDown10, ArrowDownAz, ArrowDownZa, TagIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
@@ -514,42 +513,36 @@ export function Favorites() {
         )}
 
         {/* 選択バー */}
-        <AnimatePresence>
-          {isSelectionMode && !isTagEditMode && (
-            <SelectionBar
-              count={selected.length}
-              totalCount={filteredNodes.length}
-              onSelectAll={handleSelectAll}
-              onClose={handleCloseSelectionBar}
-              className="z-40" // DropdownMenu より小さくする
-              actions={
-                <div className="flex gap-1 items-center">
-                  {/* メインのアクション */}
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleOpenTagEditor}
-                    disabled={selected.length === 0}
-                  >
-                    <TagIcon size={18} />
-                  </Button>
-                </div>
-              }
-            />
-          )}
-        </AnimatePresence>
+        <SelectionBar
+          open={isSelectionMode && !isTagEditMode}
+          count={selected.length}
+          totalCount={filteredNodes.length}
+          onSelectAll={handleSelectAll}
+          onClose={handleCloseSelectionBar}
+          className="z-40" // DropdownMenu より小さくする
+          actions={
+            <div className="flex gap-1 items-center">
+              {/* メインのアクション */}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleOpenTagEditor}
+                disabled={selected.length === 0}
+              >
+                <TagIcon size={18} />
+              </Button>
+            </div>
+          }
+        />
 
         {/* タグエディター */}
-        <AnimatePresence>
-          {isTagEditMode && (
-            <TagEditSheet
-              targetNodes={selected}
-              onClose={handleCloseTagEditor}
-              mode={tagEditMode}
-              opacity={tagEditMode === "default" ? 100 : 0}
-            />
-          )}
-        </AnimatePresence>
+        <TagEditSheet
+          open={isTagEditMode}
+          targetNodes={selected}
+          onClose={handleCloseTagEditor}
+          mode={tagEditMode}
+          opacity={tagEditMode === "default" ? 100 : 0}
+        />
       </div>
     </PagingProvider>
   );

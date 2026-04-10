@@ -36,7 +36,6 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import { AnimatePresence } from "framer-motion";
 import { MoreVertical, RotateCcw, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
@@ -417,44 +416,41 @@ export function Trash() {
         )}
 
         {/* 選択バー */}
-        <AnimatePresence>
-          {isSelectionMode && (
-            <SelectionBar
-              count={selected.length}
-              totalCount={filteredNodes.length}
-              onSelectAll={handleSelectAll}
-              onClose={handleCloseSelectionBar}
-              className="z-40"
-              actions={
-                <div className="flex gap-1 items-center">
-                  {/* その他 */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="ghost">
-                        <MoreVertical size={18} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        variant="default"
-                        onClick={handleOpenRestoreSelected}
-                      >
-                        <RotateCcw className="mr-2 h-4 w-4" />
-                        復元
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={handleOpenDeleteSelected}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              }
-            />
-          )}
-        </AnimatePresence>
+        <SelectionBar
+          open={isSelectionMode}
+          count={selected.length}
+          totalCount={filteredNodes.length}
+          onSelectAll={handleSelectAll}
+          onClose={handleCloseSelectionBar}
+          className="z-40"
+          actions={
+            <div className="flex gap-1 items-center">
+              {/* その他のアクション */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="ghost">
+                    <MoreVertical size={18} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    variant="default"
+                    onClick={handleOpenRestoreSelected}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    復元
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={handleOpenDeleteSelected}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          }
+        />
 
         {/* 削除確認ダイアログ */}
         <DeleteConfirmDialog

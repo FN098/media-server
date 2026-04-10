@@ -52,7 +52,6 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import { AnimatePresence } from "framer-motion";
 import {
   ArrowDown10,
   ArrowDownAz,
@@ -646,66 +645,60 @@ export function Explorer() {
         )}
 
         {/* 選択バー */}
-        <AnimatePresence>
-          {isSelectionMode && !isTagEditMode && !isMoveMode && (
-            <SelectionBar
-              count={selected.length}
-              totalCount={filteredNodes.length}
-              onSelectAll={handleSelectAll}
-              onClose={handleCloseSelectionBar}
-              className="z-40" // DropdownMenu より小さくする
-              actions={
-                <div className="flex gap-1 items-center">
-                  {/* メインのアクション */}
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleOpenTagEditor}
-                    disabled={selected.length === 0}
-                  >
-                    <TagIcon size={18} />
-                  </Button>
+        <SelectionBar
+          open={isSelectionMode && !isTagEditMode && !isMoveMode}
+          count={selected.length}
+          totalCount={filteredNodes.length}
+          onSelectAll={handleSelectAll}
+          onClose={handleCloseSelectionBar}
+          className="z-40" // DropdownMenu より小さくする
+          actions={
+            <div className="flex gap-1 items-center">
+              {/* メインのアクション */}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleOpenTagEditor}
+                disabled={selected.length === 0}
+              >
+                <TagIcon size={18} />
+              </Button>
 
-                  {/* その他 */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="ghost">
-                        <MoreVertical size={18} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={handleOpenMoveSelected}>
-                        <FolderInput className="mr-2 h-4 w-4" /> 移動
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={handleOpenDeleteSelected}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" /> 削除
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              }
-            />
-          )}
-        </AnimatePresence>
+              {/* その他のアクション */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="ghost">
+                    <MoreVertical size={18} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleOpenMoveSelected}>
+                    <FolderInput className="mr-2 h-4 w-4" /> 移動
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={handleOpenDeleteSelected}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> 削除
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          }
+        />
 
         {/* タグエディター */}
-        <AnimatePresence>
-          {isTagEditMode && (
-            <TagEditSheet
-              targetNodes={selected}
-              onClose={handleCloseTagEditor}
-              mode={tagEditMode}
-              opacity={tagEditMode === "default" ? 100 : 0}
-            />
-          )}
-        </AnimatePresence>
+        <TagEditSheet
+          open={isTagEditMode}
+          targetNodes={selected}
+          onClose={handleCloseTagEditor}
+          mode={tagEditMode}
+          opacity={tagEditMode === "default" ? 100 : 0}
+        />
 
         {/* リネームダイアログ */}
         <RenameDialog
-          key={renameTarget?.path}
+          key={renameTarget?.path} // 初期入力値リセットのため
           open={isRenameMode}
           onOpenChange={handleRenameDialogOpenChange}
           sourcePath={renameTarget?.path ?? ""}
