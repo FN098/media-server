@@ -1,6 +1,6 @@
 import { PATHS } from "@/lib/path/paths";
 import {
-  FolderSearch,
+  FolderSearch2,
   LayoutDashboard,
   LucideIcon,
   PackageOpen,
@@ -25,7 +25,7 @@ export const pageMetas = {
   explorer: {
     title: "Explorer",
     url: PATHS.client.explorer.root,
-    icon: FolderSearch,
+    icon: FolderSearch2,
   },
   favorites: {
     title: "Favorites",

@@ -3,7 +3,7 @@ import { RecentFolders } from "@/components/ui/lists/recent-folders";
 import { resolveCurrentUser } from "@/lib/auth/resolver";
 import { getRecentFolders } from "@/repositories/folder-repository";
 import { Button } from "@/shadcn/components/ui/button";
-import { ArrowRight, ArrowUpRight, FolderPlus, History } from "lucide-react"; // アイコン追加
+import { ArrowRight, ArrowUpRight, FolderSearch2, History } from "lucide-react"; // アイコン追加
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
               className="h-14 px-10 text-lg rounded-xl shadow-md hover:shadow-lg transition-all group"
             >
               <Link href="/explorer" className="flex items-center gap-2">
-                <FolderPlus className="w-5 h-5" />
+                <FolderSearch2 className="w-5 h-5" />
                 Start Exploring
                 <ArrowRight className="w-4 h-4 ml-1 opacity-50 group-hover:translate-x-1 transition-transform" />
               </Link>
