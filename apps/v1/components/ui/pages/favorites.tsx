@@ -430,10 +430,11 @@ export function Favorites() {
             {/* シャッフルボタン */}
             <ShuffleButton />
 
-            {/* ファイル種別フィルター */}
+            {/* 種別フィルター */}
             <MediaTypeFilterSelect
               value={mediaTypeFilterValue}
               onChange={setMediaTypeFilterValue}
+              excludeTypes={["directory", "file"]}
             />
 
             {/* 評価フィルター */}

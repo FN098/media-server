@@ -552,10 +552,11 @@ export function Explorer() {
               ]}
             />
 
-            {/* ファイル種別フィルター */}
+            {/* 種別フィルター */}
             <MediaTypeFilterSelect
               value={mediaTypeFilterValue}
               onChange={setMediaTypeFilterValue}
+              excludeTypes={["file"]}
             />
 
             {/* 評価フィルター */}
