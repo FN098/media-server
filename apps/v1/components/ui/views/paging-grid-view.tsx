@@ -286,6 +286,7 @@ function Cell({
           <MediaThumb
             node={node}
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            showIcon
           />
 
           {/* Overlay Gradients */}

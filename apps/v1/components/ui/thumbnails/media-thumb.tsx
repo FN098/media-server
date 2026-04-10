@@ -1,20 +1,26 @@
-/* eslint-disable @next/next/no-img-element */
 import { enqueueThumbJob } from "@/actions/thumb-actions";
+import { MediaThumbIcon } from "@/components/ui/icons/media-thumb-icons";
 import { FallbackImage } from "@/components/ui/images/fallback-image";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
-import { MediaFsNodeType, MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { resolveMediaThumbUrl } from "@/lib/url/resolver";
 import { cn } from "@/shadcn/lib/utils";
-import { ReactNode, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 
 type MediaThumbProps = {
   node: MediaNode;
   className?: string;
   onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
+  showIcon?: boolean;
 };
 
-export function MediaThumb({ node, className, onLoad }: MediaThumbProps) {
+export function MediaThumb({
+  node,
+  className,
+  onLoad,
+  showIcon = false,
+}: MediaThumbProps) {
   const hasPreview =
     node.type === "image" ||
     node.type === "video" ||
@@ -32,9 +38,16 @@ export function MediaThumb({ node, className, onLoad }: MediaThumbProps) {
         />
 
         {/* アイコンのオーバーレイ表示 */}
-        <div className="absolute bottom-8 left-2 z-20 flex items-center justify-center p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 shadow-lg pointer-events-none">
-          <MediaThumbIcon type={node.type} className="w-4 h-4 opacity-90" />
-        </div>
+        {showIcon && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+            <div className="p-2 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 shadow-xl">
+              <MediaThumbIcon
+                type={node.type}
+                className="w-6 h-6 text-white opacity-90"
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -138,63 +151,5 @@ function MediaThumbImage({
         </div>
       }
     />
-  );
-}
-
-const mediaThumbIcons: Record<MediaFsNodeType, ReactNode> = {
-  audio: (
-    <img
-      width="64"
-      height="64"
-      src="https://img.icons8.com/?size=100&id=eZkFHHHAXhtt&format=png&color=000000"
-      alt="audio-wave"
-    />
-  ),
-  directory: (
-    <img
-      width="48"
-      height="48"
-      src="https://img.icons8.com/fluency/48/folder-invoices--v2.png"
-      alt="folder-invoices--v2"
-    />
-  ),
-  file: (
-    <img
-      width="50"
-      height="50"
-      src="https://img.icons8.com/?size=100&id=12053&format=png&color=000000"
-      alt="file--v1"
-    />
-  ),
-  image: (
-    <img
-      width="80"
-      height="80"
-      src="https://img.icons8.com/officel/80/picture.png"
-      alt="picture"
-    />
-  ),
-  video: (
-    <img
-      width="48"
-      height="48"
-      src="https://img.icons8.com/color/48/video.png"
-      alt="video"
-    />
-  ),
-};
-
-export function MediaThumbIcon({
-  type,
-  className,
-}: {
-  type: MediaFsNodeType;
-  className?: string;
-}) {
-  const img = mediaThumbIcons[type];
-  return (
-    <div className={cn("inline-flex items-center justify-center", className)}>
-      {img}
-    </div>
   );
 }
