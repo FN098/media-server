@@ -7,7 +7,7 @@ import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
 import { generateKana } from "@/lib/utils/kana";
 
-// タグ作成・更新・クリーンアップ
+// タグ紐づけ・クリーンアップ
 export async function updateMediaTagsAction(payload: {
   mediaPaths: string[];
   operations: TagOperation[];

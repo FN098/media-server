@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  createTagsAction,
   deleteTagAction,
   getTagsInfiniteAction,
   markTagsAsReadAction,
@@ -9,6 +10,7 @@ import {
 } from "@/actions/tag-actions";
 import { TagDeleteButton } from "@/components/ui/buttons/tag-delete-button";
 import { TagMasterItem } from "@/lib/tag/types";
+import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,
@@ -28,11 +30,11 @@ import {
 } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
-  Badge,
   Check,
   CheckCheck,
   Edit2,
   Loader2,
+  Plus,
   Search,
   Star,
   Tags,
@@ -42,8 +44,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 
-const COLS_HEADER = "grid-cols-[80px_1fr_25%_100px_120px]";
-const COLS_BODY = "grid-cols-[80px_1fr_25%_100px_120px]";
+const GRID_COLS = "grid-cols-[80px_1fr_25%_100px_120px]";
 
 export function TagMasterManagerCard() {
   const queryClient = useQueryClient();
@@ -52,6 +53,7 @@ export function TagMasterManagerCard() {
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editValue, setEditValue] = React.useState({ name: "", kana: "" });
   const [showNewOnly, setShowNewOnly] = React.useState(false);
+  const [newTagsInput, setNewTagsInput] = React.useState("");
 
   // データ取得
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -98,6 +100,21 @@ export function TagMasterManagerCard() {
         void fetchNextPage();
       }
     },
+  });
+
+  // ミューテーション: タグ作成
+  const { mutate: createTags, isPending: isCreating } = useMutation({
+    mutationFn: async (names: string[]) => {
+      const res = await createTagsAction(names);
+      if (!res.success) throw new Error(res.error);
+      return res;
+    },
+    onSuccess: (res) => {
+      void queryClient.invalidateQueries({ queryKey: ["tags"] });
+      toast.success(`${res.tags.length} 件のタグを登録しました`);
+      setNewTagsInput("");
+    },
+    onError: (err: Error) => toast.error(err.message),
   });
 
   // ミューテーション: お気に入り更新
@@ -157,11 +174,25 @@ export function TagMasterManagerCard() {
     onError: () => toast.error("処理に失敗しました"),
   });
 
+  // 作成
+  const handleCreateTags = (e: React.FormEvent) => {
+    e.preventDefault();
+    const names = newTagsInput
+      .split(/[,、\n]/)
+      .map((s) => s.trim())
+      .filter((s) => s !== "");
+
+    if (names.length === 0) return;
+    createTags(names);
+  };
+
+  // 編集
   const handleStartEdit = (tag: TagMasterItem) => {
     setEditingId(tag.id);
     setEditValue({ name: tag.name, kana: tag.kana ?? "" });
   };
 
+  // 保存
   const handleSaveEdit = (id: string) => {
     if (!editValue.name.trim()) return toast.error("名前は必須です");
     renameTag({ id, ...editValue });
@@ -205,6 +236,31 @@ export function TagMasterManagerCard() {
           </Button>
         </div>
 
+        {/* タグ追加フォーム */}
+        <form
+          onSubmit={handleCreateTags}
+          className="flex gap-2 bg-muted/30 p-2 rounded-lg border border-dashed border-muted-foreground/30"
+        >
+          <div className="relative flex-1">
+            <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="新しいタグを追加..."
+              className="pl-9 bg-background border-none shadow-none focus-visible:ring-1"
+              value={newTagsInput}
+              onChange={(e) => setNewTagsInput(e.target.value)}
+              disabled={isCreating}
+            />
+          </div>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isCreating || !newTagsInput.trim()}
+            className="shrink-0"
+          >
+            {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "追加"}
+          </Button>
+        </form>
+
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {/* 検索バー */}
           <div className="relative flex-1 w-full">
@@ -240,7 +296,7 @@ export function TagMasterManagerCard() {
           <div
             className={cn(
               "grid",
-              COLS_HEADER,
+              GRID_COLS,
               "pr-4 py-2 bg-muted/90 backdrop-blur-sm text-sm font-medium text-muted-foreground border-b sticky top-0 z-30"
             )}
           >
@@ -270,7 +326,7 @@ export function TagMasterManagerCard() {
                     key={virtualRow.key}
                     className={cn(
                       "grid absolute w-full border-b items-center hover:bg-muted/40 group transition-colors",
-                      COLS_BODY,
+                      GRID_COLS,
                       tag.isNew && "bg-yellow-50/30"
                     )}
                     style={{
