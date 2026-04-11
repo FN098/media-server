@@ -82,10 +82,11 @@ export async function createThumbs(
   );
   await Promise.all(thumbDirs.map((dir) => mkdir(dir, { recursive: true })));
 
-  // サムネイルがまだ存在しない場合のみ生成
   await Promise.all(
     filtered.map(async (n) => {
       const thumb = getServerMediaThumbPath(n.path);
+
+      // サムネイルが既に存在し、強制上書きが許可されていなければスキップ
       if ((await existsPath(thumb)) && !options?.force) return;
 
       const media = getServerMediaPath(n.path);
