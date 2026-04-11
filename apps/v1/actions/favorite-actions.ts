@@ -1,6 +1,6 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/resolver";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import {
   deleteFavorite,
   getFavorite,
@@ -17,7 +17,7 @@ export async function updateFavoriteAction(
   rating: number | null
 ) {
   try {
-    const user = await resolveCurrentUser();
+    const user = await resolveCurrentUserOrThrow();
     const media = await findMediaByPath(path);
 
     if (!media) return { success: false, error: "メディアが見つかりません" };
@@ -42,7 +42,7 @@ export async function updateFavoriteAction(
  */
 export async function revalidateFavoriteAction(path: string) {
   try {
-    const user = await resolveCurrentUser();
+    const user = await resolveCurrentUserOrThrow();
     const media = await findMediaByPath(path);
 
     if (!media) return { success: false, error: "メディアが見つかりません" };

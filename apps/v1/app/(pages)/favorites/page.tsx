@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
-import { resolveCurrentUser } from "@/lib/auth/resolver";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
@@ -36,7 +36,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
     seed,
   } = searchParams;
 
-  const user = await resolveCurrentUser();
+  const user = await resolveCurrentUserOrThrow();
 
   // 取得
   const allNodes = await getFavoriteMediaNodes(user.id);

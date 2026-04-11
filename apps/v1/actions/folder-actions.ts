@@ -1,6 +1,6 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/resolver";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { fsNameSchema } from "@/lib/media/validation";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
@@ -10,7 +10,7 @@ import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
 
 export async function visitFolderAction(dirPath: string): Promise<void> {
-  const user = await resolveCurrentUser();
+  const user = await resolveCurrentUserOrThrow();
   await visitFolderByUser(dirPath, user.id);
 
   // ダッシュボードの履歴キャッシュをクリア

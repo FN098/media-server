@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Trash } from "@/components/ui/pages/trash";
-import { resolveCurrentUser } from "@/lib/auth/resolver";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
@@ -67,7 +67,7 @@ export default async function TrashPage(props: TrashPageProps) {
 
   const dirPaths = allNodes.filter((e) => e.isDirectory).map((e) => e.path);
 
-  const user = await resolveCurrentUser();
+  const user = await resolveCurrentUserOrThrow();
 
   // DB クエリ
   const [dbMedia, dbVisited] = await Promise.all([
