@@ -41,11 +41,13 @@ import { toast } from "sonner";
 interface GhostThumbCleanupCardProps {
   onDelete: (items: GhostThumbItem[]) => Promise<GhostThumbDeleteResult>;
   autoScan?: boolean;
+  confirmFullScan?: boolean;
 }
 
 export function GhostThumbCleanupCard({
   onDelete,
   autoScan = false,
+  confirmFullScan = false,
 }: GhostThumbCleanupCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isFullScan, setIsFullScan] = useState(false);
@@ -303,7 +305,7 @@ export function GhostThumbCleanupCard({
 
         {/* ボタン類 */}
         <div className="flex gap-2">
-          {isFullScan && items === null ? (
+          {confirmFullScan && isFullScan && items === null ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button

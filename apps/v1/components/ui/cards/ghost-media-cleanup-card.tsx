@@ -41,11 +41,13 @@ import { toast } from "sonner";
 interface GhostMediaCleanupCardProps {
   onDelete: (ids: string[]) => Promise<GhostMediaDeleteResult>;
   autoScan?: boolean;
+  confirmFullScan?: boolean;
 }
 
 export function GhostMediaCleanupCard({
   onDelete,
   autoScan = false,
+  confirmFullScan = false,
 }: GhostMediaCleanupCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isFullScan, setIsFullScan] = useState(false);
@@ -284,7 +286,7 @@ export function GhostMediaCleanupCard({
 
         {/* ボタン類 */}
         <div className="flex gap-2">
-          {isFullScan && items === null ? (
+          {confirmFullScan && isFullScan && items === null ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
