@@ -4,11 +4,10 @@ import { APP_CONFIG } from "@/app.config";
 import { getMediaPathFromThumbPath } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
 import { prisma } from "@/lib/prisma";
-import { GhostThumbScanOptions } from "@/lib/thumb/types";
-import { removeEmptyDirs } from "@/lib/utils/fs";
+import { GhostThumbItem, GhostThumbScanOptions } from "@/lib/thumb/types";
 import { hashPath } from "@/lib/utils/path";
 import { connection, thumbQueue } from "@/workers/thumb/queue";
-import { promises as fs } from "fs";
+import { rm } from "fs/promises";
 import { glob } from "glob";
 import path from "path";
 
@@ -162,29 +161,35 @@ export async function scanGhostThumbnailsAction(
 /**
  * 不要なサムネイルファイルの物理削除
  */
-export async function cleanupGhostThumbnailsAction(fullPaths: string[]) {
+export async function cleanupGhostThumbnailsAction(items: GhostThumbItem[]) {
   try {
     const thumbRoot = PATHS.server.media.thumb.root;
     let deletedCount = 0;
 
-    const affectedDirs = new Set<string>();
+    // メモリ保護のためバッチ処理
+    const CHUNK_SIZE = 50;
+    for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+      const chunk = items.slice(i, i + CHUNK_SIZE);
 
-    // 安全のため、削除対象が本当にサムネイルルート配下にあるかチェックしつつ削除
-    for (const fullPath of fullPaths) {
-      if (!fullPath.startsWith(thumbRoot)) continue;
+      await Promise.all(
+        chunk.map(async (item) => {
+          // 安全確認: thumbRoot配下であること
+          if (!item.path.startsWith(thumbRoot)) return;
 
-      try {
-        await fs.unlink(fullPath);
-        affectedDirs.add(path.dirname(fullPath));
-        deletedCount++;
-      } catch {
-        // ファイルが既にない場合は無視
-      }
-    }
-
-    // 空になったディレクトリの掃除
-    for (const dir of affectedDirs) {
-      await removeEmptyDirs(dir, thumbRoot);
+          try {
+            if (item.isDirectory) {
+              // ディレクトリごと一撃で消去
+              await rm(item.path, { recursive: true, force: true });
+            } else {
+              // 個別ファイルの消去
+              await rm(item.path, { force: true });
+            }
+            deletedCount++;
+          } catch (e) {
+            console.error(`Failed to delete: ${item.path}`, e);
+          }
+        })
+      );
     }
 
     return { success: true, deletedCount };

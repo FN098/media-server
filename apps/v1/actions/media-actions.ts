@@ -8,10 +8,10 @@ import {
 import { fsNameSchema } from "@/lib/media/validation";
 import {
   getServerMediaPath,
+  getServerMediaThumbPath,
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
-import { deleteThumb } from "@/lib/thumb/delete";
 import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
 import { constants } from "fs";
@@ -51,8 +51,10 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     await rename(oldRealPath, newRealPath);
 
     // サムネイル削除
-    await deleteThumb(oldVirtualPath);
-    await deleteThumb(newVirtualPath);
+    const oldThumbPath = getServerMediaThumbPath(oldVirtualPath);
+    const newThumbPath = getServerMediaThumbPath(newVirtualPath);
+    await rm(oldThumbPath);
+    await rm(newThumbPath);
 
     const stats = await lstat(newRealPath);
     const isDirectory = stats.isDirectory();

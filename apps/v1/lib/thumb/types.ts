@@ -1,5 +1,6 @@
 export type GhostThumbItem = {
   path: string;
+  isDirectory?: boolean;
 };
 
 export type GhostThumbScanOptions = {

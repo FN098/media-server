@@ -85,14 +85,9 @@ async function runQuickScan(
     if (relativeDirPath.startsWith("/"))
       relativeDirPath = relativeDirPath.substring(1);
 
-    // そのフォルダがDBに存在しなければ、中身をまるごとゴーストとして追加
+    // DBに存在しないフォルダなら、そのディレクトリパス自体をゴーストとして登録
     if (!validDirPaths.has(relativeDirPath)) {
-      const filesInDir = await glob("**/*" + APP_CONFIG.thumb.extension, {
-        cwd: fullDirPath,
-        absolute: true,
-        nodir: true,
-      });
-      ghostItems.push(...filesInDir.map((path) => ({ path })));
+      ghostItems.push({ path: fullDirPath, isDirectory: true });
     }
 
     send({

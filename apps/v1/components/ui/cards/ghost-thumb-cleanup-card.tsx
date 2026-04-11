@@ -39,7 +39,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface GhostThumbCleanupCardProps {
-  onDelete: (paths: string[]) => Promise<GhostThumbDeleteResult>;
+  onDelete: (items: GhostThumbItem[]) => Promise<GhostThumbDeleteResult>;
   autoScan?: boolean;
 }
 
@@ -130,7 +130,6 @@ export function GhostThumbCleanupCard({
   const handleDelete = useCallback(() => {
     if (!items || items.length === 0) return;
 
-    const allPaths = items.map((item) => item.path);
     const BATCH_SIZE = 500; // 1回あたりの送信件数（1MBを超えない程度に調整）
 
     startTransition(async () => {
@@ -138,8 +137,8 @@ export function GhostThumbCleanupCard({
       let hasError = false;
 
       // パスを指定サイズごとに分割してループ
-      for (let i = 0; i < allPaths.length; i += BATCH_SIZE) {
-        const batch = allPaths.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < items.length; i += BATCH_SIZE) {
+        const batch = items.slice(i, i + BATCH_SIZE);
 
         try {
           const result = await onDelete(batch);
