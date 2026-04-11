@@ -60,9 +60,15 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     triggered: debouncedQuery === query,
   });
 
-  // クイック編集タグ
+  // お気に入りタグ
   const { tags: favoriteTags, isLoading: isLoadingFavorite } = useTags({
     strategy: "favorite-only",
+  });
+
+  // 最近使用されたタグ
+  const { tags: recentTags, isLoading: isLoadingRecent } = useTags({
+    strategy: "recently-used",
+    limit: 10,
   });
 
   // マスタータグ
@@ -70,7 +76,8 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     return uniqueBy([...baseTags, ...searchedTags], "id");
   }, [baseTags, searchedTags]);
 
-  const isLoadingTags = isLoadingBase || isLoadingSearch || isLoadingFavorite;
+  const isLoadingTags =
+    isLoadingBase || isLoadingSearch || isLoadingFavorite || isLoadingRecent;
 
   const tagStates = useTagStates(targetNodes, masterTags);
 
@@ -216,6 +223,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     viewModeTags,
     suggestedTags,
     favoriteTags,
+    recentTags,
     isLoadingTags,
 
     // 戦略

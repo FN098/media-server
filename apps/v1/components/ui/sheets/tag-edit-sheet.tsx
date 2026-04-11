@@ -1,5 +1,6 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { FavoriteTagPanel } from "@/components/ui/sheets/tag-edit-sheet/favorite-tag-panel";
+import { RecentTagPanel } from "@/components/ui/sheets/tag-edit-sheet/recent-tag-panel";
 import { SheetFooter } from "@/components/ui/sheets/tag-edit-sheet/seet-footer";
 import { SheetHeader } from "@/components/ui/sheets/tag-edit-sheet/seet-header";
 import { TagInput } from "@/components/ui/sheets/tag-edit-sheet/tag-input";
@@ -308,6 +309,13 @@ export function TagEditSheet({
                         pendingChanges={editor.pendingChanges}
                         pendingNewTags={editor.pendingNewTags}
                         tagStates={editor.tagStates}
+                        onToggle={editor.toggleTagChange}
+                        opacity={opacity}
+                      />
+                      <RecentTagPanel
+                        recentTags={editor.recentTags}
+                        tagStates={editor.tagStates}
+                        pendingChanges={editor.pendingChanges}
                         onToggle={editor.toggleTagChange}
                         opacity={opacity}
                       />
