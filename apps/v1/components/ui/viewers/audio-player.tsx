@@ -225,7 +225,7 @@ export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
           <PlayerButton
             onClick={() => seek(-10)}
             label="Back 10s"
-            shortcut="Ctrl + ←"
+            shortcut="↓"
             className="text-white/60 hover:text-white transition-all active:scale-90"
           >
             <RotateCcw size={28} />
@@ -249,7 +249,7 @@ export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
           <PlayerButton
             onClick={() => seek(10)}
             label="Forward 10s"
-            shortcut="Ctrl + →"
+            shortcut="↑"
             className="text-white/60 hover:text-white transition-all active:scale-90"
           >
             <RotateCw size={28} />
