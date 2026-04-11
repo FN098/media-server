@@ -19,9 +19,12 @@ export function useFavorites(initialData?: FavoriteStatus[]) {
     setFavorites((m) => new Map(m).set(path, rating));
   });
 
-  // 現在の状態を取得
+  // 現在の状態を取得 (0やnullならfalse、1以上ならratingを返す)
   const getFavorite = useCallback(
-    (path: string) => ({ rating: favorites.get(path) ?? null }),
+    (path: string) => {
+      const rating = favorites.get(path);
+      return { rating: rating == 0 ? null : rating };
+    },
     [favorites]
   );
 
@@ -57,7 +60,7 @@ export function useFavorites(initialData?: FavoriteStatus[]) {
   const toggleFavorite = useCallback(
     (path: string) => {
       const { rating } = getFavorite(path);
-      const next = rating === null ? 3 : null;
+      const next = rating == null ? 3 : null;
       return updateFavorite(path, next);
     },
     [updateFavorite, getFavorite]
