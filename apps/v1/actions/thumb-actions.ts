@@ -88,7 +88,7 @@ export async function scanGhostThumbnailsAction(
 ) {
   try {
     const isFullScan = options?.fullScan ?? false;
-    const thumbRoot = PATHS.server.media.thumb.root;
+    const thumbRoot = path.resolve(PATHS.server.media.thumb.root);
     const ghostThumbnails: string[] = [];
 
     if (isFullScan) {
@@ -163,7 +163,7 @@ export async function scanGhostThumbnailsAction(
  */
 export async function cleanupGhostThumbnailsAction(items: GhostThumbItem[]) {
   try {
-    const thumbRoot = PATHS.server.media.thumb.root;
+    const thumbRoot = path.resolve(PATHS.server.media.thumb.root);
     let deletedCount = 0;
 
     // メモリ保護のためバッチ処理

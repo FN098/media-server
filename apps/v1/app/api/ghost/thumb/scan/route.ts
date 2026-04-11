@@ -14,7 +14,7 @@ async function runFullScan(
   send: (data: GhostThumbScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostThumbItem[]> {
-  const thumbRoot = PATHS.server.media.thumb.root;
+  const thumbRoot = path.resolve(PATHS.server.media.thumb.root);
   const ghostItems: GhostThumbItem[] = [];
 
   // 1. 全サムネイルファイルを取得
@@ -60,33 +60,51 @@ async function runQuickScan(
   send: (data: GhostThumbScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostThumbItem[]> {
-  const thumbRoot = PATHS.server.media.thumb.root;
+  const thumbRoot = path.resolve(PATHS.server.media.thumb.root);
   const ghostItems: GhostThumbItem[] = [];
 
   // サムネイル側のディレクトリ一覧を取得
-  const thumbDirs = await glob("**/", { cwd: thumbRoot, absolute: true });
-  const total = thumbDirs.length;
+  const thumbDirs = await glob("**/", {
+    cwd: thumbRoot,
+    absolute: true,
+    ignore: ["", "/"],
+  });
 
   // DB側のdirPath一覧を取得
-  const folders = await prisma.media.groupBy({ by: ["dirPath"] });
-  const validDirPaths = new Set(folders.map((f) => f.dirPath));
+  const allMedia = await prisma.media.findMany({ select: { dirPath: true } });
+  const validDirParts = new Set<string>();
 
+  // ひとつでもファイルがDBに登録されていれば、そのファイルの先祖をすべて有効なディレクトリエントリとして登録
+  for (const m of allMedia) {
+    let currentPath = m.dirPath.replace(/\\/g, "/").replace(/\/$/, "");
+    while (currentPath) {
+      validDirParts.add(currentPath);
+      const parent = path.dirname(currentPath);
+      if (parent === "." || parent === "/" || parent === currentPath) break;
+      currentPath = parent;
+    }
+  }
+
+  const total = thumbDirs.length;
   for (let i = 0; i < total; i++) {
     if (signal.aborted) return ghostItems;
 
-    const fullDirPath = thumbDirs[i];
-    if (fullDirPath === thumbRoot || fullDirPath === thumbRoot + path.sep)
-      continue;
+    const fullDirPath = thumbDirs[i].replace(/\\/g, "/").replace(/\/$/, "");
+    const normalizedRoot = thumbRoot.replace(/\\/g, "/").replace(/\/$/, "");
 
-    let relativeDirPath = fullDirPath
-      .replace(thumbRoot, "")
-      .replace(/\\/g, "/")
-      .replace(/\/$/, "");
+    // 【超重要】絶対条件：ルートディレクトリ自体は絶対に削除対象に入れない
+    if (fullDirPath === normalizedRoot) continue;
+
+    // 相対パスに変換
+    let relativeDirPath = fullDirPath.slice(normalizedRoot.length);
     if (relativeDirPath.startsWith("/"))
       relativeDirPath = relativeDirPath.substring(1);
 
-    // DBに存在しないフォルダなら、そのディレクトリパス自体をゴーストとして登録
-    if (!validDirPaths.has(relativeDirPath)) {
+    // 空文字（root）はスキップ
+    if (!relativeDirPath) continue;
+
+    // 判定：DB上のどのファイルのパス（およびその親）にも含まれていなければ「丸ごと不要」
+    if (!validDirParts.has(relativeDirPath)) {
       ghostItems.push({ path: fullDirPath, isDirectory: true });
     }
 
@@ -97,6 +115,10 @@ async function runQuickScan(
       found: ghostItems.length,
     });
   }
+
+  // TODO
+  // 親ディレクトリが削除対象なら、その子ディレクトリはリストから除外するとより安全（二重削除防止）
+  // ...（必要に応じて filter）
 
   return ghostItems;
 }
