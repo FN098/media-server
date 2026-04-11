@@ -130,17 +130,44 @@ export function GhostThumbCleanupCard({
   const handleDelete = useCallback(() => {
     if (!items || items.length === 0) return;
 
-    const paths = items.map((item) => item.path);
+    const allPaths = items.map((item) => item.path);
+    const BATCH_SIZE = 500; // 1回あたりの送信件数（1MBを超えない程度に調整）
 
     startTransition(async () => {
-      const result = await onDelete(paths);
-      if (result.success) {
+      let totalDeleted = 0;
+      let hasError = false;
+
+      // パスを指定サイズごとに分割してループ
+      for (let i = 0; i < allPaths.length; i += BATCH_SIZE) {
+        const batch = allPaths.slice(i, i + BATCH_SIZE);
+
+        try {
+          const result = await onDelete(batch);
+
+          if (result.success) {
+            totalDeleted += result.deletedCount ?? 0;
+          } else {
+            toast.error(result.error || "一部の削除中にエラーが発生しました");
+            hasError = true;
+          }
+        } catch (err) {
+          console.error("Batch Delete Error:", err);
+          toast.error("通信エラーが発生しました");
+          hasError = true;
+          break;
+        }
+      }
+
+      if (!hasError) {
         toast.success(
-          `${result.deletedCount}件の不要なサムネイルを削除しました`
+          `${totalDeleted}件の不要なサムネイルをすべて削除しました`
         );
-        setItems(null);
+        setItems(null); // すべて完了したらリストをクリア
       } else {
-        toast.error(result.error || "削除中にエラーが発生しました");
+        // 途中で止まった場合、再スキャンを促すか、残りの items を更新する処理を入れると親切
+        toast.info(
+          "削除処理が中断されました。再スキャンして残りを確認してください。"
+        );
       }
     });
   }, [onDelete, items]);
