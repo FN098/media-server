@@ -57,7 +57,8 @@ export function useFavorites(initialData?: FavoriteStatus[]) {
   const toggleFavorite = useCallback(
     (path: string) => {
       const { rating } = getFavorite(path);
-      return updateFavorite(path, rating ?? 3);
+      const next = rating === null ? 3 : null;
+      return updateFavorite(path, next);
     },
     [updateFavorite, getFavorite]
   );
