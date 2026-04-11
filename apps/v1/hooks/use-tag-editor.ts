@@ -186,8 +186,11 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   );
 
   return {
+    // 編集対象
     targetNodes,
     setTargetNodes,
+
+    // 編集状態
     isTagEditMode,
     setIsTagEditMode,
     newTagName,
@@ -195,22 +198,30 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     pendingNewTags,
     pendingChanges,
     hasChanges,
-    setSearchStrategy,
-    setSortStrategy,
+    tagStates,
+
+    // タグ操作
+    toggleTagChange,
+    setTagChange,
+    selectSuggestion,
+    addPendingNewTag,
+    resetChanges,
+
+    // 検索・表示
+    opacity,
+    setOpacity,
     invalidateTags,
     refreshTags,
-    isLoadingTags,
-    tagStates,
     editModeTags,
     viewModeTags,
     suggestedTags,
-    toggleTagChange,
-    setTagChange,
-    resetChanges,
-    addPendingNewTag,
-    selectSuggestion,
-    opacity,
-    setOpacity,
     favoriteTags,
+    isLoadingTags,
+
+    // 戦略
+    searchStrategy,
+    setSearchStrategy,
+    sortStrategy,
+    setSortStrategy,
   };
 }
