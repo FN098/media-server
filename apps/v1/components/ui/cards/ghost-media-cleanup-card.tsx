@@ -29,8 +29,8 @@ import { Progress } from "@/shadcn/components/ui/progress";
 import { Switch } from "@/shadcn/components/ui/switch";
 import {
   AlertCircle,
+  BrushCleaning,
   CheckCircle2,
-  Ghost,
   Loader2,
   Search,
   Trash2,
@@ -165,7 +165,7 @@ export function GhostMediaCleanupCard({
     <Card className="border-destructive/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-destructive">
-          <Ghost className="w-5 h-5" />
+          <BrushCleaning className="w-5 h-5" />
           ゴーストデータ削除
         </CardTitle>
         <CardDescription>
