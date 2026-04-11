@@ -128,6 +128,17 @@ export function GhostThumbCleanupCard({
     };
   }, [isFullScan]);
 
+  // 中断処理
+  const handleAbort = () => {
+    if (esRef.current) {
+      setIsScanning(false);
+      setEta(null);
+      esRef.current.close();
+      esRef.current = null;
+      toast.info("スキャンを中断しました。");
+    }
+  };
+
   // 削除実行
   const handleDelete = useCallback(() => {
     if (!items || items.length === 0) return;
@@ -160,10 +171,8 @@ export function GhostThumbCleanupCard({
       }
 
       if (!hasError) {
-        toast.success(
-          `${totalDeleted}件の不要なサムネイルをすべて削除しました`
-        );
-        setItems(null); // すべて完了したらリストをクリア
+        toast.success(`${totalDeleted}件の不要なサムネイルを削除しました`);
+        setItems(null);
       } else {
         // 途中で止まった場合、再スキャンを促すか、残りの items を更新する処理を入れると親切
         toast.info(
@@ -172,17 +181,6 @@ export function GhostThumbCleanupCard({
       }
     });
   }, [onDelete, items]);
-
-  // 中断処理
-  const handleAbort = () => {
-    if (esRef.current) {
-      setIsScanning(false);
-      setEta(null);
-      esRef.current.close();
-      esRef.current = null;
-      toast.info("スキャンを中断しました。");
-    }
-  };
 
   // 初回のみ自動スキャン
   useEffect(() => {
@@ -295,7 +293,10 @@ export function GhostThumbCleanupCard({
           <Switch
             id="thumb-scan-mode"
             checked={isFullScan}
-            onCheckedChange={setIsFullScan}
+            onCheckedChange={(checked) => {
+              setIsFullScan(checked);
+              setItems(null);
+            }}
             disabled={isScanning}
           />
           <Label htmlFor="thumb-scan-mode" className="text-xs cursor-pointer">

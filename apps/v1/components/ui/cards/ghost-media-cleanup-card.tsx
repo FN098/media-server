@@ -146,7 +146,7 @@ export function GhostMediaCleanupCard({
     startTransition(async () => {
       const result = await onDelete(ids);
       if (result.success) {
-        toast.success(`${result.deletedCount}件のゴーストデータを削除しました`);
+        toast.success(`${result.deletedCount}件の不要なメディアを削除しました`);
         setItems(null);
       } else {
         toast.error(result.error || "削除中にエラーが発生しました");
@@ -166,7 +166,7 @@ export function GhostMediaCleanupCard({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-destructive">
           <BrushCleaning className="w-5 h-5" />
-          ゴーストデータ削除
+          ゴーストメディア削除
         </CardTitle>
         <CardDescription>
           実体のないメディアレコードを掃除します
@@ -227,7 +227,7 @@ export function GhostMediaCleanupCard({
           ) : items.length > 0 ? (
             <div className="flex items-center gap-2 text-orange-600 font-medium">
               <AlertCircle className="w-4 h-4" /> {items.length}{" "}
-              件のゴーストデータを発見
+              件の不要なレコードが見つかりました
             </div>
           ) : (
             <div className="flex items-center gap-2 text-green-600 font-medium">
