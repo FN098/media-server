@@ -77,8 +77,8 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         WHERE path = ${oldVirtualPath}
       `;
 
+      // 配下の更新
       if (isDirectory) {
-        // 配下の更新
         await tx.$executeRaw`
           UPDATE Media 
           SET 
@@ -178,19 +178,30 @@ export async function moveNodesAction(
       const newRealPath = getServerMediaPath(newVirtualPath);
 
       // 存在確認
+      if (!(await existsPath(oldRealPath))) {
+        throw new Error(
+          `移動対象のファイルまたはフォルダが存在しません。: ${basename(oldRealPath)}`
+        );
+      }
       if (await existsPath(newRealPath)) {
         throw new Error(
           `移動先に同名の項目が存在します: ${basename(newRealPath)}`
         );
       }
 
+      const stats = await lstat(oldRealPath);
+      const isDirectory = stats.isDirectory();
+
+      const oldThumbPath = getServerMediaThumbPath(oldVirtualPath, isDirectory);
+      const newThumbPath = getServerMediaThumbPath(newVirtualPath, isDirectory);
+
+      // サムネイルリネーム（本体リネーム前に実行しないと、サムネイル作成コマンドが走ってしまいロックされてエラーになる）
+      if (await existsPath(oldThumbPath)) {
+        await rename(oldThumbPath, newThumbPath);
+      }
+
       // FS更新
       await rename(oldRealPath, newRealPath);
-
-      // NOTE: サムネイルは再作成すればいいので更新しない
-
-      const stats = await lstat(newRealPath);
-      const isDirectory = stats.isDirectory();
 
       // DB更新
       await prisma.$transaction(async (tx) => {
@@ -202,8 +213,8 @@ export async function moveNodesAction(
           WHERE path = ${oldVirtualPath}
         `;
 
+        // 配下の更新
         if (isDirectory) {
-          // 配下の更新
           await tx.$executeRaw`
             UPDATE Media SET 
               path = REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/')),
@@ -224,6 +235,45 @@ export async function moveNodesAction(
           END
           WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
         `;
+
+        // プレビューの更新
+        if (isDirectory) {
+          // リネーム先の重複を削除（上書き許容）
+          await tx.$executeRaw`
+            DELETE FROM FolderMeta 
+            WHERE path = ${newVirtualPath} OR path LIKE CONCAT(${newVirtualPath}, '/%')
+          `;
+
+          // path と previewPath を一括置換
+          await tx.$executeRaw`
+            UPDATE FolderMeta
+            SET 
+              path = CASE 
+                WHEN path = ${oldVirtualPath} THEN ${newVirtualPath}
+                ELSE REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+              END,
+              previewPath = CASE
+                WHEN previewPath IS NULL THEN NULL
+                WHEN previewPath = ${oldVirtualPath} THEN ${newVirtualPath}
+                WHEN previewPath LIKE CONCAT(${oldVirtualPath}, '/%') 
+                  THEN REPLACE(previewPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+                ELSE previewPath
+              END
+            WHERE path = ${oldVirtualPath} OR path LIKE CONCAT(${oldVirtualPath}, '/%')
+          `;
+        } else {
+          // ファイル単体の移動の場合
+          await tx.$executeRaw`DELETE FROM FolderMeta WHERE path = ${newVirtualPath}`;
+
+          await tx.$executeRaw`
+            UPDATE FolderMeta SET path = ${newVirtualPath} WHERE path = ${oldVirtualPath}
+          `;
+
+          // 他のフォルダの表紙(previewPath)として使われていた場合、その参照も更新
+          await tx.$executeRaw`
+            UPDATE FolderMeta SET previewPath = ${newVirtualPath} WHERE previewPath = ${oldVirtualPath}
+          `;
+        }
       });
 
       results.success++;
@@ -234,7 +284,9 @@ export async function moveNodesAction(
     }
   }
 
+  // キャッシュの更新
   revalidatePath("/explorer");
+
   return results;
 }
 
