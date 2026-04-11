@@ -6,6 +6,7 @@ import {
 } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 
+// 最近訪れたフォルダの一覧取得
 export async function getRecentFolders(
   userId: string,
   length: number
@@ -17,6 +18,33 @@ export async function getRecentFolders(
   });
 }
 
+// 最近訪れたフォルダを更新
+export async function updateVisitedFolder(
+  dirPath: string,
+  userId: string
+): Promise<void> {
+  const normalizedDirPath = dirPath.replace(/\/+$/, "");
+
+  await prisma.$transaction(async (tx) => {
+    await tx.visitedFolder.upsert({
+      where: {
+        userId_dirPath: {
+          userId,
+          dirPath: normalizedDirPath,
+        },
+      },
+      update: {
+        lastViewedAt: new Date(),
+      },
+      create: {
+        userId,
+        dirPath: normalizedDirPath,
+      },
+    });
+  });
+}
+
+// フォルダ訪問履歴取得
 export async function getFolderVisitedInfo(
   dirPaths: string[],
   userId: string
@@ -64,6 +92,7 @@ export async function getFolderVisitedInfo(
   });
 }
 
+// 各ディレクトリ内のお気に入り数を再帰的に取得
 export async function getFolderFavoriteInfo(
   dirPaths: string[],
   userId: string
@@ -78,7 +107,7 @@ export async function getFolderFavoriteInfo(
     })
   );
 
-  // 2. 100個のクエリを一括で DB に送信
+  // 2. クエリを一括で DB に送信
   const counts = await prisma.$transaction(tasks);
 
   // 3. 結果をマッピング
@@ -88,6 +117,7 @@ export async function getFolderFavoriteInfo(
   }));
 }
 
+// フォルダメタ情報取得
 export async function getFolderMetas(
   dirPaths: string[]
 ): Promise<FolderMeta[]> {

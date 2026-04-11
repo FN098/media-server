@@ -1,24 +1,25 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { prisma } from "@/lib/prisma";
 import {
   deleteFavorite,
   getFavorite,
   upsertFavorite,
 } from "@/repositories/favorite-repository";
-import { findMediaByPath } from "@/repositories/media-repository";
 
-/**
- * お気に入りの状態を更新する
- * rating が null の場合は削除、数値の場合は作成または更新
- */
+// お気に入り更新
 export async function updateFavoriteAction(
   path: string,
   rating: number | null
 ) {
   try {
     const user = await resolveCurrentUserOrThrow();
-    const media = await findMediaByPath(path);
+
+    const media = await prisma.media.findFirst({
+      select: { id: true },
+      where: { path },
+    });
 
     if (!media) return { success: false, error: "メディアが見つかりません" };
 
@@ -37,13 +38,15 @@ export async function updateFavoriteAction(
   }
 }
 
-/**
- * 最新のDB状態を取得してクライアントと同期する
- */
+// お気に入り再検証
 export async function revalidateFavoriteAction(path: string) {
   try {
     const user = await resolveCurrentUserOrThrow();
-    const media = await findMediaByPath(path);
+
+    const media = await prisma.media.findFirst({
+      select: { id: true },
+      where: { path },
+    });
 
     if (!media) return { success: false, error: "メディアが見つかりません" };
 

@@ -1,16 +1,7 @@
-import type { Media } from "@/generated/prisma/client";
 import { detectMediaType } from "@/lib/media/media-types";
 import { MediaNode, VirtualMediaNode } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import path from "path";
-
-export async function findMediaByPath(path: string): Promise<Media | null> {
-  return prisma.media.findUnique({
-    where: {
-      path,
-    },
-  });
-}
 
 export async function getVirtualMediaNodes(
   dirPath: string,

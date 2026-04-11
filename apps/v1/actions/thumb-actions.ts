@@ -11,8 +11,16 @@ import { rm } from "fs/promises";
 import { glob } from "glob";
 import path from "path";
 
+// ジョブの有効期限
 const LOCK_TTL = 1000 * 60 * 10; // 10分
 
+/**
+ * Redis を使ってロックを取得
+ *
+ * @returns
+ *  true  ロック取得成功（他に処理している人はいない）
+ *  false 既にロックあり（他のワーカーが処理中）
+ */
 async function acquireLock(key: string, ttlMs: number): Promise<boolean> {
   // key: lockKey
   // value: 1 (any)
@@ -23,7 +31,8 @@ async function acquireLock(key: string, ttlMs: number): Promise<boolean> {
   return res === "OK";
 }
 
-export async function enqueueThumbJobAction(
+// サムネ生成ジョブ登録（ディレクトリ単位）
+export async function enqueueCreateThumbsJobAction(
   dirPath: string,
   forceCreate = false
 ) {
@@ -51,7 +60,8 @@ export async function enqueueThumbJobAction(
   );
 }
 
-export async function enqueueSingleThumbJobAction(
+// サムネ生成ジョブ登録（ファイル単位）
+export async function enqueueCreateSingleThumbJobAction(
   filePath: string,
   forceCreate = false
 ) {
@@ -80,7 +90,7 @@ export async function enqueueSingleThumbJobAction(
 }
 
 /**
- * 不要なサムネイル（DBに紐づかないファイル）をスキャン
+ * 不要サムネイルスキャン
  * @deprecated 進捗確認できないので非推奨。代わりに /api/ghost/thumb/scan を推奨
  */
 export async function scanGhostThumbnailsAction(
@@ -158,9 +168,7 @@ export async function scanGhostThumbnailsAction(
   }
 }
 
-/**
- * 不要なサムネイルファイルの物理削除
- */
+// 不要サムネイル削除
 export async function cleanupGhostThumbnailsAction(items: GhostThumbItem[]) {
   try {
     const thumbRoot = path.resolve(PATHS.server.media.thumb.root);

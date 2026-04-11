@@ -1,4 +1,4 @@
-import { enqueueThumbJobAction } from "@/actions/thumb-actions";
+import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
 import { FallbackImage } from "@/components/ui/images/fallback-image";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
@@ -54,7 +54,7 @@ export function MediaThumbImage({
       const targetDir = previewPath
         ? getParentDirPath(previewPath)
         : getParentDirPath(node.path);
-      await enqueueThumbJobAction(targetDir);
+      await enqueueCreateThumbsJobAction(targetDir);
     } catch (e) {
       console.error("Failed to enqueue thumb job", e);
       setIsProcessing(false);

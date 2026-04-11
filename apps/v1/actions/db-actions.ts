@@ -1,12 +1,12 @@
 "use server";
 
-import { getServerMediaDbPath } from "@/lib/path/helpers";
+import { PATHS } from "@/lib/path/paths";
 import { getDatabaseUrlInfo } from "@/lib/url/db";
 import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 
-const BACKUP_DIR = getServerMediaDbPath("");
+const BACKUP_DIR = PATHS.server.media.db.root;
 
 // バックアップ一覧の取得
 export async function getBackupListAction() {
@@ -89,6 +89,7 @@ export async function createBackupAction() {
 
     return { success: false, error: "バックアップに失敗しました" };
   } finally {
+    // ファイルハンドルは必ず解放
     if (fileHandle) {
       try {
         await fileHandle.close();
@@ -137,6 +138,7 @@ export async function restoreBackupAction(fileName: string) {
     console.error("restore db backup error", error);
     return { success: false, error: "リストアに失敗しました" };
   } finally {
+    // ファイルハンドルは必ず解放
     if (fileHandle) {
       try {
         await fileHandle.close();
@@ -145,9 +147,7 @@ export async function restoreBackupAction(fileName: string) {
   }
 }
 
-/**
- * バックアップファイルの削除
- */
+// バックアップファイルの削除
 export async function deleteBackupAction(fileName: string) {
   // セキュリティ対策: ファイル名にパス区切り文字が含まれていないかチェック
   // (ディレクトリトラバーサル対策)
@@ -178,10 +178,7 @@ export async function deleteBackupAction(fileName: string) {
   }
 }
 
-/**
- * バックアップの世代管理（内部用）
- * @param keepCount 残す件数
- */
+// バックアップの世代管理
 export async function cleanupOldBackupsAction(keepCount: number = 10) {
   try {
     const files = await fs.readdir(BACKUP_DIR);

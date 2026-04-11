@@ -282,7 +282,7 @@ export async function moveNodesAction(
   return results;
 }
 
-// フォルダ一覧
+// サブフォルダ一覧
 export async function getSubDirectoriesAction(dirPath: string) {
   try {
     const realPath = getServerMediaPath(dirPath);
@@ -303,7 +303,38 @@ export async function getSubDirectoriesAction(dirPath: string) {
   }
 }
 
-// 削除
+// 再帰的な移動
+async function recursiveMergeMove(src: string, dest: string) {
+  const stats = await lstat(src);
+  if (!stats.isDirectory()) {
+    // ファイルの場合
+    // 移動先に同名ファイルがあれば上書き
+    if (await existsPath(dest)) {
+      await rm(dest, { force: true });
+    }
+    await rename(src, dest);
+  } else {
+    // ディレクトリの場合
+    // 移動先に同名フォルダがなければリネーム
+    if (!(await existsPath(dest))) {
+      await rename(src, dest);
+      return;
+    }
+
+    // 同名フォルダがあれば中のファイルやフォルダを再帰的に移動
+    const entries = await readdir(src);
+    for (const entry of entries) {
+      const srcPath = join(src, entry);
+      const destPath = join(dest, entry);
+      await recursiveMergeMove(srcPath, destPath);
+    }
+
+    // 空になったソースディレクトリを削除
+    await rm(src, { recursive: true, force: true });
+  }
+}
+
+// 削除（ゴミ箱フォルダへの移動）
 export async function deleteNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
@@ -326,37 +357,11 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     }
   }
 
+  // キャッシュの更新
   revalidatePath("/explorer");
   revalidatePath("/trash");
+
   return results;
-}
-
-async function recursiveMergeMove(src: string, dest: string) {
-  const stats = await lstat(src);
-  if (!stats.isDirectory()) {
-    // ファイルの場合
-    // 移動先に同名ファイルがあれば上書き
-    if (await existsPath(dest)) {
-      await rm(dest, { force: true });
-    }
-    await rename(src, dest);
-  } else {
-    // ディレクトリの場合
-    if (!(await existsPath(dest))) {
-      await rename(src, dest);
-      return;
-    }
-
-    const entries = await readdir(src);
-    for (const entry of entries) {
-      const srcPath = join(src, entry);
-      const destPath = join(dest, entry);
-      await recursiveMergeMove(srcPath, destPath);
-    }
-
-    // 空になったソースディレクトリを削除
-    await rm(src, { recursive: true, force: true });
-  }
 }
 
 // 完全に削除
@@ -387,7 +392,7 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
   return results;
 }
 
-// 復元
+// 復元（ゴミ箱フォルダから元のフォルダへの移動）
 export async function restoreNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
@@ -416,8 +421,7 @@ export async function restoreNodesAction(sourcePaths: string[]) {
 }
 
 /**
- * スキャン（ゴーストデータ）
- * フォルダ単位の高速スキャンと、ファイル単位のフルスキャンをサポート
+ * 不要なメディアをスキャン
  * @deprecated 進捗確認できないので非推奨。代わりに /api/ghost/media/scan を推奨
  */
 export async function scanGhostMediaAction(options?: GhostMediaScanOptions) {
@@ -426,7 +430,7 @@ export async function scanGhostMediaAction(options?: GhostMediaScanOptions) {
     const ghostItems: GhostMediaItem[] = [];
 
     if (isFullScan) {
-      // 1. 全レコードを取得して一つずつ実体を確認
+      // フルスキャン：ファイル単位で実体を確認
       const allMedia = await prisma.media.findMany({
         select: { id: true, title: true, path: true, dirPath: true },
       });
@@ -444,7 +448,7 @@ export async function scanGhostMediaAction(options?: GhostMediaScanOptions) {
         }
       }
     } else {
-      // 2. フォルダ単位の高速チェック
+      // クイックスキャン：フォルダ単位で実体を確認
       const folders = await prisma.media.groupBy({
         by: ["dirPath"],
       });
@@ -478,10 +482,7 @@ export async function scanGhostMediaAction(options?: GhostMediaScanOptions) {
   }
 }
 
-/**
- * 削除実行（ゴーストデータ）
- * フロントエンドから送られてきたIDリストに基づいて一括削除
- */
+// 不要なメディアを削除
 export async function cleanupGhostMediaAction(
   ids: string[]
 ): Promise<GhostMediaDeleteResult> {

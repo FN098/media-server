@@ -4,45 +4,21 @@ import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { fsNameSchema } from "@/lib/media/validation";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
-import { prisma } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
+import { updateVisitedFolder } from "@/repositories/folder-repository";
 import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
 
+// フォルダ訪問履歴更新
 export async function visitFolderAction(dirPath: string): Promise<void> {
   const user = await resolveCurrentUserOrThrow();
-  await visitFolderByUser(dirPath, user.id);
+  await updateVisitedFolder(dirPath, user.id);
 
   // ダッシュボードの履歴キャッシュをクリア
   revalidatePath(PATHS.client.dashboard.root);
 }
 
-async function visitFolderByUser(
-  dirPath: string,
-  userId: string
-): Promise<void> {
-  const normalizedDirPath = dirPath.replace(/\/+$/, "");
-
-  // 最近訪れたフォルダを更新
-  await prisma.$transaction(async (tx) => {
-    await tx.visitedFolder.upsert({
-      where: {
-        userId_dirPath: {
-          userId,
-          dirPath: normalizedDirPath,
-        },
-      },
-      update: {
-        lastViewedAt: new Date(),
-      },
-      create: {
-        userId,
-        dirPath: normalizedDirPath,
-      },
-    });
-  });
-}
-
+// フォルダ作成
 export async function createFolderAction(
   parentPath: string,
   folderName: string

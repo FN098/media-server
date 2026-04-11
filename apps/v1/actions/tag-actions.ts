@@ -7,6 +7,7 @@ import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
 import { generateKana } from "@/lib/utils/kana";
 
+// タグ作成・更新・クリーンアップ
 export async function updateMediaTagsAction(payload: {
   mediaPaths: string[];
   operations: TagOperation[];
@@ -82,6 +83,7 @@ export async function updateMediaTagsAction(payload: {
   }
 }
 
+// タグ一括作成
 export async function createTagsAction(
   names: string[]
 ): Promise<CreateTagsResult> {
@@ -129,6 +131,7 @@ export async function createTagsAction(
   }
 }
 
+// 不要タグスキャン
 export async function scanUnusedTagsAction() {
   try {
     // どの MediaTag にも紐付いていないタグを取得
@@ -162,6 +165,7 @@ export async function scanUnusedTagsAction() {
   }
 }
 
+// 不要タグ削除
 export async function deleteSelectedTagsAction(ids: string[]) {
   try {
     if (ids.length === 0) return { success: true, deletedCount: 0 };
@@ -182,6 +186,7 @@ export async function deleteSelectedTagsAction(ids: string[]) {
   }
 }
 
+// タグ一覧無限スクロール
 export async function getTagsInfiniteAction({
   cursor,
   query,
@@ -264,6 +269,7 @@ export async function getTagsInfiniteAction({
   }
 }
 
+// タグ既読チェック
 export async function markTagsAsReadAction(ids: string[]) {
   try {
     if (ids.length === 0) return { success: true };
@@ -286,6 +292,7 @@ export async function markTagsAsReadAction(ids: string[]) {
   }
 }
 
+// タグお気に入り更新
 export async function updateTagFavoriteAction(id: string, isFavorite: boolean) {
   try {
     const { id: userId } = await resolveCurrentUserOrThrow();
@@ -325,6 +332,7 @@ export async function updateTagFavoriteAction(id: string, isFavorite: boolean) {
   }
 }
 
+// タグリネーム
 export async function renameTagAction(
   id: string,
   newName: string,
@@ -350,6 +358,7 @@ export async function renameTagAction(
   }
 }
 
+// タグ削除
 export async function deleteTagAction(id: string) {
   try {
     const tag = await prisma.tag.delete({
