@@ -41,15 +41,8 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     const newRealPath = getServerMediaPath(newVirtualPath);
 
     // 存在確認
-    if (!(await existsPath(oldRealPath))) {
-      throw new Error(
-        `リネーム対象のファイルまたはフォルダが存在しません。: ${basename(oldRealPath)}`
-      );
-    }
     if (await existsPath(newRealPath)) {
-      throw new Error(
-        `同名のファイルまたはフォルダが既に存在します。: ${basename(newRealPath)}`
-      );
+      throw new Error(`同名の項目が既に存在します。: ${basename(newRealPath)}`);
     }
 
     const stats = await lstat(oldRealPath);
@@ -59,8 +52,10 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     const newThumbPath = getServerMediaThumbPath(newVirtualPath, isDirectory);
 
     // サムネイルリネーム（本体リネーム前に実行しないと、サムネイル作成コマンドが走ってしまいロックされてエラーになる）
-    if (await existsPath(oldThumbPath)) {
+    try {
       await rename(oldThumbPath, newThumbPath);
+    } catch (e) {
+      console.error("rename thumbnail error:", e);
     }
 
     // FS更新
@@ -178,11 +173,6 @@ export async function moveNodesAction(
       const newRealPath = getServerMediaPath(newVirtualPath);
 
       // 存在確認
-      if (!(await existsPath(oldRealPath))) {
-        throw new Error(
-          `移動対象のファイルまたはフォルダが存在しません。: ${basename(oldRealPath)}`
-        );
-      }
       if (await existsPath(newRealPath)) {
         throw new Error(
           `移動先に同名の項目が存在します: ${basename(newRealPath)}`
@@ -196,8 +186,10 @@ export async function moveNodesAction(
       const newThumbPath = getServerMediaThumbPath(newVirtualPath, isDirectory);
 
       // サムネイルリネーム（本体リネーム前に実行しないと、サムネイル作成コマンドが走ってしまいロックされてエラーになる）
-      if (await existsPath(oldThumbPath)) {
+      try {
         await rename(oldThumbPath, newThumbPath);
+      } catch (e) {
+        console.error("rename thumbnail error:", e);
       }
 
       // FS更新
