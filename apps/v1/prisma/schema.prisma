@@ -30,6 +30,7 @@ model User {
 
   favorites      Favorite[]
   visitedFolders VisitedFolder[]
+  userFavorites  UserTagFavorite[]
 }
 
 model Media {
@@ -51,19 +52,30 @@ model Media {
 }
 
 model Tag {
-  id         String   @id @default(uuid())
-  name       String   @unique
-  kana       String?
-  isFavorite Boolean  @default(false)
-  isActive   Boolean  @default(true)
-  isNew      Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(uuid())
+  name      String   @unique
+  kana      String?
+  isActive  Boolean  @default(true)
+  isNew     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  mediaTags MediaTag[]
+  mediaTags     MediaTag[]
+  userFavorites UserTagFavorite[]
 
   @@index([kana])
-  @@index([isFavorite])
+}
+
+model UserTagFavorite {
+  userId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tagId])
+  @@index([userId])
 }
 
 model MediaTag {
