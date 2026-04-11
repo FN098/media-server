@@ -44,13 +44,12 @@ export function RenameDialog({
       }
     }
 
-    onOpenChange?.(open);
+    onOpenChange(open);
   };
 
   const handleRename = () => {
     startTransition(async () => {
       // 拡張子を再度結合
-      debugger;
       const fullNewName = `${newName}${extension}`;
 
       if (!newName || fullNewName === currentName) {
@@ -64,7 +63,7 @@ export function RenameDialog({
         toast.success("リネームしました");
         onOpenChange(false);
       } else {
-        toast.error(result.error);
+        toast.error(result.error || "リネームに失敗しました");
       }
     });
   };
@@ -75,6 +74,7 @@ export function RenameDialog({
         <DialogHeader>
           <DialogTitle>名前の変更</DialogTitle>
         </DialogHeader>
+
         <div className="py-4 space-y-2">
           <div className="flex items-center gap-2">
             <Input
@@ -86,7 +86,6 @@ export function RenameDialog({
               disabled={isPending}
               className="flex-1"
             />
-            {/* 視覚的に拡張子を表示するとユーザーに親切です */}
             <span className="text-sm text-muted-foreground font-mono">
               {extension}
             </span>

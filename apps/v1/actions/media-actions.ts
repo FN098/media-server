@@ -5,7 +5,7 @@ import {
   GhostMediaItem,
   GhostMediaScanOptions,
 } from "@/lib/media/types";
-import { renameSchema } from "@/lib/media/validation";
+import { fsNameSchema } from "@/lib/media/validation";
 import {
   getServerMediaPath,
   getServerMediaTrashPath,
@@ -21,7 +21,7 @@ import { basename, dirname, join } from "path";
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
-  const result = renameSchema.safeParse({ newName });
+  const result = fsNameSchema.safeParse(newName);
 
   if (!result.success) {
     return {
@@ -100,7 +100,9 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     };
   }
 
+  // キャッシュの更新
   revalidatePath("/explorer");
+
   return {
     success: true,
   };

@@ -5,6 +5,7 @@ import { deleteNodesAction } from "@/actions/media-actions";
 import { enqueueThumbJob } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
+import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
@@ -59,6 +60,7 @@ import {
   CalendarArrowDown,
   FolderInput,
   MoreVertical,
+  Plus,
   TagIcon,
   Trash2,
 } from "lucide-react";
@@ -353,6 +355,23 @@ export function Explorer() {
     }
   };
 
+  // ===== フォルダ作成 =====
+
+  const [folderDir, setFolderDir] = useState<string | null>(null);
+  const isCreateFolderMode = !!folderDir;
+
+  // フォルダ作成ダイアログを開く
+  const handleOpenCreateFolderDialog = () => {
+    setFolderDir(listing.path);
+  };
+
+  // 後始末
+  const handleCreateFolderDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setFolderDir(null);
+    }
+  };
+
   // ===== 移動 (Move) =====
 
   // 移動対象のノードリストを管理
@@ -522,6 +541,16 @@ export function Explorer() {
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-[repeat(6,180px)] gap-2 flex-grow">
+            {/* 新規フォルダ作成ボタン */}
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleOpenCreateFolderDialog}
+            >
+              <Plus className="h-4 w-4" />
+              新規フォルダ
+            </Button>
+
             {/* 並び替え */}
             <SortSelect
               options={[
@@ -687,7 +716,6 @@ export function Explorer() {
             </div>
           }
         />
-
         {/* タグエディター */}
         <TagEditSheet
           open={isTagEditMode}
@@ -704,6 +732,13 @@ export function Explorer() {
           onOpenChange={handleRenameDialogOpenChange}
           sourcePath={renameTarget?.path ?? ""}
           currentName={renameTarget?.name ?? ""}
+        />
+
+        {/* フォルダ作成ダイアログ */}
+        <CreateFolderDialog
+          open={isCreateFolderMode}
+          onOpenChange={handleCreateFolderDialogOpenChange}
+          parentPath={listing.path}
         />
 
         {/* 移動ダイアログ */}
