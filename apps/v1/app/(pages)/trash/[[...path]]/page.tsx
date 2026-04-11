@@ -11,8 +11,8 @@ import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { TrashProvider } from "@/providers/trash-provider";
-import { getDbVisitedInfoDeeply } from "@/repositories/folder-repository";
-import { getDbMediaNodes } from "@/repositories/media-repository";
+import { getFolderVisitedInfo } from "@/repositories/folder-repository";
+import { getVirtualMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -70,16 +70,16 @@ export default async function TrashPage(props: TrashPageProps) {
   const user = await resolveCurrentUserOrThrow();
 
   // DB クエリ
-  const [dbMedia, dbVisited] = await Promise.all([
-    getDbMediaNodes(currentVirtualDirPath, user.id),
-    getDbVisitedInfoDeeply(dirPaths, user.id),
+  const [media, visited] = await Promise.all([
+    getVirtualMediaNodes(currentVirtualDirPath, user.id),
+    getFolderVisitedInfo(dirPaths, user.id),
   ]);
 
   // マージ
   const merged = mergeFsWithDb({
-    fsMediaNodes: allNodes,
-    dbMediaNodes: dbMedia,
-    dbVisited,
+    realNodes: allNodes,
+    virtualNodes: media,
+    folderVisited: visited,
   });
 
   // ソート

@@ -1,7 +1,10 @@
 import type { VisitedFolder } from "@/generated/prisma/client";
-import { DbFavoriteInfo, DbFolderMeta, DbVisitedInfo } from "@/lib/media/types";
+import {
+  FolderFavoriteInfo,
+  FolderMeta,
+  FolderVisitedInfo,
+} from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
-import { benchmark } from "@/lib/utils/benchmark";
 
 export async function getRecentFolders(
   userId: string,
@@ -14,113 +17,10 @@ export async function getRecentFolders(
   });
 }
 
-export async function getDbVisitedInfo(
+export async function getFolderVisitedInfo(
   dirPaths: string[],
   userId: string
-): Promise<DbVisitedInfo[]> {
-  const folders = await prisma.visitedFolder.findMany({
-    select: {
-      dirPath: true,
-      lastViewedAt: true,
-    },
-    where: {
-      userId,
-      dirPath: { in: dirPaths },
-    },
-  });
-
-  return folders.map((e) => ({
-    path: e.dirPath,
-    lastViewedAt: e.lastViewedAt,
-  }));
-}
-
-export async function getDbVisitedInfoDeeply(
-  dirPaths: string[],
-  userId: string,
-  strategy: "single" | "transaction" = "single"
-): Promise<DbVisitedInfo[]> {
-  // シングルクエリのほうがトランザクションより5倍くらい速い
-  switch (strategy) {
-    case "single":
-      return await getDbVisitedInfoDeeplyWithSingleQuery(dirPaths, userId);
-
-    case "transaction":
-      return await getDbVisitedInfoDeeplyWithTransaction(dirPaths, userId);
-  }
-}
-
-export async function benchGetDbVisitedInfoDeeply(
-  dirPaths: string[],
-  userId: string
-): Promise<void> {
-  await benchmark(`Performance Test (dirPaths count: ${dirPaths.length})`, [
-    {
-      // 結果: 50ms / 18 dirs
-      name: "Transaction Method",
-      callback: async () => {
-        await getDbVisitedInfoDeeplyWithTransaction(dirPaths, userId);
-      },
-    },
-    {
-      // 結果: 10ms / 18 dirs
-      name: "Single Query Method",
-      callback: async () => {
-        await getDbVisitedInfoDeeplyWithSingleQuery(dirPaths, userId);
-      },
-    },
-  ]);
-}
-
-// Transaction 方式（DBサーバー負荷↑）
-export async function getDbVisitedInfoDeeplyWithTransaction(
-  dirPaths: string[],
-  userId: string
-): Promise<DbVisitedInfo[]> {
-  // 1. 各パスに対するクエリ（Promise）の配列を作成
-  const tasks = dirPaths.map((d) =>
-    prisma.visitedFolder.findMany({
-      select: {
-        lastViewedAt: true,
-      },
-      where: {
-        userId,
-        dirPath: { startsWith: d },
-      },
-      orderBy: {
-        lastViewedAt: "desc",
-      },
-      take: 1,
-    })
-  );
-
-  // 2. $transaction で一括実行
-  // results はフォルダオブジェクトの配列の配列になります: VisitFolder[][]
-  const results = await prisma.$transaction(tasks);
-
-  // 3. 結果を元のパスと紐付けて加工
-  return dirPaths.map((d, index) => {
-    const latest = results[index];
-
-    if (latest.length === 0) {
-      return {
-        path: d,
-        lastViewedAt: null,
-      };
-    }
-
-    return {
-      path: d,
-      lastViewedAt: latest[0].lastViewedAt,
-    } satisfies DbVisitedInfo;
-  });
-}
-
-// Single Query 方式（WEBサーバー負荷↑）
-export async function getDbVisitedInfoDeeplyWithSingleQuery(
-  dirPaths: string[],
-  userId: string
-): Promise<DbVisitedInfo[]> {
+): Promise<FolderVisitedInfo[]> {
   // 1. 指定されたいずれかのパスに前方一致するレコードをすべて取得
   const allRelatedFolders = await prisma.visitedFolder.findMany({
     where: {
@@ -164,10 +64,10 @@ export async function getDbVisitedInfoDeeplyWithSingleQuery(
   });
 }
 
-export async function getDbFavoriteCount(
+export async function getFolderFavoriteInfo(
   dirPaths: string[],
   userId: string
-): Promise<DbFavoriteInfo[]> {
+): Promise<FolderFavoriteInfo[]> {
   // 1. クエリの「準備」だけを行う（まだ実行しない）
   const tasks = dirPaths.map((d) =>
     prisma.favorite.count({
@@ -188,9 +88,9 @@ export async function getDbFavoriteCount(
   }));
 }
 
-export async function getDbFolderMetas(
+export async function getFolderMetas(
   dirPaths: string[]
-): Promise<DbFolderMeta[]> {
+): Promise<FolderMeta[]> {
   const metas = await prisma.folderMeta.findMany({
     where: {
       path: { in: dirPaths },
@@ -198,11 +98,13 @@ export async function getDbFolderMetas(
     select: {
       path: true,
       previewPath: true,
+      title: true,
     },
   });
 
   return metas.map((m) => ({
     path: m.path,
     previewPath: m.previewPath,
+    title: m.title,
   }));
 }

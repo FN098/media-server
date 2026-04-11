@@ -1,6 +1,6 @@
 import type { Media } from "@/generated/prisma/client";
 import { detectMediaType } from "@/lib/media/media-types";
-import { DbMediaNode, MediaNode } from "@/lib/media/types";
+import { MediaNode, VirtualMediaNode } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import path from "path";
 
@@ -12,26 +12,10 @@ export async function findMediaByPath(path: string): Promise<Media | null> {
   });
 }
 
-export async function findMediaByPathOrThrow(
-  path: string
-): Promise<Media | null> {
-  return prisma.media.findUniqueOrThrow({
-    where: {
-      path,
-    },
-  });
-}
-
-export async function getDbMediaCount(dirPath: string): Promise<number> {
-  return await prisma.media.count({
-    where: { dirPath },
-  });
-}
-
-export async function getDbMediaNodes(
+export async function getVirtualMediaNodes(
   dirPath: string,
   userId: string
-): Promise<DbMediaNode[]> {
+): Promise<VirtualMediaNode[]> {
   const dbMedia = await prisma.media.findMany({
     where: { dirPath },
     select: {
@@ -120,18 +104,4 @@ export async function getFavoriteMediaNodes(
     favoritedAt: f.createdAt,
     previewPath: f.media.previewPath,
   }));
-}
-
-export async function getMediaByTags(tagNames: string[]) {
-  return await prisma.media.findMany({
-    where: {
-      mediaTags: {
-        every: {
-          tag: {
-            name: { in: tagNames },
-          },
-        },
-      },
-    },
-  });
 }

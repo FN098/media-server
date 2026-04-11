@@ -12,11 +12,11 @@ import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { TagFilterProvider } from "@/providers/tag-filter-provider";
 import {
-  getDbFavoriteCount,
-  getDbFolderMetas,
-  getDbVisitedInfoDeeply,
+  getFolderFavoriteInfo,
+  getFolderMetas,
+  getFolderVisitedInfo,
 } from "@/repositories/folder-repository";
-import { getDbMediaNodes } from "@/repositories/media-repository";
+import { getVirtualMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -72,21 +72,20 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   await syncMediaDir(currentVirtualPath, allNodes);
 
   // DB クエリ
-  const [dbMediaNodes, dbVisited, dbFavorites, dbFolderMetas] =
-    await Promise.all([
-      getDbMediaNodes(currentVirtualPath, user.id),
-      getDbVisitedInfoDeeply(dirPaths, user.id),
-      getDbFavoriteCount(dirPaths, user.id),
-      getDbFolderMetas(dirPaths),
-    ]);
+  const [media, visited, favorites, metas] = await Promise.all([
+    getVirtualMediaNodes(currentVirtualPath, user.id),
+    getFolderVisitedInfo(dirPaths, user.id),
+    getFolderFavoriteInfo(dirPaths, user.id),
+    getFolderMetas(dirPaths),
+  ]);
 
   // マージ
   const merged = mergeFsWithDb({
-    fsMediaNodes: allNodes,
-    dbMediaNodes,
-    dbVisited,
-    dbFavorites,
-    dbFolderMetas,
+    realNodes: allNodes,
+    virtualNodes: media,
+    folderVisited: visited,
+    folderFavorites: favorites,
+    folderMetas: metas,
   });
 
   // ソート

@@ -48,7 +48,7 @@ export type MediaListing = {
   next: string | null;
 };
 
-export type DbMediaNode = {
+export type VirtualMediaNode = {
   id: string;
   path: string;
   title?: string;
@@ -59,14 +59,20 @@ export type DbMediaNode = {
   previewPath?: string;
 };
 
-export type DbVisitedInfo = {
+export type FolderVisitedInfo = {
   path: string;
   lastViewedAt: Date | null;
 };
 
-export type DbFavoriteInfo = {
+export type FolderFavoriteInfo = {
   path: string;
-  favoriteCountInFolder: number;
+  favoriteMediaCount: number;
+};
+
+export type FolderMeta = {
+  path: string;
+  previewPath: string | null;
+  title: string | null;
 };
 
 export type MediaPathToIndexMap = Map<string, number>;
@@ -81,11 +87,6 @@ export interface MediaFsContext {
   /** 仮想パスのフィルタリング関数（ブラックリストなど） */
   filterVirtualPath?: (virtualPath: string) => boolean;
 }
-
-export type DbFolderMeta = {
-  path: string;
-  previewPath: string | null;
-};
 
 export type GhostMediaItem = {
   id: string;
