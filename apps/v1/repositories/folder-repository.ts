@@ -84,7 +84,7 @@ export async function getFolderFavoriteInfo(
   // 3. 結果をマッピング
   return dirPaths.map((d, index) => ({
     path: d,
-    favoriteCountInFolder: counts[index],
+    favoriteMediaCount: counts[index],
   }));
 }
 
