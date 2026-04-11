@@ -171,7 +171,7 @@ export function GhostThumbCleanupCard({
           不要サムネイル削除
         </CardTitle>
         <CardDescription>
-          DBにレコードが存在しない古いサムネイルファイルを物理削除します
+          DBにレコードが存在しない古いサムネイルファイルを掃除します
         </CardDescription>
       </CardHeader>
 
@@ -182,8 +182,10 @@ export function GhostThumbCleanupCard({
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>
                 スキャン中...
-                {Math.floor((progress.current / progress.total) * 100)} % (
-                {progress.current} / {progress.total})
+                {progress.total > 0
+                  ? Math.floor((progress.current / progress.total) * 100)
+                  : 0}{" "}
+                % ({progress.current} / {progress.total})
               </span>
               <span>
                 {elapsedDisplay ? Math.ceil(elapsedDisplay) : "--"} 秒経過
@@ -213,11 +215,11 @@ export function GhostThumbCleanupCard({
           {isPending ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />{" "}
-              ゴーストファイル削除中...
+              不要なファイル削除中...
             </div>
           ) : isScanning ? (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="w-4 h-4 animate-spin" /> 調査中... (
+              <Loader2 className="w-4 h-4 animate-spin" /> スキャン中... (
               {foundCount}件発見)
             </div>
           ) : items === null ? (
@@ -227,7 +229,7 @@ export function GhostThumbCleanupCard({
           ) : items.length > 0 ? (
             <div className="flex items-center gap-2 text-orange-600 font-medium">
               <AlertCircle className="w-4 h-4" /> {items.length}{" "}
-              件のゴーストファイルが見つかりました
+              件の不要なファイルが見つかりました
             </div>
           ) : (
             <div className="flex items-center gap-2 text-green-600 font-medium">
@@ -269,7 +271,7 @@ export function GhostThumbCleanupCard({
             disabled={isScanning}
           />
           <Label htmlFor="thumb-scan-mode" className="text-xs cursor-pointer">
-            {isFullScan ? "フルスキャン" : "高速スキャン"}
+            フルスキャン
           </Label>
         </div>
 

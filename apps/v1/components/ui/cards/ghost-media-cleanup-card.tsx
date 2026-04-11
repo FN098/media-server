@@ -178,11 +178,13 @@ export function GhostMediaCleanupCard({
             <div className="flex flex-col text-xs text-muted-foreground">
               <span>
                 スキャン中...
-                {Math.floor((progress.current / progress.total) * 100)} % (
-                {progress.current} / {progress.total})
+                {progress.total > 0
+                  ? Math.floor((progress.current / progress.total) * 100)
+                  : 0}{" "}
+                % ({progress.current} / {progress.total})
               </span>
               <span>
-                {elapsedDisplay ? Math.ceil(elapsedDisplay) : "--"} 秒経過
+                {elapsedDisplay > 1 ? Math.ceil(elapsedDisplay) : "--"} 秒経過
               </span>
               <span>残り約 {eta ? Math.ceil(eta) : "--"} 秒</span>
             </div>
@@ -213,7 +215,7 @@ export function GhostMediaCleanupCard({
             </div>
           ) : isScanning ? (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="w-4 h-4 animate-spin" /> 調査中... (
+              <Loader2 className="w-4 h-4 animate-spin" /> スキャン中... (
               {foundCount}件発見)
             </div>
           ) : items === null ? (
@@ -276,7 +278,7 @@ export function GhostMediaCleanupCard({
             htmlFor="scan-mode"
             className="text-xs font-bold cursor-pointer"
           >
-            {isFullScan ? "フルスキャン" : "高速スキャン"}
+            フルスキャン
           </Label>
         </div>
 
