@@ -47,14 +47,14 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       );
     }
 
-    // FS更新
-    await rename(oldRealPath, newRealPath);
-
-    // サムネイル削除
+    // サムネイル削除（リネーム前に実行しないと、サムネイル作成コマンドが走ってしまいロックされてエラーになる）
     const oldThumbPath = getServerMediaThumbPath(oldVirtualPath);
     const newThumbPath = getServerMediaThumbPath(newVirtualPath);
-    await rm(oldThumbPath);
-    await rm(newThumbPath);
+    await rm(oldThumbPath, { force: true });
+    await rm(newThumbPath, { force: true });
+
+    // FS更新
+    await rename(oldRealPath, newRealPath);
 
     const stats = await lstat(newRealPath);
     const isDirectory = stats.isDirectory();
