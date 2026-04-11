@@ -47,12 +47,12 @@ export async function createFolderAction(
   parentPath: string,
   folderName: string
 ) {
-  const result = fsNameSchema.safeParse(folderName);
+  const validation = fsNameSchema.safeParse(folderName);
 
-  if (!result.success) {
+  if (!validation.success) {
     return {
       success: false,
-      error: result.error.issues[0].message,
+      error: validation.error.issues[0].message,
     };
   }
 

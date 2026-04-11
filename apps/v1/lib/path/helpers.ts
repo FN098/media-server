@@ -26,10 +26,13 @@ export function getServerMediaPath(mediaPath: string): string {
   return path.join(PATHS.server.media.root, mediaPath);
 }
 
-export function getServerMediaThumbPath(mediaPath: string): string {
+export function getServerMediaThumbPath(
+  mediaPath: string,
+  isDirectory?: boolean
+): string {
   return path.join(
     PATHS.server.media.thumb.root,
-    mediaPath + APP_CONFIG.thumb.extension
+    mediaPath + (isDirectory ? "" : APP_CONFIG.thumb.extension)
   );
 }
 

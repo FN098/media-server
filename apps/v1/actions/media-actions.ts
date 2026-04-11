@@ -21,12 +21,12 @@ import { basename, dirname, join } from "path";
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
-  const result = fsNameSchema.safeParse(newName);
+  const validation = fsNameSchema.safeParse(newName);
 
-  if (!result.success) {
+  if (!validation.success) {
     return {
       success: false,
-      error: result.error.issues[0].message,
+      error: validation.error.issues[0].message,
     };
   }
 
@@ -41,23 +41,30 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     const newRealPath = getServerMediaPath(newVirtualPath);
 
     // 存在確認
+    if (!(await existsPath(oldRealPath))) {
+      throw new Error(
+        `リネーム対象のファイルまたはフォルダが存在しません。: ${basename(oldRealPath)}`
+      );
+    }
     if (await existsPath(newRealPath)) {
       throw new Error(
         `同名のファイルまたはフォルダが既に存在します。: ${basename(newRealPath)}`
       );
     }
 
-    // サムネイル削除（リネーム前に実行しないと、サムネイル作成コマンドが走ってしまいロックされてエラーになる）
-    const oldThumbPath = getServerMediaThumbPath(oldVirtualPath);
-    const newThumbPath = getServerMediaThumbPath(newVirtualPath);
-    await rm(oldThumbPath, { force: true });
-    await rm(newThumbPath, { force: true });
+    const stats = await lstat(oldRealPath);
+    const isDirectory = stats.isDirectory();
+
+    const oldThumbPath = getServerMediaThumbPath(oldVirtualPath, isDirectory);
+    const newThumbPath = getServerMediaThumbPath(newVirtualPath, isDirectory);
+
+    // サムネイルリネーム（本体リネーム前に実行しないと、サムネイル作成コマンドが走ってしまいロックされてエラーになる）
+    if (await existsPath(oldThumbPath)) {
+      await rename(oldThumbPath, newThumbPath);
+    }
 
     // FS更新
     await rename(oldRealPath, newRealPath);
-
-    const stats = await lstat(newRealPath);
-    const isDirectory = stats.isDirectory();
 
     // DB更新
     await prisma.$transaction(async (tx) => {
@@ -93,6 +100,48 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         END
         WHERE dirPath = ${oldVirtualPath} OR dirPath LIKE CONCAT(${oldVirtualPath}, '/%')
       `;
+
+      // プレビューの更新
+      if (isDirectory) {
+        // 1. リネーム先に既に存在するレコードを削除 (上書きを許容するため)
+        //    自分自身だけでなく、配下のパスも重複する可能性があるため一括削除
+        await tx.$executeRaw`
+          DELETE FROM FolderMeta 
+          WHERE path = ${newVirtualPath} OR path LIKE CONCAT(${newVirtualPath}, '/%')
+        `;
+
+        // 2. 既存レコードの path と previewPath を一括更新
+        await tx.$executeRaw`
+          UPDATE FolderMeta
+          SET 
+            path = CASE 
+              WHEN path = ${oldVirtualPath} THEN ${newVirtualPath}
+              ELSE REPLACE(path, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+            END,
+            previewPath = CASE
+              WHEN previewPath IS NULL THEN NULL
+              WHEN previewPath = ${oldVirtualPath} THEN ${newVirtualPath}
+              WHEN previewPath LIKE CONCAT(${oldVirtualPath}, '/%') 
+                THEN REPLACE(previewPath, CONCAT(${oldVirtualPath}, '/'), CONCAT(${newVirtualPath}, '/'))
+              ELSE previewPath
+            END
+          WHERE path = ${oldVirtualPath} OR path LIKE CONCAT(${oldVirtualPath}, '/%')
+        `;
+      } else {
+        // ファイル単体のリネームの場合
+        // 1. もしリネーム先にメタデータがあれば削除
+        await tx.$executeRaw`DELETE FROM FolderMeta WHERE path = ${newVirtualPath}`;
+
+        // 2. 自身のパス更新
+        await tx.$executeRaw`
+          UPDATE FolderMeta SET path = ${newVirtualPath} WHERE path = ${oldVirtualPath}
+        `;
+
+        // 3. 他のフォルダの previewPath として使われていた場合の更新
+        await tx.$executeRaw`
+          UPDATE FolderMeta SET previewPath = ${newVirtualPath} WHERE previewPath = ${oldVirtualPath}
+        `;
+      }
     });
   } catch (error) {
     console.error("Rename Error:", error);
