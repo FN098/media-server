@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma } from "@/generated/prisma/client";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
@@ -81,32 +82,6 @@ export async function updateMediaTagsAction(payload: {
   }
 }
 
-export async function createTagAction(name: string, isFavorite = false) {
-  try {
-    const normalizedName = normalizeTagName(name);
-    if (!normalizedName) {
-      return { success: false, error: "タグ名が空です" };
-    }
-
-    const kana = await generateKana(normalizedName);
-
-    const tag = await prisma.tag.upsert({
-      where: { name: normalizedName },
-      update: { isFavorite }, // すでに存在する場合、お気に入りフラグだけ更新する運用
-      create: {
-        name: normalizedName,
-        kana: kana,
-        isFavorite,
-        isActive: true,
-      },
-    });
-    return { success: true, tag };
-  } catch (error) {
-    console.error("Create tag error:", error);
-    return { success: false, error: "タグの作成に失敗しました" };
-  }
-}
-
 export async function createTagsAction(
   names: string[]
 ): Promise<CreateTagsResult> {
@@ -132,7 +107,6 @@ export async function createTagsAction(
         .map(async (name) => ({
           name,
           kana: await generateKana(name),
-          isFavorite: false,
           isActive: true,
         }))
     );
@@ -222,6 +196,8 @@ export async function getTagsInfiniteAction({
   onlyNew?: boolean;
 }) {
   try {
+    const { id: userId } = await resolveCurrentUserOrThrow();
+
     const buildTagWhere = (): Prisma.TagWhereInput => {
       const where: Prisma.TagWhereInput = {
         isActive: true,
@@ -235,7 +211,9 @@ export async function getTagsInfiniteAction({
       }
 
       if (onlyFavorites) {
-        where.isFavorite = true;
+        where.userFavorites = {
+          some: { userId },
+        };
       }
 
       if (onlyNew) {
@@ -247,7 +225,7 @@ export async function getTagsInfiniteAction({
 
     const tagWhere = buildTagWhere();
 
-    const tags = await prisma.tag.findMany({
+    const rawTags = await prisma.tag.findMany({
       take: limit,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
@@ -258,10 +236,22 @@ export async function getTagsInfiniteAction({
         id: true,
         name: true,
         kana: true,
-        isFavorite: true,
         isNew: true,
         _count: { select: { mediaTags: true } },
+        userFavorites: {
+          where: { userId },
+          select: { userId: true },
+        },
       },
+    });
+
+    // フロントエンドが扱いやすいように整形
+    const tags = rawTags.map((tag) => {
+      const { userFavorites, ...rest } = tag;
+      return {
+        ...rest,
+        isFavorite: userFavorites.length > 0,
+      };
     });
 
     const nextCursor =
@@ -298,11 +288,37 @@ export async function markTagsAsReadAction(ids: string[]) {
 
 export async function updateTagFavoriteAction(id: string, isFavorite: boolean) {
   try {
-    const tag = await prisma.tag.update({
-      where: { id },
-      data: { isFavorite },
-    });
-    return { success: true, tag };
+    const { id: userId } = await resolveCurrentUserOrThrow();
+
+    if (isFavorite) {
+      // お気に入り登録：UserTagFavorite レコードを作成
+      // すでに存在する場合にエラーにならないよう upsert か create (ignore) 的な処理にする
+      await prisma.userTagFavorite.upsert({
+        where: {
+          userId_tagId: {
+            userId,
+            tagId: id,
+          },
+        },
+        update: {}, // すでに存在する場合は何もしない
+        create: {
+          userId,
+          tagId: id,
+        },
+      });
+    } else {
+      // お気に入り解除：UserTagFavorite レコードを削除
+      // 存在しないレコードを delete するとエラーになるため deleteMany を使用
+      await prisma.userTagFavorite.deleteMany({
+        where: {
+          userId,
+          tagId: id,
+        },
+      });
+    }
+
+    // フロントエンドとの互換性のために、現在の状態を返す
+    return { success: true, isFavorite };
   } catch (error) {
     console.error("Update Tag Favorite Error:", error);
     return { success: false, error: "タグのお気に入り更新に失敗しました。" };
