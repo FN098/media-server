@@ -1,12 +1,12 @@
 "use client";
 
-import { enqueueThumbJob } from "@/actions/thumb-actions";
+import { enqueueThumbJobAction } from "@/actions/thumb-actions";
 import { useCallback } from "react";
 
 export function useThumb() {
   // サムネイル作成リクエスト送信
   const sendCreateThumbRequest = useCallback(async (path: string) => {
-    await enqueueThumbJob(path);
+    await enqueueThumbJobAction(path);
   }, []);
 
   return {

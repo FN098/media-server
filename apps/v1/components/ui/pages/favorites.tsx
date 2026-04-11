@@ -1,7 +1,7 @@
 "use client";
 
 import { visitFolderAction } from "@/actions/folder-actions";
-import { enqueueThumbJob } from "@/actions/thumb-actions";
+import { enqueueThumbJobAction } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
@@ -309,7 +309,7 @@ export function Favorites() {
   // サムネイル作成リクエスト送信
   useEffect(() => {
     if (listing.path) {
-      void enqueueThumbJob(listing.path);
+      void enqueueThumbJobAction(listing.path);
     }
   }, [listing.path]);
 

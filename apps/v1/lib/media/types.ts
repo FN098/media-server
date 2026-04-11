@@ -98,7 +98,7 @@ export type GhostMediaScanOptions = {
   fullScan: boolean;
 };
 
-export type GhostMediaScanEventArgs =
+export type GhostMediaScanEventData =
   | { type: "progress"; current: number; total: number; found: number }
   | { type: "complete"; items: GhostMediaItem[] }
   | { type: "error"; message: string };

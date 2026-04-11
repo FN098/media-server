@@ -323,7 +323,7 @@ export async function restoreNodesAction(sourcePaths: string[]) {
 /**
  * スキャン（ゴーストデータ）
  * フォルダ単位の高速スキャンと、ファイル単位のフルスキャンをサポート
- * @deprecated メモリを大量に消費するので非推奨。代わりに /api/ghost/media/scan を推奨
+ * @deprecated 進捗確認できないので非推奨。代わりに /api/ghost/media/scan を推奨
  */
 export async function scanGhostMediaAction(options?: GhostMediaScanOptions) {
   try {

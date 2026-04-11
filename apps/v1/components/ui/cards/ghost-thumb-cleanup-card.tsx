@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  GhostMediaDeleteResult,
-  GhostMediaItem,
-  GhostMediaScanEventData,
-} from "@/lib/media/types";
+  GhostThumbDeleteResult,
+  GhostThumbItem,
+  GhostThumbScanEventData,
+} from "@/lib/thumb/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +30,7 @@ import { Switch } from "@/shadcn/components/ui/switch";
 import {
   AlertCircle,
   CheckCircle2,
-  Ghost,
+  FileImage,
   Loader2,
   Search,
   Trash2,
@@ -38,18 +38,18 @@ import {
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-interface GhostMediaCleanupCardProps {
-  onDelete: (ids: string[]) => Promise<GhostMediaDeleteResult>;
+interface GhostThumbCleanupCardProps {
+  onDelete: (paths: string[]) => Promise<GhostThumbDeleteResult>;
   autoScan?: boolean;
 }
 
-export function GhostMediaCleanupCard({
+export function GhostThumbCleanupCard({
   onDelete,
   autoScan = false,
-}: GhostMediaCleanupCardProps) {
+}: GhostThumbCleanupCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isFullScan, setIsFullScan] = useState(false);
-  const [items, setItems] = useState<GhostMediaItem[] | null>(null);
+  const [items, setItems] = useState<GhostThumbItem[] | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [elapsedDisplay, setElapsedDisplay] = useState(0);
   const [eta, setEta] = useState<number | null>(null);
@@ -72,13 +72,13 @@ export function GhostMediaCleanupCard({
     startTimeRef.current = Date.now();
 
     const eventSource = new EventSource(
-      `/api/ghost/media/scan?full=${isFullScan}`
+      `/api/ghost/thumb/scan?full=${isFullScan}`
     );
     esRef.current = eventSource;
 
     eventSource.onmessage = (event: MessageEvent) => {
       if (typeof event.data !== "string") return;
-      const data = JSON.parse(event.data) as GhostMediaScanEventData;
+      const data = JSON.parse(event.data) as GhostThumbScanEventData;
 
       switch (data.type) {
         case "progress":
@@ -103,7 +103,7 @@ export function GhostMediaCleanupCard({
           setIsScanning(false);
           eventSource.close();
           esRef.current = null;
-          toast.success("スキャンが完了しました");
+          toast.success("サムネイルのスキャンが完了しました");
           break;
 
         case "error":
@@ -121,10 +121,29 @@ export function GhostMediaCleanupCard({
         setIsScanning(false);
         eventSource.close();
         esRef.current = null;
-        toast.error("接続エラーが発生しました");
+        toast.error("スキャン中に接続エラーが発生しました");
       }
     };
-  }, [isFullScan, startTimeRef]);
+  }, [isFullScan]);
+
+  // 削除実行
+  const handleDelete = useCallback(() => {
+    if (!items || items.length === 0) return;
+
+    const paths = items.map((item) => item.path);
+
+    startTransition(async () => {
+      const result = await onDelete(paths);
+      if (result.success) {
+        toast.success(
+          `${result.deletedCount}件の不要なサムネイルを削除しました`
+        );
+        setItems(null);
+      } else {
+        toast.error(result.error || "削除中にエラーが発生しました");
+      }
+    });
+  }, [onDelete, items]);
 
   // 中断処理
   const handleAbort = () => {
@@ -137,21 +156,6 @@ export function GhostMediaCleanupCard({
     }
   };
 
-  // 削除実行
-  const handleDelete = useCallback(() => {
-    if (!items || items.length === 0) return;
-    const ids = items.map((n) => n.id);
-    startTransition(async () => {
-      const result = await onDelete(ids);
-      if (result.success) {
-        toast.success(`${result.deletedCount}件のゴーストデータを削除しました`);
-        setItems(null);
-      } else {
-        toast.error(result.error || "削除中にエラーが発生しました");
-      }
-    });
-  }, [onDelete, items]);
-
   // 初回のみ自動スキャン
   useEffect(() => {
     if (autoScan) handleScan();
@@ -160,14 +164,14 @@ export function GhostMediaCleanupCard({
   }, []);
 
   return (
-    <Card className="border-destructive/50">
+    <Card className="border-orange-500/50">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-destructive">
-          <Ghost className="w-5 h-5" />
-          ゴーストデータ削除
+        <CardTitle className="flex items-center gap-2 text-orange-600">
+          <FileImage className="w-5 h-5" />
+          不要サムネイル削除
         </CardTitle>
         <CardDescription>
-          実体のないメディアレコードを掃除します
+          DBにレコードが存在しない古いサムネイルファイルを物理削除します
         </CardDescription>
       </CardHeader>
 
@@ -175,7 +179,7 @@ export function GhostMediaCleanupCard({
         {/* 進捗表示 */}
         {isScanning && (
           <div className="space-y-2">
-            <div className="flex flex-col text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>
                 スキャン中...
                 {Math.floor((progress.current / progress.total) * 100)} % (
@@ -209,7 +213,7 @@ export function GhostMediaCleanupCard({
           {isPending ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />{" "}
-              ゴーストデータ削除中...
+              ゴーストファイル削除中...
             </div>
           ) : isScanning ? (
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -223,7 +227,7 @@ export function GhostMediaCleanupCard({
           ) : items.length > 0 ? (
             <div className="flex items-center gap-2 text-orange-600 font-medium">
               <AlertCircle className="w-4 h-4" /> {items.length}{" "}
-              件のゴーストデータを発見
+              件のゴーストファイルが見つかりました
             </div>
           ) : (
             <div className="flex items-center gap-2 text-green-600 font-medium">
@@ -234,26 +238,21 @@ export function GhostMediaCleanupCard({
 
         {/* スキャン結果プレビュー */}
         {items && items.length > 0 && (
-          <div className="mt-4 space-y-2">
+          <div className="space-y-2">
             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
               検出されたアイテム (最大100件)
             </Label>
-            <div className="max-h-[200px] overflow-y-auto border rounded-md bg-muted/30 divide-y">
-              {items.slice(0, 100).map((item) => (
+            <div className="max-h-[160px] overflow-y-auto border rounded-md bg-muted/30 divide-y divide-border/40">
+              {items.slice(0, 100).map((item, i) => (
                 <div
-                  key={item.id}
-                  className="p-2 text-[11px] flex flex-col gap-0.5"
+                  key={i}
+                  className="p-2 text-[10px] font-mono text-muted-foreground truncate hover:bg-muted/50"
                 >
-                  <span className="font-medium text-destructive truncate">
-                    {item.title || "無題のメディア"}
-                  </span>
-                  <span className="text-muted-foreground font-mono truncate">
-                    {item.path}
-                  </span>
+                  {item.path}
                 </div>
               ))}
               {items.length > 100 && (
-                <div className="p-2 text-[10px] text-center text-muted-foreground bg-muted/50">
+                <div className="p-2 text-[10px] text-center text-muted-foreground italic">
                   ほか {items.length - 100} 件を検出
                 </div>
               )}
@@ -262,20 +261,14 @@ export function GhostMediaCleanupCard({
         )}
 
         {/* オプション類 */}
-        <div className="flex items-center gap-2 p-2 rounded-md">
+        <div className="flex items-center gap-2 p-1">
           <Switch
-            id="scan-mode"
+            id="thumb-scan-mode"
             checked={isFullScan}
-            onCheckedChange={(checked) => {
-              setIsFullScan(checked);
-              setItems(null);
-            }}
+            onCheckedChange={setIsFullScan}
             disabled={isScanning}
           />
-          <Label
-            htmlFor="scan-mode"
-            className="text-xs font-bold cursor-pointer"
-          >
+          <Label htmlFor="thumb-scan-mode" className="text-xs cursor-pointer">
             {isFullScan ? "フルスキャン" : "高速スキャン"}
           </Label>
         </div>
@@ -341,7 +334,7 @@ export function GhostMediaCleanupCard({
                 <AlertDialogTitle>削除しますか？</AlertDialogTitle>
                 <AlertDialogDescription>
                   検出された {items?.length}{" "}
-                  件のメディアデータをDBから削除します。
+                  件のサムネイルファイルをサーバーから完全に削除します。
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -1,4 +1,4 @@
-import { GhostMediaItem, GhostMediaScanEventArgs } from "@/lib/media/types";
+import { GhostMediaItem, GhostMediaScanEventData } from "@/lib/media/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { access, constants } from "fs/promises";
@@ -6,9 +6,9 @@ import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-// --- ヘルパー関数: フルスキャン (ファイルごと) ---
+// フルスキャン (ファイル単位)
 async function runFullScan(
-  send: (data: GhostMediaScanEventArgs) => void,
+  send: (data: GhostMediaScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostMediaItem[]> {
   const allMedia = await prisma.media.findMany({
@@ -44,9 +44,9 @@ async function runFullScan(
   return ghostItems;
 }
 
-// --- ヘルパー関数: 高速スキャン (フォルダごと) ---
+// 高速スキャン (フォルダ単位)
 async function runQuickScan(
-  send: (data: GhostMediaScanEventArgs) => void,
+  send: (data: GhostMediaScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostMediaItem[]> {
   const folders = await prisma.media.groupBy({ by: ["dirPath"] });
@@ -78,7 +78,6 @@ async function runQuickScan(
   return ghostItems;
 }
 
-// --- メインハンドラー ---
 export function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const isFullScan = searchParams.get("full") === "true";
@@ -86,7 +85,7 @@ export function GET(req: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
-      const send = (data: GhostMediaScanEventArgs) => {
+      const send = (data: GhostMediaScanEventData) => {
         // クライアントが切断していたら enqueue しない
         if (!req.signal.aborted) {
           controller.enqueue(
@@ -109,12 +108,8 @@ export function GET(req: NextRequest) {
           send({ type: "complete", items: finalItems });
         }
       } catch (error) {
-        console.error("Scan API Error:", error);
-        send({
-          type: "error",
-          message:
-            error instanceof Error ? error.message : "エラーが発生しました",
-        });
+        console.error("Ghost Media Scan Error:", error);
+        send({ type: "error", message: "スキャン中にエラーが発生しました" });
       } finally {
         controller.close();
       }

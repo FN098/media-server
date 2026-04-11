@@ -2,7 +2,7 @@
 
 import { visitFolderAction } from "@/actions/folder-actions";
 import { deleteNodesAction } from "@/actions/media-actions";
-import { enqueueThumbJob } from "@/actions/thumb-actions";
+import { enqueueThumbJobAction } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
@@ -438,7 +438,7 @@ export function Explorer() {
   // サムネイル作成リクエスト送信
   useEffect(() => {
     if (listing.path) {
-      void enqueueThumbJob(listing.path);
+      void enqueueThumbJobAction(listing.path);
     }
   }, [listing.path]);
 

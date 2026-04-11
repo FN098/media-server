@@ -56,3 +56,24 @@ export function getParentDirPath(filePath: string): string {
   // アプリケーションの仕様に合わせて調整（空文字にする等）
   return dir === "." ? "" : dir.replace(/\\/g, "/");
 }
+
+/**
+ * サムネイルの絶対パスから、DB上の mediaPath を復元する
+ */
+export function getMediaPathFromThumbPath(fullThumbPath: string): string {
+  // 1. ルートディレクトリ部分を削除
+  let virtualPath = fullThumbPath.replace(PATHS.server.media.thumb.root, "");
+
+  // 2. 先頭のスラッシュを調整
+  if (virtualPath.startsWith(path.sep)) {
+    virtualPath = virtualPath.substring(1);
+  }
+
+  // 3. サムネイル用拡張子を削除
+  const ext = APP_CONFIG.thumb.extension;
+  if (virtualPath.endsWith(ext)) {
+    virtualPath = virtualPath.slice(0, -ext.length);
+  }
+
+  return virtualPath;
+}
