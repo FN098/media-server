@@ -32,6 +32,7 @@ export async function getFavoriteTags(options?: { limit?: number }) {
         select: { id: true, name: true },
       },
     },
+    orderBy: [{ tag: { kana: "asc" } }, { tag: { name: "asc" } }],
     take: options?.limit,
   });
 
