@@ -25,22 +25,15 @@ export async function getRelatedTags(
 export async function getFavoriteTags(options?: { limit?: number }) {
   const { id: userId } = await resolveCurrentUserOrThrow();
 
-  const tags = await prisma.tag.findMany({
-    where: {
-      userFavorites: {
-        some: {
-          userId: userId,
-        },
-      },
-      isActive: true,
-    },
-    orderBy: [{ kana: "asc" }, { name: "asc" }],
+  const favorites = await prisma.userTagFavorite.findMany({
+    where: { userId },
     select: {
-      id: true,
-      name: true,
+      tag: {
+        select: { id: true, name: true },
+      },
     },
     take: options?.limit,
   });
 
-  return tags;
+  return favorites.map((f) => f.tag);
 }
