@@ -64,28 +64,29 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   const fsListing = await getMediaFsListing(currentVirtualPath);
   if (!fsListing) notFound();
 
-  const allNodes = fsListing.nodes;
-  const dirPaths = allNodes.filter((e) => e.isDirectory).map((e) => e.path);
+  const fsNodes = fsListing.nodes;
+  const dirPaths = fsNodes.filter((e) => e.isDirectory).map((e) => e.path);
   const user = await resolveCurrentUserOrThrow();
 
   // DBクエリの前にファイルシステムとDBの同期を取る（新規追加されたメディアをDBに反映）
-  await syncMediaDir(currentVirtualPath, allNodes);
+  await syncMediaDir(currentVirtualPath, fsNodes);
 
   // DB クエリ
-  const [media, visited, favorites, metas] = await Promise.all([
-    getVirtualMediaNodes(currentVirtualPath, user.id),
-    getFolderVisitedInfo(dirPaths, user.id),
-    getFolderFavoriteInfo(dirPaths, user.id),
-    getFolderMetas(dirPaths),
-  ]);
+  const [dbNodes, folderVisited, folderFavorites, folderMetas] =
+    await Promise.all([
+      getVirtualMediaNodes(currentVirtualPath, user.id),
+      getFolderVisitedInfo(dirPaths, user.id),
+      getFolderFavoriteInfo(dirPaths, user.id),
+      getFolderMetas(dirPaths),
+    ]);
 
   // マージ
   const merged = mergeFsWithDb({
-    realNodes: allNodes,
-    virtualNodes: media,
-    folderVisited: visited,
-    folderFavorites: favorites,
-    folderMetas: metas,
+    fsNodes,
+    dbNodes,
+    folderVisited,
+    folderFavorites,
+    folderMetas,
   });
 
   // ソート

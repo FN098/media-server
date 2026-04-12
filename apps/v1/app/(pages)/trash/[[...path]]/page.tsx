@@ -63,23 +63,21 @@ export default async function TrashPage(props: TrashPageProps) {
   });
   if (!fsListing) notFound();
 
-  const allNodes = fsListing.nodes;
-
-  const dirPaths = allNodes.filter((e) => e.isDirectory).map((e) => e.path);
-
+  const fsNodes = fsListing.nodes;
+  const dirPaths = fsNodes.filter((e) => e.isDirectory).map((e) => e.path);
   const user = await resolveCurrentUserOrThrow();
 
   // DB クエリ
-  const [media, visited] = await Promise.all([
+  const [dbNodes, folderVisited] = await Promise.all([
     getVirtualMediaNodes(currentVirtualDirPath, user.id),
     getFolderVisitedInfo(dirPaths, user.id),
   ]);
 
   // マージ
   const merged = mergeFsWithDb({
-    realNodes: allNodes,
-    virtualNodes: media,
-    folderVisited: visited,
+    fsNodes,
+    dbNodes,
+    folderVisited,
   });
 
   // ソート

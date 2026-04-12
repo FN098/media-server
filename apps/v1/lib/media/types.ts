@@ -48,7 +48,7 @@ export type MediaListing = {
   next: string | null;
 };
 
-export type VirtualMediaNode = {
+export type MediaDbNode = {
   id: string;
   path: string;
   title?: string;

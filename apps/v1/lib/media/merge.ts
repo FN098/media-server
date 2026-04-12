@@ -2,30 +2,30 @@ import {
   FolderFavoriteInfo,
   FolderMeta,
   FolderVisitedInfo,
+  MediaDbNode,
   MediaFsNode,
   MediaNode,
-  VirtualMediaNode,
 } from "@/lib/media/types";
 
 export function mergeFsWithDb({
-  realNodes,
-  virtualNodes = [],
+  fsNodes,
+  dbNodes = [],
   folderVisited: visited = [],
   folderFavorites: favorites = [],
   folderMetas = [],
 }: {
-  realNodes: MediaFsNode[];
-  virtualNodes?: VirtualMediaNode[];
+  fsNodes: MediaFsNode[];
+  dbNodes?: MediaDbNode[];
   folderVisited?: FolderVisitedInfo[];
   folderFavorites?: FolderFavoriteInfo[];
   folderMetas?: FolderMeta[];
 }): MediaNode[] {
-  const virtualMediaMap = new Map(virtualNodes.map((e) => [e.path, e]));
+  const virtualMediaMap = new Map(dbNodes.map((e) => [e.path, e]));
   const visitedMap = new Map(visited.map((e) => [e.path, e]));
   const favoriteMap = new Map(favorites.map((e) => [e.path, e]));
   const folderMetaMap = new Map(folderMetas.map((e) => [e.path, e]));
 
-  return realNodes.map((node) => {
+  return fsNodes.map((node) => {
     const media = virtualMediaMap.get(node.path);
 
     if (node.isDirectory) {

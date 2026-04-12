@@ -1,12 +1,12 @@
 import { detectMediaType } from "@/lib/media/media-types";
-import { MediaNode, VirtualMediaNode } from "@/lib/media/types";
+import { MediaDbNode, MediaNode } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import path from "path";
 
 export async function getVirtualMediaNodes(
   dirPath: string,
   userId: string
-): Promise<VirtualMediaNode[]> {
+): Promise<MediaDbNode[]> {
   const dbMedia = await prisma.media.findMany({
     where: { dirPath },
     select: {
