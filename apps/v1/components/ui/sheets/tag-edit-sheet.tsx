@@ -59,13 +59,13 @@ export function TagEditSheet({
   const [editingMode, setEditingMode] = useState<EditingMode>(
     edit ? "edit" : "view"
   );
-  const changeEditingMode = (next: EditingMode) => {
+  const handleEditingModeChange = (next: EditingMode) => {
     setEditingMode(next);
     if (autoBlur) {
       handleChangeOpacity(next === "view" ? 0 : 100);
     }
   };
-  const resetEditingMode = () => changeEditingMode("view");
+  const resetEditingMode = () => handleEditingModeChange("view");
 
   // 透明モード
   const [opacity, setOpacity] = useState(initialOpacity ?? editor.opacity);
@@ -133,7 +133,7 @@ export function TagEditSheet({
         editor.resetChanges();
 
         await editor.invalidateTags();
-        changeEditingMode("view");
+        handleEditingModeChange("view");
 
         router.refresh();
       }
@@ -149,7 +149,7 @@ export function TagEditSheet({
     } as const;
 
     const nextMode = modeMap[editingMode];
-    changeEditingMode(nextMode);
+    handleEditingModeChange(nextMode);
   };
 
   // 詳細→クイック→閲覧モードに移行 or 閉じる
@@ -165,12 +165,12 @@ export function TagEditSheet({
       handleClose();
       return;
     }
-    changeEditingMode(nextMode);
+    handleEditingModeChange(nextMode);
   };
 
   // 閉じる
   const handleClose = () => {
-    changeEditingMode("view");
+    handleEditingModeChange("view");
     onClose?.();
   };
 
@@ -179,15 +179,15 @@ export function TagEditSheet({
     scopes: "tag-editor",
     enabled: open,
   });
-  useHotkeys("e", () => changeEditingMode("edit"), {
+  useHotkeys("e", () => handleEditingModeChange("edit"), {
     scopes: "tag-editor",
     enabled: open,
   });
-  useHotkeys("q", () => changeEditingMode("quick"), {
+  useHotkeys("q", () => handleEditingModeChange("quick"), {
     scopes: "tag-editor",
     enabled: open,
   });
-  useHotkeys("v", () => changeEditingMode("view"), {
+  useHotkeys("v", () => handleEditingModeChange("view"), {
     scopes: "tag-editor",
     enabled: open,
   });
@@ -277,7 +277,7 @@ export function TagEditSheet({
                         mode={mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
-                        setEditingMode={setEditingMode}
+                        onModeChange={handleEditingModeChange}
                         opacity={opacity}
                         canEdit={canEdit}
                         onClose={handleClose}
@@ -309,7 +309,7 @@ export function TagEditSheet({
                         mode={mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
-                        setEditingMode={setEditingMode}
+                        onModeChange={handleEditingModeChange}
                         opacity={opacity}
                         canEdit={canEdit}
                         onClose={handleClose}
@@ -392,7 +392,7 @@ export function TagEditSheet({
                         mode={mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
-                        setEditingMode={setEditingMode}
+                        onModeChange={handleEditingModeChange}
                         opacity={opacity}
                         canEdit={canEdit}
                         onEditClick={() => {}}

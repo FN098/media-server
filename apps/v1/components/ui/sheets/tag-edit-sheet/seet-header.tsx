@@ -10,9 +10,9 @@ import { Eye, EyeOff, TagIcon, X } from "lucide-react";
 
 interface SheetHeaderProps {
   mode: TagEditMode;
+  onModeChange: (mode: EditingMode) => void;
   count: number;
   editingMode: EditingMode;
-  setEditingMode: (mode: EditingMode) => void;
   canEdit: boolean;
   opacity: number;
   onOpacityChange: (val: number) => void;
@@ -22,9 +22,9 @@ interface SheetHeaderProps {
 
 export function SheetHeader({
   mode,
+  onModeChange,
   count,
   editingMode,
-  setEditingMode,
   opacity,
   onOpacityChange,
   onClose,
@@ -133,7 +133,7 @@ export function SheetHeader({
           return (
             <button
               key={m}
-              onClick={() => setEditingMode(m)}
+              onClick={() => onModeChange(m)}
               className={cn(
                 "text-[11px] px-5 py-2 rounded-full transition-all duration-300 ease-out flex-1 sm:flex-none whitespace-nowrap",
                 "font-bold uppercase tracking-widest leading-none text-[11px]",
