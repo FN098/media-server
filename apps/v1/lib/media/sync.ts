@@ -1,3 +1,4 @@
+import { sortNodes } from "@/lib/media/sort";
 import type { MediaFsNode, PrismaMedia } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 
@@ -12,9 +13,15 @@ type MediaUpdateItem = Pick<
 >;
 
 export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
-  const files = nodes.filter((n) => !n.isDirectory);
+  let files = nodes.filter((n) => !n.isDirectory);
   // ファイルが空でも、ディレクトリが存在するなら FolderMeta は更新したい場合があるため
   // 早期リターンはせず、ロジックを進めます。
+
+  // プレビュー候補は名前順で先頭に近いものを優先する
+  files = sortNodes(files, {
+    key: "name",
+    direction: "asc",
+  });
 
   // --- 1. プレビュー候補の抽出 ---
   const firstMedia = files.find(
