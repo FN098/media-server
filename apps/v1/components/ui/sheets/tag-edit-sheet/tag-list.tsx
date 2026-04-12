@@ -101,7 +101,7 @@ export function TagList({
         } as React.CSSProperties
       }
       className={cn(
-        "flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto py-1 pr-1",
+        "flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto p-2",
         "[&::-webkit-scrollbar]:w-1.5",
         "[&::-webkit-scrollbar-track]:bg-transparent",
         "[&::-webkit-scrollbar-thumb]:bg-[var(--scrollbar-color)]",
