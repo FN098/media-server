@@ -1,6 +1,4 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
-import { FavoriteTagPanel } from "@/components/ui/sheets/tag-edit-sheet/favorite-tag-panel";
-import { RecentTagPanel } from "@/components/ui/sheets/tag-edit-sheet/recent-tag-panel";
 import { SheetFooter } from "@/components/ui/sheets/tag-edit-sheet/seet-footer";
 import { SheetHeader } from "@/components/ui/sheets/tag-edit-sheet/seet-header";
 import { TagInput } from "@/components/ui/sheets/tag-edit-sheet/tag-input";
@@ -12,9 +10,16 @@ import {
 import { MediaNode } from "@/lib/media/types";
 import { TagOperation } from "@/lib/tag/types";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shadcn/components/ui/tabs";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
+import { Clock, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -312,20 +317,50 @@ export function TagEditSheet({
                         onToggle={editor.toggleTagChange}
                         opacity={opacity}
                       />
-                      <RecentTagPanel
-                        recentTags={editor.recentTags}
-                        tagStates={editor.tagStates}
-                        pendingChanges={editor.pendingChanges}
-                        onToggle={editor.toggleTagChange}
-                        opacity={opacity}
-                      />
-                      <FavoriteTagPanel
-                        favoriteTags={editor.favoriteTags}
-                        tagStates={editor.tagStates}
-                        pendingChanges={editor.pendingChanges}
-                        onToggle={editor.toggleTagChange}
-                        opacity={opacity}
-                      />
+                      <Tabs defaultValue="recent" className="w-full">
+                        <TabsList className="w-full h-10">
+                          <TabsTrigger value="recent" className="gap-2">
+                            <Clock className="size-3.5" />
+                            最近使用
+                          </TabsTrigger>
+                          <TabsTrigger value="favorite" className="gap-2">
+                            <Star className="size-3.5" />
+                            お気に入り
+                          </TabsTrigger>
+                        </TabsList>
+
+                        <div className="mt-2 min-h-[150px] max-h-[150px] overflow-auto">
+                          <TabsContent
+                            value="recent"
+                            className="mt-0 outline-none"
+                          >
+                            <TagList
+                              isEditing={true}
+                              tags={editor.recentTags}
+                              pendingChanges={editor.pendingChanges}
+                              pendingNewTags={editor.pendingNewTags}
+                              tagStates={editor.tagStates}
+                              onToggle={editor.toggleTagChange}
+                              opacity={opacity}
+                            />
+                          </TabsContent>
+
+                          <TabsContent
+                            value="favorite"
+                            className="mt-0 outline-none"
+                          >
+                            <TagList
+                              isEditing={true}
+                              tags={editor.favoriteTags}
+                              pendingChanges={editor.pendingChanges}
+                              pendingNewTags={editor.pendingNewTags}
+                              tagStates={editor.tagStates}
+                              onToggle={editor.toggleTagChange}
+                              opacity={opacity}
+                            />
+                          </TabsContent>
+                        </div>
+                      </Tabs>
                       <SheetFooter
                         onReset={editor.resetChanges}
                         onApply={handleApply}
