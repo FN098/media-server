@@ -29,9 +29,10 @@ interface TagEditSheetProps {
   open: boolean;
   targetNodes: MediaNode[];
   mode?: TagEditMode;
-  opacity?: number;
+  opacity?: number; // 背景の不透明度 (0~100)
   edit?: boolean;
   onClose: () => void;
+  autoBlur?: boolean; // 編集モード切り替え時に自動で背景ブラーを有効化
 }
 
 export function TagEditSheet({
@@ -41,6 +42,7 @@ export function TagEditSheet({
   opacity: initialOpacity,
   edit,
   onClose,
+  autoBlur = true,
 }: TagEditSheetProps) {
   const router = useRouter();
   const editor = useTagEditorContext();
@@ -57,7 +59,13 @@ export function TagEditSheet({
   const [editingMode, setEditingMode] = useState<EditingMode>(
     edit ? "edit" : "view"
   );
-  const resetEditingMode = () => setEditingMode("view");
+  const changeEditingMode = (next: EditingMode) => {
+    setEditingMode(next);
+    if (autoBlur) {
+      handleChangeOpacity(next === "view" ? 0 : 100);
+    }
+  };
+  const resetEditingMode = () => changeEditingMode("view");
 
   // 透明モード
   const [opacity, setOpacity] = useState(initialOpacity ?? editor.opacity);
@@ -125,7 +133,7 @@ export function TagEditSheet({
         editor.resetChanges();
 
         await editor.invalidateTags();
-        setEditingMode("view");
+        changeEditingMode("view");
 
         router.refresh();
       }
@@ -141,7 +149,7 @@ export function TagEditSheet({
     } as const;
 
     const nextMode = modeMap[editingMode];
-    setEditingMode(nextMode);
+    changeEditingMode(nextMode);
   };
 
   // 詳細→クイック→閲覧モードに移行 or 閉じる
@@ -157,12 +165,12 @@ export function TagEditSheet({
       handleClose();
       return;
     }
-    setEditingMode(nextMode);
+    changeEditingMode(nextMode);
   };
 
   // 閉じる
   const handleClose = () => {
-    setEditingMode("view");
+    changeEditingMode("view");
     onClose?.();
   };
 
@@ -171,15 +179,15 @@ export function TagEditSheet({
     scopes: "tag-editor",
     enabled: open,
   });
-  useHotkeys("e", () => setEditingMode("edit"), {
+  useHotkeys("e", () => changeEditingMode("edit"), {
     scopes: "tag-editor",
     enabled: open,
   });
-  useHotkeys("q", () => setEditingMode("quick"), {
+  useHotkeys("q", () => changeEditingMode("quick"), {
     scopes: "tag-editor",
     enabled: open,
   });
-  useHotkeys("v", () => setEditingMode("view"), {
+  useHotkeys("v", () => changeEditingMode("view"), {
     scopes: "tag-editor",
     enabled: open,
   });
