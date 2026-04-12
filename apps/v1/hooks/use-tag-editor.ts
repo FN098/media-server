@@ -65,7 +65,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     strategy: "favorite-only",
   });
 
-  // 最近使用されたタグ
+  // 最近使用タグ
   const { tags: recentTags, isLoading: isLoadingRecent } = useTags({
     strategy: "recently-used",
     limit: 10,
@@ -101,8 +101,8 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     }
   }, [pendingNewTags, pendingChangeTags, masterTags, sortStrategy]);
 
-  // 閲覧タグ
-  const viewModeTags = useMemo(() => {
+  // 関連タグ
+  const relatedTags = useMemo(() => {
     const relatedTags = masterTags.filter(
       (tag) => tagStates[tag.name] === "some" || tagStates[tag.name] === "all"
     );
@@ -220,7 +220,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     invalidateTags,
     refreshTags,
     editModeTags,
-    viewModeTags,
+    relatedTags,
     suggestedTags,
     favoriteTags,
     recentTags,

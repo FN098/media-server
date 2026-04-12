@@ -278,7 +278,7 @@ export function TagEditSheet({
                       />
                       <TagList
                         isEditing={false}
-                        tags={editor.viewModeTags}
+                        tags={editor.relatedTags}
                         pendingChanges={editor.pendingChanges}
                         pendingNewTags={editor.pendingNewTags}
                         tagStates={editor.tagStates}
@@ -310,7 +310,7 @@ export function TagEditSheet({
                       />
                       <TagList
                         isEditing={true}
-                        tags={editor.viewModeTags}
+                        tags={editor.relatedTags}
                         pendingChanges={editor.pendingChanges}
                         pendingNewTags={editor.pendingNewTags}
                         tagStates={editor.tagStates}
