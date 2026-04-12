@@ -113,7 +113,7 @@ export function TagInput({
           ref={inputRef}
           autoFocus={autoFocus}
           className="w-full bg-muted/50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 ring-primary/20 outline-none"
-          placeholder="新しいタグを入力..."
+          placeholder="タグを入力..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
