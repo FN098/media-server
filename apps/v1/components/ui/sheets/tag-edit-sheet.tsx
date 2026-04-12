@@ -62,17 +62,18 @@ export function TagEditSheet({
   const handleEditingModeChange = (next: EditingMode) => {
     setEditingMode(next);
     if (autoBlur) {
-      handleChangeOpacity(next === "view" ? 0 : 100);
+      handleOpacityChange(next === "view" ? 0 : 100);
     }
   };
   const resetEditingMode = () => handleEditingModeChange("view");
 
-  // 透明モード
+  // 不透明度
   const [opacity, setOpacity] = useState(initialOpacity ?? editor.opacity);
-  const handleChangeOpacity = (opacity: number) => {
+  const handleOpacityChange = (opacity: number) => {
     setOpacity(opacity);
     editor.setOpacity(opacity);
   };
+  const toggleOpacity = () => handleOpacityChange(opacity === 0 ? 100 : 0);
 
   // 新規作成
   const handleNewAdd = (name: string) => {
@@ -191,6 +192,10 @@ export function TagEditSheet({
     scopes: "tag-editor",
     enabled: open,
   });
+  useHotkeys("b", () => toggleOpacity(), {
+    scopes: "tag-editor",
+    enabled: open,
+  });
 
   return (
     <AnimatePresence>
@@ -282,7 +287,7 @@ export function TagEditSheet({
                         canEdit={canEdit}
                         onClose={handleClose}
                         onEditClick={handleModeChangeUp}
-                        onOpacityChange={handleChangeOpacity}
+                        onOpacityChange={handleOpacityChange}
                       />
                       <TagList
                         isEditing={false}
@@ -314,7 +319,7 @@ export function TagEditSheet({
                         canEdit={canEdit}
                         onClose={handleClose}
                         onEditClick={handleModeChangeUp}
-                        onOpacityChange={handleChangeOpacity}
+                        onOpacityChange={handleOpacityChange}
                       />
                       <TagList
                         isEditing={true}
@@ -397,7 +402,7 @@ export function TagEditSheet({
                         canEdit={canEdit}
                         onEditClick={() => {}}
                         onClose={handleClose}
-                        onOpacityChange={handleChangeOpacity}
+                        onOpacityChange={handleOpacityChange}
                       />
                       <TagInput
                         value={editor.newTagName}
