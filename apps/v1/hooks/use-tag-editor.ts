@@ -89,7 +89,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     }));
 
     const combined = uniqueBy(
-      [...masterTags, ...pendingNewAsTags, ...pendingChangeTags],
+      [...pendingNewAsTags, ...pendingChangeTags, ...masterTags],
       "id"
     );
 
