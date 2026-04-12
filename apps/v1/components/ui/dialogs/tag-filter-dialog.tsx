@@ -21,6 +21,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Loader2, RotateCcw, Search, Tag, X } from "lucide-react";
 import { useRef, useState } from "react";
 
+interface TagFilterDialogProps {
+  autoFocusInput?: boolean;
+}
+
 const modeTexts = {
   AND: "すべて含む",
   OR: "いずれか",
@@ -28,7 +32,9 @@ const modeTexts = {
   EMPTY: "タグなし",
 } as const;
 
-export function TagFilterDialog() {
+export function TagFilterDialog({
+  autoFocusInput = false,
+}: TagFilterDialogProps) {
   const {
     query,
     setQuery,
@@ -110,7 +116,7 @@ export function TagFilterDialog() {
     addToTemp(tag);
     setQuery("");
     setActiveIndex(-1);
-    inputRef.current?.focus();
+    if (autoFocusInput) inputRef.current?.focus();
   };
 
   const scrollIntoView = (index: number) => {
@@ -207,7 +213,7 @@ export function TagFilterDialog() {
       <DialogContent
         onOpenAutoFocus={(e) => {
           e.preventDefault();
-          inputRef.current?.focus();
+          if (autoFocusInput) inputRef.current?.focus();
         }}
         className="sm:max-w-[450px] h-[550px] flex flex-col p-0 overflow-hidden"
       >
@@ -262,7 +268,7 @@ export function TagFilterDialog() {
                 onClick={() => {
                   setQuery("");
                   setActiveIndex(-1);
-                  inputRef.current?.focus();
+                  if (autoFocusInput) inputRef.current?.focus();
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
