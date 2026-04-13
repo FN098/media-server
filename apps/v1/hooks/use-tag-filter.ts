@@ -3,7 +3,7 @@
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import { SearchTagStrategy, SortTagStrategy, Tag } from "@/lib/tag/types";
-import { uniqueBy } from "@/lib/utils/unique";
+import { unique } from "@/lib/utils/unique";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 
@@ -20,7 +20,7 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
   const [mode, setMode] = useState<TagFilterMode>("AND");
   const [query, setQuery] = useState("");
   const [searchStrategy, setSearchStrategy] =
-    useState<SearchTagStrategy>("favorite-only");
+    useState<SearchTagStrategy>("default");
   const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
 
   const trimmedQuery = useMemo(() => query.trim().toLowerCase(), [query]);
@@ -44,21 +44,28 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     triggered: debouncedQuery === trimmedQuery && !!debouncedQuery,
   });
 
-  const isLoading = isLoadingBase || isLoadingSearch;
+  // お気に入りタグ
+  const { tags: favoriteTags, isLoading: isLoadingFavorite } = useTags({
+    strategy: "favorite-only",
+  });
 
-  // 表示用タグ（query があれば検索結果を優先、なければベース）
-  const displayTags = useMemo(() => {
-    const merged = trimmedQuery
-      ? uniqueBy([...searchedTags, ...baseTags], "id")
-      : baseTags;
+  // 最近使用タグ
+  const { tags: recentTags, isLoading: isLoadingRecent } = useTags({
+    strategy: "recently-used",
+    limit: 10,
+  });
 
-    switch (sortStrategy) {
-      case "by-name":
-        return [...merged].sort((a, b) => a.name.localeCompare(b.name));
-      default:
-        return merged;
-    }
-  }, [trimmedQuery, baseTags, searchedTags, sortStrategy]);
+  // 関連タグ
+  const relatedTags = useMemo(() => {
+    const flatten = targetNodes
+      .filter((n) => n.tags != null)
+      .flatMap((n) => n.tags!);
+
+    return unique(flatten);
+  }, [targetNodes]);
+
+  const isLoading =
+    isLoadingBase || isLoadingSearch || isLoadingFavorite || isLoadingRecent;
 
   const toggleTag = useCallback((tag: Tag) => {
     setSelectedTagIds((prev) => {
@@ -118,9 +125,11 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     // 検索・表示
     query,
     setQuery,
-    displayTags,
     baseTags,
     searchedTags,
+    favoriteTags,
+    recentTags,
+    relatedTags,
     isLoading,
 
     // 戦略
