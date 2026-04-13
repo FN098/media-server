@@ -49,7 +49,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   // ベースタグ
   const {
     tags: baseTags,
-    refreshTags,
+    refetchTags,
     invalidateTags,
     isLoading: isLoadingBase,
   } = useTags({
@@ -237,7 +237,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     opacity,
     setOpacity,
     invalidateTags,
-    refreshTags,
+    refetchTags,
     editModeTags,
     relatedTags,
     suggestedTags,

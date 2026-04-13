@@ -16,6 +16,7 @@ import { cn } from "@/shadcn/lib/utils";
 import {
   Copy,
   FolderInput,
+  ListFilterPlus,
   MoreVertical,
   Pencil,
   RotateCcw,
@@ -35,6 +36,7 @@ interface ActionMenuProps {
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
+  onAddTagFilter?: (node: MediaNode) => void;
   onRatingChange?: (node: MediaNode, rating: number | null) => void;
 }
 
@@ -49,6 +51,7 @@ export function ActionMenu({
   onDeletePermanently,
   onRestore,
   onEditTags,
+  onAddTagFilter,
   onRatingChange,
 }: ActionMenuProps) {
   const { getFavorite } = useFavoritesContext();
@@ -138,6 +141,17 @@ export function ActionMenu({
             }}
           >
             <Tag className="mr-2 h-4 w-4" /> タグの編集
+          </DropdownMenuItem>
+        )}
+
+        {onAddTagFilter && (
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddTagFilter(node);
+            }}
+          >
+            <ListFilterPlus className="mr-2 h-4 w-4" /> タグフィルターに追加
           </DropdownMenuItem>
         )}
 

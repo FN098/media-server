@@ -6,14 +6,16 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export function useTags(
-  params: SearchTagsRequestParams & { triggered?: boolean }
+  params: SearchTagsRequestParams & {
+    triggered?: boolean;
+    onSuccess?: (tags: Tag[]) => void;
+  }
 ) {
   const queryClient = useQueryClient();
-
-  const { triggered = true, ...apiRequestParams } = params;
+  const { triggered = true, onSuccess, ...apiRequestParams } = params;
 
   const { data, refetch, isLoading, isPlaceholderData, isFetching } = useQuery({
     queryKey: ["tags", apiRequestParams],
@@ -31,6 +33,15 @@ export function useTags(
     placeholderData: keepPreviousData,
   });
 
+  // フェッチ完了時にコールバックを呼ぶ（onSuccess 相当）
+  const prevDataRef = useRef<Tag[] | undefined>(undefined);
+  useEffect(() => {
+    if (data !== undefined && data !== prevDataRef.current) {
+      prevDataRef.current = data;
+      onSuccess?.(data);
+    }
+  }, [data, onSuccess]);
+
   // キャッシュを無効化する関数をメモ化して提供
   const invalidateTags = useCallback(async () => {
     // "tags" で始まる全てのクエリ（他のパスの組み合わせも含む）を無効化
@@ -39,7 +50,7 @@ export function useTags(
 
   return {
     tags: data ?? [],
-    refreshTags: refetch, // 特定のこのクエリだけをリフェッチ
+    refetchTags: refetch, // 特定のこのクエリだけをリフェッチ
     invalidateTags, // タグ関連の全キャッシュを無効化（保存後などに使用）
     isLoading: (isLoading && triggered) || isPlaceholderData || isFetching,
   };

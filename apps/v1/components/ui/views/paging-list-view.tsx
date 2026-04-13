@@ -36,6 +36,7 @@ interface PagingListViewProps {
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
+  onAddTagFilter?: (node: MediaNode) => void;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
 }
@@ -57,6 +58,7 @@ export function PagingListView({
   onDeletePermanently,
   onRestore,
   onEditTags,
+  onAddTagFilter,
   onPageChange,
   onScrollRestored,
 }: PagingListViewProps) {
@@ -143,6 +145,7 @@ export function PagingListView({
             onDeletePermanently={onDeletePermanently}
             onRestore={onRestore}
             onEditTags={onEditTags}
+            onAddTagFilter={onAddTagFilter}
           />
         ))}
       </div>
@@ -194,6 +197,7 @@ interface DataRowProps {
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
+  onAddTagFilter?: (node: MediaNode) => void;
 }
 
 function DataRow({
@@ -212,6 +216,7 @@ function DataRow({
   onDeletePermanently,
   onRestore,
   onEditTags,
+  onAddTagFilter,
 }: DataRowProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const favCtx = useFavoritesContext();
@@ -397,6 +402,7 @@ function DataRow({
             onDeletePermanently={onDeletePermanently}
             onRestore={onRestore}
             onEditTags={onEditTags}
+            onAddTagFilter={onAddTagFilter}
             onOpenFolder={onOpenFolder}
             onRatingChange={onRatingChange}
           />

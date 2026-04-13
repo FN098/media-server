@@ -34,6 +34,7 @@ interface PagingGridViewProps {
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
+  onAddTagFilter?: (node: MediaNode) => void;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
 }
@@ -52,6 +53,7 @@ export function PagingGridView({
   onDeletePermanently,
   onRestore,
   onEditTags,
+  onAddTagFilter,
   onPageChange,
   onScrollRestored,
 }: PagingGridViewProps) {
@@ -143,6 +145,7 @@ export function PagingGridView({
             onDeletePermanently={onDeletePermanently}
             onRestore={onRestore}
             onEditTags={onEditTags}
+            onAddTagFilter={onAddTagFilter}
           />
         ))}
       </div>
@@ -173,6 +176,7 @@ interface CellProps {
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
   onEditTags?: (node: MediaNode) => void;
+  onAddTagFilter?: (node: MediaNode) => void;
 }
 
 function Cell({
@@ -191,6 +195,7 @@ function Cell({
   onDeletePermanently,
   onRestore,
   onEditTags,
+  onAddTagFilter,
 }: CellProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const favCtx = useFavoritesContext();
@@ -348,6 +353,7 @@ function Cell({
                   onDeletePermanently={onDeletePermanently}
                   onRestore={onRestore}
                   onEditTags={onEditTags}
+                  onAddTagFilter={onAddTagFilter}
                   onOpenFolder={onOpenFolder}
                   className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white rounded-full"
                 />
