@@ -3,6 +3,7 @@
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
+import { ActionContextMenu } from "@/components/ui/context-menus/action-context-menu";
 import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
@@ -204,12 +205,6 @@ function Cell({
   const isSelected = selectCtx.isSelectedPath(node.path);
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setActionMenuOpen(true);
-  };
-
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
@@ -285,102 +280,117 @@ function Cell({
         node={node}
         enabled={isMediaNode && !isMobile && !actionMenuOpen}
       >
-        <div
-          id={`media-item-${globalIndex}`}
-          onMouseDown={start}
-          onMouseUp={stop}
-          onMouseLeave={stop}
-          onTouchStart={start}
-          onTouchEnd={stop}
-          onTouchMove={stop}
-          onClick={isMobile ? handleTap : handleClick}
-          onDoubleClick={!isMobile ? () => onOpen?.(node) : undefined}
-          className={cn(
-            "relative w-full h-full overflow-hidden rounded-xl border bg-card transition-all duration-200 select-none cursor-pointer",
-            isSelected
-              ? "ring-2 ring-primary border-transparent shadow-md scale-[0.98]"
-              : "hover:border-primary/50 hover:shadow-sm"
-          )}
-          onContextMenu={handleContextMenu}
+        <ActionContextMenu
+          node={node}
+          onRatingChange={onRatingChange}
+          onRename={onRename}
+          onMove={onMove}
+          onCopy={onCopy}
+          onDelete={onDelete}
+          onDeletePermanently={onDeletePermanently}
+          onRestore={onRestore}
+          onEditTags={onEditTags}
+          onAddTagFilter={onAddTagFilter}
+          onOpenFolder={onOpenFolder}
         >
-          <MediaThumb
-            node={node}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-            showIcon
-          />
-
-          {/* Overlay Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-60" />
-
-          {/* Selection UI */}
           <div
+            id={`media-item-${globalIndex}`}
+            onMouseDown={start}
+            onMouseUp={stop}
+            onMouseLeave={stop}
+            onTouchStart={start}
+            onTouchEnd={stop}
+            onTouchMove={stop}
+            onClick={isMobile ? handleTap : handleClick}
+            onDoubleClick={!isMobile ? () => onOpen?.(node) : undefined}
             className={cn(
-              "absolute top-3 left-3 z-10 transition-opacity duration-200",
-              selectCtx.isSelectionMode
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100"
+              "relative w-full h-full overflow-hidden rounded-xl border bg-card transition-all duration-200 select-none cursor-pointer",
+              isSelected
+                ? "ring-2 ring-primary border-transparent shadow-md scale-[0.98]"
+                : "hover:border-primary/50 hover:shadow-sm"
             )}
-            onClick={(e) => e.stopPropagation()}
           >
-            <Checkbox
-              checked={isSelected}
-              className="h-5 w-5 border-white/50 data-[state=checked]:bg-primary"
+            <MediaThumb
+              node={node}
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              showIcon
             />
-          </div>
 
-          {/* Info Overlays */}
-          <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
-            <MarqueeText
-              text={node.title ?? node.name}
-              className="text-[11px] font-medium text-white text-center"
-            />
-          </div>
+            {/* Overlay Gradients */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-60" />
 
-          {/* Actions */}
-          <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-            {!selectCtx.isSelectionMode && isMediaNode && onRatingChange && (
-              <ToggleFavoriteButton
-                variant="grid"
-                rating={rating}
-                onRatingChange={(rating) => onRatingChange(node, rating)}
+            {/* Selection UI */}
+            <div
+              className={cn(
+                "absolute top-3 left-3 z-10 transition-opacity duration-200",
+                selectCtx.isSelectionMode
+                  ? "opacity-100"
+                  : "opacity-0 group-hover:opacity-100"
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Checkbox
+                checked={isSelected}
+                className="h-5 w-5 border-white/50 data-[state=checked]:bg-primary"
               />
-            )}
+            </div>
 
-            {!selectCtx.isSelectionMode && (
-              <div
-                className={cn(
-                  "opacity-0 group-hover:opacity-100 transition-opacity",
-                  isMobile && "opacity-100"
-                )}
-              >
-                <ActionDropdownMenu
-                  open={actionMenuOpen}
-                  onOpenChange={setActionMenuOpen}
-                  node={node}
-                  onRatingChange={onRatingChange}
-                  onRename={onRename}
-                  onMove={onMove}
-                  onCopy={onCopy}
-                  onDelete={onDelete}
-                  onDeletePermanently={onDeletePermanently}
-                  onRestore={onRestore}
-                  onEditTags={onEditTags}
-                  onAddTagFilter={onAddTagFilter}
-                  onOpenFolder={onOpenFolder}
-                  className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white rounded-full"
+            {/* Info Overlays */}
+            <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
+              <MarqueeText
+                text={node.title ?? node.name}
+                className="text-[11px] font-medium text-white text-center"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
+              {!selectCtx.isSelectionMode && isMediaNode && onRatingChange && (
+                <ToggleFavoriteButton
+                  variant="grid"
+                  rating={rating}
+                  onRatingChange={(rating) => onRatingChange(node, rating)}
                 />
-              </div>
-            )}
-          </div>
+              )}
 
-          {/* Badges */}
-          <div className="absolute flex flex-col bottom-8 right-2 gap-1 items-end">
-            {node.isDirectory && !!node.favoriteCount && (
-              <FavoriteCountBadge count={node.favoriteCount} />
-            )}
-            {node.isDirectory && <FolderStatusBadge date={node.lastViewedAt} />}
+              {!selectCtx.isSelectionMode && (
+                <div
+                  className={cn(
+                    "opacity-0 group-hover:opacity-100 transition-opacity",
+                    isMobile && "opacity-100"
+                  )}
+                >
+                  <ActionDropdownMenu
+                    open={actionMenuOpen}
+                    onOpenChange={setActionMenuOpen}
+                    node={node}
+                    onRatingChange={onRatingChange}
+                    onRename={onRename}
+                    onMove={onMove}
+                    onCopy={onCopy}
+                    onDelete={onDelete}
+                    onDeletePermanently={onDeletePermanently}
+                    onRestore={onRestore}
+                    onEditTags={onEditTags}
+                    onAddTagFilter={onAddTagFilter}
+                    onOpenFolder={onOpenFolder}
+                    className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white rounded-full"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Badges */}
+            <div className="absolute flex flex-col bottom-8 right-2 gap-1 items-end">
+              {node.isDirectory && !!node.favoriteCount && (
+                <FavoriteCountBadge count={node.favoriteCount} />
+              )}
+              {node.isDirectory && (
+                <FolderStatusBadge date={node.lastViewedAt} />
+              )}
+            </div>
           </div>
-        </div>
+        </ActionContextMenu>
       </HoverPreviewPortal>
     </div>
   );

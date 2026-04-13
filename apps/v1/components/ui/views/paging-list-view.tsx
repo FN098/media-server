@@ -4,6 +4,7 @@ import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge"
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
+import { ActionContextMenu } from "@/components/ui/context-menus/action-context-menu";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
@@ -225,12 +226,6 @@ function DataRow({
   const isSelected = selectCtx.isSelectedPath(node.path);
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setActionMenuOpen(true);
-  };
-
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
@@ -305,121 +300,136 @@ function DataRow({
       node={node}
       enabled={isMediaNode && !isMobile && !actionMenuOpen}
     >
-      <div
-        id={`media-item-${globalIndex}`}
-        role="row"
-        onMouseDown={start}
-        onMouseUp={stop}
-        onMouseLeave={stop}
-        onTouchStart={start}
-        onTouchEnd={stop}
-        onTouchMove={stop}
-        onClick={isMobile ? handleTap : handleClick}
-        onDoubleClick={!isMobile ? () => onOpen?.(node) : undefined}
-        className={cn(
-          "grid items-center h-12 border-b select-none cursor-pointer transition-colors text-sm",
-          GRID_TEMPLATE,
-          isSelected ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-muted/50"
-        )}
-        onContextMenu={handleContextMenu}
+      <ActionContextMenu
+        node={node}
+        onRatingChange={onRatingChange}
+        onRename={onRename}
+        onMove={onMove}
+        onCopy={onCopy}
+        onDelete={onDelete}
+        onDeletePermanently={onDeletePermanently}
+        onRestore={onRestore}
+        onEditTags={onEditTags}
+        onAddTagFilter={onAddTagFilter}
+        onOpenFolder={onOpenFolder}
       >
         <div
-          className="flex justify-center"
-          onClick={(e) => e.stopPropagation()}
+          id={`media-item-${globalIndex}`}
+          role="row"
+          onMouseDown={start}
+          onMouseUp={stop}
+          onMouseLeave={stop}
+          onTouchStart={start}
+          onTouchEnd={stop}
+          onTouchMove={stop}
+          onClick={isMobile ? handleTap : handleClick}
+          onDoubleClick={!isMobile ? () => onOpen?.(node) : undefined}
+          className={cn(
+            "grid items-center h-12 border-b select-none cursor-pointer transition-colors text-sm",
+            GRID_TEMPLATE,
+            isSelected
+              ? "bg-primary/10 hover:bg-primary/15"
+              : "hover:bg-muted/50"
+          )}
         >
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={() => {
-              selectCtx.togglePath(node.path);
-              onSelectChange?.();
-            }}
-          />
-        </div>
+          <div
+            className="flex justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => {
+                selectCtx.togglePath(node.path);
+                onSelectChange?.();
+              }}
+            />
+          </div>
 
-        {/* Icon + Name */}
-        <div className="flex items-center gap-3 overflow-hidden pr-2">
-          <MediaThumbIcon
-            type={node.type}
-            className="w-5 h-5 shrink-0 opacity-70"
-          />
-          <div className="flex flex-col min-w-0">
-            <span className="truncate font-medium">
-              {node.title ?? node.name}
-            </span>
-            <span className="md:hidden text-[10px] text-muted-foreground truncate">
-              {node.isDirectory
-                ? "Folder"
-                : `${getExtension(node.name)} • ${formatBytes(node.size)}`}
-            </span>
+          {/* Icon + Name */}
+          <div className="flex items-center gap-3 overflow-hidden pr-2">
+            <MediaThumbIcon
+              type={node.type}
+              className="w-5 h-5 shrink-0 opacity-70"
+            />
+            <div className="flex flex-col min-w-0">
+              <span className="truncate font-medium">
+                {node.title ?? node.name}
+              </span>
+              <span className="md:hidden text-[10px] text-muted-foreground truncate">
+                {node.isDirectory
+                  ? "Folder"
+                  : `${getExtension(node.name)} • ${formatBytes(node.size)}`}
+              </span>
+            </div>
+          </div>
+
+          {/* Type */}
+          <div className="hidden md:block text-muted-foreground text-xs uppercase">
+            {node.isDirectory
+              ? "Folder"
+              : getExtension(node.name, { withDot: false })}
+          </div>
+
+          {/* Updated */}
+          <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
+            <LocalDate value={node.mtime} />
+          </div>
+
+          {/* Size */}
+          <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
+            {node.isDirectory ? "-" : formatBytes(node.size)}
+          </div>
+
+          {/* Last Viewed */}
+          <div className="hidden md:block flex items-center overflow-hidden">
+            {node.isDirectory && (
+              <FolderStatusBadge
+                date={node.lastViewedAt}
+                className="border-none bg-transparent p-0"
+              />
+            )}
+          </div>
+
+          {/* Rating */}
+          <div
+            className="flex justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {node.isDirectory ? (
+              <FavoriteCountBadge count={node.favoriteCount ?? 0} />
+            ) : isMobile && onRatingChange ? (
+              <ToggleFavoriteButton
+                rating={rating}
+                variant="list"
+                onRatingChange={(rating) => onRatingChange(node, rating)}
+              />
+            ) : onRatingChange ? (
+              <FavoriteRating
+                rating={rating}
+                onRatingChange={(rating) => onRatingChange(node, rating)}
+              />
+            ) : null}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-center">
+            <ActionDropdownMenu
+              open={actionMenuOpen}
+              onOpenChange={setActionMenuOpen}
+              node={node}
+              onRename={onRename}
+              onMove={onMove}
+              onCopy={onCopy}
+              onDelete={onDelete}
+              onDeletePermanently={onDeletePermanently}
+              onRestore={onRestore}
+              onEditTags={onEditTags}
+              onAddTagFilter={onAddTagFilter}
+              onOpenFolder={onOpenFolder}
+            />
           </div>
         </div>
-
-        {/* Type */}
-        <div className="hidden md:block text-muted-foreground text-xs uppercase">
-          {node.isDirectory
-            ? "Folder"
-            : getExtension(node.name, { withDot: false })}
-        </div>
-
-        {/* Updated */}
-        <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
-          <LocalDate value={node.mtime} />
-        </div>
-
-        {/* Size */}
-        <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
-          {node.isDirectory ? "-" : formatBytes(node.size)}
-        </div>
-
-        {/* Last Viewed */}
-        <div className="hidden md:block flex items-center overflow-hidden">
-          {node.isDirectory && (
-            <FolderStatusBadge
-              date={node.lastViewedAt}
-              className="border-none bg-transparent p-0"
-            />
-          )}
-        </div>
-
-        {/* Rating */}
-        <div
-          className="flex justify-center"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {node.isDirectory ? (
-            <FavoriteCountBadge count={node.favoriteCount ?? 0} />
-          ) : isMobile && onRatingChange ? (
-            <ToggleFavoriteButton
-              rating={rating}
-              variant="list"
-              onRatingChange={(rating) => onRatingChange(node, rating)}
-            />
-          ) : onRatingChange ? (
-            <FavoriteRating
-              rating={rating}
-              onRatingChange={(rating) => onRatingChange(node, rating)}
-            />
-          ) : null}
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-center">
-          <ActionDropdownMenu
-            open={actionMenuOpen}
-            onOpenChange={setActionMenuOpen}
-            node={node}
-            onRename={onRename}
-            onMove={onMove}
-            onCopy={onCopy}
-            onDelete={onDelete}
-            onDeletePermanently={onDeletePermanently}
-            onRestore={onRestore}
-            onEditTags={onEditTags}
-            onAddTagFilter={onAddTagFilter}
-            onOpenFolder={onOpenFolder}
-          />
-        </div>
-      </div>
+      </ActionContextMenu>
     </HoverPreviewPortal>
   );
 }
