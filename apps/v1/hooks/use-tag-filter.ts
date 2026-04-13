@@ -22,6 +22,9 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     useState<SearchTagStrategy>("default");
   const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
 
+  const [activated, setActivated] = useState(false);
+  const activate = useCallback(() => setActivated(true), []);
+
   const trimmedQuery = useMemo(() => query.trim().toLowerCase(), [query]);
   const [debouncedQuery] = useDebounce(trimmedQuery, 300);
 
@@ -33,10 +36,11 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
 
   // TODO: クエリ検索以外にも triggered を設定して無駄なリクエストをなくす
 
-  // ベースタグ（全件 or strategy 絞り込み）
+  // ベースタグ：未使用のため停止
   const { tags: baseTags, isLoading: isLoadingBase } = useTags({
     paths: targetPaths,
     strategy: searchStrategy,
+    triggered: false,
   });
 
   // クエリ検索タグ
@@ -48,18 +52,21 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
   // お気に入りタグ
   const { tags: favoriteTags, isLoading: isLoadingFavorite } = useTags({
     strategy: "favorite-only",
+    triggered: activated,
   });
 
   // 最近使用タグ
   const { tags: recentTags, isLoading: isLoadingRecent } = useTags({
     strategy: "recently-used",
     limit: 10,
+    triggered: activated,
   });
 
   // 関連タグ
   const { tags: relatedTags, isLoading: isLoadingRelated } = useTags({
     paths: targetPaths,
     strategy: "related-only",
+    triggered: activated && targetPaths.length > 0,
   });
 
   const isLoading =
@@ -139,5 +146,8 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     setSearchStrategy,
     sortStrategy,
     setSortStrategy,
+
+    // ダイアログ初回オープン時に呼ぶ
+    activate,
   };
 }

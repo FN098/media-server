@@ -64,6 +64,7 @@ export function TagFilterDialog({
     selectTags,
     mode,
     setMode,
+    activate,
   } = useTagFilterContext();
 
   const [open, setOpen] = useState(false);
@@ -74,14 +75,14 @@ export function TagFilterDialog({
   const [tempSelectedCache, setTempSelectedCache] = useState<
     Map<string, TagType>
   >(new Map());
-  const [tempFilterMode, setTempMode] = useState<TagFilterMode>(mode);
+  const [currentMode, setCurrentMode] = useState<TagFilterMode>(mode);
 
   // サジェスト用
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const isEmptyMode = tempFilterMode === "EMPTY";
+  const isEmptyMode = currentMode === "EMPTY";
   const hasSelection = selectedTagIds.size > 0;
   const suggestionOpen = query.length > 0 && !isEmptyMode;
 
@@ -95,10 +96,11 @@ export function TagFilterDialog({
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
+      activate();
       // 現在のコンテキスト状態を一時状態に同期
       setTempSelectedIds(new Set(selectedTagIds));
       setTempSelectedCache(new Map(selectedTags.map((t) => [t.id, t])));
-      setTempMode(mode);
+      setCurrentMode(mode);
       setQuery("");
     } else {
       setQuery("");
@@ -178,12 +180,12 @@ export function TagFilterDialog({
   };
 
   const handleApply = () => {
-    if (tempFilterMode === "EMPTY") {
+    if (currentMode === "EMPTY") {
       selectTags([]);
     } else {
       selectTags(tempSelectedTags);
     }
-    setMode(tempFilterMode);
+    setMode(currentMode);
     setOpen(false);
   };
 
@@ -195,6 +197,8 @@ export function TagFilterDialog({
       </div>
     );
   }
+
+  const handlePointerEnter = () => activate();
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -208,6 +212,8 @@ export function TagFilterDialog({
               "border-primary bg-primary/5 text-primary hover:bg-primary/10",
             !hasSelection && "text-muted-foreground"
           )}
+          onPointerEnter={handlePointerEnter}
+          onPointerDown={handlePointerEnter}
         >
           <Tag className="h-4 w-4" />
           <span>タグで絞り込む</span>
@@ -242,10 +248,10 @@ export function TagFilterDialog({
               (m) => (
                 <button
                   key={m}
-                  onClick={() => setTempMode(m)}
+                  onClick={() => setCurrentMode(m)}
                   className={cn(
                     "flex-1 text-xs font-medium py-1.5 rounded-md transition-all",
-                    tempFilterMode === m
+                    currentMode === m
                       ? "bg-background shadow-sm text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   )}
