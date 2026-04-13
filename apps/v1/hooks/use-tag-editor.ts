@@ -139,23 +139,24 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     });
   }, [query, searchedTags, tagStates, pendingChanges, pendingNewTags]);
 
-  // タグ変更状態トグル
+  // タグ操作状態トグル
   const toggleTagChange = useCallback(
     (tag: Tag) => {
+      const tagState = tagStates[tag.name] || "none";
+
       setPendingChanges((prev) => {
         const next = { ...prev };
         const currentOp = prev[tag.id]; // "add" | "remove" | undefined
 
         const nextOp = (() => {
-          const tagState = tagStates[tag.name] || "none";
           switch (tagState) {
             case "all":
               // none <-> remove
               return currentOp === "remove" ? undefined : "remove";
 
             case "none":
-              // none <-> remove
-              return currentOp === "remove" ? undefined : "remove";
+              // none <-> add
+              return currentOp === "add" ? undefined : "add";
 
             case "some":
               // some: none -> add -> remove -> none
