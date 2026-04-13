@@ -159,7 +159,7 @@ export function ActionDropdownMenu({
             }}
             disabled={!node.tags || node.tags.length === 0}
           >
-            <ListFilterPlus className="mr-2 h-4 w-4" /> タグフィルターに追加
+            <ListFilterPlus className="mr-2 h-4 w-4" /> タグをフィルターに追加
           </DropdownMenuItem>
         )}
 
