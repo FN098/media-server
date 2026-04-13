@@ -5,7 +5,7 @@ import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
 import { LocalDate } from "@/components/ui/dates/local-date";
-import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
+import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
@@ -404,7 +404,7 @@ function DataRow({
 
         {/* Actions */}
         <div className="flex justify-center">
-          <ActionMenu
+          <ActionDropdownMenu
             open={actionMenuOpen}
             onOpenChange={setActionMenuOpen}
             node={node}

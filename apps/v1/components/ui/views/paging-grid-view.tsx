@@ -3,7 +3,7 @@
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
-import { ActionMenu } from "@/components/ui/dropdown-menus/action-menu";
+import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
@@ -353,7 +353,7 @@ function Cell({
                   isMobile && "opacity-100"
                 )}
               >
-                <ActionMenu
+                <ActionDropdownMenu
                   open={actionMenuOpen}
                   onOpenChange={setActionMenuOpen}
                   node={node}

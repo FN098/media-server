@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-interface ActionMenuProps {
+interface ActionDropdownMenuProps {
   node: MediaNode;
   className?: string;
   onOpenFolder?: (path: string) => void;
@@ -42,7 +42,7 @@ interface ActionMenuProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function ActionMenu({
+export function ActionDropdownMenu({
   node,
   className,
   onOpenFolder,
@@ -57,7 +57,7 @@ export function ActionMenu({
   onRatingChange,
   open: controlledOpen,
   onOpenChange: onControlledOpenChange,
-}: ActionMenuProps) {
+}: ActionDropdownMenuProps) {
   const { getFavorite } = useFavoritesContext();
   const [internalOpen, setInternalOpen] = useState(false);
 
