@@ -1,7 +1,7 @@
 import { getMediaFsNode, getMediaFsNodes } from "@/lib/media/fs";
 import { sortNodes } from "@/lib/media/sort";
 import { createThumbs } from "@/lib/thumb/create";
-import { chunk } from "@/lib/utils/chunk";
+import { chunk } from "@/lib/utils/array";
 import { ThumbJobData } from "@/workers/thumb/types";
 import { Worker } from "bullmq";
 import { connection } from "./queue";

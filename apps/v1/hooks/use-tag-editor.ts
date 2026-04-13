@@ -10,7 +10,7 @@ import {
   Tag,
   TagOperator,
 } from "@/lib/tag/types";
-import { uniqueBy } from "@/lib/utils/unique";
+import { uniqueBy } from "@/lib/utils/array";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { v4 } from "uuid";

@@ -2,7 +2,7 @@
 
 import { MediaNode } from "@/lib/media/types";
 import { Tag, TagCounts, TagStates } from "@/lib/tag/types";
-import { uniqueBy } from "@/lib/utils/unique";
+import { uniqueBy } from "@/lib/utils/array";
 import { useMemo } from "react";
 
 export function useTagStates(

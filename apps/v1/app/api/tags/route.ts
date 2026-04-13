@@ -1,7 +1,7 @@
 import { MAX_PATHS_TO_PROCESS, MAX_RETURN_TAGS_COUNT } from "@/lib/tag/limits";
 import { searchTags } from "@/lib/tag/search";
 import { searchTagStrategies } from "@/lib/tag/strategies";
-import { uniqueBy } from "@/lib/utils/unique";
+import { uniqueBy } from "@/lib/utils/array";
 import { getFavoriteTags, getRelatedTags } from "@/repositories/tag-repository";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";

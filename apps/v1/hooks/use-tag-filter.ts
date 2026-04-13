@@ -3,7 +3,7 @@
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import { SearchTagStrategy, SortTagStrategy, Tag } from "@/lib/tag/types";
-import { unique } from "@/lib/utils/unique";
+import { unique } from "@/lib/utils/array";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 
