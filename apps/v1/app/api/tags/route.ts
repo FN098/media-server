@@ -58,9 +58,10 @@ export async function POST(request: NextRequest) {
 async function process(params: RequestParams) {
   const { paths: pathsRaw, limit, query, strategy } = params;
 
+  // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
+  const paths = pathsRaw.slice(0, MAX_PATHS_TO_PROCESS);
+
   if (strategy === "related-only") {
-    // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
-    const paths = pathsRaw.slice(0, MAX_PATHS_TO_PROCESS);
     const relatedTags = await getRelatedTags(paths, { limit });
     return relatedTags;
   }
@@ -70,10 +71,7 @@ async function process(params: RequestParams) {
     return favoriteTags;
   }
 
-  // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
-  const paths = pathsRaw.slice(0, MAX_PATHS_TO_PROCESS);
-
-  // 現在紐づいているタグは必ず取得
+  // 関連タグは必ず取得
   const relatedTags = await getRelatedTags(paths, { limit });
 
   const excludeIds = relatedTags.map((t) => t.id);

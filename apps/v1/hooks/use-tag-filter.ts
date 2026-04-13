@@ -3,7 +3,6 @@
 import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import { SearchTagStrategy, SortTagStrategy, Tag } from "@/lib/tag/types";
-import { unique } from "@/lib/utils/array";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 
@@ -32,6 +31,8 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     [targetNodes]
   );
 
+  // TODO: クエリ検索以外にも triggered を設定して無駄なリクエストをなくす
+
   // ベースタグ（全件 or strategy 絞り込み）
   const { tags: baseTags, isLoading: isLoadingBase } = useTags({
     paths: targetPaths,
@@ -56,16 +57,17 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
   });
 
   // 関連タグ
-  const relatedTags = useMemo(() => {
-    const flatten = targetNodes
-      .filter((n) => n.tags != null)
-      .flatMap((n) => n.tags!);
-
-    return unique(flatten);
-  }, [targetNodes]);
+  const { tags: relatedTags, isLoading: isLoadingRelated } = useTags({
+    paths: targetPaths,
+    strategy: "related-only",
+  });
 
   const isLoading =
-    isLoadingBase || isLoadingSearch || isLoadingFavorite || isLoadingRecent;
+    isLoadingBase ||
+    isLoadingSearch ||
+    isLoadingFavorite ||
+    isLoadingRecent ||
+    isLoadingRelated;
 
   const toggleTag = useCallback((tag: Tag) => {
     setSelectedTagIds((prev) => {

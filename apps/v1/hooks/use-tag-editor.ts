@@ -42,6 +42,8 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     [targetNodes]
   );
 
+  // TODO: クエリ検索以外にも triggered を設定して無駄なリクエストをなくす
+
   // ベースタグ（全件 or strategy 絞り込み）
   const {
     tags: baseTags,
