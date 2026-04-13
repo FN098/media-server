@@ -21,6 +21,7 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
+import { useTags } from "@/hooks/use-tags";
 import {
   createMediaTypeFilter,
   createRatingFilter,
@@ -113,6 +114,21 @@ export function Explorer() {
 
   // タグフィルタ
   const tagFilter = useTagFilterContext();
+
+  // タグフィルタにタグを追加
+  const [pathsToAddTagFilter, setPathsToAddTagFilter] = useState<string[]>([]);
+  useTags({
+    strategy: "related-only",
+    paths: pathsToAddTagFilter,
+    triggered: pathsToAddTagFilter.length > 0,
+    onSuccess: (tags) => {
+      if (tags.length > 0) tagFilter.selectTags(tags);
+    },
+  });
+
+  const handleAddTagFilter = (node: MediaNode) => {
+    setPathsToAddTagFilter([node.path]);
+  };
 
   // 最小レーティングフィルタ
   const [minRating, setMinRating] = useState<number>(0);
@@ -660,6 +676,7 @@ export function Explorer() {
                 handleSelectSingle(node);
                 handleOpenTagEditor();
               }}
+              onAddTagFilter={handleAddTagFilter}
               onScrollRestored={() => setLastPath(null)}
             />
           </div>
@@ -683,6 +700,7 @@ export function Explorer() {
                 handleSelectSingle(node);
                 handleOpenTagEditor();
               }}
+              onAddTagFilter={handleAddTagFilter}
               onScrollRestored={() => setLastPath(null)}
             />
           </div>
