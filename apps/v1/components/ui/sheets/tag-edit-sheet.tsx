@@ -339,34 +339,19 @@ export function TagEditSheet({
                         onToggle={editor.toggleTagChange}
                         opacity={opacity}
                       />
-                      <Tabs defaultValue="recent" className="w-full">
+                      <Tabs defaultValue="favorite" className="w-full">
                         <TabsList className="w-full h-10">
-                          <TabsTrigger value="recent" className="gap-2">
-                            <Clock className="size-3.5" />
-                            最近使用
-                          </TabsTrigger>
                           <TabsTrigger value="favorite" className="gap-2">
                             <Star className="size-3.5" />
                             お気に入り
                           </TabsTrigger>
+                          <TabsTrigger value="recent" className="gap-2">
+                            <Clock className="size-3.5" />
+                            最近使用
+                          </TabsTrigger>
                         </TabsList>
 
                         <div className="mt-2 min-h-[150px] max-h-[150px] overflow-auto">
-                          <TabsContent
-                            value="recent"
-                            className="mt-0 outline-none"
-                          >
-                            <TagList
-                              isEditing={true}
-                              tags={editor.recentTags}
-                              pendingChanges={editor.pendingChanges}
-                              pendingNewTags={editor.pendingNewTags}
-                              tagStates={editor.tagStates}
-                              onToggle={editor.toggleTagChange}
-                              opacity={opacity}
-                            />
-                          </TabsContent>
-
                           <TabsContent
                             value="favorite"
                             className="mt-0 outline-none"
@@ -374,6 +359,20 @@ export function TagEditSheet({
                             <TagList
                               isEditing={true}
                               tags={editor.favoriteTags}
+                              pendingChanges={editor.pendingChanges}
+                              pendingNewTags={editor.pendingNewTags}
+                              tagStates={editor.tagStates}
+                              onToggle={editor.toggleTagChange}
+                              opacity={opacity}
+                            />
+                          </TabsContent>
+                          <TabsContent
+                            value="recent"
+                            className="mt-0 outline-none"
+                          >
+                            <TagList
+                              isEditing={true}
+                              tags={editor.recentTags}
                               pendingChanges={editor.pendingChanges}
                               pendingNewTags={editor.pendingNewTags}
                               tagStates={editor.tagStates}
