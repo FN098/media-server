@@ -151,17 +151,17 @@ export function ActionDropdownMenu({
           </DropdownMenuItem>
         )}
 
-        {onAddTagFilter &&
-          !(node.isDirectory || !node.tags || node.tags.length === 0) && (
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddTagFilter(node);
-              }}
-            >
-              <ListFilterPlus className="mr-2 h-4 w-4" /> タグフィルターに追加
-            </DropdownMenuItem>
-          )}
+        {onAddTagFilter && !node.isDirectory && (
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddTagFilter(node);
+            }}
+            disabled={!node.tags || node.tags.length === 0}
+          >
+            <ListFilterPlus className="mr-2 h-4 w-4" /> タグフィルターに追加
+          </DropdownMenuItem>
+        )}
 
         {onRestore && (
           <DropdownMenuItem

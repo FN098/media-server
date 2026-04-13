@@ -34,6 +34,8 @@ interface ActionContextMenuProps {
   onEditTags?: (node: MediaNode) => void;
   onAddTagFilter?: (node: MediaNode) => void;
   onRatingChange?: (node: MediaNode, rating: number | null) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ActionContextMenu({
@@ -49,6 +51,8 @@ export function ActionContextMenu({
   onEditTags,
   onAddTagFilter,
   onRatingChange,
+  open,
+  onOpenChange,
 }: ActionContextMenuProps) {
   const { getFavorite } = useFavoritesContext();
 
@@ -58,7 +62,7 @@ export function ActionContextMenu({
   const { rating } = getFavorite(node.path);
 
   return (
-    <ContextMenu>
+    <ContextMenu modal={open} onOpenChange={onOpenChange}>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
         {onRatingChange && !node.isDirectory && (
@@ -126,17 +130,17 @@ export function ActionContextMenu({
           </ContextMenuItem>
         )}
 
-        {onAddTagFilter &&
-          !(node.isDirectory || !node.tags || node.tags.length === 0) && (
-            <ContextMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddTagFilter(node);
-              }}
-            >
-              <ListFilterPlus className="mr-2 h-4 w-4" /> タグフィルターに追加
-            </ContextMenuItem>
-          )}
+        {onAddTagFilter && !node.isDirectory && (
+          <ContextMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddTagFilter(node);
+            }}
+            disabled={!node.tags || node.tags.length === 0}
+          >
+            <ListFilterPlus className="mr-2 h-4 w-4" /> タグフィルターに追加
+          </ContextMenuItem>
+        )}
 
         {onRestore && (
           <ContextMenuItem

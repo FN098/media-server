@@ -224,7 +224,8 @@ function DataRow({
   const selectCtx = usePathSelectionContext();
   const { rating } = favCtx.getFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
-  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+  const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
+  const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
 
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
@@ -298,9 +299,16 @@ function DataRow({
   return (
     <HoverPreviewPortal
       node={node}
-      enabled={isMediaNode && !isMobile && !actionMenuOpen}
+      enabled={
+        isMediaNode &&
+        !isMobile &&
+        !actionDropdownMenuOpen &&
+        !actionContextMenuOpen
+      }
     >
       <ActionContextMenu
+        open={actionContextMenuOpen}
+        onOpenChange={setActionContextMenuOpen}
         node={node}
         onRatingChange={onRatingChange}
         onRename={onRename}
@@ -414,8 +422,8 @@ function DataRow({
           {/* Actions */}
           <div className="flex justify-center">
             <ActionDropdownMenu
-              open={actionMenuOpen}
-              onOpenChange={setActionMenuOpen}
+              open={actionDropdownMenuOpen}
+              onOpenChange={setActionDropdownMenuOpen}
               node={node}
               onRename={onRename}
               onMove={onMove}
