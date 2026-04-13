@@ -12,12 +12,12 @@ const TagFilterContext = createContext<TagFilterContextType | undefined>(
 
 export function TagFilterProvider({
   children,
-  initialTargetNodes,
+  targetNodes,
 }: {
   children: ReactNode;
-  initialTargetNodes?: MediaNode[];
+  targetNodes?: MediaNode[];
 }) {
-  const value = useTagFilter(initialTargetNodes);
+  const value = useTagFilter(targetNodes);
 
   return (
     <TagFilterContext.Provider value={value}>

@@ -11,12 +11,12 @@ const PathSelectionContext = createContext<
 
 export function PathSelectionProvider({
   children,
-  initialSelectedPaths,
+  selectedPaths,
 }: {
   children: React.ReactNode;
-  initialSelectedPaths?: Iterable<string>;
+  selectedPaths?: Iterable<string>;
 }) {
-  const value = usePathSelection(initialSelectedPaths);
+  const value = usePathSelection(selectedPaths);
 
   return (
     <PathSelectionContext.Provider value={value}>
