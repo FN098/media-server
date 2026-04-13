@@ -16,9 +16,25 @@ import {
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shadcn/components/ui/tabs";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Loader2, RotateCcw, Search, Tag, X } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Link,
+  Loader2,
+  RotateCcw,
+  Search,
+  Star,
+  Tag,
+  X,
+} from "lucide-react";
 import { useRef, useState } from "react";
 
 interface TagFilterDialogProps {
@@ -38,8 +54,10 @@ export function TagFilterDialog({
   const {
     query,
     setQuery,
-    baseTags,
     searchedTags,
+    favoriteTags,
+    relatedTags,
+    recentTags,
     isLoading,
     selectedTagIds,
     selectedTags,
@@ -56,29 +74,24 @@ export function TagFilterDialog({
   const [tempSelectedCache, setTempSelectedCache] = useState<
     Map<string, TagType>
   >(new Map());
-  const [tempMode, setTempMode] = useState<TagFilterMode>(mode);
+  const [tempFilterMode, setTempMode] = useState<TagFilterMode>(mode);
 
   // サジェスト用
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const isEmptyMode = tempMode === "EMPTY";
+  const isEmptyMode = tempFilterMode === "EMPTY";
   const hasSelection = selectedTagIds.size > 0;
   const suggestionOpen = query.length > 0 && !isEmptyMode;
 
-  // query なし → お気に入りタグのうち未選択のもの
-  const favoriteTagsToShow = query
-    ? []
-    : baseTags.filter((t) => !tempSelectedIds.has(t.id));
+  // ダイアログ内の選択済みタグ一覧（キャッシュから取得）
+  const tempSelectedTags = [...tempSelectedCache.values()];
 
-  // query あり → 検索結果のうち未選択のもの（サジェスト候補）
+  // サジェスト候補（選択済みは除外）
   const suggestions = suggestionOpen
     ? searchedTags.filter((t) => !tempSelectedIds.has(t.id))
     : [];
-
-  // ダイアログ内の選択済みタグ一覧（キャッシュから取得）
-  const tempSelectedTags = [...tempSelectedCache.values()];
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
@@ -94,26 +107,26 @@ export function TagFilterDialog({
     setOpen(nextOpen);
   };
 
-  const addToTemp = (tag: TagType) => {
-    setTempSelectedIds((prev) => new Set(prev).add(tag.id));
-    setTempSelectedCache((prev) => new Map(prev).set(tag.id, tag));
-  };
-
-  const removeFromTemp = (tag: TagType) => {
-    setTempSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.delete(tag.id);
-      return next;
-    });
-    setTempSelectedCache((prev) => {
-      const next = new Map(prev);
-      next.delete(tag.id);
-      return next;
-    });
+  const toggleTemp = (tag: TagType) => {
+    if (tempSelectedIds.has(tag.id)) {
+      setTempSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(tag.id);
+        return next;
+      });
+      setTempSelectedCache((prev) => {
+        const next = new Map(prev);
+        next.delete(tag.id);
+        return next;
+      });
+    } else {
+      setTempSelectedIds((prev) => new Set(prev).add(tag.id));
+      setTempSelectedCache((prev) => new Map(prev).set(tag.id, tag));
+    }
   };
 
   const handleSelectSuggestion = (tag: TagType) => {
-    addToTemp(tag);
+    toggleTemp(tag);
     setQuery("");
     setActiveIndex(-1);
     if (autoFocusInput) inputRef.current?.focus();
@@ -128,7 +141,6 @@ export function TagFilterDialog({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!suggestionOpen) return;
-
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
@@ -166,12 +178,12 @@ export function TagFilterDialog({
   };
 
   const handleApply = () => {
-    if (tempMode === "EMPTY") {
+    if (tempFilterMode === "EMPTY") {
       selectTags([]);
     } else {
       selectTags(tempSelectedTags);
     }
-    setMode(tempMode);
+    setMode(tempFilterMode);
     setOpen(false);
   };
 
@@ -215,7 +227,7 @@ export function TagFilterDialog({
           e.preventDefault();
           if (autoFocusInput) inputRef.current?.focus();
         }}
-        className="sm:max-w-[450px] h-[550px] flex flex-col p-0 overflow-hidden"
+        className="sm:max-w-[450px] h-[580px] flex flex-col p-0 overflow-hidden"
       >
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-xl font-semibold">
@@ -233,7 +245,7 @@ export function TagFilterDialog({
                   onClick={() => setTempMode(m)}
                   className={cn(
                     "flex-1 text-xs font-medium py-1.5 rounded-md transition-all",
-                    tempMode === m
+                    tempFilterMode === m
                       ? "bg-background shadow-sm text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   )}
@@ -245,7 +257,7 @@ export function TagFilterDialog({
           </div>
         </div>
 
-        {/* 検索ボックス + サジェストポップアップ */}
+        {/* 検索ボックス＋サジェストポップアップ */}
         <div className="px-6 pb-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -337,55 +349,91 @@ export function TagFilterDialog({
           </div>
         </div>
 
-        {/* タグ一覧エリア */}
-        <div className="flex-1 flex flex-col gap-4 p-6 overflow-y-auto border-t border-b border-muted/50">
-          {/* 選択済みタグ */}
-          {tempSelectedTags.length > 0 && (
-            <div className="flex flex-wrap gap-x-2 gap-y-2">
-              {tempSelectedTags.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="default"
-                  className="cursor-pointer px-4 h-9 text-sm select-none border-transparent inline-flex items-center ring-2 ring-primary shadow-sm"
-                  onClick={() => removeFromTemp(tag)}
+        {/* 選択済みタグ */}
+        {tempSelectedTags.length > 0 ? (
+          <div className="px-6 pb-2 flex flex-wrap gap-1.5 min-h-[40px]">
+            {tempSelectedTags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="default"
+                className="cursor-pointer px-3 h-7 text-xs select-none inline-flex items-center gap-1.5 ring-2 ring-primary shadow-sm"
+                onClick={() => toggleTemp(tag)}
+              >
+                {tag.name}
+                <X className="h-3 w-3" />
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <div className="px-6 pb-2 flex justify-center gap-1.5 min-h-[40px]">
+            <p className="text-xs text-muted-foreground italic self-center select-none">
+              タグを検索するか下から選択してください
+            </p>
+          </div>
+        )}
+
+        {/* 仕切り */}
+        <div className="border-t border-muted/50 mx-6" />
+
+        {/* タブ候補エリア */}
+        <div className="flex-1 overflow-hidden px-6 py-3">
+          {!isEmptyMode && (
+            <Tabs defaultValue="recent" className="h-full flex flex-col">
+              <TabsList className="w-full h-9 shrink-0">
+                <TabsTrigger value="recent" className="flex-1 gap-1.5 text-xs">
+                  <Clock className="size-3.5" />
+                  最近使用
+                </TabsTrigger>
+                <TabsTrigger
+                  value="favorite"
+                  className="flex-1 gap-1.5 text-xs"
                 >
-                  {tag.name}
-                  <X className="ml-2 h-3.5 w-3.5" />
-                </Badge>
-              ))}
-            </div>
-          )}
+                  <Star className="size-3.5" />
+                  お気に入り
+                </TabsTrigger>
+                <TabsTrigger value="related" className="flex-1 gap-1.5 text-xs">
+                  <Link className="size-3.5" />
+                  関連
+                </TabsTrigger>
+              </TabsList>
 
-          {/* セパレーター（両方ある場合のみ） */}
-          {tempSelectedTags.length > 0 && favoriteTagsToShow.length > 0 && (
-            <div className="border-t border-muted/50" />
-          )}
-
-          {/* お気に入りタグ（query なし・EMPTY モード以外） */}
-          {favoriteTagsToShow.length > 0 && !isEmptyMode && (
-            <div className="flex flex-wrap gap-x-2 gap-y-2">
-              {favoriteTagsToShow.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="secondary"
-                  className="cursor-pointer px-4 h-9 text-sm select-none border-transparent inline-flex items-center hover:bg-secondary/80"
-                  onClick={() => addToTemp(tag)}
+              <div className="flex-1 overflow-hidden mt-2">
+                <TabsContent
+                  value="recent"
+                  className="h-full overflow-y-auto mt-0 outline-none"
                 >
-                  {tag.name}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {/* 何もない場合 */}
-          {tempSelectedTags.length === 0 &&
-            favoriteTagsToShow.length === 0 &&
-            !isEmptyMode &&
-            !query && (
-              <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                <p className="text-sm">上の検索バーからタグを追加できます</p>
+                  <TagChipList
+                    tags={recentTags}
+                    selectedIds={tempSelectedIds}
+                    onToggle={toggleTemp}
+                    emptyMessage="最近使用したタグがありません"
+                  />
+                </TabsContent>
+                <TabsContent
+                  value="favorite"
+                  className="h-full overflow-y-auto mt-0 outline-none"
+                >
+                  <TagChipList
+                    tags={favoriteTags}
+                    selectedIds={tempSelectedIds}
+                    onToggle={toggleTemp}
+                    emptyMessage="お気に入りタグがありません"
+                  />
+                </TabsContent>
+                <TabsContent
+                  value="related"
+                  className="h-full overflow-y-auto mt-0 outline-none"
+                >
+                  <TagChipList
+                    tags={relatedTags}
+                    selectedIds={tempSelectedIds}
+                    onToggle={toggleTemp}
+                    emptyMessage="関連タグがありません"
+                  />
+                </TabsContent>
               </div>
-            )}
+            </Tabs>
+          )}
         </div>
 
         {/* 操作ボタン */}
@@ -400,7 +448,6 @@ export function TagFilterDialog({
             <RotateCcw className="mr-2 h-3.5 w-3.5" />
             選択を解除
           </Button>
-
           <Button
             type="button"
             size="sm"
@@ -412,5 +459,53 @@ export function TagFilterDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ---- 共通タグチップリスト ---- */
+
+interface TagChipListProps {
+  tags: TagType[];
+  selectedIds: Set<string>;
+  onToggle: (tag: TagType) => void;
+  emptyMessage?: string;
+}
+
+function TagChipList({
+  tags,
+  selectedIds,
+  onToggle,
+  emptyMessage = "タグがありません",
+}: TagChipListProps) {
+  if (tags.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground py-2 text-center italic">
+        {emptyMessage}
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2 py-1">
+      {tags.map((tag) => {
+        const selected = selectedIds.has(tag.id);
+        return (
+          <button
+            key={tag.id}
+            type="button"
+            onClick={() => onToggle(tag)}
+            className={cn(
+              "flex items-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-medium transition-all active:scale-95",
+              selected
+                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+            )}
+          >
+            {selected && <Check size={11} />}
+            {tag.name}
+          </button>
+        );
+      })}
+    </div>
   );
 }

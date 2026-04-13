@@ -63,7 +63,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
     <ExplorerProvider listing={listing}>
       <FavoritesProvider favorites={listing.nodes}>
         <PathSelectionProvider>
-          <TagFilterProvider>
+          <TagFilterProvider targetNodes={listing.nodes}>
             <Favorites />
           </TagFilterProvider>
         </PathSelectionProvider>

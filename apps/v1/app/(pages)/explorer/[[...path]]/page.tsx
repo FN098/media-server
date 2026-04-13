@@ -107,7 +107,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     <ExplorerProvider listing={listing}>
       <FavoritesProvider favorites={listing.nodes}>
         <PathSelectionProvider>
-          <TagFilterProvider>
+          <TagFilterProvider targetNodes={listing.nodes}>
             <Explorer />
           </TagFilterProvider>
         </PathSelectionProvider>
