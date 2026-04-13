@@ -483,7 +483,9 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     }
   }
 
+  // キャッシュの更新
   revalidatePath("/trash");
+
   return results;
 }
 
