@@ -166,6 +166,18 @@ export async function moveNodesAction(
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of sourcePaths) {
+    // 子孫チェック
+    if (
+      destDirPath === srcVirtualPath ||
+      destDirPath.startsWith(srcVirtualPath + "/")
+    ) {
+      results.failed++;
+      results.errors.push(
+        `自分自身またはサブフォルダへの操作はできません: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
+
     try {
       const srcName = srcVirtualPath.split("/").pop() || "";
       const destVirtualPath =
@@ -299,6 +311,18 @@ export async function copyNodesAction(
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of sourcePaths) {
+    // 子孫チェック
+    if (
+      destDirPath === srcVirtualPath ||
+      destDirPath.startsWith(srcVirtualPath + "/")
+    ) {
+      results.failed++;
+      results.errors.push(
+        `自分自身またはサブフォルダへの操作はできません: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
+
     try {
       const srcName = srcVirtualPath.split("/").pop() || "";
       const destVirtualPath =
