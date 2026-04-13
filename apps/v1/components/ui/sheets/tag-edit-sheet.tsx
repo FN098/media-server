@@ -50,6 +50,13 @@ export function TagEditSheet({
   const isMobile = useIsMobile();
   const canEdit = mode !== "none" && targetNodes.length > 0;
 
+  // オープン時にアクティブ化
+  useEffect(() => {
+    if (open) {
+      editor.activate();
+    }
+  }, [editor, open]);
+
   // 対象が変更されたらコンテキストに反映
   useEffect(() => {
     editor.setTargetNodes(targetNodes);

@@ -44,7 +44,7 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
   // クエリ検索タグ
   const { tags: searchedTags, isLoading: isLoadingSearch } = useTags({
     query: debouncedQuery,
-    triggered: debouncedQuery === trimmedQuery && !!debouncedQuery,
+    triggered: activated && debouncedQuery === trimmedQuery && !!debouncedQuery,
   });
 
   // お気に入りタグ
