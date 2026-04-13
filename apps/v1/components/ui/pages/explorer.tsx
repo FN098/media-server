@@ -5,6 +5,7 @@ import { deleteNodesAction } from "@/actions/media-actions";
 import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
+import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
 import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
@@ -58,6 +59,7 @@ import {
   ArrowDownAz,
   ArrowDownZa,
   CalendarArrowDown,
+  Copy,
   FolderInput,
   MoreVertical,
   Plus,
@@ -377,7 +379,7 @@ export function Explorer() {
   // 移動対象のノードリストを管理
   const [moveTargets, setMoveTargets] = useState<MediaNode[]>([]);
   const isMoveMode = moveTargets.length > 0;
-  const initialDirPath =
+  const initialMoveDialogDirPath =
     moveTargets.length > 0 ? dirname(moveTargets[0]?.path) : undefined;
 
   // 単体移動
@@ -394,6 +396,32 @@ export function Explorer() {
   const handleMoveDialogOpenChange = (open: boolean) => {
     if (!open) {
       setMoveTargets([]);
+      if (isSelectionMode) handleClearSelection();
+    }
+  };
+
+  // ===== コピー (Copy) =====
+
+  // 移動対象のノードリストを管理
+  const [copyTargets, setCopyTargets] = useState<MediaNode[]>([]);
+  const isCopyMode = copyTargets.length > 0;
+  const initialCopyDialogDirPath =
+    copyTargets.length > 0 ? dirname(copyTargets[0]?.path) : undefined;
+
+  // 単体コピー
+  const handleOpenCopySingle = (node: MediaNode) => {
+    setCopyTargets([node]);
+  };
+
+  // 一括コピー
+  const handleOpenCopySelected = () => {
+    setCopyTargets(selected);
+  };
+
+  // 後始末
+  const handleCopyDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setCopyTargets([]);
       if (isSelectionMode) handleClearSelection();
     }
   };
@@ -626,6 +654,7 @@ export function Explorer() {
               }
               onRename={handleRenameSingle}
               onMove={handleOpenMoveSingle}
+              onCopy={handleOpenCopySingle}
               onDelete={handleOpenDeleteSingle}
               onEditTags={(node) => {
                 handleSelectSingle(node);
@@ -648,6 +677,7 @@ export function Explorer() {
               }
               onRename={handleRenameSingle}
               onMove={handleOpenMoveSingle}
+              onCopy={handleOpenCopySingle}
               onDelete={handleOpenDeleteSingle}
               onEditTags={(node) => {
                 handleSelectSingle(node);
@@ -705,6 +735,11 @@ export function Explorer() {
                   <DropdownMenuItem onClick={handleOpenMoveSelected}>
                     <FolderInput className="mr-2 h-4 w-4" /> 移動
                   </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={handleOpenCopySelected}>
+                    <Copy className="mr-2 h-4 w-4" /> コピー
+                  </DropdownMenuItem>
+
                   <DropdownMenuItem
                     variant="destructive"
                     onClick={handleOpenDeleteSelected}
@@ -746,7 +781,15 @@ export function Explorer() {
           open={isMoveMode}
           onOpenChange={handleMoveDialogOpenChange}
           sourceNodes={moveTargets}
-          initialDirPath={initialDirPath}
+          initialDirPath={initialMoveDialogDirPath}
+        />
+
+        {/* コピーダイアログ */}
+        <CopyDialog
+          open={isCopyMode}
+          onOpenChange={handleCopyDialogOpenChange}
+          sourceNodes={copyTargets}
+          initialDirPath={initialCopyDialogDirPath}
         />
 
         {/* 削除確認ダイアログ */}

@@ -29,6 +29,7 @@ interface PagingGridViewProps {
   onRatingChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
+  onCopy?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
@@ -46,6 +47,7 @@ export function PagingGridView({
   onRatingChange,
   onRename,
   onMove,
+  onCopy,
   onDelete,
   onDeletePermanently,
   onRestore,
@@ -136,6 +138,7 @@ export function PagingGridView({
             onRatingChange={onRatingChange}
             onRename={onRename}
             onMove={onMove}
+            onCopy={onCopy}
             onDelete={onDelete}
             onDeletePermanently={onDeletePermanently}
             onRestore={onRestore}
@@ -165,6 +168,7 @@ interface CellProps {
   onRatingChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
+  onCopy?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
@@ -182,6 +186,7 @@ function Cell({
   onRatingChange,
   onRename,
   onMove,
+  onCopy,
   onDelete,
   onDeletePermanently,
   onRestore,
@@ -338,6 +343,7 @@ function Cell({
                   onRatingChange={onRatingChange}
                   onRename={onRename}
                   onMove={onMove}
+                  onCopy={onCopy}
                   onDelete={onDelete}
                   onDeletePermanently={onDeletePermanently}
                   onRestore={onRestore}

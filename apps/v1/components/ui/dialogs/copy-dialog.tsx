@@ -1,8 +1,8 @@
 "use client";
 
 import {
+  copyNodesAction,
   getSubDirectoriesAction,
-  moveNodesAction,
 } from "@/actions/media-actions";
 import { TextWithTooltip } from "@/components/ui/texts/text-with-tooltip";
 import { Button } from "@/shadcn/components/ui/button";
@@ -14,32 +14,32 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
-import { ChevronLeft, ChevronRight, Folder, FolderInput } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import { dirname } from "path";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-interface MoveDialogProps {
+interface CopyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sourceNodes: { path: string; name: string }[];
   initialDirPath?: string;
 }
 
-export function MoveDialog({
+export function CopyDialog({
   open,
   onOpenChange,
   sourceNodes,
   initialDirPath = "/",
-}: MoveDialogProps) {
+}: CopyDialogProps) {
   const [targetDirPath, setTargetDirPath] = useState(initialDirPath);
   const [dirs, setDirs] = useState<{ name: string; path: string }[]>([]);
   const [isNavigating, startNavigating] = useTransition();
-  const [isMoving, startMoving] = useTransition();
+  const [isCopying, startCopying] = useTransition();
 
   // ダイアログを開いたときに初期パスをリセット
   useEffect(() => {
-    if (open && initialDirPath !== targetDirPath) {
+    if (open) {
       fetchDirs(initialDirPath);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,7 +50,7 @@ export function MoveDialog({
     startNavigating(async () => {
       const result = await getSubDirectoriesAction(path);
       if (result.success) {
-        // 移動対象自身や、その子孫フォルダは選択肢から除外する（ループ防止）
+        // コピー元自身・およびその子孫フォルダは選択肢から除外（再帰ループ防止）
         const filtered = result.directories!.filter(
           (d) =>
             !sourceNodes.some(
@@ -65,18 +65,18 @@ export function MoveDialog({
     });
   };
 
-  // 移動実行
-  const handleMove = () => {
-    startMoving(async () => {
+  // コピー実行
+  const handleCopy = () => {
+    startCopying(async () => {
       const paths = sourceNodes.map((n) => n.path);
-      const result = await moveNodesAction(paths, targetDirPath);
+      const result = await copyNodesAction(paths, targetDirPath);
 
       if (result.failed === 0) {
-        toast.success(`${result.success}件のアイテムを移動しました`);
+        toast.success(`${result.success}件のアイテムをコピーしました`);
         onOpenChange(false);
       } else {
         toast.error(
-          `${result.failed}件の移動に失敗しました\n${result.errors.join("\n")}`
+          `${result.failed}件のコピーに失敗しました\n${result.errors.join("\n")}`
         );
       }
     });
@@ -97,7 +97,7 @@ export function MoveDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] h-[500px] flex flex-col">
         <DialogHeader>
-          <DialogTitle>移動先を選択</DialogTitle>
+          <DialogTitle>コピー先を選択</DialogTitle>
           <div className="flex items-center gap-2 text-sm text-muted-foreground break-all bg-muted p-2 rounded">
             <Folder className="h-4 w-4 shrink-0" />
             {targetDirPath}
@@ -110,7 +110,7 @@ export function MoveDialog({
               variant="ghost"
               className="w-full justify-start text-primary"
               onClick={() => handleBack()}
-              disabled={isMoving || isNavigating}
+              disabled={isCopying || isNavigating}
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               上の階層へ
@@ -119,7 +119,7 @@ export function MoveDialog({
 
           <ScrollArea className="flex-1 overflow-auto border rounded-md p-2 relative">
             {/* スピナー */}
-            {(isMoving || isNavigating) && (
+            {(isCopying || isNavigating) && (
               <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
                 <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
               </div>
@@ -138,9 +138,9 @@ export function MoveDialog({
                     variant="ghost"
                     className="w-full justify-between hover:bg-primary/10 group"
                     onClick={() => handleOpen(dir.path)}
-                    disabled={isMoving || isNavigating}
+                    disabled={isCopying || isNavigating}
                   >
-                    <div className="flex items-center ">
+                    <div className="flex items-center">
                       <Folder className="mr-2 h-4 w-4 text-blue-500" />
                       <TextWithTooltip
                         text={dir.name}
@@ -159,16 +159,16 @@ export function MoveDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={isMoving}
+            disabled={isCopying}
           >
             キャンセル
           </Button>
-          <Button onClick={handleMove} disabled={isMoving || isNavigating}>
-            {isMoving ? (
-              "移動中..."
+          <Button onClick={handleCopy} disabled={isCopying || isNavigating}>
+            {isCopying ? (
+              "コピー中..."
             ) : (
               <>
-                <FolderInput className="mr-2 h-4 w-4" />
+                <Copy className="mr-2 h-4 w-4" />
                 ここにコピー
               </>
             )}

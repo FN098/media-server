@@ -14,6 +14,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import {
+  Copy,
   FolderInput,
   MoreVertical,
   Pencil,
@@ -29,6 +30,7 @@ interface ActionMenuProps {
   onOpenFolder?: (path: string) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
+  onCopy?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
@@ -42,6 +44,7 @@ export function ActionMenu({
   onOpenFolder,
   onRename,
   onMove,
+  onCopy,
   onDelete,
   onDeletePermanently,
   onRestore,
@@ -113,6 +116,17 @@ export function ActionMenu({
             }}
           >
             <FolderInput className="mr-2 h-4 w-4" /> 移動
+          </DropdownMenuItem>
+        )}
+
+        {onCopy && (
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onCopy(node);
+            }}
+          >
+            <Copy className="mr-2 h-4 w-4" /> コピー
           </DropdownMenuItem>
         )}
 

@@ -31,6 +31,7 @@ interface PagingListViewProps {
   onRatingChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
+  onCopy?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
@@ -51,6 +52,7 @@ export function PagingListView({
   onRatingChange,
   onRename,
   onMove,
+  onCopy,
   onDelete,
   onDeletePermanently,
   onRestore,
@@ -136,6 +138,7 @@ export function PagingListView({
             onRatingChange={onRatingChange}
             onRename={onRename}
             onMove={onMove}
+            onCopy={onCopy}
             onDelete={onDelete}
             onDeletePermanently={onDeletePermanently}
             onRestore={onRestore}
@@ -186,6 +189,7 @@ interface DataRowProps {
   onRatingChange?: (node: MediaNode, rating: number | null) => void;
   onRename?: (node: MediaNode) => void;
   onMove?: (node: MediaNode) => void;
+  onCopy?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
   onDeletePermanently?: (node: MediaNode) => void;
   onRestore?: (node: MediaNode) => void;
@@ -203,6 +207,7 @@ function DataRow({
   onRatingChange,
   onRename,
   onMove,
+  onCopy,
   onDelete,
   onDeletePermanently,
   onRestore,
@@ -387,6 +392,7 @@ function DataRow({
             node={node}
             onRename={onRename}
             onMove={onMove}
+            onCopy={onCopy}
             onDelete={onDelete}
             onDeletePermanently={onDeletePermanently}
             onRestore={onRestore}
