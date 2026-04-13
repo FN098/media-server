@@ -1,6 +1,7 @@
 "use client";
 
 import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs/dynamic-breadcrumbs";
+import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { ArrowUp } from "lucide-react";
@@ -39,7 +40,7 @@ export function HeaderNavigation({ basePath }: { basePath?: string }) {
 
       {isMobile ? (
         <div className="min-w-0 flex-1 text-sm font-medium truncate">
-          {current?.label ?? ""}
+          <ClickToCopy>{current?.label ?? ""}</ClickToCopy>
         </div>
       ) : (
         <DynamicBreadcrumbs

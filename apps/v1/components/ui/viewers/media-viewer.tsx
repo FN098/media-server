@@ -3,6 +3,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
+import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
@@ -389,13 +390,15 @@ export function MediaViewer({
             {/* ファイル情報 */}
             <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0 select-text">
               <span className="text-white md:text-lg font-medium drop-shadow-md">
-                <MarqueeText
-                  key={currentIndex}
-                  text={currentNode?.title ?? currentNode?.name ?? "no title"}
-                  autoplay={isMobile}
-                  speed={40}
-                  delay={1}
-                />
+                <ClickToCopy>
+                  <MarqueeText
+                    key={currentIndex}
+                    text={currentNode?.title ?? currentNode?.name ?? "no title"}
+                    autoplay={isMobile}
+                    speed={40}
+                    delay={1}
+                  />
+                </ClickToCopy>
               </span>
               <span className="text-white/60 text-sm">
                 {currentIndex + 1} / {allNodes.length}
