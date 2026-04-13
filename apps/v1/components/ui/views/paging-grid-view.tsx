@@ -18,7 +18,7 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 interface PagingGridViewProps {
   allNodes: MediaNode[];
@@ -200,9 +200,15 @@ function Cell({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const favCtx = useFavoritesContext();
   const selectCtx = usePathSelectionContext();
-
   const { rating } = favCtx.getFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActionMenuOpen(true);
+  };
 
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
@@ -275,7 +281,10 @@ function Cell({
 
   return (
     <div className="relative group aspect-[3/4] sm:aspect-[4/5]">
-      <HoverPreviewPortal node={node} enabled={isMediaNode && !isMobile}>
+      <HoverPreviewPortal
+        node={node}
+        enabled={isMediaNode && !isMobile && !actionMenuOpen}
+      >
         <div
           id={`media-item-${globalIndex}`}
           onMouseDown={start}
@@ -292,6 +301,7 @@ function Cell({
               ? "ring-2 ring-primary border-transparent shadow-md scale-[0.98]"
               : "hover:border-primary/50 hover:shadow-sm"
           )}
+          onContextMenu={handleContextMenu}
         >
           <MediaThumb
             node={node}
@@ -344,6 +354,8 @@ function Cell({
                 )}
               >
                 <ActionMenu
+                  open={actionMenuOpen}
+                  onOpenChange={setActionMenuOpen}
                   node={node}
                   onRatingChange={onRatingChange}
                   onRename={onRename}

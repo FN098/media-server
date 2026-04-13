@@ -38,6 +38,8 @@ interface ActionMenuProps {
   onEditTags?: (node: MediaNode) => void;
   onAddTagFilter?: (node: MediaNode) => void;
   onRatingChange?: (node: MediaNode, rating: number | null) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ActionMenu({
@@ -53,9 +55,14 @@ export function ActionMenu({
   onEditTags,
   onAddTagFilter,
   onRatingChange,
+  open: controlledOpen,
+  onOpenChange: onControlledOpenChange,
 }: ActionMenuProps) {
   const { getFavorite } = useFavoritesContext();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onControlledOpenChange ?? setInternalOpen;
 
   const mounted = useMounted();
   if (!mounted) return null;
@@ -71,7 +78,7 @@ export function ActionMenu({
           size="icon"
           className={cn("h-8 w-8 rounded-full", className)}
           onPointerDown={(e) => e.preventDefault()}
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={() => setOpen(!open)}
         >
           <MoreVertical className="h-4 w-4" />
         </Button>

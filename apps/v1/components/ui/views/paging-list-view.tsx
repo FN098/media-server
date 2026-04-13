@@ -20,7 +20,7 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 interface PagingListViewProps {
   allNodes: MediaNode[];
@@ -223,6 +223,13 @@ function DataRow({
   const selectCtx = usePathSelectionContext();
   const { rating } = favCtx.getFavorite(node.path);
   const isSelected = selectCtx.isSelectedPath(node.path);
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActionMenuOpen(true);
+  };
 
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
@@ -294,7 +301,10 @@ function DataRow({
   };
 
   return (
-    <HoverPreviewPortal node={node} enabled={isMediaNode && !isMobile}>
+    <HoverPreviewPortal
+      node={node}
+      enabled={isMediaNode && !isMobile && !actionMenuOpen}
+    >
       <div
         id={`media-item-${globalIndex}`}
         role="row"
@@ -311,6 +321,7 @@ function DataRow({
           GRID_TEMPLATE,
           isSelected ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-muted/50"
         )}
+        onContextMenu={handleContextMenu}
       >
         <div
           className="flex justify-center"
@@ -394,6 +405,8 @@ function DataRow({
         {/* Actions */}
         <div className="flex justify-center">
           <ActionMenu
+            open={actionMenuOpen}
+            onOpenChange={setActionMenuOpen}
             node={node}
             onRename={onRename}
             onMove={onMove}
@@ -404,7 +417,6 @@ function DataRow({
             onEditTags={onEditTags}
             onAddTagFilter={onAddTagFilter}
             onOpenFolder={onOpenFolder}
-            onRatingChange={onRatingChange}
           />
         </div>
       </div>
