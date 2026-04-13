@@ -99,10 +99,12 @@ export function TagEditSheet({
     startTransition(async () => {
       if (isLoading || !editor.hasChanges) return;
 
+      const tagsToCreate = editor.pendingNewTags
+        .filter((t) => editor.pendingChanges[t.id] !== "remove")
+        .map((t) => t.name);
+
       // 仮タグを DB 作成
-      const created = await createTagsAction(
-        editor.pendingNewTags.map((t) => t.name)
-      );
+      const created = await createTagsAction(tagsToCreate);
       if (!created.success) throw new Error(created.error);
 
       // 新規タグの操作

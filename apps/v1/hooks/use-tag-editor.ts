@@ -5,7 +5,6 @@ import { useTags } from "@/hooks/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import {
   PendingChanges,
-  PendingNewTag,
   SearchTagStrategy,
   SortTagStrategy,
   Tag,
@@ -22,7 +21,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     initialTargetNodes ?? []
   );
   const [newTagName, setNewTagName] = useState("");
-  const [pendingNewTags, setPendingNewTags] = useState<PendingNewTag[]>([]);
+  const [pendingNewTags, setPendingNewTags] = useState<Tag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
   const [pendingChangeTags, setPendingChangeTags] = useState<Tag[]>([]);
   const [searchStrategy, setSearchStrategy] =
@@ -79,12 +78,17 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   const isLoadingTags =
     isLoadingBase || isLoadingSearch || isLoadingFavorite || isLoadingRecent;
 
-  const tagStates = useTagStates(targetNodes, masterTags);
+  const allTags = useMemo(
+    () => [...masterTags, ...pendingNewTags],
+    [masterTags, pendingNewTags]
+  );
+
+  const tagStates = useTagStates(targetNodes, allTags);
 
   // 編集タグ
   const editModeTags = useMemo(() => {
     const pendingNewAsTags: Tag[] = pendingNewTags.map((t) => ({
-      id: t.tempId, // 仮ID
+      id: t.id, // 仮ID
       name: t.name,
     }));
 
@@ -128,28 +132,31 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     });
   }, [query, searchedTags, tagStates, pendingChanges, pendingNewTags]);
 
+  // タグ変更状態トグル
   const toggleTagChange = useCallback(
     (tag: Tag) => {
-      const dbState = tagStates[tag.name] || "none";
-
       setPendingChanges((prev) => {
         const next = { ...prev };
-        const current = prev[tag.id]; // "add" | "remove" | undefined
+        const currentOp = prev[tag.id]; // "add" | "remove" | undefined
 
-        let nextOp: "add" | "remove" | undefined;
+        const nextOp = (() => {
+          const tagState = tagStates[tag.name] || "none";
+          switch (tagState) {
+            case "all":
+              // none <-> remove
+              return currentOp === "remove" ? undefined : "remove";
 
-        if (dbState === "all") {
-          // none <-> remove
-          nextOp = current === "remove" ? undefined : "remove";
-        } else if (dbState === "none") {
-          // none <-> add
-          nextOp = current === "add" ? undefined : "add";
-        } else {
-          // some: none -> add -> remove -> none
-          if (current === undefined) nextOp = "add";
-          else if (current === "add") nextOp = "remove";
-          else nextOp = undefined;
-        }
+            case "none":
+              // none <-> remove
+              return currentOp === "remove" ? undefined : "remove";
+
+            case "some":
+              // some: none -> add -> remove -> none
+              if (currentOp === undefined) return "add";
+              else if (currentOp === "add") return "remove";
+              else return undefined;
+          }
+        })();
 
         if (nextOp === undefined) {
           delete next[tag.id];
@@ -163,6 +170,7 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     [tagStates]
   );
 
+  // タグ変更バッファ更新
   const setTagChange = useCallback((tag: Tag, operator: TagOperator) => {
     setPendingChanges((prev) => {
       return { ...prev, [tag.id]: operator };
@@ -172,18 +180,21 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
     });
   }, []);
 
+  // すべての変更をリセット
   const resetChanges = useCallback(() => {
     setPendingChanges({});
     setPendingNewTags([]);
   }, []);
 
+  // 新規タグ追加
   const addPendingNewTag = useCallback((name: string) => {
     setPendingNewTags((prev) => {
       if (prev.some((t) => t.name === name)) return prev;
-      return [...prev, { tempId: v4(), name }];
+      return [...prev, { id: v4(), name }];
     });
   }, []);
 
+  // サジェスト候補選択
   const selectSuggestion = useCallback(
     (tag: Tag) => {
       setTagChange(tag, "add");

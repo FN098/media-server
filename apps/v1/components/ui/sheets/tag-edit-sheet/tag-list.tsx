@@ -1,4 +1,4 @@
-import { PendingNewTag, Tag, TagOperator, TagState } from "@/lib/tag/types";
+import { Tag, TagOperator, TagState } from "@/lib/tag/types";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,7 +9,7 @@ interface TagListProps {
   isEditing: boolean;
   tags: Tag[];
   pendingChanges: Record<string, TagOperator>;
-  pendingNewTags: PendingNewTag[];
+  pendingNewTags: Tag[];
   tagStates: Record<string, TagState>;
   onToggle: (tag: Tag) => void;
 }
@@ -120,7 +120,7 @@ export function TagList({
 
         const isPartiallyOn = op == null && tagStates[tag.name] === "some";
         const isHighlighted = isOnAfterApply || isPartiallyOn;
-        const isPendingNew = pendingNewTags.some((t) => t.tempId === tag.id);
+        const isPendingNew = pendingNewTags.some((t) => t.id === tag.id);
 
         return (
           <button

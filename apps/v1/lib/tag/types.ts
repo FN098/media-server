@@ -22,11 +22,6 @@ export type TagState = "all" | "some" | "none";
 export type TagStates = Record<TagNameType, TagState>;
 export type TagCounts = Record<TagNameType, number>;
 
-export type PendingNewTag = {
-  tempId: string;
-  name: string;
-};
-
 export type CreateTagsResult =
   | {
       success: true;

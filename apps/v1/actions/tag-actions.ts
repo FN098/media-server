@@ -363,7 +363,7 @@ export async function deleteTagAction(id: string) {
   try {
     const tag = await prisma.tag.delete({
       where: {
-        id: id,
+        id,
       },
     });
 
