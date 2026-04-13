@@ -384,11 +384,11 @@ export function TagFilterDialog({
         {/* タブ候補エリア */}
         <div className="flex-1 overflow-hidden px-6 py-3">
           {!isEmptyMode && (
-            <Tabs defaultValue="recent" className="h-full flex flex-col">
+            <Tabs defaultValue="related" className="h-full flex flex-col">
               <TabsList className="w-full h-9 shrink-0">
-                <TabsTrigger value="recent" className="flex-1 gap-1.5 text-xs">
-                  <Clock className="size-3.5" />
-                  最近使用
+                <TabsTrigger value="related" className="flex-1 gap-1.5 text-xs">
+                  <Link className="size-3.5" />
+                  関連
                 </TabsTrigger>
                 <TabsTrigger
                   value="favorite"
@@ -397,22 +397,22 @@ export function TagFilterDialog({
                   <Star className="size-3.5" />
                   お気に入り
                 </TabsTrigger>
-                <TabsTrigger value="related" className="flex-1 gap-1.5 text-xs">
-                  <Link className="size-3.5" />
-                  関連
+                <TabsTrigger value="recent" className="flex-1 gap-1.5 text-xs">
+                  <Clock className="size-3.5" />
+                  最近使用
                 </TabsTrigger>
               </TabsList>
 
               <div className="flex-1 overflow-hidden mt-2">
                 <TabsContent
-                  value="recent"
+                  value="related"
                   className="h-full overflow-y-auto mt-0 outline-none"
                 >
                   <TagChipList
-                    tags={recentTags}
+                    tags={relatedTags}
                     selectedIds={tempSelectedIds}
                     onToggle={toggleTemp}
-                    emptyMessage="最近使用したタグがありません"
+                    emptyMessage="関連タグがありません"
                   />
                 </TabsContent>
                 <TabsContent
@@ -427,14 +427,14 @@ export function TagFilterDialog({
                   />
                 </TabsContent>
                 <TabsContent
-                  value="related"
+                  value="recent"
                   className="h-full overflow-y-auto mt-0 outline-none"
                 >
                   <TagChipList
-                    tags={relatedTags}
+                    tags={recentTags}
                     selectedIds={tempSelectedIds}
                     onToggle={toggleTemp}
-                    emptyMessage="関連タグがありません"
+                    emptyMessage="最近使用したタグがありません"
                   />
                 </TabsContent>
               </div>

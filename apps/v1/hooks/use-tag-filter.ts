@@ -34,8 +34,6 @@ export function useTagFilter(initialTargetNodes?: MediaNode[]) {
     [targetNodes]
   );
 
-  // TODO: クエリ検索以外にも triggered を設定して無駄なリクエストをなくす
-
   // ベースタグ：未使用のため停止
   const { tags: baseTags, isLoading: isLoadingBase } = useTags({
     paths: targetPaths,
