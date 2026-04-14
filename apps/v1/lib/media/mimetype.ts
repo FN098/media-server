@@ -1,4 +1,5 @@
 import { MediaExt } from "@/lib/media/extensions";
+import { getExtension } from "@/lib/utils/filename";
 
 export const MIME_MAP: Record<MediaExt, string> = {
   // images
@@ -27,8 +28,7 @@ export const MIME_MAP: Record<MediaExt, string> = {
 };
 
 export function getMimetype(filePath: string): string {
-  const lower = filePath.toLowerCase();
-  const ext = "." + (lower.split(".").pop() ?? "");
+  const ext = getExtension(filePath, { withDot: true, case: "lower" });
 
   return MIME_MAP[ext as MediaExt] ?? "application/octet-stream";
 }
