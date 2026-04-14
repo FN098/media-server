@@ -6,7 +6,7 @@ import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { resolveMediaThumbUrl } from "@/lib/url/resolver";
 import { cn } from "@/shadcn/lib/utils";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 interface MediaThumbImageProps {
   node: MediaNode;
@@ -14,6 +14,8 @@ interface MediaThumbImageProps {
   className?: string;
   onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 }
+
+const MAX_RETRY_COUNT = 1;
 
 export function MediaThumbImage({
   node,
@@ -25,10 +27,14 @@ export function MediaThumbImage({
   const [version, setVersion] = useState(0);
   const [requested, setRequested] = useState(false);
 
+  const retryCountRef = useRef(0);
+  const [isError, setIsError] = useState(false);
+
   const update = () => {
     setVersion(Date.now());
     setIsProcessing(false);
     setRequested(false);
+    setIsError(false);
   };
 
   // サムネイル作成完了イベントの監視
@@ -45,9 +51,18 @@ export function MediaThumbImage({
 
   // サムネイル作成依頼イベントを発行
   const handleError = useCallback(async () => {
-    if (requested) return;
+    // すでにリクエスト中、または上限に達している場合は何もしない
+    if (requested || retryCountRef.current >= MAX_RETRY_COUNT) {
+      if (retryCountRef.current >= MAX_RETRY_COUNT) {
+        setIsError(true);
+        setIsProcessing(false);
+      }
+      return;
+    }
+
     setRequested(true);
     setIsProcessing(true);
+    retryCountRef.current += 1;
 
     try {
       // サムネイルを作成するディレクトリを enqueue
@@ -65,6 +80,15 @@ export function MediaThumbImage({
   // 表示するソースの決定
   const displayPath = previewPath || node.path;
   const thumbSrc = resolveMediaThumbUrl({ path: displayPath });
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center gap-1">
+        {/* <MediaThumbIcon type={node.type} className="opacity-50" /> */}
+        <span className="text-[10px] text-destructive">Error</span>
+      </div>
+    );
+  }
 
   return (
     <FallbackImage
