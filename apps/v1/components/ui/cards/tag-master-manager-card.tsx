@@ -192,6 +192,7 @@ export function TagMasterManagerCard() {
     <Card className="shadow-md border-muted/60">
       <CardHeader className="pb-4 space-y-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          {/* タイトル・説明 */}
           <div className="space-y-1">
             <CardTitle className="flex items-center gap-2 text-primary text-xl">
               <Tags className="w-6 h-6" />
@@ -202,6 +203,7 @@ export function TagMasterManagerCard() {
             </CardDescription>
           </div>
 
+          {/* 既読チェック */}
           <Button
             variant={hasNewTags ? "default" : "secondary"}
             size="sm"
@@ -225,30 +227,7 @@ export function TagMasterManagerCard() {
           </Button>
         </div>
 
-        <form
-          onSubmit={handleCreateTags}
-          className="flex gap-2 bg-muted/30 p-2 rounded-lg border border-dashed border-muted-foreground/30"
-        >
-          <div className="relative flex-1">
-            <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="新しいタグを追加..."
-              className="pl-9 bg-background border-none shadow-none focus-visible:ring-1"
-              value={newTagsInput}
-              onChange={(e) => setNewTagsInput(e.target.value)}
-              disabled={isCreating}
-            />
-          </div>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={isCreating || !newTagsInput.trim()}
-            className="shrink-0"
-          >
-            {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "追加"}
-          </Button>
-        </form>
-
+        {/* タグ検索・フィルター */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -273,8 +252,34 @@ export function TagMasterManagerCard() {
             />
           </div>
         </div>
+
+        {/* 新規タグ追加 */}
+        <form
+          onSubmit={handleCreateTags}
+          className="flex gap-2 bg-muted/30 p-2 rounded-lg border border-dashed border-muted-foreground/30"
+        >
+          <div className="relative flex-1">
+            <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="新しいタグを追加..."
+              className="pl-9 bg-background border-none shadow-none focus-visible:ring-1"
+              value={newTagsInput}
+              onChange={(e) => setNewTagsInput(e.target.value)}
+              disabled={isCreating}
+            />
+          </div>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isCreating || !newTagsInput.trim()}
+            className="shrink-0"
+          >
+            {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : "追加"}
+          </Button>
+        </form>
       </CardHeader>
 
+      {/* タグ一覧 */}
       <CardContent className="p-0 sm:p-6 sm:pt-0">
         {isMobile ? (
           <TagMasterCardList {...listProps} />
