@@ -71,8 +71,8 @@ export function MediaTypeFilterSelect({
 
       <SelectContent>
         {/* 種別選択リセット */}
-        <SelectItem value="all">
-          <span className="text-muted-foreground">すべての種別</span>
+        <SelectItem value="all" className="text-muted-foreground">
+          <span>すべての種別</span>
         </SelectItem>
 
         {/* セパレータ */}
