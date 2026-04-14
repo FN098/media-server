@@ -51,6 +51,7 @@ export function TagInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    debugger;
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
@@ -77,11 +78,12 @@ export function TagInput({
         // タグが選択されていればそれを入力
         if (activeIndex >= 0) {
           const tag = suggestions[activeIndex];
-          if (!tag) return;
-          onSelectSuggestion(tag);
-          inputRef.current?.focus();
-          setActiveIndex(-1);
-          return;
+          if (tag) {
+            onSelectSuggestion(tag);
+            inputRef.current?.focus();
+            setActiveIndex(-1);
+            return;
+          }
         }
 
         // 何も入力されていない場合は確定操作とみなす
