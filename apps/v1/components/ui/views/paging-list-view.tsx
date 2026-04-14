@@ -169,8 +169,9 @@ function DataRow({
   const isSelected = selectCtx.isSelectedPath(node.path);
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
-  const { actions } = useActionsContext();
-  const { open, changeRating } = actions;
+  const {
+    actions: { open, changeRating },
+  } = useActionsContext();
 
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
@@ -267,9 +268,7 @@ function DataRow({
           onTouchEnd={stop}
           onTouchMove={stop}
           onClick={isMobile ? handleTap : handleClick}
-          onDoubleClick={
-            !isMobile ? () => void actions.open?.(node) : undefined
-          }
+          onDoubleClick={open && !isMobile ? () => void open(node) : undefined}
           className={cn(
             "grid items-center h-12 border-b select-none cursor-pointer transition-colors text-sm",
             GRID_TEMPLATE,

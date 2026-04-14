@@ -147,8 +147,9 @@ function Cell({
   const isSelected = selectCtx.isSelectedPath(node.path);
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
-  const { actions } = useActionsContext();
-  const { open, changeRating } = actions;
+  const {
+    actions: { open, changeRating },
+  } = useActionsContext();
 
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
