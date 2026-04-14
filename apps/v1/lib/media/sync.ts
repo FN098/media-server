@@ -4,12 +4,12 @@ import { prisma } from "@/lib/prisma";
 
 type MediaCreateItem = Pick<
   PrismaMedia,
-  "path" | "dirPath" | "title" | "fileMtime" | "fileSize" | "previewPath"
+  "path" | "dirPath" | "fileMtime" | "fileSize" | "previewPath"
 >;
 
 type MediaUpdateItem = Pick<
   PrismaMedia,
-  "path" | "title" | "fileMtime" | "fileSize" | "previewPath"
+  "path" | "fileMtime" | "fileSize" | "previewPath"
 >;
 
 export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
@@ -53,7 +53,6 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
       return [
         f.path,
         {
-          title: f.name,
           fileMtime: f.mtime,
           fileSize: f.size,
           previewPath,
@@ -80,7 +79,6 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
       toInsert.push({
         path,
         dirPath,
-        title: meta.title,
         fileMtime: meta.fileMtime,
         fileSize: meta.fileSize ? BigInt(meta.fileSize) : null,
         previewPath: meta.previewPath,
@@ -92,7 +90,6 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
       // 更新
       toUpdate.push({
         path,
-        title: meta.title,
         fileMtime: meta.fileMtime,
         fileSize: meta.fileSize ? BigInt(meta.fileSize) : null,
         previewPath: meta.previewPath,
@@ -115,7 +112,6 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
       await tx.media.update({
         where: { path: u.path },
         data: {
-          title: u.title,
           fileMtime: u.fileMtime,
           fileSize: u.fileSize,
           previewPath: u.previewPath,
