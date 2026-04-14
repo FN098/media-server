@@ -22,6 +22,7 @@ import {
 } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
+import { ActionsProvider } from "@/providers/actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
@@ -377,26 +378,36 @@ export function Trash() {
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div className="flex-1">
-            <PagingGridView
-              allNodes={filteredNodes}
-              initialScrollPath={lastPath}
-              onOpen={handleOpen}
-              onDeletePermanently={handleOpenDeleteSingle}
-              onRestore={handleOpenRestoreSingle}
-            />
+            <ActionsProvider
+              actions={{
+                open: handleOpen,
+                deletePermanently: handleOpenDeleteSingle,
+                restore: handleOpenRestoreSingle,
+              }}
+            >
+              <PagingGridView
+                allNodes={filteredNodes}
+                initialScrollPath={lastPath}
+              />
+            </ActionsProvider>
           </div>
         )}
 
         {/* リストビュー */}
         {viewMode === "list" && (
           <div className="flex-1">
-            <PagingListView
-              allNodes={filteredNodes}
-              initialScrollPath={lastPath}
-              onOpen={handleOpen}
-              onDeletePermanently={handleOpenDeleteSingle}
-              onRestore={handleOpenRestoreSingle}
-            />
+            <ActionsProvider
+              actions={{
+                open: handleOpen,
+                deletePermanently: handleOpenDeleteSingle,
+                restore: handleOpenRestoreSingle,
+              }}
+            >
+              <PagingListView
+                allNodes={filteredNodes}
+                initialScrollPath={lastPath}
+              />
+            </ActionsProvider>
           </div>
         )}
 

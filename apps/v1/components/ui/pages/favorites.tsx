@@ -28,7 +28,9 @@ import {
   MediaPathToNodeMap,
   MediaTypeFilterValue,
 } from "@/lib/media/types";
+import { getParentDirPath } from "@/lib/path/helpers";
 import { normalizeIndex } from "@/lib/query/utils";
+import { ActionsProvider } from "@/providers/actions-provider";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { PagingProvider } from "@/providers/paging-provider";
@@ -222,6 +224,11 @@ export function Favorites() {
     }
 
     toast.warning("このファイル形式は対応していません");
+  };
+
+  const handleOpenParentFolder = (node: MediaNode) => {
+    const parentDir = getParentDirPath(node.path);
+    openFolder(parentDir);
   };
 
   // ===== お気に入り =====
@@ -454,42 +461,48 @@ export function Favorites() {
         {/* グリッドビュー */}
         {viewMode === "grid" && !isViewMode && (
           <div className="flex-1">
-            <PagingGridView
-              allNodes={filteredNodes}
-              initialScrollPath={lastPath}
-              onOpen={handleOpen}
-              onOpenFolder={openFolder}
-              onRatingChange={(node, rating) =>
-                void handleRatingChange(node, rating)
-              }
-              onEditTags={(node) => {
-                handleSelectSingle(node);
-                handleOpenTagEditor();
+            <ActionsProvider
+              actions={{
+                open: handleOpen,
+                openParentFolder: handleOpenParentFolder,
+                changeRating: handleRatingChange,
+                editTags: (node: MediaNode) => {
+                  handleSelectSingle(node);
+                  handleOpenTagEditor();
+                },
+                addTagFilter: handleAddTagFilter,
               }}
-              onAddTagFilter={handleAddTagFilter}
-              onScrollRestored={() => setLastPath(null)}
-            />
+            >
+              <PagingGridView
+                allNodes={filteredNodes}
+                initialScrollPath={lastPath}
+                onScrollRestored={() => setLastPath(null)}
+              />
+            </ActionsProvider>
           </div>
         )}
 
         {/* リストビュー */}
         {viewMode === "list" && !isViewMode && (
           <div className="flex-1">
-            <PagingListView
-              allNodes={filteredNodes}
-              initialScrollPath={lastPath}
-              onOpen={handleOpen}
-              onOpenFolder={openFolder}
-              onRatingChange={(node, rating) =>
-                void handleRatingChange(node, rating)
-              }
-              onEditTags={(node) => {
-                handleSelectSingle(node);
-                handleOpenTagEditor();
+            <ActionsProvider
+              actions={{
+                open: handleOpen,
+                openParentFolder: handleOpenParentFolder,
+                changeRating: handleRatingChange,
+                editTags: (node: MediaNode) => {
+                  handleSelectSingle(node);
+                  handleOpenTagEditor();
+                },
+                addTagFilter: handleAddTagFilter,
               }}
-              onAddTagFilter={handleAddTagFilter}
-              onScrollRestored={() => setLastPath(null)}
-            />
+            >
+              <PagingListView
+                allNodes={filteredNodes}
+                initialScrollPath={lastPath}
+                onScrollRestored={() => setLastPath(null)}
+              />
+            </ActionsProvider>
           </div>
         )}
 

@@ -12,7 +12,7 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { IndexLike } from "@/lib/query/types";
+import { useActionsContext } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
@@ -24,18 +24,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 interface PagingGridViewProps {
   allNodes: MediaNode[];
   initialScrollPath?: string | null;
-  onOpen?: (node: MediaNode) => void;
-  onOpenFolder?: (path: string, at?: IndexLike) => void;
-  onSelectChange?: () => void;
-  onRatingChange?: (node: MediaNode, rating: number | null) => void;
-  onRename?: (node: MediaNode) => void;
-  onMove?: (node: MediaNode) => void;
-  onCopy?: (node: MediaNode) => void;
-  onDelete?: (node: MediaNode) => void;
-  onDeletePermanently?: (node: MediaNode) => void;
-  onRestore?: (node: MediaNode) => void;
-  onEditTags?: (node: MediaNode) => void;
-  onAddTagFilter?: (node: MediaNode) => void;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
 }
@@ -43,18 +31,6 @@ interface PagingGridViewProps {
 export function PagingGridView({
   allNodes,
   initialScrollPath,
-  onOpen,
-  onOpenFolder,
-  onSelectChange,
-  onRatingChange,
-  onRename,
-  onMove,
-  onCopy,
-  onDelete,
-  onDeletePermanently,
-  onRestore,
-  onEditTags,
-  onAddTagFilter,
   onPageChange,
   onScrollRestored,
 }: PagingGridViewProps) {
@@ -135,18 +111,6 @@ export function PagingGridView({
             globalIndex={(currentPage - 1) * pageSize + index}
             allNodes={allNodes}
             isMobile={isMobile}
-            onOpen={onOpen}
-            onOpenFolder={onOpenFolder}
-            onSelectChange={onSelectChange}
-            onRatingChange={onRatingChange}
-            onRename={onRename}
-            onMove={onMove}
-            onCopy={onCopy}
-            onDelete={onDelete}
-            onDeletePermanently={onDeletePermanently}
-            onRestore={onRestore}
-            onEditTags={onEditTags}
-            onAddTagFilter={onAddTagFilter}
           />
         ))}
       </div>
@@ -166,18 +130,7 @@ interface CellProps {
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
-  onOpen?: (node: MediaNode) => void;
-  onOpenFolder?: (path: string, at?: IndexLike) => void;
-  onSelectChange?: () => void;
-  onRatingChange?: (node: MediaNode, rating: number | null) => void;
-  onRename?: (node: MediaNode) => void;
-  onMove?: (node: MediaNode) => void;
-  onCopy?: (node: MediaNode) => void;
-  onDelete?: (node: MediaNode) => void;
-  onDeletePermanently?: (node: MediaNode) => void;
-  onRestore?: (node: MediaNode) => void;
-  onEditTags?: (node: MediaNode) => void;
-  onAddTagFilter?: (node: MediaNode) => void;
+  onSelectionChange?: () => void;
 }
 
 function Cell({
@@ -185,18 +138,7 @@ function Cell({
   globalIndex,
   allNodes,
   isMobile,
-  onOpen,
-  onOpenFolder,
-  onSelectChange,
-  onRatingChange,
-  onRename,
-  onMove,
-  onCopy,
-  onDelete,
-  onDeletePermanently,
-  onRestore,
-  onEditTags,
-  onAddTagFilter,
+  onSelectionChange,
 }: CellProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const favCtx = useFavoritesContext();
@@ -205,13 +147,15 @@ function Cell({
   const isSelected = selectCtx.isSelectedPath(node.path);
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
+  const { actions } = useActionsContext();
+  const { open, changeRating } = actions;
 
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
     selectCtx.setLastSelectedPath(node.path);
-    onSelectChange?.();
-  }, [selectCtx, node.path, onSelectChange]);
+    onSelectionChange?.();
+  }, [selectCtx, node.path, onSelectionChange]);
 
   const { start, stop, isLongPressed } = useLongPress(handleLongPress, 600);
 
@@ -235,7 +179,8 @@ function Cell({
         } else {
           selectCtx.addPaths(paths);
         }
-        onSelectChange?.();
+
+        onSelectionChange?.();
         return;
       }
     }
@@ -250,7 +195,7 @@ function Cell({
     }
 
     selectCtx.setLastSelectedPath(node.path);
-    onSelectChange?.();
+    onSelectionChange?.();
   };
 
   const handleTap = (e: React.MouseEvent) => {
@@ -269,10 +214,11 @@ function Cell({
           selectCtx.exitSelectionMode();
         }
       }
-      onSelectChange?.();
+      onSelectionChange?.();
       return;
     }
-    onOpen?.(node);
+
+    void open?.(node);
   };
 
   return (
@@ -290,16 +236,6 @@ function Cell({
           open={actionContextMenuOpen}
           onOpenChange={setActionContextMenuOpen}
           node={node}
-          onRatingChange={onRatingChange}
-          onRename={onRename}
-          onMove={onMove}
-          onCopy={onCopy}
-          onDelete={onDelete}
-          onDeletePermanently={onDeletePermanently}
-          onRestore={onRestore}
-          onEditTags={onEditTags}
-          onAddTagFilter={onAddTagFilter}
-          onOpenFolder={onOpenFolder}
         >
           <div
             id={`media-item-${globalIndex}`}
@@ -310,7 +246,7 @@ function Cell({
             onTouchEnd={stop}
             onTouchMove={stop}
             onClick={isMobile ? handleTap : handleClick}
-            onDoubleClick={!isMobile ? () => onOpen?.(node) : undefined}
+            onDoubleClick={!isMobile ? () => void open?.(node) : undefined}
             className={cn(
               "relative w-full h-full overflow-hidden rounded-xl border bg-card transition-all duration-200 select-none cursor-pointer",
               isSelected
@@ -353,11 +289,11 @@ function Cell({
 
             {/* Actions */}
             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-              {!selectCtx.isSelectionMode && isMediaNode && onRatingChange && (
+              {!selectCtx.isSelectionMode && isMediaNode && changeRating && (
                 <ToggleFavoriteButton
                   variant="grid"
                   rating={rating}
-                  onRatingChange={(rating) => onRatingChange(node, rating)}
+                  onRatingChange={(rating) => void changeRating?.(node, rating)}
                 />
               )}
 
@@ -372,16 +308,6 @@ function Cell({
                     open={actionDropdownMenuOpen}
                     onOpenChange={setActionDropdownMenuOpen}
                     node={node}
-                    onRatingChange={onRatingChange}
-                    onRename={onRename}
-                    onMove={onMove}
-                    onCopy={onCopy}
-                    onDelete={onDelete}
-                    onDeletePermanently={onDeletePermanently}
-                    onRestore={onRestore}
-                    onEditTags={onEditTags}
-                    onAddTagFilter={onAddTagFilter}
-                    onOpenFolder={onOpenFolder}
                     className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white rounded-full"
                   />
                 </div>

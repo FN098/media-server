@@ -15,6 +15,7 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/formatter";
+import { useActionsContext } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
@@ -26,18 +27,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 interface PagingListViewProps {
   allNodes: MediaNode[];
   initialScrollPath?: string | null;
-  onOpen?: (node: MediaNode) => void;
-  onOpenFolder?: (path: string) => void;
-  onSelectChange?: () => void;
-  onRatingChange?: (node: MediaNode, rating: number | null) => void;
-  onRename?: (node: MediaNode) => void;
-  onMove?: (node: MediaNode) => void;
-  onCopy?: (node: MediaNode) => void;
-  onDelete?: (node: MediaNode) => void;
-  onDeletePermanently?: (node: MediaNode) => void;
-  onRestore?: (node: MediaNode) => void;
-  onEditTags?: (node: MediaNode) => void;
-  onAddTagFilter?: (node: MediaNode) => void;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
 }
@@ -48,18 +37,6 @@ const GRID_TEMPLATE =
 export function PagingListView({
   allNodes,
   initialScrollPath,
-  onOpen,
-  onOpenFolder,
-  onSelectChange,
-  onRatingChange,
-  onRename,
-  onMove,
-  onCopy,
-  onDelete,
-  onDeletePermanently,
-  onRestore,
-  onEditTags,
-  onAddTagFilter,
   onPageChange,
   onScrollRestored,
 }: PagingListViewProps) {
@@ -135,18 +112,6 @@ export function PagingListView({
             globalIndex={(currentPage - 1) * pageSize + index}
             allNodes={allNodes}
             isMobile={isMobile}
-            onOpen={onOpen}
-            onOpenFolder={onOpenFolder}
-            onSelectChange={onSelectChange}
-            onRatingChange={onRatingChange}
-            onRename={onRename}
-            onMove={onMove}
-            onCopy={onCopy}
-            onDelete={onDelete}
-            onDeletePermanently={onDeletePermanently}
-            onRestore={onRestore}
-            onEditTags={onEditTags}
-            onAddTagFilter={onAddTagFilter}
           />
         ))}
       </div>
@@ -187,18 +152,7 @@ interface DataRowProps {
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
-  onOpen?: (node: MediaNode) => void;
-  onOpenFolder?: (path: string) => void;
-  onSelectChange?: () => void;
-  onRatingChange?: (node: MediaNode, rating: number | null) => void;
-  onRename?: (node: MediaNode) => void;
-  onMove?: (node: MediaNode) => void;
-  onCopy?: (node: MediaNode) => void;
-  onDelete?: (node: MediaNode) => void;
-  onDeletePermanently?: (node: MediaNode) => void;
-  onRestore?: (node: MediaNode) => void;
-  onEditTags?: (node: MediaNode) => void;
-  onAddTagFilter?: (node: MediaNode) => void;
+  onSelectionChange?: () => void;
 }
 
 function DataRow({
@@ -206,18 +160,7 @@ function DataRow({
   globalIndex,
   allNodes,
   isMobile,
-  onOpen,
-  onOpenFolder,
-  onSelectChange,
-  onRatingChange,
-  onRename,
-  onMove,
-  onCopy,
-  onDelete,
-  onDeletePermanently,
-  onRestore,
-  onEditTags,
-  onAddTagFilter,
+  onSelectionChange,
 }: DataRowProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const favCtx = useFavoritesContext();
@@ -226,13 +169,15 @@ function DataRow({
   const isSelected = selectCtx.isSelectedPath(node.path);
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
+  const { actions } = useActionsContext();
+  const { open, changeRating } = actions;
 
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
     selectCtx.setLastSelectedPath(node.path);
-    onSelectChange?.();
-  }, [selectCtx, node.path, onSelectChange]);
+    onSelectionChange?.();
+  }, [selectCtx, node.path, onSelectionChange]);
 
   const { start, stop, isLongPressed } = useLongPress(handleLongPress, 600);
 
@@ -257,7 +202,7 @@ function DataRow({
           selectCtx.addPaths(paths);
         }
 
-        onSelectChange?.();
+        onSelectionChange?.();
         return;
       }
     }
@@ -272,7 +217,7 @@ function DataRow({
     }
 
     selectCtx.setLastSelectedPath(node.path);
-    onSelectChange?.();
+    onSelectionChange?.();
   };
 
   const handleTap = (e: React.MouseEvent) => {
@@ -290,10 +235,11 @@ function DataRow({
           selectCtx.exitSelectionMode();
         }
       }
-      onSelectChange?.();
-    } else {
-      onOpen?.(node);
+      onSelectionChange?.();
+      return;
     }
+
+    void open?.(node);
   };
 
   return (
@@ -310,16 +256,6 @@ function DataRow({
         open={actionContextMenuOpen}
         onOpenChange={setActionContextMenuOpen}
         node={node}
-        onRatingChange={onRatingChange}
-        onRename={onRename}
-        onMove={onMove}
-        onCopy={onCopy}
-        onDelete={onDelete}
-        onDeletePermanently={onDeletePermanently}
-        onRestore={onRestore}
-        onEditTags={onEditTags}
-        onAddTagFilter={onAddTagFilter}
-        onOpenFolder={onOpenFolder}
       >
         <div
           id={`media-item-${globalIndex}`}
@@ -331,7 +267,9 @@ function DataRow({
           onTouchEnd={stop}
           onTouchMove={stop}
           onClick={isMobile ? handleTap : handleClick}
-          onDoubleClick={!isMobile ? () => onOpen?.(node) : undefined}
+          onDoubleClick={
+            !isMobile ? () => void actions.open?.(node) : undefined
+          }
           className={cn(
             "grid items-center h-12 border-b select-none cursor-pointer transition-colors text-sm",
             GRID_TEMPLATE,
@@ -348,7 +286,7 @@ function DataRow({
               checked={isSelected}
               onCheckedChange={() => {
                 selectCtx.togglePath(node.path);
-                onSelectChange?.();
+                onSelectionChange?.();
               }}
             />
           </div>
@@ -405,16 +343,16 @@ function DataRow({
           >
             {node.isDirectory ? (
               <FavoriteCountBadge count={node.favoriteCount ?? 0} />
-            ) : isMobile && onRatingChange ? (
+            ) : isMobile && changeRating ? (
               <ToggleFavoriteButton
                 rating={rating}
                 variant="list"
-                onRatingChange={(rating) => onRatingChange(node, rating)}
+                onRatingChange={(rating) => void changeRating(node, rating)}
               />
-            ) : onRatingChange ? (
+            ) : changeRating ? (
               <FavoriteRating
                 rating={rating}
-                onRatingChange={(rating) => onRatingChange(node, rating)}
+                onRatingChange={(rating) => void changeRating(node, rating)}
               />
             ) : null}
           </div>
@@ -425,15 +363,6 @@ function DataRow({
               open={actionDropdownMenuOpen}
               onOpenChange={setActionDropdownMenuOpen}
               node={node}
-              onRename={onRename}
-              onMove={onMove}
-              onCopy={onCopy}
-              onDelete={onDelete}
-              onDeletePermanently={onDeletePermanently}
-              onRestore={onRestore}
-              onEditTags={onEditTags}
-              onAddTagFilter={onAddTagFilter}
-              onOpenFolder={onOpenFolder}
             />
           </div>
         </div>

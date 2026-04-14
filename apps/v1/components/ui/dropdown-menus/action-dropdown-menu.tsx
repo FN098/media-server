@@ -1,9 +1,10 @@
 "use client";
 
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
+import { Actions } from "@/hooks/use-actions";
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import { getParentDirPath } from "@/lib/path/helpers";
+import { useActionsContext } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import {
   Copy,
+  Folder,
   FolderInput,
   ListFilterPlus,
   MoreVertical,
@@ -23,51 +25,55 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 interface ActionDropdownMenuProps {
   node: MediaNode;
   className?: string;
-  onOpenFolder?: (path: string) => void;
-  onRename?: (node: MediaNode) => void;
-  onMove?: (node: MediaNode) => void;
-  onCopy?: (node: MediaNode) => void;
-  onDelete?: (node: MediaNode) => void;
-  onDeletePermanently?: (node: MediaNode) => void;
-  onRestore?: (node: MediaNode) => void;
-  onEditTags?: (node: MediaNode) => void;
-  onAddTagFilter?: (node: MediaNode) => void;
-  onRatingChange?: (node: MediaNode, rating: number | null) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  overrides?: Partial<Actions>;
 }
 
 export function ActionDropdownMenu({
   node,
   className,
-  onOpenFolder,
-  onRename,
-  onMove,
-  onCopy,
-  onDelete,
-  onDeletePermanently,
-  onRestore,
-  onEditTags,
-  onAddTagFilter,
-  onRatingChange,
   open: controlledOpen,
   onOpenChange: onControlledOpenChange,
+  overrides,
 }: ActionDropdownMenuProps) {
-  const { getFavorite } = useFavoritesContext();
-  const [internalOpen, setInternalOpen] = useState(false);
+  const { actions: contextActions } = useActionsContext();
 
+  const actions = useMemo(
+    () => ({
+      ...contextActions,
+      ...overrides,
+    }),
+    [contextActions, overrides]
+  );
+
+  const {
+    changeRating,
+    openParentFolder,
+    rename,
+    move,
+    copy,
+    editTags,
+    addTagFilter,
+    restore,
+    delete: deleteAction,
+    deletePermanently,
+  } = actions;
+
+  const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const setOpen = onControlledOpenChange ?? setInternalOpen;
 
+  const { getFavorite } = useFavoritesContext();
+  const { rating } = getFavorite(node.path);
+
   const mounted = useMounted();
   if (!mounted) return null;
-
-  const { rating } = getFavorite(node.path);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -86,76 +92,76 @@ export function ActionDropdownMenu({
 
       {/* アクションメニュー */}
       <DropdownMenuContent align="end" className="min-w-48">
-        {onRatingChange && !node.isDirectory && (
+        {changeRating && !node.isDirectory && (
           <DropdownMenuItem className="flex justify-center">
             <FavoriteRating
               rating={rating}
-              onRatingChange={(rating) => onRatingChange(node, rating)}
+              onRatingChange={(rating) => void changeRating(node, rating)}
               variant="menu"
             />
           </DropdownMenuItem>
         )}
 
-        {onOpenFolder && (
+        {openParentFolder && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              onOpenFolder(getParentDirPath(node.path));
+              void openParentFolder(node);
             }}
           >
-            <Pencil className="mr-2 h-4 w-4" /> フォルダを開く
+            <Folder className="mr-2 h-4 w-4" /> フォルダを開く
           </DropdownMenuItem>
         )}
 
-        {onRename && (
+        {rename && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              onRename(node);
+              void rename(node);
             }}
           >
             <Pencil className="mr-2 h-4 w-4" /> 名前の変更
           </DropdownMenuItem>
         )}
 
-        {onMove && (
+        {move && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              onMove(node);
+              void move(node);
             }}
           >
             <FolderInput className="mr-2 h-4 w-4" /> 移動
           </DropdownMenuItem>
         )}
 
-        {onCopy && (
+        {copy && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              onCopy(node);
+              void copy(node);
             }}
           >
             <Copy className="mr-2 h-4 w-4" /> コピー
           </DropdownMenuItem>
         )}
 
-        {onEditTags && !node.isDirectory && (
+        {editTags && !node.isDirectory && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              onEditTags(node);
+              void editTags(node);
             }}
           >
             <Tag className="mr-2 h-4 w-4" /> タグの編集
           </DropdownMenuItem>
         )}
 
-        {onAddTagFilter && !node.isDirectory && (
+        {addTagFilter && !node.isDirectory && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              onAddTagFilter(node);
+              void addTagFilter(node);
             }}
             disabled={!node.tags || node.tags.length === 0}
           >
@@ -163,12 +169,12 @@ export function ActionDropdownMenu({
           </DropdownMenuItem>
         )}
 
-        {onRestore && (
+        {restore && (
           <DropdownMenuItem
             className="text-success focus:text-success"
             onClick={(e) => {
               e.stopPropagation();
-              onRestore(node);
+              void restore(node);
             }}
           >
             <RotateCcw className="mr-2 h-4 w-4" />
@@ -176,12 +182,12 @@ export function ActionDropdownMenu({
           </DropdownMenuItem>
         )}
 
-        {onDelete && (
+        {deleteAction && (
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
-              onDelete(node);
+              void deleteAction(node);
             }}
           >
             <Trash2 className="mr-2 h-4 w-4" />
@@ -189,12 +195,12 @@ export function ActionDropdownMenu({
           </DropdownMenuItem>
         )}
 
-        {onDeletePermanently && (
+        {deletePermanently && (
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
-              onDeletePermanently(node);
+              void deletePermanently(node);
             }}
           >
             <Trash2 className="mr-2 h-4 w-4" />

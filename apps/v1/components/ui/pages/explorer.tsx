@@ -38,6 +38,7 @@ import {
 } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
+import { ActionsProvider } from "@/providers/actions-provider";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { PagingProvider } from "@/providers/paging-provider";
@@ -661,48 +662,54 @@ export function Explorer() {
         {/* グリッドビュー */}
         {viewMode === "grid" && !isViewMode && (
           <div className="flex-1">
-            <PagingGridView
-              allNodes={filteredNodes}
-              initialScrollPath={lastPath}
-              onOpen={handleOpen}
-              onRatingChange={(node, rating) =>
-                void handleRatingChange(node, rating)
-              }
-              onRename={handleRenameSingle}
-              onMove={handleOpenMoveSingle}
-              onCopy={handleOpenCopySingle}
-              onDelete={handleOpenDeleteSingle}
-              onEditTags={(node) => {
-                handleSelectSingle(node);
-                handleOpenTagEditor();
+            <ActionsProvider
+              actions={{
+                open: handleOpen,
+                changeRating: handleRatingChange,
+                rename: handleRenameSingle,
+                move: handleOpenMoveSingle,
+                copy: handleOpenCopySingle,
+                delete: handleOpenDeleteSingle,
+                editTags: (node: MediaNode) => {
+                  handleSelectSingle(node);
+                  handleOpenTagEditor();
+                },
+                addTagFilter: handleAddTagFilter,
               }}
-              onAddTagFilter={handleAddTagFilter}
-              onScrollRestored={() => setLastPath(null)}
-            />
+            >
+              <PagingGridView
+                allNodes={filteredNodes}
+                initialScrollPath={lastPath}
+                onScrollRestored={() => setLastPath(null)}
+              />
+            </ActionsProvider>
           </div>
         )}
 
         {/* リストビュー */}
         {viewMode === "list" && !isViewMode && (
           <div className="flex-1">
-            <PagingListView
-              allNodes={filteredNodes}
-              initialScrollPath={lastPath}
-              onOpen={handleOpen}
-              onRatingChange={(node, rating) =>
-                void handleRatingChange(node, rating)
-              }
-              onRename={handleRenameSingle}
-              onMove={handleOpenMoveSingle}
-              onCopy={handleOpenCopySingle}
-              onDelete={handleOpenDeleteSingle}
-              onEditTags={(node) => {
-                handleSelectSingle(node);
-                handleOpenTagEditor();
+            <ActionsProvider
+              actions={{
+                open: handleOpen,
+                changeRating: handleRatingChange,
+                rename: handleRenameSingle,
+                move: handleOpenMoveSingle,
+                copy: handleOpenCopySingle,
+                delete: handleOpenDeleteSingle,
+                editTags: (node: MediaNode) => {
+                  handleSelectSingle(node);
+                  handleOpenTagEditor();
+                },
+                addTagFilter: handleAddTagFilter,
               }}
-              onAddTagFilter={handleAddTagFilter}
-              onScrollRestored={() => setLastPath(null)}
-            />
+            >
+              <PagingListView
+                allNodes={filteredNodes}
+                initialScrollPath={lastPath}
+                onScrollRestored={() => setLastPath(null)}
+              />
+            </ActionsProvider>
           </div>
         )}
 
@@ -769,6 +776,7 @@ export function Explorer() {
             </div>
           }
         />
+
         {/* タグエディター */}
         <TagEditSheet
           open={isTagEditMode}
