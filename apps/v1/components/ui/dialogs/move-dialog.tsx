@@ -22,7 +22,7 @@ import { toast } from "sonner";
 interface MoveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  sourceNodes: { path: string; name: string }[];
+  sourceNodes: { path: string }[];
   initialDirPath?: string;
 }
 
