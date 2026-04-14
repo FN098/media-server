@@ -1,5 +1,6 @@
 import { Header } from "@/components/ui/headers/header";
 import { pageMetas } from "@/lib/meta";
+import { HistoryProvider } from "@/providers/history-provider";
 import { SearchProvider } from "@/providers/search-provider";
 import { TagEditorProvider } from "@/providers/tag-editor-provider";
 import { ViewModeProvider } from "@/providers/view-mode-provider";
@@ -13,19 +14,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <SearchProvider>
         <ViewerUIProvider>
           <TagEditorProvider>
-            <div className="w-full h-svh flex flex-col overflow-hidden">
-              <Header
-                title={meta.title}
-                icon={meta.icon}
-                basePath={meta.url}
-                features={{
-                  navigation: false,
-                }}
-              />
-              <main className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                {children}
-              </main>
-            </div>
+            <HistoryProvider>
+              <div className="w-full h-svh flex flex-col overflow-hidden">
+                <Header
+                  title={meta.title}
+                  icon={meta.icon}
+                  basePath={meta.url}
+                  features={{
+                    navigation: false,
+                  }}
+                />
+                <main className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                  {children}
+                </main>
+              </div>
+            </HistoryProvider>
           </TagEditorProvider>
         </ViewerUIProvider>
       </SearchProvider>
