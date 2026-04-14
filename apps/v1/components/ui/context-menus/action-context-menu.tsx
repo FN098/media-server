@@ -30,6 +30,7 @@ interface ActionContextMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   overrides?: Partial<Actions>;
+  disabled?: boolean;
 }
 
 export function ActionContextMenu({
@@ -38,8 +39,11 @@ export function ActionContextMenu({
   open,
   onOpenChange,
   overrides,
+  disabled = false,
 }: ActionContextMenuProps) {
   const { actions: contextActions } = useActionsContext();
+  const { getFavorite } = useFavoritesContext();
+  const mounted = useMounted();
 
   const actions = useMemo(
     () => ({
@@ -48,6 +52,10 @@ export function ActionContextMenu({
     }),
     [contextActions, overrides]
   );
+
+  if (!mounted || disabled) {
+    return <>{children}</>;
+  }
 
   const {
     changeRating,
@@ -62,15 +70,11 @@ export function ActionContextMenu({
     deletePermanently,
   } = actions;
 
-  const { getFavorite } = useFavoritesContext();
   const { rating } = getFavorite(node.path);
-
-  const mounted = useMounted();
-  if (!mounted) return <>{children}</>;
 
   return (
     <ContextMenu modal={open} onOpenChange={onOpenChange}>
-      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{children} </ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
         {changeRating && !node.isDirectory && (
           <ContextMenuItem className="flex justify-center">

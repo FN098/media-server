@@ -257,6 +257,7 @@ function DataRow({
         open={actionContextMenuOpen}
         onOpenChange={setActionContextMenuOpen}
         node={node}
+        disabled={isMobile}
       >
         <div
           id={`media-item-${globalIndex}`}
