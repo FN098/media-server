@@ -42,7 +42,7 @@ import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import { ArrowDownAz, ArrowDownZa, Sparkle, TagIcon } from "lucide-react";
+import { ArrowDownAz, Sparkle, TagIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
@@ -410,12 +410,6 @@ export function Favorites() {
                   direction: "asc",
                   label: "パス順 (A-Z)",
                   icon: ArrowDownAz,
-                },
-                {
-                  key: "path",
-                  direction: "desc",
-                  label: "パス順 (Z-A)",
-                  icon: ArrowDownZa,
                 },
                 {
                   key: "rating",

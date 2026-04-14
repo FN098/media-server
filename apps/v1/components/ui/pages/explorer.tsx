@@ -58,7 +58,6 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import {
   ArrowDownAz,
-  ArrowDownZa,
   CalendarArrowDown,
   Copy,
   FolderInput,
@@ -612,12 +611,6 @@ export function Explorer() {
                   direction: "asc",
                   label: "名前順 (A-Z)",
                   icon: ArrowDownAz,
-                },
-                {
-                  key: "name",
-                  direction: "desc",
-                  label: "名前順 (Z-A)",
-                  icon: ArrowDownZa,
                 },
                 {
                   key: "rating",
