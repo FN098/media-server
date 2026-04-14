@@ -51,6 +51,16 @@ export function Trash() {
     openPrevFolder,
   } = useTrashContext();
 
+  // 前のフォルダを開く
+  const handleOpenPrevFolder = (at: IndexLike = "last") => {
+    openPrevFolder(at);
+  };
+
+  // 次のフォルダを開く
+  const handleOpenNextFolder = (at: IndexLike = "first") => {
+    openNextFolder(at);
+  };
+
   // ===== URL ステート =====
 
   // URLファーストのステート管理
@@ -129,16 +139,6 @@ export function Trash() {
     if (!media) return;
     selectPaths([media.path]);
     setLastPath(media.path);
-  };
-
-  // 前のフォルダを開く
-  const handleOpenPrevFolder = (at: IndexLike = "last") => {
-    openPrevFolder(at);
-  };
-
-  // 次のフォルダを開く
-  const handleOpenNextFolder = (at: IndexLike = "first") => {
-    openNextFolder(at);
   };
 
   // ===== ナビゲーション =====
