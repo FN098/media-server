@@ -4,6 +4,15 @@ import kuromoji, { IpadicFeatures, Tokenizer } from "kuromoji";
 let cachedTokenizer: Tokenizer<IpadicFeatures> | null = null;
 
 /**
+ * ひらがなをカタカナに変換するユーティリティ
+ */
+function toKatakana(str: string): string {
+  return str.replace(/[\u3041-\u3096]/g, (match) => {
+    return String.fromCharCode(match.charCodeAt(0) + 0x60);
+  });
+}
+
+/**
  * タグ名から読み（カタカナ）を自動生成する
  */
 export async function generateKana(text: string): Promise<string> {
@@ -30,8 +39,12 @@ export async function generateKana(text: string): Promise<string> {
 
   return tokens
     .map((token: IpadicFeatures) => {
-      // IpadicFeatures の型定義に基づき、reading があれば優先、なければ原文(surface_form)
-      return token.reading ? token.reading : token.surface_form;
+      // 1. 読み(reading)があればそれを使う
+      // 2. なければ原文(surface_form)を使う
+      const base = token.reading ? token.reading : token.surface_form;
+
+      // ひらがなが含まれる可能性があるのでカタカナに変換
+      return toKatakana(base);
     })
     .join("");
 }
