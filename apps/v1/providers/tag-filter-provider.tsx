@@ -29,6 +29,16 @@ export function TagFilterProvider({
   );
 }
 
+// overload
+export function useTagFilterContext(options: {
+  suppressError?: false;
+}): TagFilterContextType;
+
+export function useTagFilterContext(options: {
+  suppressError: true;
+}): TagFilterContextType | null;
+
+// implementation
 export function useTagFilterContext(options?: TagFilterContextOptions) {
   const context = useContext(TagFilterContext);
   if (context === undefined) {

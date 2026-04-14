@@ -65,7 +65,7 @@ export function TagFilterDialog({
     mode,
     setMode,
     activate,
-  } = useTagFilterContext();
+  } = useTagFilterContext({ suppressError: false });
 
   const [open, setOpen] = useState(false);
   const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(
