@@ -593,16 +593,6 @@ export function Explorer() {
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-[repeat(6,180px)] gap-2 flex-grow">
-            {/* 新規フォルダ作成ボタン */}
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleOpenCreateFolderDialog}
-            >
-              <Plus className="h-4 w-4" />
-              新規フォルダ
-            </Button>
-
             {/* 並び替え */}
             <SortSelect
               options={[
@@ -650,7 +640,13 @@ export function Explorer() {
             {/* タグフィルター */}
             <TagFilterDialog />
 
-            {/* リセットボタン */}
+            {/* 新規フォルダ作成 */}
+            <Button variant="outline" onClick={handleOpenCreateFolderDialog}>
+              <Plus className="h-4 w-4" />
+              新規フォルダ
+            </Button>
+
+            {/* リセット */}
             <FilterResetButton
               onReset={handleResetFilters}
               isVisible={isFiltered}
