@@ -19,6 +19,7 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { ActionsProvider } from "@/providers/actions-provider";
+import { useHistoryContext } from "@/providers/history-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -57,9 +58,6 @@ export function Trash() {
     openNextFolder(at);
   };
 
-  // 最後に閲覧したパス
-  const [lastPath, setLastPath] = useState<string | null>(null);
-
   // ===== URL ステート =====
 
   // URLファーストのステート管理
@@ -93,6 +91,25 @@ export function Trash() {
     }
   }, [setExplorerQuery, query, viewMode, q, view]);
 
+  // ===== 訪問履歴 =====
+
+  const {
+    last: lastHistory,
+    pushHistory,
+    toHistoryItem,
+    popHistory,
+    replaceHistoryLast,
+  } = useHistoryContext();
+
+  useEffect(() => {
+    pushHistory({ path: listing.path, type: "folder" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleScrollRestored = () => {
+    popHistory();
+  };
+
   // ===== フィルタリング =====
 
   const allNodes = listing.nodes;
@@ -115,8 +132,14 @@ export function Trash() {
   const handleViewerIndexChange = (index: number) => {
     const media = mediaOnly[index];
     if (!media) return;
+
     select(media);
-    setLastPath(media.path);
+
+    if (lastHistory?.type === "file") {
+      replaceHistoryLast(toHistoryItem(media));
+    } else {
+      pushHistory(toHistoryItem(media));
+    }
   };
 
   // ===== ナビゲーション =====
@@ -315,7 +338,8 @@ export function Trash() {
             >
               <PagingGridView
                 allNodes={filteredNodes}
-                initialScrollPath={lastPath}
+                initialScrollPath={lastHistory?.path}
+                onScrollRestored={handleScrollRestored}
               />
             </ActionsProvider>
           </div>
@@ -333,7 +357,8 @@ export function Trash() {
             >
               <PagingListView
                 allNodes={filteredNodes}
-                initialScrollPath={lastPath}
+                initialScrollPath={lastHistory?.path}
+                onScrollRestored={handleScrollRestored}
               />
             </ActionsProvider>
           </div>

@@ -22,6 +22,7 @@ import { getParentDirPath } from "@/lib/path/helpers";
 import { ActionsProvider } from "@/providers/actions-provider";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useHistoryContext } from "@/providers/history-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
@@ -30,15 +31,12 @@ import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowDownAz, Sparkle, TagIcon } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function Favorites() {
   const { listing, openViewer, closeViewer, openFolder } = useExplorerContext();
-
-  // 最後に閲覧したパス
-  const [lastPath, setLastPath] = useState<string | null>(null);
 
   // ===== URL ステート =====
 
@@ -67,6 +65,25 @@ export function Favorites() {
       });
     }
   }, [setExplorerQuery, query, viewMode, q, view]);
+
+  // ===== 訪問履歴 =====
+
+  const {
+    last: lastHistory,
+    pushHistory,
+    toHistoryItem,
+    popHistory,
+    replaceHistoryLast,
+  } = useHistoryContext();
+
+  useEffect(() => {
+    pushHistory({ path: listing.path, type: "folder" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleScrollRestored = () => {
+    popHistory();
+  };
 
   // ===== フィルタリング =====
 
@@ -100,8 +117,14 @@ export function Favorites() {
   const handleViewerIndexChange = (index: number) => {
     const media = mediaOnly[index];
     if (!media) return;
+
     select(media);
-    setLastPath(media.path);
+
+    if (lastHistory?.type === "file") {
+      replaceHistoryLast(toHistoryItem(media));
+    } else {
+      pushHistory(toHistoryItem(media));
+    }
   };
 
   // ===== ナビゲーション =====
@@ -324,8 +347,8 @@ export function Favorites() {
             >
               <PagingGridView
                 allNodes={filteredNodes}
-                initialScrollPath={lastPath}
-                onScrollRestored={() => setLastPath(null)}
+                initialScrollPath={lastHistory?.path}
+                onScrollRestored={handleScrollRestored}
               />
             </ActionsProvider>
           </div>
@@ -348,8 +371,8 @@ export function Favorites() {
             >
               <PagingListView
                 allNodes={filteredNodes}
-                initialScrollPath={lastPath}
-                onScrollRestored={() => setLastPath(null)}
+                initialScrollPath={lastHistory?.path}
+                onScrollRestored={handleScrollRestored}
               />
             </ActionsProvider>
           </div>
