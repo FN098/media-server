@@ -42,7 +42,7 @@ export function CopyDialog({
     if (open) {
       fetchDirs(initialDirPath);
     }
-    onOpenChange(false);
+    onOpenChange(open);
   };
 
   // フォルダ一覧を取得

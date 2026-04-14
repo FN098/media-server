@@ -42,6 +42,7 @@ export function MoveDialog({
     if (open) {
       fetchDirs(initialDirPath);
     }
+    onOpenChange(open);
   };
 
   // フォルダ一覧を取得
