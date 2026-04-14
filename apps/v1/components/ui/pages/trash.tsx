@@ -57,6 +57,9 @@ export function Trash() {
     openNextFolder(at);
   };
 
+  // 最後に閲覧したパス
+  const [lastPath, setLastPath] = useState<string | null>(null);
+
   // ===== URL ステート =====
 
   // URLファーストのステート管理
@@ -102,12 +105,11 @@ export function Trash() {
 
   // ===== ビューア =====
 
-  const { initialIndex, getViewerIndex, isViewMode, lastPath, setLastPath } =
-    useViewerControl({
-      mediaOnly,
-      at,
-      modal,
-    });
+  const { initialIndex, getViewerIndex, isViewMode } = useViewerControl({
+    mediaOnly,
+    at,
+    modal,
+  });
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {

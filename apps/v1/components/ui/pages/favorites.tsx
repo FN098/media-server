@@ -30,12 +30,15 @@ import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowDownAz, Sparkle, TagIcon } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function Favorites() {
   const { listing, openViewer, closeViewer, openFolder } = useExplorerContext();
+
+  // 最後に閲覧したパス
+  const [lastPath, setLastPath] = useState<string | null>(null);
 
   // ===== URL ステート =====
 
@@ -87,12 +90,11 @@ export function Favorites() {
 
   // ===== ビューア =====
 
-  const { initialIndex, getViewerIndex, isViewMode, lastPath, setLastPath } =
-    useViewerControl({
-      mediaOnly,
-      at,
-      modal,
-    });
+  const { initialIndex, getViewerIndex, isViewMode } = useViewerControl({
+    mediaOnly,
+    at,
+    modal,
+  });
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {

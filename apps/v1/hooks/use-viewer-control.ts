@@ -2,7 +2,7 @@
 
 import { MediaNode, MediaPathToIndexMap } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 const normalizeIndex = (at: IndexLike, total: number) => {
   if (at === "first") return 0;
@@ -47,14 +47,9 @@ export function useViewerControl({
   // ビューア起動モード
   const isViewMode = modal && initialIndex != null && !!mediaOnly[initialIndex];
 
-  // 直前のインデックス
-  const [lastPath, setLastPath] = useState<string | null>(null);
-
   return {
     initialIndex,
     getViewerIndex,
     isViewMode,
-    lastPath,
-    setLastPath,
   };
 }
