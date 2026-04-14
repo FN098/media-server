@@ -433,20 +433,20 @@ async function recursiveMergeMove(src: string, dest: string) {
 export async function deleteNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  for (const oldVirtualPath of sourcePaths) {
+  for (const srcVirtualPath of sourcePaths) {
     try {
-      const newVirtualPath = oldVirtualPath;
+      const destVirtualPath = srcVirtualPath;
 
-      const oldRealPath = getServerMediaPath(oldVirtualPath);
-      const newRealPath = getServerMediaTrashPath(newVirtualPath);
+      const srcRealPath = getServerMediaPath(srcVirtualPath);
+      const destRealPath = getServerMediaTrashPath(destVirtualPath);
 
       // FS更新
-      await mkdir(dirname(newRealPath), { recursive: true });
-      await recursiveMergeMove(oldRealPath, newRealPath);
+      await mkdir(dirname(destRealPath), { recursive: true });
+      await recursiveMergeMove(srcRealPath, destRealPath);
 
       results.success++;
     } catch (error) {
-      console.error(`Delete Error [${oldVirtualPath}]:`, error);
+      console.error(`Delete Error [${srcVirtualPath}]:`, error);
       results.failed++;
       results.errors.push(getErrorMessage(error));
     }
@@ -493,27 +493,29 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
 export async function restoreNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  for (const oldVirtualPath of sourcePaths) {
+  for (const srcVirtualPath of sourcePaths) {
     try {
-      const newVirtualPath = oldVirtualPath;
+      const destVirtualPath = srcVirtualPath;
 
-      const oldRealPath = getServerMediaTrashPath(oldVirtualPath);
-      const newRealPath = getServerMediaPath(newVirtualPath);
+      const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
+      const destRealPath = getServerMediaPath(destVirtualPath);
 
       // FS更新
-      await mkdir(dirname(newRealPath), { recursive: true });
-      await recursiveMergeMove(oldRealPath, newRealPath);
+      await mkdir(dirname(destRealPath), { recursive: true });
+      await recursiveMergeMove(srcRealPath, destRealPath);
 
       results.success++;
     } catch (error) {
-      console.error(`Restore Error [${oldVirtualPath}]:`, error);
+      console.error(`Restore Error [${srcVirtualPath}]:`, error);
       results.failed++;
       results.errors.push(getErrorMessage(error));
     }
   }
 
+  // キャッシュの更新
   revalidatePath("/explorer");
   revalidatePath("/trash");
+
   return results;
 }
 
