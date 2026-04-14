@@ -285,7 +285,6 @@ export function MediaViewer({
   // 左右キー / A, D: 前後のメディアに移動
   // S: お気に入りの切り替え
   // F: 全画面表示
-  // P/N: 前/次のフォルダを開く
   // O: フォルダを開く
   // H: ヘッダーの固定切り替え
   // 0~5: お気に入り評価の設定
@@ -315,14 +314,6 @@ export function MediaViewer({
     enabled: active,
   });
   useHotkeys("f", () => toggleFullscreen(), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: active,
-  });
-  useHotkeys("p", () => onPrevFolder?.("first"), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: active,
-  });
-  useHotkeys("n", () => onNextFolder?.("first"), {
     scopes: ["viewer", "tag-editor"],
     enabled: active,
   });

@@ -501,7 +501,7 @@ export function Explorer() {
 
   // ショートカット利用可能スコープ
   const allScopes = useMemo(
-    () => ["explorer-main", "tag-editor", "viewer", "dialog"] as const,
+    () => ["explorer", "tag-editor", "viewer", "dialog"] as const,
     []
   );
 
@@ -510,7 +510,7 @@ export function Explorer() {
     if (isRenameMode || isMoveMode || isDeleteMode) return "dialog";
     else if (isTagEditMode) return "tag-editor";
     else if (isViewMode) return "viewer";
-    else return "explorer-main";
+    else return "explorer";
   }, [isDeleteMode, isMoveMode, isRenameMode, isTagEditMode, isViewMode]);
 
   // デバッグ用
@@ -535,14 +535,15 @@ export function Explorer() {
   // Ctrl + A: 全選択
   // Ctrl + K: 検索
   // F2: リネーム
+  // P/N: 前/次のフォルダを開く
   useHotkeys("escape", () => handleClearSelection(), {
-    scopes: "explorer-main",
+    scopes: "explorer",
   });
   useHotkeys("delete", () => handleOpenDeleteSelected(), {
-    scopes: "explorer-main",
+    scopes: "explorer",
   });
   useHotkeys("t", () => handleToggleTagEditor(), {
-    scopes: ["explorer-main", "viewer", "tag-editor"],
+    scopes: ["explorer", "viewer", "tag-editor"],
   });
   useHotkeys(
     "ctrl+a",
@@ -550,7 +551,7 @@ export function Explorer() {
       e.preventDefault();
       handleSelectAll();
     },
-    { scopes: ["explorer-main", "tag-editor"] }
+    { scopes: ["explorer", "tag-editor"] }
   );
   useHotkeys(
     "ctrl+k",
@@ -558,10 +559,16 @@ export function Explorer() {
       e.preventDefault();
       focusSearch();
     },
-    { scopes: "explorer-main" }
+    { scopes: "explorer" }
   );
   useHotkeys("f2", () => setRenameTarget(selected[0]), {
-    scopes: ["explorer-main", "viewer"],
+    scopes: ["explorer", "viewer"],
+  });
+  useHotkeys("p", () => handleOpenPrevFolder("first"), {
+    scopes: ["explorer", "viewer", "tag-editor"],
+  });
+  useHotkeys("n", () => handleOpenNextFolder("first"), {
+    scopes: ["explorer", "viewer", "tag-editor"],
   });
 
   // ===== その他 =====

@@ -326,7 +326,7 @@ export function Favorites() {
 
   // ショートカット利用可能スコープ
   const allScopes = useMemo(
-    () => ["favorites-main", "tag-editor", "viewer", "dialog"] as const,
+    () => ["favorites", "tag-editor", "viewer", "dialog"] as const,
     []
   );
 
@@ -334,7 +334,7 @@ export function Favorites() {
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
     if (isTagEditMode) return "tag-editor";
     else if (isViewMode) return "viewer";
-    else return "favorites-main";
+    else return "favorites";
   }, [isTagEditMode, isViewMode]);
 
   // デバッグ用
@@ -358,10 +358,10 @@ export function Favorites() {
   // Ctrl + A: 全選択
   // Ctrl + K: 検索
   useHotkeys("escape", () => handleClearSelection(), {
-    scopes: "favorites-main",
+    scopes: "favorites",
   });
   useHotkeys("t", () => handleToggleTagEditor(), {
-    scopes: ["favorites-main", "viewer", "tag-editor"],
+    scopes: ["favorites", "viewer", "tag-editor"],
   });
   useHotkeys(
     "ctrl+a",
@@ -369,7 +369,7 @@ export function Favorites() {
       e.preventDefault();
       handleSelectAll();
     },
-    { scopes: ["favorites-main", "tag-editor"] }
+    { scopes: ["favorites", "tag-editor"] }
   );
   useHotkeys(
     "ctrl+k",
@@ -377,7 +377,7 @@ export function Favorites() {
       e.preventDefault();
       focusSearch();
     },
-    { scopes: "favorites-main" }
+    { scopes: "favorites" }
   );
 
   // ===== その他 =====

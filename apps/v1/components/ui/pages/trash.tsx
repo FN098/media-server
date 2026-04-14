@@ -302,14 +302,14 @@ export function Trash() {
 
   // ショートカットを利用可能なスコープ
   const allScopes = useMemo(
-    () => ["trash-main", "tag-editor", "viewer", "dialog"] as const,
+    () => ["trash", "tag-editor", "viewer", "dialog"] as const,
     []
   );
 
   // 現在のスコープ
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
     if (isViewMode) return "viewer";
-    return "trash-main";
+    return "trash";
   }, [isViewMode]);
 
   // デバッグ用
@@ -332,11 +332,12 @@ export function Trash() {
   // Delete: 削除
   // Ctrl + A: 全選択
   // Ctrl + K: 検索
+  // P/N: 前/次のフォルダを開く
   useHotkeys("escape", () => handleClearSelection(), {
-    scopes: "trash-main",
+    scopes: "trash",
   });
   useHotkeys("delete", () => handleOpenDeleteSelected(), {
-    scopes: "trash-main",
+    scopes: "trash",
   });
   useHotkeys(
     "ctrl+a",
@@ -344,7 +345,7 @@ export function Trash() {
       e.preventDefault();
       handleSelectAll();
     },
-    { scopes: "trash-main" }
+    { scopes: "trash" }
   );
   useHotkeys(
     "ctrl+k",
@@ -352,8 +353,14 @@ export function Trash() {
       e.preventDefault();
       focusSearch();
     },
-    { scopes: "trash-main" }
+    { scopes: "trash" }
   );
+  useHotkeys("p", () => handleOpenPrevFolder("first"), {
+    scopes: ["trash", "viewer"],
+  });
+  useHotkeys("n", () => handleOpenNextFolder("first"), {
+    scopes: ["trash", "viewer"],
+  });
 
   // ===== その他 =====
 
