@@ -10,11 +10,8 @@
   "eslint.format.enable": false,
   "files.eol": "\n",
   "files.insertFinalNewline": true,
-  "jest.runMode": "on-demand",
-  "typescript.preferences.importModuleSpecifier": "non-relative",
-  "typescript.preferences.importModuleSpecifierEnding": "minimal",
-  "javascript.preferences.importModuleSpecifier": "non-relative",
-  "javascript.preferences.importModuleSpecifierEnding": "minimal",
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.preferences.importModuleSpecifierEnding": "minimal",
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
