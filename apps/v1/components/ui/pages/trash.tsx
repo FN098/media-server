@@ -13,14 +13,10 @@ import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import { useFilters } from "@/hooks/use-filters";
+import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
-import {
-  MediaNode,
-  MediaPathToIndexMap,
-  MediaPathToNodeMap,
-} from "@/lib/media/types";
+import { MediaNode, MediaPathToNodeMap } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
-import { normalizeIndex } from "@/lib/query/utils";
 import { ActionsProvider } from "@/providers/actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
@@ -37,7 +33,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical, RotateCcw, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
@@ -106,32 +102,12 @@ export function Trash() {
 
   // ===== ビューア =====
 
-  // ビューア用インデックスを計算するためのマップ
-  const viewerIndexMap: MediaPathToIndexMap = useMemo(
-    () => new Map(mediaOnly.map((n, index) => [n.path, index])),
-    [mediaOnly]
-  );
-
-  // ビューア用インデックスを取得
-  const getViewerIndex = useCallback(
-    (path: string) => {
-      if (viewerIndexMap.has(path)) return viewerIndexMap.get(path)!;
-      return null;
-    },
-    [viewerIndexMap]
-  );
-
-  // ビューア用インデックス
-  const viewerIndex = useMemo(
-    () => (at != null ? normalizeIndex(at, mediaOnly.length) : null),
-    [at, mediaOnly.length]
-  );
-
-  // ビューア起動モード
-  const isViewMode = modal && viewerIndex != null && !!mediaOnly[viewerIndex];
-
-  // 直前のインデックス
-  const [lastPath, setLastPath] = useState<string | null>(null);
+  const { initialIndex, getViewerIndex, isViewMode, lastPath, setLastPath } =
+    useViewerControl({
+      mediaOnly,
+      at,
+      modal,
+    });
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
@@ -402,7 +378,7 @@ export function Trash() {
           <ScrollLockProvider>
             <MediaViewer
               allNodes={mediaOnly}
-              initialIndex={viewerIndex}
+              initialIndex={initialIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
               onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
