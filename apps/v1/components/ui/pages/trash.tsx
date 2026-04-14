@@ -13,13 +13,13 @@ import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import { useFilters } from "@/hooks/use-filters";
+import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
-import { MediaNode, MediaPathToNodeMap } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { ActionsProvider } from "@/providers/actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTrashContext } from "@/providers/trash-provider";
@@ -113,7 +113,7 @@ export function Trash() {
   const handleViewerIndexChange = (index: number) => {
     const media = mediaOnly[index];
     if (!media) return;
-    selectPaths([media.path]);
+    select(media);
     setLastPath(media.path);
   };
 
@@ -138,47 +138,11 @@ export function Trash() {
 
   // ===== 選択機能 =====
 
-  const {
-    isSelectionMode,
-    enterSelectionMode,
-    exitSelectionMode,
-    selectedPaths,
-    selectPaths,
-    clearSelection,
-  } = usePathSelectionContext();
-
-  // 処理高速化のため、path => node の Map を作成しておく
-  const pathToNodeMap: MediaPathToNodeMap = useMemo(() => {
-    return new Map(listing.nodes.map((node) => [node.path, node]));
-  }, [listing.nodes]);
-
-  // 選択済みノードリスト
-  const selected = useMemo(() => {
-    const result = [];
-    for (const path of selectedPaths) {
-      const node = pathToNodeMap.get(path);
-      if (node) result.push(node);
-    }
-    return result;
-  }, [pathToNodeMap, selectedPaths]);
-
-  // 全選択
-  const handleSelectAll = () => {
-    selectPaths(filteredNodes.map((n) => n.path));
-    enterSelectionMode();
-  };
-
-  // 選択解除
-  const handleClearSelection = () => {
-    clearSelection();
-    exitSelectionMode();
-  };
-
-  // 選択バー閉じる
-  const handleCloseSelectionBar = () => {
-    clearSelection();
-    exitSelectionMode();
-  };
+  const { isSelectionMode, selected, select, selectAll, resetSelection } =
+    useSelectionControl({
+      allNodes,
+      controlledNodes: filteredNodes,
+    });
 
   // ===== 復元 (Restore) =====
 
@@ -192,7 +156,7 @@ export function Trash() {
 
     if (result.failed === 0) {
       toast.success(`${result.success}件のアイテムを復元しました`);
-      clearSelection();
+      resetSelection();
     } else {
       toast.error(`${result.failed}件の復元に失敗しました`);
     }
@@ -237,7 +201,7 @@ export function Trash() {
 
     if (result.failed === 0) {
       toast.success(`${result.success}件のアイテムを完全に削除しました`);
-      clearSelection();
+      resetSelection();
     } else {
       toast.error(`${result.failed}件の削除に失敗しました`);
     }
@@ -288,7 +252,7 @@ export function Trash() {
   // Ctrl + A: 全選択
   // Ctrl + K: 検索
   // P/N: 前/次のフォルダを開く
-  useHotkeys("escape", () => handleClearSelection(), {
+  useHotkeys("escape", () => resetSelection(), {
     scopes: "trash",
   });
   useHotkeys("delete", () => handleOpenDeleteSelected(), {
@@ -298,7 +262,7 @@ export function Trash() {
     "ctrl+a",
     (e) => {
       e.preventDefault();
-      handleSelectAll();
+      selectAll();
     },
     { scopes: "trash" }
   );
@@ -393,8 +357,8 @@ export function Trash() {
           open={isSelectionMode}
           count={selected.length}
           totalCount={filteredNodes.length}
-          onSelectAll={handleSelectAll}
-          onClose={handleCloseSelectionBar}
+          onSelectAll={selectAll}
+          onClose={resetSelection}
           className="z-40"
           actions={
             <div className="flex gap-1 items-center">

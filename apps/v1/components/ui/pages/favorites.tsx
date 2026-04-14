@@ -14,15 +14,15 @@ import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import { useFilters } from "@/hooks/use-filters";
+import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
-import { MediaNode, MediaPathToNodeMap } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { ActionsProvider } from "@/providers/actions-provider";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { PagingProvider } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
@@ -98,7 +98,7 @@ export function Favorites() {
   const handleViewerIndexChange = (index: number) => {
     const media = mediaOnly[index];
     if (!media) return;
-    selectPaths([media.path]);
+    select(media);
     setLastPath(media.path);
   };
 
@@ -141,53 +141,11 @@ export function Favorites() {
 
   // ===== 選択機能 =====
 
-  const {
-    isSelectionMode,
-    enterSelectionMode,
-    exitSelectionMode,
-    selectedPaths,
-    replaceSelection,
-    selectPaths,
-    clearSelection,
-  } = usePathSelectionContext();
-
-  // O(1) で path => node を検索するための Map
-  const pathToNodeMap: MediaPathToNodeMap = useMemo(() => {
-    return new Map(listing.nodes.map((node) => [node.path, node]));
-  }, [listing.nodes]);
-
-  // 選択済みノードリスト
-  const selected = useMemo(() => {
-    const result = [];
-    for (const path of selectedPaths) {
-      const node = pathToNodeMap.get(path);
-      if (node) result.push(node);
-    }
-    return result;
-  }, [pathToNodeMap, selectedPaths]);
-
-  // 選択
-  const handleSelectSingle = (node: MediaNode) => {
-    replaceSelection(node.path);
-  };
-
-  // 全選択
-  const handleSelectAll = () => {
-    selectPaths(filteredNodes.map((n) => n.path));
-    enterSelectionMode();
-  };
-
-  // 選択解除
-  const handleClearSelection = () => {
-    clearSelection();
-    exitSelectionMode();
-  };
-
-  // 選択バー閉じる
-  const handleCloseSelectionBar = () => {
-    clearSelection();
-    exitSelectionMode();
-  };
+  const { isSelectionMode, selected, select, selectAll, resetSelection } =
+    useSelectionControl({
+      allNodes,
+      controlledNodes: filteredNodes,
+    });
 
   // ===== タグエディタ =====
 
@@ -252,7 +210,7 @@ export function Favorites() {
   // T: タグエディタ
   // Ctrl + A: 全選択
   // Ctrl + K: 検索
-  useHotkeys("escape", () => handleClearSelection(), {
+  useHotkeys("escape", () => resetSelection(), {
     scopes: "favorites",
   });
   useHotkeys("t", () => handleToggleTagEditor(), {
@@ -262,7 +220,7 @@ export function Favorites() {
     "ctrl+a",
     (e) => {
       e.preventDefault();
-      handleSelectAll();
+      selectAll();
     },
     { scopes: ["favorites", "tag-editor"] }
   );
@@ -356,7 +314,7 @@ export function Favorites() {
                 openParentFolder: handleOpenParentFolder,
                 changeRating: handleRatingChange,
                 editTags: (node: MediaNode) => {
-                  handleSelectSingle(node);
+                  select(node);
                   handleOpenTagEditor();
                 },
                 addTagFilter,
@@ -380,7 +338,7 @@ export function Favorites() {
                 openParentFolder: handleOpenParentFolder,
                 changeRating: handleRatingChange,
                 editTags: (node: MediaNode) => {
-                  handleSelectSingle(node);
+                  select(node);
                   handleOpenTagEditor();
                 },
                 addTagFilter,
@@ -414,8 +372,8 @@ export function Favorites() {
           open={isSelectionMode && !isTagEditMode}
           count={selected.length}
           totalCount={filteredNodes.length}
-          onSelectAll={handleSelectAll}
-          onClose={handleCloseSelectionBar}
+          onSelectAll={selectAll}
+          onClose={resetSelection}
           className="z-40" // DropdownMenu より小さくする
           actions={
             <div className="flex gap-1 items-center">
