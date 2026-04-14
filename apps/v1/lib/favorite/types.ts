@@ -1,6 +1,6 @@
 export type FavoriteStatus = {
   path: string;
-  rating: number;
+  rating: number | null;
 };
 
 export type FavoritesMap = Map<string, number | null>;

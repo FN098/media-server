@@ -1,6 +1,7 @@
 "use client";
 
-import { MediaFsNodeType, MediaTypeFilterValue } from "@/lib/media/types";
+import { MediaTypeFilterValue } from "@/lib/filter/types";
+import { MediaFsNodeType } from "@/lib/media/types";
 import {
   Select,
   SelectContent,

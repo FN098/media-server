@@ -30,12 +30,12 @@ export type MediaNodeTag = {
 
 export type MediaNode = MediaFsNode & {
   id?: string;
-  title?: string;
-  lastViewedAt?: Date;
-  favoriteCount?: number;
-  tags?: MediaNodeTag[];
+  title?: string | null;
+  lastViewedAt?: Date | null;
+  favoriteCount?: number | null;
+  tags?: MediaNodeTag[] | null;
   previewPath?: string | null; // サムネイルやプレビュー画像のパス
-  rating: number; // 1-5の整数
+  rating: number | null; // 1-5の整数 または 未評価 (null)
   isDeleted?: boolean;
   favoritedAt?: Date;
 };
@@ -51,12 +51,12 @@ export type MediaListing = {
 export type MediaDbNode = {
   id: string;
   path: string;
-  title?: string;
+  title?: string | null;
   fileMtime: Date;
-  fileSize?: number;
-  tags?: MediaNodeTag[];
-  rating?: number;
-  previewPath?: string;
+  fileSize?: number | null;
+  tags?: MediaNodeTag[] | null;
+  rating?: number | null;
+  previewPath?: string | null;
 };
 
 export type FolderVisitedInfo = {
@@ -114,5 +114,3 @@ export type GhostMediaDeleteResult = {
   deletedCount?: number;
   error?: string;
 };
-
-export type MediaTypeFilterValue = MediaFsNodeType | "all";

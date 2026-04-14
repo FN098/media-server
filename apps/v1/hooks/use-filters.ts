@@ -1,6 +1,7 @@
 "use client";
 
 import { useTags } from "@/hooks/use-tags";
+import { MediaTypeFilterValue, RatingFilterInput } from "@/lib/filter/types";
 import {
   createMediaTypeFilter,
   createRatingFilter,
@@ -8,11 +9,7 @@ import {
   createTagFilter,
 } from "@/lib/media/filters";
 import { isMedia } from "@/lib/media/media-types";
-import {
-  MediaNode,
-  MediaNodeFilter,
-  MediaTypeFilterValue,
-} from "@/lib/media/types";
+import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
 import { unique } from "@/lib/utils/array";
 import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useCallback, useMemo, useState } from "react";
@@ -62,8 +59,10 @@ export function useFilters({
     },
   });
 
-  // 最小レーティングフィルタ
-  const [minRating, setMinRating] = useState<number>(0);
+  // レーティングフィルタ
+  const [ratingFilter, setRatingFilter] = useState<RatingFilterInput>({
+    mode: "all",
+  });
 
   // 種類フィルタ
   const [mediaTypeFilterValue, setMediaTypeFilterValue] =
@@ -73,7 +72,7 @@ export function useFilters({
   const resetFilters = useCallback(() => {
     tagFilter.selectTags([]);
     tagFilter.setMode("AND");
-    setMinRating(0);
+    setRatingFilter({ mode: "all" });
     setMediaTypeFilterValue("all");
   }, [tagFilter]);
 
@@ -81,8 +80,7 @@ export function useFilters({
   const isFiltered =
     tagFilter.selectedCount > 0 ||
     tagFilter.mode !== "AND" ||
-    minRating > 0 ||
-    minRating === -1 ||
+    ratingFilter.mode !== "all" ||
     mediaTypeFilterValue !== "all";
 
   // フィルタ関数
@@ -96,8 +94,8 @@ export function useFilters({
     [tagFilter]
   );
   const ratingFilterFn = useMemo(
-    () => createRatingFilter(minRating),
-    [minRating]
+    () => createRatingFilter(ratingFilter),
+    [ratingFilter]
   );
   const mediaTypeFilterFn = useMemo(
     () => createMediaTypeFilter(mediaTypeFilterValue),
@@ -143,8 +141,8 @@ export function useFilters({
     // フィルター状態
     mediaTypeFilterValue,
     setMediaTypeFilterValue,
-    minRating,
-    setMinRating,
+    ratingFilter,
+    setRatingFilter,
 
     // フィルター結果
     filteredNodes,

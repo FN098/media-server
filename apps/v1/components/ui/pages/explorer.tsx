@@ -119,8 +119,8 @@ export function Explorer() {
   const {
     mediaTypeFilterValue,
     setMediaTypeFilterValue,
-    minRating,
-    setMinRating,
+    ratingFilter,
+    setRatingFilter,
     filteredNodes,
     mediaOnly,
     isFiltered,
@@ -551,8 +551,8 @@ export function Explorer() {
 
             {/* 評価フィルター */}
             <RatingFilterSelect
-              value={minRating}
-              onChange={setMinRating}
+              value={ratingFilter}
+              onChange={setRatingFilter}
               showUnrated
             />
 

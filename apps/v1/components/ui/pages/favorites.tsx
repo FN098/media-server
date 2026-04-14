@@ -76,8 +76,8 @@ export function Favorites() {
   const {
     mediaTypeFilterValue,
     setMediaTypeFilterValue,
-    minRating,
-    setMinRating,
+    ratingFilter,
+    setRatingFilter,
     filteredNodes,
     mediaOnly,
     isFiltered,
@@ -347,7 +347,10 @@ export function Favorites() {
             />
 
             {/* 評価フィルター */}
-            <RatingFilterSelect value={minRating} onChange={setMinRating} />
+            <RatingFilterSelect
+              value={ratingFilter}
+              onChange={setRatingFilter}
+            />
 
             {/* タグフィルター */}
             <TagFilterDialog />

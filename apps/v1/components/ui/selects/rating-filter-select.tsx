@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  deserializeRatingFilter,
+  serializeRatingFilter,
+} from "@/lib/filter/serialize";
+import { RatingFilterInput } from "@/lib/filter/types";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -11,8 +16,8 @@ import { cn } from "@/shadcn/lib/utils";
 import { Star } from "lucide-react"; // Filterアイコンを追加
 
 interface RatingFilterSelectProps {
-  value: number; // 0は「すべて」、-1は「未評価」、1~5は「星の数以上」
-  onChange: (value: number) => void;
+  value: RatingFilterInput;
+  onChange: (value: RatingFilterInput) => void;
   className?: string;
   showUnrated?: boolean;
 }
@@ -23,38 +28,30 @@ export function RatingFilterSelect({
   className,
   showUnrated = false,
 }: RatingFilterSelectProps) {
+  const serialized = serializeRatingFilter(value);
+
   return (
     <Select
-      value={value.toString()}
-      onValueChange={(v) => onChange(parseInt(v, 10))}
+      value={serialized}
+      onValueChange={(v) => onChange(deserializeRatingFilter(v))}
     >
       <SelectTrigger className={cn("w-full h-9", className)}>
-        {/* すべての評価 */}
-        {value === 0 && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Star size={14} />
-            <span>評価で絞り込む</span>
-          </div>
+        {value.mode === "all" ? (
+          <span className="text-muted-foreground">評価で絞り込む</span>
+        ) : (
+          <SelectValue />
         )}
-
-        {/* 未評価 */}
-        {value === -1 && <SelectValue />}
-
-        {/* 1~5の星評価 */}
-        {value > 0 && <SelectValue />}
       </SelectTrigger>
 
       <SelectContent>
-        {/* 全表示オプション */}
-        <SelectItem value="0" className="text-muted-foreground">
+        <SelectItem value="all" className="text-muted-foreground">
           すべての評価
         </SelectItem>
 
         <div className="my-1 h-px bg-muted" />
 
-        {/* 星評価オプション */}
         {[5, 4, 3, 2, 1].map((rating) => (
-          <SelectItem key={rating} value={rating.toString()}>
+          <SelectItem key={rating} value={`gte:${rating}`}>
             <div className="flex items-center gap-2">
               <div className="flex">
                 {[...Array.from({ length: 5 })].map((_, i) => (
@@ -75,16 +72,15 @@ export function RatingFilterSelect({
           </SelectItem>
         ))}
 
-        {/* フラグが true の場合のみ「未評価」オプションを表示 */}
         {showUnrated && (
-          <SelectItem value="-1">
+          <SelectItem value="unrated">
             <div className="flex items-center gap-2">
               <div className="flex">
                 {[...Array.from({ length: 5 })].map((_, i) => (
                   <Star
                     key={i}
                     size={12}
-                    className={cn("fill-current", "text-muted-foreground/20")}
+                    className="text-muted-foreground/20"
                   />
                 ))}
               </div>

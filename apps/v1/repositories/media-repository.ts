@@ -36,13 +36,13 @@ export async function getVirtualMediaNodes(
     id: m.id,
     fileMtime: m.fileMtime,
     path: m.path,
-    previewPath: m.previewPath ?? undefined,
+    previewPath: m.previewPath ?? null,
     fileSize: Number(m.fileSize),
-    title: m.title ?? undefined,
+    title: m.title ?? null,
     tags: m.mediaTags.map((t) => ({
       name: t.tag.name,
     })),
-    rating: m.favorites[0]?.rating ?? undefined,
+    rating: m.favorites[0]?.rating ?? null,
   }));
 }
 
@@ -87,11 +87,11 @@ export async function getFavoriteMediaNodes(
     isDirectory: false,
     size: Number(f.media.fileSize),
     mtime: f.media.fileMtime,
-    title: f.media.title ?? undefined,
+    title: f.media.title ?? null,
     tags: f.media.mediaTags.map((t) => ({
       name: t.tag.name,
     })),
-    rating: f.rating ?? 0,
+    rating: f.rating ?? null,
     favoritedAt: f.createdAt,
     previewPath: f.media.previewPath,
   }));

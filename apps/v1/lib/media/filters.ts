@@ -1,6 +1,7 @@
 import { TagFilterMode } from "@/hooks/use-tag-filter";
-import { MediaNodeFilter, MediaTypeFilterValue } from "@/lib/media/types";
+import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/search";
+import { MediaTypeFilterValue, RatingFilterInput } from "../filter/types";
 
 export const createLimitFilter = (limit: number): MediaNodeFilter => {
   let count = 0;
@@ -41,16 +42,36 @@ export const createTagFilter = (
   };
 };
 
-export const createRatingFilter = (minRating: number): MediaNodeFilter => {
-  return (node) => {
-    if (node.isDirectory) return true; // フォルダは常にパス
-    if (minRating === 0) return true; // すべて
-    if (minRating === -1) return node.rating === 0; // 評価無し
+export function createRatingFilter(filter: RatingFilterInput) {
+  return (node: MediaNode) => {
+    const rating = node.rating;
 
-    const rating = node.rating ?? 0;
-    return rating >= minRating; // ★1~5 以上
+    switch (filter.mode) {
+      case "all":
+        return true;
+
+      case "unrated":
+        return rating == null;
+
+      case "rated": {
+        if (rating == null) return false;
+
+        const c = filter.condition;
+
+        switch (c.operator) {
+          case "gte":
+            return rating >= c.value;
+          case "lte":
+            return rating <= c.value;
+          case "eq":
+            return rating === c.value;
+          case "between":
+            return rating >= c.min && rating <= c.max;
+        }
+      }
+    }
   };
-};
+}
 
 export const createMediaTypeFilter = (
   type: MediaTypeFilterValue

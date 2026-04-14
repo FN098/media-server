@@ -38,9 +38,9 @@ export function mergeFsWithDb({
         ...node,
         id: media?.id,
         title: meta?.title ?? node.name,
-        lastViewedAt: visited?.lastViewedAt ?? undefined,
+        lastViewedAt: visited?.lastViewedAt ?? null,
         favoriteCount: fav?.favoriteMediaCount,
-        tags: undefined,
+        tags: null,
         previewPath: meta?.previewPath,
         rating: 0,
       } satisfies MediaNode;
@@ -50,11 +50,11 @@ export function mergeFsWithDb({
         ...node,
         id: media?.id,
         title: media?.title ?? node.name,
-        lastViewedAt: undefined,
-        favoriteCount: undefined,
-        tags: media?.tags,
+        lastViewedAt: null,
+        favoriteCount: null,
+        tags: media?.tags ?? null,
         previewPath: media?.previewPath,
-        rating: media?.rating ?? 0,
+        rating: media?.rating ?? null,
       } satisfies MediaNode;
     }
   });
