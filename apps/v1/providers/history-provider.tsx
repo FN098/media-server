@@ -7,8 +7,14 @@ type HistoryContextType = ReturnType<typeof useHistory>;
 
 const HistoryContext = createContext<HistoryContextType | undefined>(undefined);
 
-export function HistoryProvider({ children }: { children: React.ReactNode }) {
-  const value = useHistory();
+export function HistoryProvider({
+  children,
+  maxLength,
+}: {
+  children: React.ReactNode;
+  maxLength?: number;
+}) {
+  const value = useHistory({ maxLength });
 
   return (
     <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>
