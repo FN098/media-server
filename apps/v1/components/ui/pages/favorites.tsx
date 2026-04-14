@@ -42,7 +42,7 @@ import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import { ArrowDown10, ArrowDownAz, ArrowDownZa, TagIcon } from "lucide-react";
+import { ArrowDownAz, ArrowDownZa, Sparkle, TagIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
@@ -420,14 +420,11 @@ export function Favorites() {
                 {
                   key: "rating",
                   direction: "desc",
-                  label: "評価が高い順",
-                  icon: ArrowDown10,
+                  label: "評価順",
+                  icon: Sparkle,
                 },
               ]}
             />
-
-            {/* シャッフルボタン */}
-            <ShuffleButton />
 
             {/* 種別フィルター */}
             <MediaTypeFilterSelect
@@ -441,6 +438,9 @@ export function Favorites() {
 
             {/* タグフィルター */}
             <TagFilterDialog />
+
+            {/* シャッフルボタン */}
+            <ShuffleButton />
 
             {/* リセットボタン */}
             <FilterResetButton

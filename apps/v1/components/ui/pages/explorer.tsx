@@ -57,7 +57,6 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import {
-  ArrowDown10,
   ArrowDownAz,
   ArrowDownZa,
   CalendarArrowDown,
@@ -65,6 +64,8 @@ import {
   FolderInput,
   MoreVertical,
   Plus,
+  Sparkle,
+  Sparkles,
   TagIcon,
   Trash2,
 } from "lucide-react";
@@ -621,13 +622,19 @@ export function Explorer() {
                 {
                   key: "rating",
                   direction: "desc",
-                  label: "評価が高い順",
-                  icon: ArrowDown10,
+                  label: "評価順",
+                  icon: Sparkle,
+                },
+                {
+                  key: "favoriteCount",
+                  direction: "desc",
+                  label: "人気順",
+                  icon: Sparkles,
                 },
                 {
                   key: "mtime",
                   direction: "desc",
-                  label: "更新日が新しい順",
+                  label: "更新順",
                   icon: CalendarArrowDown,
                 },
               ]}
