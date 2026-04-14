@@ -12,11 +12,10 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { createSearchFilter } from "@/lib/media/filters";
+import { useFilters } from "@/hooks/use-filters";
 import { isMedia } from "@/lib/media/media-types";
 import {
   MediaNode,
-  MediaNodeFilter,
   MediaPathToIndexMap,
   MediaPathToNodeMap,
 } from "@/lib/media/types";
@@ -87,33 +86,13 @@ export function Trash() {
 
   // ===== フィルタリング =====
 
-  // フィルタ関数
-  const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
+  const allNodes = listing.nodes;
 
-  // フィルタリング結果
-  const filteredNodes = useMemo(() => {
-    const { nodes: allNodes } = listing;
-
-    // 各フィルタの生成
-    const filters: MediaNodeFilter[] = [searchFilterFn];
-
-    // フィルタの適用
-    return allNodes.filter((node) => {
-      if (node.isDirectory) {
-        // フォルダは検索クエリには反応させるが、タグやお気に入りフィルタからは除外する
-        return searchFilterFn(node);
-      }
-
-      // メディアファイルは全てのフィルタを適用
-      return filters.every((fn) => fn(node));
-    });
-  }, [listing, searchFilterFn]);
-
-  // 「メディアのみ」のリスト
-  const mediaOnly = useMemo(
-    () => filteredNodes.filter((n) => isMedia(n.type)),
-    [filteredNodes]
-  );
+  const { filteredNodes, mediaOnly } = useFilters({
+    allNodes,
+    query,
+    activated: true,
+  });
 
   // ===== ビューア =====
 

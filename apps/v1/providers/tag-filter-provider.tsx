@@ -5,6 +5,9 @@ import { MediaNode } from "@/lib/media/types";
 import { createContext, ReactNode, useContext } from "react";
 
 type TagFilterContextType = ReturnType<typeof useTagFilter>;
+type TagFilterContextOptions = {
+  suppressError?: boolean;
+};
 
 const TagFilterContext = createContext<TagFilterContextType | undefined>(
   undefined
@@ -26,9 +29,12 @@ export function TagFilterProvider({
   );
 }
 
-export function useTagFilterContext() {
+export function useTagFilterContext(options?: TagFilterContextOptions) {
   const context = useContext(TagFilterContext);
   if (context === undefined) {
+    if (options?.suppressError) {
+      return null; // throw せずに null を返す
+    }
     throw new Error(
       "useTagFilterContext must be used within TagFilterProvider"
     );

@@ -21,20 +21,12 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { useTags } from "@/hooks/use-tags";
-import {
-  createMediaTypeFilter,
-  createRatingFilter,
-  createSearchFilter,
-  createTagFilter,
-} from "@/lib/media/filters";
+import { useFilters } from "@/hooks/use-filters";
 import { isMedia } from "@/lib/media/media-types";
 import {
   MediaNode,
-  MediaNodeFilter,
   MediaPathToIndexMap,
   MediaPathToNodeMap,
-  MediaTypeFilterValue,
 } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { normalizeIndex } from "@/lib/query/utils";
@@ -46,7 +38,6 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
-import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -113,95 +104,23 @@ export function Explorer() {
 
   // ===== フィルタリング =====
 
-  // タグフィルタ
-  const tagFilter = useTagFilterContext();
-
-  // タグフィルタにタグを追加
-  const [pathsToAddTagFilter, setPathsToAddTagFilter] = useState<string[]>([]);
-  useTags({
-    strategy: "related-only",
-    paths: pathsToAddTagFilter,
-    triggered: pathsToAddTagFilter.length > 0,
-    onSuccess: (tags) => {
-      if (tags.length > 0) tagFilter.selectTags(tags);
-    },
-  });
-
-  const handleAddTagFilter = (node: MediaNode) => {
-    setPathsToAddTagFilter([node.path]);
-  };
-
-  // 最小レーティングフィルタ
-  const [minRating, setMinRating] = useState<number>(0);
-
-  // 種類フィルタ
-  const [mediaTypeFilterValue, setMediaTypeFilterValue] =
-    useState<MediaTypeFilterValue>("all");
-
-  // フィルタリセット
-  const handleResetFilters = () => {
-    tagFilter.selectTags([]);
-    tagFilter.setMode("AND");
-    setMinRating(0);
-    setMediaTypeFilterValue("all");
-  };
-
-  // フィルターが一つでも適用されているかチェック
-  const isFiltered =
-    tagFilter.selectedCount > 0 ||
-    tagFilter.mode !== "AND" ||
-    minRating > 0 ||
-    minRating === -1 ||
-    mediaTypeFilterValue !== "all";
-
-  // フィルタ関数
-  const searchFilterFn = useMemo(() => createSearchFilter(query), [query]);
-  const tagFilterFn = useMemo(
-    () =>
-      createTagFilter(
-        tagFilter.selectedTags.map((t) => t.name),
-        tagFilter.mode
-      ),
-    [tagFilter]
-  );
-  const ratingFilterFn = useMemo(
-    () => createRatingFilter(minRating),
-    [minRating]
-  );
-  const mediaTypeFilterFn = useMemo(
-    () => createMediaTypeFilter(mediaTypeFilterValue),
-    [mediaTypeFilterValue]
-  );
-
   const allNodes = listing.nodes;
 
-  // フィルタリング結果
-  const filteredNodes = useMemo(() => {
-    // 各フィルタの生成
-    const filters: MediaNodeFilter[] = [
-      mediaTypeFilterFn,
-      ratingFilterFn,
-      searchFilterFn,
-      tagFilterFn,
-    ];
-
-    // フィルタの適用
-    return allNodes.filter((node) => {
-      return filters.every((fn) => fn(node));
-    });
-  }, [
-    mediaTypeFilterFn,
-    ratingFilterFn,
-    searchFilterFn,
-    tagFilterFn,
+  const {
+    mediaTypeFilterValue,
+    setMediaTypeFilterValue,
+    minRating,
+    setMinRating,
+    filteredNodes,
+    mediaOnly,
+    isFiltered,
+    addTagFilter,
+    resetFilters,
+  } = useFilters({
     allNodes,
-  ]);
-
-  // 「メディアのみ」のリスト
-  const mediaOnly = useMemo(
-    () => filteredNodes.filter((n) => isMedia(n.type)),
-    [filteredNodes]
-  );
+    query,
+    activated: true,
+  });
 
   // ===== ビューア =====
 
@@ -647,10 +566,7 @@ export function Explorer() {
             </Button>
 
             {/* リセット */}
-            <FilterResetButton
-              onReset={handleResetFilters}
-              isVisible={isFiltered}
-            />
+            <FilterResetButton onReset={resetFilters} isVisible={isFiltered} />
           </div>
 
           {/* フィルター結果 */}
@@ -677,7 +593,7 @@ export function Explorer() {
                   handleSelectSingle(node);
                   handleOpenTagEditor();
                 },
-                addTagFilter: handleAddTagFilter,
+                addTagFilter,
               }}
             >
               <PagingGridView
@@ -704,7 +620,7 @@ export function Explorer() {
                   handleSelectSingle(node);
                   handleOpenTagEditor();
                 },
-                addTagFilter: handleAddTagFilter,
+                addTagFilter,
               }}
             >
               <PagingListView
