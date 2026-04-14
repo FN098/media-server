@@ -74,7 +74,7 @@ export function ActionContextMenu({
 
   return (
     <ContextMenu modal={open} onOpenChange={onOpenChange}>
-      <ContextMenuTrigger asChild>{children} </ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
         {changeRating && !node.isDirectory && (
           <ContextMenuItem className="flex justify-center">
