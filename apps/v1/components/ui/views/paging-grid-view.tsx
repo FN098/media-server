@@ -19,7 +19,13 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface PagingGridViewProps {
   allNodes: MediaNode[];
@@ -36,6 +42,9 @@ export function PagingGridView({
 }: PagingGridViewProps) {
   const { currentPage, pageSize, totalPages, setPage, paginate } =
     usePagingContext();
+
+  // スクロール復元が実行済みかどうかを保持するフラグ
+  const hasRestored = useRef(false);
 
   // 現在のページのノードを取得
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
@@ -55,11 +64,33 @@ export function PagingGridView({
 
   // ページ自動遷移
   useEffect(() => {
-    if (!targetPage || targetPage === currentPage) return;
+    if (!targetPage || targetPage === currentPage || hasRestored.current)
+      return;
     setPage(targetPage);
   }, [currentPage, setPage, targetPage]);
 
-  // フィルターなどで件数が変わったら1ページ目に戻す
+  // スクロール実行と完了通知
+  useEffect(() => {
+    // すでに復元済み、またはターゲットがない場合は何もしない
+    if (hasRestored.current || targetIndex === null) return;
+
+    const pageStart = (currentPage - 1) * pageSize;
+    const pageEnd = pageStart + pageSize;
+
+    // 現在のページにターゲットが含まれているか確認
+    if (targetIndex >= pageStart && targetIndex < pageEnd) {
+      const element = document.getElementById(`media-item-${targetIndex}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "instant", block: "center" });
+
+        // フラグを立てて、二度と実行されないようにする
+        hasRestored.current = true;
+        onScrollRestored?.();
+      }
+    }
+  }, [currentPage, pageSize, targetIndex, onScrollRestored]);
+
+  // フィルターなどで allNodes が変わった時のリセット処理
   useEffect(() => {
     if (currentPage > 1 && allNodes.length > 0) {
       const maxPage = Math.ceil(allNodes.length / pageSize);
@@ -68,24 +99,6 @@ export function PagingGridView({
       }
     }
   }, [allNodes.length, pageSize, currentPage, setPage]);
-
-  // DOM構築後にスクロール
-  useEffect(() => {
-    if (targetIndex === null) return;
-
-    const pageStart = (currentPage - 1) * pageSize;
-    const pageEnd = pageStart + pageSize;
-
-    if (targetIndex >= pageStart && targetIndex < pageEnd) {
-      requestAnimationFrame(() => {
-        const element = document.getElementById(`media-item-${targetIndex}`);
-        if (element) {
-          element.scrollIntoView({ behavior: "instant", block: "center" });
-          onScrollRestored?.(); // 親に通知してパスをクリアさせる
-        }
-      });
-    }
-  }, [currentPage, targetIndex, pageSize, onScrollRestored]);
 
   const handlePageChange = (page: number) => {
     setPage(page);
