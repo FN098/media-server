@@ -1,3 +1,5 @@
+import { basename, extname } from "path";
+
 export function removeExtension(filename: string): string {
   const lastDot = filename.lastIndexOf(".");
   if (lastDot <= 0) return filename; // 拡張子なし or .gitignore 対策
@@ -30,4 +32,11 @@ export function getExtension(
   if (caseOpt === "upper") ext = ext.toUpperCase();
 
   return ext;
+}
+
+// ファイルパスから拡張子を除くファイル名を取得
+export function getFilenameWithoutExt(filepath: string): string {
+  const name = basename(filepath);
+  const ext = extname(filepath);
+  return name.slice(0, -ext.length);
 }
