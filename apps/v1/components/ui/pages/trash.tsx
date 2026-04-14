@@ -418,6 +418,7 @@ export function Trash() {
 
         {/* 削除確認ダイアログ */}
         <DeleteConfirmDialog
+          key={`delete-${isDeleteMode}`}
           open={isDeleteMode}
           onConfirm={handleDeleteConfirm}
           onOpenChange={handleDeleteDialogOpenChange}
@@ -427,6 +428,7 @@ export function Trash() {
 
         {/* 復元確認ダイアログ */}
         <RestoreConfirmDialog
+          key={`restore-${isRestoreMode}`}
           open={isRestoreMode}
           onConfirm={handleRestoreConfirm}
           onOpenChange={handleRestoreDialogOpenChange}

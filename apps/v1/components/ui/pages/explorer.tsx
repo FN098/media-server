@@ -666,7 +666,7 @@ export function Explorer() {
 
         {/* リネームダイアログ */}
         <RenameDialog
-          key={renameTarget?.path} // 初期入力値リセットのため
+          key={`rename-${isRenameMode}`}
           open={isRenameMode}
           onOpenChange={handleRenameDialogOpenChange}
           sourcePath={renameTarget?.path ?? ""}
@@ -675,6 +675,7 @@ export function Explorer() {
 
         {/* フォルダ作成ダイアログ */}
         <CreateFolderDialog
+          key={`create-folder-${isCreateFolderMode}`}
           open={isCreateFolderMode}
           onOpenChange={handleCreateFolderDialogOpenChange}
           parentPath={listing.path}
@@ -682,6 +683,7 @@ export function Explorer() {
 
         {/* 移動ダイアログ */}
         <MoveDialog
+          key={`move-${isMoveMode}`}
           open={isMoveMode}
           onOpenChange={handleMoveDialogOpenChange}
           sourceNodes={moveTargets}
@@ -690,6 +692,7 @@ export function Explorer() {
 
         {/* コピーダイアログ */}
         <CopyDialog
+          key={`copy-${isCopyMode}`}
           open={isCopyMode}
           onOpenChange={handleCopyDialogOpenChange}
           sourceNodes={copyTargets}
@@ -698,6 +701,7 @@ export function Explorer() {
 
         {/* 削除確認ダイアログ */}
         <DeleteConfirmDialog
+          key={`delete-${isDeleteMode}`}
           open={isDeleteMode}
           onConfirm={handleDeleteConfirm}
           onOpenChange={handleDeleteDialogOpenChange}

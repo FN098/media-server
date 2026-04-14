@@ -16,7 +16,7 @@ import {
 import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import { dirname } from "path";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface CopyDialogProps {
@@ -38,12 +38,12 @@ export function CopyDialog({
   const [isCopying, startCopying] = useTransition();
 
   // ダイアログを開いたときに初期パスをリセット
-  useEffect(() => {
+  const handleOpenChange = (open: boolean) => {
     if (open) {
       fetchDirs(initialDirPath);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+    onOpenChange(false);
+  };
 
   // フォルダ一覧を取得
   const fetchDirs = (path: string) => {
@@ -94,7 +94,7 @@ export function CopyDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px] h-[500px] flex flex-col">
         <DialogHeader>
           <DialogTitle>コピー先を選択</DialogTitle>

@@ -16,7 +16,7 @@ import {
 import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight, Folder, FolderInput } from "lucide-react";
 import { dirname } from "path";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface MoveDialogProps {
@@ -38,12 +38,11 @@ export function MoveDialog({
   const [isMoving, startMoving] = useTransition();
 
   // ダイアログを開いたときに初期パスをリセット
-  useEffect(() => {
-    if (open && initialDirPath !== targetDirPath) {
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
       fetchDirs(initialDirPath);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  };
 
   // フォルダ一覧を取得
   const fetchDirs = (path: string) => {
@@ -94,7 +93,7 @@ export function MoveDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px] h-[500px] flex flex-col">
         <DialogHeader>
           <DialogTitle>移動先を選択</DialogTitle>
