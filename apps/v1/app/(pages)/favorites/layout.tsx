@@ -3,7 +3,7 @@ import { pageMetas } from "@/lib/meta";
 import { SearchProvider } from "@/providers/search-provider";
 import { TagEditorProvider } from "@/providers/tag-editor-provider";
 import { ViewModeProvider } from "@/providers/view-mode-provider";
-import { ViewerProvider } from "@/providers/viewer-provider";
+import { ViewerUIProvider } from "@/providers/viewer-provider";
 
 const meta = pageMetas["favorites"];
 
@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ViewModeProvider>
       <SearchProvider>
-        <ViewerProvider>
+        <ViewerUIProvider>
           <TagEditorProvider>
             <div className="w-full h-svh flex flex-col overflow-hidden">
               <Header
@@ -27,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </main>
             </div>
           </TagEditorProvider>
-        </ViewerProvider>
+        </ViewerUIProvider>
       </SearchProvider>
     </ViewModeProvider>
   );

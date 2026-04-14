@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function useViewer() {
+export function useViewerUI() {
   const [isHeaderPinned, setIsHeaderPinned] = useState(false);
 
   const toggleIsHeaderPinned = () => setIsHeaderPinned((prev) => !prev);

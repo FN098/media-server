@@ -1,24 +1,28 @@
 "use client";
 
-import { useViewer } from "@/hooks/use-viewer";
+import { useViewerUI } from "@/hooks/use-viewer-ui";
 import { createContext, useContext } from "react";
 
-type ViewerContextType = ReturnType<typeof useViewer>;
+type ViewerUIContextType = ReturnType<typeof useViewerUI>;
 
-const ViewerContext = createContext<ViewerContextType | undefined>(undefined);
+const ViewerUIContext = createContext<ViewerUIContextType | undefined>(
+  undefined
+);
 
-export function ViewerProvider({ children }: { children: React.ReactNode }) {
-  const value = useViewer();
+export function ViewerUIProvider({ children }: { children: React.ReactNode }) {
+  const value = useViewerUI();
 
   return (
-    <ViewerContext.Provider value={value}>{children}</ViewerContext.Provider>
+    <ViewerUIContext.Provider value={value}>
+      {children}
+    </ViewerUIContext.Provider>
   );
 }
 
-export function useViewerContext() {
-  const context = useContext(ViewerContext);
+export function useViewerUIContext() {
+  const context = useContext(ViewerUIContext);
   if (context === undefined) {
-    throw new Error("useViewerContext must be used within ViewerProvider");
+    throw new Error("useViewerUIContext must be used within ViewerUIProvider");
   }
   return context;
 }
