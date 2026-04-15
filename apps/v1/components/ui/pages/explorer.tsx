@@ -1,7 +1,10 @@
 "use client";
 
 import { visitFolderAction } from "@/actions/folder-actions";
-import { deleteNodesAction } from "@/actions/media-actions";
+import {
+  deleteNodesAction,
+  updatePreviewAction,
+} from "@/actions/media-actions";
 import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
 import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
@@ -375,6 +378,18 @@ export function Explorer() {
     }
   };
 
+  // プレビュー解除
+  const resetPreview = async (node: MediaNode) => {
+    const result = await updatePreviewAction(node.path, null);
+
+    if (result.success) {
+      toast.success("プレビューを解除しました");
+      resetSelection();
+    } else {
+      toast.error("プレビューの解除に失敗しました");
+    }
+  };
+
   // ===== サーバーアクション =====
 
   // サムネイル作成リクエスト送信
@@ -573,6 +588,7 @@ export function Explorer() {
                 },
                 addTagFilter,
                 setAsPreview: openApplyPreviewDialog,
+                resetPreview,
               }}
             >
               <PagingGridView
@@ -601,6 +617,7 @@ export function Explorer() {
                 },
                 addTagFilter,
                 setAsPreview: openApplyPreviewDialog,
+                resetPreview,
               }}
             >
               <PagingListView

@@ -19,6 +19,7 @@ export interface Actions {
     rating: number | null
   ) => void | Promise<void>;
   setAsPreview?: (node: MediaNode) => void | Promise<void>;
+  resetPreview?: (node: MediaNode) => void | Promise<void>;
 }
 
 export function useActions(actions: Actions) {

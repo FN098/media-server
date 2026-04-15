@@ -660,7 +660,7 @@ export async function cleanupGhostMediaAction(
  */
 export async function updatePreviewAction(
   targetPath: string,
-  previewResourcePath: string
+  previewResourcePath: string | null
 ) {
   try {
     const realPath = getServerMediaPath(targetPath);

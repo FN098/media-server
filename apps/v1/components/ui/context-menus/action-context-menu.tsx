@@ -16,6 +16,7 @@ import {
   Copy,
   Folder,
   FolderInput,
+  ImageMinus,
   ImagePlus,
   ListFilterPlus,
   Pencil,
@@ -67,6 +68,7 @@ export function ActionContextMenu({
     editTags,
     addTagFilter,
     setAsPreview,
+    resetPreview,
     restore,
     delete: deleteAction,
     deletePermanently,
@@ -164,6 +166,18 @@ export function ActionContextMenu({
             disabled={node.type !== "image" && node.type !== "video"}
           >
             <ImagePlus className="mr-2 h-4 w-4" /> プレビューに設定
+          </ContextMenuItem>
+        )}
+
+        {resetPreview && (
+          <ContextMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              void resetPreview(node);
+            }}
+            disabled={node.previewPath === null}
+          >
+            <ImageMinus className="mr-2 h-4 w-4" /> プレビューを解除
           </ContextMenuItem>
         )}
 
