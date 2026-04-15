@@ -179,15 +179,15 @@ export function ApplyPreviewDialog({
           </ScrollArea>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 border-t pt-4">
-          <div className="flex-1 text-[10px] text-muted-foreground flex items-center">
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 border-t pt-4 items-center">
+          <div className="text-[10px] text-muted-foreground truncate w-full">
             {selectedTargetPath && (
-              <span className="truncate">
+              <span className="truncate" title={selectedTargetPath}>
                 設定先: {path.basename(selectedTargetPath) || "/"}
               </span>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             <Button
               variant="outline"
               size="sm"
