@@ -19,7 +19,7 @@ import {
 } from "@/shadcn/components/ui/dialog";
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
-import { RotateCcw, Star } from "lucide-react";
+import { RotateCcw, Star, StarOff } from "lucide-react";
 import { useState } from "react";
 
 // ─── 定数 ────────────────────────────────────────────────────────────────────
@@ -104,16 +104,40 @@ function fromFilterInput(input: RatingFilterInput): {
   };
 }
 
-function describeFilter(input: RatingFilterInput): string | null {
+function describeFilter(input: RatingFilterInput): React.ReactNode {
   if (input.mode === "all") return null;
-  if (input.mode === "unrated") return "未評価";
+
+  if (input.mode === "unrated") {
+    return (
+      <span className="flex items-center gap-1">
+        <StarOff className="h-3 w-3 opacity-30" />
+        未評価
+      </span>
+    );
+  }
+
   const { condition } = input;
-  if (condition.operator === "between")
-    return `★${condition.min}〜★${condition.max}`;
+
+  if (condition.operator === "between") {
+    return (
+      <span className="flex items-center gap-1">
+        <StarDisplay rating={condition.min} variant="numeric" />
+        <span>〜</span>
+        <StarDisplay rating={condition.max} variant="numeric" />
+      </span>
+    );
+  }
+
   const opLabel = { gte: "以上", lte: "以下", eq: "ちょうど" }[
     condition.operator
   ];
-  return `★${condition.value} ${opLabel}`;
+
+  return (
+    <span className="flex items-center gap-1">
+      <StarDisplay rating={condition.value} variant="compact" />
+      <span>{opLabel}</span>
+    </span>
+  );
 }
 
 // ─── サブコンポーネント ────────────────────────────────────────────────────────
@@ -121,23 +145,46 @@ function describeFilter(input: RatingFilterInput): string | null {
 interface StarDisplayProps {
   rating: RatingValue;
   size?: number;
+  variant?: "full" | "compact" | "numeric";
 }
 
-function StarDisplay({ rating, size = 14 }: StarDisplayProps) {
+function StarDisplay({
+  rating,
+  size = 14,
+  variant = "full",
+}: StarDisplayProps) {
+  // 数字だけ表示
+  if (variant === "numeric") {
+    return (
+      <span className="inline-flex items-center gap-1 text-sm">
+        <Star size={size} className="fill-current text-yellow-400" />
+        <span>{rating}</span>
+      </span>
+    );
+  }
+
+  // 表示する星配列
+  const stars =
+    variant === "compact"
+      ? Array.from({ length: rating }, (_, i) => i + 1)
+      : RATINGS.slice().reverse(); // full
+
   return (
     <span className="inline-flex items-center gap-0.5">
-      {RATINGS.slice()
-        .reverse()
-        .map((v) => (
-          <Star
-            key={v}
-            size={size}
-            className={cn(
-              "fill-current",
-              v <= rating ? "text-yellow-400" : "text-muted-foreground/20"
-            )}
-          />
-        ))}
+      {stars.map((v) => (
+        <Star
+          key={v}
+          size={size}
+          className={cn(
+            "fill-current",
+            variant === "compact"
+              ? "text-yellow-400"
+              : v <= rating
+                ? "text-yellow-400"
+                : "text-muted-foreground/20"
+          )}
+        />
+      ))}
     </span>
   );
 }
