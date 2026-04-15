@@ -50,36 +50,43 @@ export function PagingGridView({
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
 
   // パスからグローバルインデックスを特定する
-  const targetIndex = useMemo(() => {
+  const scrollTargetIndex = useMemo(() => {
     if (!initialScrollPath) return null;
     const index = allNodes.findIndex((n) => n.path === initialScrollPath);
     return index !== -1 ? index : null;
   }, [allNodes, initialScrollPath]);
 
   // グローバルページを特定する
-  const targetPage = useMemo(() => {
-    if (!targetIndex) return null;
-    return Math.floor(targetIndex / pageSize) + 1;
-  }, [pageSize, targetIndex]);
+  const scrollTargetPage = useMemo(() => {
+    if (!scrollTargetIndex) return null;
+    return Math.floor(scrollTargetIndex / pageSize) + 1;
+  }, [pageSize, scrollTargetIndex]);
 
   // ページ自動遷移
   useEffect(() => {
-    if (!targetPage || targetPage === currentPage || hasRestored.current)
+    if (
+      !scrollTargetPage ||
+      scrollTargetPage === currentPage ||
+      hasRestored.current
+    ) {
       return;
-    setPage(targetPage);
-  }, [currentPage, setPage, targetPage]);
+    }
+    setPage(scrollTargetPage);
+  }, [currentPage, setPage, scrollTargetPage]);
 
   // スクロール実行と完了通知
   useEffect(() => {
     // すでに復元済み、またはターゲットがない場合は何もしない
-    if (hasRestored.current || targetIndex === null) return;
+    if (hasRestored.current || scrollTargetIndex === null) return;
 
     const pageStart = (currentPage - 1) * pageSize;
     const pageEnd = pageStart + pageSize;
 
     // 現在のページにターゲットが含まれているか確認
-    if (targetIndex >= pageStart && targetIndex < pageEnd) {
-      const element = document.getElementById(`media-item-${targetIndex}`);
+    if (scrollTargetIndex >= pageStart && scrollTargetIndex < pageEnd) {
+      const element = document.getElementById(
+        `media-item-${scrollTargetIndex}`
+      );
       if (element) {
         element.scrollIntoView({ behavior: "instant", block: "center" });
 
@@ -88,7 +95,7 @@ export function PagingGridView({
         onScrollRestored?.();
       }
     }
-  }, [currentPage, pageSize, targetIndex, onScrollRestored]);
+  }, [currentPage, pageSize, scrollTargetIndex, onScrollRestored]);
 
   // フィルターなどで allNodes が変わった時のリセット処理
   useEffect(() => {

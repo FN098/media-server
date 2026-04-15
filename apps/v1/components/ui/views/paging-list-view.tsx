@@ -22,7 +22,13 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface PagingListViewProps {
   allNodes: MediaNode[];
@@ -43,29 +49,61 @@ export function PagingListView({
   const { currentPage, pageSize, totalPages, setPage, paginate } =
     usePagingContext();
 
+  // スクロール復元が実行済みかどうかを保持するフラグ
+  const hasRestored = useRef(false);
+
   // 現在のページのノードを取得
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
 
   // パスからグローバルインデックスを特定する
-  const targetIndex = useMemo(() => {
+  const scrollTargetIndex = useMemo(() => {
     if (!initialScrollPath) return null;
     const index = allNodes.findIndex((n) => n.path === initialScrollPath);
     return index !== -1 ? index : null;
   }, [allNodes, initialScrollPath]);
 
   // グローバルページを特定する
-  const targetPage = useMemo(() => {
-    if (!targetIndex) return null;
-    return Math.floor(targetIndex / pageSize) + 1;
-  }, [pageSize, targetIndex]);
+  const scrollTargetPage = useMemo(() => {
+    if (!scrollTargetIndex) return null;
+    return Math.floor(scrollTargetIndex / pageSize) + 1;
+  }, [pageSize, scrollTargetIndex]);
 
   // ページ自動遷移
   useEffect(() => {
-    if (!targetPage || targetPage === currentPage) return;
-    setPage(targetPage);
-  }, [currentPage, setPage, targetPage]);
+    if (
+      !scrollTargetPage ||
+      scrollTargetPage === currentPage ||
+      hasRestored.current
+    ) {
+      return;
+    }
+    setPage(scrollTargetPage);
+  }, [currentPage, setPage, scrollTargetPage]);
 
-  // フィルターなどで件数が変わったら1ページ目に戻す
+  // スクロール実行と完了通知
+  useEffect(() => {
+    // すでに復元済み、またはターゲットがない場合は何もしない
+    if (hasRestored.current || scrollTargetIndex === null) return;
+
+    const pageStart = (currentPage - 1) * pageSize;
+    const pageEnd = pageStart + pageSize;
+
+    // 現在のページにターゲットが含まれているか確認
+    if (scrollTargetIndex >= pageStart && scrollTargetIndex < pageEnd) {
+      const element = document.getElementById(
+        `media-item-${scrollTargetIndex}`
+      );
+      if (element) {
+        element.scrollIntoView({ behavior: "instant", block: "center" });
+
+        // フラグを立てて、二度と実行されないようにする
+        hasRestored.current = true;
+        onScrollRestored?.();
+      }
+    }
+  }, [currentPage, pageSize, scrollTargetIndex, onScrollRestored]);
+
+  // フィルターなどで allNodes が変わった時のリセット処理
   useEffect(() => {
     if (currentPage > 1 && allNodes.length > 0) {
       const maxPage = Math.ceil(allNodes.length / pageSize);
@@ -74,24 +112,6 @@ export function PagingListView({
       }
     }
   }, [allNodes.length, pageSize, currentPage, setPage]);
-
-  // 2. DOM構築後にスクロール
-  useEffect(() => {
-    if (targetIndex === null) return;
-
-    const pageStart = (currentPage - 1) * pageSize;
-    const pageEnd = pageStart + pageSize;
-
-    if (targetIndex >= pageStart && targetIndex < pageEnd) {
-      requestAnimationFrame(() => {
-        const element = document.getElementById(`media-item-${targetIndex}`);
-        if (element) {
-          element.scrollIntoView({ behavior: "instant", block: "center" });
-          onScrollRestored?.(); // 親に通知してパスをクリアさせる
-        }
-      });
-    }
-  }, [currentPage, targetIndex, pageSize, onScrollRestored]);
 
   const handlePageChange = (page: number) => {
     setPage(page);
