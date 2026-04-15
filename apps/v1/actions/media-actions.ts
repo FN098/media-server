@@ -420,7 +420,11 @@ export async function getFolderMediaFilesAction(dirPath: string) {
       .filter((e) => e.isFile()) // ファイルのみ対象
       .filter((e) => {
         const mimeType = getMimetype(e.name);
-        return mimeType.startsWith("image/") || mimeType.startsWith("video/");
+        return (
+          mimeType.startsWith("image/") ||
+          mimeType.startsWith("video/") ||
+          mimeType.startsWith("audio/")
+        );
       })
       .map((e) => ({
         name: e.name,
