@@ -10,13 +10,13 @@ import {
 import { MediaNode } from "@/lib/media/types";
 import { TagOperation } from "@/lib/tag/types";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
+import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/shadcn/components/ui/tabs";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { Clock, Star } from "lucide-react";

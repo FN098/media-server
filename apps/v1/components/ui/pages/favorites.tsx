@@ -28,6 +28,7 @@ import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
+import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowDownAz, Sparkle, TagIcon } from "lucide-react";
@@ -263,6 +264,9 @@ export function Favorites() {
   // スクロール対象のref
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // モバイル判定
+  const isMobile = useIsMobile();
+
   return (
     <PagingProvider
       totalItems={filteredNodes.length}
@@ -312,7 +316,7 @@ export function Favorites() {
             />
 
             {/* タグフィルター */}
-            <TagFilterDialog />
+            <TagFilterDialog autoFocusInput={!isMobile} />
 
             {/* シャッフルボタン */}
             <ShuffleButton />

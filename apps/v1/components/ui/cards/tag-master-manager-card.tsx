@@ -11,6 +11,7 @@ import {
 import { TagMasterCardList } from "@/components/ui/cards/tag-master-manager-card/tag-master-card-list";
 import { TagMasterTable } from "@/components/ui/cards/tag-master-manager-card/tag-master-table";
 import { TagMasterItem } from "@/lib/tag/types";
+import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,
@@ -22,7 +23,6 @@ import {
 import { Input } from "@/shadcn/components/ui/input";
 import { Label } from "@/shadcn/components/ui/label";
 import { Switch } from "@/shadcn/components/ui/switch";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile"; // ← shadcn hook
 import { cn } from "@/shadcn/lib/utils";
 import {
   useInfiniteQuery,
