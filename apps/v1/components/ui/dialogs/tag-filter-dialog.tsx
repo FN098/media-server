@@ -368,13 +368,13 @@ export function TagFilterDialog({
               </Badge>
             ))}
           </div>
-        ) : (
+        ) : currentMode !== "EMPTY" ? (
           <div className="px-6 pb-2 flex justify-center gap-1.5 min-h-[40px]">
             <p className="text-xs text-muted-foreground italic self-center select-none">
               タグを検索するか下から選択してください
             </p>
           </div>
-        )}
+        ) : null}
 
         {/* 仕切り */}
         <div className="border-t border-muted/50 mx-6" />
