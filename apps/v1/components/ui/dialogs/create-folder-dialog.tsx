@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface CreateFolderDialogProps {
@@ -47,14 +47,6 @@ export function CreateFolderDialog({
       }
     });
   };
-
-  // ダイアログ初期化
-  useEffect(() => {
-    if (open) {
-      setFolderName("");
-      inputRef.current?.focus();
-    }
-  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
