@@ -10,7 +10,7 @@ import {
 } from "@/shadcn/components/ui/alert-dialog";
 import { useTransition } from "react";
 
-interface DeleteConfirmDialogProps {
+interface DeleteAlertDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   count: number;
@@ -18,13 +18,13 @@ interface DeleteConfirmDialogProps {
   permanent?: boolean;
 }
 
-export function DeleteConfirmDialog({
+export function DeleteAlertDialog({
   open,
   onOpenChange,
   count,
   onConfirm,
   permanent = false,
-}: DeleteConfirmDialogProps) {
+}: DeleteAlertDialogProps) {
   const [isPending, startTransition] = useTransition();
 
   const handleConfirm = () => {

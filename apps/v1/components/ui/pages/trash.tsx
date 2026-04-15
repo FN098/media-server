@@ -4,9 +4,9 @@ import {
   deleteNodesPermanentlyAction,
   restoreNodesAction,
 } from "@/actions/media-actions";
+import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
+import { RestoreAlertDialog } from "@/components/ui/alert-dialogs/restore-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
-import { RestoreConfirmDialog } from "@/components/ui/dialogs/restore-confirm-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
@@ -174,8 +174,18 @@ export function Trash() {
   const [restoreTargets, setRestoreTargets] = useState<MediaNode[]>([]);
   const isRestoreMode = restoreTargets.length > 0;
 
+  // 復元ダイアログを開く（単体）
+  const openRestoreDialogSingle = (node: MediaNode) => {
+    setRestoreTargets([node]);
+  };
+
+  // 復元ダイアログを開く（選択）
+  const openRestoreDialogSelected = () => {
+    setRestoreTargets(selected);
+  };
+
   // 復元実行
-  const handleRestoreConfirm = async () => {
+  const performRestore = async () => {
     const paths = restoreTargets.map((n) => n.path);
     const result = await restoreNodesAction(paths);
 
@@ -185,16 +195,6 @@ export function Trash() {
     } else {
       toast.error(`${result.failed}件の復元に失敗しました`);
     }
-  };
-
-  // 単体復元
-  const handleOpenRestoreSingle = (node: MediaNode) => {
-    setRestoreTargets([node]);
-  };
-
-  // 一括復元
-  const handleOpenRestoreSelected = () => {
-    setRestoreTargets(selected);
   };
 
   // 後始末
@@ -209,18 +209,18 @@ export function Trash() {
   const [deleteTargets, setDeleteTargets] = useState<MediaNode[]>([]);
   const isDeleteMode = deleteTargets.length > 0;
 
-  // 単体削除
-  const handleOpenDeleteSingle = (node: MediaNode) => {
+  // 削除ダイアログを開く（単体）
+  const openDeleteDialogSingle = (node: MediaNode) => {
     setDeleteTargets([node]);
   };
 
-  // 一括削除
-  const handleOpenDeleteSelected = () => {
+  // 削除ダイアログを開く（選択）
+  const openDeleteDialogSelected = () => {
     setDeleteTargets(selected);
   };
 
   // 削除実行
-  const handleDeleteConfirm = async () => {
+  const performDelete = async () => {
     const paths = deleteTargets.map((n) => n.path);
     const result = await deleteNodesPermanentlyAction(paths);
 
@@ -280,7 +280,7 @@ export function Trash() {
   useHotkeys("escape", () => resetSelection(), {
     scopes: "trash",
   });
-  useHotkeys("delete", () => handleOpenDeleteSelected(), {
+  useHotkeys("delete", () => openDeleteDialogSelected(), {
     scopes: "trash",
   });
   useHotkeys(
@@ -332,8 +332,8 @@ export function Trash() {
             <ActionsProvider
               actions={{
                 open: handleOpen,
-                deletePermanently: handleOpenDeleteSingle,
-                restore: handleOpenRestoreSingle,
+                deletePermanently: openDeleteDialogSingle,
+                restore: openRestoreDialogSingle,
               }}
             >
               <PagingGridView
@@ -351,8 +351,8 @@ export function Trash() {
             <ActionsProvider
               actions={{
                 open: handleOpen,
-                deletePermanently: handleOpenDeleteSingle,
-                restore: handleOpenRestoreSingle,
+                deletePermanently: openDeleteDialogSingle,
+                restore: openRestoreDialogSingle,
               }}
             >
               <PagingListView
@@ -374,7 +374,7 @@ export function Trash() {
               onClose={closeViewer}
               onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
               onNextFolder={listing.next ? handleOpenNextFolder : undefined}
-              onDelete={handleOpenDeleteSelected}
+              onDelete={openDeleteDialogSelected}
             />
           </ScrollLockProvider>
         )}
@@ -399,14 +399,14 @@ export function Trash() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     variant="default"
-                    onClick={handleOpenRestoreSelected}
+                    onClick={openRestoreDialogSelected}
                   >
                     <RotateCcw className="mr-2 h-4 w-4" />
                     復元
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     variant="destructive"
-                    onClick={handleOpenDeleteSelected}
+                    onClick={openDeleteDialogSelected}
                   >
                     <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
                   </DropdownMenuItem>
@@ -416,21 +416,19 @@ export function Trash() {
           }
         />
 
-        {/* 削除確認ダイアログ */}
-        <DeleteConfirmDialog
-          key={`delete-${isDeleteMode}`}
+        {/* 削除警告ダイアログ */}
+        <DeleteAlertDialog
           open={isDeleteMode}
-          onConfirm={handleDeleteConfirm}
+          onConfirm={performDelete}
           onOpenChange={handleDeleteDialogOpenChange}
           count={deleteTargets.length}
           permanent
         />
 
-        {/* 復元確認ダイアログ */}
-        <RestoreConfirmDialog
-          key={`restore-${isRestoreMode}`}
+        {/* 復元警告ダイアログ */}
+        <RestoreAlertDialog
           open={isRestoreMode}
-          onConfirm={handleRestoreConfirm}
+          onConfirm={performRestore}
           onOpenChange={handleRestoreDialogOpenChange}
           count={restoreTargets.length}
         />

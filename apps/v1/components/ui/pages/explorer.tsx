@@ -3,11 +3,12 @@
 import { visitFolderAction } from "@/actions/folder-actions";
 import { deleteNodesAction } from "@/actions/media-actions";
 import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
+import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
-import { DeleteConfirmDialog } from "@/components/ui/dialogs/delete-confirm-dialog";
+import { FolderPreviewDialog } from "@/components/ui/dialogs/folder-preview-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
@@ -49,8 +50,8 @@ import {
   CalendarArrowDown,
   Copy,
   FolderInput,
+  FolderPlus,
   MoreVertical,
-  Plus,
   Sparkle,
   Sparkles,
   TagIcon,
@@ -220,18 +221,18 @@ export function Explorer() {
     return "default";
   }, [isViewMode]);
 
-  // タグエディタを表示
-  const handleOpenTagEditor = () => {
+  // タグエディタを開く
+  const openTagEditor = () => {
     setIsTagEditMode(true);
   };
 
-  // タグエディタを非表示
-  const handleCloseTagEditor = () => {
+  // タグエディタを閉じる
+  const closeTagEditor = () => {
     setIsTagEditMode(false);
   };
 
   // タグエディタを表示/非表示
-  const handleToggleTagEditor = () => {
+  const toggleTagEditMode = () => {
     setIsTagEditMode((prev) => !prev);
   };
 
@@ -240,8 +241,8 @@ export function Explorer() {
   const [renameTarget, setRenameTarget] = useState<MediaNode | null>(null);
   const isRenameMode = !!renameTarget;
 
-  // 単体リネーム
-  const handleRenameSingle = (node: MediaNode) => {
+  // リネームダイアログを開く（単体）
+  const openRenameDialogSingle = (node: MediaNode) => {
     setRenameTarget(node);
   };
 
@@ -258,7 +259,7 @@ export function Explorer() {
   const isCreateFolderMode = !!folderDir;
 
   // フォルダ作成ダイアログを開く
-  const handleOpenCreateFolderDialog = () => {
+  const openCreateFolderDialog = () => {
     setFolderDir(listing.path);
   };
 
@@ -277,13 +278,13 @@ export function Explorer() {
   const initialMoveDialogDirPath =
     moveTargets.length > 0 ? dirname(moveTargets[0]?.path) : undefined;
 
-  // 単体移動
-  const handleOpenMoveSingle = (node: MediaNode) => {
+  // 移動ダイアログを開く（単体）
+  const openMoveDialogSingle = (node: MediaNode) => {
     setMoveTargets([node]);
   };
 
-  // 一括移動
-  const handleOpenMoveSelected = () => {
+  // 移動ダイアログを開く（選択）
+  const openMoveDialogSelected = () => {
     setMoveTargets(selected);
   };
 
@@ -303,13 +304,13 @@ export function Explorer() {
   const initialCopyDialogDirPath =
     copyTargets.length > 0 ? dirname(copyTargets[0]?.path) : undefined;
 
-  // 単体コピー
-  const handleOpenCopySingle = (node: MediaNode) => {
+  // コピーダイアログを開く（単体）
+  const openCopyDialogSingle = (node: MediaNode) => {
     setCopyTargets([node]);
   };
 
-  // 一括コピー
-  const handleOpenCopySelected = () => {
+  // コピーダイアログを開く（選択）
+  const openCopyDialogSelected = () => {
     setCopyTargets(selected);
   };
 
@@ -326,18 +327,18 @@ export function Explorer() {
   const [deleteTargets, setDeleteTargets] = useState<MediaNode[]>([]);
   const isDeleteMode = deleteTargets.length > 0;
 
-  // 単体削除
-  const handleOpenDeleteSingle = (node: MediaNode) => {
+  // 削除ダイアログを開く（単体）
+  const openDeleteDialogSingle = (node: MediaNode) => {
     setDeleteTargets([node]);
   };
 
-  // 一括削除
-  const handleOpenDeleteSelected = () => {
+  // 削除ダイアログを開く（選択）
+  const openDeleteDialogSelected = () => {
     setDeleteTargets(selected);
   };
 
   // 削除実行
-  const handleDeleteConfirm = async () => {
+  const performDelete = async () => {
     const paths = deleteTargets.map((n) => n.path);
     const result = await deleteNodesAction(paths);
 
@@ -353,6 +354,25 @@ export function Explorer() {
   const handleDeleteDialogOpenChange = (open: boolean) => {
     if (!open) {
       setDeleteTargets([]);
+    }
+  };
+
+  // ===== プレビュー設定 =====
+
+  const [folderPreviewTarget, setFolderPreviewTarget] =
+    useState<MediaNode | null>(null);
+
+  const isFolderPreviewMode = folderPreviewTarget != null;
+
+  // プレビュー設定ダイアログを開く
+  const openFolderPreviewDialog = (node: MediaNode) => {
+    setFolderPreviewTarget(node);
+  };
+
+  // 後始末
+  const handleFolderPreviewDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setFolderPreviewTarget(null);
     }
   };
 
@@ -417,10 +437,10 @@ export function Explorer() {
   useHotkeys("escape", () => resetSelection(), {
     scopes: "explorer",
   });
-  useHotkeys("delete", () => handleOpenDeleteSelected(), {
+  useHotkeys("delete", () => openDeleteDialogSelected(), {
     scopes: "explorer",
   });
-  useHotkeys("t", () => handleToggleTagEditor(), {
+  useHotkeys("t", () => toggleTagEditMode(), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
   useHotkeys(
@@ -519,8 +539,8 @@ export function Explorer() {
             <TagFilterDialog />
 
             {/* 新規フォルダ作成 */}
-            <Button variant="outline" onClick={handleOpenCreateFolderDialog}>
-              <Plus className="h-4 w-4" />
+            <Button variant="outline" onClick={openCreateFolderDialog}>
+              <FolderPlus className="h-4 w-4" />
               新規フォルダ
             </Button>
 
@@ -544,15 +564,16 @@ export function Explorer() {
               actions={{
                 open: handleOpen,
                 changeRating: handleRatingChange,
-                rename: handleRenameSingle,
-                move: handleOpenMoveSingle,
-                copy: handleOpenCopySingle,
-                delete: handleOpenDeleteSingle,
+                rename: openRenameDialogSingle,
+                move: openMoveDialogSingle,
+                copy: openCopyDialogSingle,
+                delete: openDeleteDialogSingle,
                 editTags: (node: MediaNode) => {
                   select(node);
-                  handleOpenTagEditor();
+                  openTagEditor();
                 },
                 addTagFilter,
+                changeFolderPreview: openFolderPreviewDialog,
               }}
             >
               <PagingGridView
@@ -571,15 +592,16 @@ export function Explorer() {
               actions={{
                 open: handleOpen,
                 changeRating: handleRatingChange,
-                rename: handleRenameSingle,
-                move: handleOpenMoveSingle,
-                copy: handleOpenCopySingle,
-                delete: handleOpenDeleteSingle,
+                rename: openRenameDialogSingle,
+                move: openMoveDialogSingle,
+                copy: openCopyDialogSingle,
+                delete: openDeleteDialogSingle,
                 editTags: (node: MediaNode) => {
                   select(node);
-                  handleOpenTagEditor();
+                  openTagEditor();
                 },
                 addTagFilter,
+                changeFolderPreview: openFolderPreviewDialog,
               }}
             >
               <PagingListView
@@ -601,8 +623,8 @@ export function Explorer() {
               onClose={closeViewer}
               onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
               onNextFolder={listing.next ? handleOpenNextFolder : undefined}
-              onEditTags={handleToggleTagEditor}
-              onDelete={handleOpenDeleteSelected}
+              onEditTags={toggleTagEditMode}
+              onDelete={openDeleteDialogSelected}
             />
           </ScrollLockProvider>
         )}
@@ -621,7 +643,7 @@ export function Explorer() {
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={handleOpenTagEditor}
+                onClick={openTagEditor}
                 disabled={selected.length === 0}
               >
                 <TagIcon size={18} />
@@ -635,17 +657,17 @@ export function Explorer() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleOpenMoveSelected}>
+                  <DropdownMenuItem onClick={openMoveDialogSelected}>
                     <FolderInput className="mr-2 h-4 w-4" /> 移動
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={handleOpenCopySelected}>
+                  <DropdownMenuItem onClick={openCopyDialogSelected}>
                     <Copy className="mr-2 h-4 w-4" /> コピー
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
                     variant="destructive"
-                    onClick={handleOpenDeleteSelected}
+                    onClick={openDeleteDialogSelected}
                   >
                     <Trash2 className="mr-2 h-4 w-4" /> 削除
                   </DropdownMenuItem>
@@ -659,14 +681,13 @@ export function Explorer() {
         <TagEditSheet
           open={isTagEditMode}
           targetNodes={selected}
-          onClose={handleCloseTagEditor}
+          onClose={closeTagEditor}
           mode={tagEditMode}
           opacity={tagEditMode === "default" ? 100 : 0}
         />
 
         {/* リネームダイアログ */}
         <RenameDialog
-          key={`rename-${isRenameMode}`}
           open={isRenameMode}
           onOpenChange={handleRenameDialogOpenChange}
           sourcePath={renameTarget?.path ?? ""}
@@ -683,7 +704,6 @@ export function Explorer() {
 
         {/* 移動ダイアログ */}
         <MoveDialog
-          key={`move-${isMoveMode}`}
           open={isMoveMode}
           onOpenChange={handleMoveDialogOpenChange}
           sourceNodes={moveTargets}
@@ -692,20 +712,25 @@ export function Explorer() {
 
         {/* コピーダイアログ */}
         <CopyDialog
-          key={`copy-${isCopyMode}`}
           open={isCopyMode}
           onOpenChange={handleCopyDialogOpenChange}
           sourceNodes={copyTargets}
           initialDirPath={initialCopyDialogDirPath}
         />
 
-        {/* 削除確認ダイアログ */}
-        <DeleteConfirmDialog
-          key={`delete-${isDeleteMode}`}
+        {/* 削除警告ダイアログ */}
+        <DeleteAlertDialog
           open={isDeleteMode}
-          onConfirm={handleDeleteConfirm}
+          onConfirm={performDelete}
           onOpenChange={handleDeleteDialogOpenChange}
           count={deleteTargets.length}
+        />
+
+        {/* プレビュー設定ダイアログ */}
+        <FolderPreviewDialog
+          open={isFolderPreviewMode}
+          onOpenChange={handleFolderPreviewDialogOpenChange}
+          targetNode={folderPreviewTarget}
         />
 
         {/* フォルダナビゲーション */}

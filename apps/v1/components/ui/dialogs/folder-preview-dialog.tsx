@@ -1,10 +1,9 @@
 "use client";
 
-import {
-  getSubDirectoriesAction,
-  moveNodesAction,
-} from "@/actions/media-actions";
+import { updateFolderPreviewAction } from "@/actions/folder-actions";
+import { getSubDirectoriesAction } from "@/actions/media-actions";
 import { TextWithTooltip } from "@/components/ui/texts/text-with-tooltip";
+import { MediaNode } from "@/lib/media/types";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
@@ -14,65 +13,59 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
-import { ChevronLeft, ChevronRight, Folder, FolderInput } from "lucide-react";
-import { dirname } from "path";
+import { ChevronLeft, ChevronRight, Folder, Save } from "lucide-react";
+import path, { dirname } from "path";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-interface MoveDialogProps {
+interface FolderPreviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  sourceNodes: { path: string }[];
-  initialDirPath?: string;
+  targetNode: MediaNode | null;
 }
 
-export function MoveDialog({
+export function FolderPreviewDialog({
   open,
   onOpenChange,
-  sourceNodes,
-  initialDirPath = "/",
-}: MoveDialogProps) {
+  targetNode,
+}: FolderPreviewDialogProps) {
+  const initialDirPath = targetNode ? path.dirname(targetNode.path) : "/";
+
+  // ナビゲーション用の現在のパス
   const [currentPath, setCurrentPath] = useState(initialDirPath);
   const [dirs, setDirs] = useState<{ name: string; path: string }[]>([]);
 
   const [isNavigating, startNavigating] = useTransition();
-  const [isMoving, startMoving] = useTransition();
-  const isLoading = isNavigating || isMoving;
+  const [isSaving, startSaving] = useTransition();
+  const isLoading = isNavigating || isSaving;
 
   // フォルダ一覧を取得
   const fetchDirs = (path: string) => {
     startNavigating(async () => {
       const result = await getSubDirectoriesAction(path);
       if (result.success) {
-        // 移動対象自身や、その子孫フォルダは選択肢から除外する（ループ防止）
-        const filtered = result.directories!.filter(
-          (d) =>
-            !sourceNodes.some(
-              (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
-            )
-        );
-        setDirs(filtered);
+        setDirs(result.directories!);
       } else {
         toast.error(result.error);
       }
     });
   };
 
-  // 移動実行
-  const performMove = () => {
-    if (!currentPath) return;
+  // 保存実行
+  const performSave = () => {
+    if (!currentPath || !targetNode) return;
 
-    startMoving(async () => {
-      const paths = sourceNodes.map((n) => n.path);
-      const result = await moveNodesAction(paths, currentPath);
+    startSaving(async () => {
+      const result = await updateFolderPreviewAction(
+        currentPath,
+        targetNode.path
+      );
 
-      if (result.failed === 0) {
-        toast.success(`${result.success}件のアイテムを移動しました`);
+      if (result.success) {
+        toast.success("プレビューを設定しました");
         onOpenChange(false);
       } else {
-        toast.error(
-          `${result.failed}件の移動に失敗しました\n${result.errors.join("\n")}`
-        );
+        toast.error(result.error);
       }
     });
   };
@@ -97,15 +90,18 @@ export function MoveDialog({
       setCurrentPath(initialDirPath);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] h-[500px] flex flex-col">
+      <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col">
         <DialogHeader>
-          <DialogTitle>移動先を選択</DialogTitle>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground break-all bg-muted p-2 rounded">
-            <Folder className="h-4 w-4 shrink-0" />
+          <DialogTitle className="flex items-center gap-2">
+            プレビュー設定:{" "}
+            <span className="text-primary truncate">{targetNode?.name}</span>
+          </DialogTitle>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted p-2 rounded">
+            <Folder className="h-3 w-3 shrink-0" />
             {currentPath}
           </div>
         </DialogHeader>
@@ -116,7 +112,7 @@ export function MoveDialog({
               variant="ghost"
               className="w-full justify-start text-primary"
               onClick={() => goBackParentFolder()}
-              disabled={isLoading}
+              disabled={isSaving || isNavigating}
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               上の階層へ
@@ -161,7 +157,7 @@ export function MoveDialog({
           </ScrollArea>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -169,16 +165,13 @@ export function MoveDialog({
           >
             キャンセル
           </Button>
-          <Button
-            onClick={performMove}
-            disabled={isLoading || currentPath === initialDirPath}
-          >
-            {isMoving ? (
-              "移動中..."
+          <Button onClick={performSave} disabled={isLoading || !currentPath}>
+            {isSaving ? (
+              "設定中..."
             ) : (
               <>
-                <FolderInput className="mr-2 h-4 w-4" />
-                ここに移動
+                <Save className="mr-2 h-4 w-4" />
+                ここに設定
               </>
             )}
           </Button>

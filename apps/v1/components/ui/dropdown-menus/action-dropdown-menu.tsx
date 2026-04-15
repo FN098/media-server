@@ -18,6 +18,7 @@ import {
   Copy,
   Folder,
   FolderInput,
+  ImagePlus,
   ListFilterPlus,
   MoreVertical,
   Pencil,
@@ -60,6 +61,7 @@ export function ActionDropdownMenu({
     copy,
     editTags,
     addTagFilter,
+    changeFolderPreview,
     restore,
     delete: deleteAction,
     deletePermanently,
@@ -166,6 +168,18 @@ export function ActionDropdownMenu({
             disabled={!node.tags || node.tags.length === 0}
           >
             <ListFilterPlus className="mr-2 h-4 w-4" /> タグをフィルターに追加
+          </DropdownMenuItem>
+        )}
+
+        {changeFolderPreview && !node.isDirectory && (
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              void changeFolderPreview(node);
+            }}
+            disabled={node.type !== "image" && node.type !== "video"}
+          >
+            <ImagePlus className="mr-2 h-4 w-4" /> フォルダプレビューに設定
           </DropdownMenuItem>
         )}
 

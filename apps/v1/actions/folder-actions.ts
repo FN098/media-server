@@ -1,9 +1,10 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { getMimetype } from "@/lib/media/mimetype";
 import { fsNameSchema } from "@/lib/media/validation";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import { PATHS } from "@/lib/path/paths";
+import { prisma } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
 import { updateVisitedFolder } from "@/repositories/folder-repository";
 import { mkdir } from "fs/promises";
@@ -14,8 +15,8 @@ export async function visitFolderAction(dirPath: string): Promise<void> {
   const user = await resolveCurrentUserOrThrow();
   await updateVisitedFolder(dirPath, user.id);
 
-  // ダッシュボードの履歴キャッシュをクリア
-  revalidatePath(PATHS.client.dashboard.root);
+  // キャッシュの更新
+  revalidatePath("/dashboard");
 }
 
 // フォルダ作成
@@ -51,6 +52,13 @@ export async function createFolderAction(
     }
 
     await mkdir(newRealPath, { recursive: true });
+
+    // キャッシュの更新
+    revalidatePath("/explorer");
+
+    return {
+      success: true,
+    };
   } catch (error) {
     console.error("Create Folder Error:", error);
     return {
@@ -58,11 +66,70 @@ export async function createFolderAction(
       error: "フォルダ作成中にエラーが発生しました。",
     };
   }
+}
 
-  // キャッシュの更新
-  revalidatePath("/explorer");
+// フォルダにプレビュー画像パスを設定
+export async function updateFolderPreviewAction(
+  virtualPath: string,
+  previewPath: string
+) {
+  try {
+    // プレビュー対象のファイル形式（MIMEタイプ）をチェック
+    const mimeType = getMimetype(previewPath);
+    const isImage = mimeType.startsWith("image/");
+    const isVideo = mimeType.startsWith("video/");
 
-  return {
-    success: true,
-  };
+    if (!isImage && !isVideo) {
+      return {
+        success: false,
+        error:
+          "プレビューには画像または動画ファイルのみ指定可能です。またはサポートされない形式です。",
+      };
+    }
+
+    // フォルダ本体の存在確認
+    const realFolderPath = getServerMediaPath(virtualPath);
+    if (!(await existsPath(realFolderPath))) {
+      return {
+        success: false,
+        error: "対象のフォルダが見つかりません。",
+      };
+    }
+
+    // プレビュー用ファイルの存在確認
+    const realPreviewPath = getServerMediaPath(previewPath);
+    if (!(await existsPath(realPreviewPath))) {
+      return {
+        success: false,
+        error: "指定されたプレビューファイルが存在しません。",
+      };
+    }
+
+    // DB更新 (upsert)
+    await prisma.folderMeta.upsert({
+      where: {
+        path: virtualPath,
+      },
+      update: {
+        previewPath: previewPath,
+      },
+      create: {
+        path: virtualPath,
+        previewPath: previewPath,
+      },
+    });
+
+    // キャッシュの更新
+    revalidatePath("/explorer");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Update Folder Preview Error:", error);
+    return {
+      success: false,
+      error: "プレビューの設定中にデータベースエラーが発生しました。",
+    };
+  }
 }

@@ -10,19 +10,19 @@ import {
 } from "@/shadcn/components/ui/alert-dialog";
 import { useTransition } from "react";
 
-interface RestoreConfirmDialogProps {
+interface RestoreAlertDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   count: number;
   onConfirm: () => Promise<void>;
 }
 
-export function RestoreConfirmDialog({
+export function RestoreAlertDialog({
   open,
   onOpenChange,
   count,
   onConfirm,
-}: RestoreConfirmDialogProps) {
+}: RestoreAlertDialogProps) {
   const [isPending, startTransition] = useTransition();
 
   const handleConfirm = (e: React.MouseEvent) => {

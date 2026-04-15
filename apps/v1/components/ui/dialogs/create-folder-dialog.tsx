@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface CreateFolderDialogProps {
@@ -26,19 +26,8 @@ export function CreateFolderDialog({
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleOpenChange = (open: boolean) => {
-    if (open) {
-      setFolderName("");
-
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }
-
-    onOpenChange(open);
-  };
-
-  const handleCreate = () => {
+  // 作成実行
+  const performCreate = () => {
     const trimmedName = folderName.trim();
 
     if (!trimmedName) {
@@ -59,8 +48,17 @@ export function CreateFolderDialog({
     });
   };
 
+  // ダイアログ初期化
+  useEffect(() => {
+    if (open) {
+      setFolderName("");
+      inputRef.current?.focus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>新規フォルダ作成</DialogTitle>
@@ -75,7 +73,7 @@ export function CreateFolderDialog({
             onKeyDown={(e) => {
               if (e.key === "Enter" && !isPending) {
                 e.preventDefault();
-                handleCreate();
+                performCreate();
               }
             }}
             disabled={isPending}
@@ -92,7 +90,7 @@ export function CreateFolderDialog({
             キャンセル
           </Button>
           <Button
-            onClick={handleCreate}
+            onClick={performCreate}
             disabled={isPending || !folderName.trim()}
           >
             {isPending ? "作成中..." : "作成"}

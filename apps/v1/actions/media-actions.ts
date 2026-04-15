@@ -1,11 +1,13 @@
 "use server";
 
+import { getMimetype } from "@/lib/media/mimetype";
 import {
   GhostMediaDeleteResult,
   GhostMediaItem,
   GhostMediaScanOptions,
 } from "@/lib/media/types";
 import { fsNameSchema } from "@/lib/media/validation";
+import { isBlockedServerPath } from "@/lib/path/blacklist";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
@@ -17,7 +19,7 @@ import { existsPath } from "@/lib/utils/fs";
 import { constants } from "fs";
 import { access, cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import { basename, dirname, join } from "path";
+import path, { basename, dirname, join } from "path";
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
@@ -387,6 +389,7 @@ export async function getSubDirectoriesAction(dirPath: string) {
       success: true,
       directories: entries
         .filter((e) => e.isDirectory())
+        .filter((e) => !isBlockedServerPath(path.join(realPath, e.name)))
         .map((e) => ({
           name: e.name,
           path: join(dirPath, e.name).replace(/\\/g, "/"),
@@ -395,6 +398,38 @@ export async function getSubDirectoriesAction(dirPath: string) {
   } catch (error) {
     console.error(`Sub Directories Error [${dirPath}]:`, error);
     return { success: false, error: "フォルダ一覧の取得に失敗しました" };
+  }
+}
+
+// フォルダプレビュー用ファイル一覧
+export async function getFolderMediaFilesAction(dirPath: string) {
+  try {
+    const realPath = getServerMediaPath(dirPath);
+    const entries = await readdir(realPath, { withFileTypes: true });
+
+    const mediaFiles = entries
+      .filter((e) => e.isFile()) // ファイルのみ対象
+      .filter((e) => {
+        const mimeType = getMimetype(e.name);
+        return mimeType.startsWith("image/") || mimeType.startsWith("video/");
+      })
+      .map((e) => ({
+        name: e.name,
+        // 仮想パスを生成
+        path: join(dirPath, e.name).replace(/\\/g, "/"),
+        type: getMimetype(e.name).startsWith("video/") ? "video" : "image",
+      }));
+
+    return {
+      success: true,
+      files: mediaFiles,
+    };
+  } catch (error) {
+    console.error(`Get Media Files Error [${dirPath}]:`, error);
+    return {
+      success: false,
+      error: "メディアファイルの取得に失敗しました",
+    };
   }
 }
 

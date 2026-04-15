@@ -18,6 +18,7 @@ export interface Actions {
     node: MediaNode,
     rating: number | null
   ) => void | Promise<void>;
+  changeFolderPreview?: (node: MediaNode) => void | Promise<void>;
 }
 
 export function useActions(actions: Actions) {

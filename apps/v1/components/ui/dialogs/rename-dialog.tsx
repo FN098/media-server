@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface RenameDialogProps {
@@ -33,7 +33,8 @@ export function RenameDialog({
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleOpenChange = (open: boolean) => {
+  // ダイアログを開いたときに名前をリセット
+  useEffect(() => {
     if (open) {
       setNewName(baseName);
 
@@ -43,11 +44,10 @@ export function RenameDialog({
         inputRef.current.select();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    onOpenChange(open);
-  };
-
-  const handleRename = () => {
+  const performRename = () => {
     startTransition(async () => {
       // 拡張子を再度結合
       const fullNewName = `${newName}${extension}`;
@@ -69,7 +69,7 @@ export function RenameDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>名前の変更</DialogTitle>
@@ -82,7 +82,7 @@ export function RenameDialog({
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="ファイル名を入力"
-              onKeyDown={(e) => e.key === "Enter" && void handleRename()}
+              onKeyDown={(e) => e.key === "Enter" && void performRename()}
               disabled={isPending}
               className="flex-1"
             />
@@ -99,7 +99,7 @@ export function RenameDialog({
           >
             キャンセル
           </Button>
-          <Button onClick={handleRename} disabled={isPending}>
+          <Button onClick={performRename} disabled={isPending}>
             {isPending ? "実行中..." : "保存"}
           </Button>
         </DialogFooter>

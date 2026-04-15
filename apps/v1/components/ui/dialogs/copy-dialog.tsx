@@ -16,14 +16,14 @@ import {
 import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
 import { dirname } from "path";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 interface CopyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sourceNodes: { path: string; name: string }[];
-  initialDirPath?: string;
+  initialDirPath?: string; // ナビゲーションの開始ディレクトリパス
 }
 
 export function CopyDialog({
@@ -34,16 +34,10 @@ export function CopyDialog({
 }: CopyDialogProps) {
   const [targetDirPath, setTargetDirPath] = useState(initialDirPath);
   const [dirs, setDirs] = useState<{ name: string; path: string }[]>([]);
+
   const [isNavigating, startNavigating] = useTransition();
   const [isCopying, startCopying] = useTransition();
-
-  // ダイアログを開いたときに初期パスをリセット
-  const handleOpenChange = (open: boolean) => {
-    if (open) {
-      fetchDirs(initialDirPath);
-    }
-    onOpenChange(open);
-  };
+  const isLoading = isNavigating || isCopying;
 
   // フォルダ一覧を取得
   const fetchDirs = (path: string) => {
@@ -93,8 +87,16 @@ export function CopyDialog({
     fetchDirs(parent === "." ? "/" : parent);
   };
 
+  // ダイアログ初期化
+  useEffect(() => {
+    if (open) {
+      fetchDirs(initialDirPath);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] h-[500px] flex flex-col">
         <DialogHeader>
           <DialogTitle>コピー先を選択</DialogTitle>
@@ -110,7 +112,7 @@ export function CopyDialog({
               variant="ghost"
               className="w-full justify-start text-primary"
               onClick={() => handleBack()}
-              disabled={isCopying || isNavigating}
+              disabled={isLoading}
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               上の階層へ
@@ -119,7 +121,7 @@ export function CopyDialog({
 
           <ScrollArea className="flex-1 overflow-auto border rounded-md p-2 relative">
             {/* スピナー */}
-            {(isCopying || isNavigating) && (
+            {isLoading && (
               <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
                 <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
               </div>
@@ -138,7 +140,7 @@ export function CopyDialog({
                     variant="ghost"
                     className="w-full justify-between hover:bg-primary/10 group"
                     onClick={() => handleOpen(dir.path)}
-                    disabled={isCopying || isNavigating}
+                    disabled={isLoading}
                   >
                     <div className="flex items-center">
                       <Folder className="mr-2 h-4 w-4 text-blue-500" />
@@ -163,7 +165,10 @@ export function CopyDialog({
           >
             キャンセル
           </Button>
-          <Button onClick={handleCopy} disabled={isCopying || isNavigating}>
+          <Button
+            onClick={handleCopy}
+            disabled={isLoading || initialDirPath === targetDirPath}
+          >
             {isCopying ? (
               "コピー中..."
             ) : (

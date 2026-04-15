@@ -16,6 +16,7 @@ import {
   Copy,
   Folder,
   FolderInput,
+  ImagePlus,
   ListFilterPlus,
   Pencil,
   RotateCcw,
@@ -65,6 +66,7 @@ export function ActionContextMenu({
     copy,
     editTags,
     addTagFilter,
+    changeFolderPreview,
     restore,
     delete: deleteAction,
     deletePermanently,
@@ -150,6 +152,18 @@ export function ActionContextMenu({
             disabled={!node.tags || node.tags.length === 0}
           >
             <ListFilterPlus className="mr-2 h-4 w-4" /> タグをフィルターに追加
+          </ContextMenuItem>
+        )}
+
+        {changeFolderPreview && !node.isDirectory && (
+          <ContextMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              void changeFolderPreview(node);
+            }}
+            disabled={node.type !== "image" && node.type !== "video"}
+          >
+            <ImagePlus className="mr-2 h-4 w-4" /> フォルダプレビューに設定
           </ContextMenuItem>
         )}
 
