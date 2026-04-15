@@ -45,26 +45,26 @@ export function useExplorerQuery() {
   const params = Object.fromEntries(searchParams);
   const explorerQuery = explorerQuerySchema.parse(params);
 
-  const setExplorerQuery = useCallback(
+  // URLを生成するロジックを共通化
+  const getExplorerUrl = useCallback(
     (query: Partial<ExplorerQuery>, options: ExplorerQueryOptions = {}) => {
       const parsed = explorerQuerySchema.parse(query);
-
-      // 既存のパラメータに新しい値をマージ
       const search = overrideSearchParams(parsed, searchParams).toString();
-
-      // ベースパスの決定
       const basePath = resolveClientPath(options) || pathname;
+      return search ? `${basePath}?${search}` : basePath;
+    },
+    [pathname, searchParams]
+  );
 
-      // 遷移先のフルURLを作成
-      const nextUrl = search ? `${basePath}?${search}` : basePath;
+  const setExplorerQuery = useCallback(
+    (query: Partial<ExplorerQuery>, options: ExplorerQueryOptions = {}) => {
+      const nextUrl = getExplorerUrl(query, options);
 
-      // 現在のフルURLを作成（比較用）
+      // 現在のフルURLと比較
       const currentSearch = searchParams.toString();
       const currentUrl = currentSearch
         ? `${pathname}?${currentSearch}`
         : pathname;
-
-      // URLが変わらなければ何もしない
       if (nextUrl === currentUrl) return;
 
       if (options.history === "push") {
@@ -73,12 +73,13 @@ export function useExplorerQuery() {
         router.replace(nextUrl, { scroll: false });
       }
     },
-    [pathname, router, searchParams]
+    [getExplorerUrl, pathname, router, searchParams]
   );
 
   return {
     explorerQuery,
     setExplorerQuery,
+    getExplorerUrl,
   };
 }
 

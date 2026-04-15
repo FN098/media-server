@@ -5,14 +5,24 @@ import { MediaListing } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { useCallback } from "react";
 
+export type ExplorerOpenOptions = {
+  newTab?: boolean;
+};
+
 export function useExplorer(listing: MediaListing) {
-  const { setExplorerQuery } = useExplorerQuery();
+  const { setExplorerQuery, getExplorerUrl } = useExplorerQuery();
 
   const openViewer = useCallback(
-    (at: IndexLike) => {
-      setExplorerQuery({ modal: true, at }, { history: "push" });
+    (at: IndexLike, options?: ExplorerOpenOptions) => {
+      const query = { modal: true, at };
+      if (options?.newTab) {
+        const url = getExplorerUrl(query);
+        window.open(url, "_blank", "noreferrer");
+      } else {
+        setExplorerQuery(query, { history: "push" });
+      }
     },
-    [setExplorerQuery]
+    [getExplorerUrl, setExplorerQuery]
   );
 
   const closeViewer = useCallback(() => {
@@ -20,24 +30,32 @@ export function useExplorer(listing: MediaListing) {
   }, [setExplorerQuery]);
 
   const openFolder = useCallback(
-    (path: string, at?: IndexLike) => {
-      setExplorerQuery({ at }, { path, history: "push" });
+    (path: string, at?: IndexLike, options?: ExplorerOpenOptions) => {
+      const query = { at };
+      const queryOpts = { path, history: "push" as const };
+
+      if (options?.newTab) {
+        const url = getExplorerUrl(query, queryOpts);
+        window.open(url, "_blank", "noreferrer");
+      } else {
+        setExplorerQuery(query, queryOpts);
+      }
     },
-    [setExplorerQuery]
+    [getExplorerUrl, setExplorerQuery]
   );
 
   const openNextFolder = useCallback(
-    (at: IndexLike) => {
+    (at: IndexLike, options?: ExplorerOpenOptions) => {
       if (listing.next == null) return;
-      openFolder(listing.next, at);
+      openFolder(listing.next, at, options);
     },
     [listing.next, openFolder]
   );
 
   const openPrevFolder = useCallback(
-    (at: IndexLike) => {
+    (at: IndexLike, options?: ExplorerOpenOptions) => {
       if (listing.prev == null) return;
-      openFolder(listing.prev, at);
+      openFolder(listing.prev, at, options);
     },
     [listing.prev, openFolder]
   );

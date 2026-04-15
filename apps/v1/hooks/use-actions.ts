@@ -5,6 +5,7 @@ import { useCallback } from "react";
 
 export interface Actions {
   open?: (node: MediaNode) => void | Promise<void>;
+  openInNewTab?: (node: MediaNode) => void | Promise<void>;
   openParentFolder?: (node: MediaNode) => void | Promise<void>;
   rename?: (node: MediaNode) => void | Promise<void>;
   move?: (node: MediaNode) => void | Promise<void>;

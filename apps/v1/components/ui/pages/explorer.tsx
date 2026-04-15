@@ -193,6 +193,23 @@ export function Explorer() {
     toast.warning("このファイル形式は対応していません");
   };
 
+  // 新しいタブで開く
+  const handleOpenInNewTab = (node: MediaNode) => {
+    if (node.isDirectory) {
+      openFolder(node.path, undefined, { newTab: true });
+      return;
+    }
+
+    if (isMedia(node.type)) {
+      const index = getViewerIndex(node.path);
+      if (index == null) return;
+      openViewer(index, { newTab: true });
+      return;
+    }
+
+    toast.warning("このファイル形式は対応していません");
+  };
+
   // ===== お気に入り =====
 
   const favCtx = useFavoritesContext();
@@ -577,6 +594,7 @@ export function Explorer() {
             <ActionsProvider
               actions={{
                 open: handleOpen,
+                openInNewTab: handleOpenInNewTab,
                 changeRating: handleRatingChange,
                 rename: openRenameDialogSingle,
                 move: openMoveDialogSingle,

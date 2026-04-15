@@ -16,6 +16,7 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import {
   Copy,
+  ExternalLink,
   Folder,
   FolderInput,
   ImageMinus,
@@ -55,6 +56,7 @@ export function ActionDropdownMenu({
   );
 
   const {
+    openInNewTab,
     changeRating,
     openParentFolder,
     rename,
@@ -103,6 +105,17 @@ export function ActionDropdownMenu({
               onRatingChange={(rating) => void changeRating(node, rating)}
               variant="menu"
             />
+          </DropdownMenuItem>
+        )}
+
+        {openInNewTab && (
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              void openInNewTab(node);
+            }}
+          >
+            <ExternalLink className="mr-2 h-4 w-4" /> 新しいタブで開く
           </DropdownMenuItem>
         )}
 

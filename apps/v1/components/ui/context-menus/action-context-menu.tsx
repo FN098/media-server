@@ -14,6 +14,7 @@ import {
 } from "@/shadcn/components/ui/context-menu";
 import {
   Copy,
+  ExternalLink,
   Folder,
   FolderInput,
   ImageMinus,
@@ -60,6 +61,7 @@ export function ActionContextMenu({
   }
 
   const {
+    openInNewTab,
     changeRating,
     openParentFolder,
     rename,
@@ -87,6 +89,17 @@ export function ActionContextMenu({
               onRatingChange={(rating) => void changeRating(node, rating)}
               variant="menu"
             />
+          </ContextMenuItem>
+        )}
+
+        {openInNewTab && (
+          <ContextMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              void openInNewTab(node);
+            }}
+          >
+            <ExternalLink className="mr-2 h-4 w-4" /> 新しいタブで開く
           </ContextMenuItem>
         )}
 
