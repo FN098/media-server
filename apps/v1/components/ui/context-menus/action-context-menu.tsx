@@ -66,7 +66,7 @@ export function ActionContextMenu({
     copy,
     editTags,
     addTagFilter,
-    changeFolderPreview,
+    setAsPreview,
     restore,
     delete: deleteAction,
     deletePermanently,
@@ -155,15 +155,15 @@ export function ActionContextMenu({
           </ContextMenuItem>
         )}
 
-        {changeFolderPreview && !node.isDirectory && (
+        {setAsPreview && !node.isDirectory && (
           <ContextMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              void changeFolderPreview(node);
+              void setAsPreview(node);
             }}
             disabled={node.type !== "image" && node.type !== "video"}
           >
-            <ImagePlus className="mr-2 h-4 w-4" /> フォルダプレビューに設定
+            <ImagePlus className="mr-2 h-4 w-4" /> プレビューに設定
           </ContextMenuItem>
         )}
 

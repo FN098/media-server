@@ -6,9 +6,9 @@ import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
 import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
+import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
-import { FolderPreviewDialog } from "@/components/ui/dialogs/folder-preview-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
@@ -359,20 +359,19 @@ export function Explorer() {
 
   // ===== プレビュー設定 =====
 
-  const [folderPreviewTarget, setFolderPreviewTarget] =
-    useState<MediaNode | null>(null);
+  const [previewPath, setPreviewPath] = useState<string | null>(null);
 
-  const isFolderPreviewMode = folderPreviewTarget != null;
+  const isFolderPreviewMode = previewPath != null;
 
   // プレビュー設定ダイアログを開く
-  const openFolderPreviewDialog = (node: MediaNode) => {
-    setFolderPreviewTarget(node);
+  const openApplyPreviewDialog = (node: MediaNode) => {
+    setPreviewPath(node.path);
   };
 
   // 後始末
-  const handleFolderPreviewDialogOpenChange = (open: boolean) => {
+  const handleApplyPreviewDialogOpenChange = (open: boolean) => {
     if (!open) {
-      setFolderPreviewTarget(null);
+      setPreviewPath(null);
     }
   };
 
@@ -573,7 +572,7 @@ export function Explorer() {
                   openTagEditor();
                 },
                 addTagFilter,
-                changeFolderPreview: openFolderPreviewDialog,
+                setAsPreview: openApplyPreviewDialog,
               }}
             >
               <PagingGridView
@@ -601,7 +600,7 @@ export function Explorer() {
                   openTagEditor();
                 },
                 addTagFilter,
-                changeFolderPreview: openFolderPreviewDialog,
+                setAsPreview: openApplyPreviewDialog,
               }}
             >
               <PagingListView
@@ -727,10 +726,10 @@ export function Explorer() {
         />
 
         {/* プレビュー設定ダイアログ */}
-        <FolderPreviewDialog
+        <ApplyPreviewDialog
           open={isFolderPreviewMode}
-          onOpenChange={handleFolderPreviewDialogOpenChange}
-          targetNode={folderPreviewTarget}
+          onOpenChange={handleApplyPreviewDialogOpenChange}
+          previewPath={previewPath}
         />
 
         {/* フォルダナビゲーション */}

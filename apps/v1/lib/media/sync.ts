@@ -1,6 +1,7 @@
 import { sortNodes } from "@/lib/media/sort";
 import type { MediaFsNode, PrismaMedia } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
+import { getFilenameWithoutExt } from "@/lib/utils/filename";
 
 type MediaCreateItem = Pick<
   PrismaMedia,
@@ -36,68 +37,69 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
     }
   });
 
-  // --- 2. 各ファイルのメタデータ準備 ---
-  const fsMap = new Map(
-    files.map((f) => {
-      let previewPath: string | null = null;
-      const baseName = f.name.replace(/\.[^/.]+$/, "");
-
-      if (f.type === "audio") {
-        // オーディオは「同名画像」があれば優先、なければ「フォルダの顔」
-        previewPath = imageMap.get(baseName) ?? firstMedia?.path ?? null;
-      } else if (f.type === "video") {
-        // 動画は「同名画像」がある場合のみ上書き（自分自身のパスは含めない）
-        previewPath = imageMap.get(baseName) ?? null;
-      }
-
-      return [
-        f.path,
-        {
-          fileMtime: f.mtime,
-          fileSize: f.size,
-          previewPath,
-        },
-      ];
-    })
-  );
-
-  // --- 3. DB状態との比較 ---
+  // --- 2. DB状態の取得 ---
+  // 比較のために早めに取得します
   const dbMedia = await prisma.media.findMany({
     where: { dirPath },
     select: { id: true, path: true, fileMtime: true, previewPath: true },
   });
   const dbMap = new Map(dbMedia.map((m) => [m.path, m]));
 
+  const currentFolderMeta = await prisma.folderMeta.findUnique({
+    where: { path: dirPath },
+    select: { previewPath: true },
+  });
+
   const toInsert: MediaCreateItem[] = [];
   const toUpdate: MediaUpdateItem[] = [];
 
-  for (const [path, meta] of fsMap) {
-    const dbMeta = dbMap.get(path);
+  // --- 3. 各ファイルのメタデータ準備 & 比較 ---
+  for (const f of files) {
+    const dbMeta = dbMap.get(f.path);
+    const baseName = getFilenameWithoutExt(f.path);
+
+    // A. 既にDBにプレビュー設定があるならそれを維持。なければ計算。
+    let previewPath: string | null = dbMeta?.previewPath ?? null;
+
+    if (previewPath === null) {
+      if (f.type === "audio") {
+        previewPath = imageMap.get(baseName) ?? firstMedia?.path ?? null;
+      } else if (f.type === "video") {
+        previewPath = imageMap.get(baseName) ?? null;
+      }
+    }
 
     if (!dbMeta) {
       // 新規挿入
       toInsert.push({
-        path,
+        path: f.path,
         dirPath,
-        fileMtime: meta.fileMtime,
-        fileSize: meta.fileSize ? BigInt(meta.fileSize) : null,
-        previewPath: meta.previewPath,
+        fileMtime: f.mtime,
+        fileSize: f.size ? BigInt(f.size) : null,
+        previewPath: previewPath,
       });
-    } else if (
-      dbMeta.fileMtime.getTime() !== meta.fileMtime.getTime() ||
-      dbMeta.previewPath !== meta.previewPath // プレビューパスが変わった場合も更新対象
-    ) {
-      // 更新
-      toUpdate.push({
-        path,
-        fileMtime: meta.fileMtime,
-        fileSize: meta.fileSize ? BigInt(meta.fileSize) : null,
-        previewPath: meta.previewPath,
-      });
+    } else {
+      // 更新判定
+      const timeChanged = dbMeta.fileMtime.getTime() !== f.mtime.getTime();
+      // DBがnullかつ、計算結果がある場合のみpreviewPathを更新対象にする
+      const shouldAutoSetPreview =
+        dbMeta.previewPath === null && previewPath !== null;
+
+      if (timeChanged || shouldAutoSetPreview) {
+        toUpdate.push({
+          path: f.path,
+          fileMtime: f.mtime,
+          fileSize: f.size ? BigInt(f.size) : null,
+          previewPath: shouldAutoSetPreview ? previewPath : dbMeta.previewPath,
+        });
+      }
     }
   }
 
-  const toDelete = dbMedia.filter((m) => !fsMap.has(m.path)).map((m) => m.path);
+  const fsPaths = new Set(files.map((f) => f.path));
+  const toDelete = dbMedia
+    .filter((m) => !fsPaths.has(m.path))
+    .map((m) => m.path);
 
   // --- 4. トランザクション実行 ---
   await prisma.$transaction(async (tx) => {
@@ -119,12 +121,16 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
       });
     }
 
-    // FolderMeta 更新
-    // このディレクトリ自体のプレビューパスを保存
-    await tx.folderMeta.upsert({
-      where: { path: dirPath },
-      update: { previewPath: firstMedia?.path ?? null },
-      create: { path: dirPath, previewPath: firstMedia?.path ?? null },
-    });
+    // FolderMeta の自動設定（null の場合のみ）
+    if (!currentFolderMeta || currentFolderMeta.previewPath === null) {
+      const folderPreview = firstMedia?.path ?? null;
+      if (folderPreview) {
+        await tx.folderMeta.upsert({
+          where: { path: dirPath },
+          update: { previewPath: folderPreview },
+          create: { path: dirPath, previewPath: folderPreview },
+        });
+      }
+    }
   });
 }

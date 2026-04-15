@@ -61,7 +61,7 @@ export function ActionDropdownMenu({
     copy,
     editTags,
     addTagFilter,
-    changeFolderPreview,
+    setAsPreview,
     restore,
     delete: deleteAction,
     deletePermanently,
@@ -171,15 +171,15 @@ export function ActionDropdownMenu({
           </DropdownMenuItem>
         )}
 
-        {changeFolderPreview && !node.isDirectory && (
+        {setAsPreview && !node.isDirectory && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
-              void changeFolderPreview(node);
+              void setAsPreview(node);
             }}
             disabled={node.type !== "image" && node.type !== "video"}
           >
-            <ImagePlus className="mr-2 h-4 w-4" /> フォルダプレビューに設定
+            <ImagePlus className="mr-2 h-4 w-4" /> プレビューに設定
           </DropdownMenuItem>
         )}
 

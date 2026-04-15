@@ -1,10 +1,8 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
-import { getMimetype } from "@/lib/media/mimetype";
 import { fsNameSchema } from "@/lib/media/validation";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import { prisma } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
 import { updateVisitedFolder } from "@/repositories/folder-repository";
 import { mkdir } from "fs/promises";
@@ -64,72 +62,6 @@ export async function createFolderAction(
     return {
       success: false,
       error: "フォルダ作成中にエラーが発生しました。",
-    };
-  }
-}
-
-// フォルダにプレビュー画像パスを設定
-export async function updateFolderPreviewAction(
-  virtualPath: string,
-  previewPath: string
-) {
-  try {
-    // プレビュー対象のファイル形式（MIMEタイプ）をチェック
-    const mimeType = getMimetype(previewPath);
-    const isImage = mimeType.startsWith("image/");
-    const isVideo = mimeType.startsWith("video/");
-
-    if (!isImage && !isVideo) {
-      return {
-        success: false,
-        error:
-          "プレビューには画像または動画ファイルのみ指定可能です。またはサポートされない形式です。",
-      };
-    }
-
-    // フォルダ本体の存在確認
-    const realFolderPath = getServerMediaPath(virtualPath);
-    if (!(await existsPath(realFolderPath))) {
-      return {
-        success: false,
-        error: "対象のフォルダが見つかりません。",
-      };
-    }
-
-    // プレビュー用ファイルの存在確認
-    const realPreviewPath = getServerMediaPath(previewPath);
-    if (!(await existsPath(realPreviewPath))) {
-      return {
-        success: false,
-        error: "指定されたプレビューファイルが存在しません。",
-      };
-    }
-
-    // DB更新 (upsert)
-    await prisma.folderMeta.upsert({
-      where: {
-        path: virtualPath,
-      },
-      update: {
-        previewPath: previewPath,
-      },
-      create: {
-        path: virtualPath,
-        previewPath: previewPath,
-      },
-    });
-
-    // キャッシュの更新
-    revalidatePath("/explorer");
-
-    return {
-      success: true,
-    };
-  } catch (error) {
-    console.error("Update Folder Preview Error:", error);
-    return {
-      success: false,
-      error: "プレビューの設定中にデータベースエラーが発生しました。",
     };
   }
 }

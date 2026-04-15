@@ -17,7 +17,16 @@ import { prisma } from "@/lib/prisma";
 import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
 import { constants } from "fs";
-import { access, cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
+import {
+  access,
+  cp,
+  lstat,
+  mkdir,
+  readdir,
+  rename,
+  rm,
+  stat,
+} from "fs/promises";
 import { revalidatePath } from "next/cache";
 import path, { basename, dirname, join } from "path";
 
@@ -641,5 +650,42 @@ export async function cleanupGhostMediaAction(
       success: false,
       error: "削除中に予期せぬエラーが発生しました。",
     };
+  }
+}
+
+/**
+ * プレビューパスを更新する
+ * targetPath: 設定対象（ファイル or フォルダ）
+ * previewResourcePath: プレビュー画像として使うファイルのパス
+ */
+export async function updatePreviewAction(
+  targetPath: string,
+  previewResourcePath: string
+) {
+  try {
+    const realPath = getServerMediaPath(targetPath);
+    const s = await stat(realPath);
+    const isDirectory = s.isDirectory();
+
+    if (isDirectory) {
+      // フォルダメタデータの更新
+      await prisma.folderMeta.upsert({
+        where: { path: targetPath },
+        update: { previewPath: previewResourcePath },
+        create: { path: targetPath, previewPath: previewResourcePath },
+      });
+    } else {
+      // メディア（ファイル）データの更新
+      await prisma.media.update({
+        where: { path: targetPath },
+        data: { previewPath: previewResourcePath },
+      });
+    }
+
+    revalidatePath("/explorer");
+    return { success: true };
+  } catch (error) {
+    console.error("Update Preview Error:", error);
+    return { success: false, error: "プレビューの更新に失敗しました。" };
   }
 }
