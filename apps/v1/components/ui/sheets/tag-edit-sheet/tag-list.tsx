@@ -2,7 +2,6 @@ import { Tag, TagOperator, TagState } from "@/lib/tag/types";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check } from "lucide-react";
 
 interface TagListProps {
   opacity: number;
@@ -147,7 +146,7 @@ export function TagList({
             }}
           >
             <span className="flex items-center gap-1.5 pointer-events-none">
-              {isOnAfterApply && <Check size={12} />}
+              {/* {isOnAfterApply && <Check size={12} />} */}
               {tag.name}
             </span>
 
