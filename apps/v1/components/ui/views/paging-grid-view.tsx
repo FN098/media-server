@@ -43,11 +43,13 @@ export function PagingGridView({
   const { currentPage, pageSize, totalPages, setPage, paginate } =
     usePagingContext();
 
-  // スクロール復元が実行済みかどうかを保持するフラグ
-  const hasRestored = useRef(false);
-
   // 現在のページのノードを取得
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
+
+  // ─── 自動スクロール ────────────────────────────────────────────────────────────────────
+
+  // スクロール復元が実行済みかどうかを保持するフラグ
+  const hasRestored = useRef(false);
 
   // パスからグローバルインデックスを特定する
   const scrollTargetIndex = useMemo(() => {
@@ -96,6 +98,8 @@ export function PagingGridView({
       }
     }
   }, [currentPage, pageSize, scrollTargetIndex, onScrollRestored]);
+
+  // ─── ページネーション ────────────────────────────────────────────────────────────────────
 
   // フィルターなどで allNodes が変わった時のリセット処理
   useEffect(() => {
