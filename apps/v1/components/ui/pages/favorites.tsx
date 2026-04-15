@@ -3,9 +3,9 @@
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
+import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { MediaTypeFilterSelect } from "@/components/ui/selects/media-type-filter-select";
-import { RatingFilterSelect } from "@/components/ui/selects/rating-filter-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
@@ -306,7 +306,7 @@ export function Favorites() {
             />
 
             {/* 評価フィルター */}
-            <RatingFilterSelect
+            <RatingFilterDialog
               value={ratingFilter}
               onChange={setRatingFilter}
             />

@@ -1,6 +1,8 @@
 import { MediaFsNodeType } from "@/lib/media/types";
 
 export type RatingValue = 1 | 2 | 3 | 4 | 5;
+export type RatingFilterMode = "all" | "unrated" | "rated";
+export type RatingOperator = "gte" | "lte" | "eq" | "between";
 
 export type RatedCondition =
   | { operator: "gte"; value: RatingValue }
