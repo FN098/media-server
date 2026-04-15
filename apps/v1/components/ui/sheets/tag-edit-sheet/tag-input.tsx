@@ -10,6 +10,7 @@ interface TagInputProps {
   disabled: boolean;
   suggestions: Tag[];
   autoFocus?: boolean;
+  autoBlur?: boolean;
   opacity: number;
   onChange: (val: string) => void;
   onAdd: () => void;
@@ -23,6 +24,7 @@ export function TagInput({
   disabled,
   suggestions,
   autoFocus,
+  autoBlur,
   onChange,
   onAdd,
   onSelectSuggestion,
@@ -51,7 +53,6 @@ export function TagInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    debugger;
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
@@ -80,8 +81,8 @@ export function TagInput({
           const tag = suggestions[activeIndex];
           if (tag) {
             onSelectSuggestion(tag);
-            inputRef.current?.focus();
             setActiveIndex(-1);
+            inputRef.current?.blur();
             return;
           }
         }
@@ -98,6 +99,7 @@ export function TagInput({
         if (suggests.has(normalized)) {
           onSelectSuggestion(suggests.get(value)!);
           setActiveIndex(-1);
+          if (autoBlur) inputRef.current?.blur();
           return;
         }
 
@@ -105,6 +107,7 @@ export function TagInput({
         onAdd();
         onChange("");
         setActiveIndex(-1);
+        if (autoBlur) inputRef.current?.blur();
     }
   };
 
@@ -174,7 +177,8 @@ export function TagInput({
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => {
                       onSelectSuggestion(tag);
-                      inputRef.current?.focus();
+                      setActiveIndex(-1);
+                      if (autoBlur) inputRef.current?.blur();
                     }}
                     className={cn(
                       "w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between",

@@ -416,7 +416,8 @@ export function TagEditSheet({
                         value={editor.newTagName}
                         opacity={opacity}
                         disabled={isLoading}
-                        autoFocus={isMobile ? false : true}
+                        autoFocus={!isMobile}
+                        autoBlur={isMobile}
                         suggestions={editor.suggestedTags}
                         onChange={editor.setNewTagName}
                         onAdd={() => handleNewAdd(editor.newTagName)}
