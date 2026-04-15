@@ -121,7 +121,7 @@ export function ApplyPreviewDialog({
             </div>
           </div>
 
-          <ScrollArea className="flex-1 border rounded-md">
+          <ScrollArea className="flex-1 min-h-0 border rounded-md">
             <div className="p-2 flex flex-col gap-1">
               {/* 「このフォルダ自体を設定先にする」ボタン */}
               <Button
