@@ -198,8 +198,6 @@ export function TagFilterDialog({
     );
   }
 
-  const handlePointerEnter = () => activate();
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -212,8 +210,8 @@ export function TagFilterDialog({
               "border-primary bg-primary/5 text-primary hover:bg-primary/10",
             !hasSelection && "text-muted-foreground"
           )}
-          onPointerEnter={handlePointerEnter}
-          onPointerDown={handlePointerEnter}
+          onPointerEnter={activate}
+          onPointerDown={activate}
         >
           <Tag className="h-4 w-4" />
           <span>タグで絞り込む</span>

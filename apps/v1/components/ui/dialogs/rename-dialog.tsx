@@ -33,20 +33,6 @@ export function RenameDialog({
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ダイアログを開いたときに名前をリセット
-  useEffect(() => {
-    if (open) {
-      setNewName(baseName);
-
-      // ダイアログが開いた時に全選択状態にする（使い勝手向上のため）
-      if (inputRef.current) {
-        inputRef.current.focus();
-        inputRef.current.select();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const performRename = () => {
     startTransition(async () => {
       // 拡張子を再度結合
@@ -67,6 +53,19 @@ export function RenameDialog({
       }
     });
   };
+
+  // ダイアログ初期化
+  useEffect(() => {
+    if (open) {
+      setNewName(baseName);
+
+      if (inputRef.current) {
+        inputRef.current.focus();
+        inputRef.current.select();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

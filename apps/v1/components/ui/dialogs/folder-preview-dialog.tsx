@@ -29,6 +29,7 @@ export function FolderPreviewDialog({
   onOpenChange,
   targetNode,
 }: FolderPreviewDialogProps) {
+  debugger;
   const initialDirPath = targetNode ? path.dirname(targetNode.path) : "/";
 
   // ナビゲーション用の現在のパス
@@ -90,7 +91,7 @@ export function FolderPreviewDialog({
       setCurrentPath(initialDirPath);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

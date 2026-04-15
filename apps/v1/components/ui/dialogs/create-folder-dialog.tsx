@@ -54,8 +54,7 @@ export function CreateFolderDialog({
       setFolderName("");
       inputRef.current?.focus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
