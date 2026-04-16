@@ -1,7 +1,7 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
-import { fsNameSchema } from "@/lib/media/validation";
+import { fsNameSchema } from "@/lib/media/schemas";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import { updateVisitedFolder } from "@/repositories/folder-repository";
