@@ -6,6 +6,7 @@ import {
   getBackupListAction,
   restoreBackupAction,
 } from "@/actions/db-actions";
+import { DbBackupFile, DbUploadResponse } from "@/lib/db/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,14 +42,14 @@ import {
   Plus,
   RotateCcw,
   Settings2,
+  Upload,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-type BackupInfo = {
-  name: string;
-  createdAt: string;
-  size: number; // バイト単位
+type DbBackupSelectItem = {
+  key: string;
+  value: DbBackupFile;
 };
 
 const formatDateTime = (isoString: string) => {
@@ -77,15 +78,31 @@ export function DatabaseBackupCard() {
   const [isListing, startListing] = useTransition();
   const [isCreating, startCreating] = useTransition();
   const [isRestoring, startRestoring] = useTransition();
-  const [backups, setBackups] = useState<BackupInfo[]>([]);
-  const [selectedFile, setSelectedFile] = useState<string>("");
+  const [isUploading, startUploading] = useTransition();
+  const [backupFiles, setBackupFiles] = useState<DbBackupSelectItem[]>([]);
+  const [uploadedFile, setUploadedFile] = useState<DbBackupSelectItem | null>(
+    null
+  );
+  const [selectedFile, setSelectedFile] = useState<DbBackupSelectItem | null>(
+    null
+  );
   const [autoCleanup, setAutoCleanup] = useState(true);
   const [keepCount, setKeepCount] = useState(5);
+
+  const displayBackupFiles = useMemo(
+    () => [uploadedFile, ...backupFiles].filter((v) => !!v),
+    [backupFiles, uploadedFile]
+  );
 
   const refreshList = () => {
     startListing(async () => {
       const list = await getBackupListAction();
-      setBackups(list);
+      setBackupFiles(
+        list.map((v) => ({
+          key: `saved:${v.name}`,
+          value: v,
+        }))
+      );
     });
   };
 
@@ -112,12 +129,63 @@ export function DatabaseBackupCard() {
     });
   };
 
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    // クライアント側でも簡易チェック（Zod を使ってもOK）
+    if (!file.name.endsWith(".sql")) {
+      toast.error(".sql ファイルを選択してください");
+      input.value = "";
+      return;
+    }
+
+    startUploading(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("/api/db/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = (await res.json()) as DbUploadResponse;
+
+        if (data.success) {
+          const temp = {
+            key: `upload:${data.name}`,
+            value: data,
+          };
+          setUploadedFile(temp);
+          setSelectedFile(temp);
+          toast.success("一時ファイルをアップロードしました");
+        } else {
+          toast.error(data.error);
+        }
+      } catch {
+        toast.error("通信エラーが発生しました");
+      } finally {
+        // 確実にリセット（既にやっていても念の為）
+        input.value = "";
+      }
+    });
+  };
+
   const handleRestore = () => {
     if (!selectedFile) return;
+
     startRestoring(async () => {
-      const res = await restoreBackupAction(selectedFile);
+      const res = await restoreBackupAction(selectedFile.value);
       if (res.success) {
         toast.success("リストアが完了しました");
+        // 一時ファイルだった場合は、リストから消去して選択を解除
+        if (selectedFile.value.isTemp) {
+          setUploadedFile(null);
+          setSelectedFile(null);
+        }
       } else {
         toast.error(res.error);
       }
@@ -151,7 +219,7 @@ export function DatabaseBackupCard() {
           新規バックアップ作成
         </Button>
 
-        {/* 設定セクション */}
+        {/* バックアップ設定セクション */}
         <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-medium">
@@ -179,6 +247,38 @@ export function DatabaseBackupCard() {
           )}
         </div>
 
+        {/* アップロードボタン */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-medium text-muted-foreground">
+            外部バックアップのインポート
+          </label>
+          <div className="relative">
+            <Input
+              type="file"
+              accept=".sql"
+              onChange={handleUpload}
+              disabled={isUploading}
+              className="hidden"
+              id="db-upload"
+            />
+            <Button
+              asChild
+              variant="secondary"
+              className="w-full border-dashed border-2"
+              disabled={isUploading}
+            >
+              <label htmlFor="db-upload" className="cursor-pointer">
+                {isUploading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" />
+                )}
+                SQLファイルを一時アップロード
+              </label>
+            </Button>
+          </div>
+        </div>
+
         {/* 保存済みバックアップ選択 */}
         <div className="space-y-2">
           <label className="text-xs font-medium text-muted-foreground">
@@ -186,10 +286,14 @@ export function DatabaseBackupCard() {
           </label>
           <div className="flex gap-2">
             <Select
-              onValueChange={setSelectedFile}
-              value={selectedFile}
+              onValueChange={(k) =>
+                setSelectedFile(
+                  displayBackupFiles.find((f) => f.key === k) ?? null
+                )
+              }
+              value={selectedFile?.key}
               onOpenChange={(open) => {
-                if (open && backups.length === 0) {
+                if (open && backupFiles.length === 0) {
                   void refreshList();
                 }
               }}
@@ -197,10 +301,18 @@ export function DatabaseBackupCard() {
               <SelectTrigger className="flex-1 h-auto py-3 [&>span]:line-clamp-none">
                 <SelectValue placeholder="ファイルを選択">
                   {selectedFile && (
-                    <div className="flex w-full justify-between items-start gap-1">
-                      <span className="font-medium text-sm leading-none">
-                        {selectedFile}
+                    <div className="flex items-center gap-2">
+                      {selectedFile.value.isTemp && (
+                        <Upload className="w-4 h-4 text-amber-600" />
+                      )}
+                      <span className="font-medium text-sm">
+                        {selectedFile.value.label}
                       </span>
+                      {selectedFile.value.isTemp && (
+                        <span className="text-[10px] text-amber-600 font-bold">
+                          (一時ファイル)
+                        </span>
+                      )}
                     </div>
                   )}
                 </SelectValue>
@@ -211,28 +323,55 @@ export function DatabaseBackupCard() {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     リストを取得中...
                   </div>
-                ) : backups.length === 0 ? (
+                ) : displayBackupFiles.length === 0 ? (
                   <div className="p-6 text-xs text-center text-muted-foreground">
                     バックアップが見つかりません
                   </div>
                 ) : (
-                  backups.map((file) => (
+                  displayBackupFiles.map((file) => (
                     <SelectItem
-                      key={file.name}
-                      value={file.name}
-                      className="py-3 cursor-pointer"
+                      key={file.key}
+                      value={file.key}
+                      className={`py-3 cursor-pointer transition-colors ${
+                        file.value.isTemp
+                          ? "bg-amber-50/50 border-l-4 border-l-amber-400 focus:bg-amber-100 dark:bg-amber-950/40 dark:border-l-amber-600 dark:focus:bg-amber-900/60"
+                          : ""
+                      }`}
                     >
                       <div className="flex flex-col items-start gap-1">
-                        <span className="font-medium leading-none text-sm">
-                          {file.name}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {file.value.isTemp && (
+                            <Upload className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                          )}
+                          <span
+                            className={`font-medium leading-none text-sm ${
+                              file.value.isTemp
+                                ? "text-amber-900 dark:text-amber-100"
+                                : ""
+                            }`}
+                          >
+                            {file.value.label}
+                          </span>
+                          {file.value.isTemp && (
+                            <span className="text-[9px] bg-amber-200 text-amber-700 px-1.5 py-0.5 rounded-full font-bold tracking-wider dark:bg-amber-800 dark:text-amber-100">
+                              TEMP
+                            </span>
+                          )}
+                        </div>
+
                         <div className="text-[10px] text-muted-foreground flex items-center gap-3 mt-1">
                           <span className="flex items-center gap-1">
-                            <span className="inline-block w-2 h-2 rounded-full bg-blue-400/50" />
-                            作成日: {formatDateTime(file.createdAt)}
+                            <span
+                              className={`inline-block w-2 h-2 rounded-full ${
+                                file.value.isTemp
+                                  ? "bg-amber-400 dark:bg-amber-500"
+                                  : "bg-blue-400/50"
+                              }`}
+                            />
+                            {`作成日: ${formatDateTime(file.value.createdAt)}`}
                           </span>
-                          <span className="flex items-center gap-1 border-l pl-3">
-                            サイズ: {formatBytes(file.size)}
+                          <span className="flex items-center gap-1 border-l pl-3 dark:border-muted/20">
+                            サイズ: {formatBytes(file.value.size)}
                           </span>
                         </div>
                       </div>
@@ -249,9 +388,10 @@ export function DatabaseBackupCard() {
           <Button
             variant="secondary"
             className="flex-1"
-            disabled={!selectedFile || isListing}
+            disabled={!selectedFile || isListing || selectedFile.value.isTemp}
             onClick={() => {
-              const url = `/api/db/download?file=${encodeURIComponent(selectedFile)}`;
+              if (!selectedFile) return;
+              const url = `/api/db/download?file=${encodeURIComponent(selectedFile.value.name)}`;
               window.location.href = url;
             }}
           >
@@ -278,7 +418,8 @@ export function DatabaseBackupCard() {
               <AlertDialogHeader>
                 <AlertDialogTitle>本当にリストアしますか？</AlertDialogTitle>
                 <AlertDialogDescription>
-                  選択したバックアップファイル <strong>{selectedFile}</strong>{" "}
+                  選択したバックアップファイル{" "}
+                  <strong>{selectedFile?.value.label}</strong>{" "}
                   を使用してデータベースを復元します。
                   <br />
                   <span className="text-destructive font-bold">

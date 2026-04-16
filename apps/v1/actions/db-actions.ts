@@ -1,12 +1,11 @@
 "use server";
 
-import { PATHS } from "@/lib/path/paths";
+import { BACKUP_DIR, TEMP_BACKUP_DIR } from "@/lib/db/const";
+import { DbBackupFile } from "@/lib/db/types";
 import { getDatabaseUrlInfo } from "@/lib/url/db";
 import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
-
-const BACKUP_DIR = PATHS.server.media.db.root;
 
 // バックアップ一覧の取得
 export async function getBackupListAction() {
@@ -23,9 +22,11 @@ export async function getBackupListAction() {
           const stats = await fs.stat(path.join(BACKUP_DIR, file));
           return {
             name: file,
-            createdAt: stats.mtime.toISOString(), // クライアントで扱うためにISO形式で送る
+            label: file,
+            createdAt: stats.mtime.toISOString(),
             size: stats.size,
-          };
+            isTemp: false,
+          } satisfies DbBackupFile;
         })
     );
 
@@ -100,8 +101,17 @@ export async function createBackupAction() {
 }
 
 // リストアの実行
-export async function restoreBackupAction(fileName: string) {
-  const filePath = path.join(BACKUP_DIR, fileName);
+export async function restoreBackupAction(file: DbBackupFile) {
+  // セキュリティ対策: ファイル名にパス区切り文字が含まれていないかチェック
+  // (ディレクトリトラバーサル対策)
+  if (file.name.includes("/") || file.name.includes("\\")) {
+    return { success: false, error: "不正なファイル名です" };
+  }
+
+  const filePath = file.isTemp
+    ? path.join(TEMP_BACKUP_DIR, file.name)
+    : path.join(BACKUP_DIR, file.name);
+
   const db = getDatabaseUrlInfo();
 
   let fileHandle: fs.FileHandle | null = null;
@@ -149,14 +159,14 @@ export async function restoreBackupAction(fileName: string) {
 }
 
 // バックアップファイルの削除
-export async function deleteBackupAction(fileName: string) {
+export async function deleteBackupAction(file: DbBackupFile) {
   // セキュリティ対策: ファイル名にパス区切り文字が含まれていないかチェック
   // (ディレクトリトラバーサル対策)
-  if (fileName.includes("/") || fileName.includes("\\")) {
+  if (file.name.includes("/") || file.name.includes("\\")) {
     return { success: false, error: "不正なファイル名です" };
   }
 
-  const filePath = path.join(BACKUP_DIR, fileName);
+  const filePath = path.join(BACKUP_DIR, file.name);
 
   try {
     // ファイルの存在確認
