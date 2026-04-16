@@ -3,8 +3,8 @@
 import { useMounted } from "@/hooks/use-mounted";
 import {
   RatedCondition,
-  RatingFilterInput,
   RatingFilterMode,
+  RatingFilterValue,
   RatingOperator,
   RatingValue,
 } from "@/lib/filter/types";
@@ -47,7 +47,7 @@ function toFilterInput(
   value: RatingValue,
   betweenMin: RatingValue,
   betweenMax: RatingValue
-): RatingFilterInput {
+): RatingFilterValue {
   if (filterMode === "all") return { mode: "all" };
   if (filterMode === "unrated") return { mode: "unrated" };
 
@@ -60,7 +60,7 @@ function toFilterInput(
   return { mode: "rated", condition };
 }
 
-function fromFilterInput(input: RatingFilterInput): {
+function fromFilterInput(input: RatingFilterValue): {
   filterMode: RatingFilterMode;
   op: RatingOperator;
   value: RatingValue;
@@ -104,7 +104,7 @@ function fromFilterInput(input: RatingFilterInput): {
   };
 }
 
-function describeFilter(input: RatingFilterInput): React.ReactNode {
+function describeFilter(input: RatingFilterValue): React.ReactNode {
   if (input.mode === "all") return null;
 
   if (input.mode === "unrated") {
@@ -227,8 +227,8 @@ function StarPicker({ value, onChange }: StarPickerProps) {
 // ─── メインコンポーネント ───────────────────────────────────────────────────────
 
 interface RatingFilterDialogProps {
-  value: RatingFilterInput;
-  onChange: (value: RatingFilterInput) => void;
+  value: RatingFilterValue;
+  onChange: (value: RatingFilterValue) => void;
 }
 
 export function RatingFilterDialog({

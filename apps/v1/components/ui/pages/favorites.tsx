@@ -1,7 +1,7 @@
 "use client";
 
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
+import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
@@ -13,7 +13,10 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { useFilters } from "@/hooks/use-filters";
+import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
+import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
+import { useRatingFilter } from "@/hooks/use-rating-filter";
+import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
@@ -27,6 +30,7 @@ import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
+import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
@@ -90,21 +94,38 @@ export function Favorites() {
 
   const allNodes = listing.nodes;
 
-  const {
-    mediaTypeFilterValue,
-    setMediaTypeFilterValue,
-    ratingFilter,
-    setRatingFilter,
-    filteredNodes,
-    mediaOnly,
-    isFiltered,
-    addTagFilter,
-    resetFilters,
-  } = useFilters({
+  // 種別フィルター
+  const { value: mediaTypeFilterValue, apply: applyMediaTypeFilterValue } =
+    useMediaTypeFilter(); // TODO: Context
+
+  // 評価フィルター
+  const { value: ratingFilterValue, apply: applyRatingFilterValue } =
+    useRatingFilter(); // TODO: Context
+
+  // タグフィルター
+  const { value: tagFilterValue, apply: applyTagFilterValue } =
+    useTagFilterContext();
+
+  // フィルター結果
+  const { filtered: filteredNodes, mediaOnly } = useFilteredNodes({
     allNodes,
     query,
-    activated: true,
+    mediaTypeFilterValue,
+    ratingFilterValue,
+    tagFilterValue,
   });
+
+  // タグをフィルターに追加
+  const addTagFilter = (node: MediaNode) => {
+    if (!node.tags || node.tags.length === 0) return;
+    applyTagFilterValue({
+      mode: tagFilterValue.mode,
+      tags: [...tagFilterValue.tags, ...node.tags],
+    });
+  };
+
+  // 検索パラメータリセット用
+  const { hasSearchParams, resetSearchParams } = useSearchParamsControl();
 
   // ===== ビューア =====
 
@@ -305,31 +326,39 @@ export function Favorites() {
             {/* 種別フィルター */}
             <MediaTypeFilterSelect
               value={mediaTypeFilterValue}
-              onChange={setMediaTypeFilterValue}
-              excludeTypes={["directory", "file"]}
+              onChange={applyMediaTypeFilterValue}
+              displayTypes={["all", "image", "video", "audio"]}
             />
 
             {/* 評価フィルター */}
             <RatingFilterDialog
-              value={ratingFilter}
-              onChange={setRatingFilter}
+              value={ratingFilterValue}
+              onChange={applyRatingFilterValue}
             />
 
             {/* タグフィルター */}
-            <TagFilterDialog autoFocusInput={!isMobile} />
+            <TagFilterDialog
+              value={tagFilterValue}
+              onChange={applyTagFilterValue}
+              relatedNodes={mediaOnly}
+              autoFocusInput={!isMobile}
+            />
 
             {/* シャッフルボタン */}
             <ShuffleButton />
 
             {/* リセットボタン */}
-            <FilterResetButton onReset={resetFilters} isVisible={isFiltered} />
+            <ResetButton
+              onReset={resetSearchParams}
+              isVisible={hasSearchParams}
+            />
           </div>
 
-          {/* フィルター結果 */}
+          {/* 件数 */}
           <FilterResultText
             totalCount={allNodes.length}
             filteredCount={filteredNodes.length}
-            isFiltered={isFiltered}
+            isFiltered={allNodes.length !== filteredNodes.length}
             className="ml-auto min-w-[120px] text-right"
           />
         </div>

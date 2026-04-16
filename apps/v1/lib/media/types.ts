@@ -26,6 +26,7 @@ export type MediaFsListing = {
 
 export type MediaNodeTag = {
   name: string;
+  id: string;
 };
 
 export type MediaNode = MediaFsNode & {

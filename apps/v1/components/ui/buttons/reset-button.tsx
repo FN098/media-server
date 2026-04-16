@@ -2,15 +2,12 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { RotateCcw } from "lucide-react";
 
-interface FilterResetButtonProps {
+interface ResetButtonProps {
   onReset: () => void;
-  isVisible: boolean; // 絞り込みがある時だけ表示するため
+  isVisible: boolean;
 }
 
-export const FilterResetButton = ({
-  onReset,
-  isVisible,
-}: FilterResetButtonProps) => {
+export const ResetButton = ({ onReset, isVisible }: ResetButtonProps) => {
   return (
     <div
       className={cn(

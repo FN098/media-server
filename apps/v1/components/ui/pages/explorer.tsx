@@ -8,7 +8,7 @@ import {
 import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
 import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FilterResetButton } from "@/components/ui/buttons/filter-reset-button";
+import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
@@ -25,7 +25,10 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { useFilters } from "@/hooks/use-filters";
+import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
+import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
+import { useRatingFilter } from "@/hooks/use-rating-filter";
+import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
@@ -39,6 +42,7 @@ import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
+import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
@@ -62,7 +66,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { dirname } from "path";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
@@ -137,21 +141,38 @@ export function Explorer() {
 
   const allNodes = listing.nodes;
 
-  const {
-    mediaTypeFilterValue,
-    setMediaTypeFilterValue,
-    ratingFilter,
-    setRatingFilter,
-    filteredNodes,
-    mediaOnly,
-    isFiltered,
-    addTagFilter,
-    resetFilters,
-  } = useFilters({
+  // 種別フィルター
+  const { value: mediaTypeFilterValue, apply: applyMediaTypeFilterValue } =
+    useMediaTypeFilter(); // TODO: Context
+
+  // 評価フィルター
+  const { value: ratingFilterValue, apply: applyRatingFilterValue } =
+    useRatingFilter(); // TODO: Context
+
+  // タグフィルター
+  const { value: tagFilterValue, apply: applyTagFilterValue } =
+    useTagFilterContext();
+
+  // フィルター結果
+  const { filtered: filteredNodes, mediaOnly } = useFilteredNodes({
     allNodes,
     query,
-    activated: true,
+    mediaTypeFilterValue,
+    ratingFilterValue,
+    tagFilterValue,
   });
+
+  // タグをフィルターに追加
+  const addTagFilter = (node: MediaNode) => {
+    if (!node.tags || node.tags.length === 0) return;
+    applyTagFilterValue({
+      mode: tagFilterValue.mode,
+      tags: [...tagFilterValue.tags, ...node.tags],
+    });
+  };
+
+  // 検索パラメータリセット用
+  const { hasSearchParams, resetSearchParams } = useSearchParamsControl();
 
   // ===== ビューア =====
 
@@ -503,9 +524,6 @@ export function Explorer() {
 
   // ===== その他 =====
 
-  // スクロール対象のref
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   // モバイル判定
   const isMobile = useIsMobile();
 
@@ -521,7 +539,6 @@ export function Explorer() {
         className={cn(
           "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
         )}
-        ref={scrollRef}
         tabIndex={-1}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
@@ -559,18 +576,22 @@ export function Explorer() {
             {/* 種別フィルター */}
             <MediaTypeFilterSelect
               value={mediaTypeFilterValue}
-              onChange={setMediaTypeFilterValue}
-              excludeTypes={["file"]}
+              onChange={applyMediaTypeFilterValue}
             />
 
             {/* 評価フィルター */}
             <RatingFilterDialog
-              value={ratingFilter}
-              onChange={setRatingFilter}
+              value={ratingFilterValue}
+              onChange={applyRatingFilterValue}
             />
 
             {/* タグフィルター */}
-            <TagFilterDialog autoFocusInput={!isMobile} />
+            <TagFilterDialog
+              value={tagFilterValue}
+              onChange={applyTagFilterValue}
+              relatedNodes={mediaOnly}
+              autoFocusInput={!isMobile}
+            />
 
             {/* 新規フォルダ作成 */}
             <Button variant="outline" onClick={openCreateFolderDialog}>
@@ -579,14 +600,17 @@ export function Explorer() {
             </Button>
 
             {/* リセット */}
-            <FilterResetButton onReset={resetFilters} isVisible={isFiltered} />
+            <ResetButton
+              onReset={resetSearchParams}
+              isVisible={hasSearchParams}
+            />
           </div>
 
-          {/* フィルター結果 */}
+          {/* 件数 */}
           <FilterResultText
             totalCount={allNodes.length}
             filteredCount={filteredNodes.length}
-            isFiltered={isFiltered}
+            isFiltered={allNodes.length !== filteredNodes.length}
             className="ml-auto min-w-[120px] text-right"
           />
         </div>

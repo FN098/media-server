@@ -1,13 +1,10 @@
 "use client";
 
 import { useTagFilter } from "@/hooks/use-tag-filter";
-import { MediaNode } from "@/lib/media/types";
+import { TagFilterOptions } from "@/lib/filter/types";
 import { createContext, ReactNode, useContext } from "react";
 
 type TagFilterContextType = ReturnType<typeof useTagFilter>;
-type TagFilterContextOptions = {
-  suppressError?: boolean;
-};
 
 const TagFilterContext = createContext<TagFilterContextType | undefined>(
   undefined
@@ -15,12 +12,12 @@ const TagFilterContext = createContext<TagFilterContextType | undefined>(
 
 export function TagFilterProvider({
   children,
-  targetNodes,
+  options,
 }: {
   children: ReactNode;
-  targetNodes?: MediaNode[];
+  options?: TagFilterOptions;
 }) {
-  const value = useTagFilter(targetNodes);
+  const value = useTagFilter(options);
 
   return (
     <TagFilterContext.Provider value={value}>
@@ -29,22 +26,9 @@ export function TagFilterProvider({
   );
 }
 
-// overload
-export function useTagFilterContext(options: {
-  suppressError?: false;
-}): TagFilterContextType;
-
-export function useTagFilterContext(options: {
-  suppressError: true;
-}): TagFilterContextType | null;
-
-// implementation
-export function useTagFilterContext(options?: TagFilterContextOptions) {
+export function useTagFilterContext() {
   const context = useContext(TagFilterContext);
   if (context === undefined) {
-    if (options?.suppressError) {
-      return null; // throw せずに null を返す
-    }
     throw new Error(
       "useTagFilterContext must be used within TagFilterProvider"
     );

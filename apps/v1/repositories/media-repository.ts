@@ -24,6 +24,7 @@ export async function getVirtualMediaNodes(
         select: {
           tag: {
             select: {
+              id: true,
               name: true,
             },
           },
@@ -40,6 +41,7 @@ export async function getVirtualMediaNodes(
     fileSize: Number(m.fileSize),
     title: m.title ?? null,
     tags: m.mediaTags.map((t) => ({
+      id: t.tag.id,
       name: t.tag.name,
     })),
     rating: m.favorites[0]?.rating ?? null,
@@ -66,6 +68,7 @@ export async function getFavoriteMediaNodes(
             select: {
               tag: {
                 select: {
+                  id: true,
                   name: true,
                 },
               },
@@ -89,6 +92,7 @@ export async function getFavoriteMediaNodes(
     mtime: f.media.fileMtime,
     title: f.media.title ?? null,
     tags: f.media.mediaTags.map((t) => ({
+      id: t.tag.id,
       name: t.tag.name,
     })),
     rating: f.rating ?? null,

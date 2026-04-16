@@ -414,7 +414,7 @@ export async function getMediaByTagId(tagId: string, limit = 20) {
         id: m.id,
         title: displayTitle,
         path: m.path,
-        url: `${getClientExplorerPath(m.dirPath)}?tagId=${tagId}`,
+        url: `${getClientExplorerPath(m.dirPath)}?tagIds=${tagId}`,
       };
     });
 

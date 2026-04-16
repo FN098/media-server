@@ -1,7 +1,6 @@
 "use client";
 
 import { MediaTypeFilterValue } from "@/lib/filter/types";
-import { MediaFsNodeType } from "@/lib/media/types";
 import {
   Select,
   SelectContent,
@@ -23,32 +22,24 @@ interface MediaTypeFilterSelectProps {
   value: MediaTypeFilterValue;
   onChange: (value: MediaTypeFilterValue) => void;
   className?: string;
-  excludeTypes?: MediaFsNodeType[];
+  displayTypes?: MediaTypeFilterValue[];
 }
 
 // 型に応じたアイコンとラベルの定義
-const TYPE_CONFIG: Record<
-  MediaFsNodeType,
-  { label: string; icon: React.ElementType }
-> = {
+const TYPE_CONFIG = {
+  all: { label: "すべて", icon: File },
   directory: { label: "フォルダ", icon: Folder },
   image: { label: "画像", icon: ImageIcon },
   video: { label: "動画", icon: Film },
   audio: { label: "オーディオ", icon: Music },
-  file: { label: "その他ファイル", icon: File },
 };
 
 export function MediaTypeFilterSelect({
   value,
   onChange,
   className,
-  excludeTypes = [],
+  displayTypes = ["directory", "image", "video", "audio"],
 }: MediaTypeFilterSelectProps) {
-  // 表示対象のタイプを抽出
-  const displayTypes = (Object.keys(TYPE_CONFIG) as MediaFsNodeType[]).filter(
-    (type) => !excludeTypes.includes(type)
-  );
-
   // 選択中のアイコンを取得（除外されていても表示崩れしないようにフォールバック付き）
   const SelectedIcon =
     value !== "all" && TYPE_CONFIG[value] ? TYPE_CONFIG[value].icon : Type;
@@ -56,7 +47,7 @@ export function MediaTypeFilterSelect({
   return (
     <Select
       value={value}
-      onValueChange={(v) => onChange(v as MediaFsNodeType | "all")}
+      onValueChange={(v) => onChange(v as MediaTypeFilterValue)}
     >
       <SelectTrigger className={cn("w-full h-9", className)}>
         {value === "all" ? (

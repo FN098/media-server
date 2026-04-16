@@ -12,7 +12,7 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { useFilters } from "@/hooks/use-filters";
+import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
 import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
@@ -114,10 +114,10 @@ export function Trash() {
 
   const allNodes = listing.nodes;
 
-  const { filteredNodes, mediaOnly } = useFilters({
+  // フィルター結果
+  const { filtered: filteredNodes, mediaOnly } = useFilteredNodes({
     allNodes,
     query,
-    activated: true,
   });
 
   // ===== ビューア =====

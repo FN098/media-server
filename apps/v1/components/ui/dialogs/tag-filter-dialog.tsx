@@ -1,9 +1,10 @@
 "use client";
 
 import { useMounted } from "@/hooks/use-mounted";
-import { TagFilterMode } from "@/hooks/use-tag-filter";
+import { useTags } from "@/hooks/use-tags";
+import { TagFilterMode, TagFilterValue } from "@/lib/filter/types";
+import { MediaNode } from "@/lib/media/types";
 import { Tag as TagType } from "@/lib/tag/types";
-import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -35,10 +36,14 @@ import {
   Tag,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useDebounce } from "use-debounce";
 
 interface TagFilterDialogProps {
+  value: TagFilterValue;
+  onChange: (value: TagFilterValue) => void;
   autoFocusInput?: boolean;
+  relatedNodes?: MediaNode[];
 }
 
 const modeTexts = {
@@ -46,26 +51,98 @@ const modeTexts = {
   OR: "いずれか",
   NOT: "含まない",
   EMPTY: "タグなし",
-} as const;
+} as const satisfies Record<TagFilterMode, string>;
 
 export function TagFilterDialog({
+  value,
+  onChange,
   autoFocusInput = false,
+  relatedNodes = [],
 }: TagFilterDialogProps) {
-  const {
-    query,
-    setQuery,
-    searchedTags,
-    favoriteTags,
-    relatedTags,
-    recentTags,
-    isLoading,
-    selectedTagIds,
-    selectedTags,
-    selectTags,
-    mode,
-    setMode,
-    activate,
-  } = useTagFilterContext({ suppressError: false });
+  const selectedTagIds = useMemo(
+    () => new Set(value.tags.map((t) => t.id)),
+    [value.tags]
+  );
+  const selectedCount = selectedTagIds.size;
+
+  // タグ取得APIを有効化
+  const [activated, setActivated] = useState(false);
+  const activate = useCallback(() => setActivated(true), []);
+
+  // タグ検索用クエリ
+  const [query, setQuery] = useState("");
+  const trimmedQuery = useMemo(() => query.trim().toLowerCase(), [query]);
+  const [debouncedQuery] = useDebounce(trimmedQuery, 300);
+
+  // 関連タグ用パス
+  const relatedPaths = relatedNodes.map((n) => n.path);
+
+  // URL同期タグ
+  const { tags: syncedTags, isLoading: isLoadingSynced } = useTags({
+    strategy: "ids-only",
+    ids: Array.from(selectedTagIds),
+    triggered: activated && selectedCount > 0,
+  });
+
+  // クエリ検索タグ
+  const { tags: searchedTags, isLoading: isLoadingSearch } = useTags({
+    query: debouncedQuery,
+    triggered: activated && debouncedQuery === trimmedQuery && !!debouncedQuery,
+  });
+
+  // お気に入りタグ
+  const { tags: favoriteTags, isLoading: isLoadingFavorite } = useTags({
+    strategy: "favorite-only",
+    triggered: activated,
+  });
+
+  // 最近使用タグ
+  const { tags: recentTags, isLoading: isLoadingRecent } = useTags({
+    strategy: "recently-used",
+    limit: 10,
+    triggered: activated,
+  });
+
+  // 関連タグ
+  const { tags: relatedTags, isLoading: isLoadingRelated } = useTags({
+    paths: relatedPaths,
+    strategy: "related-only",
+    triggered: activated && relatedPaths.length > 0,
+  });
+
+  // タグ取得中フラグ
+  const isLoading =
+    isLoadingSynced ||
+    isLoadingSearch ||
+    isLoadingFavorite ||
+    isLoadingRecent ||
+    isLoadingRelated;
+
+  // 取得済みタグ
+  const allKnownTags = useMemo(() => {
+    // すべての取得済みタグをフラットにする
+    return [
+      ...(syncedTags ?? []),
+      ...(searchedTags ?? []),
+      ...(favoriteTags ?? []),
+      ...(recentTags ?? []),
+      ...(relatedTags ?? []),
+    ];
+  }, [syncedTags, searchedTags, favoriteTags, recentTags, relatedTags]);
+
+  // ID -> タグのマップ
+  const tagMap = useMemo(
+    () => new Map(allKnownTags.map((t) => [t.id, t])),
+    [allKnownTags]
+  );
+
+  // 表示用データ
+  const selectedTags = useMemo(() => {
+    // URLにあるIDに基づき、重複を除去して実体を取り出す
+    return Array.from(selectedTagIds)
+      .map((id) => tagMap.get(id))
+      .filter((t): t is TagType => !!t);
+  }, [selectedTagIds, tagMap]);
 
   const [open, setOpen] = useState(false);
   const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(
@@ -75,7 +152,7 @@ export function TagFilterDialog({
   const [tempSelectedCache, setTempSelectedCache] = useState<
     Map<string, TagType>
   >(new Map());
-  const [currentMode, setCurrentMode] = useState<TagFilterMode>(mode);
+  const [currentMode, setCurrentMode] = useState<TagFilterMode>(value.mode);
 
   // サジェスト用
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -100,7 +177,7 @@ export function TagFilterDialog({
       // 現在のコンテキスト状態を一時状態に同期
       setTempSelectedIds(new Set(selectedTagIds));
       setTempSelectedCache(new Map(selectedTags.map((t) => [t.id, t])));
-      setCurrentMode(mode);
+      setCurrentMode(value.mode);
       setQuery("");
     } else {
       setQuery("");
@@ -180,12 +257,10 @@ export function TagFilterDialog({
   };
 
   const handleApply = () => {
-    if (currentMode === "EMPTY") {
-      selectTags([]);
-    } else {
-      selectTags(tempSelectedTags);
-    }
-    setMode(currentMode);
+    onChange({
+      mode: currentMode,
+      tags: tempSelectedTags,
+    });
     setOpen(false);
   };
 

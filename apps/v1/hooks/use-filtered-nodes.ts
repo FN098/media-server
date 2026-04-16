@@ -1,0 +1,126 @@
+"use client";
+
+import {
+  MediaTypeFilterValue,
+  RatingFilterValue,
+  TagFilterValue,
+} from "@/lib/filter/types";
+import { isMedia } from "@/lib/media/media-types";
+import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
+import { isMatchJapanese } from "@/lib/utils/search";
+import { useMemo } from "react";
+
+// helpers
+
+function createSearchFilter(value: string): MediaNodeFilter {
+  const trimmed = value.trim();
+  return (node) => !trimmed || isMatchJapanese(node.name, trimmed);
+}
+
+function createTagFilter(value: TagFilterValue): MediaNodeFilter {
+  return (node) => {
+    const nodeTagNames = node.tags?.map((t) => t.name) || [];
+
+    switch (value.mode) {
+      case "OR":
+        // 選択したタグのいずれか1つでも含まれていればOK
+        return value.tags.some((tag) => nodeTagNames.includes(tag.name));
+      case "NOT":
+        // 選択したタグがいずれも含まれていない場合のみOK
+        return !value.tags.some((tag) => nodeTagNames.includes(tag.name));
+      case "AND":
+        // すべて含まれている場合のみOK
+        return value.tags.every((tag) => nodeTagNames.includes(tag.name));
+      case "EMPTY":
+        // 1つもタグを含まなければOK
+        return nodeTagNames.length === 0;
+      default:
+        return true;
+    }
+  };
+}
+
+function createRatingFilter(value: RatingFilterValue): MediaNodeFilter {
+  return (node: MediaNode) => {
+    const rating = node.rating;
+
+    switch (value.mode) {
+      case "all":
+        return true;
+
+      case "unrated":
+        return rating == null;
+
+      case "rated": {
+        if (rating == null) return false;
+
+        const c = value.condition;
+
+        switch (c.operator) {
+          case "gte":
+            return rating >= c.value;
+          case "lte":
+            return rating <= c.value;
+          case "eq":
+            return rating === c.value;
+          case "between":
+            return rating >= c.min && rating <= c.max;
+        }
+      }
+    }
+  };
+}
+
+function createMediaTypeFilter(value: MediaTypeFilterValue): MediaNodeFilter {
+  return (node) => {
+    if (value === "all") return true;
+    return node.type === value;
+  };
+}
+
+export function useFilteredNodes({
+  allNodes,
+  query,
+  tagFilterValue,
+  mediaTypeFilterValue,
+  ratingFilterValue,
+  activated = true,
+}: {
+  allNodes: MediaNode[];
+  query?: string;
+  tagFilterValue?: TagFilterValue;
+  mediaTypeFilterValue?: MediaTypeFilterValue;
+  ratingFilterValue?: RatingFilterValue;
+  activated?: boolean;
+}) {
+  const pipeline = useMemo(
+    () => [
+      mediaTypeFilterValue ? createMediaTypeFilter(mediaTypeFilterValue) : null,
+      ratingFilterValue ? createRatingFilter(ratingFilterValue) : null,
+      tagFilterValue ? createTagFilter(tagFilterValue) : null,
+      query ? createSearchFilter(query) : null,
+    ],
+    [mediaTypeFilterValue, query, ratingFilterValue, tagFilterValue]
+  );
+
+  // フィルタリング実行
+  const filtered = useMemo(() => {
+    if (!activated) return allNodes;
+
+    // フィルタの適用
+    return allNodes.filter((node) => {
+      return pipeline.filter((f) => !!f).every((filter) => filter(node));
+    });
+  }, [activated, allNodes, pipeline]);
+
+  // 「メディアのみ」のリスト
+  const mediaOnly = useMemo(
+    () => filtered.filter((n) => isMedia(n.type)),
+    [filtered]
+  );
+
+  return {
+    filtered,
+    mediaOnly,
+  };
+}

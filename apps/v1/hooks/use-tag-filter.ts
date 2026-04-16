@@ -1,151 +1,90 @@
 "use client";
 
 import { useTags } from "@/hooks/use-tags";
-import { MediaNode } from "@/lib/media/types";
-import { SearchTagStrategy, SortTagStrategy, Tag } from "@/lib/tag/types";
-import { useCallback, useMemo, useState } from "react";
-import { useDebounce } from "use-debounce";
+import {
+  TagFilterMode,
+  TagFilterOptions,
+  TagFilterValue,
+} from "@/lib/filter/types";
+import { unique } from "@/lib/utils/array";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 
-export type TagFilterMode = "AND" | "OR" | "NOT" | "EMPTY";
+// --- URL parse helpers ---
 
-export function useTagFilter(initialTargetNodes?: MediaNode[]) {
-  const [targetNodes, setTargetNodes] = useState<MediaNode[]>(
-    initialTargetNodes ?? []
-  );
-  const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
-  const [selectedTagCache, setSelectedTagCache] = useState<Map<string, Tag>>(
-    new Map()
-  );
-  const [mode, setMode] = useState<TagFilterMode>("AND");
-  const [query, setQuery] = useState("");
-  const [searchStrategy, setSearchStrategy] =
-    useState<SearchTagStrategy>("default");
-  const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
+function parseTagIds(raw: string | null): string[] {
+  return raw ? raw.split(",") : [];
+}
 
-  const [activated, setActivated] = useState(false);
-  const activate = useCallback(() => setActivated(true), []);
+function parseMode(raw: string | null): TagFilterMode {
+  return (raw as TagFilterMode) || "AND";
+}
 
-  const trimmedQuery = useMemo(() => query.trim().toLowerCase(), [query]);
-  const [debouncedQuery] = useDebounce(trimmedQuery, 300);
+// --- URL serialize helpers ---
 
-  // targetNodesからパスを抽出（APIコールや状態計算に利用）
-  const targetPaths = useMemo(
-    () => targetNodes.map((n) => n.path),
-    [targetNodes]
-  );
+function buildParams(
+  params: URLSearchParams,
+  next: TagFilterValue,
+  keys: { tagsKey: string; modeKey: string }
+): void {
+  const { tagsKey, modeKey } = keys;
+  const tagIds = unique(next.tags.map((t) => t.id));
 
-  // ベースタグ：未使用のため停止
-  const { tags: baseTags, isLoading: isLoadingBase } = useTags({
-    paths: targetPaths,
-    strategy: searchStrategy,
-    triggered: false,
-  });
+  if (next.mode === "EMPTY") {
+    params.delete(tagsKey);
+    params.set(modeKey, "EMPTY");
+  } else if (next.mode === "AND" && tagIds.length === 0) {
+    params.delete(tagsKey);
+    params.delete(modeKey);
+  } else {
+    params.set(tagsKey, tagIds.join(","));
+    params.set(modeKey, next.mode);
+  }
+}
 
-  // クエリ検索タグ
-  const { tags: searchedTags, isLoading: isLoadingSearch } = useTags({
-    query: debouncedQuery,
-    triggered: activated && debouncedQuery === trimmedQuery && !!debouncedQuery,
-  });
+// --- hook ---
 
-  // お気に入りタグ
-  const { tags: favoriteTags, isLoading: isLoadingFavorite } = useTags({
-    strategy: "favorite-only",
-    triggered: activated,
-  });
+export function useTagFilter(options?: TagFilterOptions) {
+  const { tagsKey = "tagIds", modeKey = "tagFilterMode" } = options ?? {};
 
-  // 最近使用タグ
-  const { tags: recentTags, isLoading: isLoadingRecent } = useTags({
-    strategy: "recently-used",
-    limit: 10,
-    triggered: activated,
-  });
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  // 関連タグ
-  const { tags: relatedTags, isLoading: isLoadingRelated } = useTags({
-    paths: targetPaths,
-    strategy: "related-only",
-    triggered: activated && targetPaths.length > 0,
-  });
-
-  const isLoading =
-    isLoadingBase ||
-    isLoadingSearch ||
-    isLoadingFavorite ||
-    isLoadingRecent ||
-    isLoadingRelated;
-
-  const toggleTag = useCallback((tag: Tag) => {
-    setSelectedTagIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(tag.id)) {
-        next.delete(tag.id);
-        setSelectedTagCache((m) => {
-          const n = new Map(m);
-          n.delete(tag.id);
-          return n;
-        });
-      } else {
-        next.add(tag.id);
-        setSelectedTagCache((m) => new Map(m).set(tag.id, tag));
-      }
-      return next;
-    });
-  }, []);
-
-  const selectedTags = useMemo(
-    () => [...selectedTagCache.values()],
-    [selectedTagCache]
+  const tagIds = useMemo(
+    () => parseTagIds(searchParams.get(tagsKey)),
+    [searchParams, tagsKey]
   );
 
-  const selectedCount = selectedTags.length;
+  const { tags } = useTags({
+    strategy: "ids-only",
+    ids: tagIds,
+  });
 
-  const resetTags = useCallback(() => setSelectedTagIds(new Set()), []);
-
-  const selectTags = useCallback((tags: Tag[]) => {
-    setSelectedTagCache(new Map(tags.map((t) => [t.id, t])));
-    setSelectedTagIds(new Set(tags.map((t) => t.id)));
-  }, []);
-
-  const isSelected = useCallback(
-    (tag: Tag) => selectedTagIds.has(tag.id),
-    [selectedTagIds]
+  const mode = useMemo(
+    () => parseMode(searchParams.get(modeKey)),
+    [modeKey, searchParams]
   );
+
+  const value = {
+    mode,
+    tags,
+  };
+
+  const apply = useCallback(
+    (next: TagFilterValue) => {
+      const params = new URLSearchParams(searchParams.toString());
+      buildParams(params, next, { tagsKey, modeKey });
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [modeKey, pathname, router, searchParams, tagsKey]
+  );
+
+  const reset = useCallback(() => apply({ mode: "AND", tags: [] }), [apply]);
 
   return {
-    // フィルター対象
-    targetNodes,
-    setTargetNodes,
-
-    // フィルター状態
-    selectedTags,
-    selectedTagIds,
-    selectedCount,
-    isSelected,
-    mode,
-    setMode,
-
-    // タグ操作
-    toggleTag,
-    resetTags,
-    selectTags,
-
-    // 検索・表示
-    query,
-    setQuery,
-    baseTags,
-    searchedTags,
-    favoriteTags,
-    recentTags,
-    relatedTags,
-    isLoading,
-
-    // 戦略
-    searchStrategy,
-    setSearchStrategy,
-    sortStrategy,
-    setSortStrategy,
-
-    // ダイアログ初回オープン時に呼ぶ
-    activate,
+    value,
+    apply,
+    reset,
   };
 }
