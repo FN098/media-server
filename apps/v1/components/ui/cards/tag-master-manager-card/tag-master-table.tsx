@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import { TagDeleteButton } from "@/components/ui/buttons/tag-delete-button";
