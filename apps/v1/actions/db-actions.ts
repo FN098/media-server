@@ -24,6 +24,7 @@ export async function getBackupListAction() {
           return {
             name: file,
             createdAt: stats.mtime.toISOString(), // クライアントで扱うためにISO形式で送る
+            size: stats.size,
           };
         })
     );

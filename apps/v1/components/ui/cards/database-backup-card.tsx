@@ -48,6 +48,29 @@ import { toast } from "sonner";
 type BackupInfo = {
   name: string;
   createdAt: string;
+  size: number; // バイト単位
+};
+
+const formatDateTime = (isoString: string) => {
+  const date = new Date(isoString);
+  const formatted = date.toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  return `${formatted} (JST)`;
+};
+
+const formatBytes = (bytes: number) => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
 export function DatabaseBackupCard() {
@@ -58,20 +81,6 @@ export function DatabaseBackupCard() {
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [autoCleanup, setAutoCleanup] = useState(true);
   const [keepCount, setKeepCount] = useState(5);
-
-  const formatDateTime = (isoString: string) => {
-    const date = new Date(isoString);
-    const formatted = date.toLocaleString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-
-    return `${formatted} (JST)`;
-  };
 
   const refreshList = () => {
     startListing(async () => {
@@ -214,13 +223,18 @@ export function DatabaseBackupCard() {
                       className="py-3 cursor-pointer"
                     >
                       <div className="flex flex-col items-start gap-1">
-                        <span className="font-medium leading-none">
+                        <span className="font-medium leading-none text-sm">
                           {file.name}
                         </span>
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-1">
-                          <span className="inline-block w-2 h-2 rounded-full bg-blue-400/50" />
-                          作成日: {formatDateTime(file.createdAt)}
-                        </span>
+                        <div className="text-[10px] text-muted-foreground flex items-center gap-3 mt-1">
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2 h-2 rounded-full bg-blue-400/50" />
+                            作成日: {formatDateTime(file.createdAt)}
+                          </span>
+                          <span className="flex items-center gap-1 border-l pl-3">
+                            サイズ: {formatBytes(file.size)}
+                          </span>
+                        </div>
                       </div>
                     </SelectItem>
                   ))
