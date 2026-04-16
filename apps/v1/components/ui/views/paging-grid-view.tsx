@@ -50,7 +50,7 @@ export function PagingGridView({
   // 現在のページのノード
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
 
-  // グリッドコンテナ
+  // ビューコンテナ
   const containerRef = useRef<HTMLDivElement>(null);
 
   // グリッドの列数
@@ -58,6 +58,9 @@ export function PagingGridView({
 
   // スクロール復元が実行済みかどうかを保持するフラグ
   const hasRestored = useRef(false);
+
+  // ページ遷移後にスクロールをやり直す必要があるかどうかのフラグ
+  const needsScrollAfterPageChange = useRef(false);
 
   // パスから初期スクロール対象インデックスを特定する
   const initialScrollTargetIndex = useMemo(() => {
@@ -72,7 +75,7 @@ export function PagingGridView({
     return Math.floor(initialScrollTargetIndex / pageSize) + 1;
   }, [pageSize, initialScrollTargetIndex]);
 
-  // ページ自動遷移
+  // 初期スクロール対象ページに遷移
   useEffect(() => {
     if (
       !initialScrollTargetPage ||
@@ -84,7 +87,7 @@ export function PagingGridView({
     setPage(initialScrollTargetPage);
   }, [currentPage, setPage, initialScrollTargetPage]);
 
-  // スクロール実行と完了通知
+  // 初期スクロール実行と完了通知
   useEffect(() => {
     // すでに復元済み、またはターゲットがない場合は何もしない
     if (hasRestored.current || initialScrollTargetIndex === null) return;
@@ -220,6 +223,9 @@ export function PagingGridView({
       // ページ更新（必要なら）
       const nextPage = Math.floor(nextIndex / pageSize) + 1;
       if (nextPage !== currentPage) {
+        // ページが変わる場合：今のDOMには nextIndex がないので、
+        // ページ遷移後の useEffect でスクロールさせるためにフラグを立てる
+        needsScrollAfterPageChange.current = true;
         setPage(nextPage);
       }
 
@@ -231,6 +237,30 @@ export function PagingGridView({
     },
     [selectCtx, allNodes, columnCount, pageSize, currentPage, actions, setPage]
   );
+
+  // ページ遷移時の自動スクロール（副作用）
+  useEffect(() => {
+    // フォーカスは常に当てる
+    containerRef.current?.focus();
+
+    // ページ変更に伴うスクロールが必要な場合、または外部からの指示（初期表示など）
+    // lastSelectedPath があれば、その要素へスクロールを試みる
+    const currentPath = selectCtx.lastSelectedPath;
+    if (!currentPath) return;
+
+    const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
+    if (currentIndex === -1) return;
+
+    // ページ変更によるスクロール、またはページボタンクリックなどによる遷移の場合に実行
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`media-item-${currentIndex}`);
+      el?.scrollIntoView({ behavior: "instant", block: "nearest" });
+    });
+
+    needsScrollAfterPageChange.current = false; // 終わったらリセット
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]); // 依存は currentPage だけでOK
 
   return (
     <div
