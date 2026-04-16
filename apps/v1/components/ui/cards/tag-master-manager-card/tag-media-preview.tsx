@@ -39,11 +39,15 @@ export function TagMediaPreview({
   useEffect(() => {
     if (isOpen && count > 0) {
       startTransition(async () => {
-        const result = await getMediaByTagId(tagId);
-        if (result.success && result.media) {
-          setMedia(result.media);
-        } else {
-          toast.error(result.error ?? "失敗");
+        try {
+          const result = await getMediaByTagId(tagId);
+          if (result.success && result.media) {
+            setMedia(result.media);
+          } else {
+            toast.error(result.error ?? "メディア情報の取得に失敗しました。");
+          }
+        } catch {
+          toast.error("通信エラーが発生しました。");
         }
       });
     }
@@ -54,16 +58,23 @@ export function TagMediaPreview({
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start">
         <div className="p-3 border-b bg-muted/50">
-          <p className="text-sm font-bold truncate">「{tagName}」のファイル</p>
-          <p className="text-[10px] text-muted-foreground">
-            最新 {media.length} 件を表示
+          <p className="text-sm font-bold truncate">
+            「{tagName}」を含むフォルダ
           </p>
+          <div className="flex justify-between items-center mt-1">
+            <p className="text-[10px] text-muted-foreground">
+              最新 {media.length} 件を表示
+            </p>
+            {isLoading && (
+              <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+            )}
+          </div>
         </div>
 
-        <div className="max-h-[300px] overflow-auto p-2 scrollbar-thin">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <div className="max-h-[400px] overflow-auto p-2 scrollbar-thin">
+          {isLoading && media.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : media.length > 0 ? (
             <div className="space-y-1">
@@ -75,11 +86,11 @@ export function TagMediaPreview({
                   <div className="flex items-start gap-2">
                     <FileText className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium truncate">
+                      <p className="text-xs font-medium truncate leading-relaxed">
                         {item.title}
                       </p>
                       <p
-                        className="text-[10px] text-muted-foreground truncate italic"
+                        className="text-[10px] text-muted-foreground truncate italic opacity-70"
                         title={item.path}
                       >
                         {item.path}
@@ -87,7 +98,7 @@ export function TagMediaPreview({
                     </div>
                     <Link
                       href={item.url}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:text-primary transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:text-primary transition-opacity shrink-0"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                     </Link>
@@ -96,9 +107,11 @@ export function TagMediaPreview({
               ))}
             </div>
           ) : (
-            <p className="text-xs text-center py-8 text-muted-foreground">
-              ファイルが見つかりません
-            </p>
+            !isLoading && (
+              <p className="text-xs text-center py-12 text-muted-foreground">
+                ファイルが見つかりません
+              </p>
+            )
           )}
         </div>
       </PopoverContent>

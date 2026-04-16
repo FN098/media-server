@@ -6,7 +6,6 @@ import { getClientExplorerPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
-import { getFilenameWithoutExt } from "@/lib/utils/filename";
 import { generateKana } from "@/lib/utils/kana";
 import { basename } from "path";
 
@@ -386,40 +385,42 @@ export async function deleteTagAction(id: string) {
 
 export async function getMediaByTagId(tagId: string, limit = 20) {
   try {
-    const mediaTags = await prisma.mediaTag.findMany({
-      where: { tagId },
-      take: limit,
-      include: {
-        media: {
-          select: {
-            id: true,
-            title: true,
-            path: true,
-            dirPath: true,
+    const media = await prisma.media.findMany({
+      where: {
+        mediaTags: {
+          some: {
+            tagId: tagId,
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
+      // dirPath が同じものは 1 つのレコードのみを返す（DBレベルでのグループ化）
+      distinct: ["dirPath"],
+      select: {
+        id: true,
+        title: true,
+        path: true,
+        dirPath: true,
       },
+      orderBy: {
+        dirPath: "asc",
+      },
+      take: limit,
     });
 
-    // フロントに合わせて加工
-    const media = mediaTags.map((mt) => {
-      const { path, dirPath, title, ...rest } = mt.media;
-      const filename = basename(path);
-      const titleLike = title ?? getFilenameWithoutExt(path);
+    const result = media.map((m) => {
+      const displayTitle = basename(m.dirPath);
+
       return {
-        ...rest,
-        path,
-        title: titleLike,
-        url: getClientExplorerPath(dirPath) + `?q=${filename}`,
+        id: m.id,
+        title: displayTitle,
+        path: m.path,
+        url: `${getClientExplorerPath(m.dirPath)}?tagId=${tagId}`,
       };
     });
 
     return {
       success: true,
-      media,
+      media: result,
     };
   } catch (error) {
     console.error("Failed to fetch media by tag:", error);
