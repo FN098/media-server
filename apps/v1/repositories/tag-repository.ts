@@ -1,6 +1,25 @@
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { prisma } from "@/lib/prisma";
 
+export async function getTagsByIds(
+  ids: string[],
+  options?: { limit?: number }
+) {
+  if (ids.length > 0) {
+    return await prisma.tag.findMany({
+      where: {
+        id: { in: ids },
+        isActive: true,
+      },
+      orderBy: [{ kana: "asc" }, { name: "asc" }],
+      select: { id: true, name: true },
+      take: options?.limit,
+    });
+  }
+
+  return [];
+}
+
 export async function getRelatedTags(
   paths: string[],
   options?: { limit?: number }

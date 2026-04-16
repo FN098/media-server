@@ -2,13 +2,18 @@ import { MAX_PATHS_TO_PROCESS, MAX_RETURN_TAGS_COUNT } from "@/lib/tag/limits";
 import { searchTags } from "@/lib/tag/search";
 import { searchTagStrategies } from "@/lib/tag/strategies";
 import { uniqueBy } from "@/lib/utils/array";
-import { getFavoriteTags, getRelatedTags } from "@/repositories/tag-repository";
+import {
+  getFavoriteTags,
+  getRelatedTags,
+  getTagsByIds,
+} from "@/repositories/tag-repository";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
 const RequestSchema = z.object({
   query: z.string().optional(),
   paths: z.array(z.string()).optional().default([]),
+  ids: z.array(z.string()).optional().default([]),
   strategy: z.enum(searchTagStrategies).optional().default("default"),
   limit: z.coerce.number().optional().default(MAX_RETURN_TAGS_COUNT),
 });
@@ -56,20 +61,30 @@ export async function POST(request: NextRequest) {
 }
 
 async function process(params: RequestParams) {
-  const { paths: pathsRaw, limit, query, strategy } = params;
+  const { ids, paths: pathsRaw, limit, query, strategy } = params;
+
+  // ID 直接指定
+  if (strategy === "ids-only") {
+    const tags = await getTagsByIds(ids, { limit });
+    return tags;
+  }
 
   // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
   const paths = pathsRaw.slice(0, MAX_PATHS_TO_PROCESS);
 
+  // 関連タグのみ
   if (strategy === "related-only") {
     const relatedTags = await getRelatedTags(paths, { limit });
     return relatedTags;
   }
 
+  // お気に入りタグのみ
   if (strategy === "favorite-only") {
     const favoriteTags = await getFavoriteTags({ limit });
     return favoriteTags;
   }
+
+  // === これ移行は strategy に合わせて検索 ===
 
   // 関連タグは必ず取得
   const relatedTags = await getRelatedTags(paths, { limit });

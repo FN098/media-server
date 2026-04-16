@@ -41,6 +41,7 @@ export type SearchTagsOptions = {
 };
 export type SearchTagsRequestParams = {
   paths?: string[];
+  ids?: string[];
   limit?: number;
   query?: string;
   strategy?: SearchTagStrategy;
