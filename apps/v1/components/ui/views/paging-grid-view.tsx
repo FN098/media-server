@@ -374,6 +374,12 @@ function Cell({
     onSelectionChange?.();
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (isMobile || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    void open?.(node);
+  };
+
   const handleTap = (e: React.MouseEvent) => {
     if (isLongPressed || !isMobile) return;
     e.preventDefault();
@@ -423,7 +429,7 @@ function Cell({
             onTouchEnd={stop}
             onTouchMove={stop}
             onClick={isMobile ? handleTap : handleClick}
-            onDoubleClick={!isMobile ? () => void open?.(node) : undefined}
+            onDoubleClick={!isMobile ? handleDoubleClick : undefined}
             className={cn(
               "relative w-full h-full overflow-hidden rounded-xl border bg-card transition-all duration-200 select-none cursor-pointer",
               isSelected

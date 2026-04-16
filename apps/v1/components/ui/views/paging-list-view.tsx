@@ -365,6 +365,12 @@ function DataRow({
     onSelectionChange?.();
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (isMobile || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    void open?.(node);
+  };
+
   const handleTap = (e: React.MouseEvent) => {
     if (isLongPressed || !isMobile) return;
     e.preventDefault();
@@ -414,7 +420,7 @@ function DataRow({
           onTouchEnd={stop}
           onTouchMove={stop}
           onClick={isMobile ? handleTap : handleClick}
-          onDoubleClick={open && !isMobile ? () => void open(node) : undefined}
+          onDoubleClick={!isMobile ? handleDoubleClick : undefined}
           className={cn(
             "grid items-center h-12 border-b select-none cursor-pointer transition-colors text-sm",
             GRID_TEMPLATE,
