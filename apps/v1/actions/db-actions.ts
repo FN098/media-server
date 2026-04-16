@@ -1,6 +1,6 @@
 "use server";
 
-import { BACKUP_DIR, TEMP_BACKUP_DIR } from "@/lib/db/const";
+import { BACKUP_DIR, MIN_KEEP_COUNT, TEMP_BACKUP_DIR } from "@/lib/db/const";
 import { DbBackupFile } from "@/lib/db/types";
 import { getDatabaseUrlInfo } from "@/lib/url/db";
 import { spawn } from "child_process";
@@ -192,6 +192,13 @@ export async function deleteBackupAction(file: DbBackupFile) {
 // バックアップの世代管理
 export async function cleanupOldBackupsAction(keepCount: number = 10) {
   try {
+    if (keepCount <= MIN_KEEP_COUNT) {
+      return {
+        success: false,
+        error: "保持する世代数が少なすぎます！",
+      };
+    }
+
     const files = await fs.readdir(BACKUP_DIR);
     const backupFiles = await Promise.all(
       files
