@@ -43,51 +43,62 @@ export function PagingGridView({
   const { currentPage, pageSize, totalPages, setPage, paginate } =
     usePagingContext();
 
-  // 現在のページのノードを取得
+  const selectCtx = usePathSelectionContext();
+  const { actions } = useActionsContext();
+  const isMobile = useIsMobile();
+
+  // 現在のページのノード
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
 
-  // ─── 自動スクロール ────────────────────────────────────────────────────────────────────
+  // グリッドコンテナ
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // グリッドの列数
+  const [columnCount, setColumnCount] = useState(0);
 
   // スクロール復元が実行済みかどうかを保持するフラグ
   const hasRestored = useRef(false);
 
-  // パスからグローバルインデックスを特定する
-  const scrollTargetIndex = useMemo(() => {
+  // パスから初期スクロール対象インデックスを特定する
+  const initialScrollTargetIndex = useMemo(() => {
     if (!initialScrollPath) return null;
     const index = allNodes.findIndex((n) => n.path === initialScrollPath);
     return index !== -1 ? index : null;
   }, [allNodes, initialScrollPath]);
 
-  // グローバルページを特定する
-  const scrollTargetPage = useMemo(() => {
-    if (!scrollTargetIndex) return null;
-    return Math.floor(scrollTargetIndex / pageSize) + 1;
-  }, [pageSize, scrollTargetIndex]);
+  // 初期スクロール対象ページを特定する
+  const initialScrollTargetPage = useMemo(() => {
+    if (!initialScrollTargetIndex) return null;
+    return Math.floor(initialScrollTargetIndex / pageSize) + 1;
+  }, [pageSize, initialScrollTargetIndex]);
 
   // ページ自動遷移
   useEffect(() => {
     if (
-      !scrollTargetPage ||
-      scrollTargetPage === currentPage ||
+      !initialScrollTargetPage ||
+      initialScrollTargetPage === currentPage ||
       hasRestored.current
     ) {
       return;
     }
-    setPage(scrollTargetPage);
-  }, [currentPage, setPage, scrollTargetPage]);
+    setPage(initialScrollTargetPage);
+  }, [currentPage, setPage, initialScrollTargetPage]);
 
   // スクロール実行と完了通知
   useEffect(() => {
     // すでに復元済み、またはターゲットがない場合は何もしない
-    if (hasRestored.current || scrollTargetIndex === null) return;
+    if (hasRestored.current || initialScrollTargetIndex === null) return;
 
     const pageStart = (currentPage - 1) * pageSize;
     const pageEnd = pageStart + pageSize;
 
     // 現在のページにターゲットが含まれているか確認
-    if (scrollTargetIndex >= pageStart && scrollTargetIndex < pageEnd) {
+    if (
+      initialScrollTargetIndex >= pageStart &&
+      initialScrollTargetIndex < pageEnd
+    ) {
       const element = document.getElementById(
-        `media-item-${scrollTargetIndex}`
+        `media-item-${initialScrollTargetIndex}`
       );
       if (element) {
         element.scrollIntoView({ behavior: "instant", block: "center" });
@@ -97,12 +108,11 @@ export function PagingGridView({
         onScrollRestored?.();
       }
     }
-  }, [currentPage, pageSize, scrollTargetIndex, onScrollRestored]);
+  }, [currentPage, pageSize, initialScrollTargetIndex, onScrollRestored]);
 
-  // ─── ページネーション ────────────────────────────────────────────────────────────────────
-
-  // フィルターなどで allNodes が変わった時のリセット処理
+  // 範囲外アクセスでページリセット
   useEffect(() => {
+    // currentPage は 1 以上であることが保証されているため、上限のみチェック
     if (currentPage > 1 && allNodes.length > 0) {
       const maxPage = Math.ceil(allNodes.length / pageSize);
       if (currentPage > maxPage) {
@@ -111,15 +121,124 @@ export function PagingGridView({
     }
   }, [allNodes.length, pageSize, currentPage, setPage]);
 
+  // ページ更新ハンドラ
   const handlePageChange = (page: number) => {
     setPage(page);
     onPageChange?.(page);
   };
 
-  const isMobile = useIsMobile();
+  // 列数の動的計算
+  useEffect(() => {
+    const updateColumns = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        // CSSの minmax(120px or 180px) と gap(16px) に合わせる
+        const minWidth = isMobile ? 120 : 180;
+        const gap = 16;
+        // 列数 = (コンテナ幅 + gap) / (最小幅 + gap) の切り捨て
+        const cols = Math.floor((containerWidth + gap) / (minWidth + gap));
+        setColumnCount(cols || 1);
+      }
+    };
+
+    const observer = new ResizeObserver(updateColumns);
+    if (containerRef.current) observer.observe(containerRef.current);
+    updateColumns();
+    return () => observer.disconnect();
+  }, [isMobile]);
+
+  // キーボード操作ハンドラ
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const moveKeys = [
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "Enter",
+      ];
+      if (!moveKeys.includes(e.key)) return;
+
+      e.preventDefault();
+
+      // 最後に選択されたパスから現在のインデックスを探す
+      const currentPath = selectCtx.lastSelectedPath;
+      const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
+
+      // Enterで開く
+      if (e.key === "Enter" && currentPath) {
+        const node = allNodes[currentIndex];
+        if (node) void actions.open?.(node);
+        return;
+      }
+
+      // 何も選択されていない場合は最初の要素を選択
+      if (currentIndex === -1) {
+        const first = allNodes[0];
+        if (first) {
+          selectCtx.replaceSelection(first.path);
+          selectCtx.setLastSelectedPath(first.path);
+          selectCtx.setAnchorPath(first.path);
+        }
+        return;
+      }
+
+      // 次のインデックス計算
+      let nextIndex = currentIndex;
+      if (e.key === "ArrowLeft") nextIndex -= 1;
+      if (e.key === "ArrowRight") nextIndex += 1;
+      if (e.key === "ArrowUp") nextIndex -= columnCount;
+      if (e.key === "ArrowDown") nextIndex += columnCount;
+
+      // 範囲チェック
+      if (nextIndex < 0 || nextIndex >= allNodes.length) return;
+
+      const nextNode = allNodes[nextIndex];
+
+      if (e.shiftKey) {
+        // --- 範囲選択移動 (Shift) ---
+        // 起点 (anchorPath) がなければ現在の位置を起点にする
+        const anchorPath = selectCtx.anchorPath ?? currentPath;
+        const anchorIndex = allNodes.findIndex((n) => n.path === anchorPath);
+
+        const start = Math.min(anchorIndex, nextIndex);
+        const end = Math.max(anchorIndex, nextIndex);
+        const paths = allNodes.slice(start, end + 1).map((n) => n.path);
+
+        selectCtx.enterSelectionMode();
+        selectCtx.selectPaths(paths); // 範囲で上書き
+        // ※ setAnchorPath は更新しない (起点を維持)
+      } else {
+        // 通常移動
+        selectCtx.replaceSelection(nextNode.path);
+        selectCtx.setAnchorPath(nextNode.path); // 次のShift操作のために起点を更新
+      }
+
+      // フォーカス位置更新
+      selectCtx.setLastSelectedPath(nextNode.path);
+
+      // ページ更新（必要なら）
+      const nextPage = Math.floor(nextIndex / pageSize) + 1;
+      if (nextPage !== currentPage) {
+        setPage(nextPage);
+      }
+
+      // DOMが更新されるタイミングでスクロール
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`media-item-${nextIndex}`);
+        el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    },
+    [selectCtx, allNodes, columnCount, pageSize, currentPage, actions, setPage]
+  );
 
   return (
-    <div className="h-full flex flex-col relative">
+    <div
+      ref={containerRef}
+      className="h-full flex flex-col relative outline-none"
+      tabIndex={0} // フォーカス可能にし、keydownイベントを拾う
+      onKeyDown={handleKeyDown}
+    >
       <div
         className={cn(
           "flex-1 overflow-y-auto p-4 grid gap-4 auto-rows-max",
@@ -165,10 +284,13 @@ function Cell({
   onSelectionChange,
 }: CellProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
+
   const favCtx = useFavoritesContext();
-  const selectCtx = usePathSelectionContext();
   const { rating } = favCtx.getFavorite(node.path);
+
+  const selectCtx = usePathSelectionContext();
   const isSelected = selectCtx.isSelectedPath(node.path);
+
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
   const {
@@ -188,35 +310,34 @@ function Cell({
     if (isLongPressed || isMobile) return;
     e.preventDefault();
 
-    // 範囲選択
-    if (e.shiftKey && selectCtx.lastSelectedPath !== null) {
+    if (e.shiftKey && selectCtx.anchorPath !== null) {
+      // Shift 選択
       selectCtx.enterSelectionMode();
-      const lastIdx = allNodes.findIndex(
-        (n) => n.path === selectCtx.lastSelectedPath
+      const anchorIdx = allNodes.findIndex(
+        (n) => n.path === selectCtx.anchorPath
       );
-      if (lastIdx !== -1) {
-        const startIdx = Math.min(lastIdx, globalIndex);
-        const endIdx = Math.max(lastIdx, globalIndex);
-        const paths = allNodes.slice(startIdx, endIdx + 1).map((n) => n.path);
+      if (anchorIdx === -1) return;
+      const startIdx = Math.min(anchorIdx, globalIndex);
+      const endIdx = Math.max(anchorIdx, globalIndex);
+      const paths = allNodes.slice(startIdx, endIdx + 1).map((n) => n.path);
 
-        if (e.ctrlKey || e.metaKey) {
-          selectCtx.deletePaths(paths);
-        } else {
-          selectCtx.addPaths(paths);
-        }
-
-        onSelectionChange?.();
-        return;
+      if (e.ctrlKey || e.metaKey) {
+        // Ctrl あり
+        selectCtx.deletePaths(paths);
+      } else {
+        // Shift のみ
+        selectCtx.addPaths(paths);
       }
-    }
-
-    // 選択追加 or 選択解除
-    if (e.ctrlKey || e.metaKey) {
+    } else if (e.ctrlKey || e.metaKey) {
+      // Ctrl選択
       selectCtx.enterSelectionMode();
       selectCtx.togglePath(node.path);
+      selectCtx.setAnchorPath(node.path); // 次のShift操作の起点更新
     } else {
+      // 通常選択
       selectCtx.exitSelectionMode();
       selectCtx.replaceSelection(node.path);
+      selectCtx.setAnchorPath(node.path); // 次のShift操作の起点更新
     }
 
     selectCtx.setLastSelectedPath(node.path);

@@ -20,12 +20,17 @@ export function usePathSelection(initialSelectedPaths?: Iterable<string>) {
     replaceSelection,
     lastSelectedKey,
     setLastSelectedKey,
+    anchorKey,
+    setAnchorKey,
   } = useSelection<string>(initialSelectedPaths);
 
   return {
+    // 選択モード
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
+
+    // 選択操作
     selectedCount,
     selectedPaths: selectedKeys,
     isSelectedPath: isSelected,
@@ -37,7 +42,11 @@ export function usePathSelection(initialSelectedPaths?: Iterable<string>) {
     addPaths: addKeys,
     deletePaths: deleteKeys,
     replaceSelection,
+
+    // 範囲選択用
     lastSelectedPath: lastSelectedKey,
     setLastSelectedPath: setLastSelectedKey,
+    anchorPath: anchorKey,
+    setAnchorPath: setAnchorKey,
   };
 }

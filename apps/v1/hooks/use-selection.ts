@@ -9,9 +9,19 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     () => new Set(initialSelectedKeys)
   );
 
+  const selectedCount = selectedKeys.size;
+
+  /**
+   * lastSelectedKey: 最後に触れた（移動した）キー。
+   * エクスプローラー等における「フォーカス」の役割。
+   */
   const [lastSelectedKey, setLastSelectedKey] = useState<K | null>(null);
 
-  const selectedCount = selectedKeys.size;
+  /**
+   * anchorKey: 範囲選択の起点。
+   * Shiftキーを押しながら移動する際、このキーから現在のキーまでを選択範囲とする。
+   */
+  const [anchorKey, setAnchorKey] = useState<K | null>(null);
 
   const enterSelectionMode = useCallback(() => {
     setIsSelectionMode(true);
@@ -82,10 +92,12 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
   }, []);
 
   return {
+    // 選択モード
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
 
+    // 選択操作
     selectedCount,
     selectedKeys,
     isSelected,
@@ -98,7 +110,10 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     deleteKeys,
     replaceSelection,
 
+    // 範囲選択用
     lastSelectedKey,
     setLastSelectedKey,
+    anchorKey,
+    setAnchorKey,
   };
 }
