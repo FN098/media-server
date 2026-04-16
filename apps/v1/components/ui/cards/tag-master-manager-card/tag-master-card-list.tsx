@@ -2,6 +2,7 @@
 "use client";
 
 import { TagDeleteButton } from "@/components/ui/buttons/tag-delete-button";
+import { TagMediaPreview } from "@/components/ui/cards/tag-master-manager-card/tag-media-preview";
 import { TagMasterItem } from "@/lib/tag/types";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
@@ -200,8 +201,25 @@ export function TagMasterCardList({
                       <span className="text-xs text-muted-foreground flex-1 truncate">
                         {tag.kana || "---"}
                       </span>
-                      <div className="inline-flex items-center px-2.5 py-0.5 rounded-full border text-[11px] font-mono bg-muted/30 shrink-0">
-                        {tag._count.mediaTags.toLocaleString()}
+
+                      <div>
+                        <TagMediaPreview
+                          tagId={tag.id}
+                          tagName={tag.name}
+                          count={tag._count.mediaTags}
+                        >
+                          <button
+                            className={cn(
+                              "inline-flex items-center px-2.5 py-0.5 rounded-full border text-[11px] font-mono bg-muted/30 transition-colors",
+                              tag._count.mediaTags > 0
+                                ? "hover:bg-primary/10 hover:border-primary/30 cursor-pointer"
+                                : "opacity-50 cursor-default"
+                            )}
+                            disabled={tag._count.mediaTags === 0}
+                          >
+                            {tag._count.mediaTags.toLocaleString()}
+                          </button>
+                        </TagMediaPreview>
                       </div>
                     </>
                   )}

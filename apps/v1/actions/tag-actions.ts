@@ -2,10 +2,13 @@
 
 import { Prisma } from "@/generated/prisma/client";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { getClientExplorerPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
+import { getFilenameWithoutExt } from "@/lib/utils/filename";
 import { generateKana } from "@/lib/utils/kana";
+import { basename } from "path";
 
 // タグ紐づけ・クリーンアップ
 export async function updateMediaTagsAction(payload: {
@@ -377,6 +380,52 @@ export async function deleteTagAction(id: string) {
     return {
       success: false,
       error: "タグの削除に失敗しました。既に削除されている可能性があります。",
+    };
+  }
+}
+
+export async function getMediaByTagId(tagId: string, limit = 20) {
+  try {
+    const mediaTags = await prisma.mediaTag.findMany({
+      where: { tagId },
+      take: limit,
+      include: {
+        media: {
+          select: {
+            id: true,
+            title: true,
+            path: true,
+            dirPath: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // フロントに合わせて加工
+    const media = mediaTags.map((mt) => {
+      const { path, dirPath, title, ...rest } = mt.media;
+      const filename = basename(path);
+      const titleLike = title ?? getFilenameWithoutExt(path);
+      return {
+        ...rest,
+        path,
+        title: titleLike,
+        url: getClientExplorerPath(dirPath) + `?q=${filename}`,
+      };
+    });
+
+    return {
+      success: true,
+      media,
+    };
+  } catch (error) {
+    console.error("Failed to fetch media by tag:", error);
+    return {
+      success: false,
+      error: "メディア情報の取得に失敗しました。",
     };
   }
 }
