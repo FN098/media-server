@@ -90,8 +90,7 @@ export function TagMasterCardList({
             >
               <div
                 className={cn(
-                  "mx-3 my-1 rounded-lg border bg-card p-3 flex flex-col gap-2",
-                  tag.isNew && "border-yellow-300 bg-yellow-50/30"
+                  "mx-3 my-1 rounded-lg border bg-card p-3 flex flex-col gap-2"
                 )}
               >
                 {/* 1行目: 星 + タグ名/編集 + NEWバッジ + 操作ボタン */}

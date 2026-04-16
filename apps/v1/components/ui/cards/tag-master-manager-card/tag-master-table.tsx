@@ -100,8 +100,7 @@ export function TagMasterTable({
                 key={virtualRow.key}
                 className={cn(
                   "grid absolute w-full border-b items-center hover:bg-muted/40 group transition-colors",
-                  GRID_COLS,
-                  tag.isNew && "bg-yellow-50/30"
+                  GRID_COLS
                 )}
                 style={{
                   height: `${virtualRow.size}px`,
