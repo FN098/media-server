@@ -184,6 +184,7 @@ export function TagMasterTable({
                 {/* 操作 */}
                 <div className="flex justify-end">
                   {editingId === tag.id ? (
+                    // 編集中の行：保存・キャンセルボタンを表示
                     <div className="flex gap-1">
                       <Button
                         size="icon"
@@ -207,22 +208,26 @@ export function TagMasterTable({
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity gap-1">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-9 w-9"
-                        onClick={() => onStartEdit(tag)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <TagDeleteButton
-                        tagName={tag.name}
-                        mediaCount={tag._count.mediaTags}
-                        onDelete={() => onDelete(tag.id)}
-                        isDeleting={isDeleting}
-                      />
-                    </div>
+                    // 非編集中の行：
+                    // 他の行が編集中の場合（editingId !== null）は何も表示しない
+                    !editingId && (
+                      <div className="flex opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-9 w-9"
+                          onClick={() => onStartEdit(tag)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <TagDeleteButton
+                          tagName={tag.name}
+                          mediaCount={tag._count.mediaTags}
+                          onDelete={() => onDelete(tag.id)}
+                          isDeleting={isDeleting}
+                        />
+                      </div>
+                    )
                   )}
                 </div>
               </div>
