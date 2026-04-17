@@ -119,8 +119,15 @@ export function useFilteredNodes({
     [filtered]
   );
 
+  const filteredCount = filtered.length;
+  const totalCount = allNodes.length;
+  const isFiltered = filteredCount != totalCount;
+
   return {
     filtered,
     mediaOnly,
+    filteredCount,
+    totalCount,
+    isFiltered,
   };
 }

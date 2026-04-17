@@ -35,6 +35,7 @@ interface PagingListViewProps {
   initialScrollPath?: string | null;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
+  focusOnPageChange?: boolean;
 }
 
 const GRID_TEMPLATE =
@@ -45,6 +46,7 @@ export function PagingListView({
   initialScrollPath,
   onPageChange,
   onScrollRestored,
+  focusOnPageChange = false,
 }: PagingListViewProps) {
   const { currentPage, pageSize, totalPages, setPage, paginate } =
     usePagingContext();
@@ -215,8 +217,9 @@ export function PagingListView({
 
   // ページ遷移時の自動スクロール（副作用）
   useEffect(() => {
-    // フォーカスは常に当てる
-    containerRef.current?.focus();
+    if (focusOnPageChange) {
+      containerRef.current?.focus();
+    }
 
     // ページ変更に伴うスクロールが必要な場合、または外部からの指示（初期表示など）
     // lastSelectedPath があれば、その要素へスクロールを試みる

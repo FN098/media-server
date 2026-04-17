@@ -32,6 +32,7 @@ interface PagingGridViewProps {
   initialScrollPath?: string | null;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
+  focusOnPageChange?: boolean;
 }
 
 export function PagingGridView({
@@ -39,6 +40,7 @@ export function PagingGridView({
   initialScrollPath,
   onPageChange,
   onScrollRestored,
+  focusOnPageChange = false,
 }: PagingGridViewProps) {
   const { currentPage, pageSize, totalPages, setPage, paginate } =
     usePagingContext();
@@ -240,8 +242,9 @@ export function PagingGridView({
 
   // ページ遷移時の自動スクロール（副作用）
   useEffect(() => {
-    // フォーカスは常に当てる
-    containerRef.current?.focus();
+    if (focusOnPageChange) {
+      containerRef.current?.focus();
+    }
 
     // ページ変更に伴うスクロールが必要な場合、または外部からの指示（初期表示など）
     // lastSelectedPath があれば、その要素へスクロールを試みる

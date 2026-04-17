@@ -153,7 +153,13 @@ export function Explorer() {
   const { value: tagFilterValue, apply: applyTagFilterValue } = useTagFilter();
 
   // フィルター結果
-  const { filtered: filteredNodes, mediaOnly } = useFilteredNodes({
+  const {
+    filtered: filteredNodes,
+    mediaOnly,
+    filteredCount,
+    totalCount,
+    isFiltered,
+  } = useFilteredNodes({
     allNodes,
     query,
     mediaTypeFilterValue,
@@ -616,9 +622,9 @@ export function Explorer() {
 
           {/* 件数 */}
           <FilterResultText
-            totalCount={allNodes.length}
-            filteredCount={filteredNodes.length}
-            isFiltered={allNodes.length !== filteredNodes.length}
+            totalCount={totalCount}
+            filteredCount={filteredCount}
+            isFiltered={isFiltered}
             className="ml-auto min-w-[120px] text-right"
           />
         </div>
@@ -649,6 +655,7 @@ export function Explorer() {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
+                focusOnPageChange
               />
             </ActionsProvider>
           </div>
@@ -679,6 +686,7 @@ export function Explorer() {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
+                focusOnPageChange
               />
             </ActionsProvider>
           </div>

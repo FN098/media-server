@@ -109,6 +109,7 @@ export function Favorites() {
   const mediaOnly = filteredNodes; // サーバーサイドでフィルター済み
   const filteredCount = filteredNodes.length;
   const totalCount = listing.total ?? allNodes.length;
+  const isFiltered = totalCount !== filteredCount;
 
   // タグをフィルターに追加
   const addTagFilter = (node: MediaNode) => {
@@ -362,7 +363,7 @@ export function Favorites() {
           <FilterResultText
             totalCount={totalCount}
             filteredCount={filteredCount}
-            isFiltered={totalCount !== filteredCount}
+            isFiltered={isFiltered}
             className="ml-auto min-w-[120px] text-right"
           />
         </div>
