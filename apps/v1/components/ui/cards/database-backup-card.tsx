@@ -155,12 +155,12 @@ export function DatabaseBackupCard() {
         const data = (await res.json()) as DbUploadResponse;
 
         if (data.success) {
-          const temp = {
-            key: `upload:${data.name}`,
-            value: data,
+          const uploaded = {
+            key: `upload:${data.backup.name}`,
+            value: data.backup,
           };
-          setUploadedFile(temp);
-          setSelectedFile(temp);
+          setUploadedFile(uploaded);
+          setSelectedFile(uploaded);
           toast.success("一時ファイルをアップロードしました");
         } else {
           toast.error(data.error);

@@ -37,11 +37,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      name: tmpFileName,
-      label: validatedFile.name,
-      createdAt: new Date().toISOString(),
-      size: validatedFile.size,
-      isTemp: true,
+      backup: {
+        name: tmpFileName,
+        label: validatedFile.name,
+        createdAt: new Date().toISOString(),
+        size: validatedFile.size,
+        isTemp: true,
+      },
     } satisfies DbUploadResponse);
   } catch (e) {
     console.error("upload db file error:", e);

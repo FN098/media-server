@@ -6,7 +6,12 @@ export type DbBackupFile = {
   isTemp: boolean;
 };
 
-export type DbUploadResponse = DbBackupFile & {
-  success: boolean;
-  error?: string;
-};
+export type DbUploadResponse =
+  | {
+      success: true;
+      backup: DbBackupFile;
+    }
+  | {
+      success: false;
+      error: string;
+    };
