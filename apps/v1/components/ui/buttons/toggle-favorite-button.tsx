@@ -28,25 +28,38 @@ export function ToggleFavoriteButton({
     onToggle();
   };
 
+  const iconOnly = rating == null;
+
   // スタイル設定の定義
   const styles = {
     grid: {
-      container:
-        "h-8 min-w-[32px] px-2 bg-black/60 rounded-full backdrop-blur-md border border-white/10 shadow-lg",
+      container: cn(
+        "h-8 backdrop-blur-md border border-white/10 shadow-lg",
+        iconOnly
+          ? "w-8 rounded-full bg-black/60 p-0"
+          : "min-w-[32px] px-2 rounded-full bg-black/60"
+      ),
       star: "h-4 w-4",
       text: "text-[10px]",
     },
     viewer: {
-      container:
-        "h-11 min-w-[44px] px-3 bg-white/10 rounded-full backdrop-blur-md border border-white/10 shadow-lg",
+      container: cn(
+        "h-11 backdrop-blur-md border border-white/10 shadow-lg",
+        iconOnly
+          ? "w-11 rounded-full bg-white/10 p-0"
+          : "min-w-[44px] px-3 rounded-full bg-white/10"
+      ),
       star: "h-6 w-6",
       text: "text-sm",
     },
     list: {
-      // リスト用：背景なし、タップしやすいようにパディング広め、アイコンやや大きめ
-      container: "h-9 w-9 p-0 bg-transparent hover:bg-muted/50",
+      container: cn(
+        "h-9",
+        iconOnly ? "w-9 rounded-full p-0" : "w-auto px-2",
+        "bg-transparent hover:bg-muted/50"
+      ),
       star: "h-5 w-5",
-      text: "text-[11px]", // アイコンに重ねるか、横に並べるかですが、今回は既存ロジック通り横並び想定
+      text: "text-[11px]",
     },
   }[variant];
 
