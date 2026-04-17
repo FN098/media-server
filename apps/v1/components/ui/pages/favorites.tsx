@@ -164,6 +164,24 @@ export function Favorites() {
     toast.warning("このファイル形式は対応していません");
   };
 
+  // 新しいタブで開く
+  const handleOpenInNewTab = (node: MediaNode) => {
+    if (node.isDirectory) {
+      openFolder(node.path, undefined, { newTab: true });
+      return;
+    }
+
+    if (isMedia(node.type)) {
+      const index = getViewerIndex(node.path);
+      if (index == null) return;
+      openViewer(index, { newTab: true });
+      return;
+    }
+
+    toast.warning("このファイル形式は対応していません");
+  };
+
+  // フォルダを開く
   const handleOpenParentFolder = (node: MediaNode) => {
     const parentDir = getParentDirPath(node.path);
     openFolder(parentDir);
@@ -374,6 +392,7 @@ export function Favorites() {
             <ActionsProvider
               actions={{
                 open: handleOpen,
+                openInNewTab: handleOpenInNewTab,
                 openParentFolder: handleOpenParentFolder,
                 toggleFavorite: handleToggleFavorite,
                 changeRating: handleRatingChange,
@@ -399,6 +418,7 @@ export function Favorites() {
             <ActionsProvider
               actions={{
                 open: handleOpen,
+                openInNewTab: handleOpenInNewTab,
                 openParentFolder: handleOpenParentFolder,
                 changeRating: handleRatingChange,
                 toggleFavorite: handleToggleFavorite,
