@@ -30,6 +30,7 @@ import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSelectionControl } from "@/hooks/use-selection-control";
+import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
@@ -42,7 +43,6 @@ import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
-import { useTagFilterContext } from "@/providers/tag-filter-provider";
 import { useViewModeContext } from "@/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
@@ -143,15 +143,14 @@ export function Explorer() {
 
   // 種別フィルター
   const { value: mediaTypeFilterValue, apply: applyMediaTypeFilterValue } =
-    useMediaTypeFilter(); // TODO: Context
+    useMediaTypeFilter();
 
   // 評価フィルター
   const { value: ratingFilterValue, apply: applyRatingFilterValue } =
-    useRatingFilter(); // TODO: Context
+    useRatingFilter();
 
   // タグフィルター
-  const { value: tagFilterValue, apply: applyTagFilterValue } =
-    useTagFilterContext();
+  const { value: tagFilterValue, apply: applyTagFilterValue } = useTagFilter();
 
   // フィルター結果
   const { filtered: filteredNodes, mediaOnly } = useFilteredNodes({
