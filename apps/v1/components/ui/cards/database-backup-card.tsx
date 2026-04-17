@@ -6,7 +6,7 @@ import {
   getBackupListAction,
   restoreBackupAction,
 } from "@/actions/db-actions";
-import { DbBackupFile, DbUploadResponse } from "@/lib/db/types";
+import { DbBackupFile, DbUploadResult } from "@/lib/db/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -152,7 +152,7 @@ export function DatabaseBackupCard() {
           body: formData,
         });
 
-        const data = (await res.json()) as DbUploadResponse;
+        const data = (await res.json()) as DbUploadResult;
 
         if (data.success) {
           const uploaded = {

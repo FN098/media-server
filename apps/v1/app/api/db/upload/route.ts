@@ -1,6 +1,6 @@
 import { TEMP_BACKUP_DIR } from "@/lib/db/const";
 import { dbUploadSchema } from "@/lib/db/schemas";
-import { DbUploadResponse } from "@/lib/db/types";
+import { DbUploadResult } from "@/lib/db/types";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     // --------------------------------------------
 
     // 一時ディレクトリに保存
-    const tmpFileName = `upload_${uuidv4()}.sql`;
+    const tmpFileName = `upload_${uuidv4()}.sql`; // ユーザーから渡されたファイル名は使用しない（セキュリティのため）
     const tmpPath = path.join(TEMP_BACKUP_DIR, tmpFileName);
 
     await fs.writeFile(tmpPath, buffer);
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         size: validatedFile.size,
         isTemp: true,
       },
-    } satisfies DbUploadResponse);
+    } satisfies DbUploadResult);
   } catch (e) {
     console.error("upload db file error:", e);
     return NextResponse.json(
