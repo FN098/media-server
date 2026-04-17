@@ -37,8 +37,6 @@ export const allMediaExtensions = [
   ...audioExtensions,
 ] as const;
 
-export type MediaType = keyof typeof mediaExtensions;
-
 export type MediaExt =
   | (typeof imageExtensions)[number]
   | (typeof videoExtensions)[number]

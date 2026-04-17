@@ -1,13 +1,14 @@
 import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
+import { FavoriteSortKey } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
-import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
-import { MediaNode } from "@/lib/media/types";
+import { MediaType } from "@/lib/media/types";
+import { hashObject } from "@/lib/utils/hash";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
-import { getFavoriteMediaNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 
 // 動的ページとしてレンダリング
@@ -20,9 +21,17 @@ export const metadata: Metadata = {
 interface FavoritePageProps {
   // URLクエリパラメータ: ?sort=name&direction=asc
   searchParams: Promise<{
-    sort?: SortKeyOf<MediaNode>;
-    direction?: SortDirection;
+    page?: number;
+    sort?: string;
+    direction?: "asc" | "desc";
+    shuffle?: boolean;
     seed?: string;
+    mediaType?: MediaType;
+    q?: string;
+    ratingMode?: "all" | "unrated" | "rated";
+    ratingOp?: "gte" | "lte" | "eq" | "between";
+    ratingVal?: string; // 1~5 の数値 or {min},{max}
+    tagIds?: string; // カンマ区切り
   }>;
 }
 
@@ -32,23 +41,35 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const {
     sort: sortKey = "favoritedAt",
     direction: sortDirection = "desc",
+    shuffle,
     seed,
+    mediaType,
+    q: query,
+    ratingMode,
+    ratingOp,
+    ratingVal,
+    tagIds,
   } = searchParams;
 
   const user = await resolveCurrentUserOrThrow();
 
-  // 取得
-  const allNodes = await getFavoriteMediaNodes(user.id);
-
-  // ソート
-  const sorted = sortNodes(allNodes, {
-    key: sortKey,
-    direction: sortDirection,
+  // 検索
+  const favoriteNodes = await searchFavoriteMediaNodes({
+    userId: user.id,
+    sortKey: sortKey as FavoriteSortKey,
+    sortDirection,
+    shuffle,
     seed,
+    mediaType,
+    query,
+    ratingMode,
+    ratingOp,
+    ratingVal,
+    tagIds,
   });
 
   // フォーマット
-  const formatted = formatNodes(sorted);
+  const formatted = formatNodes(favoriteNodes);
 
   const listing = {
     nodes: formatted,
@@ -58,9 +79,11 @@ export default async function FavoritePage(props: FavoritePageProps) {
     next: null,
   };
 
+  const key = hashObject(searchParams);
+
   return (
     <ExplorerProvider listing={listing}>
-      <FavoritesProvider favorites={listing.nodes}>
+      <FavoritesProvider key={key} favorites={favoriteNodes}>
         <PathSelectionProvider>
           <Favorites />
         </PathSelectionProvider>

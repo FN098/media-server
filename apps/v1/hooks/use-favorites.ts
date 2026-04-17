@@ -4,12 +4,12 @@ import {
   revalidateFavoriteAction,
   updateFavoriteAction,
 } from "@/actions/favorite-actions";
-import { FavoritesMap, FavoriteStatus } from "@/lib/favorite/types";
+import { FavoritesMap, FavoriteValue } from "@/lib/favorite/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type Msg = { path: string; rating: number | null };
 
-export function useFavorites(initialData?: FavoriteStatus[]) {
+export function useFavorites(initialData?: FavoriteValue[]) {
   const [favorites, setFavorites] = useState<FavoritesMap>(
     () => new Map(initialData?.map((f) => [f.path, f.rating]) ?? [])
   );

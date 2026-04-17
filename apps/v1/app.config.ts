@@ -9,4 +9,7 @@ export const APP_CONFIG = {
   dbDump: {
     maxFileSize: 50 * 1024 * 1024, // 50MB
   },
+  favorites: {
+    maxPageSize: 1000,
+  },
 } as const;

@@ -1,0 +1,248 @@
+import { APP_CONFIG } from "@/app.config";
+import { Prisma } from "@/generated/prisma/client";
+import { FavoriteSortKey } from "@/lib/favorite/types";
+import {
+  MediaTypeFilterValue,
+  RatingFilterMode,
+  RatingOperator,
+  TagFilterMode,
+} from "@/lib/filter/types";
+import { MediaFsNodeType, MediaNode, SortDirection } from "@/lib/media/types";
+import { prisma } from "@/lib/prisma";
+import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/random";
+import { normalizeForLike } from "@/lib/utils/search";
+import path from "path";
+
+function buildWhere({
+  userId,
+  mediaType = "all",
+  query,
+  ratingMode,
+  ratingOp,
+  ratingVal,
+  tagIds,
+  tagFilterMode,
+}: {
+  userId: string;
+  mediaType?: MediaTypeFilterValue;
+  query?: string;
+  ratingMode?: RatingFilterMode;
+  ratingOp?: RatingOperator;
+  ratingVal?: string; // 1~5 の数値 or {min},{max}
+  tagIds?: string; // カンマ区切り
+  tagFilterMode?: TagFilterMode;
+}): Prisma.FavoriteWhereInput {
+  const normalizedQuery = query ? normalizeForLike(query.trim()) : undefined;
+
+  const normalizedType =
+    mediaType === "image" || mediaType === "audio" || mediaType === "video"
+      ? mediaType
+      : undefined;
+
+  const where: Prisma.FavoriteWhereInput = { userId };
+
+  if (ratingMode === "rated") {
+    // 具体的な星が付いているもの
+    where.rating = { not: null };
+  } else if (ratingMode === "unrated") {
+    // お気に入り済みだが、星は付けていないもの
+    where.rating = null;
+  }
+
+  if (ratingVal && ratingOp) {
+    if (ratingOp === "between") {
+      const [min, max] = ratingVal.split(",").map(Number);
+      where.rating = { gte: min, lte: max };
+    } else {
+      const val = Number(ratingVal);
+      where.rating = { [ratingOp]: val };
+    }
+  }
+
+  const mediaConditions: Prisma.MediaWhereInput[] = [];
+
+  if (normalizedType) {
+    mediaConditions.push({ type: normalizedType });
+  }
+
+  if (normalizedQuery) {
+    mediaConditions.push({
+      OR: [
+        { path: { contains: normalizedQuery } },
+        { title: { contains: normalizedQuery } },
+      ],
+    });
+  }
+
+  if (tagFilterMode === "EMPTY") {
+    // タグが一つも設定されていないメディア
+    mediaConditions.push({
+      mediaTags: { none: {} },
+    });
+  } else if (tagIds) {
+    const ids = tagIds.split(",").filter(Boolean);
+    if (ids.length > 0) {
+      switch (tagFilterMode) {
+        case "OR":
+          // 指定したタグのうち、いずれか1つでも含まれている
+          mediaConditions.push({
+            mediaTags: {
+              some: { tagId: { in: ids } },
+            },
+          });
+          break;
+
+        case "NOT":
+          // 指定したタグが1つも含まれていない
+          mediaConditions.push({
+            mediaTags: {
+              none: { tagId: { in: ids } },
+            },
+          });
+          break;
+
+        case "AND":
+        default:
+          // 全ての指定したタグが含まれている（現状のロジック）
+          ids.forEach((id) => {
+            mediaConditions.push({
+              mediaTags: {
+                some: { tagId: id },
+              },
+            });
+          });
+          break;
+      }
+    }
+  }
+
+  if (mediaConditions.length > 0) {
+    where.media = { AND: mediaConditions };
+  }
+
+  return where;
+}
+
+function buildOrderBy(
+  key: FavoriteSortKey,
+  direction: "asc" | "desc"
+): Prisma.FavoriteOrderByWithRelationInput {
+  const dir = direction;
+
+  switch (key) {
+    case "name":
+    case "path":
+      return { media: { path: dir } };
+    case "mtime":
+      return { media: { fileMtime: dir } };
+    case "size":
+      return { media: { fileSize: dir } };
+    case "title":
+      return { media: { title: dir } };
+    case "rating":
+      return { rating: dir };
+    case "favoritedAt":
+      return { createdAt: dir };
+    default:
+      return { createdAt: "desc" };
+  }
+}
+
+export async function searchFavoriteMediaNodes({
+  userId,
+  limit = APP_CONFIG.favorites.maxPageSize,
+  sortKey = "favoritedAt",
+  sortDirection = "desc",
+  shuffle = false,
+  seed,
+  mediaType = "all",
+  query,
+  ratingMode,
+  ratingOp,
+  ratingVal,
+  tagIds,
+  tagFilterMode,
+}: {
+  userId: string;
+  limit?: number;
+  sortKey?: FavoriteSortKey;
+  sortDirection?: SortDirection;
+  shuffle?: boolean;
+  seed?: string;
+  mediaType?: MediaTypeFilterValue;
+  query?: string;
+  ratingMode?: RatingFilterMode;
+  ratingOp?: RatingOperator;
+  ratingVal?: string; // 1~5 の数値 or {min},{max}
+  tagIds?: string; // カンマ区切り
+  tagFilterMode?: TagFilterMode;
+}): Promise<MediaNode[]> {
+  const where = buildWhere({
+    userId,
+    mediaType,
+    query,
+    ratingMode,
+    ratingOp,
+    ratingVal,
+    tagIds,
+    tagFilterMode,
+  });
+  const orderBy = buildOrderBy(sortKey, sortDirection);
+
+  const select = {
+    rating: true,
+    createdAt: true,
+    media: {
+      select: {
+        id: true,
+        path: true,
+        title: true,
+        fileMtime: true,
+        fileSize: true,
+        previewPath: true,
+        type: true,
+        mediaTags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const favorites = await prisma.favorite.findMany({
+    where,
+    select,
+    orderBy,
+    take: limit,
+  });
+
+  const nodes = favorites.map((f) => ({
+    id: f.media.id,
+    name: path.basename(f.media.path),
+    path: f.media.path,
+    type: f.media.type ?? ("file" as MediaFsNodeType),
+    isDirectory: false,
+    size: Number(f.media.fileSize),
+    mtime: f.media.fileMtime,
+    title: f.media.title ?? null,
+    tags: f.media.mediaTags.map((t) => ({
+      id: t.tag.id,
+      name: t.tag.name,
+    })),
+    rating: f.rating ?? null,
+    favoritedAt: f.createdAt,
+    previewPath: f.media.previewPath,
+  }));
+
+  if (shuffle) {
+    return seed ? shuffleArrayWithSeed(nodes, seed) : shuffleArray(nodes);
+  }
+
+  return nodes;
+}

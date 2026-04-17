@@ -35,10 +35,12 @@ export type MediaTypeFilterOptions = {
 
 // タグフィルター
 export type TagFilterMode = "AND" | "OR" | "NOT" | "EMPTY";
+
 export type TagFilterValue = {
   tags: { id: string; name: string }[];
   mode: TagFilterMode;
 };
+
 export type TagFilterOptions = {
   tagsKey?: string;
   modeKey?: string;

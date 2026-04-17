@@ -41,7 +41,9 @@ export async function getMediaFsNodes(
         name: item.name,
         path: virtualPath,
         isDirectory: isDirectory,
-        type: isDirectory ? "directory" : detectMediaType(item.name),
+        type: isDirectory
+          ? "directory"
+          : (detectMediaType(item.name) ?? "file"),
         size: isDirectory ? undefined : stat.size,
         mtime: stat.mtime,
       };
@@ -65,7 +67,7 @@ export async function getMediaFsNode(
     name: fileName,
     path: virtualPath,
     isDirectory: isDirectory,
-    type: isDirectory ? "directory" : detectMediaType(fileName),
+    type: isDirectory ? "directory" : (detectMediaType(fileName) ?? "file"),
     size: isDirectory ? undefined : stat.size,
     mtime: stat.mtime,
   };

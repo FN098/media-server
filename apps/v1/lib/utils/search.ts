@@ -22,3 +22,12 @@ export function isMatchJapanese(target: string, query: string): boolean {
   const normalizedQuery = normalizeJapanese(query);
   return normalizedTarget.includes(normalizedQuery);
 }
+
+/**
+ * DB の LIKE 検索で使うクエリのみ正規化
+ */
+export function normalizeForLike(text: string): string {
+  return text.normalize("NFKC").trim();
+  // utf8mb4_unicode_ci なので toLowerCase() は不要
+  // カタカナ→ひらがな変換は妥協
+}

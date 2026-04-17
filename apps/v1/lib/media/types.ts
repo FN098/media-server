@@ -7,6 +7,8 @@ export type MediaFsNodeType =
   | "audio"
   | "file";
 
+export type MediaType = "image" | "video" | "audio";
+
 export type MediaFsNode = {
   name: string; // ファイル/フォルダ名
   path: string; // ルートからの相対パス
@@ -59,6 +61,15 @@ export type MediaDbNode = {
   rating?: number | null;
   previewPath?: string | null;
 };
+
+export type SortDirection = "asc" | "desc";
+
+export type SortOptions<T> = {
+  key?: keyof T;
+  direction?: SortDirection;
+};
+
+export type SortKeyOf<T> = SortOptions<T>["key"];
 
 export type FolderVisitedInfo = {
   path: string;

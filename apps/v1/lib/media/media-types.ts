@@ -3,20 +3,14 @@ import {
   imageExtensions,
   videoExtensions,
 } from "@/lib/media/extensions";
-import { MediaFsNodeType } from "@/lib/media/types";
+import { MediaType } from "@/lib/media/types";
 
-export const mediaTypes = [
-  "audio",
-  "image",
-  "video",
-] as const satisfies MediaFsNodeType[];
+export const mediaTypes = ["audio", "image", "video"] as const;
 
-export type MediaType = (typeof mediaTypes)[number];
+export const isMedia = (type: string | null) =>
+  type != null && mediaTypes.includes(type as MediaType);
 
-export const isMedia = (type: MediaFsNodeType) =>
-  mediaTypes.includes(type as MediaType);
-
-export function detectMediaType(fileName: string): MediaFsNodeType {
+export function detectMediaType(fileName: string): MediaType | null {
   const lowerName = fileName.toLowerCase();
 
   if (imageExtensions.some((ext) => lowerName.endsWith(ext))) {
@@ -31,5 +25,5 @@ export function detectMediaType(fileName: string): MediaFsNodeType {
     return "audio";
   }
 
-  return "file";
+  return null;
 }

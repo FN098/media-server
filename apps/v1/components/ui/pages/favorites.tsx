@@ -13,7 +13,6 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
-import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
 import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
@@ -106,13 +105,8 @@ export function Favorites() {
   const { value: tagFilterValue, apply: applyTagFilterValue } = useTagFilter();
 
   // フィルター結果
-  const { filtered: filteredNodes, mediaOnly } = useFilteredNodes({
-    allNodes,
-    query,
-    mediaTypeFilterValue,
-    ratingFilterValue,
-    tagFilterValue,
-  });
+  const filteredNodes = allNodes; // サーバーサイドでフィルター済み
+  const mediaOnly = filteredNodes; // サーバーサイドでフィルター済み
 
   // タグをフィルターに追加
   const addTagFilter = (node: MediaNode) => {
@@ -326,7 +320,7 @@ export function Favorites() {
             <MediaTypeFilterSelect
               value={mediaTypeFilterValue}
               onChange={applyMediaTypeFilterValue}
-              displayTypes={["all", "image", "video", "audio"]}
+              displayTypes={["image", "video", "audio"]}
             />
 
             {/* 評価フィルター */}
