@@ -40,6 +40,6 @@ export type TagFilterValue = {
   mode: TagFilterMode;
 };
 export type TagFilterOptions = {
-  tagsKey: string;
-  modeKey: string;
+  tagsKey?: string;
+  modeKey?: string;
 };
