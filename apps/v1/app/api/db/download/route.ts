@@ -1,11 +1,9 @@
+import { BACKUP_DIR } from "@/lib/db/const";
 import { getMimetype } from "@/lib/media/mimetype";
-import { getServerMediaDbPath } from "@/lib/path/helpers";
 import fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { Readable } from "stream";
-
-const BACKUP_DIR = getServerMediaDbPath("");
 
 export function GET(req: NextRequest) {
   try {
