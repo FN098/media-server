@@ -1,9 +1,5 @@
-// update-media-types-bulk.ts
-import {
-  detectMediaType,
-  MediaType,
-  mediaTypes,
-} from "@/lib/media/media-types";
+import { detectMediaType, mediaTypes } from "@/lib/media/media-types";
+import { MediaType } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 
 export async function bulkUpdateMediaTypes() {
