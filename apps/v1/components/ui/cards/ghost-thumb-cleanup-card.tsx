@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  GhostThumbDeleteResult,
-  GhostThumbItem,
-  GhostThumbScanEventData,
-} from "@/lib/thumb/types";
+import { cleanupGhostThumbnailsAction } from "@/actions/thumb-actions";
+import { GhostThumbItem, GhostThumbScanEventData } from "@/lib/thumb/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,20 +32,10 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-interface GhostThumbCleanupCardProps {
-  onDelete: (items: GhostThumbItem[]) => Promise<GhostThumbDeleteResult>;
-  autoScan?: boolean;
-  confirmFullScan?: boolean;
-}
-
-export function GhostThumbCleanupCard({
-  onDelete,
-  autoScan = false,
-  confirmFullScan = false,
-}: GhostThumbCleanupCardProps) {
+export function GhostThumbCleanupCard() {
   const [isPending, startTransition] = useTransition();
   const [isFullScan, setIsFullScan] = useState(false);
   const [items, setItems] = useState<GhostThumbItem[] | null>(null);
@@ -154,7 +141,7 @@ export function GhostThumbCleanupCard({
         const batch = items.slice(i, i + BATCH_SIZE);
 
         try {
-          const result = await onDelete(batch);
+          const result = await cleanupGhostThumbnailsAction(batch);
 
           if (result.success) {
             totalDeleted += result.deletedCount ?? 0;
@@ -180,14 +167,7 @@ export function GhostThumbCleanupCard({
         );
       }
     });
-  }, [onDelete, items]);
-
-  // 初回のみ自動スキャン
-  useEffect(() => {
-    if (autoScan) handleScan();
-    return () => esRef.current?.close(); // アンマウント時に掃除
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [items]);
 
   return (
     <Card className="border-orange-500/50">
@@ -306,46 +286,15 @@ export function GhostThumbCleanupCard({
 
         {/* ボタン類 */}
         <div className="flex gap-2">
-          {confirmFullScan && isFullScan && items === null ? (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  disabled={isScanning || isPending}
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  スキャン
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    フルスキャンを開始しますか？
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    全ファイルの存在を確認するため、完了まで時間がかかる場合があります。
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>キャンセル</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleScan}>
-                    実行する
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={handleScan}
-              disabled={isScanning || isPending}
-            >
-              <Search className="mr-2 h-4 w-4" />
-              {items === null ? "スキャン" : "再スキャン"}
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={handleScan}
+            disabled={isScanning || isPending}
+          >
+            <Search className="mr-2 h-4 w-4" />
+            {items === null ? "スキャン" : "再スキャン"}
+          </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>

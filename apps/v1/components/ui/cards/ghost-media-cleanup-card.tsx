@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  GhostMediaDeleteResult,
-  GhostMediaItem,
-  GhostMediaScanEventData,
-} from "@/lib/media/types";
+import { cleanupGhostMediaAction } from "@/actions/media-actions";
+import { GhostMediaItem, GhostMediaScanEventData } from "@/lib/media/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,20 +32,10 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-interface GhostMediaCleanupCardProps {
-  onDelete: (ids: string[]) => Promise<GhostMediaDeleteResult>;
-  autoScan?: boolean;
-  confirmFullScan?: boolean;
-}
-
-export function GhostMediaCleanupCard({
-  onDelete,
-  autoScan = false,
-  confirmFullScan = false,
-}: GhostMediaCleanupCardProps) {
+export function GhostMediaCleanupCard() {
   const [isPending, startTransition] = useTransition();
   const [isFullScan, setIsFullScan] = useState(false);
   const [items, setItems] = useState<GhostMediaItem[] | null>(null);
@@ -144,7 +131,7 @@ export function GhostMediaCleanupCard({
     if (!items || items.length === 0) return;
     const ids = items.map((n) => n.id);
     startTransition(async () => {
-      const result = await onDelete(ids);
+      const result = await cleanupGhostMediaAction(ids);
       if (result.success) {
         toast.success(`${result.deletedCount}件の不要なメディアを削除しました`);
         setItems(null);
@@ -152,14 +139,7 @@ export function GhostMediaCleanupCard({
         toast.error(result.error || "削除中にエラーが発生しました");
       }
     });
-  }, [onDelete, items]);
-
-  // 初回のみ自動スキャン
-  useEffect(() => {
-    if (autoScan) handleScan();
-    return () => esRef.current?.close(); // アンマウント時に掃除
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [items]);
 
   return (
     <Card className="border-destructive/50">
@@ -286,46 +266,15 @@ export function GhostMediaCleanupCard({
 
         {/* ボタン類 */}
         <div className="flex gap-2">
-          {confirmFullScan && isFullScan && items === null ? (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  disabled={isScanning || isPending}
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  スキャン
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    フルスキャンを開始しますか？
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    全ファイルの存在を確認するため、完了まで時間がかかる場合があります。
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>キャンセル</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleScan}>
-                    実行する
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={handleScan}
-              disabled={isScanning || isPending}
-            >
-              <Search className="mr-2 h-4 w-4" />
-              {items === null ? "スキャン" : "再スキャン"}
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={handleScan}
+            disabled={isScanning || isPending}
+          >
+            <Search className="mr-2 h-4 w-4" />
+            {items === null ? "スキャン" : "再スキャン"}
+          </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
