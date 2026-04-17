@@ -34,15 +34,16 @@ model User {
 }
 
 model Media {
-  id          String   @id @default(uuid())
-  path        String   @unique
+  id          String     @id @default(uuid())
+  path        String     @unique
   dirPath     String
   previewPath String? // オーディオファイルのジャケ絵や、動画の特定サムネイルなどを保持
   title       String?
   fileMtime   DateTime
   fileSize    BigInt?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  type        MediaType?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   mediaTags MediaTag[]
   favorites Favorite[]
@@ -123,4 +124,10 @@ model FolderMeta {
   updatedAt   DateTime @updatedAt
 
   @@index([path])
+}
+
+enum MediaType {
+  video
+  audio
+  image
 }
