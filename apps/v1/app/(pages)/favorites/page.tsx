@@ -3,8 +3,9 @@ import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
 import { FavoriteSortKey } from "@/lib/favorite/types";
+import { RatingFilterMode, RatingOperator } from "@/lib/filter/types";
 import { formatNodes } from "@/lib/media/format";
-import { MediaType } from "@/lib/media/types";
+import { MediaType, SortDirection } from "@/lib/media/types";
 import { hashObject } from "@/lib/utils/hash";
 import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
@@ -22,50 +23,28 @@ interface FavoritePageProps {
   // URLクエリパラメータ: ?sort=name&direction=asc
   searchParams: Promise<{
     page?: number;
-    sort?: string;
-    direction?: "asc" | "desc";
+    sort?: FavoriteSortKey;
+    direction?: SortDirection;
     shuffle?: boolean;
     seed?: string;
     mediaType?: MediaType;
     q?: string;
-    ratingMode?: "all" | "unrated" | "rated";
-    ratingOp?: "gte" | "lte" | "eq" | "between";
+    ratingMode?: RatingFilterMode;
+    ratingOp?: RatingOperator;
     ratingVal?: string; // 1~5 の数値 or {min},{max}
     tagIds?: string; // カンマ区切り
   }>;
 }
 
 export default async function FavoritePage(props: FavoritePageProps) {
-  const [searchParams] = await Promise.all([props.searchParams]);
-
-  const {
-    sort: sortKey = "favoritedAt",
-    direction: sortDirection = "desc",
-    shuffle,
-    seed,
-    mediaType,
-    q: query,
-    ratingMode,
-    ratingOp,
-    ratingVal,
-    tagIds,
-  } = searchParams;
-
+  const searchParams = await props.searchParams;
   const user = await resolveCurrentUserOrThrow();
 
   // 検索
-  const favoriteNodes = await searchFavoriteMediaNodes({
+  const { nodes: favoriteNodes, total } = await searchFavoriteMediaNodes({
+    ...searchParams,
     userId: user.id,
-    sortKey: sortKey as FavoriteSortKey,
-    sortDirection,
-    shuffle,
-    seed,
-    mediaType,
-    query,
-    ratingMode,
-    ratingOp,
-    ratingVal,
-    tagIds,
+    limit: APP_CONFIG.favorites.maxPageSize,
   });
 
   // フォーマット
@@ -77,6 +56,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
     parent: null,
     prev: null,
     next: null,
+    total,
   };
 
   const key = hashObject(searchParams);

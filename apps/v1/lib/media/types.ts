@@ -49,6 +49,7 @@ export type MediaListing = {
   parent: string | null;
   prev: string | null;
   next: string | null;
+  total?: number;
 };
 
 export type MediaDbNode = {

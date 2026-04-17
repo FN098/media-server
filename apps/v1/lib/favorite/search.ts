@@ -1,4 +1,3 @@
-import { APP_CONFIG } from "@/app.config";
 import { Prisma } from "@/generated/prisma/client";
 import { FavoriteSortKey } from "@/lib/favorite/types";
 import {
@@ -13,17 +12,13 @@ import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/random";
 import { normalizeForLike } from "@/lib/utils/search";
 import path from "path";
 
-function buildWhere({
-  userId,
-  mediaType = "all",
-  query,
-  ratingMode,
-  ratingOp,
-  ratingVal,
-  tagIds,
-  tagFilterMode,
-}: {
+type SearchFavoriteParams = {
   userId: string;
+  limit?: number;
+  sortKey?: FavoriteSortKey;
+  sortDirection?: SortDirection;
+  shuffle?: boolean;
+  seed?: string;
   mediaType?: MediaTypeFilterValue;
   query?: string;
   ratingMode?: RatingFilterMode;
@@ -31,9 +26,26 @@ function buildWhere({
   ratingVal?: string; // 1~5 の数値 or {min},{max}
   tagIds?: string; // カンマ区切り
   tagFilterMode?: TagFilterMode;
-}): Prisma.FavoriteWhereInput {
+};
+
+type SearchFavoriteResult = {
+  nodes: MediaNode[];
+  total: number; // limit を考慮しない全件数
+};
+
+function buildWhere({
+  userId,
+  mediaType,
+  query,
+  ratingMode,
+  ratingOp,
+  ratingVal,
+  tagIds,
+  tagFilterMode,
+}: SearchFavoriteParams): Prisma.FavoriteWhereInput {
   const normalizedQuery = query ? normalizeForLike(query.trim()) : undefined;
 
+  // all の場合はフィルタしない
   const normalizedType =
     mediaType === "image" || mediaType === "audio" || mediaType === "video"
       ? mediaType
@@ -75,7 +87,7 @@ function buildWhere({
   }
 
   if (tagFilterMode === "EMPTY") {
-    // タグが一つも設定されていないメディア
+    // タグが一つも設定されていない
     mediaConditions.push({
       mediaTags: { none: {} },
     });
@@ -103,7 +115,7 @@ function buildWhere({
 
         case "AND":
         default:
-          // 全ての指定したタグが含まれている（現状のロジック）
+          // 指定したタグがすべて含まれている
           ids.forEach((id) => {
             mediaConditions.push({
               mediaTags: {
@@ -123,12 +135,10 @@ function buildWhere({
   return where;
 }
 
-function buildOrderBy(
-  key: FavoriteSortKey,
-  direction: "asc" | "desc"
-): Prisma.FavoriteOrderByWithRelationInput {
-  const dir = direction;
-
+function buildOrderBy({
+  sortKey: key,
+  sortDirection: dir,
+}: SearchFavoriteParams): Prisma.FavoriteOrderByWithRelationInput {
   switch (key) {
     case "name":
     case "path":
@@ -148,47 +158,13 @@ function buildOrderBy(
   }
 }
 
-export async function searchFavoriteMediaNodes({
-  userId,
-  limit = APP_CONFIG.favorites.maxPageSize,
-  sortKey = "favoritedAt",
-  sortDirection = "desc",
-  shuffle = false,
-  seed,
-  mediaType = "all",
-  query,
-  ratingMode,
-  ratingOp,
-  ratingVal,
-  tagIds,
-  tagFilterMode,
-}: {
-  userId: string;
-  limit?: number;
-  sortKey?: FavoriteSortKey;
-  sortDirection?: SortDirection;
-  shuffle?: boolean;
-  seed?: string;
-  mediaType?: MediaTypeFilterValue;
-  query?: string;
-  ratingMode?: RatingFilterMode;
-  ratingOp?: RatingOperator;
-  ratingVal?: string; // 1~5 の数値 or {min},{max}
-  tagIds?: string; // カンマ区切り
-  tagFilterMode?: TagFilterMode;
-}): Promise<MediaNode[]> {
-  const where = buildWhere({
-    userId,
-    mediaType,
-    query,
-    ratingMode,
-    ratingOp,
-    ratingVal,
-    tagIds,
-    tagFilterMode,
-  });
-  const orderBy = buildOrderBy(sortKey, sortDirection);
+export async function searchFavoriteMediaNodes(
+  params: SearchFavoriteParams
+): Promise<SearchFavoriteResult> {
+  const { limit: take, seed, shuffle } = params;
 
+  const where = buildWhere(params);
+  const orderBy = buildOrderBy(params);
   const select = {
     rating: true,
     createdAt: true,
@@ -215,34 +191,38 @@ export async function searchFavoriteMediaNodes({
     },
   };
 
-  const favorites = await prisma.favorite.findMany({
-    where,
-    select,
-    orderBy,
-    take: limit,
-  });
+  // 並列でクエリ実行
+  const [favorites, total] = await Promise.all([
+    prisma.favorite.findMany({ where, select, orderBy, take }),
+    prisma.favorite.count({ where }),
+  ]);
 
-  const nodes = favorites.map((f) => ({
-    id: f.media.id,
-    name: path.basename(f.media.path),
-    path: f.media.path,
-    type: f.media.type ?? ("file" as MediaFsNodeType),
-    isDirectory: false,
-    size: Number(f.media.fileSize),
-    mtime: f.media.fileMtime,
-    title: f.media.title ?? null,
-    tags: f.media.mediaTags.map((t) => ({
-      id: t.tag.id,
-      name: t.tag.name,
-    })),
-    rating: f.rating ?? null,
-    favoritedAt: f.createdAt,
-    previewPath: f.media.previewPath,
-  }));
+  // 結果を加工
+  let nodes = favorites.map(
+    (f) =>
+      ({
+        id: f.media.id,
+        name: path.basename(f.media.path),
+        path: f.media.path,
+        type: f.media.type ?? ("file" as MediaFsNodeType),
+        isDirectory: false,
+        size: Number(f.media.fileSize),
+        mtime: f.media.fileMtime,
+        title: f.media.title ?? null,
+        tags: f.media.mediaTags.map((t) => ({
+          id: t.tag.id,
+          name: t.tag.name,
+        })),
+        rating: f.rating ?? null,
+        favoritedAt: f.createdAt,
+        previewPath: f.media.previewPath,
+      }) satisfies MediaNode
+  );
 
+  // limit 後にシャッフル（IDをすべて取得してシャッフルするのは重過ぎるため、シンプルさを優先）
   if (shuffle) {
-    return seed ? shuffleArrayWithSeed(nodes, seed) : shuffleArray(nodes);
+    nodes = seed ? shuffleArrayWithSeed(nodes, seed) : shuffleArray(nodes);
   }
 
-  return nodes;
+  return { nodes, total };
 }
