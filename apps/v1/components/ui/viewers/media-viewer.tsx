@@ -110,7 +110,9 @@ export function MediaViewer({
   const lastViewedPathRef = useRef<string | null>(
     allNodes[initialIndex]?.path ?? null
   );
-  const { rating = null } = currentNode ? getFavorite(currentNode.path) : {};
+  const { isFavorite = false, rating = null } = currentNode
+    ? getFavorite(currentNode.path)
+    : {};
 
   // 仮想スライド構成
   // [最初のページダミー] → [前のフォルダナビ] → [メディア配列] → [次のフォルダナビ] → [最後のページダミー]
@@ -155,17 +157,17 @@ export function MediaViewer({
   };
 
   // お気に入りボタンクリック時の処理
-  const handleToggleFavorite = async () => {
+  const handleToggleFavorite = () => {
     try {
       if (!currentNode) return;
-      const { rating } = getFavorite(currentNode.path);
+      const { isFavorite } = getFavorite(currentNode.path);
+      const nextIsFavorite = !isFavorite;
 
-      await toggleFavorite(currentNode.path);
+      toggleFavorite(currentNode.path);
 
-      const message =
-        rating == null
-          ? "⭐お気に入りに登録しました"
-          : "お気に入りを解除しました";
+      const message = nextIsFavorite
+        ? "⭐お気に入りに登録しました"
+        : "お気に入りを解除しました";
       toast.info(message, { duration: 1000 });
 
       interactHeader();
@@ -175,15 +177,15 @@ export function MediaViewer({
     }
   };
 
-  const handleRatingChange = async (rating: number | null) => {
+  const handleRatingChange = (rating: number | null) => {
     try {
       if (!currentNode) return;
       const node = currentNode;
 
-      await updateFavorite(node.path, rating);
+      updateFavorite(node.path, rating);
 
       const message =
-        rating != null && rating > 0
+        rating != null
           ? "⭐レーティングを更新しました"
           : "レーティングを解除しました";
       toast.info(message, { duration: 1000 });
@@ -336,7 +338,7 @@ export function MediaViewer({
     "0,1,2,3,4,5",
     (event) => {
       const rating = parseInt(event.key);
-      void handleRatingChange(rating === 0 ? null : rating);
+      handleRatingChange(rating === 0 ? null : rating);
     },
     {
       scopes: ["viewer", "tag-editor"],
@@ -410,7 +412,8 @@ export function MediaViewer({
                 <ToggleFavoriteButton
                   variant="viewer"
                   rating={rating}
-                  onRatingChange={(rating) => void handleRatingChange(rating)}
+                  isFavorite={isFavorite}
+                  onToggle={handleToggleFavorite}
                 />
               )}
 

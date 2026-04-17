@@ -1,7 +1,7 @@
 import { MediaDbNode } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 
-export async function getVirtualMediaNodes(
+export async function getMediaDbNodes(
   dirPath: string,
   userId: string
 ): Promise<MediaDbNode[]> {
@@ -16,7 +16,7 @@ export async function getVirtualMediaNodes(
       fileSize: true,
       favorites: {
         where: { userId },
-        select: { mediaId: true, rating: true },
+        select: { mediaId: true, rating: true, createdAt: true },
       },
       mediaTags: {
         select: {
@@ -43,5 +43,6 @@ export async function getVirtualMediaNodes(
       name: t.tag.name,
     })),
     rating: m.favorites[0]?.rating ?? null,
+    favoritedAt: m.favorites[0]?.createdAt,
   }));
 }

@@ -307,7 +307,7 @@ function DataRow({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   const favCtx = useFavoritesContext();
-  const { rating } = favCtx.getFavorite(node.path);
+  const { isFavorite, rating } = favCtx.getFavorite(node.path);
 
   const selectCtx = usePathSelectionContext();
   const isSelected = selectCtx.isSelectedPath(node.path);
@@ -315,7 +315,7 @@ function DataRow({
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
   const {
-    actions: { open, changeRating },
+    actions: { open, toggleFavorite, changeRating },
   } = useActionsContext();
 
   const handleLongPress = useCallback(() => {
@@ -494,11 +494,12 @@ function DataRow({
           >
             {node.isDirectory ? (
               <FavoriteCountBadge count={node.favoriteCount ?? 0} />
-            ) : isMobile && changeRating ? (
+            ) : isMobile && toggleFavorite ? (
               <ToggleFavoriteButton
-                rating={rating}
                 variant="list"
-                onRatingChange={(rating) => void changeRating(node, rating)}
+                rating={rating}
+                isFavorite={isFavorite}
+                onToggle={() => void toggleFavorite?.(node)}
               />
             ) : changeRating ? (
               <FavoriteRating

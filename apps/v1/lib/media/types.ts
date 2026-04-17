@@ -60,6 +60,7 @@ export type MediaDbNode = {
   tags?: MediaNodeTag[] | null;
   rating?: number | null;
   previewPath?: string | null;
+  favoritedAt?: Date;
 };
 
 export type SortDirection = "asc" | "desc";

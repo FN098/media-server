@@ -5,27 +5,27 @@ import { Star } from "lucide-react";
 import React from "react";
 
 type ToggleFavoriteButtonProps = {
+  isFavorite: boolean;
   rating: number | null;
-  onRatingChange: (rating: number | null) => void;
-  variant?: "grid" | "viewer" | "list"; // list を追加
+  onToggle: () => void;
+  variant?: "grid" | "viewer" | "list";
   className?: string;
 };
 
 export function ToggleFavoriteButton({
+  isFavorite,
   rating,
-  onRatingChange,
+  onToggle,
   variant = "grid",
   className,
 }: ToggleFavoriteButtonProps) {
-  const isFavorite = rating != null && rating > 0;
-
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
   };
 
-  const toggleFavorite = (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onRatingChange(isFavorite ? null : 3);
+    onToggle();
   };
 
   // スタイル設定の定義
@@ -53,14 +53,16 @@ export function ToggleFavoriteButton({
   return (
     <button
       type="button"
-      onClick={toggleFavorite}
+      onClick={handleClick}
       onMouseDown={handleInteraction}
       onMouseUp={handleInteraction}
       onTouchStart={handleInteraction}
       onTouchEnd={handleInteraction}
       className={cn(
-        "flex items-center gap-1 justify-center transition-all active:scale-75 group/fav outline-none",
+        "flex items-center gap-1 justify-center transition-all active:scale-90 group/fav outline-none",
         styles.container,
+        // お気に入り時は枠線を少し目立たせる（任意）
+        isFavorite && variant !== "list" && "border-yellow-400/30",
         className
       )}
     >
@@ -69,14 +71,15 @@ export function ToggleFavoriteButton({
           styles.star,
           "transition-colors",
           isFavorite
-            ? "fill-yellow-400 text-yellow-400"
+            ? "fill-yellow-400 text-yellow-400" // お気に入りなら黄色（評価nullでも）
             : variant === "list"
-              ? "text-muted-foreground opacity-40" // リストの未設定時は控えめに
+              ? "text-muted-foreground opacity-40"
               : "text-white opacity-70 group-hover/fav:opacity-100"
         )}
       />
 
-      {isFavorite && (
+      {/* 評価値がある場合のみ数字を表示 */}
+      {isFavorite && rating !== null && (
         <span
           className={cn("font-bold text-yellow-400 tabular-nums", styles.text)}
         >

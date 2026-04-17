@@ -170,10 +170,19 @@ export function Favorites() {
 
   const favCtx = useFavoritesContext();
 
-  // レーティング更新
-  const handleRatingChange = async (node: MediaNode, rating: number | null) => {
+  // お気に入り登録/解除
+  const handleToggleFavorite = (node: MediaNode) => {
     try {
-      await favCtx.updateFavorite(node.path, rating);
+      favCtx.toggleFavorite(node.path);
+    } catch {
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  };
+
+  // レーティング更新
+  const handleRatingChange = (node: MediaNode, rating: number | null) => {
+    try {
+      favCtx.updateFavorite(node.path, rating);
     } catch {
       toast.error("お気に入りの更新に失敗しました");
     }
@@ -363,6 +372,7 @@ export function Favorites() {
               actions={{
                 open: handleOpen,
                 openParentFolder: handleOpenParentFolder,
+                toggleFavorite: handleToggleFavorite,
                 changeRating: handleRatingChange,
                 editTags: (node: MediaNode) => {
                   select(node);
@@ -388,6 +398,7 @@ export function Favorites() {
                 open: handleOpen,
                 openParentFolder: handleOpenParentFolder,
                 changeRating: handleRatingChange,
+                toggleFavorite: handleToggleFavorite,
                 editTags: (node: MediaNode) => {
                   select(node);
                   handleOpenTagEditor();

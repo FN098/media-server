@@ -15,7 +15,7 @@ import {
   getFolderMetas,
   getFolderVisitedInfo,
 } from "@/repositories/folder-repository";
-import { getVirtualMediaNodes } from "@/repositories/media-repository";
+import { getMediaDbNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -73,7 +73,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   // DB クエリ
   const [dbNodes, folderVisited, folderFavorites, folderMetas] =
     await Promise.all([
-      getVirtualMediaNodes(currentVirtualPath, user.id),
+      getMediaDbNodes(currentVirtualPath, user.id),
       getFolderVisitedInfo(dirPaths, user.id),
       getFolderFavoriteInfo(dirPaths, user.id),
       getFolderMetas(dirPaths),

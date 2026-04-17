@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 export async function upsertFavorite(
   userId: string,
   mediaId: string,
-  rating: number
+  rating: number | null
 ) {
   return await prisma.favorite.upsert({
     where: {

@@ -316,7 +316,7 @@ function Cell({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   const favCtx = useFavoritesContext();
-  const { rating } = favCtx.getFavorite(node.path);
+  const { isFavorite, rating } = favCtx.getFavorite(node.path);
 
   const selectCtx = usePathSelectionContext();
   const isSelected = selectCtx.isSelectedPath(node.path);
@@ -324,7 +324,7 @@ function Cell({
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
   const {
-    actions: { open, changeRating },
+    actions: { open, toggleFavorite },
   } = useActionsContext();
 
   const handleLongPress = useCallback(() => {
@@ -472,11 +472,12 @@ function Cell({
 
             {/* Actions */}
             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-              {!selectCtx.isSelectionMode && isMediaNode && changeRating && (
+              {!selectCtx.isSelectionMode && isMediaNode && toggleFavorite && (
                 <ToggleFavoriteButton
                   variant="grid"
                   rating={rating}
-                  onRatingChange={(rating) => void changeRating?.(node, rating)}
+                  isFavorite={isFavorite}
+                  onToggle={() => void toggleFavorite?.(node)}
                 />
               )}
 

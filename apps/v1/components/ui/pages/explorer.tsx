@@ -235,10 +235,19 @@ export function Explorer() {
 
   const favCtx = useFavoritesContext();
 
-  // レーティング更新
-  const handleRatingChange = async (node: MediaNode, rating: number | null) => {
+  // お気に入り登録/解除
+  const handleToggleFavorite = (node: MediaNode) => {
     try {
-      await favCtx.updateFavorite(node.path, rating);
+      favCtx.toggleFavorite(node.path);
+    } catch {
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  };
+
+  // レーティング更新
+  const handleRatingChange = (node: MediaNode, rating: number | null) => {
+    try {
+      favCtx.updateFavorite(node.path, rating);
     } catch {
       toast.error("お気に入りの更新に失敗しました");
     }
@@ -622,6 +631,7 @@ export function Explorer() {
                 open: handleOpen,
                 openInNewTab: handleOpenInNewTab,
                 changeRating: handleRatingChange,
+                toggleFavorite: handleToggleFavorite,
                 rename: openRenameDialogSingle,
                 move: openMoveDialogSingle,
                 copy: openCopyDialogSingle,
@@ -651,6 +661,7 @@ export function Explorer() {
               actions={{
                 open: handleOpen,
                 changeRating: handleRatingChange,
+                toggleFavorite: handleToggleFavorite,
                 rename: openRenameDialogSingle,
                 move: openMoveDialogSingle,
                 copy: openCopyDialogSingle,

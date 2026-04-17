@@ -1,96 +1,154 @@
 "use client";
 
 import {
+  deleteFavoriteAction,
   revalidateFavoriteAction,
   updateFavoriteAction,
 } from "@/actions/favorite-actions";
 import { FavoritesMap, FavoriteValue } from "@/lib/favorite/types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
-type Msg = { path: string; rating: number | null };
+type FavoriteMsg =
+  | { type: "UPDATE"; path: string; rating: number | null }
+  | { type: "DELETE"; path: string };
 
 export function useFavorites(initialData?: FavoriteValue[]) {
   const [favorites, setFavorites] = useState<FavoritesMap>(
-    () => new Map(initialData?.map((f) => [f.path, f.rating]) ?? [])
+    () =>
+      new Map(
+        initialData
+          ?.filter((f) => !!f.favoritedAt)
+          .map((f) => [f.path, f.rating]) ?? []
+      )
   );
 
   const { startFlight, finishFlight, isInFlight } = useInFlight();
-  const { broadcast } = useFavoriteChannel((path, rating) => {
-    setFavorites((m) => new Map(m).set(path, rating));
+  const [isUpdating, startUpdating] = useTransition();
+  const [isDeleting, startDeleting] = useTransition();
+  const isLoading = isUpdating || isDeleting;
+
+  // タブ間同期
+  const { broadcast } = useFavoriteChannel((msg: FavoriteMsg) => {
+    setFavorites((prev) => {
+      const next = new Map(prev);
+      if (msg.type === "DELETE") {
+        next.delete(msg.path);
+      } else {
+        next.set(msg.path, msg.rating);
+      }
+      return next;
+    });
   });
 
-  // 現在の状態を取得 (評価 0 の場合は null として扱う)
+  // 現在の状態を取得
   const getFavorite = useCallback(
     (path: string) => {
-      const rating = favorites.get(path) ?? null;
-      return { rating: rating == 0 ? null : rating };
+      return {
+        isFavorite: favorites.has(path),
+        rating: favorites.get(path) ?? null,
+      };
     },
     [favorites]
   );
 
   // お気に入り状態を更新
   const updateFavorite = useCallback(
-    async (path: string, rating: number | null) => {
+    (path: string, rating: number | null) => {
       if (isInFlight(path)) return;
-
-      // 1. 楽観的アップデート
       startFlight(path);
+
+      // 楽観的アップデート
       setFavorites((m) => new Map(m).set(path, rating));
-      broadcast(path, rating);
+      broadcast({ type: "UPDATE", path, rating });
 
-      try {
-        // 2. サーバー更新 (rating: null なら削除、数値ならupsert)
-        const { success } = await updateFavoriteAction(path, rating);
-
-        if (!success) {
-          // 3. 失敗時のロールバック
+      startUpdating(async () => {
+        try {
+          const { success } = await updateFavoriteAction(path, rating);
+          if (!success) throw new Error();
+        } catch {
+          // 失敗時のロールバック
           const { favorite } = await revalidateFavoriteAction(path);
-          const actual = favorite?.rating ?? null;
-          setFavorites((m) => new Map(m).set(path, actual));
-          broadcast(path, actual);
+          setFavorites((m) => {
+            const next = new Map(m);
+            if (favorite) {
+              next.set(path, favorite.rating);
+            } else {
+              next.delete(path);
+            }
+            return next;
+          });
+        } finally {
+          finishFlight(path);
         }
-      } finally {
-        finishFlight(path);
-      }
+      });
     },
     [broadcast, finishFlight, isInFlight, startFlight]
   );
 
-  // トグル動作 (デフォルト値を 3 とする)
+  const deleteFavorite = useCallback(
+    (path: string) => {
+      if (isInFlight(path)) return;
+      startFlight(path);
+
+      // 楽観的アップデート
+      setFavorites((m) => {
+        const next = new Map(m);
+        next.delete(path);
+        return next;
+      });
+      broadcast({ type: "DELETE", path });
+
+      startDeleting(async () => {
+        try {
+          const { success } = await deleteFavoriteAction(path);
+          if (!success) throw new Error();
+        } catch {
+          // 失敗時のロールバック
+          const { favorite } = await revalidateFavoriteAction(path);
+          if (favorite)
+            setFavorites((m) => new Map(m).set(path, favorite.rating));
+        } finally {
+          finishFlight(path);
+        }
+      });
+    },
+    [broadcast, finishFlight, isInFlight, startFlight]
+  );
+
   const toggleFavorite = useCallback(
     (path: string) => {
-      const { rating } = getFavorite(path);
-      const next = rating == null ? 3 : null;
-      return updateFavorite(path, next);
+      const { isFavorite } = getFavorite(path);
+      return isFavorite ? deleteFavorite(path) : updateFavorite(path, null);
     },
-    [updateFavorite, getFavorite]
+    [getFavorite, deleteFavorite, updateFavorite]
   );
 
   return {
     favorites,
     getFavorite,
+    isUpdating,
     updateFavorite,
+    isDeleting,
+    deleteFavorite,
+    isLoading,
     toggleFavorite,
   };
 }
 
 // 複数タブ同期（BroadcastChannel）
-function useFavoriteChannel(
-  onMessage: (path: string, rating: number | null) => void
-) {
+function useFavoriteChannel(onMessage: (msg: FavoriteMsg) => void) {
   const channelRef = useRef<BroadcastChannel | null>(null);
 
   useEffect(() => {
     // クライアントサイドでのみ初期化
     const channel = new BroadcastChannel("favorite_sync");
     channelRef.current = channel;
-    channel.onmessage = (e: MessageEvent<Msg>) =>
-      onMessage(e.data.path, e.data.rating);
+    channel.onmessage = (e: MessageEvent<FavoriteMsg>) => onMessage(e.data);
     return () => channel.close();
   }, [onMessage]);
 
-  const broadcast = useCallback((path: string, rating: number | null) => {
-    channelRef.current?.postMessage({ path, rating });
+  const broadcast = useCallback((msg: FavoriteMsg) => {
+    channelRef.current?.postMessage(msg);
   }, []);
 
   return { broadcast };

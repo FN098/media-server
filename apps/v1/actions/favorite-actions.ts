@@ -23,18 +23,37 @@ export async function updateFavoriteAction(
 
     if (!media) return { success: false, error: "メディアが見つかりません" };
 
-    if (rating === null) {
-      await deleteFavorite(user.id, media.id);
-    } else {
-      // 1~5の範囲にクランプ（念のためのバリデーション）
-      const validatedRating = Math.max(1, Math.min(5, rating));
-      await upsertFavorite(user.id, media.id, validatedRating);
-    }
+    // バリデーション: 数値がある場合は 1~5 にクランプ
+    const validatedRating =
+      rating !== null ? Math.max(1, Math.min(5, rating)) : null;
+
+    await upsertFavorite(user.id, media.id, validatedRating);
 
     return { success: true };
   } catch (error) {
     console.error("Failed to update favorite:", error);
     return { success: false, error: "お気に入りの更新に失敗しました" };
+  }
+}
+
+// お気に入り削除 (レコード自体の消去)
+export async function deleteFavoriteAction(path: string) {
+  try {
+    const user = await resolveCurrentUserOrThrow();
+
+    const media = await prisma.media.findFirst({
+      select: { id: true },
+      where: { path },
+    });
+
+    if (!media) return { success: false, error: "メディアが見つかりません" };
+
+    await deleteFavorite(user.id, media.id);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete favorite:", error);
+    return { success: false, error: "お気に入り解除に失敗しました" };
   }
 }
 

@@ -42,7 +42,7 @@ export function mergeFsWithDb({
         favoriteCount: fav?.favoriteMediaCount,
         tags: null,
         previewPath: meta?.previewPath,
-        rating: 0,
+        rating: null,
       } satisfies MediaNode;
     } else {
       // ファイル
@@ -55,6 +55,7 @@ export function mergeFsWithDb({
         tags: dbNode?.tags ?? null,
         previewPath: dbNode?.previewPath,
         rating: dbNode?.rating ?? null,
+        favoritedAt: dbNode?.favoritedAt,
       } satisfies MediaNode;
     }
   });

@@ -12,7 +12,7 @@ import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { TrashProvider } from "@/providers/trash-provider";
 import { getFolderVisitedInfo } from "@/repositories/folder-repository";
-import { getVirtualMediaNodes } from "@/repositories/media-repository";
+import { getMediaDbNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -69,7 +69,7 @@ export default async function TrashPage(props: TrashPageProps) {
 
   // DB クエリ
   const [dbNodes, folderVisited] = await Promise.all([
-    getVirtualMediaNodes(currentVirtualDirPath, user.id),
+    getMediaDbNodes(currentVirtualDirPath, user.id),
     getFolderVisitedInfo(dirPaths, user.id),
   ]);
 

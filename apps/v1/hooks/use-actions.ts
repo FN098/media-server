@@ -19,6 +19,7 @@ export interface Actions {
     node: MediaNode,
     rating: number | null
   ) => void | Promise<void>;
+  toggleFavorite?: (node: MediaNode) => void | Promise<void>;
   setAsPreview?: (node: MediaNode) => void | Promise<void>;
   resetPreview?: (node: MediaNode) => void | Promise<void>;
 }
