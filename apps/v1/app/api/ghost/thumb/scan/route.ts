@@ -116,11 +116,28 @@ async function runQuickScan(
     });
   }
 
-  // TODO
-  // 親ディレクトリが削除対象なら、その子ディレクトリはリストから除外するとより安全（二重削除防止）
-  // ...（必要に応じて filter）
+  // パスが短い順（かつ辞書順）にソートする
+  // これにより、親ディレクトリが必ず子ディレクトリより前に来るようになる
+  ghostItems.sort((a, b) => a.path.localeCompare(b.path));
 
-  return ghostItems;
+  const filteredGhostItems: GhostThumbItem[] = [];
+  let lastSavedPath = "";
+
+  for (const item of ghostItems) {
+    // 現在のパスが、最後に保存した「削除確定パス」で始まっているかチェック
+    // 例: lastSavedPath = "/root/trash"
+    //     item.path = "/root/trash/subdir" -> これはスキップ対象
+
+    const isChildOfLastSaved =
+      lastSavedPath !== "" && item.path.startsWith(lastSavedPath + "/");
+
+    if (!isChildOfLastSaved) {
+      filteredGhostItems.push(item);
+      lastSavedPath = item.path; // 新たな「親」として基準を更新
+    }
+  }
+
+  return filteredGhostItems;
 }
 
 export function GET(req: NextRequest) {
