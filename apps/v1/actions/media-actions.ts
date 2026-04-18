@@ -81,9 +81,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       // 自分自身の更新
       await tx.$executeRaw`
         UPDATE Media 
-        SET path = ${destVirtualPath},
-            dirPath = ${dirname(destVirtualPath).replace(/\\/g, "/")},
-            title = ${newName}
+        SET path = ${destVirtualPath}
         WHERE path = ${srcVirtualPath}
       `;
 
@@ -139,15 +137,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         `;
       } else {
         // ファイル単体のリネームの場合
-        // 1. もしリネーム先にメタデータがあれば削除
-        await tx.$executeRaw`DELETE FROM FolderMeta WHERE path = ${destVirtualPath}`;
-
-        // 2. 自身のパス更新
-        await tx.$executeRaw`
-          UPDATE FolderMeta SET path = ${destVirtualPath} WHERE path = ${srcVirtualPath}
-        `;
-
-        // 3. 他のフォルダの previewPath として使われていた場合の更新
+        // 他のフォルダの previewPath として使われていた場合の更新
         await tx.$executeRaw`
           UPDATE FolderMeta SET previewPath = ${destVirtualPath} WHERE previewPath = ${srcVirtualPath}
         `;
