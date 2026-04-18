@@ -46,6 +46,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
     ...searchParams,
     userId: user.id,
     limit: APP_CONFIG.favorites.maxPageSize,
+    query: searchParams.q,
   });
 
   // フォーマット
