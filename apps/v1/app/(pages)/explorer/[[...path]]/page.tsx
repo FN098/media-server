@@ -1,6 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { Explorer } from "@/components/ui/pages/explorer";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { FavoriteValue } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
@@ -101,8 +102,17 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     nodes: formatted,
   };
 
+  const favorites = listing.nodes.map(
+    (n) =>
+      ({
+        path: n.path,
+        rating: n.rating,
+        favoritedAt: n.favoritedAt,
+      }) satisfies FavoriteValue
+  );
+
   return (
-    <FavoritesProvider favorites={listing.nodes}>
+    <FavoritesProvider favorites={favorites}>
       <PathSelectionProvider>
         <Explorer listing={listing} />
       </PathSelectionProvider>

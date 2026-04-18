@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
-import { FavoriteSortKey } from "@/lib/favorite/types";
+import { FavoriteSortKey, FavoriteValue } from "@/lib/favorite/types";
 import { RatingFilterMode, RatingOperator } from "@/lib/filter/types";
 import { formatNodes } from "@/lib/media/format";
 import { MediaType, SortDirection } from "@/lib/media/types";
@@ -42,14 +42,14 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const user = await resolveCurrentUserOrThrow();
 
   // 検索
-  const { nodes: favoriteNodes, total } = await searchFavoriteMediaNodes({
+  const { nodes: searched, total } = await searchFavoriteMediaNodes({
     ...searchParams,
     userId: user.id,
     limit: APP_CONFIG.favorites.maxPageSize,
   });
 
   // フォーマット
-  const formatted = formatNodes(favoriteNodes);
+  const formatted = formatNodes(searched);
 
   const listing = {
     nodes: formatted,
@@ -60,12 +60,21 @@ export default async function FavoritePage(props: FavoritePageProps) {
     total,
   };
 
+  const favorites = listing.nodes.map(
+    (n) =>
+      ({
+        path: n.path,
+        rating: n.rating,
+        favoritedAt: n.favoritedAt,
+      }) satisfies FavoriteValue
+  );
+
   const key = hashObject(searchParams);
 
   return (
     <TagEditorProvider>
       <HistoryProvider>
-        <FavoritesProvider key={key} favorites={favoriteNodes}>
+        <FavoritesProvider key={key} favorites={favorites}>
           <PathSelectionProvider>
             <Favorites listing={listing} />
           </PathSelectionProvider>
