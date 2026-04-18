@@ -69,6 +69,7 @@ export function ActionDropdownMenu({
     restore,
     delete: deleteAction,
     deletePermanently,
+    updateThumb,
   } = actions;
 
   const [internalOpen, setInternalOpen] = useState(false);
@@ -207,6 +208,18 @@ export function ActionDropdownMenu({
             disabled={node.previewPath === null}
           >
             <ImageMinus className="mr-2 h-4 w-4" /> プレビューを解除
+          </DropdownMenuItem>
+        )}
+
+        {updateThumb && !node.isDirectory && (
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              void updateThumb(node);
+            }}
+            disabled={node.previewPath === null}
+          >
+            <ImageMinus className="mr-2 h-4 w-4" /> サムネイルを更新
           </DropdownMenuItem>
         )}
 

@@ -22,6 +22,7 @@ export interface Actions {
   toggleFavorite?: (node: MediaNode) => void | Promise<void>;
   setAsPreview?: (node: MediaNode) => void | Promise<void>;
   resetPreview?: (node: MediaNode) => void | Promise<void>;
+  updateThumb?: (node: MediaNode) => void | Promise<void>;
 }
 
 export function useActions(actions: Actions) {

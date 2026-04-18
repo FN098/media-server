@@ -5,7 +5,10 @@ import {
   deleteNodesAction,
   updatePreviewAction,
 } from "@/actions/media-actions";
-import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
+import {
+  enqueueCreateSingleThumbJobAction,
+  enqueueCreateThumbsJobAction,
+} from "@/actions/thumb-actions";
 import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
@@ -100,6 +103,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const handleScrollRestored = () => {
     popHistory();
   };
+
+  // フォルダ訪問履歴自動更新
+  useEffect(() => {
+    if (listing.path) {
+      void visitFolderAction(listing.path);
+    }
+  }, [listing.path]);
 
   // ===== フィルタリング =====
 
@@ -433,21 +443,19 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   };
 
-  // ===== サーバーアクション =====
+  // ===== サムネイル =====
 
-  // サムネイル作成リクエスト送信
+  // サムネイル自動作成
   useEffect(() => {
     if (listing.path) {
       void enqueueCreateThumbsJobAction(listing.path);
     }
   }, [listing.path]);
 
-  // 訪問済みフォルダ更新リクエスト送信
-  useEffect(() => {
-    if (listing.path) {
-      void visitFolderAction(listing.path);
-    }
-  }, [listing.path]);
+  // サムネイル強制更新
+  const handleForceUpdateThumb = (node: MediaNode) => {
+    void enqueueCreateSingleThumbJobAction(node.path, true);
+  };
 
   // ===== ショートカット =====
 
@@ -646,6 +654,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 addTagFilter,
                 setAsPreview: openApplyPreviewDialog,
                 resetPreview,
+                updateThumb: handleForceUpdateThumb,
               }}
             >
               <PagingGridView
@@ -677,6 +686,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 addTagFilter,
                 setAsPreview: openApplyPreviewDialog,
                 resetPreview,
+                updateThumb: handleForceUpdateThumb,
               }}
             >
               <PagingListView
