@@ -330,6 +330,8 @@ function Cell({
     actions: { open, toggleFavorite },
   } = useActionsContext();
 
+  const { actions } = useActionsContext();
+
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
@@ -443,6 +445,7 @@ function Cell({
             <MediaThumb
               node={node}
               className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              onError={() => void actions.updateThumb?.(node)}
               showIcon
             />
 
