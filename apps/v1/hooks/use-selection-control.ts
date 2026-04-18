@@ -4,13 +4,7 @@ import { MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useMemo } from "react";
 
-export function useSelectionControl({
-  allNodes,
-  controlledNodes,
-}: {
-  allNodes: MediaNode[];
-  controlledNodes: MediaNode[];
-}) {
+export function useSelectionControl(allNodes: MediaNode[]) {
   const {
     isSelectionMode,
     enterSelectionMode,
@@ -43,7 +37,7 @@ export function useSelectionControl({
 
   // 全選択
   const selectAll = () => {
-    selectPaths(controlledNodes.map((n) => n.path));
+    selectPaths(allNodes.map((n) => n.path));
     enterSelectionMode();
   };
 
