@@ -247,7 +247,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== 選択機能 =====
 
   const { isSelectionMode, selected, select, selectAll, resetSelection } =
-    useSelectionControl(filteredNodes);
+    useSelectionControl({
+      allNodes,
+      controlledNodes: filteredNodes,
+    });
 
   // ===== タグエディタ =====
 

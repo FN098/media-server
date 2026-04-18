@@ -158,7 +158,10 @@ export function Trash({ listing }: { listing: MediaListing }) {
   // ===== 選択機能 =====
 
   const { isSelectionMode, selected, select, selectAll, resetSelection } =
-    useSelectionControl(filteredNodes);
+    useSelectionControl({
+      allNodes,
+      controlledNodes: filteredNodes,
+    });
 
   // ===== 復元 (Restore) =====
 
