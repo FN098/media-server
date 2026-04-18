@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  FavoriteFilterMode,
   MediaTypeFilterValue,
   RatingFilterValue,
   TagFilterValue,
@@ -78,12 +79,29 @@ function createMediaTypeFilter(value: MediaTypeFilterValue): MediaNodeFilter {
   };
 }
 
+function createFavoriteFilter(mode: FavoriteFilterMode): MediaNodeFilter {
+  const isFavorite = (rating: number | null) => rating != null && rating > 0;
+
+  return (node) => {
+    switch (mode) {
+      case "only_favorites":
+        return isFavorite(node.rating);
+      case "exclude_favorites":
+        return !isFavorite(node.rating);
+      case "all":
+      default:
+        return true;
+    }
+  };
+}
+
 export function useFilteredNodes({
   allNodes,
   query,
   tagFilterValue,
   mediaTypeFilterValue,
   ratingFilterValue,
+  favoriteFilterMode,
   activated = true,
 }: {
   allNodes: MediaNode[];
@@ -91,6 +109,7 @@ export function useFilteredNodes({
   tagFilterValue?: TagFilterValue;
   mediaTypeFilterValue?: MediaTypeFilterValue;
   ratingFilterValue?: RatingFilterValue;
+  favoriteFilterMode?: FavoriteFilterMode;
   activated?: boolean;
 }) {
   const pipeline = useMemo(
@@ -98,9 +117,16 @@ export function useFilteredNodes({
       mediaTypeFilterValue ? createMediaTypeFilter(mediaTypeFilterValue) : null,
       ratingFilterValue ? createRatingFilter(ratingFilterValue) : null,
       tagFilterValue ? createTagFilter(tagFilterValue) : null,
+      favoriteFilterMode ? createFavoriteFilter(favoriteFilterMode) : null,
       query ? createSearchFilter(query) : null,
     ],
-    [mediaTypeFilterValue, query, ratingFilterValue, tagFilterValue]
+    [
+      favoriteFilterMode,
+      mediaTypeFilterValue,
+      query,
+      ratingFilterValue,
+      tagFilterValue,
+    ]
   );
 
   // フィルタリング実行

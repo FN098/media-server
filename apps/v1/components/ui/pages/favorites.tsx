@@ -327,7 +327,7 @@ export function Favorites() {
         tabIndex={-1}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-[repeat(6,180px)] gap-2 flex-grow">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
             {/* 並び替え */}
             <SortSelect
               options={[

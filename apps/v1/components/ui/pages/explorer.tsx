@@ -8,6 +8,7 @@ import {
 import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
 import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
+import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
@@ -25,6 +26,7 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerQuery } from "@/hooks/use-explorer-query";
+import { useFavoriteFilter } from "@/hooks/use-favorite-filter";
 import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
 import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
@@ -151,6 +153,10 @@ export function Explorer() {
 
   // タグフィルター
   const { value: tagFilterValue, apply: applyTagFilterValue } = useTagFilter();
+
+  // お気に入りフィルター
+  const { value: favoriteFilterMode, apply: applyFavoriteFilterMode } =
+    useFavoriteFilter();
 
   // フィルター結果
   const {
@@ -556,7 +562,7 @@ export function Explorer() {
         tabIndex={-1}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-[repeat(6,180px)] gap-2 flex-grow">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
             {/* 並び替え */}
             <SortSelect
               options={[
@@ -612,6 +618,12 @@ export function Explorer() {
               <FolderPlus className="h-4 w-4" />
               新規フォルダ
             </Button>
+
+            {/* お気に入りフィルターボタン */}
+            <FavoriteFilterButton
+              mode={favoriteFilterMode}
+              onChange={applyFavoriteFilterMode}
+            />
 
             {/* リセット */}
             <ResetButton

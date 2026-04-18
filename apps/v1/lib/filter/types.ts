@@ -1,4 +1,4 @@
-// 評価フィルター
+// ===== 評価フィルター =====
 export type RatingValue = 1 | 2 | 3 | 4 | 5;
 export type RatingFilterMode = "all" | "unrated" | "rated";
 export type RatingOperator = "gte" | "lte" | "eq" | "between";
@@ -21,7 +21,7 @@ export type RatingFilterOptions = {
   ratingValKey?: string;
 };
 
-// 種別フィルター
+// ===== 種別フィルター =====
 export type MediaTypeFilterValue =
   | "all"
   | "directory"
@@ -33,7 +33,7 @@ export type MediaTypeFilterOptions = {
   mediaTypeKey?: string;
 };
 
-// タグフィルター
+// ===== タグフィルター =====
 export type TagFilterMode = "AND" | "OR" | "NOT" | "EMPTY";
 
 export type TagFilterValue = {
@@ -43,5 +43,12 @@ export type TagFilterValue = {
 
 export type TagFilterOptions = {
   tagsKey?: string;
+  modeKey?: string;
+};
+
+// ===== お気に入りフィルター =====
+export type FavoriteFilterMode = "all" | "only_favorites" | "exclude_favorites";
+
+export type FavoriteFilterOptions = {
   modeKey?: string;
 };
