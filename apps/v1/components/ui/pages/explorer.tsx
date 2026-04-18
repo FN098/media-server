@@ -768,6 +768,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           onOpenChange={handleRenameDialogOpenChange}
           sourcePath={renameTarget?.path ?? ""}
           currentName={renameTarget?.name ?? ""}
+          isDirectory={renameTarget?.isDirectory}
         />
 
         {/* フォルダ作成ダイアログ */}

@@ -16,6 +16,7 @@ interface RenameDialogProps {
   onOpenChange: (open: boolean) => void;
   sourcePath: string;
   currentName: string; // 例: "photo.jpg"
+  isDirectory?: boolean;
 }
 
 export function RenameDialog({
@@ -23,11 +24,21 @@ export function RenameDialog({
   onOpenChange,
   sourcePath,
   currentName,
+  isDirectory,
 }: RenameDialogProps) {
-  const dotIndex = currentName.lastIndexOf(".");
-  const baseName =
-    dotIndex > 0 ? currentName.substring(0, dotIndex) : currentName;
-  const extension = dotIndex > 0 ? currentName.substring(dotIndex) : "";
+  const parseName = () => {
+    if (isDirectory) {
+      return { baseName: currentName, extension: "" };
+    }
+
+    const dotIndex = currentName.lastIndexOf(".");
+    const baseName =
+      dotIndex > 0 ? currentName.substring(0, dotIndex) : currentName;
+    const extension = dotIndex > 0 ? currentName.substring(dotIndex) : "";
+    return { baseName, extension };
+  };
+
+  const { baseName, extension } = parseName();
 
   const [newName, setNewName] = useState(baseName);
   const [isPending, startTransition] = useTransition();
