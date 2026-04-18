@@ -16,10 +16,10 @@ export function useQueryFilter(options?: QueryFilterOptions) {
   const { queryKey = "q" } = options || {};
 
   // 現在の値をURLから取得
-  const q = searchParams.get(queryKey);
+  const query = searchParams.get(queryKey);
 
   // value: 現在の状態
-  const value = useMemo(() => q, [q]);
+  const value = useMemo(() => query, [query]);
 
   // apply: URLを更新して状態を変更
   const apply = useCallback(
