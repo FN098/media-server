@@ -3,6 +3,7 @@
 import {
   FavoriteFilterMode,
   MediaTypeFilterValue,
+  QueryFilterValue,
   RatingFilterValue,
   TagFilterValue,
 } from "@/lib/filter/types";
@@ -13,8 +14,8 @@ import { useMemo } from "react";
 
 // helpers
 
-function createSearchFilter(value: string): MediaNodeFilter {
-  const trimmed = value.trim();
+function createSearchFilter(value: QueryFilterValue): MediaNodeFilter {
+  const trimmed = value.query?.trim();
   return (node) => !trimmed || isMatchJapanese(node.name, trimmed);
 }
 
@@ -74,8 +75,8 @@ function createRatingFilter(value: RatingFilterValue): MediaNodeFilter {
 
 function createMediaTypeFilter(value: MediaTypeFilterValue): MediaNodeFilter {
   return (node) => {
-    if (value === "all") return true;
-    return node.type === value;
+    if (value.types.length === 0) return true;
+    return value.types.includes(node.type);
   };
 }
 
@@ -95,7 +96,7 @@ function createFavoriteFilter(mode: FavoriteFilterMode): MediaNodeFilter {
 
 export function useFilteredNodes({
   allNodes,
-  query,
+  queryFilterValue,
   tagFilterValue,
   mediaTypeFilterValue,
   ratingFilterValue,
@@ -103,7 +104,7 @@ export function useFilteredNodes({
   activated = true,
 }: {
   allNodes: MediaNode[];
-  query?: string | null;
+  queryFilterValue?: QueryFilterValue;
   tagFilterValue?: TagFilterValue;
   mediaTypeFilterValue?: MediaTypeFilterValue;
   ratingFilterValue?: RatingFilterValue;
@@ -116,12 +117,12 @@ export function useFilteredNodes({
       ratingFilterValue ? createRatingFilter(ratingFilterValue) : null,
       tagFilterValue ? createTagFilter(tagFilterValue) : null,
       favoriteFilterMode ? createFavoriteFilter(favoriteFilterMode) : null,
-      query ? createSearchFilter(query) : null,
+      queryFilterValue ? createSearchFilter(queryFilterValue) : null,
     ],
     [
       favoriteFilterMode,
       mediaTypeFilterValue,
-      query,
+      queryFilterValue,
       ratingFilterValue,
       tagFilterValue,
     ]

@@ -301,8 +301,7 @@ export function RatingFilterDialog({
           className={cn(
             "gap-2 h-9 w-full transition-colors",
             isActive &&
-              "border-primary bg-primary/5 text-primary hover:bg-primary/10",
-            !isActive && "text-muted-foreground"
+              "border-primary bg-primary/5 text-primary hover:bg-primary/10"
           )}
         >
           {isActive && description ? (

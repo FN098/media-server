@@ -18,7 +18,7 @@ import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
-import { MediaTypeFilterSelect } from "@/components/ui/selects/media-type-filter-select";
+import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
@@ -101,7 +101,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const allNodes = listing.nodes;
 
   // クエリフィルター
-  const { value: query } = useQueryFilter();
+  const { value: queryFilterValue } = useQueryFilter();
 
   // 種別フィルター
   const { value: mediaTypeFilterValue, apply: applyMediaTypeFilterValue } =
@@ -127,7 +127,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     isFiltered,
   } = useFilteredNodes({
     allNodes,
-    query,
+    queryFilterValue,
     mediaTypeFilterValue,
     ratingFilterValue,
     tagFilterValue,
@@ -574,7 +574,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             />
 
             {/* 種別フィルター */}
-            <MediaTypeFilterSelect
+            <MediaTypeFilterMultiSelect
               value={mediaTypeFilterValue}
               onChange={applyMediaTypeFilterValue}
             />

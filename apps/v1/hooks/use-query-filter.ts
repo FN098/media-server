@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryFilterValue } from "@/lib/filter/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
@@ -19,7 +20,7 @@ export function useQueryFilter(options?: QueryFilterOptions) {
   const query = searchParams.get(queryKey);
 
   // value: 現在の状態
-  const value = useMemo(() => query, [query]);
+  const value = useMemo<QueryFilterValue>(() => ({ query }), [query]);
 
   // apply: URLを更新して状態を変更
   const apply = useCallback(

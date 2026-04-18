@@ -5,7 +5,7 @@ import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
-import { MediaTypeFilterSelect } from "@/components/ui/selects/media-type-filter-select";
+import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
@@ -321,7 +321,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             />
 
             {/* 種別フィルター */}
-            <MediaTypeFilterSelect
+            <MediaTypeFilterMultiSelect
               value={mediaTypeFilterValue}
               onChange={applyMediaTypeFilterValue}
               displayTypes={["image", "video", "audio"]}

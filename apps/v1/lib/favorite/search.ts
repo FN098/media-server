@@ -1,12 +1,16 @@
 import { Prisma } from "@/generated/prisma/client";
 import { FavoriteSortKey } from "@/lib/favorite/types";
 import {
-  MediaTypeFilterValue,
   RatingFilterMode,
   RatingOperator,
   TagFilterMode,
 } from "@/lib/filter/types";
-import { MediaFsNodeType, MediaNode, SortDirection } from "@/lib/media/types";
+import {
+  MediaFsNodeType,
+  MediaNode,
+  MediaType,
+  SortDirection,
+} from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/random";
 import { normalizeForLike } from "@/lib/utils/search";
@@ -19,7 +23,7 @@ type SearchFavoriteParams = {
   sortDirection?: SortDirection;
   shuffle?: boolean;
   seed?: string;
-  mediaType?: MediaTypeFilterValue;
+  mediaType?: string; // カンマ区切り
   query?: string;
   ratingMode?: RatingFilterMode;
   ratingOp?: RatingOperator;
@@ -45,12 +49,6 @@ function buildWhere({
 }: SearchFavoriteParams): Prisma.FavoriteWhereInput {
   const normalizedQuery = query ? normalizeForLike(query.trim()) : undefined;
 
-  // all の場合はフィルタしない
-  const normalizedType =
-    mediaType === "image" || mediaType === "audio" || mediaType === "video"
-      ? mediaType
-      : undefined;
-
   const where: Prisma.FavoriteWhereInput = { userId };
 
   if (ratingMode === "rated") {
@@ -73,8 +71,13 @@ function buildWhere({
 
   const mediaConditions: Prisma.MediaWhereInput[] = [];
 
-  if (normalizedType) {
-    mediaConditions.push({ type: normalizedType });
+  if (mediaType) {
+    const types = mediaType.split(",") as MediaType[];
+    mediaConditions.push({
+      type: {
+        in: types,
+      },
+    });
   }
 
   if (normalizedQuery) {

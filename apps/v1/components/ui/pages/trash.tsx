@@ -79,7 +79,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   const allNodes = listing.nodes;
 
   // クエリフィルター
-  const { value: query } = useQueryFilter();
+  const { value: queryFilterValue } = useQueryFilter();
 
   // フィルター結果
   const {
@@ -90,7 +90,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     isFiltered,
   } = useFilteredNodes({
     allNodes,
-    query,
+    queryFilterValue,
   });
 
   // 検索パラメータリセット用

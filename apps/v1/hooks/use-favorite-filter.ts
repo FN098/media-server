@@ -16,12 +16,13 @@ function parseFavoriteFilterMode(raw: string | null): FavoriteFilterMode {
 function buildParams(
   params: URLSearchParams,
   next: FavoriteFilterMode,
-  valueKey: string
+  keys: { modeKey: string }
 ): void {
+  const { modeKey } = keys;
   if (next === "all") {
-    params.delete(valueKey);
+    params.delete(modeKey);
   } else {
-    params.set(valueKey, next);
+    params.set(modeKey, next);
   }
 }
 
@@ -42,7 +43,7 @@ export function useFavoriteFilter(options?: FavoriteFilterOptions) {
   const apply = useCallback(
     (next: FavoriteFilterMode) => {
       const params = new URLSearchParams(searchParams.toString());
-      buildParams(params, next, modeKey);
+      buildParams(params, next, { modeKey });
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
     [pathname, router, searchParams, modeKey]

@@ -5,7 +5,7 @@ import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
 import { FavoriteSortKey, FavoriteValue } from "@/lib/favorite/types";
 import { RatingFilterMode, RatingOperator } from "@/lib/filter/types";
 import { formatNodes } from "@/lib/media/format";
-import { MediaType, SortDirection } from "@/lib/media/types";
+import { SortDirection } from "@/lib/media/types";
 import { hashObject } from "@/lib/utils/hash";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { HistoryProvider } from "@/providers/history-provider";
@@ -27,7 +27,7 @@ interface FavoritePageProps {
     direction?: SortDirection;
     shuffle?: boolean;
     seed?: string;
-    mediaType?: MediaType;
+    mediaType?: string; // カンマ区切り
     q?: string;
     ratingMode?: RatingFilterMode;
     ratingOp?: RatingOperator;

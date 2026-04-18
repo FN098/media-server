@@ -1,3 +1,10 @@
+import { MediaFsNodeType } from "@/lib/media/types";
+
+// ===== クエリフィルター =====
+export type QueryFilterValue = {
+  query?: string | null;
+};
+
 // ===== 評価フィルター =====
 export type RatingValue = 1 | 2 | 3 | 4 | 5;
 export type RatingFilterMode = "all" | "unrated" | "rated";
@@ -22,12 +29,9 @@ export type RatingFilterOptions = {
 };
 
 // ===== 種別フィルター =====
-export type MediaTypeFilterValue =
-  | "all"
-  | "directory"
-  | "image"
-  | "video"
-  | "audio";
+export type MediaTypeFilterValue = {
+  types: MediaFsNodeType[];
+};
 
 export type MediaTypeFilterOptions = {
   mediaTypeKey?: string;
