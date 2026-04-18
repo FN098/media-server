@@ -12,32 +12,39 @@ type Media = {
   isDeleted?: boolean;
 };
 
-type ResolveOption = {
+type UrlOption = {
   absolute?: boolean;
+  version?: number;
 };
 
-export function resolveMediaUrl(media: Media, option?: ResolveOption) {
+function appendVersion(url: string, version?: number) {
+  if (!version) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}v=${version}`;
+}
+
+export function resolveMediaUrl(media: Media, option?: UrlOption) {
   const basePath = media.isDeleted
     ? path.join(PATHS.virtual.trash.root, media.path)
     : media.path;
 
   const encoded = encodePath(basePath);
 
-  if (option?.absolute) {
-    return getAbsoluteApiMediaUrl(encoded);
-  }
+  const url = option?.absolute
+    ? getAbsoluteApiMediaUrl(encoded)
+    : getApiMediaUrl(encoded);
 
-  return getApiMediaUrl(encoded);
+  return appendVersion(url, option?.version);
 }
 
-export function resolveMediaThumbUrl(media: Media, option?: ResolveOption) {
+export function resolveMediaThumbUrl(media: Media, option?: UrlOption) {
   // ファイルを削除してもサムネイルはそのまま残るので同じパスを参照
-  const basePath = media.isDeleted ? media.path : media.path;
+  const basePath = media.path;
   const encoded = encodePath(basePath);
 
-  if (option?.absolute) {
-    return getAbsoluteApiMediaUrl(encoded);
-  }
+  const url = option?.absolute
+    ? getAbsoluteApiMediaUrl(encoded)
+    : getApiThumbUrl(encoded);
 
-  return getApiThumbUrl(encoded);
+  return appendVersion(url, option?.version);
 }

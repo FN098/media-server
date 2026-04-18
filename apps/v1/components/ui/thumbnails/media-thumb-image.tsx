@@ -86,7 +86,10 @@ export function MediaThumbImage({
 
   // 表示するソースの決定
   const displayPath = previewPath || node.path;
-  const thumbSrc = resolveMediaThumbUrl({ path: displayPath });
+  const thumbSrc = resolveMediaThumbUrl(
+    { path: displayPath },
+    { version: new Date().getTime() }
+  );
 
   if (isError) {
     return (
