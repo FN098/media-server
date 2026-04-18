@@ -11,7 +11,7 @@ import { useDebouncedCallback } from "use-debounce";
 
 export function HeaderSearch() {
   const { value, apply } = useQueryFilter();
-  const [input, setInput] = useState(value ?? "");
+  const [input, setInput] = useState(value.query ?? "");
   const [focused, setFocused] = useState(false);
   const isMobile = useIsMobile();
   const mounted = useMounted();
