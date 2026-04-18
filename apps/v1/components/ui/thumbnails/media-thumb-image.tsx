@@ -88,7 +88,7 @@ export function MediaThumbImage({
   const displayPath = previewPath || node.path;
   const thumbSrc = resolveMediaThumbUrl(
     { path: displayPath },
-    { version: new Date().getTime() }
+    { version: node.mtime.getTime() }
   );
 
   if (isError) {
