@@ -19,7 +19,7 @@ import {
 } from "@/shadcn/components/ui/dialog";
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
-import { RotateCcw, Star, StarOff } from "lucide-react";
+import { RotateCcw, Star } from "lucide-react";
 import { useState } from "react";
 
 // ─── 定数 ────────────────────────────────────────────────────────────────────
@@ -110,7 +110,7 @@ function describeFilter(input: RatingFilterValue): React.ReactNode {
   if (input.mode === "unrated") {
     return (
       <span className="flex items-center gap-1">
-        <StarOff className="h-3 w-3 opacity-30" />
+        <StarDisplay rating={1} variant="compact" />
         未評価
       </span>
     );
@@ -134,7 +134,7 @@ function describeFilter(input: RatingFilterValue): React.ReactNode {
 
   return (
     <span className="flex items-center gap-1">
-      <StarDisplay rating={condition.value} variant="compact" />
+      <StarDisplay rating={condition.value} variant="numeric" />
       <span>{opLabel}</span>
     </span>
   );
@@ -143,7 +143,7 @@ function describeFilter(input: RatingFilterValue): React.ReactNode {
 // ─── サブコンポーネント ────────────────────────────────────────────────────────
 
 interface StarDisplayProps {
-  rating: RatingValue;
+  rating: number;
   size?: number;
   variant?: "full" | "compact" | "numeric";
 }
