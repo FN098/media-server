@@ -32,6 +32,13 @@ export function MediaThumbImage({
   const retryCountRef = useRef(0);
   const [isError, setIsError] = useState(false);
 
+  // 表示するソースの決定
+  const displayPath = previewPath || node.path;
+  const thumbSrc = resolveMediaThumbUrl(
+    { path: displayPath },
+    { version: node.mtime.getTime() }
+  );
+
   const update = () => {
     setVersion(Date.now());
     setIsProcessing(false);
@@ -42,11 +49,10 @@ export function MediaThumbImage({
   // サムネイル作成完了イベントの監視
   useThumbEventObserver((event) => {
     if (!isProcessing) return;
-    const targetPath = previewPath || node.path; // プレビュー中ならそのパスを優先
 
-    if (event.filePath === targetPath) {
+    if (event.filePath === displayPath) {
       update();
-    } else if (event.dirPath === getParentDirPath(targetPath)) {
+    } else if (event.dirPath === getParentDirPath(displayPath)) {
       setTimeout(update, 300);
     }
   });
@@ -82,13 +88,6 @@ export function MediaThumbImage({
       }
     },
     [node.path, onError, previewPath, requested]
-  );
-
-  // 表示するソースの決定
-  const displayPath = previewPath || node.path;
-  const thumbSrc = resolveMediaThumbUrl(
-    { path: displayPath },
-    { version: node.mtime.getTime() }
   );
 
   if (isError) {
