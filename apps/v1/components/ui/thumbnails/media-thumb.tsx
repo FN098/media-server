@@ -7,6 +7,7 @@ interface MediaThumbProps {
   node: MediaNode;
   className?: string;
   onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
+  onError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
   showIcon?: boolean;
 }
 
@@ -14,6 +15,7 @@ export function MediaThumb({
   node,
   className,
   onLoad,
+  onError,
   showIcon = false,
 }: MediaThumbProps) {
   const hasPreview =
@@ -30,6 +32,7 @@ export function MediaThumb({
           previewPath={node.previewPath}
           className={className}
           onLoad={onLoad}
+          onError={onError}
         />
 
         {/* アイコンのオーバーレイ表示 */}

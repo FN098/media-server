@@ -13,6 +13,7 @@ interface MediaThumbImageProps {
   previewPath?: string | null;
   className?: string;
   onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
+  onError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 }
 
 const MAX_RETRY_COUNT = 1;
@@ -22,6 +23,7 @@ export function MediaThumbImage({
   className,
   previewPath,
   onLoad,
+  onError,
 }: MediaThumbImageProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [version, setVersion] = useState(0);
@@ -50,32 +52,37 @@ export function MediaThumbImage({
   });
 
   // サムネイル作成依頼イベントを発行
-  const handleError = useCallback(async () => {
-    // すでにリクエスト中、または上限に達している場合は何もしない
-    if (requested || retryCountRef.current >= MAX_RETRY_COUNT) {
-      if (retryCountRef.current >= MAX_RETRY_COUNT) {
-        setIsError(true);
-        setIsProcessing(false);
+  const handleError = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      // すでにリクエスト中、または上限に達している場合は何もしない
+      if (requested || retryCountRef.current >= MAX_RETRY_COUNT) {
+        if (retryCountRef.current >= MAX_RETRY_COUNT) {
+          setIsError(true);
+          setIsProcessing(false);
+          onError?.(e);
+        }
+        return;
       }
-      return;
-    }
 
-    setRequested(true);
-    setIsProcessing(true);
-    retryCountRef.current += 1;
+      setRequested(true);
+      setIsProcessing(true);
+      retryCountRef.current += 1;
 
-    try {
-      // サムネイルを作成するディレクトリを enqueue
-      const targetDir = previewPath
-        ? getParentDirPath(previewPath)
-        : getParentDirPath(node.path);
-      await enqueueCreateThumbsJobAction(targetDir);
-    } catch (e) {
-      console.error("Failed to enqueue thumb job", e);
-      setIsProcessing(false);
-      setRequested(false); // 失敗時は再試行可能にする
-    }
-  }, [node.path, previewPath, requested]);
+      try {
+        // サムネイルを作成するディレクトリを enqueue
+        const targetDir = previewPath
+          ? getParentDirPath(previewPath)
+          : getParentDirPath(node.path);
+
+        void enqueueCreateThumbsJobAction(targetDir);
+      } catch (e) {
+        console.error("Failed to enqueue thumb job", e);
+        setIsProcessing(false);
+        setRequested(false); // 失敗時は再試行可能にする
+      }
+    },
+    [node.path, onError, previewPath, requested]
+  );
 
   // 表示するソースの決定
   const displayPath = previewPath || node.path;
@@ -102,7 +109,7 @@ export function MediaThumbImage({
         className
       )}
       draggable={false}
-      onError={() => void handleError()} // 画像がなかったら発火
+      onError={handleError} // 画像がなかったら発火
       onLoad={onLoad}
       loading="lazy"
       fallback={
