@@ -7,24 +7,28 @@ import {
 import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { RestoreAlertDialog } from "@/components/ui/alert-dialogs/restore-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
+import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
+import { SortSelect } from "@/components/ui/selects/sort-select";
+import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import { useExplorerQuery } from "@/hooks/use-explorer-query";
 import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
+import { useFolderNavigation } from "@/hooks/use-folder-navigation";
+import { useMediaIndex } from "@/hooks/use-media-index";
+import { useQueryFilter } from "@/hooks/use-query-filter";
+import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSelectionControl } from "@/hooks/use-selection-control";
+import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
-import { MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { ActionsProvider } from "@/providers/actions-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
-import { useSearchContext } from "@/providers/search-provider";
-import { useTrashContext } from "@/providers/trash-provider";
-import { useViewModeContext } from "@/providers/view-mode-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -33,63 +37,23 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import { MoreVertical, RotateCcw, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowDownAz,
+  CalendarArrowDown,
+  MoreVertical,
+  RotateCcw,
+  Sparkle,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
-export function Trash() {
-  const {
-    listing,
-    openViewer,
-    closeViewer,
-    openFolder,
-    openNextFolder,
-    openPrevFolder,
-  } = useTrashContext();
+export function Trash({ listing }: { listing: MediaListing }) {
+  // ===== ビューモード =====
 
-  // 前のフォルダを開く
-  const handleOpenPrevFolder = (at: IndexLike = "last") => {
-    openPrevFolder(at);
-  };
-
-  // 次のフォルダを開く
-  const handleOpenNextFolder = (at: IndexLike = "first") => {
-    openNextFolder(at);
-  };
-
-  // ===== URL ステート =====
-
-  // URLファーストのステート管理
-  const { explorerQuery, setExplorerQuery } = useExplorerQuery();
-  const { view, q, at, modal } = explorerQuery; // URL
-  const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
-  const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
-
-  // 初期同期：URL → Context（1回だけ）
-  useEffect(() => {
-    if (view !== viewMode) setViewMode(view ?? "grid");
-    if (q !== query) setQuery(q ?? "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // UI操作：Context → URL
-  useEffect(() => {
-    const hasChanged =
-      query.trim() !== (q || "") || viewMode !== (view || "grid");
-
-    if (hasChanged) {
-      setExplorerQuery(
-        {
-          q: query.trim() === "" ? undefined : query,
-          view: viewMode === "grid" ? undefined : viewMode,
-        },
-        {
-          deleted: true,
-        }
-      );
-    }
-  }, [setExplorerQuery, query, viewMode, q, view]);
+  const { value: viewMode } = useViewMode();
 
   // ===== 訪問履歴 =====
 
@@ -114,19 +78,32 @@ export function Trash() {
 
   const allNodes = listing.nodes;
 
+  // クエリフィルター
+  const { value: query } = useQueryFilter();
+
   // フィルター結果
-  const { filtered: filteredNodes, mediaOnly } = useFilteredNodes({
+  const {
+    filtered: filteredNodes,
+    mediaOnly,
+    filteredCount,
+    totalCount,
+    isFiltered,
+  } = useFilteredNodes({
     allNodes,
     query,
   });
 
+  // 検索パラメータリセット用
+  const { hasSearchParams, resetSearchParams } = useSearchParamsControl();
+
   // ===== ビューア =====
 
-  const { initialIndex, getViewerIndex, isViewMode } = useViewerControl({
-    mediaOnly,
-    at,
-    modal,
-  });
+  const {
+    normalizedIndex: initialViewerIndex,
+    isOpen: isViewerMode,
+    open: openViewer,
+    close: closeViewer,
+  } = useViewerControl(mediaOnly);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
@@ -144,21 +121,38 @@ export function Trash() {
 
   // ===== ナビゲーション =====
 
+  const { navigate: openFolder } = useFolderNavigation();
+  const { getMediaIndex } = useMediaIndex(mediaOnly);
+
   // ファイル/フォルダオープン
   const handleOpen = (node: MediaNode) => {
     if (node.isDirectory) {
-      openFolder(node.path);
+      openFolder(node.path, { deleted: true });
       return;
     }
 
     if (isMedia(node.type)) {
-      const index = getViewerIndex(node.path);
+      const index = getMediaIndex(node.path);
       if (index == null) return;
       openViewer(index);
       return;
     }
 
     toast.warning("このファイル形式は対応していません");
+  };
+
+  // 前のフォルダを開く
+  const handleOpenPrevFolder = (at: IndexLike = "last") => {
+    if (listing.prev) {
+      openFolder(listing.prev, { at, deleted: true });
+    }
+  };
+
+  // 次のフォルダを開く
+  const handleOpenNextFolder = (at: IndexLike = "first") => {
+    if (listing.next) {
+      openFolder(listing.next, { at, deleted: true });
+    }
   };
 
   // ===== 選択機能 =====
@@ -185,7 +179,7 @@ export function Trash() {
   };
 
   // 復元実行
-  const performRestore = async () => {
+  const handleRestoreDialogConfirm = async () => {
     const paths = restoreTargets.map((n) => n.path);
     const result = await restoreNodesAction(paths);
 
@@ -220,7 +214,7 @@ export function Trash() {
   };
 
   // 削除実行
-  const performDelete = async () => {
+  const handleDeleteDialogConfirm = async () => {
     const paths = deleteTargets.map((n) => n.path);
     const result = await deleteNodesPermanentlyAction(paths);
 
@@ -252,9 +246,9 @@ export function Trash() {
 
   // 現在のスコープ
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
-    if (isViewMode) return "viewer";
+    if (isViewerMode) return "viewer";
     return "trash";
-  }, [isViewMode]);
+  }, [isViewerMode]);
 
   // デバッグ用
   useEffect(() => console.debug({ activeScope }), [activeScope]);
@@ -295,7 +289,7 @@ export function Trash() {
     "ctrl+k",
     (e) => {
       e.preventDefault();
-      focusSearch();
+      // focusSearch(); TODO
     },
     { scopes: "trash" }
   );
@@ -307,9 +301,6 @@ export function Trash() {
   });
 
   // ===== その他 =====
-
-  // スクロール対象のref
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
     <PagingProvider
@@ -323,9 +314,57 @@ export function Trash() {
         className={cn(
           "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
         )}
-        ref={scrollRef}
         tabIndex={-1}
       >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
+          {/* 操作メニュー */}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
+            {/* 並び替え */}
+            <SortSelect
+              options={[
+                {
+                  key: "name",
+                  direction: "asc",
+                  label: "名前順 (A-Z)",
+                  icon: ArrowDownAz,
+                },
+                {
+                  key: "rating",
+                  direction: "desc",
+                  label: "評価順",
+                  icon: Sparkle,
+                },
+                {
+                  key: "favoriteCount",
+                  direction: "desc",
+                  label: "人気順",
+                  icon: Sparkles,
+                },
+                {
+                  key: "mtime",
+                  direction: "desc",
+                  label: "更新順",
+                  icon: CalendarArrowDown,
+                },
+              ]}
+            />
+
+            {/* リセット */}
+            <ResetButton
+              onReset={resetSearchParams}
+              isVisible={hasSearchParams}
+            />
+          </div>
+
+          {/* 件数 */}
+          <FilterResultText
+            totalCount={totalCount}
+            filteredCount={filteredCount}
+            isFiltered={isFiltered}
+            className="ml-auto min-w-[120px] text-right"
+          />
+        </div>
+
         {/* グリッドビュー */}
         {viewMode === "grid" && (
           <div className="flex-1">
@@ -365,11 +404,11 @@ export function Trash() {
         )}
 
         {/* ビューワ */}
-        {isViewMode && (
+        {isViewerMode && (
           <ScrollLockProvider>
             <MediaViewer
               allNodes={mediaOnly}
-              initialIndex={initialIndex}
+              initialIndex={initialViewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
               onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
@@ -419,7 +458,7 @@ export function Trash() {
         {/* 削除警告ダイアログ */}
         <DeleteAlertDialog
           open={isDeleteMode}
-          onConfirm={performDelete}
+          onConfirm={handleDeleteDialogConfirm}
           onOpenChange={handleDeleteDialogOpenChange}
           count={deleteTargets.length}
           permanent
@@ -428,13 +467,17 @@ export function Trash() {
         {/* 復元警告ダイアログ */}
         <RestoreAlertDialog
           open={isRestoreMode}
-          onConfirm={performRestore}
+          onConfirm={handleRestoreDialogConfirm}
           onOpenChange={handleRestoreDialogOpenChange}
           count={restoreTargets.length}
         />
 
         {/* フォルダナビゲーション */}
-        <FolderNavigation prevHref={listing.prev} nextHref={listing.next} />
+        <FolderNavigation
+          prevPath={listing.prev}
+          nextPath={listing.next}
+          isDeleted
+        />
       </div>
     </PagingProvider>
   );

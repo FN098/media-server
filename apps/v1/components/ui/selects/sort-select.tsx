@@ -31,7 +31,10 @@ export function SortSelect({
   resetLabel = "リセットする",
   onChange,
 }: SortSelectProps) {
-  const { sort, direction, setSort, isPending } = useSort();
+  const {
+    value: { key: sort, direction },
+    apply,
+  } = useSort();
 
   // 現在の URL パラメータの組み合わせ
   const currentKeyDir = sort && direction ? `${sort}-${direction}` : null;
@@ -55,12 +58,12 @@ export function SortSelect({
       [newKey, newDir] = value.split("-");
     }
 
-    setSort(newKey, newDir);
+    apply({ key: newKey, direction: newDir });
     onChange?.(newKey, newDir);
   };
 
   return (
-    <div className={cn("w-full", isPending && "opacity-70 transition-opacity")}>
+    <div className={cn("w-full")}>
       <Select
         // selectValue が変わった時にコンポーネントを正しく再描画させる
         key={selectValue || "reset"}

@@ -7,7 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import z from "zod";
 
-export const explorerQuerySchema = z.object({
+const explorerQuerySchema = z.object({
   q: z.string().optional().nullable(),
 
   modal: z
@@ -24,14 +24,14 @@ export const explorerQuerySchema = z.object({
 
   sort: z.string().optional().nullable(),
 
-  direction: z.enum(["asc", "desc", "random"]).optional().nullable(),
+  direction: z.enum(["asc", "desc"]).optional().nullable(),
 
   page: z.coerce.number().optional().nullable(),
 });
 
-export type ExplorerQuery = z.infer<typeof explorerQuerySchema>;
+type ExplorerQuery = z.infer<typeof explorerQuerySchema>;
 
-export type ExplorerQueryOptions = {
+type ExplorerQueryOptions = {
   history?: "replace" | "push";
   path?: string;
   deleted?: boolean;
@@ -88,6 +88,7 @@ function resolveClientPath(options: ExplorerQueryOptions) {
 
   const encoded = encodePath(options.path);
 
+  // 削除済み
   if (options.deleted) return getClientTrashPath(encoded);
 
   return getClientExplorerPath(encoded);

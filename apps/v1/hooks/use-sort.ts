@@ -1,57 +1,72 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useTransition } from "react";
+import { useCallback, useMemo } from "react";
 
-interface UseSortOptions {
+interface SortOptions {
   sortKey?: string; // デフォルト: "sort"
   directionKey?: string; // デフォルト: "direction"
   pageKey?: string; // デフォルト: "page"
-  seedKey?: string; // デフォルト: "seed"
 }
 
-export function useSort(options?: UseSortOptions) {
+type SortValue = {
+  key: string | null;
+  direction: string | null;
+};
+
+export function useSort(options?: SortOptions) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
 
-  // キー名のマッピング（デフォルト値を設定）
+  // キー名とデフォルト値の設定
   const {
     sortKey = "sort",
     directionKey = "direction",
     pageKey = "page",
-    seedKey = "seed",
   } = options || {};
 
+  // 現在の値をURLから取得
   const sort = searchParams.get(sortKey);
   const direction = searchParams.get(directionKey);
 
-  const setSort = useCallback(
-    (key: string | null, dir: string | null) => {
+  // value: 現在の状態
+  const value = useMemo<SortValue>(
+    () => ({
+      key: sort,
+      direction,
+    }),
+    [direction, sort]
+  );
+
+  // apply: URLを更新して状態を変更
+  const apply = useCallback(
+    (next: SortValue) => {
       const params = new URLSearchParams(searchParams.toString());
 
-      // ソート変更時にページング/シャッフルをリセット
+      // ソート変更時にページリセット
       params.delete(pageKey);
-      params.delete(seedKey);
 
-      if (!key || !dir) {
+      if (!next.key || !next.direction) {
         params.delete(sortKey);
         params.delete(directionKey);
       } else {
-        params.set(sortKey, key);
-        params.set(directionKey, dir);
+        params.set(sortKey, next.key);
+        params.set(directionKey, next.direction);
       }
 
-      startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-      });
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [directionKey, pageKey, pathname, router, searchParams, seedKey, sortKey]
+    [directionKey, pageKey, pathname, router, searchParams, sortKey]
+  );
+
+  // reset: デフォルトの状態に戻す
+  const reset = useCallback(
+    () => apply({ key: null, direction: null }),
+    [apply]
   );
 
   return {
-    sort,
-    direction,
-    setSort,
-    isPending,
+    value,
+    apply,
+    reset,
   };
 }

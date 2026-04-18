@@ -10,7 +10,6 @@ import { isBlockedVirtualPath } from "@/lib/path/blacklist";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
-import { TrashProvider } from "@/providers/trash-provider";
 import { getFolderVisitedInfo } from "@/repositories/folder-repository";
 import { getMediaDbNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
@@ -98,12 +97,10 @@ export default async function TrashPage(props: TrashPageProps) {
   };
 
   return (
-    <TrashProvider listing={listing}>
-      <FavoritesProvider favorites={listing.nodes}>
-        <PathSelectionProvider>
-          <Trash />
-        </PathSelectionProvider>
-      </FavoritesProvider>
-    </TrashProvider>
+    <FavoritesProvider favorites={listing.nodes}>
+      <PathSelectionProvider>
+        <Trash listing={listing} />
+      </PathSelectionProvider>
+    </FavoritesProvider>
   );
 }

@@ -16,7 +16,6 @@ import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import { useViewerUIContext } from "@/providers/viewer-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import {
   DropdownMenu,
@@ -86,7 +85,6 @@ export function MediaViewer({
   onDelete,
   active = true,
 }: MediaViewerProps) {
-  const { isHeaderPinned, toggleIsHeaderPinned } = useViewerUIContext();
   const hasPrevFolder = !!onPrevFolder;
   const hasNextFolder = !!onNextFolder;
   const isMobile = useIsMobile();
@@ -98,6 +96,8 @@ export function MediaViewer({
   );
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isHeaderPinned, setIsHeaderPinned] = useState(false);
+  const toggleIsHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
   const {
     isVisible: isHeaderVisible,
     toggle: toggleHeaderVisibility,

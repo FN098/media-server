@@ -3,18 +3,18 @@ import { PATHS } from "@/lib/path/paths";
 import { getAbsoluteUrl } from "@/lib/utils/url";
 import path from "path";
 
-export function getAbsoluteApiMediaUrl(mediaPath: string) {
-  return getAbsoluteUrl(getApiMediaUrl(mediaPath));
+export function getAbsoluteApiMediaUrl(virtualPath: string) {
+  return getAbsoluteUrl(getApiMediaUrl(virtualPath));
 }
 
-export function getApiMediaUrl(mediaPath: string) {
-  return path.join(PATHS.api.media.file.root, mediaPath);
+export function getApiMediaUrl(virtualPath: string) {
+  return path.join(PATHS.api.media.file.root, virtualPath);
 }
 
-export function getApiThumbUrl(mediaPath: string) {
+export function getApiThumbUrl(virtualPath: string) {
   return path.join(
     PATHS.api.media.file.thumb.root,
-    mediaPath + APP_CONFIG.thumb.extension
+    virtualPath + APP_CONFIG.thumb.extension
   );
 }
 
@@ -22,38 +22,38 @@ export function getApiThumbEventsUrl() {
   return PATHS.api.thumb.events.root;
 }
 
-export function getServerMediaPath(mediaPath: string): string {
-  return path.join(PATHS.server.media.root, mediaPath);
+export function getServerMediaPath(virtualPath: string): string {
+  return path.join(PATHS.server.media.root, virtualPath);
 }
 
 export function getServerMediaThumbPath(
-  mediaPath: string,
+  virtualPath: string,
   isDirectory?: boolean
 ): string {
   return path.join(
     PATHS.server.media.thumb.root,
-    mediaPath + (isDirectory ? "" : APP_CONFIG.thumb.extension)
+    virtualPath + (isDirectory ? "" : APP_CONFIG.thumb.extension)
   );
 }
 
-export function getServerMediaTrashPath(mediaPath: string): string {
-  return path.join(PATHS.server.media.trash.root, mediaPath);
+export function getServerMediaTrashPath(virtualPath: string): string {
+  return path.join(PATHS.server.media.trash.root, virtualPath);
 }
 
-export function getServerMediaDbPath(mediaPath: string): string {
-  return path.join(PATHS.server.media.db.root, mediaPath);
+export function getServerMediaDbPath(virtualPath: string): string {
+  return path.join(PATHS.server.media.db.root, virtualPath);
 }
 
-export function getClientExplorerPath(mediaPath: string): string {
-  return path.join(PATHS.client.explorer.root, mediaPath);
+export function getClientExplorerPath(virtualPath: string): string {
+  return path.join(PATHS.client.explorer.root, virtualPath);
 }
 
-export function getClientTrashPath(mediaPath: string): string {
-  return path.join(PATHS.client.trash.root, mediaPath);
+export function getClientTrashPath(virtualPath: string): string {
+  return path.join(PATHS.client.trash.root, virtualPath);
 }
 
-export function getParentDirPath(filePath: string): string {
-  const dir = path.dirname(filePath);
+export function getParentDirPath(virtualPath: string): string {
+  const dir = path.dirname(virtualPath);
 
   // path.dirname はルート付近で "." を返すことがあるため、
   // アプリケーションの仕様に合わせて調整（空文字にする等）
@@ -63,9 +63,9 @@ export function getParentDirPath(filePath: string): string {
 /**
  * サムネイルの絶対パスから、DB上の mediaPath を復元する
  */
-export function getMediaPathFromThumbPath(fullThumbPath: string): string {
+export function getMediaPathFromThumbPath(realThumbPath: string): string {
   // 1. ルートディレクトリ部分を削除
-  let virtualPath = fullThumbPath.replace(PATHS.server.media.thumb.root, "");
+  let virtualPath = realThumbPath.replace(PATHS.server.media.thumb.root, "");
 
   // 2. 先頭のスラッシュを調整
   if (virtualPath.startsWith(path.sep)) {

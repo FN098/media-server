@@ -7,19 +7,20 @@ import {
 import { PATHS } from "@/lib/path/paths";
 import path from "path";
 
-type ResolverMedia = {
+type Media = {
   path: string;
   isDeleted?: boolean;
 };
 
-type ResolverOption = {
+type ResolveOption = {
   absolute?: boolean;
 };
 
-export function resolveMediaUrl(media: ResolverMedia, option?: ResolverOption) {
+export function resolveMediaUrl(media: Media, option?: ResolveOption) {
   const basePath = media.isDeleted
     ? path.join(PATHS.virtual.trash.root, media.path)
     : media.path;
+
   const encoded = encodePath(basePath);
 
   if (option?.absolute) {
@@ -29,10 +30,7 @@ export function resolveMediaUrl(media: ResolverMedia, option?: ResolverOption) {
   return getApiMediaUrl(encoded);
 }
 
-export function resolveMediaThumbUrl(
-  media: ResolverMedia,
-  option?: ResolverOption
-) {
+export function resolveMediaThumbUrl(media: Media, option?: ResolveOption) {
   // ファイルを削除してもサムネイルはそのまま残るので同じパスを参照
   const basePath = media.isDeleted ? media.path : media.path;
   const encoded = encodePath(basePath);

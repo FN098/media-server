@@ -7,9 +7,10 @@ import { RatingFilterMode, RatingOperator } from "@/lib/filter/types";
 import { formatNodes } from "@/lib/media/format";
 import { MediaType, SortDirection } from "@/lib/media/types";
 import { hashObject } from "@/lib/utils/hash";
-import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
+import { HistoryProvider } from "@/providers/history-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
+import { TagEditorProvider } from "@/providers/tag-editor-provider";
 import { Metadata } from "next";
 
 // 動的ページとしてレンダリング
@@ -62,12 +63,14 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const key = hashObject(searchParams);
 
   return (
-    <ExplorerProvider listing={listing}>
-      <FavoritesProvider key={key} favorites={favoriteNodes}>
-        <PathSelectionProvider>
-          <Favorites />
-        </PathSelectionProvider>
-      </FavoritesProvider>
-    </ExplorerProvider>
+    <TagEditorProvider>
+      <HistoryProvider>
+        <FavoritesProvider key={key} favorites={favoriteNodes}>
+          <PathSelectionProvider>
+            <Favorites listing={listing} />
+          </PathSelectionProvider>
+        </FavoritesProvider>
+      </HistoryProvider>
+    </TagEditorProvider>
   );
 }

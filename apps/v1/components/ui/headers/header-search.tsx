@@ -1,45 +1,37 @@
 "use client";
 
-import { Search } from "@/components/ui/inputs/search";
+import { SearchInput } from "@/components/ui/inputs/search-input";
 import { useMounted } from "@/hooks/use-mounted";
-import { useSearchContext } from "@/providers/search-provider";
+import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export function HeaderSearch() {
-  const { inputRef, query, setQuery } = useSearchContext();
-  const [input, setInput] = useState(query);
+  const { value, apply } = useQueryFilter();
+  const [input, setInput] = useState(value ?? "");
   const [focused, setFocused] = useState(false);
   const isMobile = useIsMobile();
   const mounted = useMounted();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const placeholder = isMobile ? "" : undefined;
   const collapsedWidth = isMobile ? 36 : 180;
   const expandedWidth = isMobile ? 180 : 320;
 
-  const debouncedSetQuery = useDebouncedCallback(
-    (v: string) => setQuery(v),
+  const debouncedApply = useDebouncedCallback(
+    (v: string | null) => apply(v),
     300
   );
 
-  // 外部 query → input 同期
-  useEffect(() => {
-    setInput(query);
-  }, [query]);
-
-  // input → query（debounce）
-  useEffect(() => {
-    debouncedSetQuery(input);
-    return () => {
-      debouncedSetQuery.cancel();
-    };
-  }, [debouncedSetQuery, input]);
+  const handleChange = (value: string) => {
+    setInput(value); // 入力は即時反映
+    debouncedApply(value); // URL同期はデバウンス
+  };
 
   const isMobileBlur = isMobile && !focused && input === "";
-
   const isExpanded = focused || input.length > 0;
 
   // マウント前のプレースホルダー
@@ -67,11 +59,11 @@ export function HeaderSearch() {
       className="relative shrink-0 w-full"
       style={{ maxWidth: isMobile ? "calc(100vw - 2rem)" : "none" }}
     >
-      <Search
+      <SearchInput
         placeholder={placeholder}
         inputRef={inputRef}
         value={input}
-        setValue={setInput}
+        onChange={handleChange}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         className={cn(

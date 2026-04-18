@@ -1,26 +1,20 @@
 import { Header } from "@/components/ui/headers/header";
 import { pageMetas } from "@/lib/meta";
-import { SearchProvider } from "@/providers/search-provider";
-import { ViewModeProvider } from "@/providers/view-mode-provider";
 
 const meta = pageMetas["dashboard"];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <ViewModeProvider>
-      <SearchProvider>
-        <div className="flex flex-col min-h-screen">
-          <Header
-            title={meta.title}
-            icon={meta.icon}
-            basePath={meta.url}
-            features={{ navigation: false, search: false, viewMode: false }}
-          />
-          <main className="flex-1 flex items-center justify-center">
-            {children}
-          </main>
-        </div>
-      </SearchProvider>
-    </ViewModeProvider>
+    <div className="flex flex-col min-h-screen">
+      <Header
+        title={meta.title}
+        icon={meta.icon}
+        basePath={meta.url}
+        features={{ navigation: false, search: false, viewMode: false }}
+      />
+      <main className="flex-1 flex items-center justify-center">
+        {children}
+      </main>
+    </div>
   );
 }

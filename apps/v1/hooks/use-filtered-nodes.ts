@@ -103,7 +103,7 @@ export function useFilteredNodes({
   activated = true,
 }: {
   allNodes: MediaNode[];
-  query?: string;
+  query?: string | null;
   tagFilterValue?: TagFilterValue;
   mediaTypeFilterValue?: MediaTypeFilterValue;
   ratingFilterValue?: RatingFilterValue;

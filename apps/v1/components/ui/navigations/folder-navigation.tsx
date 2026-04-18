@@ -1,15 +1,18 @@
-import { getClientExplorerPath } from "@/lib/path/helpers";
+import { resolveClientPath } from "@/lib/path/resolvers";
 import { Button } from "@/shadcn/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { basename } from "path";
 
 export function FolderNavigation({
-  prevHref,
-  nextHref,
+  prevPath,
+  nextPath,
+  isDeleted,
 }: {
-  prevHref?: string | null;
-  nextHref?: string | null;
+  prevPath?: string | null;
+  nextPath?: string | null;
+  isDeleted?: boolean;
 }) {
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
@@ -21,6 +24,20 @@ export function FolderNavigation({
   const withParams = (path: string) =>
     params.toString() ? `${path}?${params.toString()}` : path;
 
+  // 前のフォルダ
+  const prevHref = prevPath
+    ? withParams(resolveClientPath(prevPath, { isDeleted }))
+    : null;
+
+  const prevTitle = basename(prevPath ?? "");
+
+  // 次のフォルダ
+  const nextHref = nextPath
+    ? withParams(resolveClientPath(nextPath, { isDeleted }))
+    : null;
+
+  const nextTitle = basename(nextPath ?? "");
+
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
       {/* 前のフォルダ */}
@@ -31,13 +48,16 @@ export function FolderNavigation({
             className="group flex flex-col items-start gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
             asChild
           >
-            <Link href={withParams(encodeURI(getClientExplorerPath(prevHref)))}>
+            <Link href={prevHref}>
               <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                 <ArrowLeft className="mr-1 h-3 w-3" />
                 Previous
               </div>
-              <div className="text-base font-medium truncate w-full text-left">
-                {prevHref.split("/").filter(Boolean).pop()}
+              <div
+                className="text-base font-medium truncate w-full text-left"
+                title={prevTitle}
+              >
+                {prevTitle}
               </div>
             </Link>
           </Button>
@@ -52,13 +72,16 @@ export function FolderNavigation({
             className="group flex flex-col items-end gap-1 h-auto py-4 px-6 w-full sm:max-w-[280px] hover:bg-accent transition-all"
             asChild
           >
-            <Link href={withParams(encodeURI(getClientExplorerPath(nextHref)))}>
+            <Link href={nextHref}>
               <div className="flex items-center text-xs text-muted-foreground group-hover:text-primary">
                 Next
                 <ArrowRight className="ml-1 h-3 w-3" />
               </div>
-              <div className="text-base font-medium truncate w-full text-right">
-                {nextHref.split("/").filter(Boolean).pop()}
+              <div
+                className="text-base font-medium truncate w-full text-right"
+                title={nextTitle}
+              >
+                {nextTitle}
               </div>
             </Link>
           </Button>

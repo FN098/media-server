@@ -12,63 +12,36 @@ import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import { useExplorerQuery } from "@/hooks/use-explorer-query";
+import { useFolderNavigation } from "@/hooks/use-folder-navigation";
+import { useMediaIndex } from "@/hooks/use-media-index";
 import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useTagFilter } from "@/hooks/use-tag-filter";
+import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
-import { MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { ActionsProvider } from "@/providers/actions-provider";
-import { useExplorerContext } from "@/providers/explorer-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
-import { useSearchContext } from "@/providers/search-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
-import { useViewModeContext } from "@/providers/view-mode-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowDownAz, Sparkle, TagIcon } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
-export function Favorites() {
-  const { listing, openViewer, closeViewer, openFolder } = useExplorerContext();
+export function Favorites({ listing }: { listing: MediaListing }) {
+  // ===== ビューモード =====
 
-  // ===== URL ステート =====
-
-  // URLファーストのステート管理
-  const { explorerQuery, setExplorerQuery } = useExplorerQuery();
-  const { view, q, at, modal } = explorerQuery; // URL
-  const { focus: focusSearch, query, setQuery } = useSearchContext(); // ヘッダーUI
-  const { viewMode, setViewMode } = useViewModeContext(); // ヘッダーUI
-
-  // 初期同期：URL → Context（1回だけ）
-  useEffect(() => {
-    if (view !== viewMode) setViewMode(view ?? "grid");
-    if (q !== query) setQuery(q ?? "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // UI操作：Context → URL
-  useEffect(() => {
-    const hasChanged =
-      query.trim() !== (q || "") || viewMode !== (view || "grid");
-
-    if (hasChanged) {
-      setExplorerQuery({
-        q: query.trim() === "" ? undefined : query,
-        view: viewMode === "grid" ? undefined : viewMode,
-      });
-    }
-  }, [setExplorerQuery, query, viewMode, q, view]);
+  const { value: viewMode } = useViewMode();
 
   // ===== 訪問履歴 =====
 
@@ -125,11 +98,12 @@ export function Favorites() {
 
   // ===== ビューア =====
 
-  const { initialIndex, getViewerIndex, isViewMode } = useViewerControl({
-    mediaOnly,
-    at,
-    modal,
-  });
+  const {
+    normalizedIndex: initialViewerIndex,
+    isOpen: isViewerMode,
+    open: openViewer,
+    close: closeViewer,
+  } = useViewerControl(mediaOnly);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
@@ -147,6 +121,9 @@ export function Favorites() {
 
   // ===== ナビゲーション =====
 
+  const { navigate: openFolder } = useFolderNavigation();
+  const { getMediaIndex } = useMediaIndex(mediaOnly);
+
   // ファイル/フォルダオープン
   const handleOpen = (node: MediaNode) => {
     if (node.isDirectory) {
@@ -155,7 +132,7 @@ export function Favorites() {
     }
 
     if (isMedia(node.type)) {
-      const index = getViewerIndex(node.path);
+      const index = getMediaIndex(node.path);
       if (index == null) return;
       openViewer(index);
       return;
@@ -167,12 +144,12 @@ export function Favorites() {
   // 新しいタブで開く
   const handleOpenInNewTab = (node: MediaNode) => {
     if (node.isDirectory) {
-      openFolder(node.path, undefined, { newTab: true });
+      openFolder(node.path, { newTab: true });
       return;
     }
 
     if (isMedia(node.type)) {
-      const index = getViewerIndex(node.path);
+      const index = getMediaIndex(node.path);
       if (index == null) return;
       openViewer(index, { newTab: true });
       return;
@@ -181,7 +158,7 @@ export function Favorites() {
     toast.warning("このファイル形式は対応していません");
   };
 
-  // フォルダを開く
+  // 親フォルダを開く
   const handleOpenParentFolder = (node: MediaNode) => {
     const parentDir = getParentDirPath(node.path);
     openFolder(parentDir);
@@ -223,9 +200,9 @@ export function Favorites() {
 
   // タグエディタの起動モード
   const tagEditMode = useMemo(() => {
-    if (isViewMode) return "single";
+    if (isViewerMode) return "single";
     return "default";
-  }, [isViewMode]);
+  }, [isViewerMode]);
 
   // タグエディタを表示
   const handleOpenTagEditor = () => {
@@ -256,9 +233,9 @@ export function Favorites() {
   // 現在のスコープ
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
     if (isTagEditMode) return "tag-editor";
-    else if (isViewMode) return "viewer";
+    else if (isViewerMode) return "viewer";
     else return "favorites";
-  }, [isTagEditMode, isViewMode]);
+  }, [isTagEditMode, isViewerMode]);
 
   // デバッグ用
   useEffect(() => console.debug({ activeScope }), [activeScope]);
@@ -298,15 +275,12 @@ export function Favorites() {
     "ctrl+k",
     (e) => {
       e.preventDefault();
-      focusSearch();
+      // focusSearch(); TODO
     },
     { scopes: "favorites" }
   );
 
   // ===== その他 =====
-
-  // スクロール対象のref
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   // モバイル判定
   const isMobile = useIsMobile();
@@ -323,10 +297,10 @@ export function Favorites() {
         className={cn(
           "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
         )}
-        ref={scrollRef}
         tabIndex={-1}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
+          {/* 操作メニュー */}
           <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
             {/* 並び替え */}
             <SortSelect
@@ -387,7 +361,7 @@ export function Favorites() {
         </div>
 
         {/* グリッドビュー */}
-        {viewMode === "grid" && !isViewMode && (
+        {viewMode === "grid" && !isViewerMode && (
           <div className="flex-1">
             <ActionsProvider
               actions={{
@@ -413,7 +387,7 @@ export function Favorites() {
         )}
 
         {/* リストビュー */}
-        {viewMode === "list" && !isViewMode && (
+        {viewMode === "list" && !isViewerMode && (
           <div className="flex-1">
             <ActionsProvider
               actions={{
@@ -439,14 +413,14 @@ export function Favorites() {
         )}
 
         {/* ビューワ */}
-        {isViewMode && (
+        {isViewerMode && (
           <ScrollLockProvider>
             <MediaViewer
               allNodes={mediaOnly}
-              initialIndex={initialIndex}
+              initialIndex={initialViewerIndex}
               onIndexChange={handleViewerIndexChange}
               onClose={closeViewer}
-              onOpenFolder={openFolder}
+              onOpenFolder={(path, at) => openFolder(path, { at })}
               onEditTags={handleToggleTagEditor}
             />
           </ScrollLockProvider>

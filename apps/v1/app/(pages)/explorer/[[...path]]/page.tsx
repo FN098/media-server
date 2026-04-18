@@ -7,7 +7,6 @@ import { mergeFsWithDb } from "@/lib/media/merge";
 import { sortNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { MediaNode, SortDirection, SortKeyOf } from "@/lib/media/types";
-import { ExplorerProvider } from "@/providers/explorer-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import {
@@ -103,12 +102,10 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   };
 
   return (
-    <ExplorerProvider listing={listing}>
-      <FavoritesProvider favorites={listing.nodes}>
-        <PathSelectionProvider>
-          <Explorer />
-        </PathSelectionProvider>
-      </FavoritesProvider>
-    </ExplorerProvider>
+    <FavoritesProvider favorites={listing.nodes}>
+      <PathSelectionProvider>
+        <Explorer listing={listing} />
+      </PathSelectionProvider>
+    </FavoritesProvider>
   );
 }

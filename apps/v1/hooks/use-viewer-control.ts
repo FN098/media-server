@@ -1,55 +1,81 @@
 "use client";
 
-import { MediaNode, MediaPathToIndexMap } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
-import { useCallback, useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 
-const normalizeIndex = (at: IndexLike, total: number) => {
+export interface UseViewerControlOptions {
+  atKey?: string; // デフォルト: "at"
+  modalKey?: string; // デフォルト: "modal"
+}
+
+type ViewerOpenOptions = {
+  newTab?: boolean;
+};
+
+function normalizeIndex(at: IndexLike, total: number) {
   if (at === "first") return 0;
   if (at === "last") return total - 1;
 
+  // 数字かもしれない場合
   const index = Number(at);
   if (Number.isNaN(index)) return 0;
 
   return index;
-};
+}
 
-export function useViewerControl({
-  mediaOnly,
-  at,
-  modal,
-}: {
-  mediaOnly: MediaNode[];
-  at?: IndexLike | null;
-  modal?: boolean | null;
-}) {
-  // ビューア用インデックスを計算するためのマップ
-  const indexMap: MediaPathToIndexMap = useMemo(
-    () => new Map(mediaOnly.map((n, index) => [n.path, index])),
-    [mediaOnly]
-  );
+export function useViewerControl(
+  nodes: MediaNode[],
+  options?: UseViewerControlOptions
+) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  // ビューア用インデックスを取得
-  const getViewerIndex = useCallback(
-    (path: string) => {
-      if (indexMap.has(path)) return indexMap.get(path)!;
-      return null;
+  // キー名とデフォルト値の設定
+  const { atKey = "at", modalKey = "modal" } = options || {};
+
+  // 現在の値をURLから取得
+  const at = searchParams.get(atKey) as IndexLike;
+  const modal = searchParams.get(modalKey);
+
+  // number に正規化されたインデックス
+  const normalizedIndex = normalizeIndex(at, nodes.length);
+
+  // ビューアを起動
+  const open = useCallback(
+    (at: IndexLike, options?: ViewerOpenOptions) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      params.set(modalKey, "true");
+      params.set(atKey, String(at));
+
+      if (options?.newTab) {
+        window.open(`${pathname}?${params.toString()}`, "_blank", "noreferrer");
+      } else {
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      }
     },
-    [indexMap]
+    [atKey, modalKey, pathname, router, searchParams]
   );
 
-  // 初期インデックス
-  const initialIndex = useMemo(
-    () => (at != null ? normalizeIndex(at, mediaOnly.length) : 0),
-    [at, mediaOnly.length]
-  );
+  // ビューアを閉じる
+  const close = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
 
-  // ビューア起動モード
-  const isViewMode = modal && initialIndex != null && !!mediaOnly[initialIndex];
+    params.delete(modalKey);
+    params.delete(atKey);
+
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [atKey, modalKey, pathname, router, searchParams]);
 
   return {
-    initialIndex,
-    getViewerIndex,
-    isViewMode,
+    at,
+    modal,
+    normalizedIndex,
+    isOpen: modal,
+    open,
+    close,
   };
 }

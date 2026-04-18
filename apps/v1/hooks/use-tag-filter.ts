@@ -45,32 +45,40 @@ function buildParams(
 // --- hook ---
 
 export function useTagFilter(options?: TagFilterOptions) {
-  const { tagsKey = "tagIds", modeKey = "tagFilterMode" } = options ?? {};
-
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // キー名とデフォルト値の設定
+  const { tagsKey = "tagIds", modeKey = "tagFilterMode" } = options ?? {};
+
+  // 現在の値をURLから取得
   const tagIds = useMemo(
     () => parseTagIds(searchParams.get(tagsKey)),
     [searchParams, tagsKey]
   );
-
-  const { tags } = useTags({
-    strategy: "ids-only",
-    ids: tagIds,
-  });
 
   const mode = useMemo(
     () => parseMode(searchParams.get(modeKey)),
     [modeKey, searchParams]
   );
 
-  const value = {
-    mode,
-    tags,
-  };
+  // タグデータの本体をロード
+  const { tags } = useTags({
+    strategy: "ids-only",
+    ids: tagIds,
+  });
 
+  // value: 現在の状態
+  const value = useMemo<TagFilterValue>(
+    () => ({
+      mode,
+      tags,
+    }),
+    [mode, tags]
+  );
+
+  // apply: URLを更新して状態を変更
   const apply = useCallback(
     (next: TagFilterValue) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -80,6 +88,7 @@ export function useTagFilter(options?: TagFilterOptions) {
     [modeKey, pathname, router, searchParams, tagsKey]
   );
 
+  // reset: デフォルトの状態に戻す
   const reset = useCallback(() => apply({ mode: "AND", tags: [] }), [apply]);
 
   return {
