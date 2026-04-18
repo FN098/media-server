@@ -1,6 +1,6 @@
 "use client";
 
-import { MediaNode, MediaPathToNodeMap } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useMemo } from "react";
 
@@ -22,7 +22,7 @@ export function useSelectionControl({
   } = usePathSelectionContext();
 
   // O(1) で path => node を検索するための Map
-  const pathToNodeMap: MediaPathToNodeMap = useMemo(() => {
+  const pathToNodeMap: Map<string, MediaNode> = useMemo(() => {
     return new Map(allNodes.map((node) => [node.path, node]));
   }, [allNodes]);
 

@@ -1,11 +1,11 @@
 "use client";
 
-import { MediaNode, MediaPathToIndexMap } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { useCallback, useMemo } from "react";
 
 export function useMediaIndex(nodes: MediaNode[]) {
   // path -> index
-  const indexMap: MediaPathToIndexMap = useMemo(
+  const indexMap: Map<string, number> = useMemo(
     () => new Map(nodes.map((n, index) => [n.path, index])),
     [nodes]
   );

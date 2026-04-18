@@ -89,9 +89,6 @@ export type FolderMeta = {
   title: string | null;
 };
 
-export type MediaPathToIndexMap = Map<string, number>;
-export type MediaPathToNodeMap = Map<string, MediaNode>;
-
 export type MediaNodeFilter = (node: MediaNode) => boolean;
 
 export interface MediaFsContext {
