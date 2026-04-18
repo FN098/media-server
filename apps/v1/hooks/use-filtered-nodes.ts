@@ -80,14 +80,12 @@ function createMediaTypeFilter(value: MediaTypeFilterValue): MediaNodeFilter {
 }
 
 function createFavoriteFilter(mode: FavoriteFilterMode): MediaNodeFilter {
-  const isFavorite = (rating: number | null) => rating != null && rating > 0;
-
   return (node) => {
     switch (mode) {
       case "only_favorites":
-        return isFavorite(node.rating);
+        return !!node.favoritedAt;
       case "exclude_favorites":
-        return !isFavorite(node.rating);
+        return !node.favoritedAt;
       case "all":
       default:
         return true;

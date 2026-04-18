@@ -171,6 +171,7 @@ export function Explorer() {
     mediaTypeFilterValue,
     ratingFilterValue,
     tagFilterValue,
+    favoriteFilterMode,
   });
 
   // タグをフィルターに追加
