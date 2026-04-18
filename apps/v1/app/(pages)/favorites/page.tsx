@@ -23,7 +23,6 @@ export const metadata: Metadata = {
 interface FavoritePageProps {
   // URLクエリパラメータ: ?sort=name&direction=asc
   searchParams: Promise<{
-    page?: number;
     sort?: FavoriteSortKey;
     direction?: SortDirection;
     shuffle?: boolean;
@@ -39,14 +38,35 @@ interface FavoritePageProps {
 
 export default async function FavoritePage(props: FavoritePageProps) {
   const searchParams = await props.searchParams;
+  const {
+    sort,
+    direction,
+    shuffle,
+    seed,
+    mediaType,
+    q,
+    ratingMode,
+    ratingOp,
+    ratingVal,
+    tagIds,
+  } = searchParams;
+
   const user = await resolveCurrentUserOrThrow();
 
   // 検索
   const { nodes: searched, total } = await searchFavoriteMediaNodes({
-    ...searchParams,
     userId: user.id,
     limit: APP_CONFIG.favorites.maxPageSize,
-    query: searchParams.q,
+    sortKey: sort,
+    sortDirection: direction,
+    shuffle,
+    seed,
+    mediaType,
+    query: q,
+    ratingMode,
+    ratingOp,
+    ratingVal,
+    tagIds,
   });
 
   // フォーマット
