@@ -29,6 +29,7 @@ import { ActionsProvider } from "@/providers/actions-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
+import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -51,6 +52,10 @@ import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function Trash({ listing }: { listing: MediaListing }) {
+  // ===== 検索 =====
+
+  const { trigger: focusSearch } = useSearchFocusContext();
+
   // ===== ビューモード =====
 
   const { value: viewMode } = useViewMode();
@@ -289,7 +294,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     "ctrl+k",
     (e) => {
       e.preventDefault();
-      // focusSearch(); TODO
+      focusSearch();
     },
     { scopes: "trash" }
   );

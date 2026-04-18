@@ -3,10 +3,11 @@
 import { SearchInput } from "@/components/ui/inputs/search-input";
 import { useMounted } from "@/hooks/use-mounted";
 import { useQueryFilter } from "@/hooks/use-query-filter";
+import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export function HeaderSearch() {
@@ -16,6 +17,12 @@ export function HeaderSearch() {
   const isMobile = useIsMobile();
   const mounted = useMounted();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { register } = useSearchFocusContext();
+
+  useEffect(() => {
+    // 他のコンポーネントから検索バーにフォーカスできるようにする
+    register(() => inputRef.current?.focus());
+  }, [register]);
 
   const placeholder = isMobile ? "" : undefined;
   const collapsedWidth = isMobile ? 36 : 180;
