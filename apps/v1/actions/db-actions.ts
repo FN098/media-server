@@ -197,17 +197,17 @@ export async function deleteBackupAction(file: DbBackupFile) {
 // バックアップの世代管理
 export async function cleanupOldBackupsAction(keepCount: number = 10) {
   try {
-    if (keepCount <= MIN_KEEP_COUNT) {
+    if (keepCount < MIN_KEEP_COUNT) {
       return {
         success: false,
-        error: "保持する世代数が少なすぎます！",
+        error: `保持する世代数が少なすぎます！ ${MIN_KEEP_COUNT} 以上にしてください。`,
       };
     }
 
-    if (keepCount >= MAX_KEEP_COUNT) {
+    if (keepCount > MAX_KEEP_COUNT) {
       return {
         success: false,
-        error: "保持する世代数が多すぎます！",
+        error: `保持する世代数が多すぎます！ ${MAX_KEEP_COUNT} 以下にしてください。`,
       };
     }
 

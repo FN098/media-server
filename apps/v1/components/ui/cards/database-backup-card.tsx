@@ -6,6 +6,7 @@ import {
   getBackupListAction,
   restoreBackupAction,
 } from "@/actions/db-actions";
+import { MAX_KEEP_COUNT, MIN_KEEP_COUNT } from "@/lib/db/const";
 import { DbBackupFile, DbUploadResult } from "@/lib/db/types";
 import {
   AlertDialog,
@@ -48,7 +49,7 @@ import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type DbBackupSelectItem = {
-  key: string;
+  key: string; // Select 用のキー。自動保存は「saved:」、アップロードは「upload:」がプレフィックスにつく。例: saved:backup_20200101000000.sql
   value: DbBackupFile;
 };
 
@@ -109,7 +110,6 @@ export function DatabaseBackupCard() {
   };
 
   const handleBackup = () => {
-    setShowCleanupConfirm(false);
     startCreating(async () => {
       const res = await createBackupAction();
       if (res.success) {
@@ -122,6 +122,8 @@ export function DatabaseBackupCard() {
             toast.info(
               `古いバックアップを ${cleanRes.deletedCount} 件削除しました`
             );
+          } else if (!cleanRes.success) {
+            toast.error(cleanRes.error);
           }
         }
 
@@ -195,75 +197,36 @@ export function DatabaseBackupCard() {
     });
   };
 
-  // 削除対象の件数を計算する
-  const calculateDeleteCount = () => {
-    if (!autoCleanup) return 0;
-    // 現在のリストが keepCount 以上なら、(現在の件数 + 新規作成分(1) - 保持数) が削除対象
-    const count = backupFiles.length + 1 - keepCount;
-    return count > 0 ? count : 0;
-  };
+  const initiateBackup = () => {
+    if (!autoCleanup) {
+      handleBackup();
+      return;
+    }
 
-  // バックアップボタンが押された時の入り口
-  const initiateBackup = async () => {
-    // リストが空の場合は一度取得（判定精度のため）
-    if (backupFiles.length === 0) {
+    // 最新のリストを取得して件数を確認
+    // (表示中の backupFiles を使わず、常に最新状態を取ることで判定ミスを防ぐ)
+    startListing(async () => {
       const list = await getBackupListAction();
       const mappedList = list.map((v) => ({
         key: `saved:${v.name}`,
         value: v,
       }));
       setBackupFiles(mappedList);
-      // 取得後のリストで判定
-      const deleteCount = mappedList.length + 1 - keepCount;
-      if (autoCleanup && deleteCount > 0) {
-        setPendingDeleteCount(deleteCount);
-        setShowCleanupConfirm(true);
-        return;
-      }
-    } else {
-      const deleteCount = calculateDeleteCount();
-      if (autoCleanup && deleteCount > 0) {
-        setPendingDeleteCount(deleteCount);
-        setShowCleanupConfirm(true);
-        return;
-      }
-    }
 
-    // 削除対象がなければそのまま実行
-    handleBackup();
+      // 今から作る1件を加えた合計が keepCount を超えるか計算
+      const deleteCount = mappedList.length + 1 - keepCount;
+
+      if (deleteCount > 0) {
+        setPendingDeleteCount(deleteCount);
+        setShowCleanupConfirm(true);
+      } else {
+        handleBackup();
+      }
+    });
   };
 
   return (
     <Card>
-      {/* TODO: AlertDialog を一か所に集める。トリガーとダイアログを分離 */}
-      <AlertDialog
-        open={showCleanupConfirm}
-        onOpenChange={setShowCleanupConfirm}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>バックアップの作成と整理</AlertDialogTitle>
-            <AlertDialogDescription>
-              新しいバックアップを作成すると、保持設定（{keepCount}
-              件）を超えるため、
-              <strong className="text-destructive mx-1">
-                {pendingDeleteCount} 件
-              </strong>
-              の古いバックアップが自動的に削除されます。
-              <br />
-              <br />
-              続行してもよろしいですか？
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>キャンセル</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBackup}>
-              削除を承諾して作成
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="w-5 h-5 text-primary" />
@@ -273,10 +236,11 @@ export function DatabaseBackupCard() {
           MySQLデータベースのバックアップ作成と復元を行います
         </CardDescription>
       </CardHeader>
+
       <CardContent className="space-y-4">
         {/* 新規バックアップ作成ボタン */}
         <Button
-          onClick={() => void initiateBackup()}
+          onClick={initiateBackup}
           disabled={isCreating}
           className="w-full"
           variant="outline"
@@ -288,6 +252,40 @@ export function DatabaseBackupCard() {
           )}
           新規バックアップ作成
         </Button>
+
+        {/* バックアップ確認ダイアログ（必要に応じて表示） */}
+        <AlertDialog
+          open={showCleanupConfirm}
+          onOpenChange={setShowCleanupConfirm}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>バックアップの作成と整理</AlertDialogTitle>
+              <AlertDialogDescription>
+                新しいバックアップを作成すると、保持設定（{keepCount}
+                件）を超えるため、
+                <strong className="text-destructive mx-1">
+                  {pendingDeleteCount} 件
+                </strong>
+                の古いバックアップが自動的に削除されます。
+                <br />
+                <br />
+                続行してもよろしいですか？
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>キャンセル</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setShowCleanupConfirm(false);
+                  handleBackup();
+                }}
+              >
+                削除を承諾して作成
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* バックアップ設定セクション */}
         <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
@@ -306,8 +304,8 @@ export function DatabaseBackupCard() {
               </label>
               <Input
                 type="number"
-                min={1}
-                max={50}
+                min={MIN_KEEP_COUNT}
+                max={MAX_KEEP_COUNT}
                 value={keepCount}
                 onChange={(e) => setKeepCount(Number(e.target.value))}
                 className="h-8 w-20"
