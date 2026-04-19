@@ -11,6 +11,7 @@ import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import { usePinned } from "@/hooks/use-pinned";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
@@ -96,8 +97,7 @@ export function MediaViewer({
   );
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isHeaderPinned, setIsHeaderPinned] = useState(false);
-  const toggleIsHeaderPinned = () => setIsHeaderPinned((prev) => !prev);
+  const { value: isHeaderPinned, toggle: toggleIsHeaderPinned } = usePinned();
   const {
     isVisible: isHeaderVisible,
     toggle: toggleHeaderVisibility,

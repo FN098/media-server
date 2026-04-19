@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 type Options = {
-  modalKey?: string; // デフォルト: "modal"
+  pinnedKey?: string; // デフォルト: "pinned"
 };
 
 export function usePinned(options?: Options) {
@@ -13,13 +13,13 @@ export function usePinned(options?: Options) {
   const searchParams = useSearchParams();
 
   // キー名とデフォルト値の設定
-  const { modalKey = "modal" } = options || {};
+  const { pinnedKey = "pinned" } = options || {};
 
   // 現在の値をURLから取得
-  const modal = searchParams.get(modalKey);
+  const pinned = searchParams.get(pinnedKey);
 
   // value: 現在の状態
-  const value = useMemo(() => modal, [modal]);
+  const value = useMemo(() => pinned === "true", [pinned]);
 
   // apply: URLを更新して状態を変更
   const apply = useCallback(
@@ -27,22 +27,25 @@ export function usePinned(options?: Options) {
       const params = new URLSearchParams(searchParams.toString());
 
       if (next === false) {
-        params.delete(modalKey);
+        params.delete(pinnedKey);
       } else {
-        params.set(modalKey, "true");
+        params.set(pinnedKey, "true");
       }
 
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [modalKey, pathname, router, searchParams]
+    [pinnedKey, pathname, router, searchParams]
   );
 
   // reset: デフォルトの状態に戻す
   const reset = useCallback(() => apply(false), [apply]);
 
+  const toggle = useCallback(() => apply(!value), [apply, value]);
+
   return {
     value,
     apply,
     reset,
+    toggle,
   };
 }
