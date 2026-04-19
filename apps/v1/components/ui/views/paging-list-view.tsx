@@ -111,7 +111,7 @@ export function PagingListView({
         `media-item-${initialScrollTargetIndex}`
       );
       if (element) {
-        element.scrollIntoView({ behavior: "instant", block: "center" });
+        element.scrollIntoView({ behavior: "instant", block: "nearest" });
 
         // フラグを立てて、二度と実行されないようにする
         hasRestored.current = true;
