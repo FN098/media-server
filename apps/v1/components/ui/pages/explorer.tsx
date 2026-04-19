@@ -633,13 +633,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
             {/* お気に入りフィルターボタン */}
             <FavoriteFilterButton
-              mode={favoriteFilterMode}
+              value={favoriteFilterMode}
               onChange={applyFavoriteFilterMode}
             />
 
             {/* リセット */}
             <ResetButton
-              onReset={clearSearchParams}
+              onClick={clearSearchParams}
               isVisible={hasSearchParams}
             />
           </div>

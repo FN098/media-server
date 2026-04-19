@@ -363,7 +363,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
             {/* リセットボタン */}
             <ResetButton
-              onReset={clearSearchParams}
+              onClick={clearSearchParams}
               isVisible={hasSearchParams}
             />
           </div>

@@ -3,11 +3,11 @@ import { cn } from "@/shadcn/lib/utils";
 import { RotateCcw } from "lucide-react";
 
 interface ResetButtonProps {
-  onReset: () => void;
+  onClick: () => void;
   isVisible: boolean;
 }
 
-export const ResetButton = ({ onReset, isVisible }: ResetButtonProps) => {
+export const ResetButton = ({ onClick, isVisible }: ResetButtonProps) => {
   return (
     <div
       className={cn(
@@ -18,7 +18,7 @@ export const ResetButton = ({ onReset, isVisible }: ResetButtonProps) => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={onReset}
+        onClick={onClick}
         className="h-7 px-2 text-[11px] font-bold tracking-tighter text-muted-foreground hover:text-destructive hover:bg-destructive/5 gap-1 rounded-md"
       >
         <RotateCcw className="h-3 w-3" />

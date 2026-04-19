@@ -372,7 +372,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
             {/* リセット */}
             <ResetButton
-              onReset={clearSearchParams}
+              onClick={clearSearchParams}
               isVisible={hasSearchParams}
             />
           </div>

@@ -5,12 +5,12 @@ import { LayoutGrid, Star, StarOff } from "lucide-react";
 type FavoriteFilterMode = "all" | "only_favorites" | "exclude_favorites";
 
 interface FavoriteFilterButtonProps {
-  mode: FavoriteFilterMode;
-  onChange: (nextMode: FavoriteFilterMode) => void;
+  value: FavoriteFilterMode;
+  onChange: (value: FavoriteFilterMode) => void;
 }
 
 export const FavoriteFilterButton = ({
-  mode,
+  value,
   onChange,
 }: FavoriteFilterButtonProps) => {
   // ループのロジック
@@ -20,7 +20,7 @@ export const FavoriteFilterButton = ({
       "only_favorites",
       "exclude_favorites",
     ];
-    const currentIndex = modes.indexOf(mode);
+    const currentIndex = modes.indexOf(value);
     const nextIndex = (currentIndex + 1) % modes.length;
     onChange(modes[nextIndex]);
   };
@@ -44,7 +44,7 @@ export const FavoriteFilterButton = ({
     },
   };
 
-  const current = config[mode];
+  const current = config[value];
 
   return (
     <Button
