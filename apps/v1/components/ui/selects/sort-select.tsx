@@ -15,7 +15,7 @@ type SortValue = {
   direction: "asc" | "desc"; // 並び替えの向き
 };
 
-type SortOption = {
+type SelectOption = {
   value: SortValue; // 選択項目の値
   label: string; // 選択項目の表示名
   icon?: LucideIcon; // 選択項目のアイコン
@@ -24,7 +24,7 @@ type SortOption = {
 interface SortSelectProps {
   value: SortValue | null;
   onChange: (value: SortValue | null) => void;
-  options: SortOption[];
+  options: SelectOption[];
 }
 
 function combine(value: SortValue): string {
