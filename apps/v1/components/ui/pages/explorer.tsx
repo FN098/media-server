@@ -12,7 +12,6 @@ import {
 } from "@/actions/thumb-actions";
 import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteFilterButton } from "@/components/ui/buttons/favorite-filter-button";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
@@ -22,6 +21,7 @@ import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
+import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
@@ -631,8 +631,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               新規フォルダ
             </Button>
 
-            {/* お気に入りフィルターボタン */}
-            <FavoriteFilterButton
+            {/* お気に入りフィルター */}
+            <FavoriteFilterSelect
               value={favoriteFilterMode}
               onChange={applyFavoriteFilterMode}
             />
