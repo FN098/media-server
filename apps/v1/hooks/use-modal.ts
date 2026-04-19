@@ -3,11 +3,11 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-export interface UseModalOptions {
+export interface ModalOptions {
   modalKey?: string; // デフォルト: "modal"
 }
 
-export function useViewerControl(options?: UseModalOptions) {
+export function useModal(options?: ModalOptions) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
