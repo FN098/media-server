@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shadcn/components/ui/select";
-import { Filter, RotateCcw, Star, StarOff } from "lucide-react";
+import { RotateCcw, Star, StarOff } from "lucide-react";
 
 // 'all' は内部的なリセット状態として扱う
 type FavoriteFilterMode = "all" | "only_favorites" | "exclude_favorites";
@@ -63,7 +63,7 @@ export const FavoriteFilterSelect = ({
               <SelectValue
                 placeholder={
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Filter className="h-4 w-4 shrink-0" />
+                    <Star className="h-4 w-4 shrink-0" />
                     <span>お気に入りで絞り込む</span>
                   </div>
                 }

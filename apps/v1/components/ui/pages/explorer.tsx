@@ -611,6 +611,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               onChange={applyMediaTypeFilterValue}
             />
 
+            {/* お気に入りフィルター */}
+            <FavoriteFilterSelect
+              value={favoriteFilterMode}
+              onChange={applyFavoriteFilterMode}
+            />
+
             {/* 評価フィルター */}
             <RatingFilterDialog
               value={ratingFilterValue}
@@ -630,12 +636,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               <FolderPlus className="h-4 w-4" />
               新規フォルダ
             </Button>
-
-            {/* お気に入りフィルター */}
-            <FavoriteFilterSelect
-              value={favoriteFilterMode}
-              onChange={applyFavoriteFilterMode}
-            />
 
             {/* リセット */}
             <ResetButton
