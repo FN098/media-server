@@ -217,7 +217,6 @@ export function ActionDropdownMenu({
               e.stopPropagation();
               void updateThumb(node);
             }}
-            disabled={node.previewPath === null}
           >
             <ImageMinus className="mr-2 h-4 w-4" /> サムネイルを更新
           </DropdownMenuItem>
