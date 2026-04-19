@@ -85,44 +85,46 @@ function buildWhere({
     });
   }
 
-  if (tagFilterMode === "EMPTY") {
-    // タグが一つも設定されていない
-    mediaConditions.push({
-      mediaTags: { none: {} },
-    });
-  } else if (tagIds) {
-    const ids = tagIds.split(",").filter(Boolean);
-    if (ids.length > 0) {
-      switch (tagFilterMode) {
-        case "OR":
-          // 指定したタグのうち、いずれか1つでも含まれている
-          mediaConditions.push({
-            mediaTags: {
-              some: { tagId: { in: ids } },
-            },
-          });
-          break;
-
-        case "NOT":
-          // 指定したタグが1つも含まれていない
-          mediaConditions.push({
-            mediaTags: {
-              none: { tagId: { in: ids } },
-            },
-          });
-          break;
-
-        case "AND":
-        default:
-          // 指定したタグがすべて含まれている
-          ids.forEach((id) => {
+  if (tagFilterMode) {
+    if (tagFilterMode === "EMPTY") {
+      // タグが一つも設定されていない
+      mediaConditions.push({
+        mediaTags: { none: {} },
+      });
+    } else {
+      const ids = tagIds ? tagIds.split(",").filter(Boolean) : [];
+      if (ids.length > 0) {
+        switch (tagFilterMode) {
+          case "OR":
+            // 指定したタグのうち、いずれか1つでも含まれている
             mediaConditions.push({
               mediaTags: {
-                some: { tagId: id },
+                some: { tagId: { in: ids } },
               },
             });
-          });
-          break;
+            break;
+
+          case "NOT":
+            // 指定したタグが1つも含まれていない
+            mediaConditions.push({
+              mediaTags: {
+                none: { tagId: { in: ids } },
+              },
+            });
+            break;
+
+          case "AND":
+          default:
+            // 指定したタグがすべて含まれている
+            ids.forEach((id) => {
+              mediaConditions.push({
+                mediaTags: {
+                  some: { tagId: id },
+                },
+              });
+            });
+            break;
+        }
       }
     }
   }

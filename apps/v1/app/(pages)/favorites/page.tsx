@@ -3,7 +3,11 @@ import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
 import { FavoriteSortKey, FavoriteValue } from "@/lib/favorite/types";
-import { RatingFilterMode, RatingOperator } from "@/lib/filter/types";
+import {
+  RatingFilterMode,
+  RatingOperator,
+  TagFilterMode,
+} from "@/lib/filter/types";
 import { formatNodes } from "@/lib/media/format";
 import { SortDirection } from "@/lib/media/types";
 import { hashObject } from "@/lib/utils/hash";
@@ -32,6 +36,7 @@ interface FavoritePageProps {
     ratingMode?: RatingFilterMode;
     ratingOp?: RatingOperator;
     ratingVal?: string; // 1~5 の数値 or {min},{max}
+    tagFilterMode?: TagFilterMode;
     tagIds?: string; // カンマ区切り
   }>;
 }
@@ -48,6 +53,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
     ratingMode,
     ratingOp,
     ratingVal,
+    tagFilterMode,
     tagIds,
   } = searchParams;
 
@@ -66,6 +72,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
     ratingMode,
     ratingOp,
     ratingVal,
+    tagFilterMode,
     tagIds,
   });
 
