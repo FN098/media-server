@@ -10,6 +10,7 @@ import {
 } from "@/lib/filter/types";
 import { formatNodes } from "@/lib/media/format";
 import { SortDirection } from "@/lib/media/types";
+import { hashObject } from "@/lib/utils/hash";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { HistoryProvider } from "@/providers/history-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
@@ -96,14 +97,16 @@ export default async function FavoritePage(props: FavoritePageProps) {
       }) satisfies FavoriteValue
   );
 
+  const key = hashObject(searchParams);
+
   return (
     <TagEditorProvider>
       <HistoryProvider>
-        <FavoritesProvider favorites={favorites}>
-          <PathSelectionProvider>
+        <PathSelectionProvider>
+          <FavoritesProvider key={key} favorites={favorites}>
             <Favorites listing={listing} />
-          </PathSelectionProvider>
-        </FavoritesProvider>
+          </FavoritesProvider>
+        </PathSelectionProvider>
       </HistoryProvider>
     </TagEditorProvider>
   );

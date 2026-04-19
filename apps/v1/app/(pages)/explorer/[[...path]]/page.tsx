@@ -112,10 +112,10 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   );
 
   return (
-    <FavoritesProvider favorites={favorites}>
-      <PathSelectionProvider>
+    <PathSelectionProvider>
+      <FavoritesProvider favorites={favorites}>
         <Explorer listing={listing} />
-      </PathSelectionProvider>
-    </FavoritesProvider>
+      </FavoritesProvider>
+    </PathSelectionProvider>
   );
 }

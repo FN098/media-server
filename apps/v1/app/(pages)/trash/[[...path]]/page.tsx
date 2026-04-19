@@ -97,10 +97,10 @@ export default async function TrashPage(props: TrashPageProps) {
   };
 
   return (
-    <FavoritesProvider favorites={listing.nodes}>
-      <PathSelectionProvider>
+    <PathSelectionProvider>
+      <FavoritesProvider favorites={listing.nodes}>
         <Trash listing={listing} />
-      </PathSelectionProvider>
-    </FavoritesProvider>
+      </FavoritesProvider>
+    </PathSelectionProvider>
   );
 }
