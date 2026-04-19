@@ -696,6 +696,6 @@ export async function touchMediaTimestampAction(targetPath: string) {
     return { success: true };
   } catch (error) {
     console.error("Touch Media Timestamp Error:", error);
-    return { success: false };
+    return { success: false, error: "タイムスタンプの更新に失敗しました。" };
   }
 }

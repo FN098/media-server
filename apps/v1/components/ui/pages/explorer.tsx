@@ -438,18 +438,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   };
 
-  // プレビュー解除
-  const resetPreview = async (node: MediaNode) => {
-    const result = await updatePreviewAction(node.path, null);
-
-    if (result.success) {
-      toast.success("プレビューを解除しました");
-      resetSelection();
-    } else {
-      toast.error("プレビューの解除に失敗しました");
-    }
-  };
-
   // ===== サムネイル =====
 
   // サムネイル自動作成
@@ -461,9 +449,21 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // サムネイル更新
   const handleUpdateThumb = (node: MediaNode) => {
+    // サムネイルを再作成（強制）
     void enqueueCreateSingleThumbJobAction(node.path, { force: true });
-    void touchMediaTimestampAction(node.path); // タイムスタンプを更新してキャッシュを更新
-    node.mtime = new Date(); // ブラウザキャッシュ更新のため、一時的にタイムスタンプを変更
+
+    // DBのタイムスタンプを更新（サムネイルのキャッシュを上書き）
+    void touchMediaTimestampAction(node.path).then((res) => {
+      if (res.error) toast.error(res.error);
+    });
+
+    // プレビュー設定を解除
+    void updatePreviewAction(node.path, null).then((res) => {
+      if (res.error) toast.error(res.error);
+    });
+
+    // ブラウザキャッシュ更新のため、一時的にタイムスタンプを変更
+    node.mtime = new Date();
   };
 
   // ===== ショートカット =====
@@ -672,7 +672,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 },
                 addTagFilter,
                 setAsPreview: openApplyPreviewDialog,
-                resetPreview,
                 updateThumb: handleUpdateThumb,
               }}
             >
@@ -704,7 +703,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 },
                 addTagFilter,
                 setAsPreview: openApplyPreviewDialog,
-                resetPreview,
                 updateThumb: handleUpdateThumb,
               }}
             >

@@ -65,7 +65,6 @@ export function ActionDropdownMenu({
     editTags,
     addTagFilter,
     setAsPreview,
-    resetPreview,
     restore,
     delete: deleteAction,
     deletePermanently,
@@ -196,18 +195,6 @@ export function ActionDropdownMenu({
             disabled={node.type !== "image" && node.type !== "video"}
           >
             <ImagePlus className="mr-2 h-4 w-4" /> プレビューに設定
-          </DropdownMenuItem>
-        )}
-
-        {resetPreview && !node.isDirectory && (
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              void resetPreview(node);
-            }}
-            disabled={node.previewPath === null}
-          >
-            <ImageMinus className="mr-2 h-4 w-4" /> プレビューを解除
           </DropdownMenuItem>
         )}
 
