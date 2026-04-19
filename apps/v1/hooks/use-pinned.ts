@@ -1,49 +1,16 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useState } from "react";
 
-type Options = {
-  pinnedKey?: string; // デフォルト: "pinned"
-};
+export function usePinned() {
+  const [pinned, setPinned] = useState(false);
 
-export function usePinned(options?: Options) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  // キー名とデフォルト値の設定
-  const { pinnedKey = "pinned" } = options || {};
-
-  // 現在の値をURLから取得
-  const pinned = searchParams.get(pinnedKey);
-
-  // value: 現在の状態
-  const value = useMemo(() => pinned === "true", [pinned]);
-
-  // apply: URLを更新して状態を変更
-  const apply = useCallback(
-    (next: boolean) => {
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (next === false) {
-        params.delete(pinnedKey);
-      } else {
-        params.set(pinnedKey, "true");
-      }
-
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [pinnedKey, pathname, router, searchParams]
-  );
-
-  // reset: デフォルトの状態に戻す
-  const reset = useCallback(() => apply(false), [apply]);
-
-  const toggle = useCallback(() => apply(!value), [apply, value]);
+  const apply = useCallback((next: boolean) => setPinned(next), []);
+  const reset = useCallback(() => setPinned(false), []);
+  const toggle = useCallback(() => setPinned((prev) => !prev), []);
 
   return {
-    value,
+    value: pinned,
     apply,
     reset,
     toggle,

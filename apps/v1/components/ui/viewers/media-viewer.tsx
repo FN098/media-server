@@ -11,12 +11,12 @@ import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { usePinned } from "@/hooks/use-pinned";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import {
   DropdownMenu,
@@ -97,7 +97,8 @@ export function MediaViewer({
   );
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { value: isHeaderPinned, toggle: toggleIsHeaderPinned } = usePinned();
+  const { value: isHeaderPinned, toggle: toggleIsHeaderPinned } =
+    useViewerHeaderPinnedContext();
   const {
     isVisible: isHeaderVisible,
     toggle: toggleHeaderVisibility,
