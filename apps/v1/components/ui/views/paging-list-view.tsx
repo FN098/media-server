@@ -217,7 +217,7 @@ export function PagingListView({
   // ページ遷移時の自動スクロール（副作用）
   useEffect(() => {
     if (focusOnPageChange) {
-      containerRef.current?.focus();
+      containerRef.current?.focus({ preventScroll: true });
     }
 
     // ページ変更に伴うスクロールが必要な場合、または外部からの指示（初期表示など）
