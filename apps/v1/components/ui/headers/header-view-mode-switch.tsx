@@ -1,13 +1,9 @@
 "use client";
 import { ViewModeSwitch } from "@/components/ui/buttons/view-mode-switch";
-import { useViewMode, ViewModeOptions } from "@/hooks/use-view-mode";
+import { useViewMode } from "@/hooks/use-view-mode";
 
-export function HeaderViewModeSwitch({
-  options,
-}: {
-  options?: ViewModeOptions;
-}) {
-  const { value, apply } = useViewMode(options);
+export function HeaderViewModeSwitch() {
+  const { value, apply } = useViewMode();
 
   return (
     <ViewModeSwitch viewMode={value} setViewMode={apply} className="shrink-0" />

@@ -8,7 +8,13 @@ type HistoryItem = {
   type: "file" | "folder";
 };
 
-export function useHistory({ maxLength = 10 }: { maxLength?: number } = {}) {
+type Options = {
+  maxLength?: number;
+};
+
+export function useHistory(options: Options) {
+  const { maxLength = 10 } = options ?? {};
+
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const pushHistory = (item: HistoryItem) => {

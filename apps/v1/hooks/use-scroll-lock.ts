@@ -5,7 +5,7 @@ import { useCallback } from "react";
 let lockCount = 0;
 let prevOverflow = "";
 
-export const useScrollLockControl = () => {
+export const useScrollLock = () => {
   const lock = useCallback(() => {
     if (typeof window === "undefined") return;
     if (lockCount === 0) {

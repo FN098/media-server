@@ -13,12 +13,14 @@ type BreadcrumbFormatContext = {
   isLast: boolean;
 };
 
+type Options = {
+  formatLabel?: (ctx: BreadcrumbFormatContext) => string;
+};
+
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-export function useBreadcrumbs(
-  basePath: string,
-  formatLabel?: (ctx: BreadcrumbFormatContext) => string
-) {
+export function useBreadcrumbs(basePath: string, options?: Options) {
+  const { formatLabel } = options ?? {};
   const pathname = usePathname();
 
   return useMemo<BreadcrumbLinkItem[]>(() => {

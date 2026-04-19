@@ -99,12 +99,12 @@ export function Trash({ listing }: { listing: MediaListing }) {
   });
 
   // 検索パラメータリセット用
-  const { hasSearchParams, resetSearchParams } = useSearchParamsControl();
+  const { hasSearchParams, clearSearchParams } = useSearchParamsControl();
 
   // ===== ビューア =====
 
   const {
-    normalizedIndex: initialViewerIndex,
+    index: initialViewerIndex,
     isOpen: isViewerMode,
     open: openViewer,
     close: closeViewer,
@@ -356,7 +356,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
             {/* リセット */}
             <ResetButton
-              onReset={resetSearchParams}
+              onReset={clearSearchParams}
               isVisible={hasSearchParams}
             />
           </div>

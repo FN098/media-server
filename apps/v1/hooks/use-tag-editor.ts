@@ -49,8 +49,8 @@ export function useTagEditor(initialTargetNodes?: MediaNode[]) {
   // ベースタグ
   const {
     tags: baseTags,
-    refetchTags,
-    invalidateTags,
+    refetch: refetchTags,
+    invalidate: invalidateTags,
     isLoading: isLoadingBase,
   } = useTags({
     paths: targetPaths,

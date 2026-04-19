@@ -2,14 +2,21 @@
 
 import { useCallback, useRef, useState } from "react";
 
-export function useLongPress(callback: () => void, ms = 500) {
+interface Options {
+  callback?: () => void;
+  ms?: number; // default: 500
+}
+
+export function useLongPress(options?: Options) {
+  const { callback = null, ms = 500 } = options ?? {};
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [isLongPressed, setIsLongPressed] = useState(false);
 
   const start = useCallback(() => {
     setIsLongPressed(false);
     timerRef.current = setTimeout(() => {
-      callback();
+      callback?.();
       setIsLongPressed(true);
       if (window.navigator.vibrate) window.navigator.vibrate(50);
     }, ms);

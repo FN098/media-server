@@ -328,7 +328,10 @@ function DataRow({
     onSelectionChange?.();
   }, [selectCtx, node.path, onSelectionChange]);
 
-  const { start, stop, isLongPressed } = useLongPress(handleLongPress, 600);
+  const { start, stop, isLongPressed } = useLongPress({
+    callback: handleLongPress,
+    ms: 600,
+  });
 
   const handleClick = (e: React.MouseEvent) => {
     if (isLongPressed || isMobile) return;

@@ -1,45 +1,44 @@
 "use client";
 
-import { QueryFilterValue } from "@/lib/filter/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 type Options = {
-  queryKey?: string; // デフォルト: "q"
+  modalKey?: string; // デフォルト: "modal"
 };
 
-export function useQueryFilter(options?: Options) {
+export function usePinned(options?: Options) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   // キー名とデフォルト値の設定
-  const { queryKey = "q" } = options || {};
+  const { modalKey = "modal" } = options || {};
 
   // 現在の値をURLから取得
-  const query = searchParams.get(queryKey);
+  const modal = searchParams.get(modalKey);
 
   // value: 現在の状態
-  const value = useMemo<QueryFilterValue>(() => ({ query }), [query]);
+  const value = useMemo(() => modal, [modal]);
 
   // apply: URLを更新して状態を変更
   const apply = useCallback(
-    (next: string | null) => {
+    (next: boolean) => {
       const params = new URLSearchParams(searchParams.toString());
 
-      if (next == null || next.trim() === "") {
-        params.delete(queryKey);
+      if (next === false) {
+        params.delete(modalKey);
       } else {
-        params.set(queryKey, next);
+        params.set(modalKey, "true");
       }
 
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [pathname, router, searchParams, queryKey]
+    [modalKey, pathname, router, searchParams]
   );
 
   // reset: デフォルトの状態に戻す
-  const reset = useCallback(() => apply(null), [apply]);
+  const reset = useCallback(() => apply(false), [apply]);
 
   return {
     value,

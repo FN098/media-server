@@ -1,5 +1,6 @@
 "use client";
 
+import { clamp } from "@/lib/utils/clamp";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
@@ -34,10 +35,10 @@ export function usePaging(totalItems: number, options: UsePagingOptions = {}) {
   );
 
   // ページ番号の補正ロジック
-  const fixedCurrentPage = useMemo(() => {
-    if (totalPages > 0 && currentPage > totalPages) return totalPages;
-    return currentPage;
-  }, [currentPage, totalPages]);
+  const fixedCurrentPage = useMemo(
+    () => clamp(currentPage, 1, totalPages),
+    [currentPage, totalPages]
+  );
 
   // ページ更新関数
   const setPage = useCallback(

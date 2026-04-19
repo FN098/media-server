@@ -7,15 +7,15 @@ export function useSearchParamsControl() {
   const pathname = usePathname();
 
   const hasSearchParams = useMemo(() => {
-    return searchParams.toString().length > 0;
+    return searchParams.size > 0;
   }, [searchParams]);
 
-  const resetSearchParams = useCallback(() => {
+  const clearSearchParams = useCallback(() => {
     router.replace(pathname);
   }, [router, pathname]);
 
   return {
     hasSearchParams,
-    resetSearchParams,
+    clearSearchParams,
   };
 }

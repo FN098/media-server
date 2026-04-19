@@ -3,14 +3,15 @@
 import { MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
-export interface UseViewerControlOptions {
+type Options = {
   atKey?: string; // デフォルト: "at"
   modalKey?: string; // デフォルト: "modal"
-}
+};
 
-type ViewerOpenOptions = {
+type OpenOptions = {
+  at?: IndexLike;
   newTab?: boolean;
 };
 
@@ -25,10 +26,7 @@ function normalizeIndex(at: IndexLike, total: number) {
   return index;
 }
 
-export function useViewerControl(
-  nodes: MediaNode[],
-  options?: UseViewerControlOptions
-) {
+export function useViewerControl(nodes: MediaNode[], options?: Options) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -41,17 +39,21 @@ export function useViewerControl(
   const modal = searchParams.get(modalKey);
 
   // number に正規化されたインデックス
-  const normalizedIndex = normalizeIndex(at, nodes.length);
+  const index = useMemo(
+    () => normalizeIndex(at, nodes.length),
+    [at, nodes.length]
+  );
 
   // ビューアを起動
   const open = useCallback(
-    (at: IndexLike, options?: ViewerOpenOptions) => {
+    (options?: OpenOptions) => {
+      const { at = 0, newTab = false } = options ?? {};
       const params = new URLSearchParams(searchParams.toString());
 
       params.set(modalKey, "true");
       params.set(atKey, String(at));
 
-      if (options?.newTab) {
+      if (newTab) {
         window.open(`${pathname}?${params.toString()}`, "_blank", "noreferrer");
       } else {
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
@@ -71,9 +73,7 @@ export function useViewerControl(
   }, [atKey, modalKey, pathname, router, searchParams]);
 
   return {
-    at,
-    modal,
-    normalizedIndex,
+    index,
     isOpen: modal,
     open,
     close,

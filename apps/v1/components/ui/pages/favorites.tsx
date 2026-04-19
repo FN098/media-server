@@ -99,12 +99,12 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   };
 
   // 検索パラメータリセット用
-  const { hasSearchParams, resetSearchParams } = useSearchParamsControl();
+  const { hasSearchParams, clearSearchParams } = useSearchParamsControl();
 
   // ===== ビューア =====
 
   const {
-    normalizedIndex: initialViewerIndex,
+    index: initialViewerIndex,
     isOpen: isViewerMode,
     open: openViewer,
     close: closeViewer,
@@ -139,7 +139,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     if (isMedia(node.type)) {
       const index = getMediaIndex(node.path);
       if (index == null) return;
-      openViewer(index);
+      openViewer({ at: index });
       return;
     }
 
@@ -156,7 +156,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     if (isMedia(node.type)) {
       const index = getMediaIndex(node.path);
       if (index == null) return;
-      openViewer(index, { newTab: true });
+      openViewer({ at: index, newTab: true });
       return;
     }
 
@@ -351,7 +351,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
             {/* リセットボタン */}
             <ResetButton
-              onReset={resetSearchParams}
+              onReset={clearSearchParams}
               isVisible={hasSearchParams}
             />
           </div>

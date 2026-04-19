@@ -9,7 +9,7 @@ import { AudioPlayer } from "@/components/ui/viewers/audio-player";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
-import { useDocumentTitleControl } from "@/hooks/use-document-title";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
@@ -150,7 +150,7 @@ export function MediaViewer({
   );
 
   // タイトル設定
-  const { setTitle } = useDocumentTitleControl();
+  const { setTitle } = useDocumentTitle();
   const updateTitle = (node: MediaNode) => {
     const { title, name } = node;
     setTitle(`${title ?? name} | ${APP_CONFIG.meta.title}`);

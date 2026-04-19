@@ -1,31 +1,21 @@
 "use client";
 
-import { encodePath } from "@/lib/path/encoder";
-import { getClientExplorerPath, getClientTrashPath } from "@/lib/path/helpers";
+import { resolveClientPath } from "@/lib/path/resolvers";
 import { IndexLike } from "@/lib/query/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-export interface UseFolderNavigationOptions {
+type Options = {
   atKey?: string; // デフォルト: "at"
-}
+};
 
-type FolderNavigateOptions = {
+type NavigateOptions = {
   deleted?: boolean;
   newTab?: boolean;
   at?: IndexLike; // ビューア用
 };
 
-function resolveClientPath(path: string, options?: FolderNavigateOptions) {
-  const encoded = encodePath(path);
-
-  // 削除済み
-  if (options?.deleted) return getClientTrashPath(encoded);
-
-  return getClientExplorerPath(encoded);
-}
-
-export function useFolderNavigation(options?: UseFolderNavigationOptions) {
+export function useFolderNavigation(options?: Options) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -34,8 +24,10 @@ export function useFolderNavigation(options?: UseFolderNavigationOptions) {
 
   // フォルダに移動
   const navigate = useCallback(
-    (path: string, options?: FolderNavigateOptions) => {
-      const basePath = resolveClientPath(path, options) || path;
+    (path: string, options?: NavigateOptions) => {
+      const basePath =
+        resolveClientPath(path, { isDeleted: options?.deleted }) || path;
+
       const params = new URLSearchParams(searchParams.toString());
 
       if (options?.at) {

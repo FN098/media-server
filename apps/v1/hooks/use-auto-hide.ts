@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-type Option = {
+type Options = {
   duration?: number;
   disabled?: boolean;
 };
 
-export function useAutoHidingUI({ duration = 3000, disabled = false }: Option) {
+export function useAutoHidingUI(options: Options) {
+  const { duration = 3000, disabled = false } = options ?? {};
   const [isVisible, setIsVisible] = useState(true);
 
   // 非表示処理をデバウンス

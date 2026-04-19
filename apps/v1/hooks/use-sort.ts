@@ -1,18 +1,18 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-interface SortOptions {
+type Options = {
   sortKey?: string; // デフォルト: "sort"
   directionKey?: string; // デフォルト: "direction"
   pageKey?: string; // デフォルト: "page"
-}
+};
 
 type SortValue = {
   key: string | null;
   direction: string | null;
 };
 
-export function useSort(options?: SortOptions) {
+export function useSort(options?: Options) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

@@ -4,12 +4,12 @@ import { ViewMode } from "@/lib/query/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-export interface ViewModeOptions {
+type Options = {
   viewModeKey?: string; // デフォルト: "viewMode"
   defaultViewMode?: ViewMode; // デフォルト: "grid"
-}
+};
 
-export function useViewMode(options?: ViewModeOptions) {
+export function useViewMode(options?: Options) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

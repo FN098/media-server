@@ -3,12 +3,12 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-type ShuffleOption = {
+type Options = {
   shuffleKey?: string;
   seedKey?: string;
 };
 
-export function useShuffle(options?: ShuffleOption) {
+export function useShuffle(options?: Options) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

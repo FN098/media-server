@@ -1,9 +1,9 @@
 "use client";
 
-import { useScrollLockControl } from "@/hooks/use-scroll-lock";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { createContext, useContext, useEffect } from "react";
 
-type ScrollLockContextType = ReturnType<typeof useScrollLockControl>;
+type ScrollLockContextType = ReturnType<typeof useScrollLock>;
 
 const ScrollLockContext = createContext<ScrollLockContextType | undefined>(
   undefined
@@ -14,7 +14,7 @@ export function ScrollLockProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const value = useScrollLockControl();
+  const value = useScrollLock();
   const { lock, unlock } = value;
 
   // マウント時にロックし、アンマウント時にアンロック
