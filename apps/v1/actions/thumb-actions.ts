@@ -34,7 +34,9 @@ async function acquireLock(key: string, ttlMs: number): Promise<boolean> {
 // サムネ生成ジョブ登録（ディレクトリ単位）
 export async function enqueueCreateThumbsJobAction(
   dirPath: string,
-  forceCreate = false
+  options?: {
+    force?: boolean;
+  }
 ) {
   const lockKey = `thumb-lock:dir:${hashPath(dirPath)}`;
   const locked = await acquireLock(lockKey, LOCK_TTL);
@@ -50,7 +52,7 @@ export async function enqueueCreateThumbsJobAction(
       dirPath,
       createdAt: Date.now(),
       lockKey,
-      forceCreate,
+      forceCreate: options?.force ?? false,
     },
     {
       removeOnComplete: true,
@@ -63,7 +65,9 @@ export async function enqueueCreateThumbsJobAction(
 // サムネ生成ジョブ登録（ファイル単位）
 export async function enqueueCreateSingleThumbJobAction(
   filePath: string,
-  forceCreate = false
+  options?: {
+    force?: boolean;
+  }
 ) {
   const lockKey = `thumb-lock:dir:${hashPath(filePath)}`;
   const locked = await acquireLock(lockKey, LOCK_TTL);
@@ -79,7 +83,7 @@ export async function enqueueCreateSingleThumbJobAction(
       filePath,
       createdAt: Date.now(),
       lockKey,
-      forceCreate,
+      forceCreate: options?.force ?? false,
     },
     {
       removeOnComplete: true,

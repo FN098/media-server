@@ -39,6 +39,8 @@ export function MediaThumbImage({
     { version: node.mtime.getTime() }
   );
 
+  console.log({ displayPath, time: node.mtime });
+
   const update = () => {
     setVersion(Date.now());
     setIsProcessing(false);

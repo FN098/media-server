@@ -452,9 +452,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   }, [listing.path]);
 
-  // サムネイル強制更新
-  const handleForceUpdateThumb = (node: MediaNode) => {
-    void enqueueCreateSingleThumbJobAction(node.path, true);
+  // サムネイル更新
+  const handleUpdateThumb = (node: MediaNode) => {
+    void enqueueCreateSingleThumbJobAction(node.path, { force: true });
+    node.mtime = new Date(); // ブラウザキャッシュ更新のため、一時的に更新日時を変更
   };
 
   // ===== ショートカット =====
@@ -654,7 +655,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 addTagFilter,
                 setAsPreview: openApplyPreviewDialog,
                 resetPreview,
-                updateThumb: handleForceUpdateThumb,
+                updateThumb: handleUpdateThumb,
               }}
             >
               <PagingGridView
@@ -686,7 +687,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 addTagFilter,
                 setAsPreview: openApplyPreviewDialog,
                 resetPreview,
-                updateThumb: handleForceUpdateThumb,
+                updateThumb: handleUpdateThumb,
               }}
             >
               <PagingListView
