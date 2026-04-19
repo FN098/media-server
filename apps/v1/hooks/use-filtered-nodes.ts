@@ -134,6 +134,8 @@ export function useFilteredNodes({
 
     // フィルタの適用
     return allNodes.filter((node) => {
+      if (node.isDirectory) return true; // フォルダは対象外
+
       return pipeline.filter((f) => !!f).every((filter) => filter(node));
     });
   }, [activated, allNodes, pipeline]);

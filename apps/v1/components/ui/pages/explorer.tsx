@@ -603,6 +603,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             <MediaTypeFilterMultiSelect
               value={mediaTypeFilterValue}
               onChange={applyMediaTypeFilterValue}
+              displayTypes={["image", "video", "audio"]}
             />
 
             {/* お気に入りフィルター */}
