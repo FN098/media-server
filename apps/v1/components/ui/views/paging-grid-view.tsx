@@ -42,8 +42,13 @@ export function PagingGridView({
   onScrollRestored,
   focusOnPageChange = false,
 }: PagingGridViewProps) {
-  const { currentPage, pageSize, totalPages, setPage, paginate } =
-    usePagingContext();
+  const {
+    page: currentPage,
+    pageSize,
+    totalPages,
+    setPage,
+    paginate,
+  } = usePagingContext();
 
   const selectCtx = usePathSelectionContext();
   const { actions } = useActionsContext();
@@ -250,6 +255,7 @@ export function PagingGridView({
     const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
     if (currentIndex === -1) return;
 
+    console.log({ currentIndex });
     // ページ変更によるスクロール、またはページボタンクリックなどによる遷移の場合に実行
     requestAnimationFrame(() => {
       const el = document.getElementById(`media-item-${currentIndex}`);

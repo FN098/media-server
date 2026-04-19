@@ -549,13 +549,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const isMobile = useIsMobile();
 
   return (
-    <PagingProvider
-      totalItems={filteredNodes.length}
-      options={{
-        defaultPageSize: 48,
-        useUrlParams: true,
-      }}
-    >
+    <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
       <div
         className={cn(
           "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"

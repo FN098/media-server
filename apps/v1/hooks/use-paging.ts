@@ -4,71 +4,81 @@ import { clamp } from "@/lib/utils/clamp";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-export interface UsePagingOptions {
+type Options = {
   defaultPageSize?: number;
-  useUrlParams?: boolean; // URL同期を有効にするか
   pageKey?: string; // パラメータ名（デフォルト "page"）
-}
+  pageSizeKey?: string; // パラメータ名（デフォルト "pageSize"）
+};
 
-export function usePaging(totalItems: number, options: UsePagingOptions = {}) {
+const MIN_PAGE = 1;
+const MAX_PAGE = 100;
+const MIN_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 100;
+
+export function usePaging(totalItems: number, options?: Options) {
   const {
     defaultPageSize = 48,
-    useUrlParams = false,
     pageKey = "page",
-  } = options;
+    pageSizeKey = "pageSize",
+  } = options ?? {};
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const currentPage = useMemo(() => {
-    if (!useUrlParams) return 1;
-    const p = searchParams.get(pageKey);
-    return p ? Math.max(1, parseInt(p, 10) || 1) : 1;
-  }, [searchParams, pageKey, useUrlParams]);
+  const page = useMemo(() => {
+    const value = searchParams.get(pageKey);
+    if (!value) return MIN_PAGE;
+    const val = parseInt(value, 10) || MIN_PAGE;
+    return clamp(val, MIN_PAGE, MAX_PAGE);
+  }, [searchParams, pageKey]);
 
-  const pageSize = defaultPageSize;
+  const setPage = useCallback(
+    (page: number) => {
+      const newPage = clamp(page, MIN_PAGE, MAX_PAGE);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(pageKey, newPage.toString());
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pageKey, router, pathname]
+  );
+
+  const pageSize = useMemo(() => {
+    const value = searchParams.get(pageSizeKey);
+    if (!value) return defaultPageSize;
+    const val = parseInt(value, 10) || MIN_PAGE_SIZE;
+    return clamp(val, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
+  }, [defaultPageSize, pageSizeKey, searchParams]);
+
+  const setPageSize = useCallback(
+    (pageSize: number) => {
+      const newPageSize = clamp(pageSize, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(pageKey, newPageSize.toString());
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pageKey, router, pathname]
+  );
 
   const totalPages = useMemo(
     () => Math.ceil(totalItems / pageSize),
     [totalItems, pageSize]
   );
 
-  // ページ番号の補正ロジック
-  const fixedCurrentPage = useMemo(
-    () => clamp(currentPage, 1, totalPages),
-    [currentPage, totalPages]
-  );
-
-  // ページ更新関数
-  const setPage = useCallback(
-    (page: number) => {
-      const targetPage = Math.max(1, Math.min(page, totalPages || 1));
-
-      if (useUrlParams) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set(pageKey, targetPage.toString());
-
-        // URLを更新。Next.jsのrouterを使うことでpopstate管理も不要になります
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-      }
-    },
-    [searchParams, pageKey, useUrlParams, totalPages, router, pathname]
-  );
-
   const paginate = useCallback(
     <T>(items: T[]): T[] => {
-      const start = (fixedCurrentPage - 1) * pageSize;
+      const start = (page - 1) * pageSize;
       return items.slice(start, start + pageSize);
     },
-    [fixedCurrentPage, pageSize]
+    [page, pageSize]
   );
 
   return {
-    currentPage: fixedCurrentPage,
-    pageSize,
-    totalPages,
+    page,
     setPage,
+    pageSize,
+    setPageSize,
+    totalPages,
     paginate,
   };
 }

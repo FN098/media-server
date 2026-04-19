@@ -48,8 +48,13 @@ export function PagingListView({
   onScrollRestored,
   focusOnPageChange = false,
 }: PagingListViewProps) {
-  const { currentPage, pageSize, totalPages, setPage, paginate } =
-    usePagingContext();
+  const {
+    page: currentPage,
+    pageSize,
+    totalPages,
+    setPage,
+    paginate,
+  } = usePagingContext();
 
   const selectCtx = usePathSelectionContext();
   const { actions } = useActionsContext();
