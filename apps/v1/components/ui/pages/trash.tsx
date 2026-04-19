@@ -139,7 +139,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     if (isMedia(node.type)) {
       const index = getMediaIndex(node.path);
       if (index == null) return;
-      openViewer(index);
+      openViewer({ at: index });
       return;
     }
 
