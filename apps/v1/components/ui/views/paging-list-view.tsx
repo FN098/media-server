@@ -64,9 +64,6 @@ export function PagingListView({
   // スクロール復元が実行済みかどうかを保持するフラグ
   const hasRestored = useRef(false);
 
-  // ページ遷移後にスクロールをやり直す必要があるかどうかのフラグ
-  const needsScrollAfterPageChange = useRef(false);
-
   // パスから初期スクロール対象インデックスを特定する
   const initialScrollTargetIndex = useMemo(() => {
     if (!initialScrollPath) return null;
@@ -200,9 +197,6 @@ export function PagingListView({
       // ページ更新（必要なら）
       const nextPage = Math.floor(nextIndex / pageSize) + 1;
       if (nextPage !== currentPage) {
-        // ページが変わる場合：今のDOMには nextIndex がないので、
-        // ページ遷移後の useEffect でスクロールさせるためにフラグを立てる
-        needsScrollAfterPageChange.current = true;
         setPage(nextPage);
       }
 
@@ -234,8 +228,6 @@ export function PagingListView({
       const el = document.getElementById(`media-item-${currentIndex}`);
       el?.scrollIntoView({ behavior: "instant", block: "nearest" });
     });
-
-    needsScrollAfterPageChange.current = false; // 終わったらリセット
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]); // 依存は currentPage だけでOK
