@@ -1,36 +1,36 @@
+import { isMedia } from "@/lib/media/media-types";
 import { sortNodes } from "@/lib/media/sort";
-import type { MediaFsNode, PrismaMedia } from "@/lib/media/types";
+import type { MediaFsNode, MediaType, PrismaMedia } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import { getFilenameWithoutExt } from "@/lib/utils/filename";
 
 type MediaCreateItem = Pick<
   PrismaMedia,
-  "path" | "dirPath" | "fileMtime" | "fileSize" | "previewPath"
+  "path" | "dirPath" | "fileMtime" | "fileSize" | "previewPath" | "type"
 >;
 
 type MediaUpdateItem = Pick<
   PrismaMedia,
-  "path" | "fileMtime" | "fileSize" | "previewPath"
+  "path" | "fileMtime" | "fileSize" | "previewPath" | "type"
 >;
 
 export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
-  let files = nodes.filter((n) => !n.isDirectory);
-  // ファイルが空でも、ディレクトリが存在するなら FolderMeta は更新したい場合があるため
-  // 早期リターンはせず、ロジックを進めます。
+  let mediaOnly = nodes.filter((n) => isMedia(n.type));
 
   // プレビュー候補は名前順で先頭に近いものを優先する
-  files = sortNodes(files, {
+  mediaOnly = sortNodes(mediaOnly, {
     key: "name",
     direction: "asc",
   });
 
   // --- 1. プレビュー候補の抽出 ---
-  const firstMedia = files.find(
+  const firstMedia = mediaOnly.find(
     (f) => f.type === "image" || f.type === "video"
   );
 
   const imageMap = new Map<string, string>();
-  files.forEach((f) => {
+
+  mediaOnly.forEach((f) => {
     if (f.type === "image") {
       const baseName = f.name.replace(/\.[^/.]+$/, "");
       if (!imageMap.has(baseName)) imageMap.set(baseName, f.path);
@@ -54,7 +54,7 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
   const toUpdate: MediaUpdateItem[] = [];
 
   // --- 3. 各ファイルのメタデータ準備 & 比較 ---
-  for (const f of files) {
+  for (const f of mediaOnly) {
     const dbMeta = dbMap.get(f.path);
     const baseName = getFilenameWithoutExt(f.path);
 
@@ -77,6 +77,7 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
         fileMtime: f.mtime,
         fileSize: f.size ? BigInt(f.size) : null,
         previewPath: previewPath,
+        type: f.type as MediaType,
       });
     } else {
       // 更新判定
@@ -91,12 +92,13 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
           fileMtime: f.mtime,
           fileSize: f.size ? BigInt(f.size) : null,
           previewPath: shouldAutoSetPreview ? previewPath : dbMeta.previewPath,
+          type: f.type as MediaType,
         });
       }
     }
   }
 
-  const fsPaths = new Set(files.map((f) => f.path));
+  const fsPaths = new Set(mediaOnly.map((f) => f.path));
   const toDelete = dbMedia
     .filter((m) => !fsPaths.has(m.path))
     .map((m) => m.path);

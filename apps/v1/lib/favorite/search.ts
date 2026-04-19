@@ -5,16 +5,12 @@ import {
   RatingOperator,
   TagFilterMode,
 } from "@/lib/filter/types";
-import {
-  MediaFsNodeType,
-  MediaNode,
-  MediaType,
-  SortDirection,
-} from "@/lib/media/types";
+import { detectMediaType } from "@/lib/media/media-types";
+import { MediaNode, MediaType, SortDirection } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/random";
 import { normalizeForLike } from "@/lib/utils/search";
-import path from "path";
+import path, { basename } from "path";
 
 type SearchFavoriteParams = {
   userId: string;
@@ -207,7 +203,7 @@ export async function searchFavoriteMediaNodes(
         id: f.media.id,
         name: path.basename(f.media.path),
         path: f.media.path,
-        type: f.media.type ?? ("file" as MediaFsNodeType),
+        type: f.media.type ?? detectMediaType(basename(f.media.path)) ?? "file",
         isDirectory: false,
         size: Number(f.media.fileSize),
         mtime: f.media.fileMtime,
