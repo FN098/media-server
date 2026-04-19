@@ -394,6 +394,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
+                focusOnPageChange
               />
             </ActionsProvider>
           </div>
@@ -413,6 +414,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
+                focusOnPageChange
               />
             </ActionsProvider>
           </div>
