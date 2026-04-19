@@ -19,11 +19,11 @@ import {
   ExternalLink,
   Folder,
   FolderInput,
-  ImageMinus,
   ImagePlus,
   ListFilterPlus,
   MoreVertical,
   Pencil,
+  RefreshCw,
   RotateCcw,
   Tag,
   Trash2,
@@ -205,7 +205,7 @@ export function ActionDropdownMenu({
               void updateThumb(node);
             }}
           >
-            <ImageMinus className="mr-2 h-4 w-4" /> サムネイルを更新
+            <RefreshCw className="mr-2 h-4 w-4" /> サムネイルを更新
           </DropdownMenuItem>
         )}
 
