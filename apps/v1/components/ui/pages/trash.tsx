@@ -20,6 +20,7 @@ import { useMediaIndex } from "@/hooks/use-media-index";
 import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSelectionControl } from "@/hooks/use-selection-control";
+import { useSort } from "@/hooks/use-sort";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
@@ -78,6 +79,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
   const handleScrollRestored = () => {
     popHistory();
   };
+
+  // ===== 並び替え =====
+
+  // NOTE: 並び替え処理はサーバーサイドで実施
+  const { value: sortValue, apply: applySortValue } = useSort();
 
   // ===== フィルタリング =====
 
@@ -326,28 +332,38 @@ export function Trash({ listing }: { listing: MediaListing }) {
           <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
             {/* 並び替え */}
             <SortSelect
+              value={sortValue}
+              onChange={applySortValue}
               options={[
                 {
-                  key: "name",
-                  direction: "asc",
+                  value: {
+                    sort: "name",
+                    direction: "asc",
+                  },
                   label: "名前順 (A-Z)",
                   icon: ArrowDownAz,
                 },
                 {
-                  key: "rating",
-                  direction: "desc",
+                  value: {
+                    sort: "rating",
+                    direction: "desc",
+                  },
                   label: "評価順",
                   icon: Sparkle,
                 },
                 {
-                  key: "favoriteCount",
-                  direction: "desc",
+                  value: {
+                    sort: "favoriteCount",
+                    direction: "desc",
+                  },
                   label: "人気順",
                   icon: Sparkles,
                 },
                 {
-                  key: "mtime",
-                  direction: "desc",
+                  value: {
+                    sort: "mtime",
+                    direction: "desc",
+                  },
                   label: "更新順",
                   icon: CalendarArrowDown,
                 },

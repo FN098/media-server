@@ -1,6 +1,5 @@
 "use client";
 
-import { useSort } from "@/hooks/use-sort";
 import {
   Select,
   SelectContent,
@@ -11,63 +10,63 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowUpDown, LucideIcon, RotateCcw } from "lucide-react";
 
-export interface SortOption {
-  key?: string;
-  direction?: string;
-  label?: string;
-  icon?: LucideIcon;
-}
+type SortValue = {
+  sort: string; // 並び替えのフィールド名
+  direction: "asc" | "desc"; // 並び替えの向き
+};
+
+type SortOption = {
+  value: SortValue; // 選択項目の値
+  label: string; // 選択項目の表示名
+  icon?: LucideIcon; // 選択項目のアイコン
+};
 
 interface SortSelectProps {
+  value: SortValue | null;
+  onChange: (value: SortValue | null) => void;
   options: SortOption[];
-  placeholder?: string;
-  resetLabel?: string;
-  onChange?: (key: string | null, dir: string | null) => void;
 }
 
-export function SortSelect({
-  options,
-  placeholder = "並び替え",
-  resetLabel = "リセットする",
-  onChange,
-}: SortSelectProps) {
-  const {
-    value: { key: sort, direction },
-    apply,
-  } = useSort();
+function combine(value: SortValue): string {
+  return `${value.sort}-${value.direction}`;
+}
 
-  // 現在の URL パラメータの組み合わせ
-  const currentKeyDir = sort && direction ? `${sort}-${direction}` : null;
+function separate(value: string): SortValue {
+  const [sort, direction] = value.split("-");
+  return { sort, direction } as SortValue;
+}
+
+export function SortSelect({ value, onChange, options }: SortSelectProps) {
+  const currentKey = value ? combine(value) : null;
 
   // options の中に現在の値が存在するかチェック
-  const isValidOption = options.some(
-    (opt) => `${opt.key}-${opt.direction}` === currentKeyDir
-  );
+  const isValidOption =
+    !!currentKey && options.some((opt) => combine(opt.value) === currentKey);
 
   // 有効なオプションがある場合のみ値をセット。なければ undefined (placeholder表示)
-  const selectValue = isValidOption ? (currentKeyDir as string) : undefined;
+  const selectedKey = isValidOption ? currentKey : undefined;
 
   // ソートが適用されているか判定（リセットボタンの表示用）
-  const isSorted = !!selectValue;
+  const isSorted = !!selectedKey;
 
   const handleValueChange = (value: string) => {
-    let newKey: string | null = null;
-    let newDir: string | null = null;
+    if (onChange) {
+      if (value === "reset") {
+        onChange(null);
+        return;
+      }
 
-    if (value !== "none") {
-      [newKey, newDir] = value.split("-");
+      const next = separate(value);
+      onChange(next);
     }
-
-    apply({ key: newKey, direction: newDir });
-    onChange?.(newKey, newDir);
   };
 
   return (
     <div className={cn("w-full")}>
       <Select
         // selectValue が変わった時にコンポーネントを正しく再描画させる
-        key={selectValue || "reset"}
-        value={selectValue}
+        key={selectedKey || "reset"}
+        value={selectedKey}
         onValueChange={handleValueChange}
       >
         <SelectTrigger className="bg-background focus:ring-1 w-full">
@@ -77,7 +76,7 @@ export function SortSelect({
                 placeholder={
                   <div className="flex items-center gap-2">
                     <ArrowUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <span>{placeholder}</span>
+                    <span>並び替え</span>
                   </div>
                 }
               />
@@ -89,12 +88,12 @@ export function SortSelect({
           {isSorted && (
             <>
               <SelectItem
-                value="none"
+                value="reset"
                 className="text-destructive focus:text-destructive"
               >
                 <div className="flex items-center gap-2">
                   <RotateCcw className="h-4 w-4" />
-                  <span>{resetLabel}</span>
+                  <span>リセットする</span>
                 </div>
               </SelectItem>
               <div className="my-1 h-px bg-muted" />
@@ -102,14 +101,14 @@ export function SortSelect({
           )}
 
           {options.map((opt) => {
-            const combined = `${opt.key}-${opt.direction}`;
-            const ItemIcon = opt.icon || ArrowUpDown;
+            const combined = combine(opt.value);
+            const Icon = opt.icon || ArrowUpDown;
 
             return (
               <SelectItem key={combined} value={combined}>
                 <div className="flex items-center gap-2">
-                  <ItemIcon className="h-4 w-4 text-muted-foreground" />
-                  <span>{opt.label || "ソート"}</span>
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <span>{opt.label}</span>
                 </div>
               </SelectItem>
             );

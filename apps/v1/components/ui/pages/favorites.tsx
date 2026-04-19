@@ -18,6 +18,7 @@ import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSelectionControl } from "@/hooks/use-selection-control";
+import { useSort } from "@/hooks/use-sort";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
@@ -66,6 +67,11 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   const handleScrollRestored = () => {
     popHistory();
   };
+
+  // ===== 並び替え =====
+
+  // NOTE: 並び替え処理はサーバーサイドで実施
+  const { value: sortValue, apply: applySortValue } = useSort();
 
   // ===== フィルタリング =====
 
@@ -309,16 +315,22 @@ export function Favorites({ listing }: { listing: MediaListing }) {
           <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
             {/* 並び替え */}
             <SortSelect
+              value={sortValue}
+              onChange={applySortValue}
               options={[
                 {
-                  key: "path",
-                  direction: "asc",
+                  value: {
+                    sort: "path",
+                    direction: "asc",
+                  },
                   label: "パス順 (A-Z)",
                   icon: ArrowDownAz,
                 },
                 {
-                  key: "rating",
-                  direction: "desc",
+                  value: {
+                    sort: "rating",
+                    direction: "desc",
+                  },
                   label: "評価順",
                   icon: Sparkle,
                 },
