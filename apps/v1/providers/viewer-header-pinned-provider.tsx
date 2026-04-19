@@ -1,26 +1,32 @@
 "use client";
 
-import { usePinned } from "@/hooks/use-pinned";
+import { useBoolState } from "@/hooks/use-bool-state";
 import { createContext, useContext } from "react";
 
-type PinnedContextType = ReturnType<typeof usePinned>;
+type BoolStateContextType = ReturnType<typeof useBoolState>;
 
-const PinnedContext = createContext<PinnedContextType | undefined>(undefined);
+const BoolStateContext = createContext<BoolStateContextType | undefined>(
+  undefined
+);
 
 export function ViewerHeaderPinnedProvider({
   children,
+  defaultPinned,
 }: {
   children: React.ReactNode;
+  defaultPinned?: boolean;
 }) {
-  const value = usePinned();
+  const value = useBoolState(defaultPinned);
 
   return (
-    <PinnedContext.Provider value={value}>{children}</PinnedContext.Provider>
+    <BoolStateContext.Provider value={value}>
+      {children}
+    </BoolStateContext.Provider>
   );
 }
 
 export function useViewerHeaderPinnedContext() {
-  const context = useContext(PinnedContext);
+  const context = useContext(BoolStateContext);
   if (context === undefined) {
     throw new Error(
       "useViewerHeaderPinnedContext must be used within ViewerHeaderPinnedProvider"
