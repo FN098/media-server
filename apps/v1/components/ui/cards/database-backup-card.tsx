@@ -93,6 +93,8 @@ export function DatabaseBackupCard() {
     () => [uploadedFile, ...backupFiles].filter((v) => !!v),
     [backupFiles, uploadedFile]
   );
+  const [showCleanupConfirm, setShowCleanupConfirm] = useState(false);
+  const [pendingDeleteCount, setPendingDeleteCount] = useState(0);
 
   const refreshList = () => {
     startListing(async () => {
@@ -107,6 +109,7 @@ export function DatabaseBackupCard() {
   };
 
   const handleBackup = () => {
+    setShowCleanupConfirm(false);
     startCreating(async () => {
       const res = await createBackupAction();
       if (res.success) {
@@ -192,8 +195,75 @@ export function DatabaseBackupCard() {
     });
   };
 
+  // 削除対象の件数を計算する
+  const calculateDeleteCount = () => {
+    if (!autoCleanup) return 0;
+    // 現在のリストが keepCount 以上なら、(現在の件数 + 新規作成分(1) - 保持数) が削除対象
+    const count = backupFiles.length + 1 - keepCount;
+    return count > 0 ? count : 0;
+  };
+
+  // バックアップボタンが押された時の入り口
+  const initiateBackup = async () => {
+    // リストが空の場合は一度取得（判定精度のため）
+    if (backupFiles.length === 0) {
+      const list = await getBackupListAction();
+      const mappedList = list.map((v) => ({
+        key: `saved:${v.name}`,
+        value: v,
+      }));
+      setBackupFiles(mappedList);
+      // 取得後のリストで判定
+      const deleteCount = mappedList.length + 1 - keepCount;
+      if (autoCleanup && deleteCount > 0) {
+        setPendingDeleteCount(deleteCount);
+        setShowCleanupConfirm(true);
+        return;
+      }
+    } else {
+      const deleteCount = calculateDeleteCount();
+      if (autoCleanup && deleteCount > 0) {
+        setPendingDeleteCount(deleteCount);
+        setShowCleanupConfirm(true);
+        return;
+      }
+    }
+
+    // 削除対象がなければそのまま実行
+    handleBackup();
+  };
+
   return (
     <Card>
+      {/* TODO: AlertDialog を一か所に集める。トリガーとダイアログを分離 */}
+      <AlertDialog
+        open={showCleanupConfirm}
+        onOpenChange={setShowCleanupConfirm}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>バックアップの作成と整理</AlertDialogTitle>
+            <AlertDialogDescription>
+              新しいバックアップを作成すると、保持設定（{keepCount}
+              件）を超えるため、
+              <strong className="text-destructive mx-1">
+                {pendingDeleteCount} 件
+              </strong>
+              の古いバックアップが自動的に削除されます。
+              <br />
+              <br />
+              続行してもよろしいですか？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBackup}>
+              削除を承諾して作成
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="w-5 h-5 text-primary" />
@@ -206,7 +276,7 @@ export function DatabaseBackupCard() {
       <CardContent className="space-y-4">
         {/* 新規バックアップ作成ボタン */}
         <Button
-          onClick={handleBackup}
+          onClick={() => void initiateBackup()}
           disabled={isCreating}
           className="w-full"
           variant="outline"
