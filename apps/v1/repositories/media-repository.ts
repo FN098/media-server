@@ -16,7 +16,7 @@ export async function getMediaDbNodes(
       fileSize: true,
       favorites: {
         where: { userId },
-        select: { mediaId: true, rating: true, createdAt: true },
+        select: { rating: true, createdAt: true },
       },
       mediaTags: {
         select: {
@@ -33,16 +33,16 @@ export async function getMediaDbNodes(
 
   return dbMedia.map((m) => ({
     id: m.id,
-    fileMtime: m.fileMtime,
     path: m.path,
     previewPath: m.previewPath ?? null,
-    fileSize: Number(m.fileSize),
     title: m.title ?? null,
+    fileMtime: m.fileMtime,
+    fileSize: Number(m.fileSize),
+    rating: m.favorites[0]?.rating ?? null,
+    favoritedAt: m.favorites[0]?.createdAt,
     tags: m.mediaTags.map((t) => ({
       id: t.tag.id,
       name: t.tag.name,
     })),
-    rating: m.favorites[0]?.rating ?? null,
-    favoritedAt: m.favorites[0]?.createdAt,
   }));
 }

@@ -683,3 +683,19 @@ export async function updatePreviewAction(
     return { success: false, error: "プレビューの更新に失敗しました。" };
   }
 }
+
+export async function touchMediaTimestampAction(targetPath: string) {
+  try {
+    // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
+
+    await prisma.media.update({
+      where: { path: targetPath },
+      data: { fileMtime: new Date() },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Touch Media Timestamp Error:", error);
+    return { success: false };
+  }
+}

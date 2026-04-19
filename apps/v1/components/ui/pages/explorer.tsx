@@ -3,6 +3,7 @@
 import { visitFolderAction } from "@/actions/folder-actions";
 import {
   deleteNodesAction,
+  touchMediaTimestampAction,
   updatePreviewAction,
 } from "@/actions/media-actions";
 import {
@@ -455,7 +456,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // サムネイル更新
   const handleUpdateThumb = (node: MediaNode) => {
     void enqueueCreateSingleThumbJobAction(node.path, { force: true });
-    node.mtime = new Date(); // ブラウザキャッシュ更新のため、一時的に更新日時を変更
+    void touchMediaTimestampAction(node.path); // タイムスタンプを更新してキャッシュを更新
+    node.mtime = new Date(); // ブラウザキャッシュ更新のため、一時的にタイムスタンプを変更
   };
 
   // ===== ショートカット =====

@@ -56,6 +56,7 @@ export function mergeFsWithDb({
         previewPath: dbNode?.previewPath,
         rating: dbNode?.rating ?? null,
         favoritedAt: dbNode?.favoritedAt,
+        mtime: dbNode?.fileMtime ?? node.mtime, // DB のタイムスタンプを優先
       } satisfies MediaNode;
     }
   });
