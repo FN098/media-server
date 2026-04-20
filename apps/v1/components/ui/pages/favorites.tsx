@@ -96,7 +96,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   const isFiltered = totalCount !== filteredCount;
 
   // タグをフィルターに追加
-  const addTagFilter = (node: MediaNode) => {
+  const handleAddTagFilter = (node: MediaNode) => {
     if (!node.tags || node.tags.length === 0) return;
     applyTagFilterValue({
       mode: tagFilterValue.mode,
@@ -189,7 +189,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   };
 
   // レーティング更新
-  const handleRatingChange = (node: MediaNode, rating: number | null) => {
+  const handleChangeRating = (node: MediaNode, rating: number | null) => {
     try {
       favCtx.updateFavorite(node.path, rating);
     } catch {
@@ -214,6 +214,11 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     if (isViewerMode) return "single";
     return "default";
   }, [isViewerMode]);
+
+  const handleEditTags = (node: MediaNode) => {
+    select(node);
+    handleOpenTagEditor();
+  };
 
   // タグエディタを表示
   const handleOpenTagEditor = () => {
@@ -304,12 +309,9 @@ export function Favorites({ listing }: { listing: MediaListing }) {
           openInNewTab: handleOpenInNewTab,
           openParentFolder: handleOpenParentFolder,
           toggleFavorite: handleToggleFavorite,
-          changeRating: handleRatingChange,
-          editTags: (node: MediaNode) => {
-            select(node);
-            handleOpenTagEditor();
-          },
-          addTagFilter,
+          changeRating: handleChangeRating,
+          editTags: handleEditTags,
+          addTagFilter: handleAddTagFilter,
         }}
       >
         <div

@@ -178,12 +178,12 @@ export function Trash({ listing }: { listing: MediaListing }) {
   const isRestoreMode = restoreTargets.length > 0;
 
   // 復元ダイアログを開く（単体）
-  const openRestoreDialogSingle = (node: MediaNode) => {
+  const handleOpenRestoreDialogSingle = (node: MediaNode) => {
     setRestoreTargets([node]);
   };
 
   // 復元ダイアログを開く（選択）
-  const openRestoreDialogSelected = () => {
+  const handleOpenRestoreDialogSelected = () => {
     setRestoreTargets(selected);
   };
 
@@ -213,7 +213,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   const isDeleteMode = deleteTargets.length > 0;
 
   // 削除ダイアログを開く（単体）
-  const openDeleteDialogSingle = (node: MediaNode) => {
+  const handleOpenDeleteDialogSingle = (node: MediaNode) => {
     setDeleteTargets([node]);
   };
 
@@ -316,8 +316,8 @@ export function Trash({ listing }: { listing: MediaListing }) {
       <ActionsProvider
         actions={{
           open: handleOpen,
-          deletePermanently: openDeleteDialogSingle,
-          restore: openRestoreDialogSingle,
+          deletePermanently: handleOpenDeleteDialogSingle,
+          restore: handleOpenRestoreDialogSingle,
         }}
       >
         <div
@@ -444,7 +444,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       variant="default"
-                      onClick={openRestoreDialogSelected}
+                      onClick={handleOpenRestoreDialogSelected}
                     >
                       <RotateCcw className="mr-2 h-4 w-4" />
                       復元

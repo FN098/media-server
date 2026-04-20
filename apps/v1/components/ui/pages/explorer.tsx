@@ -163,7 +163,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   ]);
 
   // タグをフィルターに追加
-  const addTagFilter = (node: MediaNode) => {
+  const handleAddTagFilter = (node: MediaNode) => {
     if (!node.tags || node.tags.length === 0) return;
     applyTagFilterValue({
       mode: tagFilterValue.mode,
@@ -264,7 +264,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   };
 
   // レーティング更新
-  const handleRatingChange = (node: MediaNode, rating: number | null) => {
+  const handleChangeRating = (node: MediaNode, rating: number | null) => {
     try {
       favCtx.updateFavorite(node.path, rating);
     } catch {
@@ -290,18 +290,23 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     return "default";
   }, [isViewerMode]);
 
+  const handleEditTags = (node: MediaNode) => {
+    select(node);
+    handleOpenTagEditor();
+  };
+
   // タグエディタを開く
-  const openTagEditor = () => {
+  const handleOpenTagEditor = () => {
     setIsTagEditMode(true);
   };
 
   // タグエディタを閉じる
-  const closeTagEditor = () => {
+  const handleCloseTagEditor = () => {
     setIsTagEditMode(false);
   };
 
   // タグエディタを表示/非表示
-  const toggleTagEditMode = () => {
+  const handleToggleTagEditMode = () => {
     setIsTagEditMode((prev) => !prev);
   };
 
@@ -311,7 +316,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const isRenameMode = !!renameTarget;
 
   // リネームダイアログを開く（単体）
-  const openRenameDialogSingle = (node: MediaNode) => {
+  const handleOpenRenameDialogSingle = (node: MediaNode) => {
     setRenameTarget(node);
   };
 
@@ -328,7 +333,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const isCreateFolderMode = !!folderDir;
 
   // フォルダ作成ダイアログを開く
-  const openCreateFolderDialog = () => {
+  const handleOpenCreateFolderDialog = () => {
     setFolderDir(listing.path);
   };
 
@@ -348,12 +353,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     moveTargets.length > 0 ? dirname(moveTargets[0]?.path) : undefined;
 
   // 移動ダイアログを開く（単体）
-  const openMoveDialogSingle = (node: MediaNode) => {
+  const handleOpenMoveDialogSingle = (node: MediaNode) => {
     setMoveTargets([node]);
   };
 
   // 移動ダイアログを開く（選択）
-  const openMoveDialogSelected = () => {
+  const handleOpenMoveDialogSelected = () => {
     setMoveTargets(selected);
   };
 
@@ -374,12 +379,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     copyTargets.length > 0 ? dirname(copyTargets[0]?.path) : undefined;
 
   // コピーダイアログを開く（単体）
-  const openCopyDialogSingle = (node: MediaNode) => {
+  const handleOpenCopyDialogSingle = (node: MediaNode) => {
     setCopyTargets([node]);
   };
 
   // コピーダイアログを開く（選択）
-  const openCopyDialogSelected = () => {
+  const handleOpenCopyDialogSelected = () => {
     setCopyTargets(selected);
   };
 
@@ -397,12 +402,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const isDeleteMode = deleteTargets.length > 0;
 
   // 削除ダイアログを開く（単体）
-  const openDeleteDialogSingle = (node: MediaNode) => {
+  const handleOpenDeleteDialogSingle = (node: MediaNode) => {
     setDeleteTargets([node]);
   };
 
   // 削除ダイアログを開く（選択）
-  const openDeleteDialogSelected = () => {
+  const handleOpenDeleteDialogSelected = () => {
     setDeleteTargets(selected);
   };
 
@@ -433,7 +438,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const isFolderPreviewMode = previewPath != null;
 
   // プレビュー設定ダイアログを開く
-  const openApplyPreviewDialog = (node: MediaNode) => {
+  const handleOpenApplyPreviewDialog = (node: MediaNode) => {
     setPreviewPath(node.path);
   };
 
@@ -517,10 +522,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   useHotkeys("escape", () => resetSelection(), {
     scopes: "explorer",
   });
-  useHotkeys("delete", () => openDeleteDialogSelected(), {
+  useHotkeys("delete", () => handleOpenDeleteDialogSelected(), {
     scopes: "explorer",
   });
-  useHotkeys("t", () => toggleTagEditMode(), {
+  useHotkeys("t", () => handleToggleTagEditMode(), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
   useHotkeys(
@@ -560,18 +565,15 @@ export function Explorer({ listing }: { listing: MediaListing }) {
         actions={{
           open: handleOpen,
           openInNewTab: handleOpenInNewTab,
-          changeRating: handleRatingChange,
+          changeRating: handleChangeRating,
           toggleFavorite: handleToggleFavorite,
-          rename: openRenameDialogSingle,
-          move: openMoveDialogSingle,
-          copy: openCopyDialogSingle,
-          delete: openDeleteDialogSingle,
-          editTags: (node: MediaNode) => {
-            select(node);
-            openTagEditor();
-          },
-          addTagFilter,
-          setAsPreview: openApplyPreviewDialog,
+          rename: handleOpenRenameDialogSingle,
+          move: handleOpenMoveDialogSingle,
+          copy: handleOpenCopyDialogSingle,
+          delete: handleOpenDeleteDialogSingle,
+          editTags: handleEditTags,
+          addTagFilter: handleAddTagFilter,
+          setAsPreview: handleOpenApplyPreviewDialog,
           updateThumb: handleUpdateThumb,
         }}
       >
@@ -652,7 +654,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               />
 
               {/* 新規フォルダ作成 */}
-              <Button variant="outline" onClick={openCreateFolderDialog}>
+              <Button variant="outline" onClick={handleOpenCreateFolderDialog}>
                 <FolderPlus className="h-4 w-4" />
                 新規フォルダ
               </Button>
@@ -707,8 +709,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 onClose={closeViewer}
                 onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
                 onNextFolder={listing.next ? handleOpenNextFolder : undefined}
-                onEditTags={toggleTagEditMode}
-                onDelete={openDeleteDialogSelected}
+                onEditTags={handleToggleTagEditMode}
+                onDelete={handleOpenDeleteDialogSelected}
               />
             </ScrollLockProvider>
           )}
@@ -727,7 +729,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={openTagEditor}
+                  onClick={handleOpenTagEditor}
                   disabled={selected.length === 0}
                 >
                   <TagIcon size={18} />
@@ -741,17 +743,17 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={openMoveDialogSelected}>
+                    <DropdownMenuItem onClick={handleOpenMoveDialogSelected}>
                       <FolderInput className="mr-2 h-4 w-4" /> 移動
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={openCopyDialogSelected}>
+                    <DropdownMenuItem onClick={handleOpenCopyDialogSelected}>
                       <Copy className="mr-2 h-4 w-4" /> コピー
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
                       variant="destructive"
-                      onClick={openDeleteDialogSelected}
+                      onClick={handleOpenDeleteDialogSelected}
                     >
                       <Trash2 className="mr-2 h-4 w-4" /> 削除
                     </DropdownMenuItem>
@@ -765,7 +767,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           <TagEditSheet
             open={isTagEditMode}
             targetNodes={selected}
-            onClose={closeTagEditor}
+            onClose={handleCloseTagEditor}
             mode={tagEditMode}
             opacity={tagEditMode === "default" ? 100 : 0}
           />
