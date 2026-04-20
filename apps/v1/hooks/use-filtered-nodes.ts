@@ -9,7 +9,7 @@ import {
 } from "@/lib/filter/types";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
-import { isMatchJapanese } from "@/lib/utils/search";
+import { isMatchJapanese } from "@/lib/utils/japanese";
 import { useMemo } from "react";
 
 // helpers

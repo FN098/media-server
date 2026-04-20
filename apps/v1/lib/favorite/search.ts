@@ -8,7 +8,7 @@ import {
 import { detectMediaType } from "@/lib/media/media-types";
 import { MediaNode, MediaType, SortDirection } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
-import { normalizeForLike } from "@/lib/utils/search";
+import { normalizeForLike } from "@/lib/utils/japanese";
 import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/shuffle";
 import path, { basename } from "path";
 
