@@ -556,291 +556,272 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
-      <div
-        className={cn(
-          "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
-        )}
-        tabIndex={-1}
+      <ActionsProvider
+        actions={{
+          open: handleOpen,
+          openInNewTab: handleOpenInNewTab,
+          changeRating: handleRatingChange,
+          toggleFavorite: handleToggleFavorite,
+          rename: openRenameDialogSingle,
+          move: openMoveDialogSingle,
+          copy: openCopyDialogSingle,
+          delete: openDeleteDialogSingle,
+          editTags: (node: MediaNode) => {
+            select(node);
+            openTagEditor();
+          },
+          addTagFilter,
+          setAsPreview: openApplyPreviewDialog,
+          updateThumb: handleUpdateThumb,
+        }}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-          {/* 操作メニュー */}
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
-            {/* 並び替え */}
-            <SortSelect
-              value={sortValue}
-              onChange={applySortValue}
-              options={[
-                {
-                  value: {
-                    sort: "name",
-                    direction: "asc",
+        <div
+          className={cn(
+            "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
+          )}
+          tabIndex={-1}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
+            {/* 操作メニュー */}
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
+              {/* 並び替え */}
+              <SortSelect
+                value={sortValue}
+                onChange={applySortValue}
+                options={[
+                  {
+                    value: {
+                      sort: "name",
+                      direction: "asc",
+                    },
+                    label: "名前順 (A-Z)",
+                    icon: ArrowDownAz,
                   },
-                  label: "名前順 (A-Z)",
-                  icon: ArrowDownAz,
-                },
-                {
-                  value: {
-                    sort: "rating",
-                    direction: "desc",
+                  {
+                    value: {
+                      sort: "rating",
+                      direction: "desc",
+                    },
+                    label: "評価順",
+                    icon: Sparkle,
                   },
-                  label: "評価順",
-                  icon: Sparkle,
-                },
-                {
-                  value: {
-                    sort: "favoriteCount",
-                    direction: "desc",
+                  {
+                    value: {
+                      sort: "favoriteCount",
+                      direction: "desc",
+                    },
+                    label: "人気順",
+                    icon: Sparkles,
                   },
-                  label: "人気順",
-                  icon: Sparkles,
-                },
-                {
-                  value: {
-                    sort: "mtime",
-                    direction: "desc",
+                  {
+                    value: {
+                      sort: "mtime",
+                      direction: "desc",
+                    },
+                    label: "更新順",
+                    icon: CalendarArrowDown,
                   },
-                  label: "更新順",
-                  icon: CalendarArrowDown,
-                },
-              ]}
-            />
+                ]}
+              />
 
-            {/* 種別フィルター */}
-            <MediaTypeFilterMultiSelect
-              value={mediaTypeFilterValue}
-              onChange={applyMediaTypeFilterValue}
-              displayTypes={["image", "video", "audio"]}
-            />
+              {/* 種別フィルター */}
+              <MediaTypeFilterMultiSelect
+                value={mediaTypeFilterValue}
+                onChange={applyMediaTypeFilterValue}
+                displayTypes={["image", "video", "audio"]}
+              />
 
-            {/* お気に入りフィルター */}
-            <FavoriteFilterSelect
-              value={favoriteFilterValue}
-              onChange={applyFavoriteFilterValue}
-            />
+              {/* お気に入りフィルター */}
+              <FavoriteFilterSelect
+                value={favoriteFilterValue}
+                onChange={applyFavoriteFilterValue}
+              />
 
-            {/* 評価フィルター */}
-            <RatingFilterDialog
-              value={ratingFilterValue}
-              onChange={applyRatingFilterValue}
-            />
+              {/* 評価フィルター */}
+              <RatingFilterDialog
+                value={ratingFilterValue}
+                onChange={applyRatingFilterValue}
+              />
 
-            {/* タグフィルター */}
-            <TagFilterDialog
-              value={tagFilterValue}
-              onChange={applyTagFilterValue}
-              relatedNodes={mediaOnly}
-              autoFocusInput={!isMobile}
-            />
+              {/* タグフィルター */}
+              <TagFilterDialog
+                value={tagFilterValue}
+                onChange={applyTagFilterValue}
+                relatedNodes={mediaOnly}
+                autoFocusInput={!isMobile}
+              />
 
-            {/* 新規フォルダ作成 */}
-            <Button variant="outline" onClick={openCreateFolderDialog}>
-              <FolderPlus className="h-4 w-4" />
-              新規フォルダ
-            </Button>
+              {/* 新規フォルダ作成 */}
+              <Button variant="outline" onClick={openCreateFolderDialog}>
+                <FolderPlus className="h-4 w-4" />
+                新規フォルダ
+              </Button>
 
-            {/* リセット */}
-            <ResetButton
-              onClick={clearSearchParams}
-              isVisible={hasSearchParams}
+              {/* リセット */}
+              <ResetButton
+                onClick={clearSearchParams}
+                isVisible={hasSearchParams}
+              />
+            </div>
+
+            {/* 件数 */}
+            <FilterResultText
+              totalCount={totalCount}
+              filteredCount={filteredCount}
+              isFiltered={isFiltered}
+              className="ml-auto min-w-[120px] text-right"
             />
           </div>
 
-          {/* 件数 */}
-          <FilterResultText
-            totalCount={totalCount}
-            filteredCount={filteredCount}
-            isFiltered={isFiltered}
-            className="ml-auto min-w-[120px] text-right"
-          />
-        </div>
-
-        {/* グリッドビュー */}
-        {viewMode === "grid" && !isViewerMode && (
-          <div className="flex-1">
-            <ActionsProvider
-              actions={{
-                open: handleOpen,
-                openInNewTab: handleOpenInNewTab,
-                changeRating: handleRatingChange,
-                toggleFavorite: handleToggleFavorite,
-                rename: openRenameDialogSingle,
-                move: openMoveDialogSingle,
-                copy: openCopyDialogSingle,
-                delete: openDeleteDialogSingle,
-                editTags: (node: MediaNode) => {
-                  select(node);
-                  openTagEditor();
-                },
-                addTagFilter,
-                setAsPreview: openApplyPreviewDialog,
-                updateThumb: handleUpdateThumb,
-              }}
-            >
+          {/* グリッドビュー */}
+          {viewMode === "grid" && !isViewerMode && (
+            <div className="flex-1">
               <PagingGridView
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
                 focusOnPageChange
               />
-            </ActionsProvider>
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* リストビュー */}
-        {viewMode === "list" && !isViewerMode && (
-          <div className="flex-1">
-            <ActionsProvider
-              actions={{
-                open: handleOpen,
-                changeRating: handleRatingChange,
-                toggleFavorite: handleToggleFavorite,
-                rename: openRenameDialogSingle,
-                move: openMoveDialogSingle,
-                copy: openCopyDialogSingle,
-                delete: openDeleteDialogSingle,
-                editTags: (node: MediaNode) => {
-                  select(node);
-                  openTagEditor();
-                },
-                addTagFilter,
-                setAsPreview: openApplyPreviewDialog,
-                updateThumb: handleUpdateThumb,
-              }}
-            >
+          {/* リストビュー */}
+          {viewMode === "list" && !isViewerMode && (
+            <div className="flex-1">
               <PagingListView
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
                 focusOnPageChange
               />
-            </ActionsProvider>
-          </div>
-        )}
-
-        {/* ビューワ */}
-        {isViewerMode && (
-          <ScrollLockProvider>
-            <MediaViewer
-              allNodes={mediaOnly}
-              initialIndex={initialViewerIndex}
-              onIndexChange={handleViewerIndexChange}
-              onClose={closeViewer}
-              onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
-              onNextFolder={listing.next ? handleOpenNextFolder : undefined}
-              onEditTags={toggleTagEditMode}
-              onDelete={openDeleteDialogSelected}
-            />
-          </ScrollLockProvider>
-        )}
-
-        {/* 選択バー */}
-        <SelectionBar
-          open={isSelectionMode && !isTagEditMode && !isMoveMode}
-          count={selected.length}
-          totalCount={filteredNodes.length}
-          onSelectAll={selectAll}
-          onClose={resetSelection}
-          className="z-40" // DropdownMenu より小さくする
-          actions={
-            <div className="flex gap-1 items-center">
-              {/* メインのアクション */}
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={openTagEditor}
-                disabled={selected.length === 0}
-              >
-                <TagIcon size={18} />
-              </Button>
-
-              {/* その他のアクション */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost">
-                    <MoreVertical size={18} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={openMoveDialogSelected}>
-                    <FolderInput className="mr-2 h-4 w-4" /> 移動
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem onClick={openCopyDialogSelected}>
-                    <Copy className="mr-2 h-4 w-4" /> コピー
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={openDeleteDialogSelected}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> 削除
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
-          }
-        />
+          )}
 
-        {/* タグエディター */}
-        <TagEditSheet
-          open={isTagEditMode}
-          targetNodes={selected}
-          onClose={closeTagEditor}
-          mode={tagEditMode}
-          opacity={tagEditMode === "default" ? 100 : 0}
-        />
+          {/* ビューワ */}
+          {isViewerMode && (
+            <ScrollLockProvider>
+              <MediaViewer
+                allNodes={mediaOnly}
+                initialIndex={initialViewerIndex}
+                onIndexChange={handleViewerIndexChange}
+                onClose={closeViewer}
+                onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
+                onNextFolder={listing.next ? handleOpenNextFolder : undefined}
+                onEditTags={toggleTagEditMode}
+                onDelete={openDeleteDialogSelected}
+              />
+            </ScrollLockProvider>
+          )}
 
-        {/* リネームダイアログ */}
-        <RenameDialog
-          open={isRenameMode}
-          onOpenChange={handleRenameDialogOpenChange}
-          sourcePath={renameTarget?.path ?? ""}
-          currentName={renameTarget?.name ?? ""}
-          isDirectory={renameTarget?.isDirectory}
-        />
+          {/* 選択バー */}
+          <SelectionBar
+            open={isSelectionMode && !isTagEditMode && !isMoveMode}
+            count={selected.length}
+            totalCount={filteredNodes.length}
+            onSelectAll={selectAll}
+            onClose={resetSelection}
+            className="z-40" // DropdownMenu より小さくする
+            actions={
+              <div className="flex gap-1 items-center">
+                {/* メインのアクション */}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={openTagEditor}
+                  disabled={selected.length === 0}
+                >
+                  <TagIcon size={18} />
+                </Button>
 
-        {/* フォルダ作成ダイアログ */}
-        <CreateFolderDialog
-          key={`create-folder-${isCreateFolderMode}`}
-          open={isCreateFolderMode}
-          onOpenChange={handleCreateFolderDialogOpenChange}
-          parentPath={listing.path}
-        />
+                {/* その他のアクション */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <MoreVertical size={18} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={openMoveDialogSelected}>
+                      <FolderInput className="mr-2 h-4 w-4" /> 移動
+                    </DropdownMenuItem>
 
-        {/* 移動ダイアログ */}
-        <MoveDialog
-          open={isMoveMode}
-          onOpenChange={handleMoveDialogOpenChange}
-          sourceNodes={moveTargets}
-          initialDirPath={initialMoveDialogDirPath}
-        />
+                    <DropdownMenuItem onClick={openCopyDialogSelected}>
+                      <Copy className="mr-2 h-4 w-4" /> コピー
+                    </DropdownMenuItem>
 
-        {/* コピーダイアログ */}
-        <CopyDialog
-          open={isCopyMode}
-          onOpenChange={handleCopyDialogOpenChange}
-          sourceNodes={copyTargets}
-          initialDirPath={initialCopyDialogDirPath}
-        />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={openDeleteDialogSelected}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> 削除
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            }
+          />
 
-        {/* 削除警告ダイアログ */}
-        <DeleteAlertDialog
-          open={isDeleteMode}
-          onConfirm={handleDeleteDialogConfirm}
-          onOpenChange={handleDeleteDialogOpenChange}
-          count={deleteTargets.length}
-        />
+          {/* タグエディター */}
+          <TagEditSheet
+            open={isTagEditMode}
+            targetNodes={selected}
+            onClose={closeTagEditor}
+            mode={tagEditMode}
+            opacity={tagEditMode === "default" ? 100 : 0}
+          />
 
-        {/* プレビュー設定ダイアログ */}
-        <ApplyPreviewDialog
-          open={isFolderPreviewMode}
-          onOpenChange={handleApplyPreviewDialogOpenChange}
-          previewPath={previewPath}
-        />
+          {/* リネームダイアログ */}
+          <RenameDialog
+            open={isRenameMode}
+            onOpenChange={handleRenameDialogOpenChange}
+            sourcePath={renameTarget?.path ?? ""}
+            currentName={renameTarget?.name ?? ""}
+            isDirectory={renameTarget?.isDirectory}
+          />
 
-        {/* フォルダナビゲーション */}
-        <FolderNavigation prevPath={listing.prev} nextPath={listing.next} />
-      </div>
+          {/* フォルダ作成ダイアログ */}
+          <CreateFolderDialog
+            key={`create-folder-${isCreateFolderMode}`}
+            open={isCreateFolderMode}
+            onOpenChange={handleCreateFolderDialogOpenChange}
+            parentPath={listing.path}
+          />
+
+          {/* 移動ダイアログ */}
+          <MoveDialog
+            open={isMoveMode}
+            onOpenChange={handleMoveDialogOpenChange}
+            sourceNodes={moveTargets}
+            initialDirPath={initialMoveDialogDirPath}
+          />
+
+          {/* コピーダイアログ */}
+          <CopyDialog
+            open={isCopyMode}
+            onOpenChange={handleCopyDialogOpenChange}
+            sourceNodes={copyTargets}
+            initialDirPath={initialCopyDialogDirPath}
+          />
+
+          {/* 削除警告ダイアログ */}
+          <DeleteAlertDialog
+            open={isDeleteMode}
+            onConfirm={handleDeleteDialogConfirm}
+            onOpenChange={handleDeleteDialogOpenChange}
+            count={deleteTargets.length}
+          />
+
+          {/* プレビュー設定ダイアログ */}
+          <ApplyPreviewDialog
+            open={isFolderPreviewMode}
+            onOpenChange={handleApplyPreviewDialogOpenChange}
+            previewPath={previewPath}
+          />
+
+          {/* フォルダナビゲーション */}
+          <FolderNavigation prevPath={listing.prev} nextPath={listing.next} />
+        </div>
+      </ActionsProvider>
     </PagingProvider>
   );
 }

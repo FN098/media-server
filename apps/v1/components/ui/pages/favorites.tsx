@@ -298,179 +298,164 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
-      <div
-        className={cn(
-          "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
-        )}
-        tabIndex={-1}
+      <ActionsProvider
+        actions={{
+          open: handleOpen,
+          openInNewTab: handleOpenInNewTab,
+          openParentFolder: handleOpenParentFolder,
+          toggleFavorite: handleToggleFavorite,
+          changeRating: handleRatingChange,
+          editTags: (node: MediaNode) => {
+            select(node);
+            handleOpenTagEditor();
+          },
+          addTagFilter,
+        }}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-          {/* 操作メニュー */}
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
-            {/* 並び替え */}
-            <SortSelect
-              value={sortValue}
-              onChange={applySortValue}
-              options={[
-                {
-                  value: {
-                    sort: "path",
-                    direction: "asc",
+        <div
+          className={cn(
+            "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
+          )}
+          tabIndex={-1}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
+            {/* 操作メニュー */}
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
+              {/* 並び替え */}
+              <SortSelect
+                value={sortValue}
+                onChange={applySortValue}
+                options={[
+                  {
+                    value: {
+                      sort: "path",
+                      direction: "asc",
+                    },
+                    label: "パス順 (A-Z)",
+                    icon: ArrowDownAz,
                   },
-                  label: "パス順 (A-Z)",
-                  icon: ArrowDownAz,
-                },
-                {
-                  value: {
-                    sort: "rating",
-                    direction: "desc",
+                  {
+                    value: {
+                      sort: "rating",
+                      direction: "desc",
+                    },
+                    label: "評価順",
+                    icon: Sparkle,
                   },
-                  label: "評価順",
-                  icon: Sparkle,
-                },
-              ]}
-            />
+                ]}
+              />
 
-            {/* 種別フィルター */}
-            <MediaTypeFilterMultiSelect
-              value={mediaTypeFilterValue}
-              onChange={applyMediaTypeFilterValue}
-              displayTypes={["image", "video", "audio"]}
-            />
+              {/* 種別フィルター */}
+              <MediaTypeFilterMultiSelect
+                value={mediaTypeFilterValue}
+                onChange={applyMediaTypeFilterValue}
+                displayTypes={["image", "video", "audio"]}
+              />
 
-            {/* 評価フィルター */}
-            <RatingFilterDialog
-              value={ratingFilterValue}
-              onChange={applyRatingFilterValue}
-            />
+              {/* 評価フィルター */}
+              <RatingFilterDialog
+                value={ratingFilterValue}
+                onChange={applyRatingFilterValue}
+              />
 
-            {/* タグフィルター */}
-            <TagFilterDialog
-              value={tagFilterValue}
-              onChange={applyTagFilterValue}
-              relatedNodes={mediaOnly}
-              autoFocusInput={!isMobile}
-            />
+              {/* タグフィルター */}
+              <TagFilterDialog
+                value={tagFilterValue}
+                onChange={applyTagFilterValue}
+                relatedNodes={mediaOnly}
+                autoFocusInput={!isMobile}
+              />
 
-            {/* シャッフルボタン */}
-            <ShuffleButton />
+              {/* シャッフルボタン */}
+              <ShuffleButton />
 
-            {/* リセットボタン */}
-            <ResetButton
-              onClick={clearSearchParams}
-              isVisible={hasSearchParams}
+              {/* リセットボタン */}
+              <ResetButton
+                onClick={clearSearchParams}
+                isVisible={hasSearchParams}
+              />
+            </div>
+
+            {/* 件数 */}
+            <FilterResultText
+              totalCount={totalCount}
+              filteredCount={filteredCount}
+              isFiltered={isFiltered}
+              className="ml-auto min-w-[120px] text-right"
             />
           </div>
 
-          {/* 件数 */}
-          <FilterResultText
-            totalCount={totalCount}
-            filteredCount={filteredCount}
-            isFiltered={isFiltered}
-            className="ml-auto min-w-[120px] text-right"
-          />
-        </div>
-
-        {/* グリッドビュー */}
-        {viewMode === "grid" && !isViewerMode && (
-          <div className="flex-1">
-            <ActionsProvider
-              actions={{
-                open: handleOpen,
-                openInNewTab: handleOpenInNewTab,
-                openParentFolder: handleOpenParentFolder,
-                toggleFavorite: handleToggleFavorite,
-                changeRating: handleRatingChange,
-                editTags: (node: MediaNode) => {
-                  select(node);
-                  handleOpenTagEditor();
-                },
-                addTagFilter,
-              }}
-            >
+          {/* グリッドビュー */}
+          {viewMode === "grid" && !isViewerMode && (
+            <div className="flex-1">
               <PagingGridView
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
                 focusOnPageChange
               />
-            </ActionsProvider>
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* リストビュー */}
-        {viewMode === "list" && !isViewerMode && (
-          <div className="flex-1">
-            <ActionsProvider
-              actions={{
-                open: handleOpen,
-                openInNewTab: handleOpenInNewTab,
-                openParentFolder: handleOpenParentFolder,
-                changeRating: handleRatingChange,
-                toggleFavorite: handleToggleFavorite,
-                editTags: (node: MediaNode) => {
-                  select(node);
-                  handleOpenTagEditor();
-                },
-                addTagFilter,
-              }}
-            >
+          {/* リストビュー */}
+          {viewMode === "list" && !isViewerMode && (
+            <div className="flex-1">
               <PagingListView
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
                 focusOnPageChange
               />
-            </ActionsProvider>
-          </div>
-        )}
-
-        {/* ビューワ */}
-        {isViewerMode && (
-          <ScrollLockProvider>
-            <MediaViewer
-              allNodes={mediaOnly}
-              initialIndex={initialViewerIndex}
-              onIndexChange={handleViewerIndexChange}
-              onClose={closeViewer}
-              onOpenFolder={(path, at) => openFolder(path, { at })}
-              onEditTags={handleToggleTagEditor}
-            />
-          </ScrollLockProvider>
-        )}
-
-        {/* 選択バー */}
-        <SelectionBar
-          open={isSelectionMode && !isTagEditMode}
-          count={selected.length}
-          totalCount={filteredNodes.length}
-          onSelectAll={selectAll}
-          onClose={resetSelection}
-          className="z-40" // DropdownMenu より小さくする
-          actions={
-            <div className="flex gap-1 items-center">
-              {/* メインのアクション */}
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={handleOpenTagEditor}
-                disabled={selected.length === 0}
-              >
-                <TagIcon size={18} />
-              </Button>
             </div>
-          }
-        />
+          )}
 
-        {/* タグエディター */}
-        <TagEditSheet
-          open={isTagEditMode}
-          targetNodes={selected}
-          onClose={handleCloseTagEditor}
-          mode={tagEditMode}
-          opacity={tagEditMode === "default" ? 100 : 0}
-        />
-      </div>
+          {/* ビューワ */}
+          {isViewerMode && (
+            <ScrollLockProvider>
+              <MediaViewer
+                allNodes={mediaOnly}
+                initialIndex={initialViewerIndex}
+                onIndexChange={handleViewerIndexChange}
+                onClose={closeViewer}
+                onOpenFolder={(path, at) => openFolder(path, { at })}
+                onEditTags={handleToggleTagEditor}
+              />
+            </ScrollLockProvider>
+          )}
+
+          {/* 選択バー */}
+          <SelectionBar
+            open={isSelectionMode && !isTagEditMode}
+            count={selected.length}
+            totalCount={filteredNodes.length}
+            onSelectAll={selectAll}
+            onClose={resetSelection}
+            className="z-40" // DropdownMenu より小さくする
+            actions={
+              <div className="flex gap-1 items-center">
+                {/* メインのアクション */}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleOpenTagEditor}
+                  disabled={selected.length === 0}
+                >
+                  <TagIcon size={18} />
+                </Button>
+              </div>
+            }
+          />
+
+          {/* タグエディター */}
+          <TagEditSheet
+            open={isTagEditMode}
+            targetNodes={selected}
+            onClose={handleCloseTagEditor}
+            mode={tagEditMode}
+            opacity={tagEditMode === "default" ? 100 : 0}
+          />
+        </div>
+      </ActionsProvider>
     </PagingProvider>
   );
 }

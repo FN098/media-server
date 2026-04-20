@@ -313,187 +313,179 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
-      <div
-        className={cn(
-          "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
-        )}
-        tabIndex={-1}
+      <ActionsProvider
+        actions={{
+          open: handleOpen,
+          deletePermanently: openDeleteDialogSingle,
+          restore: openRestoreDialogSingle,
+        }}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-          {/* 操作メニュー */}
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
-            {/* 並び替え */}
-            <SortSelect
-              value={sortValue}
-              onChange={applySortValue}
-              options={[
-                {
-                  value: {
-                    sort: "name",
-                    direction: "asc",
+        <div
+          className={cn(
+            "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
+          )}
+          tabIndex={-1}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
+            {/* 操作メニュー */}
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
+              {/* 並び替え */}
+              <SortSelect
+                value={sortValue}
+                onChange={applySortValue}
+                options={[
+                  {
+                    value: {
+                      sort: "name",
+                      direction: "asc",
+                    },
+                    label: "名前順 (A-Z)",
+                    icon: ArrowDownAz,
                   },
-                  label: "名前順 (A-Z)",
-                  icon: ArrowDownAz,
-                },
-                {
-                  value: {
-                    sort: "rating",
-                    direction: "desc",
+                  {
+                    value: {
+                      sort: "rating",
+                      direction: "desc",
+                    },
+                    label: "評価順",
+                    icon: Sparkle,
                   },
-                  label: "評価順",
-                  icon: Sparkle,
-                },
-                {
-                  value: {
-                    sort: "favoriteCount",
-                    direction: "desc",
+                  {
+                    value: {
+                      sort: "favoriteCount",
+                      direction: "desc",
+                    },
+                    label: "人気順",
+                    icon: Sparkles,
                   },
-                  label: "人気順",
-                  icon: Sparkles,
-                },
-                {
-                  value: {
-                    sort: "mtime",
-                    direction: "desc",
+                  {
+                    value: {
+                      sort: "mtime",
+                      direction: "desc",
+                    },
+                    label: "更新順",
+                    icon: CalendarArrowDown,
                   },
-                  label: "更新順",
-                  icon: CalendarArrowDown,
-                },
-              ]}
-            />
+                ]}
+              />
 
-            {/* リセット */}
-            <ResetButton
-              onClick={clearSearchParams}
-              isVisible={hasSearchParams}
+              {/* リセット */}
+              <ResetButton
+                onClick={clearSearchParams}
+                isVisible={hasSearchParams}
+              />
+            </div>
+
+            {/* 件数 */}
+            <FilterResultText
+              totalCount={totalCount}
+              filteredCount={filteredCount}
+              isFiltered={isFiltered}
+              className="ml-auto min-w-[120px] text-right"
             />
           </div>
 
-          {/* 件数 */}
-          <FilterResultText
-            totalCount={totalCount}
-            filteredCount={filteredCount}
-            isFiltered={isFiltered}
-            className="ml-auto min-w-[120px] text-right"
-          />
-        </div>
-
-        {/* グリッドビュー */}
-        {viewMode === "grid" && (
-          <div className="flex-1">
-            <ActionsProvider
-              actions={{
-                open: handleOpen,
-                deletePermanently: openDeleteDialogSingle,
-                restore: openRestoreDialogSingle,
-              }}
-            >
+          {/* グリッドビュー */}
+          {viewMode === "grid" && (
+            <div className="flex-1">
               <PagingGridView
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
                 focusOnPageChange
               />
-            </ActionsProvider>
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* リストビュー */}
-        {viewMode === "list" && (
-          <div className="flex-1">
-            <ActionsProvider
-              actions={{
-                open: handleOpen,
-                deletePermanently: openDeleteDialogSingle,
-                restore: openRestoreDialogSingle,
-              }}
-            >
+          {/* リストビュー */}
+          {viewMode === "list" && (
+            <div className="flex-1">
               <PagingListView
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
                 focusOnPageChange
               />
-            </ActionsProvider>
-          </div>
-        )}
-
-        {/* ビューワ */}
-        {isViewerMode && (
-          <ScrollLockProvider>
-            <MediaViewer
-              allNodes={mediaOnly}
-              initialIndex={initialViewerIndex}
-              onIndexChange={handleViewerIndexChange}
-              onClose={closeViewer}
-              onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
-              onNextFolder={listing.next ? handleOpenNextFolder : undefined}
-              onDelete={openDeleteDialogSelected}
-            />
-          </ScrollLockProvider>
-        )}
-
-        {/* 選択バー */}
-        <SelectionBar
-          open={isSelectionMode}
-          count={selected.length}
-          totalCount={filteredNodes.length}
-          onSelectAll={selectAll}
-          onClose={resetSelection}
-          className="z-40"
-          actions={
-            <div className="flex gap-1 items-center">
-              {/* その他のアクション */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost">
-                    <MoreVertical size={18} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    variant="default"
-                    onClick={openRestoreDialogSelected}
-                  >
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    復元
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={openDeleteDialogSelected}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
-          }
-        />
+          )}
 
-        {/* 削除警告ダイアログ */}
-        <DeleteAlertDialog
-          open={isDeleteMode}
-          onConfirm={handleDeleteDialogConfirm}
-          onOpenChange={handleDeleteDialogOpenChange}
-          count={deleteTargets.length}
-          permanent
-        />
+          {/* ビューワ */}
+          {isViewerMode && (
+            <ScrollLockProvider>
+              <MediaViewer
+                allNodes={mediaOnly}
+                initialIndex={initialViewerIndex}
+                onIndexChange={handleViewerIndexChange}
+                onClose={closeViewer}
+                onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
+                onNextFolder={listing.next ? handleOpenNextFolder : undefined}
+                onDelete={openDeleteDialogSelected}
+              />
+            </ScrollLockProvider>
+          )}
 
-        {/* 復元警告ダイアログ */}
-        <RestoreAlertDialog
-          open={isRestoreMode}
-          onConfirm={handleRestoreDialogConfirm}
-          onOpenChange={handleRestoreDialogOpenChange}
-          count={restoreTargets.length}
-        />
+          {/* 選択バー */}
+          <SelectionBar
+            open={isSelectionMode}
+            count={selected.length}
+            totalCount={filteredNodes.length}
+            onSelectAll={selectAll}
+            onClose={resetSelection}
+            className="z-40"
+            actions={
+              <div className="flex gap-1 items-center">
+                {/* その他のアクション */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <MoreVertical size={18} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      variant="default"
+                      onClick={openRestoreDialogSelected}
+                    >
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      復元
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={openDeleteDialogSelected}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            }
+          />
 
-        {/* フォルダナビゲーション */}
-        <FolderNavigation
-          prevPath={listing.prev}
-          nextPath={listing.next}
-          isDeleted
-        />
-      </div>
+          {/* 削除警告ダイアログ */}
+          <DeleteAlertDialog
+            open={isDeleteMode}
+            onConfirm={handleDeleteDialogConfirm}
+            onOpenChange={handleDeleteDialogOpenChange}
+            count={deleteTargets.length}
+            permanent
+          />
+
+          {/* 復元警告ダイアログ */}
+          <RestoreAlertDialog
+            open={isRestoreMode}
+            onConfirm={handleRestoreDialogConfirm}
+            onOpenChange={handleRestoreDialogOpenChange}
+            count={restoreTargets.length}
+          />
+
+          {/* フォルダナビゲーション */}
+          <FolderNavigation
+            prevPath={listing.prev}
+            nextPath={listing.next}
+            isDeleted
+          />
+        </div>
+      </ActionsProvider>
     </PagingProvider>
   );
 }
