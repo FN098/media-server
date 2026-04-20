@@ -5,7 +5,7 @@ import { getMediaPathFromThumbPath } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
 import { prisma } from "@/lib/prisma";
 import { GhostThumbItem, GhostThumbScanOptions } from "@/lib/thumb/types";
-import { hashPath } from "@/lib/utils/path";
+import { sha1Hash } from "@/lib/utils/sha1-hash";
 import { connection, thumbQueue } from "@/workers/thumb/queue";
 import { rm } from "fs/promises";
 import { glob } from "glob";
@@ -38,7 +38,7 @@ export async function enqueueCreateThumbsJobAction(
     force?: boolean;
   }
 ) {
-  const lockKey = `thumb-lock:dir:${hashPath(dirPath)}`;
+  const lockKey = `thumb-lock:dir:${sha1Hash(dirPath)}`;
   const locked = await acquireLock(lockKey, LOCK_TTL);
 
   if (!locked) {
@@ -69,7 +69,7 @@ export async function enqueueCreateSingleThumbJobAction(
     force?: boolean;
   }
 ) {
-  const lockKey = `thumb-lock:dir:${hashPath(filePath)}`;
+  const lockKey = `thumb-lock:dir:${sha1Hash(filePath)}`;
   const locked = await acquireLock(lockKey, LOCK_TTL);
 
   if (!locked) {

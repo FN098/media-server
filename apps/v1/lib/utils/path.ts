@@ -1,5 +1,3 @@
-import { createHash } from "crypto";
-
 export function splitDirPath(dirPath: string) {
   const parts = dirPath.split(/[/\\]/);
 
@@ -10,8 +8,4 @@ export function splitDirPath(dirPath: string) {
     folderName,
     parentPath,
   };
-}
-
-export function hashPath(path: string) {
-  return createHash("sha1").update(path).digest("hex").slice(0, 12);
 }

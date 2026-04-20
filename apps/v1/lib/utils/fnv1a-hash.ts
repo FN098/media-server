@@ -36,7 +36,7 @@ function stableStringify(value: unknown): string {
 }
 
 // FNV-1a
-function fnv1aHash(str: string): string {
+export function fnv1aHash(str: string): string {
   let hash = 0x811c9dc5;
 
   for (let i = 0; i < str.length; i++) {
