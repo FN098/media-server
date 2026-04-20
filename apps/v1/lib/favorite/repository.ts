@@ -4,8 +4,8 @@ export async function upsertFavorite(
   userId: string,
   mediaId: string,
   rating: number | null
-) {
-  return await prisma.favorite.upsert({
+): Promise<void> {
+  await prisma.favorite.upsert({
     where: {
       userId_mediaId: { userId, mediaId },
     },
@@ -14,15 +14,24 @@ export async function upsertFavorite(
   });
 }
 
-export async function getFavorite(userId: string, mediaId: string) {
+export async function getFavorite(
+  userId: string,
+  mediaId: string
+): Promise<{ rating: number | null } | null> {
   return await prisma.favorite.findUnique({
     where: {
       userId_mediaId: { userId, mediaId },
     },
+    select: {
+      rating: true,
+    },
   });
 }
 
-export async function deleteFavorite(userId: string, mediaId: string) {
+export async function deleteFavorite(
+  userId: string,
+  mediaId: string
+): Promise<{ count: number }> {
   // delete はレコードがないとエラーを吐くので deleteMany か
   // 存在チェック後の delete を推奨
   return await prisma.favorite.deleteMany({

@@ -46,3 +46,11 @@ export async function getMediaDbNodes(
     })),
   }));
 }
+
+export async function getMediaIdByPath(path: string): Promise<string | null> {
+  const media = await prisma.media.findFirst({
+    where: { path },
+    select: { id: true },
+  });
+  return media ? media.id : null;
+}

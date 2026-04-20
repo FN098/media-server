@@ -1,10 +1,10 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { updateVisitedFolder } from "@/lib/folder/repository";
 import { fsNameSchema } from "@/lib/media/schemas";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
-import { updateVisitedFolder } from "@/repositories/folder-repository";
 import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
 

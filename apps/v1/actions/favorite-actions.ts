@@ -1,14 +1,15 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
-import { prisma } from "@/lib/prisma";
 import {
   deleteFavorite,
   getFavorite,
   upsertFavorite,
-} from "@/repositories/favorite-repository";
+} from "@/lib/favorite/repository";
+import { getMediaIdByPath } from "@/lib/media/repository";
+import { clamp } from "@/lib/utils/clamp";
 
-// お気に入り更新
+// お気に入りレーティング更新
 export async function updateFavoriteAction(
   path: string,
   rating: number | null
@@ -16,18 +17,13 @@ export async function updateFavoriteAction(
   try {
     const user = await resolveCurrentUserOrThrow();
 
-    const media = await prisma.media.findFirst({
-      select: { id: true },
-      where: { path },
-    });
-
-    if (!media) return { success: false, error: "メディアが見つかりません" };
+    const mediaId = await getMediaIdByPath(path);
+    if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
     // バリデーション: 数値がある場合は 1~5 にクランプ
-    const validatedRating =
-      rating !== null ? Math.max(1, Math.min(5, rating)) : null;
+    const validRating = rating !== null ? clamp(rating, 1, 5) : null;
 
-    await upsertFavorite(user.id, media.id, validatedRating);
+    await upsertFavorite(user.id, mediaId, validRating);
 
     return { success: true };
   } catch (error) {
@@ -41,14 +37,10 @@ export async function deleteFavoriteAction(path: string) {
   try {
     const user = await resolveCurrentUserOrThrow();
 
-    const media = await prisma.media.findFirst({
-      select: { id: true },
-      where: { path },
-    });
+    const mediaId = await getMediaIdByPath(path);
+    if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
-    if (!media) return { success: false, error: "メディアが見つかりません" };
-
-    await deleteFavorite(user.id, media.id);
+    await deleteFavorite(user.id, mediaId);
 
     return { success: true };
   } catch (error) {
@@ -62,14 +54,10 @@ export async function revalidateFavoriteAction(path: string) {
   try {
     const user = await resolveCurrentUserOrThrow();
 
-    const media = await prisma.media.findFirst({
-      select: { id: true },
-      where: { path },
-    });
+    const mediaId = await getMediaIdByPath(path);
+    if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
-    if (!media) return { success: false, error: "メディアが見つかりません" };
-
-    const favorite = await getFavorite(user.id, media.id);
+    const favorite = await getFavorite(user.id, mediaId);
 
     // クライアント側が期待する { path, rating } の形式で返す
     return {

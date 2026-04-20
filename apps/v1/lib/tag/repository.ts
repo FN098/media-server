@@ -1,10 +1,11 @@
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
 import { prisma } from "@/lib/prisma";
+import { Tag } from "@/lib/tag/types";
 
 export async function getTagsByIds(
   ids: string[],
   options?: { limit?: number }
-) {
+): Promise<Tag[]> {
   if (ids.length > 0) {
     return await prisma.tag.findMany({
       where: {
@@ -23,7 +24,7 @@ export async function getTagsByIds(
 export async function getRelatedTags(
   paths: string[],
   options?: { limit?: number }
-) {
+): Promise<Tag[]> {
   if (paths.length > 0) {
     return await prisma.tag.findMany({
       where: {
@@ -41,7 +42,9 @@ export async function getRelatedTags(
   return [];
 }
 
-export async function getFavoriteTags(options?: { limit?: number }) {
+export async function getFavoriteTags(options?: {
+  limit?: number;
+}): Promise<Tag[]> {
   const { id: userId } = await resolveCurrentUserOrThrow();
 
   const favorites = await prisma.userTagFavorite.findMany({

@@ -1,5 +1,5 @@
 import { Header } from "@/components/ui/headers/header";
-import { pageMetas } from "@/lib/meta";
+import { pageMetas } from "@/lib/page-meta";
 import { SearchFocusProvider } from "@/providers/search-focus.provider";
 
 const meta = pageMetas["trash"];

@@ -9,9 +9,10 @@ export function useFilteredNodes(
   filters: MediaNodeFilter[],
   options?: {
     activated?: boolean; // デフォルト: true
+    skipDirectory?: boolean; // デフォルト: true
   }
 ) {
-  const { activated = true } = options ?? {};
+  const { activated = true, skipDirectory = true } = options ?? {};
 
   // フィルタリング実行
   const filtered = useMemo(() => {
@@ -19,11 +20,12 @@ export function useFilteredNodes(
 
     // フィルタの適用
     return nodes.filter((node) => {
-      if (node.isDirectory) return true; // フォルダは対象外
-
+      if (node.isDirectory && skipDirectory) {
+        return true; // フォルダは通す
+      }
       return filters.filter((f) => !!f).every((filter) => filter(node));
     });
-  }, [activated, nodes, filters]);
+  }, [activated, nodes, filters, skipDirectory]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(

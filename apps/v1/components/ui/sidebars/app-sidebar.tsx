@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeSelect } from "@/components/ui/selects/theme-select";
-import { pageMetas } from "@/lib/meta";
+import { pageMetas } from "@/lib/page-meta";
 import {
   Sidebar,
   SidebarContent,

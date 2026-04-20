@@ -1,17 +1,17 @@
 import { APP_CONFIG } from "@/app.config";
 import { Trash } from "@/components/ui/pages/trash";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { getFolderVisitedInfo } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
+import { getMediaDbNodes } from "@/lib/media/repository";
 import { sortNodes } from "@/lib/media/sort";
 import { MediaNode, SortDirection, SortKeyOf } from "@/lib/media/types";
 import { isBlockedVirtualPath } from "@/lib/path/blacklist";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
-import { getFolderVisitedInfo } from "@/repositories/folder-repository";
-import { getMediaDbNodes } from "@/repositories/media-repository";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
