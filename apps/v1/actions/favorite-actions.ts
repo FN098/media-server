@@ -1,6 +1,6 @@
 "use server";
 
-import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import {
   deleteFavorite,
   getFavorite,

@@ -1,7 +1,7 @@
 "use client";
 
+import { IndexLike, parseIndexLike } from "@/lib/index-like";
 import { MediaNode } from "@/lib/media/types";
-import { IndexLike } from "@/lib/query/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
@@ -14,17 +14,6 @@ type OpenOptions = {
   at?: IndexLike;
   newTab?: boolean;
 };
-
-function normalizeIndex(at: IndexLike, total: number) {
-  if (at === "first") return 0;
-  if (at === "last") return total - 1;
-
-  // 数字かもしれない場合
-  const index = Number(at);
-  if (Number.isNaN(index)) return 0;
-
-  return index;
-}
 
 export function useViewerControl(nodes: MediaNode[], options?: Options) {
   const router = useRouter();
@@ -40,7 +29,7 @@ export function useViewerControl(nodes: MediaNode[], options?: Options) {
 
   // number に正規化されたインデックス
   const index = useMemo(
-    () => normalizeIndex(at, nodes.length),
+    () => parseIndexLike(at, nodes.length),
     [at, nodes.length]
   );
 

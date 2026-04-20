@@ -1,7 +1,7 @@
 "use client";
 
+import { IndexLike } from "@/lib/index-like";
 import { resolveClientPath } from "@/lib/path/resolvers";
-import { IndexLike } from "@/lib/query/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 

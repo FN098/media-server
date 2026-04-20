@@ -1,4 +1,3 @@
-import { MAX_PATHS_TO_PROCESS, MAX_RETURN_TAGS_COUNT } from "@/lib/tag/limits";
 import {
   getFavoriteTags,
   getRelatedTags,
@@ -9,6 +8,9 @@ import { searchTagStrategies } from "@/lib/tag/strategies";
 import { uniqueBy } from "@/lib/utils/array";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
+
+const MAX_PATHS_TO_PROCESS = 500;
+const MAX_RETURN_TAGS_COUNT = 100;
 
 const RequestSchema = z.object({
   query: z.string().optional(),

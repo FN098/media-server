@@ -1,13 +1,13 @@
 export const USER = process.env.BASIC_USER ?? "admin";
 export const PASS = process.env.BASIC_PASS ?? "password";
-export const NAME = "管理者";
+const NAME = "管理者";
 
-export type BasicAuthCredentials = {
+type BasicAuthCredentials = {
   user: string;
   pass: string;
 };
 
-export type BasicAuthUser = {
+type BasicAuthUser = {
   id: string;
   name: string;
 };

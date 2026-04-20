@@ -1,6 +1,6 @@
 "use client";
 
-import { ViewMode } from "@/lib/query/types";
+import { ViewMode } from "@/lib/view-mode";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 

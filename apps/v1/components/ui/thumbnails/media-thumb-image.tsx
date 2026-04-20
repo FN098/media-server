@@ -4,7 +4,7 @@ import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
-import { resolveMediaThumbUrl } from "@/lib/url/resolver";
+import { resolveMediaThumbUrl } from "@/lib/thumb/url";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useRef, useState } from "react";
 

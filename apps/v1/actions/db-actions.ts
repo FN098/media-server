@@ -7,7 +7,7 @@ import {
   TEMP_BACKUP_DIR,
 } from "@/lib/db/const";
 import { DbBackupFile } from "@/lib/db/types";
-import { getDatabaseUrlInfo } from "@/lib/url/db";
+import { getDatabaseUrlInfo } from "@/lib/db/url";
 import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";

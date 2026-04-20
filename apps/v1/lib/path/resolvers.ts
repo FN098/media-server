@@ -1,7 +1,7 @@
 import { encodePath } from "@/lib/path/encoder";
 import { getClientExplorerPath, getClientTrashPath } from "@/lib/path/helpers";
 
-export type Options = {
+type Options = {
   isDeleted?: boolean;
 };
 

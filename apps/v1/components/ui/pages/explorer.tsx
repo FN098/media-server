@@ -49,9 +49,9 @@ import {
   createSearchFilter,
   createTagFilter,
 } from "@/lib/filter/factory";
+import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
-import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MediaActionsProvider } from "@/providers/media-actions-provider";

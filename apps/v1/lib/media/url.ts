@@ -1,9 +1,5 @@
 import { encodePath } from "@/lib/path/encoder";
-import {
-  getAbsoluteApiMediaUrl,
-  getApiMediaUrl,
-  getApiThumbUrl,
-} from "@/lib/path/helpers";
+import { getAbsoluteApiMediaUrl, getApiMediaUrl } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
 import path from "path";
 
@@ -33,18 +29,6 @@ export function resolveMediaUrl(media: Media, option?: UrlOption) {
   const url = option?.absolute
     ? getAbsoluteApiMediaUrl(encoded)
     : getApiMediaUrl(encoded);
-
-  return appendVersion(url, option?.version);
-}
-
-export function resolveMediaThumbUrl(media: Media, option?: UrlOption) {
-  // ファイルを削除してもサムネイルはそのまま残るので同じパスを参照
-  const basePath = media.path;
-  const encoded = encodePath(basePath);
-
-  const url = option?.absolute
-    ? getAbsoluteApiMediaUrl(encoded)
-    : getApiThumbUrl(encoded);
 
   return appendVersion(url, option?.version);
 }

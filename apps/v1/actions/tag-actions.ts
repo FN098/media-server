@@ -1,7 +1,7 @@
 "use server";
 
 import { Prisma } from "@/generated/prisma/client";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";

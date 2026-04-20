@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Explorer } from "@/components/ui/pages/explorer";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/resolver";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { FavoriteValue } from "@/lib/favorite/types";
 import {
   getFolderFavoriteInfo,
