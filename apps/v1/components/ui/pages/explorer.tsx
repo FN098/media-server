@@ -154,16 +154,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     filteredCount,
     totalCount,
     isFiltered,
-  } = useFilteredNodes({
-    allNodes,
-    filters: [
-      createSearchFilter(queryFilterValue),
-      createMediaTypeFilter(mediaTypeFilterValue),
-      createRatingFilter(ratingFilterValue),
-      createTagFilter(tagFilterValue),
-      createFavoriteFilter(favoriteFilterValue),
-    ],
-  });
+  } = useFilteredNodes(allNodes, [
+    createSearchFilter(queryFilterValue),
+    createMediaTypeFilter(mediaTypeFilterValue),
+    createRatingFilter(ratingFilterValue),
+    createTagFilter(tagFilterValue),
+    createFavoriteFilter(favoriteFilterValue),
+  ]);
 
   // タグをフィルターに追加
   const addTagFilter = (node: MediaNode) => {

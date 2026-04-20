@@ -100,10 +100,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     filteredCount,
     totalCount,
     isFiltered,
-  } = useFilteredNodes({
-    allNodes,
-    filters: [createSearchFilter(queryFilterValue)],
-  });
+  } = useFilteredNodes(allNodes, [createSearchFilter(queryFilterValue)]);
 
   // 検索パラメータリセット用
   const { hasSearchParams, clearSearchParams } = useSearchParamsControl();

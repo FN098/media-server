@@ -4,26 +4,24 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
 import { useMemo } from "react";
 
-export function useFilteredNodes({
-  allNodes,
-  filters,
-  activated = true,
-}: {
-  allNodes: MediaNode[];
-  filters: MediaNodeFilter[];
-  activated?: boolean;
-}) {
+export function useFilteredNodes(
+  nodes: MediaNode[],
+  filters: MediaNodeFilter[],
+  options?: {
+    activated?: boolean;
+  }
+) {
   // フィルタリング実行
   const filtered = useMemo(() => {
-    if (!activated) return allNodes;
+    if (!options?.activated) return nodes;
 
     // フィルタの適用
-    return allNodes.filter((node) => {
+    return nodes.filter((node) => {
       if (node.isDirectory) return true; // フォルダは対象外
 
       return filters.filter((f) => !!f).every((filter) => filter(node));
     });
-  }, [activated, allNodes, filters]);
+  }, [nodes, filters, options?.activated]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
@@ -32,7 +30,7 @@ export function useFilteredNodes({
   );
 
   const filteredCount = filtered.length;
-  const totalCount = allNodes.length;
+  const totalCount = nodes.length;
   const isFiltered = filteredCount != totalCount;
 
   return {
