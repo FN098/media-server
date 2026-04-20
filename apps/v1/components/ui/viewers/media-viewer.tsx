@@ -228,6 +228,7 @@ export function MediaViewer({
 
     // ダミーページの場合は何もしない
     if (slide === firstPageDummy || slide === lastPageDummy) {
+      setCurrentNode(null);
       return;
     }
 
@@ -528,7 +529,10 @@ export function MediaViewer({
                   className="flex flex-col min-w-48 gap-2"
                 >
                   {isEnabled("changeRating") && (
-                    <DropdownMenuItem className="flex justify-center">
+                    <DropdownMenuItem
+                      className="flex justify-center"
+                      disabled={!currentNode}
+                    >
                       <FavoriteRating
                         value={rating}
                         onChange={handleChangeRating}
@@ -538,7 +542,10 @@ export function MediaViewer({
                   )}
 
                   {isEnabled("openParentFolder") && (
-                    <DropdownMenuItem onClick={() => handleOpenParent()}>
+                    <DropdownMenuItem
+                      onClick={() => handleOpenParent()}
+                      disabled={!currentNode}
+                    >
                       <Folder className="mr-2 h-4 w-4" />
                       <span>フォルダを開く</span>
                       {!isMobile && (
@@ -592,7 +599,11 @@ export function MediaViewer({
                   )}
 
                   {isEnabled("editTags") && (
-                    <DropdownMenuItem onClick={handleEditTags}>
+                    <DropdownMenuItem
+                      onClick={handleEditTags}
+                      disabled={!currentNode}
+                      className="relative"
+                    >
                       <TagIcon className="mr-2 h-4 w-4" />
                       <span>タグを編集</span>
                       {!isMobile && (
@@ -604,14 +615,20 @@ export function MediaViewer({
                   )}
 
                   {isEnabled("restore") && (
-                    <DropdownMenuItem onClick={handleRestore}>
+                    <DropdownMenuItem
+                      onClick={handleRestore}
+                      disabled={!currentNode}
+                    >
                       <RotateCcw className="mr-2 h-4 w-4" />
                       <span>復元</span>
                     </DropdownMenuItem>
                   )}
 
                   {isEnabled("delete") && (
-                    <DropdownMenuItem onClick={handleDelete}>
+                    <DropdownMenuItem
+                      onClick={handleDelete}
+                      disabled={!currentNode}
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
                       <span className="text-destructive">削除</span>
                       {!isMobile && (
@@ -625,7 +642,10 @@ export function MediaViewer({
                   )}
 
                   {isEnabled("deletePermanently") && (
-                    <DropdownMenuItem onClick={handleDeletePermanently}>
+                    <DropdownMenuItem
+                      onClick={handleDeletePermanently}
+                      disabled={!currentNode}
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
                       <span className="text-destructive">完全に削除</span>
                     </DropdownMenuItem>
