@@ -1,17 +1,19 @@
 "use client";
 
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
-import { Actions } from "@/hooks/use-actions";
+import { MediaActions } from "@/hooks/use-media-actions";
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import { useActionsContext } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { Button } from "@/shadcn/components/ui/button";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/shadcn/components/ui/context-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shadcn/components/ui/dropdown-menu";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
+import { cn } from "@/shadcn/lib/utils";
 import {
   Copy,
   ExternalLink,
@@ -19,147 +21,161 @@ import {
   FolderInput,
   ImagePlus,
   ListFilterPlus,
+  MoreVertical,
   Pencil,
   RefreshCw,
   RotateCcw,
   Tag,
   Trash2,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useState } from "react";
 
-interface ActionContextMenuProps {
+// TODO: actions => ActionItem
+interface ActionsDropdownMenuProps {
   node: MediaNode;
-  children: React.ReactNode;
+  actions: MediaActions;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  overrides?: Partial<Actions>;
-  disabled?: boolean;
+  className?: string;
 }
 
-export function ActionContextMenu({
+export function ActionsDropdownMenu({
   node,
-  children,
-  open,
-  onOpenChange,
-  overrides,
-  disabled = false,
-}: ActionContextMenuProps) {
-  const { actions: contextActions } = useActionsContext();
-  const { getFavorite } = useFavoritesContext();
-  const mounted = useMounted();
-
-  const actions = useMemo(
-    () => ({
-      ...contextActions,
-      ...overrides,
-    }),
-    [contextActions, overrides]
-  );
-
-  if (!mounted || disabled) {
-    return <>{children}</>;
-  }
-
+  actions,
+  open: controlledOpen,
+  onOpenChange: onControlledOpenChange,
+  className,
+}: ActionsDropdownMenuProps) {
   const {
-    openInNewTab,
-    changeRating,
-    openParentFolder,
-    rename,
-    move,
-    copy,
-    editTags,
-    addTagFilter,
-    setAsPreview,
-    restore,
-    delete: deleteAction,
-    deletePermanently,
-    updateThumb,
+    onOpenInNewTab: openInNewTab,
+    onChangeRating: changeRating,
+    onOpenParentFolder: openParentFolder,
+    onRename: rename,
+    onMove: move,
+    onCopy: copy,
+    onEditTags: editTags,
+    onAddTagFilter: addTagFilter,
+    onSetAsPreview: setAsPreview,
+    onRestore: restore,
+    onDelete: deleteAction,
+    onDeletePermanently: deletePermanently,
+    onUpdateThumb: updateThumb,
   } = actions;
 
+  const isMobile = useIsMobile();
+
+  // 外部から渡されたオープン状態を優先
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onControlledOpenChange ?? setInternalOpen;
+
+  const { getFavorite } = useFavoritesContext();
   const { rating } = getFavorite(node.path);
 
+  const mounted = useMounted();
+  if (!mounted) return null;
+
   return (
-    <ContextMenu modal={open} onOpenChange={onOpenChange}>
-      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-      <ContextMenuContent className="min-w-48">
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      {/* アクションメニュートリガーボタン */}
+      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn("h-8 w-8 rounded-full", className)}
+          onPointerDown={(e) => e.preventDefault()}
+          onClick={() => setOpen(!open)}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+
+      {/* アクションメニュー */}
+      <DropdownMenuContent align="end" className="min-w-48">
         {changeRating && !node.isDirectory && (
-          <ContextMenuItem className="flex justify-center">
+          <DropdownMenuItem className="flex justify-center">
             <FavoriteRating
               value={rating}
               onChange={(value) => void changeRating(node, value)}
               variant="menu"
             />
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {openInNewTab && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void openInNewTab(node);
             }}
           >
             <ExternalLink className="mr-2 h-4 w-4" /> 新しいタブで開く
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {openParentFolder && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void openParentFolder(node);
             }}
           >
-            <Folder className="mr-2 h-4 w-4" /> フォルダを開く
-          </ContextMenuItem>
+            <Folder className="mr-2 h-4 w-4" />
+            <span>フォルダを開く</span>
+            {!isMobile && (
+              <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                <kbd className="rounded border px-1.5 py-0.5">O</kbd>
+              </div>
+            )}
+          </DropdownMenuItem>
         )}
 
         {rename && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void rename(node);
             }}
           >
             <Pencil className="mr-2 h-4 w-4" /> 名前の変更
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {move && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void move(node);
             }}
           >
             <FolderInput className="mr-2 h-4 w-4" /> 移動
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {copy && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void copy(node);
             }}
           >
             <Copy className="mr-2 h-4 w-4" /> コピー
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {editTags && !node.isDirectory && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void editTags(node);
             }}
           >
             <Tag className="mr-2 h-4 w-4" /> タグの編集
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {addTagFilter && !node.isDirectory && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void addTagFilter(node);
@@ -167,11 +183,11 @@ export function ActionContextMenu({
             disabled={!node.tags || node.tags.length === 0}
           >
             <ListFilterPlus className="mr-2 h-4 w-4" /> タグをフィルターに追加
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {setAsPreview && !node.isDirectory && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void setAsPreview(node);
@@ -179,56 +195,59 @@ export function ActionContextMenu({
             disabled={node.type !== "image" && node.type !== "video"}
           >
             <ImagePlus className="mr-2 h-4 w-4" /> プレビューに設定
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {updateThumb && !node.isDirectory && (
-          <ContextMenuItem
+          <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               void updateThumb(node);
             }}
           >
             <RefreshCw className="mr-2 h-4 w-4" /> サムネイルを更新
-          </ContextMenuItem>
+          </DropdownMenuItem>
         )}
 
         {restore && (
-          <ContextMenuItem
+          <DropdownMenuItem
             className="text-success focus:text-success"
             onClick={(e) => {
               e.stopPropagation();
               void restore(node);
             }}
           >
-            <RotateCcw className="mr-2 h-4 w-4" /> 復元
-          </ContextMenuItem>
+            <RotateCcw className="mr-2 h-4 w-4" />
+            復元
+          </DropdownMenuItem>
         )}
 
         {deleteAction && (
-          <ContextMenuItem
+          <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
               void deleteAction(node);
             }}
           >
-            <Trash2 className="mr-2 h-4 w-4" /> 削除
-          </ContextMenuItem>
+            <Trash2 className="mr-2 h-4 w-4" />
+            削除
+          </DropdownMenuItem>
         )}
 
         {deletePermanently && (
-          <ContextMenuItem
+          <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={(e) => {
               e.stopPropagation();
               void deletePermanently(node);
             }}
           >
-            <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
-          </ContextMenuItem>
+            <Trash2 className="mr-2 h-4 w-4" />
+            完全に削除
+          </DropdownMenuItem>
         )}
-      </ContextMenuContent>
-    </ContextMenu>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

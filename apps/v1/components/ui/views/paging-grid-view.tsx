@@ -3,8 +3,8 @@
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
-import { ActionContextMenu } from "@/components/ui/context-menus/action-context-menu";
-import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
+import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
+import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
@@ -12,8 +12,8 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { useActionsContext } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useMediaActionsContext } from "@/providers/media-actions-provider";
 import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -51,7 +51,7 @@ export function PagingGridView({
   } = usePagingContext();
 
   const selectCtx = usePathSelectionContext();
-  const { actions } = useActionsContext();
+  const { actions } = useMediaActionsContext();
   const isMobile = useIsMobile();
 
   // 現在のページのノード
@@ -175,7 +175,7 @@ export function PagingGridView({
       // Enterで開く
       if (e.key === "Enter" && currentPath) {
         const node = allNodes[currentIndex];
-        if (node) void actions.open?.(node);
+        if (node) void actions.onOpen?.(node);
         return;
       }
 
@@ -315,22 +315,23 @@ function Cell({
   isMobile,
   onSelectionChange,
 }: CellProps) {
+  // メディア判定
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
+  // お気に入り機能
   const favCtx = useFavoritesContext();
   const { isFavorite, rating } = favCtx.getFavorite(node.path);
 
+  // 選択機能
   const selectCtx = usePathSelectionContext();
   const isSelected = selectCtx.isSelectedPath(node.path);
 
+  // アクションメニュー
+  const { actions } = useMediaActionsContext();
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
-  const {
-    actions: { open, toggleFavorite },
-  } = useActionsContext();
 
-  const { actions } = useActionsContext();
-
+  // 長押しで選択モード
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
@@ -338,11 +339,13 @@ function Cell({
     onSelectionChange?.();
   }, [selectCtx, node.path, onSelectionChange]);
 
+  // 長押し判定
   const { start, stop, isLongPressed } = useLongPress({
     callback: handleLongPress,
     ms: 600,
   });
 
+  // クリックで選択（PC）
   const handleClick = (e: React.MouseEvent) => {
     if (isLongPressed || isMobile) return;
     e.preventDefault();
@@ -381,12 +384,14 @@ function Cell({
     onSelectionChange?.();
   };
 
+  // ダブルクリックで開く（PC）
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (isMobile || e.ctrlKey || e.metaKey || e.shiftKey) return;
     e.preventDefault();
-    void open?.(node);
+    void actions.onOpen?.(node);
   };
 
+  // タップで開く（モバイル）
   const handleTap = (e: React.MouseEvent) => {
     if (isLongPressed || !isMobile) return;
     e.preventDefault();
@@ -407,7 +412,7 @@ function Cell({
       return;
     }
 
-    void open?.(node);
+    void actions.onOpen?.(node);
   };
 
   return (
@@ -421,7 +426,8 @@ function Cell({
           !actionContextMenuOpen
         }
       >
-        <ActionContextMenu
+        <ActionsContextMenu
+          actions={actions}
           open={actionContextMenuOpen}
           onOpenChange={setActionContextMenuOpen}
           node={node}
@@ -447,7 +453,7 @@ function Cell({
             <MediaThumb
               node={node}
               className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-              onError={() => void actions.updateThumb?.(node)}
+              onError={() => void actions.onUpdateThumb?.(node)}
               showIcon
             />
 
@@ -485,7 +491,7 @@ function Cell({
                   variant="grid"
                   rating={rating}
                   isFavorite={isFavorite}
-                  onClick={() => void toggleFavorite?.(node)}
+                  onClick={() => void actions.onToggleFavorite?.(node)}
                 />
               )}
 
@@ -496,7 +502,8 @@ function Cell({
                     isMobile && "opacity-100"
                   )}
                 >
-                  <ActionDropdownMenu
+                  <ActionsDropdownMenu
+                    actions={actions}
                     open={actionDropdownMenuOpen}
                     onOpenChange={setActionDropdownMenuOpen}
                     node={node}
@@ -516,7 +523,7 @@ function Cell({
               )}
             </div>
           </div>
-        </ActionContextMenu>
+        </ActionsContextMenu>
       </HoverPreviewPortal>
     </div>
   );

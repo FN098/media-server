@@ -4,9 +4,9 @@ import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge"
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
-import { ActionContextMenu } from "@/components/ui/context-menus/action-context-menu";
+import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
 import { LocalDate } from "@/components/ui/dates/local-date";
-import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
+import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
@@ -15,8 +15,8 @@ import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/format";
-import { useActionsContext } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useMediaActionsContext } from "@/providers/media-actions-provider";
 import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -57,7 +57,7 @@ export function PagingListView({
   } = usePagingContext();
 
   const selectCtx = usePathSelectionContext();
-  const { actions } = useActionsContext();
+  const { actions } = useMediaActionsContext();
   const isMobile = useIsMobile();
 
   // 現在のページのノードを取得
@@ -152,7 +152,7 @@ export function PagingListView({
       // Enterで開く
       if (e.key === "Enter" && currentPath) {
         const node = allNodes[currentIndex];
-        if (node) void actions.open?.(node);
+        if (node) void actions.onOpen?.(node);
         return;
       }
 
@@ -304,20 +304,23 @@ function DataRow({
   isMobile,
   onSelectionChange,
 }: DataRowProps) {
+  // メディア判定
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
+  // お気に入り機能
   const favCtx = useFavoritesContext();
   const { isFavorite, rating } = favCtx.getFavorite(node.path);
 
+  // 選択機能
   const selectCtx = usePathSelectionContext();
   const isSelected = selectCtx.isSelectedPath(node.path);
 
+  // アクションメニュー
+  const { actions } = useMediaActionsContext();
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
-  const {
-    actions: { open, toggleFavorite, changeRating },
-  } = useActionsContext();
 
+  // 長押しで選択モード
   const handleLongPress = useCallback(() => {
     selectCtx.enterSelectionMode();
     selectCtx.replaceSelection(node.path);
@@ -325,11 +328,13 @@ function DataRow({
     onSelectionChange?.();
   }, [selectCtx, node.path, onSelectionChange]);
 
+  // 長押し判定
   const { start, stop, isLongPressed } = useLongPress({
     callback: handleLongPress,
     ms: 600,
   });
 
+  // クリックで選択（PC）
   const handleClick = (e: React.MouseEvent) => {
     if (isLongPressed || isMobile) return;
     e.preventDefault();
@@ -368,12 +373,14 @@ function DataRow({
     onSelectionChange?.();
   };
 
+  // ダブルクリックで開く（PC）
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (isMobile || e.ctrlKey || e.metaKey || e.shiftKey) return;
     e.preventDefault();
-    void open?.(node);
+    void actions.onOpen?.(node);
   };
 
+  // タップで開く（モバイル）
   const handleTap = (e: React.MouseEvent) => {
     if (isLongPressed || !isMobile) return;
     e.preventDefault();
@@ -394,7 +401,7 @@ function DataRow({
       return;
     }
 
-    void open?.(node);
+    void actions.onOpen?.(node);
   };
 
   return (
@@ -407,7 +414,8 @@ function DataRow({
         !actionContextMenuOpen
       }
     >
-      <ActionContextMenu
+      <ActionsContextMenu
+        actions={actions}
         open={actionContextMenuOpen}
         onOpenChange={setActionContextMenuOpen}
         node={node}
@@ -504,26 +512,27 @@ function DataRow({
                 variant="list"
                 rating={rating}
                 isFavorite={isFavorite}
-                onClick={() => void toggleFavorite?.(node)}
+                onClick={() => void actions.onToggleFavorite?.(node)}
               />
             ) : (
               <FavoriteRating
                 value={rating}
-                onChange={(value) => void changeRating?.(node, value)}
+                onChange={(value) => void actions.onChangeRating?.(node, value)}
               />
             )}
           </div>
 
           {/* Actions */}
           <div className="flex justify-center">
-            <ActionDropdownMenu
+            <ActionsDropdownMenu
+              actions={actions}
               open={actionDropdownMenuOpen}
               onOpenChange={setActionDropdownMenuOpen}
               node={node}
             />
           </div>
         </div>
-      </ActionContextMenu>
+      </ActionsContextMenu>
     </HoverPreviewPortal>
   );
 }

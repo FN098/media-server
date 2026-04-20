@@ -25,9 +25,9 @@ import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
-import { ActionsProvider } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
+import { MediaActionsProvider } from "@/providers/media-actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
@@ -197,7 +197,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     }
   };
 
-  // ===== 選択機能 =====
+  // ===== 選択 =====
 
   const { isSelectionMode, selected, select, selectAll, resetSelection } =
     useSelectionControl({
@@ -268,17 +268,17 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     });
   }, [activeScope, allScopes, disableScope, enableScope]);
 
-  // ショートカットの定義
   // Escape: 選択解除
-  // T: タグエディタ
-  // Ctrl + A: 全選択
-  // Ctrl + K: 検索
   useHotkeys("escape", () => resetSelection(), {
     scopes: "favorites",
   });
+
+  // T: タグエディタ
   useHotkeys("t", () => handleToggleTagEditor(), {
     scopes: ["favorites", "viewer", "tag-editor"],
   });
+
+  // Ctrl + A: 全選択
   useHotkeys(
     "ctrl+a",
     (e) => {
@@ -287,6 +287,8 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     },
     { scopes: ["favorites", "tag-editor"] }
   );
+
+  // Ctrl + K: 検索
   useHotkeys(
     "ctrl+k",
     (e) => {
@@ -303,15 +305,15 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
-      <ActionsProvider
+      <MediaActionsProvider
         actions={{
-          open: handleOpen,
-          openInNewTab: handleOpenInNewTab,
-          openParentFolder: handleOpenParentFolder,
-          toggleFavorite: handleToggleFavorite,
-          changeRating: handleChangeRating,
-          editTags: handleEditTags,
-          addTagFilter: handleAddTagFilter,
+          onOpen: handleOpen,
+          onOpenInNewTab: handleOpenInNewTab,
+          onOpenParentFolder: handleOpenParentFolder,
+          onToggleFavorite: handleToggleFavorite,
+          onChangeRating: handleChangeRating,
+          onEditTags: handleEditTags,
+          onAddTagFilter: handleAddTagFilter,
         }}
       >
         <div
@@ -457,7 +459,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             opacity={tagEditMode === "default" ? 100 : 0}
           />
         </div>
-      </ActionsProvider>
+      </MediaActionsProvider>
     </PagingProvider>
   );
 }

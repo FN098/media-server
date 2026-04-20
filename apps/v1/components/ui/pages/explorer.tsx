@@ -52,9 +52,9 @@ import {
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
-import { ActionsProvider } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
+import { MediaActionsProvider } from "@/providers/media-actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
@@ -104,11 +104,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     replaceHistoryLast,
   } = useHistoryContext();
 
+  // 初回マウント時に訪問履歴にプッシュ
   useEffect(() => {
     pushHistory({ path: listing.path, type: "directory" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // スクロール完了時に訪問履歴をポップ
   const handleScrollRestored = () => {
     popHistory();
   };
@@ -200,6 +202,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== ナビゲーション =====
 
   const { navigate: openFolder } = useFolderNavigation();
+
+  // インデックス計算
   const { getMediaIndex } = useMediaIndex(mediaOnly);
 
   // ファイル/フォルダオープン
@@ -272,7 +276,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   };
 
-  // ===== 選択機能 =====
+  // ===== 選択 =====
 
   const { isSelectionMode, selected, select, selectAll, resetSelection } =
     useSelectionControl({
@@ -315,8 +319,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const [renameTarget, setRenameTarget] = useState<MediaNode | null>(null);
   const isRenameMode = !!renameTarget;
 
-  // リネームダイアログを開く（単体）
-  const handleOpenRenameDialogSingle = (node: MediaNode) => {
+  // リネームダイアログを開く
+  const handleOpenRenameDialog = (node: MediaNode) => {
     setRenameTarget(node);
   };
 
@@ -344,7 +348,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   };
 
-  // ===== 移動 (Move) =====
+  // ===== 移動 =====
 
   // 移動対象のノードリストを管理
   const [moveTargets, setMoveTargets] = useState<MediaNode[]>([]);
@@ -370,7 +374,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   };
 
-  // ===== コピー (Copy) =====
+  // ===== コピー =====
 
   // 移動対象のノードリストを管理
   const [copyTargets, setCopyTargets] = useState<MediaNode[]>([]);
@@ -396,7 +400,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   };
 
-  // ===== 削除 (Delete) =====
+  // ===== 削除 =====
 
   const [deleteTargets, setDeleteTargets] = useState<MediaNode[]>([]);
   const isDeleteMode = deleteTargets.length > 0;
@@ -511,23 +515,22 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     });
   }, [activeScope, allScopes, disableScope, enableScope]);
 
-  // ショートカットの定義
   // Escape: 選択解除
-  // Delete: 削除
-  // T: タグエディタ
-  // Ctrl + A: 全選択
-  // Ctrl + K: 検索
-  // F2: リネーム
-  // P/N: 前/次のフォルダを開く
   useHotkeys("escape", () => resetSelection(), {
     scopes: "explorer",
   });
+
+  // Delete: 削除
   useHotkeys("delete", () => handleOpenDeleteDialogSelected(), {
     scopes: "explorer",
   });
+
+  // T: タグエディタ
   useHotkeys("t", () => handleToggleTagEditMode(), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
+
+  // Ctrl + A: 全選択
   useHotkeys(
     "ctrl+a",
     (e) => {
@@ -536,6 +539,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     },
     { scopes: ["explorer", "tag-editor"] }
   );
+
+  // Ctrl + K: 検索
   useHotkeys(
     "ctrl+k",
     (e) => {
@@ -544,9 +549,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     },
     { scopes: "explorer" }
   );
+
+  // F2: リネーム
   useHotkeys("f2", () => setRenameTarget(selected[0]), {
     scopes: ["explorer", "viewer"],
   });
+
+  // P/N: 前/次のフォルダを開く
   useHotkeys("p", () => handleOpenPrevFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
@@ -561,20 +570,20 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
-      <ActionsProvider
+      <MediaActionsProvider
         actions={{
-          open: handleOpen,
-          openInNewTab: handleOpenInNewTab,
-          changeRating: handleChangeRating,
-          toggleFavorite: handleToggleFavorite,
-          rename: handleOpenRenameDialogSingle,
-          move: handleOpenMoveDialogSingle,
-          copy: handleOpenCopyDialogSingle,
-          delete: handleOpenDeleteDialogSingle,
-          editTags: handleEditTags,
-          addTagFilter: handleAddTagFilter,
-          setAsPreview: handleOpenApplyPreviewDialog,
-          updateThumb: handleUpdateThumb,
+          onOpen: handleOpen,
+          onOpenInNewTab: handleOpenInNewTab,
+          onChangeRating: handleChangeRating,
+          onToggleFavorite: handleToggleFavorite,
+          onRename: handleOpenRenameDialog,
+          onMove: handleOpenMoveDialogSingle,
+          onCopy: handleOpenCopyDialogSingle,
+          onDelete: handleOpenDeleteDialogSingle,
+          onEditTags: handleEditTags,
+          onAddTagFilter: handleAddTagFilter,
+          onSetAsPreview: handleOpenApplyPreviewDialog,
+          onUpdateThumb: handleUpdateThumb,
         }}
       >
         <div
@@ -704,11 +713,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             <ScrollLockProvider>
               <MediaViewer
                 allNodes={mediaOnly}
+                prevFolderPath={listing.prev}
+                nextFolderPath={listing.next}
                 initialIndex={initialViewerIndex}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
-                onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
-                onNextFolder={listing.next ? handleOpenNextFolder : undefined}
                 onEditTags={handleToggleTagEditMode}
                 onDelete={handleOpenDeleteDialogSelected}
               />
@@ -823,7 +832,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {/* フォルダナビゲーション */}
           <FolderNavigation prevPath={listing.prev} nextPath={listing.next} />
         </div>
-      </ActionsProvider>
+      </MediaActionsProvider>
     </PagingProvider>
   );
 }

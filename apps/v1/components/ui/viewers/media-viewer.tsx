@@ -37,6 +37,7 @@ import {
   MoreVertical,
   Pin,
   PinOff,
+  RotateCw,
   TagIcon,
   Trash2,
 } from "lucide-react";
@@ -51,12 +52,12 @@ import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
 interface MediaViewerProps {
   allNodes: MediaNode[];
-  initialIndex: number;
-  onIndexChange: (index: number) => void;
-  onClose: () => void;
+  initialIndex?: number;
+  prevFolderPath?: string | null;
+  nextFolderPath?: string | null;
+  onIndexChange?: (index: number) => void;
+  onClose?: () => void;
   onOpenFolder?: (path: string, at?: IndexLike) => void;
-  onNextFolder?: (at?: IndexLike) => void;
-  onPrevFolder?: (at?: IndexLike) => void;
   onEditTags?: () => void;
   onDelete?: () => void;
   active?: boolean;
@@ -76,29 +77,24 @@ type Slide =
 
 export function MediaViewer({
   allNodes,
-  initialIndex,
+  initialIndex = 0,
+  prevFolderPath,
+  nextFolderPath,
   onIndexChange,
   onClose,
   onOpenFolder,
-  onNextFolder,
-  onPrevFolder,
   onEditTags,
   onDelete,
   active = true,
 }: MediaViewerProps) {
-  const hasPrevFolder = !!onPrevFolder;
-  const hasNextFolder = !!onNextFolder;
-  const isMobile = useIsMobile();
-  const { toggleFullscreen } = useFullscreen();
-  const { toggleFavorite, updateFavorite, getFavorite } = useFavoritesContext();
-  const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
-  const [currentNode, setCurrentNode] = useState<MediaNode | null>(
-    allNodes[initialIndex] ?? null
-  );
+  // ===== ヘッダー =====
+
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const { value: isHeaderPinned, toggle: toggleIsHeaderPinned } =
     useViewerHeaderPinnedContext();
+
   const {
     isVisible: isHeaderVisible,
     toggle: toggleHeaderVisibility,
@@ -107,13 +103,21 @@ export function MediaViewer({
     duration: 2000,
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
+
+  // ===== スライド移動 =====
+
+  const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
+  const [currentNode, setCurrentNode] = useState<MediaNode | null>(
+    allNodes[initialIndex] ?? null
+  );
+
+  const hasPrevFolder = !!prevFolderPath;
+  const hasNextFolder = !!nextFolderPath;
+
   const swiperRef = useRef<SwiperClass | null>(null);
   const lastViewedPathRef = useRef<string | null>(
     allNodes[initialIndex]?.path ?? null
   );
-  const { isFavorite = false, rating = null } = currentNode
-    ? getFavorite(currentNode.path)
-    : {};
 
   // 仮想スライド構成
   // [最初のページダミー] → [前のフォルダナビ] → [メディア配列] → [次のフォルダナビ] → [最後のページダミー]
@@ -146,18 +150,66 @@ export function MediaViewer({
     return mediaIndex + offset;
   };
 
+  // スワイプ制御用
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(
     getSlideIndex(initialIndex)
   );
 
-  // タイトル設定
+  // スワイプ時の移動処理
+  const handleSwipe = (swiper: SwiperClass) => {
+    setCurrentSlideIndex(swiper.activeIndex);
+
+    const slide = allSlides[swiper.activeIndex];
+
+    // ダミーページの場合は何もしない
+    if (slide === firstPageDummy || slide === lastPageDummy) {
+      return;
+    }
+
+    // フォルダ遷移
+    if (hasPrevFolder && slide === prevFolderNav) {
+      handleOpenPrevFolder();
+      return;
+    }
+    if (hasNextFolder && slide === nextFolderNav) {
+      handleOpenNextFolder();
+      return;
+    }
+
+    // メディアノードの場合のみ状態更新
+    let offset = 1; // firstPageDummy
+    if (hasPrevFolder) offset += 1; // prevFolderNav
+    const index = swiper.activeIndex - offset;
+    const node = allNodes[index];
+    if (node) {
+      setCurrentIndex(index);
+      setCurrentNode(node);
+      updateTitle(node);
+      onIndexChange?.(index);
+
+      lastViewedPathRef.current = node.path;
+    }
+  };
+
+  // ===== タイトル =====
+
   const { setTitle } = useDocumentTitle();
+
+  // タイトルにファイルタイトルまたはファイル名を設定
   const updateTitle = (node: MediaNode) => {
     const { title, name } = node;
     setTitle(`${title ?? name} | ${APP_CONFIG.meta.title}`);
   };
 
-  // お気に入りボタンクリック時の処理
+  // ===== お気に入り =====
+
+  const { toggleFavorite, updateFavorite, getFavorite } = useFavoritesContext();
+
+  const { isFavorite = false, rating = null } = currentNode
+    ? getFavorite(currentNode.path)
+    : {};
+
+  // お気に入り状態トグル
   const handleToggleFavorite = () => {
     try {
       if (!currentNode) return;
@@ -178,7 +230,8 @@ export function MediaViewer({
     }
   };
 
-  const handleRatingChange = (rating: number | null) => {
+  // レーティングを更新
+  const handleChangeRating = (rating: number | null) => {
     try {
       if (!currentNode) return;
       const node = currentNode;
@@ -198,52 +251,33 @@ export function MediaViewer({
     }
   };
 
+  // ===== ナビゲーション =====
+
   // 現在のファイルが存在するフォルダを開く
   const handleOpenFolder = () => {
     if (onOpenFolder) {
+      debugger;
       if (!currentNode) return;
       const parentDir = getParentDirPath(currentNode.path);
       onOpenFolder(parentDir);
     }
   };
 
-  // スワイプ時の移動処理
-  const handleSwipe = (swiper: SwiperClass) => {
-    setCurrentSlideIndex(swiper.activeIndex);
-
-    const slide = allSlides[swiper.activeIndex];
-
-    // ダミーページの場合は何もしない
-    if (slide === firstPageDummy || slide === lastPageDummy) {
-      return;
-    }
-
-    // フォルダ遷移
-    if (!!onPrevFolder && slide === prevFolderNav) {
-      onPrevFolder("last");
-      return;
-    }
-    if (!!onNextFolder && slide === nextFolderNav) {
-      onNextFolder("first");
-      return;
-    }
-
-    // メディアノードの場合のみ状態更新
-    let offset = 1; // firstPageDummy
-    if (hasPrevFolder) offset += 1; // prevFolderNav
-    const index = swiper.activeIndex - offset;
-    const node = allNodes[index];
-    if (node) {
-      setCurrentIndex(index);
-      setCurrentNode(node);
-      updateTitle(node);
-      onIndexChange(index);
-
-      lastViewedPathRef.current = node.path;
+  // 次のフォルダを開く
+  const handleOpenNextFolder = () => {
+    if (onOpenFolder && nextFolderPath) {
+      onOpenFolder(nextFolderPath, "first");
     }
   };
 
-  // allNodes 更新時に直前に見ていたファイルを復元
+  // 前のフォルダを開く
+  const handleOpenPrevFolder = () => {
+    if (onOpenFolder && prevFolderPath) {
+      onOpenFolder(prevFolderPath, "last");
+    }
+  };
+
+  // リスト更新時に直前に見ていたファイルを復元
   useEffect(() => {
     const path = lastViewedPathRef.current;
     if (!path) return;
@@ -258,14 +292,16 @@ export function MediaViewer({
     setCurrentNode(allNodes[index]);
     setCurrentSlideIndex(slideIndex);
     updateTitle(allNodes[index]);
-    onIndexChange(index);
+    onIndexChange?.(index);
 
     swiperRef.current?.slideTo(slideIndex, 0);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps -- この処理は allNodes だけに依存させる
   }, [allNodes]);
 
-  // マウスホイールイベントでズームを制御する関数
+  // ===== ズーム =====
+
+  // マウスホイールでズーム
   const handleWheel = (e: React.WheelEvent) => {
     const swiper = swiperRef.current;
     if (!swiper?.zoom) return;
@@ -281,21 +317,21 @@ export function MediaViewer({
     }
   };
 
-  // ショートカット
+  // ===== ショートカット =====
+
   // Escape: 閉じる
+  useHotkeys("escape", () => onClose?.(), {
+    scopes: "viewer",
+    enabled: active,
+  });
+
   // Delete: 削除
-  // Enter / Space: ヘッダーの表示切替（固定されていない場合のみ）
-  // 左右キー / A, D: 前後のメディアに移動
-  // S: お気に入りの切り替え
-  // F: 全画面表示
-  // O: フォルダを開く
-  // H: ヘッダーの固定切り替え
-  // 0~5: お気に入り評価の設定
-  useHotkeys("escape", () => onClose(), { scopes: "viewer", enabled: active });
   useHotkeys("delete", () => onDelete?.(), {
     scopes: ["viewer", "tag-editor"],
     enabled: active,
   });
+
+  // Enter / Space: ヘッダーの表示切替（固定されていない場合のみ）
   useHotkeys(
     ["enter", "space"],
     () => !isHeaderPinned && toggleHeaderVisibility(),
@@ -304,6 +340,8 @@ export function MediaViewer({
       enabled: active,
     }
   );
+
+  // 左右キー / A, D: 前後のメディアに移動
   useHotkeys(["arrowleft", "a"], () => swiperRef.current?.slidePrev(), {
     scopes: ["viewer", "tag-editor"],
     enabled: active,
@@ -312,18 +350,26 @@ export function MediaViewer({
     scopes: ["viewer", "tag-editor"],
     enabled: active,
   });
+
+  // S: お気に入りの切り替え
   useHotkeys("s", () => void handleToggleFavorite(), {
     scopes: ["viewer", "tag-editor"],
     enabled: active,
   });
+
+  // F: 全画面表示
   useHotkeys("f", () => toggleFullscreen(), {
     scopes: ["viewer", "tag-editor"],
     enabled: active,
   });
+
+  // O: フォルダを開く
   useHotkeys("o", () => handleOpenFolder(), {
     scopes: ["viewer", "tag-editor"],
     enabled: active,
   });
+
+  // H: ヘッダーの固定切り替え
   useHotkeys(
     "h",
     () => {
@@ -335,17 +381,25 @@ export function MediaViewer({
       enabled: active,
     }
   );
+
+  // 0~5: お気に入り評価の設定
   useHotkeys(
     "0,1,2,3,4,5",
     (event) => {
       const rating = parseInt(event.key);
-      handleRatingChange(rating === 0 ? null : rating);
+      handleChangeRating(rating === 0 ? null : rating);
     },
     {
       scopes: ["viewer", "tag-editor"],
       enabled: active,
     }
   );
+
+  // ===== その他 =====
+
+  const isMobile = useIsMobile();
+
+  const { toggleFullscreen } = useFullscreen();
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
@@ -419,7 +473,7 @@ export function MediaViewer({
               )}
 
               {/* メニュー */}
-              <DropdownMenu onOpenChange={setIsMenuOpen}>
+              <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <button
                     className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
@@ -436,7 +490,7 @@ export function MediaViewer({
                   <DropdownMenuItem className="flex justify-center">
                     <FavoriteRating
                       value={rating}
-                      onChange={(value) => void handleRatingChange(value)}
+                      onChange={(value) => void handleChangeRating(value)}
                       variant="menu"
                     />
                   </DropdownMenuItem>
@@ -453,8 +507,8 @@ export function MediaViewer({
                     </DropdownMenuItem>
                   )}
 
-                  {onPrevFolder && (
-                    <DropdownMenuItem onClick={() => onPrevFolder("first")}>
+                  {hasPrevFolder && (
+                    <DropdownMenuItem onClick={handleOpenPrevFolder}>
                       <FolderOutput className="mr-2 h-4 w-4" />
                       <span>前のフォルダを開く</span>
                       {!isMobile && (
@@ -465,8 +519,8 @@ export function MediaViewer({
                     </DropdownMenuItem>
                   )}
 
-                  {onNextFolder && (
-                    <DropdownMenuItem onClick={() => onNextFolder("first")}>
+                  {hasNextFolder && (
+                    <DropdownMenuItem onClick={handleOpenNextFolder}>
                       <FolderInput className="mr-2 h-4 w-4" />
                       <span>次のフォルダを開く</span>
                       {!isMobile && (
@@ -495,6 +549,11 @@ export function MediaViewer({
                         <kbd className="rounded border px-1.5 py-0.5">T</kbd>
                       </div>
                     )}
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem onClick={onDelete}>
+                    <RotateCw className="mr-2 h-4 w-4" />
+                    <span className="text-destructive">復元</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem onClick={onDelete}>

@@ -27,8 +27,8 @@ import { createSearchFilter } from "@/lib/filter/factory";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
-import { ActionsProvider } from "@/providers/actions-provider";
 import { useHistoryContext } from "@/providers/history-provider";
+import { MediaActionsProvider } from "@/providers/media-actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
@@ -164,7 +164,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     }
   };
 
-  // ===== 選択機能 =====
+  // ===== 選択 =====
 
   const { isSelectionMode, selected, select, selectAll, resetSelection } =
     useSelectionControl({
@@ -172,7 +172,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
       controlledNodes: filteredNodes,
     });
 
-  // ===== 復元 (Restore) =====
+  // ===== 復元 =====
 
   const [restoreTargets, setRestoreTargets] = useState<MediaNode[]>([]);
   const isRestoreMode = restoreTargets.length > 0;
@@ -274,18 +274,17 @@ export function Trash({ listing }: { listing: MediaListing }) {
     });
   }, [activeScope, allScopes, disableScope, enableScope]);
 
-  // ショートカットの定義
   // Escape: 選択解除
-  // Delete: 削除
-  // Ctrl + A: 全選択
-  // Ctrl + K: 検索
-  // P/N: 前/次のフォルダを開く
   useHotkeys("escape", () => resetSelection(), {
     scopes: "trash",
   });
+
+  // Delete: 削除
   useHotkeys("delete", () => openDeleteDialogSelected(), {
     scopes: "trash",
   });
+
+  // Ctrl + A: 全選択
   useHotkeys(
     "ctrl+a",
     (e) => {
@@ -294,6 +293,8 @@ export function Trash({ listing }: { listing: MediaListing }) {
     },
     { scopes: "trash" }
   );
+
+  // Ctrl + K: 検索
   useHotkeys(
     "ctrl+k",
     (e) => {
@@ -302,6 +303,8 @@ export function Trash({ listing }: { listing: MediaListing }) {
     },
     { scopes: "trash" }
   );
+
+  // P/N: 前/次のフォルダを開く
   useHotkeys("p", () => handleOpenPrevFolder("first"), {
     scopes: ["trash", "viewer"],
   });
@@ -313,11 +316,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
-      <ActionsProvider
+      <MediaActionsProvider
         actions={{
-          open: handleOpen,
-          deletePermanently: handleOpenDeleteDialogSingle,
-          restore: handleOpenRestoreDialogSingle,
+          onOpen: handleOpen,
+          onDeletePermanently: handleOpenDeleteDialogSingle,
+          onRestore: handleOpenRestoreDialogSingle,
         }}
       >
         <div
@@ -414,11 +417,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
             <ScrollLockProvider>
               <MediaViewer
                 allNodes={mediaOnly}
+                prevFolderPath={listing.prev}
+                nextFolderPath={listing.next}
                 initialIndex={initialViewerIndex}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
-                onPrevFolder={listing.prev ? handleOpenPrevFolder : undefined}
-                onNextFolder={listing.next ? handleOpenNextFolder : undefined}
                 onDelete={openDeleteDialogSelected}
               />
             </ScrollLockProvider>
@@ -485,7 +488,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
             isDeleted
           />
         </div>
-      </ActionsProvider>
+      </MediaActionsProvider>
     </PagingProvider>
   );
 }
