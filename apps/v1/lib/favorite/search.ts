@@ -8,8 +8,8 @@ import {
 import { detectMediaType } from "@/lib/media/media-types";
 import { MediaNode, MediaType, SortDirection } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
-import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/random";
 import { normalizeForLike } from "@/lib/utils/search";
+import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/shuffle";
 import path, { basename } from "path";
 
 type SearchFavoriteParams = {

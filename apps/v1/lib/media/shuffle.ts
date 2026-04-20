@@ -1,5 +1,5 @@
 import { MediaFsNode } from "@/lib/media/types";
-import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/random";
+import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/shuffle";
 
 export function shuffleNodes<T extends MediaFsNode>(
   nodes: T[],
