@@ -414,7 +414,7 @@ export function MediaViewer({
                   variant="viewer"
                   rating={rating}
                   isFavorite={isFavorite}
-                  onToggle={handleToggleFavorite}
+                  onClick={handleToggleFavorite}
                 />
               )}
 

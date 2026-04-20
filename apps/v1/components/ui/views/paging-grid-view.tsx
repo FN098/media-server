@@ -485,7 +485,7 @@ function Cell({
                   variant="grid"
                   rating={rating}
                   isFavorite={isFavorite}
-                  onToggle={() => void toggleFavorite?.(node)}
+                  onClick={() => void toggleFavorite?.(node)}
                 />
               )}
 

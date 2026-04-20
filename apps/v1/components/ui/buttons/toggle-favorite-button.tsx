@@ -4,18 +4,18 @@ import { cn } from "@/shadcn/lib/utils";
 import { Star } from "lucide-react";
 import React from "react";
 
-type ToggleFavoriteButtonProps = {
+interface ToggleFavoriteButtonProps {
   isFavorite: boolean;
   rating: number | null;
-  onToggle: () => void;
+  onClick: () => void;
   variant?: "grid" | "viewer" | "list";
   className?: string;
-};
+}
 
 export function ToggleFavoriteButton({
   isFavorite,
   rating,
-  onToggle,
+  onClick,
   variant = "grid",
   className,
 }: ToggleFavoriteButtonProps) {
@@ -25,7 +25,7 @@ export function ToggleFavoriteButton({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onToggle();
+    onClick();
   };
 
   const iconOnly = rating == null;

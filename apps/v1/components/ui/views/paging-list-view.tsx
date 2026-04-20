@@ -504,7 +504,7 @@ function DataRow({
                 variant="list"
                 rating={rating}
                 isFavorite={isFavorite}
-                onToggle={() => void toggleFavorite?.(node)}
+                onClick={() => void toggleFavorite?.(node)}
               />
             ) : (
               <FavoriteRating
