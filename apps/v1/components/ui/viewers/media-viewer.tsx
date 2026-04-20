@@ -228,7 +228,6 @@ export function MediaViewer({
 
     // ダミーページの場合は何もしない
     if (slide === firstPageDummy || slide === lastPageDummy) {
-      setCurrentNode(null);
       return;
     }
 
