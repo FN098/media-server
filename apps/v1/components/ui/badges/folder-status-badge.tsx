@@ -35,10 +35,9 @@ export const FolderStatusBadge = ({
     );
   }
 
-  const lastDate = new Date(date);
-  const now = new Date();
-  const diffInDays =
-    (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+  const from = new Date(date);
+  const to = new Date();
+  const diffInDays = (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24);
 
   const isRecent = diffInDays < 1;
   const colorClass = isRecent
@@ -55,7 +54,7 @@ export const FolderStatusBadge = ({
     >
       <Clock size={10} />
       <span className="whitespace-nowrap">
-        {formatDistanceToNow(lastDate, { addSuffix: true, locale: ja })}
+        {formatDistanceToNow(from, { addSuffix: true, locale: ja })}
       </span>
     </div>
   );

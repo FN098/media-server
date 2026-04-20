@@ -482,11 +482,13 @@ function DataRow({
 
           {/* Last Viewed */}
           <div className="hidden md:block flex items-center overflow-hidden">
-            {node.isDirectory && (
+            {node.isDirectory ? (
               <FolderStatusBadge
                 date={node.lastViewedAt}
                 className="border-none bg-transparent p-0"
               />
+            ) : (
+              "-"
             )}
           </div>
 
