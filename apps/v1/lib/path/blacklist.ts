@@ -1,6 +1,12 @@
 import { getClientExplorerPath, getServerMediaPath } from "@/lib/path/helpers";
 
-export const blackListInExplorer = [".thumb", ".trash", ".db"];
+const blackListPaths = [".thumb", ".trash", ".db"] as const;
+
+const blackListPathsVirtual = [...blackListPaths];
+const blackListPathsServer = blackListPaths.map((p) => getServerMediaPath(p));
+const blackListPathsClient = blackListPaths.map((p) =>
+  getClientExplorerPath(p)
+);
 
 const isBlockedPath = (pathname: string, blacklist: string[]) => {
   return blacklist.some(
@@ -9,18 +15,13 @@ const isBlockedPath = (pathname: string, blacklist: string[]) => {
 };
 
 export const isBlockedVirtualPath = (pathname: string) => {
-  const blacklist = [...blackListInExplorer];
-  return isBlockedPath(pathname, blacklist);
+  return isBlockedPath(pathname, blackListPathsVirtual);
 };
 
 export const isBlockedServerPath = (pathname: string) => {
-  const blacklist = [...blackListInExplorer.map((p) => getServerMediaPath(p))];
-  return isBlockedPath(pathname, blacklist);
+  return isBlockedPath(pathname, blackListPathsServer);
 };
 
 export const isBlockedClientPath = (pathname: string) => {
-  const blacklist = [
-    ...blackListInExplorer.map((p) => getClientExplorerPath(p)),
-  ];
-  return isBlockedPath(pathname, blacklist);
+  return isBlockedPath(pathname, blackListPathsClient);
 };
