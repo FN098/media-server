@@ -12,7 +12,7 @@ type Options = {
 type NavigateOptions = {
   deleted?: boolean;
   newTab?: boolean;
-  at?: IndexLike; // ビューア用
+  at?: IndexLike | null; // ビューア用
 };
 
 export function useFolderNavigation(options?: Options) {
@@ -32,6 +32,8 @@ export function useFolderNavigation(options?: Options) {
 
       if (options?.at) {
         params.set(atKey, String(options.at));
+      } else if (options?.at === null) {
+        params.delete(atKey);
       }
 
       if (options?.newTab) {

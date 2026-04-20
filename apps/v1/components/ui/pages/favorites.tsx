@@ -172,7 +172,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   // 親フォルダを開く
   const handleOpenParentFolder = (node: MediaNode) => {
     const parentDir = getParentDirPath(node.path);
-    openFolder(parentDir);
+    openFolder(parentDir, { at: null });
   };
 
   // ===== お気に入り =====
