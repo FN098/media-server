@@ -85,8 +85,8 @@ export function ActionContextMenu({
         {changeRating && !node.isDirectory && (
           <ContextMenuItem className="flex justify-center">
             <FavoriteRating
-              rating={rating}
-              onRatingChange={(rating) => void changeRating(node, rating)}
+              value={rating}
+              onChange={(value) => void changeRating(node, value)}
               variant="menu"
             />
           </ContextMenuItem>

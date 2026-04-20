@@ -101,8 +101,8 @@ export function ActionDropdownMenu({
         {changeRating && !node.isDirectory && (
           <DropdownMenuItem className="flex justify-center">
             <FavoriteRating
-              rating={rating}
-              onRatingChange={(rating) => void changeRating(node, rating)}
+              value={rating}
+              onChange={(value) => void changeRating(node, value)}
               variant="menu"
             />
           </DropdownMenuItem>

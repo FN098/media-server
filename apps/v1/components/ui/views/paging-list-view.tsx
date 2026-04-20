@@ -481,7 +481,7 @@ function DataRow({
           </div>
 
           {/* Last Viewed */}
-          <div className="hidden md:block flex items-center overflow-hidden">
+          <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
             {node.isDirectory ? (
               <FolderStatusBadge
                 date={node.lastViewedAt}
@@ -499,19 +499,19 @@ function DataRow({
           >
             {node.isDirectory ? (
               <FavoriteCountBadge count={node.favoriteCount ?? 0} />
-            ) : isMobile && toggleFavorite ? (
+            ) : isMobile ? (
               <ToggleFavoriteButton
                 variant="list"
                 rating={rating}
                 isFavorite={isFavorite}
                 onToggle={() => void toggleFavorite?.(node)}
               />
-            ) : changeRating ? (
+            ) : (
               <FavoriteRating
-                rating={rating}
-                onRatingChange={(rating) => void changeRating(node, rating)}
+                value={rating}
+                onChange={(value) => void changeRating?.(node, value)}
               />
-            ) : null}
+            )}
           </div>
 
           {/* Actions */}

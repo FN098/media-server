@@ -435,10 +435,8 @@ export function MediaViewer({
                 >
                   <DropdownMenuItem className="flex justify-center">
                     <FavoriteRating
-                      rating={rating}
-                      onRatingChange={(rating) =>
-                        void handleRatingChange(rating)
-                      }
+                      value={rating}
+                      onChange={(value) => void handleRatingChange(value)}
                       variant="menu"
                     />
                   </DropdownMenuItem>

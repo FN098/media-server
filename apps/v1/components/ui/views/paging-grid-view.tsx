@@ -480,7 +480,7 @@ function Cell({
 
             {/* Actions */}
             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-              {!selectCtx.isSelectionMode && isMediaNode && toggleFavorite && (
+              {!selectCtx.isSelectionMode && isMediaNode && (
                 <ToggleFavoriteButton
                   variant="grid"
                   rating={rating}

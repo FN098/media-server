@@ -3,15 +3,15 @@ import { Star } from "lucide-react";
 import React from "react";
 
 type FavoriteRatingProps = {
-  rating: number | null;
-  onRatingChange: (newRating: number | null) => void;
+  value: number | null;
+  onChange: (newRating: number | null) => void;
   variant?: "list" | "menu";
   className?: string;
 };
 
 export function FavoriteRating({
-  rating,
-  onRatingChange,
+  value,
+  onChange,
   className,
 }: FavoriteRatingProps) {
   const [hoverRating, setHoverRating] = React.useState<number | null>(null);
@@ -23,9 +23,9 @@ export function FavoriteRating({
       onMouseLeave={() => setHoverRating(null)}
     >
       {[1, 2, 3, 4, 5].map((num) => {
-        const isSelected = (rating ?? 0) >= num;
+        const isSelected = (value ?? 0) >= num;
         const displayFilled =
-          rating === null ? false : (hoverRating ?? rating) >= num;
+          value === null ? false : (hoverRating ?? value) >= num;
 
         return (
           <button
@@ -34,8 +34,8 @@ export function FavoriteRating({
             onMouseEnter={() => setHoverRating(num)}
             onClick={(e) => {
               e.stopPropagation();
-              const next = rating === num ? null : num;
-              onRatingChange(next);
+              const next = value === num ? null : num;
+              onChange(next);
 
               // クリックした瞬間にホバー状態を一度リセットするとより確実
               if (next === null) setHoverRating(null);
