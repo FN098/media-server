@@ -305,10 +305,10 @@ export function Trash({ listing }: { listing: MediaListing }) {
   );
 
   // P/N: 前/次のフォルダを開く
-  useHotkeys("p", () => handleOpenPrevFolder("first"), {
+  useHotkeys("p", () => handleOpenPrevFolder(), {
     scopes: ["trash", "viewer"],
   });
-  useHotkeys("n", () => handleOpenNextFolder("first"), {
+  useHotkeys("n", () => handleOpenNextFolder(), {
     scopes: ["trash", "viewer"],
   });
 
@@ -319,6 +319,8 @@ export function Trash({ listing }: { listing: MediaListing }) {
       <MediaActionsProvider
         actions={{
           onOpen: handleOpen,
+          onOpenNextFolder: () => handleOpenNextFolder(),
+          onOpenPrevFolder: () => handleOpenPrevFolder(),
           onDeletePermanently: handleOpenDeleteDialogSingle,
           onRestore: handleOpenRestoreDialogSingle,
         }}
@@ -417,12 +419,24 @@ export function Trash({ listing }: { listing: MediaListing }) {
             <ScrollLockProvider>
               <MediaViewer
                 allNodes={mediaOnly}
-                prevFolderPath={listing.prev}
-                nextFolderPath={listing.next}
                 initialIndex={initialViewerIndex}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
-                onDelete={openDeleteDialogSelected}
+                menuConfig={{
+                  enabled: {
+                    pinHeader: true,
+                    toggleFavorite: false,
+                    changeRating: false,
+                    delete: false,
+                    deletePermanently: true,
+                    editTags: false,
+                    openNextFolder: true,
+                    openParentFolder: false,
+                    openPrevFolder: true,
+                    restore: true,
+                    toggleFullscreen: true,
+                  },
+                }}
               />
             </ScrollLockProvider>
           )}

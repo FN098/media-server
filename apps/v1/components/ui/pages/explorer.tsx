@@ -573,6 +573,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       <MediaActionsProvider
         actions={{
           onOpen: handleOpen,
+          onOpenNextFolder: () => handleOpenNextFolder(),
+          onOpenPrevFolder: () => handleOpenPrevFolder(),
           onOpenInNewTab: handleOpenInNewTab,
           onChangeRating: handleChangeRating,
           onToggleFavorite: handleToggleFavorite,
@@ -713,13 +715,24 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             <ScrollLockProvider>
               <MediaViewer
                 allNodes={mediaOnly}
-                prevFolderPath={listing.prev}
-                nextFolderPath={listing.next}
                 initialIndex={initialViewerIndex}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
-                onEditTags={handleToggleTagEditMode}
-                onDelete={handleOpenDeleteDialogSelected}
+                menuConfig={{
+                  enabled: {
+                    pinHeader: true,
+                    toggleFavorite: true,
+                    changeRating: true,
+                    delete: true,
+                    deletePermanently: false,
+                    editTags: true,
+                    openNextFolder: true,
+                    openParentFolder: false,
+                    openPrevFolder: true,
+                    restore: false,
+                    toggleFullscreen: true,
+                  },
+                }}
               />
             </ScrollLockProvider>
           )}

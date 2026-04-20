@@ -2,8 +2,8 @@
 
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
+import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
-import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
 import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
@@ -508,7 +508,7 @@ function DataRow({
             {node.isDirectory ? (
               <FavoriteCountBadge count={node.favoriteCount ?? 0} />
             ) : isMobile ? (
-              <ToggleFavoriteButton
+              <FavoriteButton
                 variant="list"
                 rating={rating}
                 isFavorite={isFavorite}

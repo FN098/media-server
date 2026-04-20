@@ -421,8 +421,21 @@ export function Favorites({ listing }: { listing: MediaListing }) {
                 initialIndex={initialViewerIndex}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
-                onOpenFolder={(path, at) => openFolder(path, { at })}
-                onEditTags={handleToggleTagEditor}
+                menuConfig={{
+                  enabled: {
+                    pinHeader: true,
+                    toggleFavorite: false,
+                    changeRating: true,
+                    delete: false,
+                    deletePermanently: false,
+                    editTags: true,
+                    openNextFolder: false,
+                    openParentFolder: true,
+                    openPrevFolder: false,
+                    restore: false,
+                    toggleFullscreen: true,
+                  },
+                }}
               />
             </ScrollLockProvider>
           )}

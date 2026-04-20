@@ -2,7 +2,7 @@
 
 import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
-import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
+import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
 import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
@@ -486,14 +486,16 @@ function Cell({
 
             {/* Actions */}
             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-              {!selectCtx.isSelectionMode && isMediaNode && (
-                <ToggleFavoriteButton
-                  variant="grid"
-                  rating={rating}
-                  isFavorite={isFavorite}
-                  onClick={() => void actions.onToggleFavorite?.(node)}
-                />
-              )}
+              {actions.onToggleFavorite &&
+                !selectCtx.isSelectionMode &&
+                isMediaNode && (
+                  <FavoriteButton
+                    variant="grid"
+                    rating={rating}
+                    isFavorite={isFavorite}
+                    onClick={() => void actions.onToggleFavorite?.(node)}
+                  />
+                )}
 
               {!selectCtx.isSelectionMode && (
                 <div

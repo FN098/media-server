@@ -1,8 +1,9 @@
 "use client";
 
 import { APP_CONFIG } from "@/app.config";
+import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
-import { ToggleFavoriteButton } from "@/components/ui/buttons/toggle-favorite-button";
+import { ViewerHeaderPinButton } from "@/components/ui/buttons/viewer-header-pin-button";
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
@@ -13,9 +14,8 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { getParentDirPath } from "@/lib/path/helpers";
-import { IndexLike } from "@/lib/query/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useMediaActionsContext } from "@/providers/media-actions-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import {
@@ -35,9 +35,7 @@ import {
   Loader2,
   Maximize,
   MoreVertical,
-  Pin,
-  PinOff,
-  RotateCw,
+  RotateCcw,
   TagIcon,
   Trash2,
 } from "lucide-react";
@@ -50,17 +48,31 @@ import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
+type ActionMenuConfig = {
+  enabled: {
+    pinHeader?: boolean;
+    toggleFavorite?: boolean;
+    changeRating?: boolean;
+    openParentFolder?: boolean;
+    openPrevFolder?: boolean;
+    openNextFolder?: boolean;
+    toggleFullscreen?: boolean;
+    editTags?: boolean;
+    restore?: boolean;
+    delete?: boolean;
+    deletePermanently?: boolean;
+  };
+};
+
+type ActionKey = keyof ActionMenuConfig["enabled"];
+
 interface MediaViewerProps {
   allNodes: MediaNode[];
   initialIndex?: number;
-  prevFolderPath?: string | null;
-  nextFolderPath?: string | null;
   onIndexChange?: (index: number) => void;
   onClose?: () => void;
-  onOpenFolder?: (path: string, at?: IndexLike) => void;
-  onEditTags?: () => void;
-  onDelete?: () => void;
-  active?: boolean;
+  shortcutEnabled?: boolean;
+  menuConfig?: ActionMenuConfig;
 }
 
 const firstPageDummy = { type: "dummy_first", path: "first-page" } as const;
@@ -78,15 +90,68 @@ type Slide =
 export function MediaViewer({
   allNodes,
   initialIndex = 0,
-  prevFolderPath,
-  nextFolderPath,
   onIndexChange,
   onClose,
-  onOpenFolder,
-  onEditTags,
-  onDelete,
-  active = true,
+  shortcutEnabled = true,
+  menuConfig,
 }: MediaViewerProps) {
+  // ===== アクション =====
+
+  const { actions } = useMediaActionsContext();
+  const {
+    onEditTags,
+    onDelete,
+    onDeletePermanently,
+    onRestore,
+    onOpenPrevFolder,
+    onOpenNextFolder,
+    onOpenParentFolder,
+  } = actions;
+
+  const isEnabled = (key: ActionKey) => !!menuConfig?.enabled[key];
+
+  const handleEditTags = () => {
+    if (onEditTags && currentNode) {
+      void onEditTags(currentNode);
+    }
+  };
+
+  const handleRestore = () => {
+    if (onRestore && currentNode) {
+      void onRestore(currentNode);
+    }
+  };
+
+  const handleDelete = () => {
+    if (onDelete && currentNode) {
+      void onDelete(currentNode);
+    }
+  };
+
+  const handleDeletePermanently = () => {
+    if (onDeletePermanently && currentNode) {
+      void onDeletePermanently(currentNode);
+    }
+  };
+
+  const handleOpenPrevFolder = () => {
+    if (onOpenPrevFolder && currentNode) {
+      void onOpenPrevFolder(currentNode);
+    }
+  };
+
+  const handleOpenNextFolder = () => {
+    if (onOpenNextFolder && currentNode) {
+      void onOpenNextFolder(currentNode);
+    }
+  };
+
+  const handleOpenParent = () => {
+    if (onOpenParentFolder && currentNode) {
+      void onOpenParentFolder(currentNode);
+    }
+  };
+
   // ===== ヘッダー =====
 
   const [isHovered, setIsHovered] = useState(false);
@@ -111,8 +176,8 @@ export function MediaViewer({
     allNodes[initialIndex] ?? null
   );
 
-  const hasPrevFolder = !!prevFolderPath;
-  const hasNextFolder = !!nextFolderPath;
+  const hasPrev = isEnabled("openPrevFolder");
+  const hasNext = isEnabled("openNextFolder");
 
   const swiperRef = useRef<SwiperClass | null>(null);
   const lastViewedPathRef = useRef<string | null>(
@@ -125,7 +190,7 @@ export function MediaViewer({
     const slides: Slide[] = [...allNodes];
 
     // 前側のスライドを追加
-    if (hasPrevFolder) {
+    if (hasPrev) {
       slides.unshift(firstPageDummy);
       slides.unshift(prevFolderNav);
     } else {
@@ -133,7 +198,7 @@ export function MediaViewer({
     }
 
     // 後側のスライドを追加
-    if (hasNextFolder) {
+    if (hasNext) {
       slides.push(lastPageDummy);
       slides.push(nextFolderNav);
     } else {
@@ -141,12 +206,12 @@ export function MediaViewer({
     }
 
     return slides;
-  }, [allNodes, hasPrevFolder, hasNextFolder]);
+  }, [allNodes, hasPrev, hasNext]);
 
   // 実際のメディアインデックスからスライドインデックスへの変換
   const getSlideIndex = (mediaIndex: number): number => {
     let offset = 1; // firstPageDummy
-    if (hasPrevFolder) offset += 1; // prevFolderNav
+    if (hasPrev) offset += 1; // prevFolderNav
     return mediaIndex + offset;
   };
 
@@ -167,18 +232,18 @@ export function MediaViewer({
     }
 
     // フォルダ遷移
-    if (hasPrevFolder && slide === prevFolderNav) {
+    if (hasPrev && slide === prevFolderNav) {
       handleOpenPrevFolder();
       return;
     }
-    if (hasNextFolder && slide === nextFolderNav) {
+    if (hasNext && slide === nextFolderNav) {
       handleOpenNextFolder();
       return;
     }
 
     // メディアノードの場合のみ状態更新
     let offset = 1; // firstPageDummy
-    if (hasPrevFolder) offset += 1; // prevFolderNav
+    if (hasPrev) offset += 1; // prevFolderNav
     const index = swiper.activeIndex - offset;
     const node = allNodes[index];
     if (node) {
@@ -253,30 +318,6 @@ export function MediaViewer({
 
   // ===== ナビゲーション =====
 
-  // 現在のファイルが存在するフォルダを開く
-  const handleOpenFolder = () => {
-    if (onOpenFolder) {
-      debugger;
-      if (!currentNode) return;
-      const parentDir = getParentDirPath(currentNode.path);
-      onOpenFolder(parentDir);
-    }
-  };
-
-  // 次のフォルダを開く
-  const handleOpenNextFolder = () => {
-    if (onOpenFolder && nextFolderPath) {
-      onOpenFolder(nextFolderPath, "first");
-    }
-  };
-
-  // 前のフォルダを開く
-  const handleOpenPrevFolder = () => {
-    if (onOpenFolder && prevFolderPath) {
-      onOpenFolder(prevFolderPath, "last");
-    }
-  };
-
   // リスト更新時に直前に見ていたファイルを復元
   useEffect(() => {
     const path = lastViewedPathRef.current;
@@ -320,53 +361,50 @@ export function MediaViewer({
   // ===== ショートカット =====
 
   // Escape: 閉じる
-  useHotkeys("escape", () => onClose?.(), {
+  useHotkeys("escape", () => onClose!(), {
     scopes: "viewer",
-    enabled: active,
+    enabled: shortcutEnabled && !!onClose,
   });
 
   // Delete: 削除
-  useHotkeys("delete", () => onDelete?.(), {
+  useHotkeys("delete", () => void onDelete!(currentNode!), {
     scopes: ["viewer", "tag-editor"],
-    enabled: active,
+    enabled:
+      shortcutEnabled && isEnabled("delete") && !!currentNode && !!onDelete,
   });
 
   // Enter / Space: ヘッダーの表示切替（固定されていない場合のみ）
-  useHotkeys(
-    ["enter", "space"],
-    () => !isHeaderPinned && toggleHeaderVisibility(),
-    {
-      scopes: ["viewer", "tag-editor"],
-      enabled: active,
-    }
-  );
+  useHotkeys(["enter", "space"], () => toggleHeaderVisibility(), {
+    scopes: ["viewer", "tag-editor"],
+    enabled: shortcutEnabled && !isHeaderPinned,
+  });
 
   // 左右キー / A, D: 前後のメディアに移動
-  useHotkeys(["arrowleft", "a"], () => swiperRef.current?.slidePrev(), {
+  useHotkeys(["arrowleft", "a"], () => swiperRef.current!.slidePrev(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: active,
+    enabled: shortcutEnabled && !!swiperRef.current,
   });
-  useHotkeys(["arrowright", "d"], () => swiperRef.current?.slideNext(), {
+  useHotkeys(["arrowright", "d"], () => swiperRef.current!.slideNext(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: active,
+    enabled: shortcutEnabled && !!swiperRef.current,
   });
 
   // S: お気に入りの切り替え
-  useHotkeys("s", () => void handleToggleFavorite(), {
+  useHotkeys("s", () => handleToggleFavorite(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: active,
+    enabled: shortcutEnabled && isEnabled("toggleFavorite"),
   });
 
   // F: 全画面表示
   useHotkeys("f", () => toggleFullscreen(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: active,
+    enabled: shortcutEnabled && isEnabled("toggleFullscreen"),
   });
 
   // O: フォルダを開く
-  useHotkeys("o", () => handleOpenFolder(), {
+  useHotkeys("o", () => handleOpenParent(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: active,
+    enabled: shortcutEnabled && isEnabled("openParentFolder"),
   });
 
   // H: ヘッダーの固定切り替え
@@ -378,7 +416,7 @@ export function MediaViewer({
     },
     {
       scopes: ["viewer", "tag-editor"],
-      enabled: active,
+      enabled: shortcutEnabled && isEnabled("pinHeader"),
     }
   );
 
@@ -391,7 +429,7 @@ export function MediaViewer({
     },
     {
       scopes: ["viewer", "tag-editor"],
-      enabled: active,
+      enabled: shortcutEnabled && isEnabled("changeRating"),
     }
   );
 
@@ -455,22 +493,24 @@ export function MediaViewer({
 
             <div className="flex items-center gap-4">
               {/* ヘッダー固定ピン */}
-              <button
-                className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
-                onClick={toggleIsHeaderPinned}
-              >
-                {isHeaderPinned ? <PinOff size={28} /> : <Pin size={28} />}
-              </button>
-
-              {/* お気に入りボタン */}
-              {!!currentNode && isMedia(currentNode.type) && (
-                <ToggleFavoriteButton
-                  variant="viewer"
-                  rating={rating}
-                  isFavorite={isFavorite}
-                  onClick={handleToggleFavorite}
+              {isEnabled("pinHeader") && (
+                <ViewerHeaderPinButton
+                  enabled={isHeaderPinned}
+                  onClick={toggleIsHeaderPinned}
                 />
               )}
+
+              {/* お気に入りボタン */}
+              {isEnabled("toggleFavorite") &&
+                !!currentNode &&
+                isMedia(currentNode.type) && (
+                  <FavoriteButton
+                    variant="viewer"
+                    rating={rating}
+                    isFavorite={isFavorite}
+                    onClick={handleToggleFavorite}
+                  />
+                )}
 
               {/* メニュー */}
               <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -487,16 +527,18 @@ export function MediaViewer({
                   align="end"
                   className="flex flex-col min-w-48 gap-2"
                 >
-                  <DropdownMenuItem className="flex justify-center">
-                    <FavoriteRating
-                      value={rating}
-                      onChange={(value) => void handleChangeRating(value)}
-                      variant="menu"
-                    />
-                  </DropdownMenuItem>
+                  {isEnabled("changeRating") && (
+                    <DropdownMenuItem className="flex justify-center">
+                      <FavoriteRating
+                        value={rating}
+                        onChange={handleChangeRating}
+                        variant="menu"
+                      />
+                    </DropdownMenuItem>
+                  )}
 
-                  {onOpenFolder && (
-                    <DropdownMenuItem onClick={() => handleOpenFolder()}>
+                  {isEnabled("openParentFolder") && (
+                    <DropdownMenuItem onClick={() => handleOpenParent()}>
                       <Folder className="mr-2 h-4 w-4" />
                       <span>フォルダを開く</span>
                       {!isMobile && (
@@ -507,8 +549,11 @@ export function MediaViewer({
                     </DropdownMenuItem>
                   )}
 
-                  {hasPrevFolder && (
-                    <DropdownMenuItem onClick={handleOpenPrevFolder}>
+                  {isEnabled("openPrevFolder") && (
+                    <DropdownMenuItem
+                      onClick={() => handleOpenPrevFolder()}
+                      disabled={!hasPrev}
+                    >
                       <FolderOutput className="mr-2 h-4 w-4" />
                       <span>前のフォルダを開く</span>
                       {!isMobile && (
@@ -519,8 +564,11 @@ export function MediaViewer({
                     </DropdownMenuItem>
                   )}
 
-                  {hasNextFolder && (
-                    <DropdownMenuItem onClick={handleOpenNextFolder}>
+                  {isEnabled("openNextFolder") && (
+                    <DropdownMenuItem
+                      onClick={() => handleOpenNextFolder()}
+                      disabled={!hasNext}
+                    >
                       <FolderInput className="mr-2 h-4 w-4" />
                       <span>次のフォルダを開く</span>
                       {!isMobile && (
@@ -531,40 +579,57 @@ export function MediaViewer({
                     </DropdownMenuItem>
                   )}
 
-                  <DropdownMenuItem onClick={toggleFullscreen}>
-                    <Maximize className="mr-2 h-4 w-4" />
-                    <span>全画面表示</span>
-                    {!isMobile && (
-                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                        <kbd className="rounded border px-1.5 py-0.5">F</kbd>
-                      </div>
-                    )}
-                  </DropdownMenuItem>
+                  {isEnabled("toggleFullscreen") && (
+                    <DropdownMenuItem onClick={toggleFullscreen}>
+                      <Maximize className="mr-2 h-4 w-4" />
+                      <span>全画面表示</span>
+                      {!isMobile && (
+                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                          <kbd className="rounded border px-1.5 py-0.5">F</kbd>
+                        </div>
+                      )}
+                    </DropdownMenuItem>
+                  )}
 
-                  <DropdownMenuItem onClick={onEditTags}>
-                    <TagIcon className="mr-2 h-4 w-4" />
-                    <span>タグを編集</span>
-                    {!isMobile && (
-                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                        <kbd className="rounded border px-1.5 py-0.5">T</kbd>
-                      </div>
-                    )}
-                  </DropdownMenuItem>
+                  {isEnabled("editTags") && (
+                    <DropdownMenuItem onClick={handleEditTags}>
+                      <TagIcon className="mr-2 h-4 w-4" />
+                      <span>タグを編集</span>
+                      {!isMobile && (
+                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                          <kbd className="rounded border px-1.5 py-0.5">T</kbd>
+                        </div>
+                      )}
+                    </DropdownMenuItem>
+                  )}
 
-                  <DropdownMenuItem onClick={onDelete}>
-                    <RotateCw className="mr-2 h-4 w-4" />
-                    <span className="text-destructive">復元</span>
-                  </DropdownMenuItem>
+                  {isEnabled("restore") && (
+                    <DropdownMenuItem onClick={handleRestore}>
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      <span>復元</span>
+                    </DropdownMenuItem>
+                  )}
 
-                  <DropdownMenuItem onClick={onDelete}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span className="text-destructive">削除</span>
-                    {!isMobile && (
-                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                        <kbd className="rounded border px-1.5 py-0.5">Del</kbd>
-                      </div>
-                    )}
-                  </DropdownMenuItem>
+                  {isEnabled("delete") && (
+                    <DropdownMenuItem onClick={handleDelete}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span className="text-destructive">削除</span>
+                      {!isMobile && (
+                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+                          <kbd className="rounded border px-1.5 py-0.5">
+                            Del
+                          </kbd>
+                        </div>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+
+                  {isEnabled("deletePermanently") && (
+                    <DropdownMenuItem onClick={handleDeletePermanently}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span className="text-destructive">完全に削除</span>
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -608,7 +673,7 @@ export function MediaViewer({
                   <div className="flex flex-col items-center justify-center text-white/70">
                     <ChevronLeft className="mb-4" size={64} strokeWidth={1} />
                     <p className="text-xl font-medium mb-2">最初のページです</p>
-                    {hasPrevFolder && (
+                    {hasPrev && (
                       <p className="text-sm text-white/50">
                         前のフォルダに移動するにはもう一度左にスワイプ
                       </p>
@@ -619,7 +684,7 @@ export function MediaViewer({
                   <div className="flex flex-col items-center justify-center text-white/70">
                     <ChevronRight className="mb-4" size={64} strokeWidth={1} />
                     <p className="text-xl font-medium mb-2">最後のページです</p>
-                    {hasNextFolder && (
+                    {hasNext && (
                       <p className="text-sm text-white/50">
                         次のフォルダに移動するにはもう一度右にスワイプ
                       </p>

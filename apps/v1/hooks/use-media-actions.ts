@@ -7,6 +7,8 @@ export interface MediaActions {
   onOpen?: (node: MediaNode) => void | Promise<void>;
   onOpenInNewTab?: (node: MediaNode) => void | Promise<void>;
   onOpenParentFolder?: (node: MediaNode) => void | Promise<void>;
+  onOpenPrevFolder?: (node: MediaNode) => void | Promise<void>;
+  onOpenNextFolder?: (node: MediaNode) => void | Promise<void>;
   onRename?: (node: MediaNode) => void | Promise<void>;
   onMove?: (node: MediaNode) => void | Promise<void>;
   onCopy?: (node: MediaNode) => void | Promise<void>;
