@@ -8,12 +8,14 @@ export function useFilteredNodes(
   nodes: MediaNode[],
   filters: MediaNodeFilter[],
   options?: {
-    activated?: boolean;
+    activated?: boolean; // デフォルト: true
   }
 ) {
+  const { activated = true } = options ?? {};
+
   // フィルタリング実行
   const filtered = useMemo(() => {
-    if (!options?.activated) return nodes;
+    if (!activated) return nodes;
 
     // フィルタの適用
     return nodes.filter((node) => {
@@ -21,7 +23,7 @@ export function useFilteredNodes(
 
       return filters.filter((f) => !!f).every((filter) => filter(node));
     });
-  }, [nodes, filters, options?.activated]);
+  }, [activated, nodes, filters]);
 
   // 「メディアのみ」のリスト
   const mediaOnly = useMemo(
