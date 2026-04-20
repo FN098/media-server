@@ -5,7 +5,7 @@ import { useState } from "react";
 
 type HistoryItem = {
   path: string;
-  type: "file" | "folder";
+  type: "file" | "directory";
 };
 
 type Options = {
@@ -44,7 +44,7 @@ export function useHistory(options: Options) {
 
   const toHistoryItem = (media: MediaNode): HistoryItem => ({
     path: media.path,
-    type: media.isDirectory ? "folder" : "file",
+    type: media.isDirectory ? "directory" : "file",
   });
 
   return {

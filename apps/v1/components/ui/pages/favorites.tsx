@@ -60,7 +60,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   } = useHistoryContext();
 
   useEffect(() => {
-    pushHistory({ path: listing.path, type: "folder" });
+    pushHistory({ path: listing.path, type: "directory" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
