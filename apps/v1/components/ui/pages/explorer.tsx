@@ -42,6 +42,13 @@ import { useSort } from "@/hooks/use-sort";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
+import {
+  createFavoriteFilter,
+  createMediaTypeFilter,
+  createRatingFilter,
+  createSearchFilter,
+  createTagFilter,
+} from "@/lib/filter/factory";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
@@ -137,7 +144,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const { value: tagFilterValue, apply: applyTagFilterValue } = useTagFilter();
 
   // お気に入りフィルター
-  const { value: favoriteFilterMode, apply: applyFavoriteFilterMode } =
+  const { value: favoriteFilterValue, apply: applyFavoriteFilterValue } =
     useFavoriteFilter();
 
   // フィルター結果
@@ -149,11 +156,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     isFiltered,
   } = useFilteredNodes({
     allNodes,
-    queryFilterValue,
-    mediaTypeFilterValue,
-    ratingFilterValue,
-    tagFilterValue,
-    favoriteFilterMode,
+    filters: [
+      createSearchFilter(queryFilterValue),
+      createMediaTypeFilter(mediaTypeFilterValue),
+      createRatingFilter(ratingFilterValue),
+      createTagFilter(tagFilterValue),
+      createFavoriteFilter(favoriteFilterValue),
+    ],
   });
 
   // タグをフィルターに追加
@@ -608,8 +617,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
             {/* お気に入りフィルター */}
             <FavoriteFilterSelect
-              value={favoriteFilterMode}
-              onChange={applyFavoriteFilterMode}
+              value={favoriteFilterValue}
+              onChange={applyFavoriteFilterValue}
             />
 
             {/* 評価フィルター */}

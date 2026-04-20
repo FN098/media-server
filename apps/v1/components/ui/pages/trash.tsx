@@ -23,6 +23,7 @@ import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useSort } from "@/hooks/use-sort";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
+import { createSearchFilter } from "@/lib/filter/factory";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { IndexLike } from "@/lib/query/types";
@@ -101,7 +102,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     isFiltered,
   } = useFilteredNodes({
     allNodes,
-    queryFilterValue,
+    filters: [createSearchFilter(queryFilterValue)],
   });
 
   // 検索パラメータリセット用

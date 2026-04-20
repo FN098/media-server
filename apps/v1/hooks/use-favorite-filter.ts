@@ -1,6 +1,10 @@
 "use client";
 
-import { FavoriteFilterMode, FavoriteFilterOptions } from "@/lib/filter/types";
+import {
+  FavoriteFilterMode,
+  FavoriteFilterOptions,
+  FavoriteFilterValue,
+} from "@/lib/filter/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
@@ -15,14 +19,14 @@ function parseFavoriteFilterMode(raw: string | null): FavoriteFilterMode {
 
 function buildParams(
   params: URLSearchParams,
-  next: FavoriteFilterMode,
+  next: FavoriteFilterValue,
   keys: { modeKey: string }
 ): void {
   const { modeKey } = keys;
-  if (next === "all") {
+  if (next.mode === "all") {
     params.delete(modeKey);
   } else {
-    params.set(modeKey, next);
+    params.set(modeKey, next.mode);
   }
 }
 
@@ -35,13 +39,15 @@ export function useFavoriteFilter(options?: FavoriteFilterOptions) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const value = useMemo<FavoriteFilterMode>(
+  const mode = useMemo(
     () => parseFavoriteFilterMode(searchParams.get(modeKey)),
-    [searchParams, modeKey]
+    [modeKey, searchParams]
   );
 
+  const value = useMemo<FavoriteFilterValue>(() => ({ mode }), [mode]);
+
   const apply = useCallback(
-    (next: FavoriteFilterMode) => {
+    (next: FavoriteFilterValue) => {
       const params = new URLSearchParams(searchParams.toString());
       buildParams(params, next, { modeKey });
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -49,9 +55,9 @@ export function useFavoriteFilter(options?: FavoriteFilterOptions) {
     [pathname, router, searchParams, modeKey]
   );
 
-  const reset = useCallback(() => apply("all"), [apply]);
+  const reset = useCallback(() => apply({ mode: "all" }), [apply]);
 
-  const isActive = value !== "all";
+  const isActive = mode !== "all";
 
   return { value, apply, reset, isActive };
 }

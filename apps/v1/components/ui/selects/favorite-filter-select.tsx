@@ -12,9 +12,13 @@ import { RotateCcw, Star, StarOff } from "lucide-react";
 // 'all' は内部的なリセット状態として扱う
 type FavoriteFilterMode = "all" | "only_favorites" | "exclude_favorites";
 
+type FavoriteFilterValue = {
+  mode: FavoriteFilterMode;
+};
+
 interface FavoriteFilterSelectProps {
-  value: FavoriteFilterMode;
-  onChange: (value: FavoriteFilterMode) => void;
+  value: FavoriteFilterValue;
+  onChange: (value: FavoriteFilterValue) => void;
 }
 
 export const FavoriteFilterSelect = ({
@@ -35,26 +39,26 @@ export const FavoriteFilterSelect = ({
     },
   ] as const;
 
-  const handleValueChange = (val: string) => {
-    if (val === "reset") {
-      onChange("all");
+  const handleValueChange = (value: string) => {
+    if (value === "reset") {
+      onChange({ mode: "all" });
     } else {
-      onChange(val as FavoriteFilterMode);
+      onChange({ mode: value as FavoriteFilterMode });
     }
   };
 
   // 'all' の場合は undefined にして placeholder を出す
-  const selectedValue = value === "all" ? undefined : value;
-  const isFiltered = value !== "all";
+  const selectedKey = value.mode === "all" ? undefined : value.mode;
+  const isFiltered = value.mode !== "all";
 
   // 現在の選択内容を取得（表示用）
-  const currentOption = options.find((opt) => opt.key === value);
+  const currentOption = options.find((opt) => opt.key === selectedKey);
 
   return (
     <div className="w-full">
       <Select
-        key={value} // リセット時に表示を強制更新するため
-        value={selectedValue}
+        key={selectedKey} // リセット時に表示を強制更新するため
+        value={selectedKey}
         onValueChange={handleValueChange}
       >
         <SelectTrigger className="bg-background focus:ring-1 w-full h-9">
