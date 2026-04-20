@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { formatBytes } from "@/lib/utils/formatter";
+import { formatBytes } from "@/lib/utils/format";
 import { z } from "zod";
 
 const MAX_FILE_SIZE = APP_CONFIG.dbDump.maxFileSize;

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatLocalDate } from "@/lib/utils/formatter";
+import { formatLocalDate } from "@/lib/utils/format";
 import { useEffect, useState } from "react";
 
 export function LocalDate({ value }: { value: string | Date | null }) {

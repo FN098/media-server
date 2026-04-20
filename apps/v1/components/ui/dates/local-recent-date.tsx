@@ -1,6 +1,6 @@
 "use client";
 
-import { formatRecentDate } from "@/lib/utils/formatter";
+import { formatRecentDate } from "@/lib/utils/format";
 import { useEffect, useState } from "react";
 
 export function LocalRecentDate({ value }: { value: string | Date | null }) {

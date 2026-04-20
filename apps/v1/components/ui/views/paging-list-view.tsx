@@ -14,7 +14,7 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
-import { formatBytes } from "@/lib/utils/formatter";
+import { formatBytes } from "@/lib/utils/format";
 import { useActionsContext } from "@/providers/actions-provider";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { usePagingContext } from "@/providers/paging-provider";
