@@ -209,7 +209,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     clearSelection,
   } = usePathSelectionContext();
 
-  const { selectedNodes } = useSelectedNodes(filteredNodes, selectedPaths);
+  const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
 
   // 選択
   const handleSelect = (node: MediaNode) => {

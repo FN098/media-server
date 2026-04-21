@@ -162,7 +162,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       favoriteFilterValue,
     ]
   );
-  const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
 
   // フィルター結果
   const {
@@ -171,6 +170,9 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     totalCount,
     isFiltered,
   } = useFilteredNodes(allNodes, pipeline);
+
+  // 「メディアのみ」のフィルターパイプライン
+  const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
 
   // 「メディアのみ」のリスト
   const { filtered: mediaOnly } = useFilteredNodes(

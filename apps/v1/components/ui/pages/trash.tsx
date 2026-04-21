@@ -94,7 +94,6 @@ export function Trash({ listing }: { listing: MediaListing }) {
     () => [createSearchFilter(queryFilterValue)],
     [queryFilterValue]
   );
-  const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
 
   // フィルター結果
   const {
@@ -103,6 +102,9 @@ export function Trash({ listing }: { listing: MediaListing }) {
     totalCount,
     isFiltered,
   } = useFilteredNodes(allNodes, pipeline);
+
+  // 「メディアのみ」のフィルターパイプライン
+  const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
 
   // 「メディアのみ」のリスト
   const { filtered: mediaOnly } = useFilteredNodes(
@@ -184,7 +186,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     clearSelection,
   } = usePathSelectionContext();
 
-  const { selectedNodes } = useSelectedNodes(filteredNodes, selectedPaths);
+  const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
 
   // 選択
   const handleSelect = (node: MediaNode) => {
