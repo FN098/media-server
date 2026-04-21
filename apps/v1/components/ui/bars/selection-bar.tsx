@@ -1,9 +1,23 @@
 import { AnimatedCheckCircle } from "@/components/ui/icons/animated-check-circle";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
+import { LucideIcon, MoreVertical, X } from "lucide-react";
+
+type Action = {
+  title: string;
+  onClick: () => void;
+  icon: LucideIcon;
+  disabled?: boolean;
+  className?: string;
+};
 
 interface SelectionBarProps {
   open: boolean;
@@ -11,7 +25,8 @@ interface SelectionBarProps {
   totalCount: number;
   onSelectAll: () => void;
   onClose: () => void;
-  actions: React.ReactNode;
+  inlineActions?: Action[];
+  menuActions?: Action[];
   className?: string;
 }
 
@@ -21,7 +36,8 @@ export function SelectionBar({
   totalCount,
   onSelectAll,
   onClose,
-  actions,
+  inlineActions,
+  menuActions,
   className,
 }: SelectionBarProps) {
   const isAllSelected = count > 0 && count === totalCount;
@@ -62,7 +78,55 @@ export function SelectionBar({
             </div>
 
             <div className="flex gap-1 items-center">
-              {actions} {/* ここに編集ボタンやダウンロードボタンが入る */}
+              <div className="flex gap-1 items-center">
+                {/* インラインアクション */}
+                {inlineActions &&
+                  inlineActions.map((action, index) => (
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "rounded-xl w-10 h-10 p-0",
+                        action.className
+                      )}
+                      onClick={action.onClick}
+                      disabled={action.disabled}
+                      title={action.title}
+                    >
+                      <action.icon size={18} />
+                    </Button>
+                  ))}
+
+                {/* メニューアクション */}
+                {menuActions && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title="その他"
+                        className="rounded-xl w-10 h-10 p-0"
+                      >
+                        <MoreVertical size={18} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {menuActions.map((action, index) => (
+                        <DropdownMenuItem
+                          key={index}
+                          onClick={action.onClick}
+                          disabled={action.disabled}
+                          className={action.className}
+                        >
+                          <action.icon className="mr-2 h-4 w-4" />{" "}
+                          {action.title}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
               <div className="w-[1px] h-6 bg-border mx-1" />
               <Button
                 variant="ghost"

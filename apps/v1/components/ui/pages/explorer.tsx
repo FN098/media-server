@@ -61,20 +61,12 @@ import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import {
   ArrowDownAz,
   CalendarArrowDown,
   Copy,
-  FolderInput,
   FolderPlus,
-  MoreVertical,
   Sparkle,
   Sparkles,
   TagIcon,
@@ -745,44 +737,31 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             onSelectAll={selectAll}
             onClose={resetSelection}
             className="z-40" // DropdownMenu より小さくする
-            actions={
-              <div className="flex gap-1 items-center">
-                {/* メインのアクション */}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleOpenTagEditor}
-                  disabled={selected.length === 0}
-                >
-                  <TagIcon size={18} />
-                </Button>
-
-                {/* その他のアクション */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost">
-                      <MoreVertical size={18} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleOpenMoveDialogSelected}>
-                      <FolderInput className="mr-2 h-4 w-4" /> 移動
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={handleOpenCopyDialogSelected}>
-                      <Copy className="mr-2 h-4 w-4" /> コピー
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={handleOpenDeleteDialogSelected}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> 削除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            }
+            inlineActions={[
+              {
+                title: "タグ編集",
+                onClick: handleOpenTagEditor,
+                icon: TagIcon,
+              },
+            ]}
+            menuActions={[
+              {
+                title: "移動",
+                onClick: handleOpenMoveDialogSelected,
+                icon: FolderPlus,
+              },
+              {
+                title: "コピー",
+                onClick: handleOpenCopyDialogSelected,
+                icon: Copy,
+              },
+              {
+                title: "削除",
+                onClick: handleOpenDeleteDialogSelected,
+                icon: Trash2,
+                className: "text-destructive",
+              },
+            ]}
           />
 
           {/* タグエディター */}

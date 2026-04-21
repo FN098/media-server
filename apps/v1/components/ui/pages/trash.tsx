@@ -32,18 +32,10 @@ import { MediaActionsProvider } from "@/providers/media-actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
-import { Button } from "@/shadcn/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import {
   ArrowDownAz,
   CalendarArrowDown,
-  MoreVertical,
   RotateCcw,
   Sparkle,
   Sparkles,
@@ -449,33 +441,19 @@ export function Trash({ listing }: { listing: MediaListing }) {
             onSelectAll={selectAll}
             onClose={resetSelection}
             className="z-40"
-            actions={
-              <div className="flex gap-1 items-center">
-                {/* その他のアクション */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="icon" variant="ghost">
-                      <MoreVertical size={18} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      variant="default"
-                      onClick={handleOpenRestoreDialogSelected}
-                    >
-                      <RotateCcw className="mr-2 h-4 w-4" />
-                      復元
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={openDeleteDialogSelected}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> 完全に削除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            }
+            menuActions={[
+              {
+                title: "復元",
+                onClick: handleOpenRestoreDialogSelected,
+                icon: RotateCcw,
+              },
+              {
+                title: "完全に削除",
+                onClick: openDeleteDialogSelected,
+                icon: Trash2,
+                className: "text-destructive",
+              },
+            ]}
           />
 
           {/* 削除警告ダイアログ */}

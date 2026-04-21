@@ -33,7 +33,6 @@ import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
-import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowDownAz, Sparkle, TagIcon } from "lucide-react";
 import { useEffect, useMemo } from "react";
@@ -448,19 +447,13 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             onSelectAll={selectAll}
             onClose={resetSelection}
             className="z-40" // DropdownMenu より小さくする
-            actions={
-              <div className="flex gap-1 items-center">
-                {/* メインのアクション */}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleOpenTagEditor}
-                  disabled={selected.length === 0}
-                >
-                  <TagIcon size={18} />
-                </Button>
-              </div>
-            }
+            inlineActions={[
+              {
+                title: "タグ編集",
+                onClick: handleOpenTagEditor,
+                icon: TagIcon,
+              },
+            ]}
           />
 
           {/* タグエディター */}
