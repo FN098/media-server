@@ -6,8 +6,6 @@ export type FavoriteValue = {
   favoritedAt?: Date;
 };
 
-export type FavoritesMap = Map<string, number | null>; // path -> rating
-
 export type FavoriteSortKey = Extract<
   keyof MediaNode,
   "name" | "path" | "mtime" | "size" | "rating" | "favoritedAt" | "title"

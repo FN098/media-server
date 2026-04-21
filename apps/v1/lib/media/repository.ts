@@ -54,3 +54,19 @@ export async function getMediaIdByPath(path: string): Promise<string | null> {
   });
   return media ? media.id : null;
 }
+
+export async function getMediaIdsByPaths(
+  paths: string[]
+): Promise<Record<string, string>> {
+  const medias = await prisma.media.findMany({
+    where: { path: { in: paths } },
+    select: { id: true, path: true },
+  });
+  return medias.reduce(
+    (acc, media) => {
+      acc[media.path] = media.id;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+}

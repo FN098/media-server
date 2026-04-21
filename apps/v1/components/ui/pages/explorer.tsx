@@ -69,6 +69,8 @@ import {
   FolderPlus,
   Sparkle,
   Sparkles,
+  Star,
+  StarOff,
   TagIcon,
   Trash2,
 } from "lucide-react";
@@ -268,13 +270,40 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   };
 
+  // 選択アイテムをお気に入り登録
+  const handleUpdateMultipleFavoritesSelected = () => {
+    try {
+      favCtx.updateMultipleFavorites(Array.from(selectedPaths), {
+        rating: null,
+        skipIfAlreadyFavorite: true,
+      });
+    } catch {
+      toast.error("お気に入りの一括更新に失敗しました");
+    }
+  };
+
+  // 選択アイテムをお気に入り解除
+  const handleDeleteMultipleFavoritesSelected = () => {
+    try {
+      favCtx.deleteMultipleFavorites(Array.from(selectedPaths));
+    } catch {
+      toast.error("お気に入りの一括削除に失敗しました");
+    }
+  };
+
   // ===== 選択 =====
 
-  const { isSelectionMode, selected, select, selectAll, resetSelection } =
-    useSelectionControl({
-      allNodes,
-      controlledNodes: filteredNodes,
-    });
+  const {
+    isSelectionMode,
+    selected,
+    selectedPaths,
+    select,
+    selectAll,
+    resetSelection,
+  } = useSelectionControl({
+    allNodes,
+    controlledNodes: filteredNodes,
+  });
 
   // ===== タグエディタ =====
 
@@ -745,6 +774,16 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               },
             ]}
             menuActions={[
+              {
+                title: "お気に入り登録",
+                onClick: handleUpdateMultipleFavoritesSelected,
+                icon: Star,
+              },
+              {
+                title: "お気に入り解除",
+                onClick: handleDeleteMultipleFavoritesSelected,
+                icon: StarOff,
+              },
               {
                 title: "移動",
                 onClick: handleOpenMoveDialogSelected,

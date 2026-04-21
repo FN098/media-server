@@ -56,6 +56,7 @@ export function useSelectionControl({
   return {
     isSelectionMode,
     selected,
+    selectedPaths,
     select,
     selectAll,
     resetSelection,
