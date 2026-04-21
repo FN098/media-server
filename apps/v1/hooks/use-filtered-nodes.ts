@@ -7,15 +7,13 @@ type DirectoryBehavior = "include" | "exclude" | "filter";
 
 export function useFilteredNodes(
   nodes: MediaNode[],
-  filters: MediaNodeFilter[],
+  pipeline: MediaNodeFilter[],
   options?: {
     activated?: boolean; // デフォルト: true
     directoryBehavior?: DirectoryBehavior; // デフォルト: "include"
   }
 ) {
   const { activated = true, directoryBehavior = "include" } = options ?? {};
-
-  const activeFilters = useMemo(() => filters.filter(Boolean), [filters]);
 
   // フィルタリング実行
   const filtered = useMemo(() => {
@@ -34,9 +32,9 @@ export function useFilteredNodes(
         }
       }
 
-      return activeFilters.every((filter) => filter(node));
+      return pipeline.every((filter) => filter(node));
     });
-  }, [activated, nodes, activeFilters, directoryBehavior]);
+  }, [activated, nodes, pipeline, directoryBehavior]);
 
   const filteredCount = filtered.length;
   const totalCount = nodes.length;

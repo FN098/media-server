@@ -19,7 +19,7 @@ import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
-import { useSelectionControl } from "@/hooks/use-selection-control";
+import { useSelectedNodes } from "@/hooks/use-selected-nodes";
 import { useSort } from "@/hooks/use-sort";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
@@ -33,6 +33,7 @@ import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MediaActionsProvider } from "@/providers/media-actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
+import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { cn } from "@/shadcn/lib/utils";
@@ -88,18 +89,26 @@ export function Trash({ listing }: { listing: MediaListing }) {
   // クエリフィルター
   const { value: queryFilterValue } = useQueryFilter();
 
+  // フィルターパイプライン
+  const pipeline = useMemo(
+    () => [createSearchFilter(queryFilterValue)],
+    [queryFilterValue]
+  );
+  const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
+
   // フィルター結果
   const {
     filtered: filteredNodes,
     filteredCount,
     totalCount,
     isFiltered,
-  } = useFilteredNodes(allNodes, [createSearchFilter(queryFilterValue)]);
+  } = useFilteredNodes(allNodes, pipeline);
 
   // 「メディアのみ」のリスト
-  const { filtered: mediaOnly } = useFilteredNodes(filteredNodes, [
-    createMediaOnlyFilter(),
-  ]);
+  const { filtered: mediaOnly } = useFilteredNodes(
+    filteredNodes,
+    mediaOnlyPipeline
+  );
 
   // 検索パラメータリセット用
   const { hasSearchParams, clearSearchParams } = useSearchParamsControl();
@@ -167,43 +176,32 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   const {
     isSelectionMode,
-    selected: selectedNodes,
-    select: handleSelect,
-    selectAll: handleSelectAll,
-    resetSelection: handleResetSelection,
-  } = useSelectionControl({
-    allNodes,
-    controlledNodes: filteredNodes,
-  });
+    enterSelectionMode,
+    exitSelectionMode,
+    selectedPaths,
+    replaceSelection,
+    selectPaths,
+    clearSelection,
+  } = usePathSelectionContext();
 
-  // const {
-  //   isSelectionMode,
-  //   enterSelectionMode,
-  //   exitSelectionMode,
-  //   selectedPaths,
-  //   replaceSelection,
-  //   selectPaths,
-  //   clearSelection,
-  // } = usePathSelectionContext();
+  const { selectedNodes } = useSelectedNodes(filteredNodes, selectedPaths);
 
-  // const { selectedNodes } = useSelectedNodes(filteredNodes, selectedPaths);
+  // 選択
+  const handleSelect = (node: MediaNode) => {
+    replaceSelection(node.path);
+  };
 
-  // // 選択
-  // const handleSelect = (node: MediaNode) => {
-  //   replaceSelection(node.path);
-  // };
+  // 全選択
+  const handleSelectAll = () => {
+    selectPaths(filteredNodes.map((n) => n.path));
+    enterSelectionMode();
+  };
 
-  // // 全選択
-  // const handleSelectAll = () => {
-  //   selectPaths(filteredNodes.map((n) => n.path));
-  //   enterSelectionMode();
-  // };
-
-  // // 選択解除
-  // const handleResetSelection = () => {
-  //   clearSelection();
-  //   exitSelectionMode();
-  // };
+  // 選択解除
+  const handleResetSelection = () => {
+    clearSelection();
+    exitSelectionMode();
+  };
 
   // ===== 復元 =====
 

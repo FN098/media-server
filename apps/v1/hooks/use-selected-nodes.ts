@@ -22,7 +22,7 @@ export function useSelectedNodes(
 
   // 選択済みノードリスト
   const selectedNodes = useMemo(() => {
-    if (!activated) return nodes;
+    if (!activated) return [];
 
     return Array.from(selectedPaths)
       .map((path) => {
@@ -41,7 +41,7 @@ export function useSelectedNodes(
         return node;
       })
       .filter((node): node is MediaNode => node !== null);
-  }, [activated, directoryBehavior, nodeMap, nodes, selectedPaths]);
+  }, [activated, directoryBehavior, nodeMap, selectedPaths]);
 
   const selectedCount = selectedNodes.length;
   const isSelected = selectedCount > 0;
