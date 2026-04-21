@@ -117,7 +117,6 @@ export async function updateMultipleFavoritesAction(
 // 一括お気に入り削除
 export async function deleteMultipleFavoritesAction(paths: string[]) {
   try {
-    debugger;
     const user = await resolveCurrentUserOrThrow();
 
     const mediaMap = await getMediaIdsByPaths(paths);

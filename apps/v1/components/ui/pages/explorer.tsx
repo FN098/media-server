@@ -11,6 +11,7 @@ import {
   enqueueCreateThumbsJobAction,
 } from "@/actions/thumb-actions";
 import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
+import { FavoriteAlertDialog } from "@/components/ui/alert-dialogs/favorite-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
@@ -272,47 +273,80 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== お気に入り =====
 
-  const favCtx = useFavoritesContext();
+  const {
+    toggleFavorite,
+    updateFavorite,
+    updateMultipleFavorites,
+    deleteMultipleFavorites,
+  } = useFavoritesContext();
+
+  type FavoriteDialogMode = "add" | "remove";
+
+  // お気に入りダイアログ制御
+  const [favoriteDialogTargets, setFavoriteDialogTargets] = useState<
+    MediaNode[]
+  >([]);
+  const [favoriteDialogMode, setFavoriteDialogMode] =
+    useState<FavoriteDialogMode>("add");
+  const isFavoriteDialogOpen = favoriteDialogTargets.length > 0;
 
   // お気に入り登録/解除
-  const handleToggleFavorite = (node: MediaNode) => {
-    try {
-      favCtx.toggleFavorite(node.path);
-    } catch {
-      toast.error("お気に入りの更新に失敗しました");
+  const handleToggleFavorite = async (node: MediaNode) => {
+    const result = await toggleFavorite(node.path);
+    if (result.success) {
+      toast.success("お気に入りが更新されました。");
+    } else {
+      toast.error(result.error);
     }
   };
 
   // レーティング更新
-  const handleChangeRating = (node: MediaNode, rating: number | null) => {
-    try {
-      favCtx.updateFavorite(node.path, rating);
-    } catch {
-      toast.error("お気に入りの更新に失敗しました");
+  const handleChangeRating = async (node: MediaNode, rating: number | null) => {
+    const result = await updateFavorite(node.path, rating);
+    if (result.success) {
+      toast.success("レーティングが更新されました。");
+    } else {
+      toast.error(result.error);
     }
   };
 
-  // 選択アイテムをお気に入り登録
-  const handleUpdateMultipleFavoritesSelected = () => {
-    try {
-      favCtx.updateMultipleFavorites(
-        selectedNodes.map((n) => n.path),
-        {
-          rating: null,
-          skipIfAlreadyFavorite: true,
-        }
-      );
-    } catch {
-      toast.error("お気に入りの一括更新に失敗しました");
+  // お気に入り登録ダイアログを開く
+  const handleOpenFavoriteAddDialog = () => {
+    setFavoriteDialogMode("add");
+    setFavoriteDialogTargets(selectedNodes);
+  };
+
+  // お気に入り解除ダイアログを開く
+  const handleOpenFavoriteRemoveDialog = () => {
+    setFavoriteDialogMode("remove");
+    setFavoriteDialogTargets(selectedNodes);
+  };
+
+  // 一括お気に入り登録
+  const handleUpdateMultipleFavoritesSelected = async () => {
+    const result = await updateMultipleFavorites(
+      favoriteDialogTargets.map((n) => n.path),
+      {
+        rating: null,
+        skipIfAlreadyFavorite: true,
+      }
+    );
+    if (result.success) {
+      toast.success("お気に入りが更新されました。");
+    } else {
+      toast.error(result.error);
     }
   };
 
-  // 選択アイテムをお気に入り解除
-  const handleDeleteMultipleFavoritesSelected = () => {
-    try {
-      favCtx.deleteMultipleFavorites(selectedNodes.map((n) => n.path));
-    } catch {
-      toast.error("お気に入りの一括削除に失敗しました");
+  // 一括お気に入り解除
+  const handleDeleteMultipleFavoritesSelected = async () => {
+    const result = await deleteMultipleFavorites(
+      favoriteDialogTargets.map((n) => n.path)
+    );
+    if (result.success) {
+      toast.success("お気に入りが解除されました。");
+    } else {
+      toast.error(result.error);
     }
   };
 
@@ -818,12 +852,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             menuActions={[
               {
                 title: "お気に入り登録",
-                onClick: handleUpdateMultipleFavoritesSelected,
+                onClick: handleOpenFavoriteAddDialog,
                 icon: Star,
               },
               {
                 title: "お気に入り解除",
-                onClick: handleDeleteMultipleFavoritesSelected,
+                onClick: handleOpenFavoriteRemoveDialog,
                 icon: StarOff,
               },
               {
@@ -900,6 +934,23 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             open={isFolderPreviewMode}
             onOpenChange={handleApplyPreviewDialogOpenChange}
             previewPath={previewPath}
+          />
+
+          {/* お気に入り警告ダイアログ */}
+          <FavoriteAlertDialog
+            open={isFavoriteDialogOpen}
+            onOpenChange={(open) => {
+              if (!open) {
+                setFavoriteDialogTargets([]);
+              }
+            }}
+            mode={favoriteDialogMode}
+            count={favoriteDialogTargets.length}
+            onConfirm={
+              favoriteDialogMode === "add"
+                ? handleUpdateMultipleFavoritesSelected
+                : handleDeleteMultipleFavoritesSelected
+            }
           />
 
           {/* フォルダナビゲーション */}

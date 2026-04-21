@@ -177,23 +177,25 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   // ===== お気に入り =====
 
-  const favCtx = useFavoritesContext();
+  const { toggleFavorite, updateFavorite } = useFavoritesContext();
 
   // お気に入り登録/解除
-  const handleToggleFavorite = (node: MediaNode) => {
-    try {
-      favCtx.toggleFavorite(node.path);
-    } catch {
-      toast.error("お気に入りの更新に失敗しました");
+  const handleToggleFavorite = async (node: MediaNode) => {
+    const result = await toggleFavorite(node.path);
+    if (result.success) {
+      toast.success("お気に入りが更新されました。");
+    } else {
+      toast.error(result.error);
     }
   };
 
   // レーティング更新
-  const handleChangeRating = (node: MediaNode, rating: number | null) => {
-    try {
-      favCtx.updateFavorite(node.path, rating);
-    } catch {
-      toast.error("お気に入りの更新に失敗しました");
+  const handleChangeRating = async (node: MediaNode, rating: number | null) => {
+    const result = await updateFavorite(node.path, rating);
+    if (result.success) {
+      toast.success("レーティングが更新されました。");
+    } else {
+      toast.error(result.error);
     }
   };
 

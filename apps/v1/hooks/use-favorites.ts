@@ -9,7 +9,7 @@ import {
   updateMultipleFavoritesAction,
 } from "@/actions/favorite-actions";
 import { FavoriteValue } from "@/lib/favorite/types";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type FavoriteMsg =
   | { type: "UPDATE"; path: string; rating: number | null }
@@ -28,9 +28,6 @@ export function useFavorites(initialData?: FavoriteValue[]) {
   );
 
   const { startFlight, finishFlight, isInFlight } = useInFlight();
-  const [isUpdating, startUpdating] = useTransition();
-  const [isDeleting, startDeleting] = useTransition();
-  const isLoading = isUpdating || isDeleting;
 
   // タブ間同期
   const { broadcast } = useFavoriteChannel((msg: FavoriteMsg) => {
@@ -69,8 +66,8 @@ export function useFavorites(initialData?: FavoriteValue[]) {
 
   // お気に入り状態を更新
   const updateFavorite = useCallback(
-    (path: string, rating: number | null) => {
-      if (isInFlight(path)) return;
+    async (path: string, rating: number | null) => {
+      if (isInFlight(path)) return { success: false, error: "処理中です" };
       startFlight(path);
 
       // 楽観的アップデート
@@ -78,11 +75,9 @@ export function useFavorites(initialData?: FavoriteValue[]) {
       broadcast({ type: "UPDATE", path, rating });
 
       // サーバー処理開始
-      startUpdating(async () => {
-        try {
-          const { success } = await updateFavoriteAction(path, rating);
-          if (!success) throw new Error();
-        } catch {
+      try {
+        const result = await updateFavoriteAction(path, rating);
+        if (!result.success) {
           // 失敗時のロールバック
           const { favorite } = await revalidateFavoriteAction(path);
           setFavorites((m) => {
@@ -94,18 +89,19 @@ export function useFavorites(initialData?: FavoriteValue[]) {
             }
             return next;
           });
-        } finally {
-          finishFlight(path);
         }
-      });
+        return result;
+      } finally {
+        finishFlight(path);
+      }
     },
     [broadcast, finishFlight, isInFlight, startFlight]
   );
 
   // お気に入り状態を削除
   const deleteFavorite = useCallback(
-    (path: string) => {
-      if (isInFlight(path)) return;
+    async (path: string) => {
+      if (isInFlight(path)) return { success: false, error: "処理中です" };
       startFlight(path);
 
       // 楽観的アップデート
@@ -117,20 +113,19 @@ export function useFavorites(initialData?: FavoriteValue[]) {
       broadcast({ type: "DELETE", path });
 
       // サーバー処理開始
-      startDeleting(async () => {
-        try {
-          const { success } = await deleteFavoriteAction(path);
-          if (!success) throw new Error();
-        } catch {
+      try {
+        const result = await deleteFavoriteAction(path);
+        if (!result.success) {
           // 失敗時のロールバック
           const { favorite } = await revalidateFavoriteAction(path);
           if (favorite) {
             setFavorites((m) => new Map(m).set(path, favorite.rating));
           }
-        } finally {
-          finishFlight(path);
         }
-      });
+        return result;
+      } finally {
+        finishFlight(path);
+      }
     },
     [broadcast, finishFlight, isInFlight, startFlight]
   );
@@ -146,7 +141,7 @@ export function useFavorites(initialData?: FavoriteValue[]) {
 
   // 一括お気に入り登録
   const updateMultipleFavorites = useCallback(
-    (
+    async (
       paths: string[],
       options?: {
         rating?: number | null;
@@ -171,7 +166,8 @@ export function useFavorites(initialData?: FavoriteValue[]) {
         return !isInFlight(path);
       });
 
-      if (validPaths.length === 0) return;
+      if (validPaths.length === 0)
+        return { success: false, error: "処理するパスがありません" };
 
       // すべてのパスを Flight 状態にする
       startFlight(...validPaths);
@@ -187,25 +183,22 @@ export function useFavorites(initialData?: FavoriteValue[]) {
       broadcast({ type: "UPDATE_MANY", paths: validPaths, rating });
 
       // サーバー処理開始
-      startUpdating(async () => {
-        try {
-          const { success } = await updateMultipleFavoritesAction(
-            validPaths,
-            rating
-          );
-          if (!success) throw new Error();
-        } catch {
-          // 失敗時のロールバック
-          const res = await revalidateMultipleFavoritesAction(validPaths);
+      try {
+        const result = await updateMultipleFavoritesAction(validPaths, rating);
 
-          if (res.success && res.favorites) {
+        if (!result.success) {
+          // 失敗時のロールバック
+          const revalidateResult =
+            await revalidateMultipleFavoritesAction(validPaths);
+
+          if (revalidateResult.success && revalidateResult.favorites) {
             setFavorites((prev) => {
               const next = new Map(prev);
 
               // 失敗した対象パスを一度全部消すか、最新状態で上書き
               // サーバーから返ってきたもの＝DBにあるもの
               const freshData = new Map(
-                res.favorites.map((f) => [f.path, f.rating])
+                revalidateResult.favorites.map((f) => [f.path, f.rating])
               );
 
               validPaths.forEach((path) => {
@@ -218,17 +211,19 @@ export function useFavorites(initialData?: FavoriteValue[]) {
               return next;
             });
           }
-        } finally {
-          finishFlight(...validPaths);
         }
-      });
+
+        return result;
+      } finally {
+        finishFlight(...validPaths);
+      }
     },
     [broadcast, finishFlight, getFavorite, isInFlight, startFlight]
   );
 
   // 一括お気に入り解除
   const deleteMultipleFavorites = useCallback(
-    (paths: string[]) => {
+    async (paths: string[]) => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);
@@ -242,7 +237,8 @@ export function useFavorites(initialData?: FavoriteValue[]) {
         return !isInFlight(path);
       });
 
-      if (validPaths.length === 0) return;
+      if (validPaths.length === 0)
+        return { success: false, error: "処理するパスがありません" };
 
       // すべてのパスを Flight 状態にする
       startFlight(...validPaths);
@@ -258,22 +254,22 @@ export function useFavorites(initialData?: FavoriteValue[]) {
       broadcast({ type: "DELETE_MANY", paths: validPaths });
 
       // サーバー処理開始
-      startDeleting(async () => {
-        try {
-          const { success } = await deleteMultipleFavoritesAction(validPaths);
-          if (!success) throw new Error();
-        } catch {
-          // 失敗時のロールバック
-          const res = await revalidateMultipleFavoritesAction(validPaths);
+      try {
+        const result = await deleteMultipleFavoritesAction(validPaths);
 
-          if (res.success && res.favorites) {
+        if (!result.success) {
+          // 失敗時のロールバック
+          const revalidateResult =
+            await revalidateMultipleFavoritesAction(validPaths);
+
+          if (revalidateResult.success && revalidateResult.favorites) {
             setFavorites((prev) => {
               const next = new Map(prev);
 
               // 失敗した対象パスを一度全部消すか、最新状態で上書き
               // サーバーから返ってきたもの＝DBにあるもの
               const freshData = new Map(
-                res.favorites.map((f) => [f.path, f.rating])
+                revalidateResult.favorites.map((f) => [f.path, f.rating])
               );
 
               validPaths.forEach((path) => {
@@ -286,10 +282,12 @@ export function useFavorites(initialData?: FavoriteValue[]) {
               return next;
             });
           }
-        } finally {
-          finishFlight(...validPaths);
         }
-      });
+
+        return result;
+      } finally {
+        finishFlight(...validPaths);
+      }
     },
     [broadcast, finishFlight, getFavorite, isInFlight, startFlight]
   );
@@ -297,13 +295,10 @@ export function useFavorites(initialData?: FavoriteValue[]) {
   return {
     favorites,
     getFavorite,
-    isUpdating,
     updateFavorite,
     updateMultipleFavorites,
-    isDeleting,
     deleteFavorite,
     deleteMultipleFavorites,
-    isLoading,
     toggleFavorite,
   };
 }
