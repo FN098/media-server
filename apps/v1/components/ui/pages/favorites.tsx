@@ -120,7 +120,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     const media = mediaOnly[index];
     if (!media) return;
 
-    select(media);
+    handleSelect(media);
 
     if (lastHistory?.type === "file") {
       replaceHistoryLast(toHistoryItem(media));
@@ -198,11 +198,45 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   // ===== 選択 =====
 
-  const { isSelectionMode, selected, select, selectAll, resetSelection } =
-    useSelectionControl({
-      allNodes,
-      controlledNodes: filteredNodes,
-    });
+  const {
+    isSelectionMode,
+    selected: selectedNodes,
+    select: handleSelect,
+    selectAll: handleSelectAll,
+    resetSelection: handleResetSelection,
+  } = useSelectionControl({
+    allNodes,
+    controlledNodes: filteredNodes,
+  });
+
+  // const {
+  //   isSelectionMode,
+  //   enterSelectionMode,
+  //   exitSelectionMode,
+  //   selectedPaths,
+  //   replaceSelection,
+  //   selectPaths,
+  //   clearSelection,
+  // } = usePathSelectionContext();
+
+  // const { selectedNodes } = useSelectedNodes(filteredNodes, selectedPaths);
+
+  // // 選択
+  // const handleSelect = (node: MediaNode) => {
+  //   replaceSelection(node.path);
+  // };
+
+  // // 全選択
+  // const handleSelectAll = () => {
+  //   selectPaths(filteredNodes.map((n) => n.path));
+  //   enterSelectionMode();
+  // };
+
+  // // 選択解除
+  // const handleResetSelection = () => {
+  //   clearSelection();
+  //   exitSelectionMode();
+  // };
 
   // ===== タグエディタ =====
 
@@ -215,7 +249,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   }, [isViewerMode]);
 
   const handleEditTags = (node: MediaNode) => {
-    select(node);
+    handleSelect(node);
     handleOpenTagEditor();
   };
 
@@ -268,7 +302,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   }, [activeScope, allScopes, disableScope, enableScope]);
 
   // Escape: 選択解除
-  useHotkeys("escape", () => resetSelection(), {
+  useHotkeys("escape", () => handleResetSelection(), {
     scopes: "favorites",
   });
 
@@ -282,7 +316,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     "ctrl+a",
     (e) => {
       e.preventDefault();
-      selectAll();
+      handleSelectAll();
     },
     { scopes: ["favorites", "tag-editor"] }
   );
@@ -442,10 +476,10 @@ export function Favorites({ listing }: { listing: MediaListing }) {
           {/* 選択バー */}
           <SelectionBar
             open={isSelectionMode && !isTagEditMode}
-            count={selected.length}
+            count={selectedNodes.length}
             totalCount={filteredNodes.length}
-            onSelectAll={selectAll}
-            onClose={resetSelection}
+            onSelectAll={handleSelectAll}
+            onClose={handleResetSelection}
             className="z-40" // DropdownMenu より小さくする
             inlineActions={[
               {
@@ -459,7 +493,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
           {/* タグエディター */}
           <TagEditSheet
             open={isTagEditMode}
-            targetNodes={selected}
+            targetNodes={selectedNodes}
             onClose={handleCloseTagEditor}
             mode={tagEditMode}
             opacity={tagEditMode === "default" ? 100 : 0}
