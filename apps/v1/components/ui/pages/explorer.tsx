@@ -37,14 +37,13 @@ import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
-import { useSelectedNodes } from "@/hooks/use-selected-nodes";
+import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useSort } from "@/hooks/use-sort";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import {
   createFavoriteFilter,
-  createMediaOnlyFilter,
   createMediaTypeFilter,
   createRatingFilter,
   createSearchFilter,
@@ -57,7 +56,6 @@ import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MediaActionsProvider } from "@/providers/media-actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
@@ -148,6 +146,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // フィルター結果
   const {
     filtered: filteredNodes,
+    mediaOnly,
     filteredCount,
     totalCount,
     isFiltered,
@@ -157,11 +156,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     createRatingFilter(ratingFilterValue),
     createTagFilter(tagFilterValue),
     createFavoriteFilter(favoriteFilterValue),
-  ]);
-
-  // 「メディアのみ」のリスト
-  const { filtered: mediaOnly } = useFilteredNodes(filteredNodes, [
-    createMediaOnlyFilter(),
   ]);
 
   // タグをフィルターに追加
@@ -190,7 +184,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     const media = mediaOnly[index];
     if (!media) return;
 
-    handleSelect(media);
+    select(media);
 
     if (lastHistory?.type === "file") {
       replaceHistoryLast(toHistoryItem(media));
@@ -301,32 +295,15 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   const {
     isSelectionMode,
-    enterSelectionMode,
-    exitSelectionMode,
+    selected,
     selectedPaths,
-    replaceSelection,
-    selectPaths,
-    clearSelection,
-  } = usePathSelectionContext();
-
-  const { selectedNodes } = useSelectedNodes(filteredNodes, selectedPaths);
-
-  // 選択
-  const handleSelect = (node: MediaNode) => {
-    replaceSelection(node.path);
-  };
-
-  // 全選択
-  const handleSelectAll = () => {
-    selectPaths(filteredNodes.map((n) => n.path));
-    enterSelectionMode();
-  };
-
-  // 選択解除
-  const handleResetSelection = () => {
-    clearSelection();
-    exitSelectionMode();
-  };
+    select,
+    selectAll,
+    resetSelection,
+  } = useSelectionControl({
+    allNodes,
+    controlledNodes: filteredNodes,
+  });
 
   // ===== タグエディタ =====
 
@@ -339,7 +316,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   }, [isViewerMode]);
 
   const handleEditTags = (node: MediaNode) => {
-    handleSelect(node);
+    select(node);
     handleOpenTagEditor();
   };
 
@@ -407,14 +384,14 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // 移動ダイアログを開く（選択）
   const handleOpenMoveDialogSelected = () => {
-    setMoveTargets(selectedNodes);
+    setMoveTargets(selected);
   };
 
   // 後始末
   const handleMoveDialogOpenChange = (open: boolean) => {
     if (!open) {
       setMoveTargets([]);
-      if (isSelectionMode) handleResetSelection();
+      if (isSelectionMode) resetSelection();
     }
   };
 
@@ -433,14 +410,14 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // コピーダイアログを開く（選択）
   const handleOpenCopyDialogSelected = () => {
-    setCopyTargets(selectedNodes);
+    setCopyTargets(selected);
   };
 
   // 後始末
   const handleCopyDialogOpenChange = (open: boolean) => {
     if (!open) {
       setCopyTargets([]);
-      if (isSelectionMode) handleResetSelection();
+      if (isSelectionMode) resetSelection();
     }
   };
 
@@ -456,7 +433,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // 削除ダイアログを開く（選択）
   const handleOpenDeleteDialogSelected = () => {
-    setDeleteTargets(selectedNodes);
+    setDeleteTargets(selected);
   };
 
   // 削除実行
@@ -466,7 +443,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
     if (result.failed === 0) {
       toast.success(`${result.success}件のアイテムをゴミ箱に移動しました`);
-      handleResetSelection();
+      resetSelection();
     } else {
       toast.error(`${result.failed}件の削除に失敗しました`);
     }
@@ -560,7 +537,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   }, [activeScope, allScopes, disableScope, enableScope]);
 
   // Escape: 選択解除
-  useHotkeys("escape", () => handleResetSelection(), {
+  useHotkeys("escape", () => resetSelection(), {
     scopes: "explorer",
   });
 
@@ -579,7 +556,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     "ctrl+a",
     (e) => {
       e.preventDefault();
-      handleSelectAll();
+      selectAll();
     },
     { scopes: ["explorer", "tag-editor"] }
   );
@@ -595,7 +572,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   );
 
   // F2: リネーム
-  useHotkeys("f2", () => setRenameTarget(selectedNodes[0]), {
+  useHotkeys("f2", () => setRenameTarget(selected[0]), {
     scopes: ["explorer", "viewer"],
   });
 
@@ -784,10 +761,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {/* 選択バー */}
           <SelectionBar
             open={isSelectionMode && !isTagEditMode && !isMoveMode}
-            count={selectedNodes.length}
+            count={selected.length}
             totalCount={filteredNodes.length}
-            onSelectAll={handleSelectAll}
-            onClose={handleResetSelection}
+            onSelectAll={selectAll}
+            onClose={resetSelection}
             className="z-40" // DropdownMenu より小さくする
             inlineActions={[
               {
@@ -829,7 +806,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {/* タグエディター */}
           <TagEditSheet
             open={isTagEditMode}
-            targetNodes={selectedNodes}
+            targetNodes={selected}
             onClose={handleCloseTagEditor}
             mode={tagEditMode}
             opacity={tagEditMode === "default" ? 100 : 0}

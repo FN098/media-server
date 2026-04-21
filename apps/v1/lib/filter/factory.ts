@@ -5,7 +5,6 @@ import {
   RatingFilterValue,
   TagFilterValue,
 } from "@/lib/filter/types";
-import { isMedia } from "@/lib/media/media-types";
 import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/japanese";
 
@@ -90,11 +89,5 @@ export function createFavoriteFilter(
       default:
         return true;
     }
-  };
-}
-
-export function createMediaOnlyFilter(): MediaNodeFilter {
-  return (node) => {
-    return isMedia(node.type);
   };
 }

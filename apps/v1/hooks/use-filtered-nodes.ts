@@ -1,21 +1,18 @@
 "use client";
 
+import { isMedia } from "@/lib/media/media-types";
 import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
 import { useMemo } from "react";
-
-type DirectoryBehavior = "include" | "exclude" | "filter";
 
 export function useFilteredNodes(
   nodes: MediaNode[],
   filters: MediaNodeFilter[],
   options?: {
     activated?: boolean; // デフォルト: true
-    directoryBehavior?: DirectoryBehavior; // デフォルト: "include"
+    skipDirectory?: boolean; // デフォルト: true
   }
 ) {
-  const { activated = true, directoryBehavior = "include" } = options ?? {};
-
-  const activeFilters = useMemo(() => filters.filter(Boolean), [filters]);
+  const { activated = true, skipDirectory = true } = options ?? {};
 
   // フィルタリング実行
   const filtered = useMemo(() => {
@@ -23,20 +20,18 @@ export function useFilteredNodes(
 
     // フィルタの適用
     return nodes.filter((node) => {
-      if (node.isDirectory) {
-        switch (directoryBehavior) {
-          case "include":
-            return true; // 常に通す
-          case "exclude":
-            return false; // 完全除外
-          case "filter":
-            break; // 下の通常フィルタへ
-        }
+      if (node.isDirectory && skipDirectory) {
+        return true; // フォルダは通す
       }
-
-      return activeFilters.every((filter) => filter(node));
+      return filters.filter((f) => !!f).every((filter) => filter(node));
     });
-  }, [activated, nodes, activeFilters, directoryBehavior]);
+  }, [activated, nodes, filters, skipDirectory]);
+
+  // 「メディアのみ」のリスト
+  const mediaOnly = useMemo(
+    () => filtered.filter((n) => isMedia(n.type)),
+    [filtered]
+  );
 
   const filteredCount = filtered.length;
   const totalCount = nodes.length;
@@ -44,6 +39,7 @@ export function useFilteredNodes(
 
   return {
     filtered,
+    mediaOnly,
     filteredCount,
     totalCount,
     isFiltered,

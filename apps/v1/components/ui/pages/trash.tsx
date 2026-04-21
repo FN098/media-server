@@ -19,21 +19,17 @@ import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
-import { useSelectedNodes } from "@/hooks/use-selected-nodes";
+import { useSelectionControl } from "@/hooks/use-selection-control";
 import { useSort } from "@/hooks/use-sort";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
-import {
-  createMediaOnlyFilter,
-  createSearchFilter,
-} from "@/lib/filter/factory";
+import { createSearchFilter } from "@/lib/filter/factory";
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MediaActionsProvider } from "@/providers/media-actions-provider";
 import { PagingProvider } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { cn } from "@/shadcn/lib/utils";
@@ -92,15 +88,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
   // フィルター結果
   const {
     filtered: filteredNodes,
+    mediaOnly,
     filteredCount,
     totalCount,
     isFiltered,
   } = useFilteredNodes(allNodes, [createSearchFilter(queryFilterValue)]);
-
-  // 「メディアのみ」のリスト
-  const { filtered: mediaOnly } = useFilteredNodes(filteredNodes, [
-    createMediaOnlyFilter(),
-  ]);
 
   // 検索パラメータリセット用
   const { hasSearchParams, clearSearchParams } = useSearchParamsControl();
@@ -119,7 +111,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     const media = mediaOnly[index];
     if (!media) return;
 
-    handleSelect(media);
+    select(media);
 
     if (lastHistory?.type === "file") {
       replaceHistoryLast(toHistoryItem(media));
@@ -166,34 +158,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   // ===== 選択 =====
 
-  const {
-    isSelectionMode,
-    enterSelectionMode,
-    exitSelectionMode,
-    selectedPaths,
-    replaceSelection,
-    selectPaths,
-    clearSelection,
-  } = usePathSelectionContext();
-
-  const { selectedNodes } = useSelectedNodes(filteredNodes, selectedPaths);
-
-  // 選択
-  const handleSelect = (node: MediaNode) => {
-    replaceSelection(node.path);
-  };
-
-  // 全選択
-  const handleSelectAll = () => {
-    selectPaths(filteredNodes.map((n) => n.path));
-    enterSelectionMode();
-  };
-
-  // 選択解除
-  const handleResetSelection = () => {
-    clearSelection();
-    exitSelectionMode();
-  };
+  const { isSelectionMode, selected, select, selectAll, resetSelection } =
+    useSelectionControl({
+      allNodes,
+      controlledNodes: filteredNodes,
+    });
 
   // ===== 復元 =====
 
@@ -207,7 +176,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   // 復元ダイアログを開く（選択）
   const handleOpenRestoreDialogSelected = () => {
-    setRestoreTargets(selectedNodes);
+    setRestoreTargets(selected);
   };
 
   // 復元実行
@@ -217,7 +186,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
     if (result.failed === 0) {
       toast.success(`${result.success}件のアイテムを復元しました`);
-      handleResetSelection();
+      resetSelection();
     } else {
       toast.error(`${result.failed}件の復元に失敗しました`);
     }
@@ -242,7 +211,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   // 削除ダイアログを開く（選択）
   const openDeleteDialogSelected = () => {
-    setDeleteTargets(selectedNodes);
+    setDeleteTargets(selected);
   };
 
   // 削除実行
@@ -252,7 +221,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
     if (result.failed === 0) {
       toast.success(`${result.success}件のアイテムを完全に削除しました`);
-      handleResetSelection();
+      resetSelection();
     } else {
       toast.error(`${result.failed}件の削除に失敗しました`);
     }
@@ -298,7 +267,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   }, [activeScope, allScopes, disableScope, enableScope]);
 
   // Escape: 選択解除
-  useHotkeys("escape", () => handleResetSelection(), {
+  useHotkeys("escape", () => resetSelection(), {
     scopes: "trash",
   });
 
@@ -312,7 +281,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     "ctrl+a",
     (e) => {
       e.preventDefault();
-      handleSelectAll();
+      selectAll();
     },
     { scopes: "trash" }
   );
@@ -467,10 +436,10 @@ export function Trash({ listing }: { listing: MediaListing }) {
           {/* 選択バー */}
           <SelectionBar
             open={isSelectionMode}
-            count={selectedNodes.length}
+            count={selected.length}
             totalCount={filteredNodes.length}
-            onSelectAll={handleSelectAll}
-            onClose={handleResetSelection}
+            onSelectAll={selectAll}
+            onClose={resetSelection}
             className="z-40"
             menuActions={[
               {
