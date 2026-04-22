@@ -105,7 +105,13 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
   );
 
   return (
-    <div className="relative group overflow-hidden bg-black aspect-video w-full max-w-4xl mx-auto shadow-lg">
+    <div
+      className="relative group overflow-hidden bg-black mx-auto shadow-lg"
+      style={{
+        width: "min(100%, calc(100vh * 16 / 9))",
+        aspectRatio: "16/9",
+      }}
+    >
       {/* サムネイル */}
       <div
         className={cn(
@@ -124,7 +130,6 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
         {/* ロード中のみスピナーを表示 */}
         {!isVideoReady && <LoadingSpinner />}
       </div>
-
       {/* 動画本体 */}
       <div
         className={cn("absolute inset-0 w-full h-full")}
