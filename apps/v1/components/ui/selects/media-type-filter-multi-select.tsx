@@ -94,10 +94,10 @@ export function MediaTypeFilterMultiSelect({
               <span className="text-sm font-medium">種別で絞り込む</span>
             </>
           )}
+
           {/* 選択中 */}
           {value.types.length > 0 && (
             <>
-              <div className="hidden h-4 w-px bg-border lg:block" />
               <div className="flex gap-1 overflow-hidden">
                 {value.types.length > 2 ? (
                   <Badge
