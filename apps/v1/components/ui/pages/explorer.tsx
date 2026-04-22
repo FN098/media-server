@@ -560,19 +560,19 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   }, [listing.path]);
 
   // サムネイル更新
-  const handleUpdateThumb = (node: MediaNode) => {
+  const handleUpdateThumb = async (node: MediaNode) => {
     // サムネイルを再作成（強制）
-    void enqueueCreateSingleThumbJobAction(node.path, { force: true });
+    await enqueueCreateSingleThumbJobAction(node.path, { force: true });
 
     // DBのタイムスタンプを更新（サムネイルのキャッシュを上書き）
-    void touchMediaTimestampAction(node.path).then((res) => {
-      if (res.error) toast.error(res.error);
-    });
+    if (!node.isDirectory) {
+      const touched = await touchMediaTimestampAction(node.path);
+      if (touched.error) toast.error(touched.error);
+    }
 
     // プレビュー設定を解除
-    void updatePreviewAction(node.path, null).then((res) => {
-      if (res.error) toast.error(res.error);
-    });
+    const updated = await updatePreviewAction(node.path, null);
+    if (updated.error) toast.error(updated.error);
 
     // ブラウザキャッシュ更新のため、一時的にタイムスタンプを変更
     node.mtime = new Date();

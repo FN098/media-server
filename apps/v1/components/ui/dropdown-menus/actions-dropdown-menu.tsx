@@ -198,7 +198,7 @@ export function ActionsDropdownMenu({
           </DropdownMenuItem>
         )}
 
-        {updateThumb && !node.isDirectory && (
+        {updateThumb && (
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();

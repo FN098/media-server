@@ -168,7 +168,7 @@ export function ActionsContextMenu({
           </ContextMenuItem>
         )}
 
-        {onUpdateThumb && !node.isDirectory && (
+        {onUpdateThumb && (
           <ContextMenuItem
             onClick={(e) => {
               e.stopPropagation();
