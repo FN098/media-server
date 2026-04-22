@@ -99,16 +99,17 @@ export function MediaViewer({
 
   // ===== アクション =====
 
-  const { actions } = useMediaActionsContext();
   const {
-    onEditTags,
-    onDelete,
-    onDeletePermanently,
-    onRestore,
-    onOpenPrevFolder,
-    onOpenNextFolder,
-    onOpenParentFolder,
-  } = actions;
+    actions: {
+      onEditTags,
+      onDelete,
+      onDeletePermanently,
+      onRestore,
+      onOpenPrevFolder,
+      onOpenNextFolder,
+      onOpenParentFolder,
+    },
+  } = useMediaActionsContext();
 
   const isEnabled = (key: ActionKey) => !!menuConfig?.enabled[key];
 
@@ -177,6 +178,10 @@ export function MediaViewer({
   const [currentNode, setCurrentNode] = useState<MediaNode | null>(
     allNodes[initialIndex] ?? null
   );
+
+  useEffect(() => {
+    setCurrentNode(allNodes[initialIndex] ?? null);
+  }, [initialIndex, allNodes]);
 
   const hasPrev = isEnabled("openPrevFolder");
   const hasNext = isEnabled("openNextFolder");
@@ -373,10 +378,9 @@ export function MediaViewer({
   });
 
   // Delete: 削除
-  useHotkeys("delete", () => void onDelete!(currentNode!), {
+  useHotkeys("delete", () => handleDelete(), {
     scopes: ["viewer", "tag-editor"],
-    enabled:
-      shortcutEnabled && isEnabled("delete") && !!currentNode && !!onDelete,
+    enabled: shortcutEnabled && isEnabled("delete"),
   });
 
   // Enter / Space: ヘッダーの表示切替（固定されていない場合のみ）
