@@ -315,7 +315,10 @@ export function RatingFilterDialog({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[420px] flex flex-col p-0 overflow-hidden">
+      <DialogContent
+        className="sm:max-w-[420px] flex flex-col p-0 overflow-hidden"
+        onEscapeKeyDown={(e) => e.stopPropagation()}
+      >
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-xl font-semibold">
             評価で絞り込む

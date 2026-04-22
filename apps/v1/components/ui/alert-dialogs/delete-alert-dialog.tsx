@@ -36,7 +36,7 @@ export function DeleteAlertDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent onEscapeKeyDown={(e) => e.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>
             {permanent ? "アイテムの完全削除" : "アイテムの削除"}

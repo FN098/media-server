@@ -36,7 +36,7 @@ export function RestoreAlertDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent onEscapeKeyDown={(e) => e.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>アイテムの復元</AlertDialogTitle>
           <AlertDialogDescription>

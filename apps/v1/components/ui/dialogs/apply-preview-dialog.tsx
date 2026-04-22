@@ -90,7 +90,10 @@ export function ApplyPreviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px] h-[550px] flex flex-col">
+      <DialogContent
+        className="sm:max-w-[450px] h-[550px] flex flex-col"
+        onEscapeKeyDown={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <DialogTitle className="text-base flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-primary" />

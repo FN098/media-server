@@ -815,7 +815,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 initialIndex={initialViewerIndex}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
-                shortcutEnabled={!isDeleteMode && !isMoveMode && !isRenameMode} // ダイアログ表示中はショートカット無効
                 menuConfig={{
                   enabled: {
                     pinHeader: true,

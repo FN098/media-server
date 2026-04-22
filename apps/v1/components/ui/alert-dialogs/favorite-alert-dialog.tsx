@@ -36,7 +36,7 @@ export function FavoriteAlertDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent onEscapeKeyDown={(e) => e.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>
             {mode === "add" ? "お気に入りに追加" : "お気に入りの解除"}

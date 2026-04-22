@@ -305,6 +305,7 @@ export function TagFilterDialog({
           e.preventDefault();
           if (autoFocusInput) inputRef.current?.focus();
         }}
+        onEscapeKeyDown={(e) => e.stopPropagation()}
         className="sm:max-w-[450px] h-[580px] flex flex-col p-0 overflow-hidden"
       >
         <DialogHeader className="p-6 pb-2">
