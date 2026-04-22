@@ -42,6 +42,7 @@ interface TagListProps {
   isDeleting: boolean;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  isMarking: boolean;
   onToggleFavorite: (id: string, isFavorite: boolean) => void;
   onStartEdit: (tag: TagMasterItem) => void;
   onSaveEdit: (id: string) => void;
@@ -49,6 +50,7 @@ interface TagListProps {
   onEditValueChange: (value: { name: string; kana: string }) => void;
   onDelete: (id: string) => void;
   onFetchNext: () => void;
+  onMarkAsRead: (id: string) => void;
 }
 
 export function TagMasterManagerCard() {
@@ -61,6 +63,7 @@ export function TagMasterManagerCard() {
   const [showNewOnly, setShowNewOnly] = React.useState(false);
   const [newTagsInput, setNewTagsInput] = React.useState("");
 
+  // タグ無限スクロール
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["tags", debouncedFilter, showNewOnly],
@@ -85,6 +88,7 @@ export function TagMasterManagerCard() {
   const newTagsCount = newTags.length;
   const hasNewTags = newTagsCount > 0;
 
+  // タグ作成
   const { mutate: createTags, isPending: isCreating } = useMutation({
     mutationFn: async (names: string[]) => {
       const res = await createTagsAction(names);
@@ -99,6 +103,7 @@ export function TagMasterManagerCard() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  // タグお気に入りトグル
   const { mutate: toggleFavorite } = useMutation({
     mutationFn: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
       updateTagFavoriteAction(id, isFavorite),
@@ -106,6 +111,7 @@ export function TagMasterManagerCard() {
     onError: () => toast.error("更新に失敗しました"),
   });
 
+  // タグリネーム
   const { mutate: renameTag, isPending: isUpdating } = useMutation({
     mutationFn: async ({
       id,
@@ -128,6 +134,7 @@ export function TagMasterManagerCard() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  // タグ削除
   const { mutate: performDelete, isPending: isDeleting } = useMutation({
     mutationFn: async (id: string) => {
       const res = await deleteTagAction(id);
@@ -141,15 +148,17 @@ export function TagMasterManagerCard() {
     onError: (err: Error) => toast.error(err.message),
   });
 
-  const { mutate: markAllAsRead, isPending: isMarking } = useMutation({
-    mutationFn: () => markTagsAsReadAction(newTagIds),
+  // タグ一括既読
+  const { mutate: markAsRead, isPending: isMarking } = useMutation({
+    mutationFn: (ids: string[]) => markTagsAsReadAction(ids),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["tags"] });
-      toast.success("すべての新規タグを既読にしました");
+      toast.success("既読にしました");
     },
     onError: () => toast.error("処理に失敗しました"),
   });
 
+  // タグ作成
   const handleCreateTags = (e: React.FormEvent) => {
     e.preventDefault();
     const names = newTagsInput
@@ -160,11 +169,13 @@ export function TagMasterManagerCard() {
     createTags(names);
   };
 
+  // タグ編集開始
   const handleStartEdit = (tag: TagMasterItem) => {
     setEditingId(tag.id);
     setEditValue({ name: tag.name, kana: tag.kana ?? "" });
   };
 
+  // タグ編集保存
   const handleSaveEdit = (id: string) => {
     if (!editValue.name.trim()) return toast.error("名前は必須です");
     renameTag({ id, ...editValue });
@@ -178,6 +189,7 @@ export function TagMasterManagerCard() {
     isDeleting,
     hasNextPage: hasNextPage ?? false,
     isFetchingNextPage,
+    isMarking: isMarking,
     onToggleFavorite: (id: string, isFavorite: boolean) =>
       toggleFavorite({ id, isFavorite }),
     onStartEdit: handleStartEdit,
@@ -186,6 +198,7 @@ export function TagMasterManagerCard() {
     onEditValueChange: setEditValue,
     onDelete: (id: string) => performDelete(id),
     onFetchNext: () => void fetchNextPage(),
+    onMarkAsRead: (id: string) => markAsRead([id]),
   } satisfies TagListProps;
 
   return (
@@ -211,7 +224,7 @@ export function TagMasterManagerCard() {
               "transition-all shrink-0",
               hasNewTags ? "shadow-sm" : "opacity-60"
             )}
-            onClick={() => hasNewTags && markAllAsRead()}
+            onClick={() => hasNewTags && markAsRead(newTagIds)}
             disabled={isMarking || !hasNewTags}
           >
             {isMarking ? (

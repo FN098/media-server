@@ -20,6 +20,7 @@ interface TagMasterCardListProps {
   isDeleting: boolean;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
+  isMarking: boolean;
   onToggleFavorite: (id: string, isFavorite: boolean) => void;
   onStartEdit: (tag: TagMasterItem) => void;
   onSaveEdit: (id: string) => void;
@@ -27,6 +28,7 @@ interface TagMasterCardListProps {
   onEditValueChange: (value: { name: string; kana: string }) => void;
   onDelete: (id: string) => void;
   onFetchNext: () => void;
+  onMarkAsRead: (id: string) => void;
 }
 
 export function TagMasterCardList({
@@ -37,6 +39,7 @@ export function TagMasterCardList({
   isDeleting,
   hasNextPage,
   isFetchingNextPage,
+  isMarking,
   onToggleFavorite,
   onStartEdit,
   onSaveEdit,
@@ -44,6 +47,7 @@ export function TagMasterCardList({
   onEditValueChange,
   onDelete,
   onFetchNext,
+  onMarkAsRead,
 }: TagMasterCardListProps) {
   const parentRef = React.useRef<HTMLDivElement>(null);
 
@@ -130,9 +134,38 @@ export function TagMasterCardList({
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <span className="font-medium truncate">{tag.name}</span>
                       {tag.isNew && (
-                        <Badge className="bg-yellow-400 hover:bg-yellow-400 text-black text-[10px] px-1.5 py-0 h-5 border-none shrink-0">
-                          NEW
-                        </Badge>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // 行のクリックイベントなどがあれば伝播を防止
+                            onMarkAsRead(tag.id);
+                          }}
+                          disabled={isMarking}
+                          className="group/new-badge relative inline-flex"
+                        >
+                          <Badge
+                            className={cn(
+                              "bg-yellow-400 hover:bg-yellow-500 text-black text-[10px] px-1.5 py-0 h-5 border-none transition-all cursor-pointer flex items-center gap-1",
+                              isMarking && "opacity-50 cursor-not-allowed"
+                            )}
+                          >
+                            {/* 通常時：NEWを表示 */}
+                            <span className="group-hover/new-badge:hidden">
+                              NEW
+                            </span>
+
+                            {/* ホバー時：既読アイコンとテキストを表示 */}
+                            <span className="hidden group-hover/new-badge:flex items-center gap-0.5">
+                              {isMarking ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <>
+                                  <Check className="h-3 w-3" />
+                                  既読にする
+                                </>
+                              )}
+                            </span>
+                          </Badge>
+                        </button>
                       )}
                     </div>
                   )}
