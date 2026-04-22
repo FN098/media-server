@@ -39,7 +39,7 @@ import {
   TagIcon,
   Trash2,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 import "swiper/css";
@@ -95,6 +95,8 @@ export function MediaViewer({
   shortcutEnabled = true,
   menuConfig,
 }: MediaViewerProps) {
+  const [isPending, startTransition] = useTransition();
+
   // ===== アクション =====
 
   const { actions } = useMediaActionsContext();
@@ -276,44 +278,48 @@ export function MediaViewer({
 
   // お気に入り状態トグル
   const handleToggleFavorite = () => {
-    try {
-      if (!currentNode) return;
-      const { isFavorite } = getFavorite(currentNode.path);
-      const nextIsFavorite = !isFavorite;
+    startTransition(async () => {
+      try {
+        if (!currentNode) return;
+        const { isFavorite } = getFavorite(currentNode.path);
+        const nextIsFavorite = !isFavorite;
 
-      toggleFavorite(currentNode.path);
+        await toggleFavorite(currentNode.path);
 
-      const message = nextIsFavorite
-        ? "⭐お気に入りに登録しました"
-        : "お気に入りを解除しました";
-      toast.info(message, { duration: 1000 });
+        const message = nextIsFavorite
+          ? "⭐お気に入りに登録しました"
+          : "お気に入りを解除しました";
+        toast.info(message, { duration: 1000 });
 
-      interactHeader();
-    } catch (e) {
-      console.error(e);
-      toast.error("お気に入りの更新に失敗しました");
-    }
+        interactHeader();
+      } catch (e) {
+        console.error(e);
+        toast.error("お気に入りの更新に失敗しました");
+      }
+    });
   };
 
   // レーティングを更新
   const handleChangeRating = (rating: number | null) => {
-    try {
-      if (!currentNode) return;
-      const node = currentNode;
+    startTransition(async () => {
+      try {
+        if (!currentNode) return;
+        const node = currentNode;
 
-      updateFavorite(node.path, rating);
+        await updateFavorite(node.path, rating);
 
-      const message =
-        rating != null
-          ? "⭐レーティングを更新しました"
-          : "レーティングを解除しました";
-      toast.info(message, { duration: 1000 });
+        const message =
+          rating != null
+            ? "⭐レーティングを更新しました"
+            : "レーティングを解除しました";
+        toast.info(message, { duration: 1000 });
 
-      interactHeader();
-    } catch (e) {
-      console.error(e);
-      toast.error("お気に入りの更新に失敗しました");
-    }
+        interactHeader();
+      } catch (e) {
+        console.error(e);
+        toast.error("お気に入りの更新に失敗しました");
+      }
+    });
   };
 
   // ===== ナビゲーション =====
@@ -509,6 +515,7 @@ export function MediaViewer({
                     rating={rating}
                     isFavorite={isFavorite}
                     onClick={handleToggleFavorite}
+                    disabled={isPending}
                   />
                 )}
 

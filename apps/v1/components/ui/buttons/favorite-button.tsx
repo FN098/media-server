@@ -15,6 +15,7 @@ interface FavoriteButtonProps {
   rating: number | null;
   onClick: () => void;
   variant?: "grid" | "viewer" | "list";
+  disabled?: boolean;
   className?: string;
 }
 
@@ -23,6 +24,7 @@ export function FavoriteButton({
   rating,
   onClick,
   variant = "grid",
+  disabled,
   className,
 }: FavoriteButtonProps) {
   const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
@@ -75,6 +77,7 @@ export function FavoriteButton({
         <TooltipTrigger asChild>
           <button
             type="button"
+            disabled={disabled}
             onClick={handleClick}
             onMouseDown={handleInteraction}
             onMouseUp={handleInteraction}
