@@ -176,12 +176,12 @@ export function MediaViewer({
 
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
   const [currentNode, setCurrentNode] = useState<MediaNode | null>(
-    allNodes[initialIndex] ?? null
+    allNodes[currentIndex] ?? null
   );
 
   useEffect(() => {
-    setCurrentNode(allNodes[initialIndex] ?? null);
-  }, [initialIndex, allNodes]);
+    setCurrentNode(allNodes[currentIndex] ?? null);
+  }, [currentIndex, allNodes]);
 
   const hasPrev = isEnabled("openPrevFolder");
   const hasNext = isEnabled("openNextFolder");
