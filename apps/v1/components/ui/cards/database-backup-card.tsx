@@ -80,20 +80,24 @@ export function DatabaseBackupCard() {
   const [isCreating, startCreating] = useTransition();
   const [isRestoring, startRestoring] = useTransition();
   const [isUploading, startUploading] = useTransition();
+
   const [backupFiles, setBackupFiles] = useState<DbBackupSelectItem[]>([]);
   const [uploadedFile, setUploadedFile] = useState<DbBackupSelectItem | null>(
     null
   );
-  const [selectedFile, setSelectedFile] = useState<DbBackupSelectItem | null>(
-    null
-  );
-  const [autoCleanup, setAutoCleanup] = useState(true);
-  const [keepCount, setKeepCount] = useState(5);
 
   const displayBackupFiles = useMemo(
     () => [uploadedFile, ...backupFiles].filter((v) => !!v),
     [backupFiles, uploadedFile]
   );
+
+  const [selectedFile, setSelectedFile] = useState<DbBackupSelectItem | null>(
+    null
+  );
+
+  const [autoCleanup, setAutoCleanup] = useState(true);
+  const [keepCount, setKeepCount] = useState(5);
+
   const [showCleanupConfirm, setShowCleanupConfirm] = useState(false);
   const [pendingDeleteCount, setPendingDeleteCount] = useState(0);
 
@@ -123,13 +127,15 @@ export function DatabaseBackupCard() {
               `古いバックアップを ${cleanRes.deletedCount} 件削除しました`
             );
           } else if (!cleanRes.success) {
-            toast.error(cleanRes.error);
+            toast.error(
+              cleanRes.error ?? "バックアップのクリーンアップに失敗しました"
+            );
           }
         }
 
         refreshList();
       } else {
-        toast.error(res.error);
+        toast.error(res.error ?? "バックアップの作成に失敗しました");
       }
     });
   };
