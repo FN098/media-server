@@ -85,6 +85,12 @@ export function PagingGridView({
     return index !== -1 ? index : null;
   }, [allNodes, initialScrollPath]);
 
+  // アンカー更新
+  useEffect(() => {
+    if (initialScrollTargetIndex === null) return;
+    setAnchorPath(allNodes[initialScrollTargetIndex].path);
+  }, [initialScrollTargetIndex, setAnchorPath, allNodes]);
+
   // 初期スクロール対象ページを特定する
   const initialScrollTargetPage = useMemo(() => {
     if (!initialScrollTargetIndex) return null;
