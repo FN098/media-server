@@ -17,6 +17,7 @@ import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
 import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useMediaIndex } from "@/hooks/use-media-index";
+import { useParentPathname } from "@/hooks/use-parent-pathname";
 import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
@@ -174,6 +175,9 @@ export function Trash({ listing }: { listing: MediaListing }) {
     }
   };
 
+  // 一つ上のフォルダを開く
+  const { navigateToParent } = useParentPathname();
+
   // ===== 選択 =====
 
   const {
@@ -310,6 +314,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
   // Escape: 選択解除
   useHotkeys("escape", () => handleResetSelection(), {
     scopes: "trash",
+  });
+
+  // Backspace: 一つ上のフォルダを開く
+  useHotkeys("backspace", () => navigateToParent(), {
+    scopes: ["explorer"],
   });
 
   // Delete: 削除

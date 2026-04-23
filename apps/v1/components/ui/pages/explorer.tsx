@@ -35,6 +35,7 @@ import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
 import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
+import { useParentPathname } from "@/hooks/use-parent-pathname";
 import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
@@ -270,6 +271,9 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       openFolder(listing.next, { at });
     }
   };
+
+  // 一つ上のフォルダを開く
+  const { navigateToParent } = useParentPathname();
 
   // ===== お気に入り =====
 
@@ -615,6 +619,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // Escape: 選択解除
   useHotkeys("escape", () => handleResetSelection(), {
     scopes: "explorer",
+  });
+
+  // Backspace: 一つ上のフォルダを開く
+  useHotkeys("backspace", () => navigateToParent(), {
+    scopes: ["explorer"],
   });
 
   // Delete: 削除

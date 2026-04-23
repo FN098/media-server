@@ -184,23 +184,33 @@ export function TagEditSheet({
     onClose?.();
   };
 
-  // ショートカット
-  useHotkeys("escape", () => handleModeChangeDown(), {
+  // ===== ショートカット =====
+
+  // Escape / Backspace: 閉じる
+  useHotkeys(["escape", "backspace"], () => handleModeChangeDown(), {
     scopes: "tag-editor",
     enabled: open,
   });
+
+  // E: 詳細モード
   useHotkeys("e", () => handleEditingModeChange("edit"), {
     scopes: "tag-editor",
     enabled: open,
   });
+
+  // Q: クイックモード
   useHotkeys("q", () => handleEditingModeChange("quick"), {
     scopes: "tag-editor",
     enabled: open,
   });
+
+  // V: 閲覧モード
   useHotkeys("v", () => handleEditingModeChange("view"), {
     scopes: "tag-editor",
     enabled: open,
   });
+
+  // B: 不透明度トグル
   useHotkeys("b", () => toggleOpacity(), {
     scopes: "tag-editor",
     enabled: open,

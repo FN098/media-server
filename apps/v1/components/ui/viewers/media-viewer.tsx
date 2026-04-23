@@ -371,8 +371,8 @@ export function MediaViewer({
 
   // ===== ショートカット =====
 
-  // Escape: 閉じる
-  useHotkeys("escape", () => onClose!(), {
+  // Escape / Backspace: 閉じる
+  useHotkeys(["escape", "backspace"], () => onClose!(), {
     scopes: "viewer",
     enabled: shortcutEnabled && !!onClose,
   });
