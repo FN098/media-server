@@ -50,8 +50,20 @@ export function PagingGridView({
     paginate,
   } = usePagingContext();
 
-  const selectCtx = usePathSelectionContext();
-  const { actions } = useMediaActionsContext();
+  const {
+    lastSelectedPath,
+    setLastSelectedPath,
+    replaceSelection,
+    anchorPath,
+    setAnchorPath,
+    enterSelectionMode,
+    selectPaths,
+  } = usePathSelectionContext();
+
+  const {
+    actions: { onOpen },
+  } = useMediaActionsContext();
+
   const isMobile = useIsMobile();
 
   // 現在のページのノード
@@ -169,13 +181,13 @@ export function PagingGridView({
       e.preventDefault();
 
       // 最後に選択されたパスから現在のインデックスを探す
-      const currentPath = selectCtx.lastSelectedPath;
+      const currentPath = lastSelectedPath;
       const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
 
       // Enterで開く
       if (e.key === "Enter" && currentPath) {
         const node = allNodes[currentIndex];
-        if (node) void actions.onOpen?.(node);
+        if (node) void onOpen?.(node);
         return;
       }
 
@@ -183,9 +195,9 @@ export function PagingGridView({
       if (currentIndex === -1) {
         const first = allNodes[0];
         if (first) {
-          selectCtx.replaceSelection(first.path);
-          selectCtx.setLastSelectedPath(first.path);
-          selectCtx.setAnchorPath(first.path);
+          replaceSelection(first.path);
+          setLastSelectedPath(first.path);
+          setAnchorPath(first.path);
         }
         return;
       }
@@ -205,24 +217,24 @@ export function PagingGridView({
       if (e.shiftKey) {
         // --- 範囲選択移動 (Shift) ---
         // 起点 (anchorPath) がなければ現在の位置を起点にする
-        const anchorPath = selectCtx.anchorPath ?? currentPath;
-        const anchorIndex = allNodes.findIndex((n) => n.path === anchorPath);
+        const path = anchorPath ?? currentPath;
+        const anchorIndex = allNodes.findIndex((n) => n.path === path);
 
         const start = Math.min(anchorIndex, nextIndex);
         const end = Math.max(anchorIndex, nextIndex);
         const paths = allNodes.slice(start, end + 1).map((n) => n.path);
 
-        selectCtx.enterSelectionMode();
-        selectCtx.selectPaths(paths); // 範囲で上書き
+        enterSelectionMode();
+        selectPaths(paths); // 範囲で上書き
         // ※ setAnchorPath は更新しない (起点を維持)
       } else {
         // 通常移動
-        selectCtx.replaceSelection(nextNode.path);
-        selectCtx.setAnchorPath(nextNode.path); // 次のShift操作のために起点を更新
+        replaceSelection(nextNode.path);
+        setAnchorPath(nextNode.path); // 次のShift操作のために起点を更新
       }
 
       // フォーカス位置更新
-      selectCtx.setLastSelectedPath(nextNode.path);
+      setLastSelectedPath(nextNode.path);
 
       // ページ更新（必要なら）
       const nextPage = Math.floor(nextIndex / pageSize) + 1;
@@ -238,7 +250,21 @@ export function PagingGridView({
         el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
     },
-    [selectCtx, allNodes, columnCount, pageSize, currentPage, actions, setPage]
+    [
+      lastSelectedPath,
+      allNodes,
+      columnCount,
+      setLastSelectedPath,
+      pageSize,
+      currentPage,
+      onOpen,
+      replaceSelection,
+      setAnchorPath,
+      enterSelectionMode,
+      selectPaths,
+      anchorPath,
+      setPage,
+    ]
   );
 
   // ページ遷移時の自動スクロール（副作用）
@@ -249,7 +275,7 @@ export function PagingGridView({
 
     // ページ変更に伴うスクロールが必要な場合、または外部からの指示（初期表示など）
     // lastSelectedPath があれば、その要素へスクロールを試みる
-    const currentPath = selectCtx.lastSelectedPath;
+    const currentPath = lastSelectedPath;
     if (!currentPath) return;
 
     const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
@@ -319,25 +345,47 @@ function Cell({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り機能
-  const favCtx = useFavoritesContext();
-  const { isFavorite, rating } = favCtx.getFavorite(node.path);
+  const { getFavorite } = useFavoritesContext();
+  const { isFavorite, rating } = getFavorite(node.path);
 
   // 選択機能
-  const selectCtx = usePathSelectionContext();
-  const isSelected = selectCtx.isSelectedPath(node.path);
+  const {
+    isSelectedPath,
+    replaceSelection,
+    setLastSelectedPath,
+    anchorPath,
+    setAnchorPath,
+    enterSelectionMode,
+    exitSelectionMode,
+    togglePath,
+    selectPath,
+    unselectPath,
+    selectedPaths,
+    deletePaths,
+    selectPaths,
+    isSelectionMode,
+  } = usePathSelectionContext();
+  const isSelected = isSelectedPath(node.path);
 
   // アクションメニュー
   const { actions } = useMediaActionsContext();
+  const { onOpen, onToggleFavorite, onUpdateThumb } = actions;
   const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
   const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
 
   // 長押しで選択モード
   const handleLongPress = useCallback(() => {
-    selectCtx.enterSelectionMode();
-    selectCtx.replaceSelection(node.path);
-    selectCtx.setLastSelectedPath(node.path);
+    enterSelectionMode();
+    replaceSelection(node.path);
+    setLastSelectedPath(node.path);
     onSelectionChange?.();
-  }, [selectCtx, node.path, onSelectionChange]);
+  }, [
+    enterSelectionMode,
+    replaceSelection,
+    node.path,
+    setLastSelectedPath,
+    onSelectionChange,
+  ]);
 
   // 長押し判定
   const { start, stop, isLongPressed } = useLongPress({
@@ -350,12 +398,10 @@ function Cell({
     if (isLongPressed || isMobile) return;
     e.preventDefault();
 
-    if (e.shiftKey && selectCtx.anchorPath !== null) {
+    if (e.shiftKey && anchorPath !== null) {
       // Shift 選択
-      selectCtx.enterSelectionMode();
-      const anchorIdx = allNodes.findIndex(
-        (n) => n.path === selectCtx.anchorPath
-      );
+      enterSelectionMode();
+      const anchorIdx = allNodes.findIndex((n) => n.path === anchorPath);
       if (anchorIdx === -1) return;
       const startIdx = Math.min(anchorIdx, globalIndex);
       const endIdx = Math.max(anchorIdx, globalIndex);
@@ -363,24 +409,25 @@ function Cell({
 
       if (e.ctrlKey || e.metaKey) {
         // Ctrl あり
-        selectCtx.deletePaths(paths);
+        deletePaths(paths);
       } else {
         // Shift のみ
-        selectCtx.addPaths(paths);
+        enterSelectionMode();
+        selectPaths(paths);
       }
     } else if (e.ctrlKey || e.metaKey) {
       // Ctrl選択
-      selectCtx.enterSelectionMode();
-      selectCtx.togglePath(node.path);
-      selectCtx.setAnchorPath(node.path); // 次のShift操作の起点更新
+      enterSelectionMode();
+      togglePath(node.path);
+      setAnchorPath(node.path); // 次のShift操作の起点更新
     } else {
       // 通常選択
-      selectCtx.exitSelectionMode();
-      selectCtx.replaceSelection(node.path);
-      selectCtx.setAnchorPath(node.path); // 次のShift操作の起点更新
+      exitSelectionMode();
+      replaceSelection(node.path);
+      setAnchorPath(node.path); // 次のShift操作の起点更新
     }
 
-    selectCtx.setLastSelectedPath(node.path);
+    setLastSelectedPath(node.path);
     onSelectionChange?.();
   };
 
@@ -388,7 +435,7 @@ function Cell({
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (isMobile || e.ctrlKey || e.metaKey || e.shiftKey) return;
     e.preventDefault();
-    void actions.onOpen?.(node);
+    void onOpen?.(node);
   };
 
   // タップで開く（モバイル）
@@ -396,23 +443,20 @@ function Cell({
     if (isLongPressed || !isMobile) return;
     e.preventDefault();
 
-    if (selectCtx.isSelectionMode) {
+    if (isSelectionMode) {
       if (!isSelected) {
-        selectCtx.selectPath(node.path);
+        selectPath(node.path);
       } else {
-        selectCtx.unselectPath(node.path);
-        if (
-          selectCtx.selectedPaths.size === 1 &&
-          selectCtx.selectedPaths.has(node.path)
-        ) {
-          selectCtx.exitSelectionMode();
+        unselectPath(node.path);
+        if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
+          exitSelectionMode();
         }
       }
       onSelectionChange?.();
       return;
     }
 
-    void actions.onOpen?.(node);
+    void onOpen?.(node);
   };
 
   return (
@@ -453,7 +497,7 @@ function Cell({
             <MediaThumb
               node={node}
               className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-              onError={() => void actions.onUpdateThumb?.(node)}
+              onError={() => void onUpdateThumb?.(node)}
               showIcon
             />
 
@@ -464,7 +508,7 @@ function Cell({
             <div
               className={cn(
                 "absolute top-3 left-3 z-10 transition-opacity duration-200",
-                selectCtx.isSelectionMode
+                isSelectionMode
                   ? "opacity-100"
                   : "opacity-0 group-hover:opacity-100"
               )}
@@ -486,18 +530,16 @@ function Cell({
 
             {/* Actions */}
             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-              {actions.onToggleFavorite &&
-                !selectCtx.isSelectionMode &&
-                isMediaNode && (
-                  <FavoriteButton
-                    variant="grid"
-                    rating={rating}
-                    isFavorite={isFavorite}
-                    onClick={() => void actions.onToggleFavorite?.(node)}
-                  />
-                )}
+              {onToggleFavorite && !isSelectionMode && isMediaNode && (
+                <FavoriteButton
+                  variant="grid"
+                  rating={rating}
+                  isFavorite={isFavorite}
+                  onClick={() => void onToggleFavorite?.(node)}
+                />
+              )}
 
-              {!selectCtx.isSelectionMode && (
+              {!isSelectionMode && (
                 <div
                   className={cn(
                     "opacity-0 group-hover:opacity-100 transition-opacity",
