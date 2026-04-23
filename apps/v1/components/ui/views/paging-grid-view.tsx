@@ -175,12 +175,11 @@ export function PagingGridView({
   useEffect(() => {
     const updateColumns = () => {
       if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        // CSSの minmax(120px or 180px) と gap(16px) に合わせる
-        const minWidth = isMobile ? 120 : 180;
-        const gap = 16;
-        // 列数 = (コンテナ幅 + gap) / (最小幅 + gap) の切り捨て
-        const cols = Math.floor((containerWidth + gap) / (minWidth + gap));
+        const gridStyle = window.getComputedStyle(
+          containerRef.current.querySelector(":scope > .grid") ??
+            containerRef.current
+        );
+        const cols = gridStyle.gridTemplateColumns.split(" ").length;
         setColumnCount(cols || 1);
       }
     };
@@ -189,7 +188,7 @@ export function PagingGridView({
     if (containerRef.current) observer.observe(containerRef.current);
     updateColumns();
     return () => observer.disconnect();
-  }, [isMobile]);
+  }, []);
 
   // キーボード操作ハンドラ
   const handleKeyDown = useCallback(
@@ -317,12 +316,12 @@ export function PagingGridView({
 
   return (
     <div
-      ref={containerRef}
       className="h-full flex flex-col relative outline-none"
       tabIndex={0} // フォーカス可能にし、keydownイベントを拾う
       onKeyDown={handleKeyDown}
     >
       <div
+        ref={containerRef}
         className={cn(
           "flex-1 overflow-y-auto p-4 grid gap-4 auto-rows-max",
           isMobile
