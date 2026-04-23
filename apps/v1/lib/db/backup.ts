@@ -7,3 +7,21 @@ export const TEMP_DB_BACKUP_DIR = path.join(os.tmpdir(), "media-server", ".db");
 
 export const MIN_KEEP_COUNT = 3;
 export const MAX_KEEP_COUNT = 30;
+
+export type DbBackupFile = {
+  name: string;
+  label: string;
+  createdAt: string;
+  size: number; // バイト単位
+  isTemp: boolean;
+};
+
+export type DbUploadResult =
+  | {
+      success: true;
+      backup: DbBackupFile;
+    }
+  | {
+      success: false;
+      error: string;
+    };

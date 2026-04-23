@@ -6,8 +6,12 @@ import {
   getBackupListAction,
   restoreBackupAction,
 } from "@/actions/db-actions";
-import { MAX_KEEP_COUNT, MIN_KEEP_COUNT } from "@/lib/db/const";
-import { DbBackupFile, DbUploadResult } from "@/lib/db/types";
+import {
+  DbBackupFile,
+  DbUploadResult,
+  MAX_KEEP_COUNT,
+  MIN_KEEP_COUNT,
+} from "@/lib/db/backup";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -239,7 +243,7 @@ export function DatabaseBackupCard() {
           DBバックアップ・リストア
         </CardTitle>
         <CardDescription>
-          MySQLデータベースのバックアップ作成と復元を行います
+          データベースのバックアップ作成と復元を行います
         </CardDescription>
       </CardHeader>
 
@@ -365,7 +369,7 @@ export function DatabaseBackupCard() {
                   displayBackupFiles.find((f) => f.key === k) ?? null
                 )
               }
-              value={selectedFile?.key}
+              value={selectedFile?.key ?? ""}
               onOpenChange={(open) => {
                 if (open && backupFiles.length === 0) {
                   void refreshList();
@@ -393,14 +397,16 @@ export function DatabaseBackupCard() {
               </SelectTrigger>
               <SelectContent className="max-h-[400px]">
                 {isListing ? (
-                  <div className="flex items-center justify-center p-6 text-xs text-muted-foreground">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    リストを取得中...
-                  </div>
+                  <SelectItem value="loading">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      リストを取得中...
+                    </div>
+                  </SelectItem>
                 ) : displayBackupFiles.length === 0 ? (
-                  <div className="p-6 text-xs text-center text-muted-foreground">
+                  <SelectItem value="empty">
                     バックアップが見つかりません
-                  </div>
+                  </SelectItem>
                 ) : (
                   displayBackupFiles.map((file) => (
                     <SelectItem

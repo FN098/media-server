@@ -2,11 +2,9 @@
 
 import {
   DB_BACKUP_DIR,
-  MAX_KEEP_COUNT,
-  MIN_KEEP_COUNT,
+  DbBackupFile,
   TEMP_DB_BACKUP_DIR,
-} from "@/lib/db/const";
-import { DbBackupFile } from "@/lib/db/types";
+} from "@/lib/db/backup";
 import { getDatabaseUrlInfo } from "@/lib/db/url";
 import { spawn } from "child_process";
 import fs from "fs/promises";
@@ -72,7 +70,9 @@ export async function createBackupAction() {
         db.database,
       ]);
 
-      child.stdout.pipe(fileHandle!.createWriteStream());
+      const stream = fileHandle!.createWriteStream();
+      child.stdout.pipe(stream);
+
       child.stderr.on("data", (data: Buffer) => {
         console.error("mysqldump error:", data.toString());
       });
@@ -136,7 +136,13 @@ export async function restoreBackupAction(file: DbBackupFile) {
         db.database,
       ]);
 
-      fileHandle!.createReadStream().pipe(child.stdin);
+      const stream = fileHandle!.createReadStream();
+      stream.pipe(child.stdin);
+
+      stream.on("end", () => {
+        child.stdin.end();
+      });
+
       child.stderr.on("data", (data: Buffer) => {
         console.error("mysql error:", data.toString());
       });
@@ -152,7 +158,14 @@ export async function restoreBackupAction(file: DbBackupFile) {
     return { success: true };
   } catch (error) {
     console.error("restore db backup error", error);
-    return { success: false, error: "リストアに失敗しました" };
+
+    // エラー内容に応じたメッセージ（ファイルが見つからない場合など）
+    const message =
+      (error as NodeJS.ErrnoException).code === "ENOENT"
+        ? "ファイルが見つかりませんでした"
+        : "リストアに失敗しました";
+
+    return { success: false, error: message };
   } finally {
     // ファイルハンドルは必ず解放
     if (fileHandle) {
@@ -174,9 +187,6 @@ export async function deleteBackupAction(file: DbBackupFile) {
   const filePath = path.join(DB_BACKUP_DIR, file.name);
 
   try {
-    // ファイルの存在確認
-    await fs.access(filePath);
-
     // 削除実行
     await fs.unlink(filePath);
 
@@ -197,20 +207,6 @@ export async function deleteBackupAction(file: DbBackupFile) {
 // バックアップの世代管理
 export async function cleanupOldBackupsAction(keepCount: number = 10) {
   try {
-    if (keepCount < MIN_KEEP_COUNT) {
-      return {
-        success: false,
-        error: `保持する世代数が少なすぎます！ ${MIN_KEEP_COUNT} 以上にしてください。`,
-      };
-    }
-
-    if (keepCount > MAX_KEEP_COUNT) {
-      return {
-        success: false,
-        error: `保持する世代数が多すぎます！ ${MAX_KEEP_COUNT} 以下にしてください。`,
-      };
-    }
-
     const files = await fs.readdir(DB_BACKUP_DIR);
     const backupFiles = await Promise.all(
       files
