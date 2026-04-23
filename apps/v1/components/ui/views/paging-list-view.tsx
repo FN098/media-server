@@ -88,11 +88,23 @@ export function PagingListView({
     return index !== -1 ? index : null;
   }, [allNodes, initialScrollPath]);
 
-  // アンカー更新
+  // 初期スクロール対象をアンカーに設定
   useEffect(() => {
-    if (initialScrollTargetIndex === null) return;
+    if (!initialScrollTargetIndex) return;
     setAnchorPath(allNodes[initialScrollTargetIndex].path);
-  }, [initialScrollTargetIndex, setAnchorPath, allNodes]);
+  }, [initialScrollTargetIndex, allNodes, setAnchorPath]);
+
+  // 初期スクロール対象を選択状態に設定
+  useEffect(() => {
+    if (!initialScrollTargetIndex) return;
+    replaceSelection(allNodes[initialScrollTargetIndex].path);
+  }, [initialScrollTargetIndex, allNodes, replaceSelection]);
+
+  // 初期スクロール対象を最終選択パスに設定
+  useEffect(() => {
+    if (!initialScrollTargetIndex) return;
+    setLastSelectedPath(allNodes[initialScrollTargetIndex].path);
+  }, [initialScrollTargetIndex, allNodes, setLastSelectedPath]);
 
   // 初期スクロール対象ページを特定する
   const initialScrollTargetPage = useMemo(() => {
