@@ -1,10 +1,10 @@
 "use server";
 
 import {
-  BACKUP_DIR,
+  DB_BACKUP_DIR,
   MAX_KEEP_COUNT,
   MIN_KEEP_COUNT,
-  TEMP_BACKUP_DIR,
+  TEMP_DB_BACKUP_DIR,
 } from "@/lib/db/const";
 import { DbBackupFile } from "@/lib/db/types";
 import { getDatabaseUrlInfo } from "@/lib/db/url";
@@ -15,16 +15,16 @@ import path from "path";
 // バックアップ一覧の取得
 export async function getBackupListAction() {
   try {
-    await fs.mkdir(BACKUP_DIR, { recursive: true });
+    await fs.mkdir(DB_BACKUP_DIR, { recursive: true });
 
-    const files = await fs.readdir(BACKUP_DIR);
+    const files = await fs.readdir(DB_BACKUP_DIR);
 
     // 各ファイルの情報を取得
     const backupList = await Promise.all(
       files
         .filter((file) => file.endsWith(".sql"))
         .map(async (file) => {
-          const stats = await fs.stat(path.join(BACKUP_DIR, file));
+          const stats = await fs.stat(path.join(DB_BACKUP_DIR, file));
           return {
             name: file,
             label: file,
@@ -50,13 +50,13 @@ export async function getBackupListAction() {
 export async function createBackupAction() {
   const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
   const fileName = `backup_${timestamp}.sql`;
-  const filePath = path.join(BACKUP_DIR, fileName);
+  const filePath = path.join(DB_BACKUP_DIR, fileName);
   const db = getDatabaseUrlInfo();
 
   let fileHandle: fs.FileHandle | null = null;
 
   try {
-    await fs.mkdir(BACKUP_DIR, { recursive: true });
+    await fs.mkdir(DB_BACKUP_DIR, { recursive: true });
 
     fileHandle = await fs.open(filePath, "w");
 
@@ -114,8 +114,8 @@ export async function restoreBackupAction(file: DbBackupFile) {
   }
 
   const filePath = file.isTemp
-    ? path.join(TEMP_BACKUP_DIR, file.name)
-    : path.join(BACKUP_DIR, file.name);
+    ? path.join(TEMP_DB_BACKUP_DIR, file.name)
+    : path.join(DB_BACKUP_DIR, file.name);
 
   const db = getDatabaseUrlInfo();
 
@@ -171,7 +171,7 @@ export async function deleteBackupAction(file: DbBackupFile) {
     return { success: false, error: "不正なファイル名です" };
   }
 
-  const filePath = path.join(BACKUP_DIR, file.name);
+  const filePath = path.join(DB_BACKUP_DIR, file.name);
 
   try {
     // ファイルの存在確認
@@ -211,12 +211,12 @@ export async function cleanupOldBackupsAction(keepCount: number = 10) {
       };
     }
 
-    const files = await fs.readdir(BACKUP_DIR);
+    const files = await fs.readdir(DB_BACKUP_DIR);
     const backupFiles = await Promise.all(
       files
         .filter((file) => file.endsWith(".sql"))
         .map(async (file) => {
-          const stats = await fs.stat(path.join(BACKUP_DIR, file));
+          const stats = await fs.stat(path.join(DB_BACKUP_DIR, file));
           return { name: file, mtime: stats.mtime };
         })
     );
@@ -227,7 +227,7 @@ export async function cleanupOldBackupsAction(keepCount: number = 10) {
     // 規定数を超えたファイルを削除
     const filesToDelete = backupFiles.slice(keepCount);
     for (const file of filesToDelete) {
-      await fs.unlink(path.join(BACKUP_DIR, file.name));
+      await fs.unlink(path.join(DB_BACKUP_DIR, file.name));
       console.log(`Deleted old backup: ${file.name}`);
     }
 

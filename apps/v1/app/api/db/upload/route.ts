@@ -1,4 +1,4 @@
-import { TEMP_BACKUP_DIR } from "@/lib/db/const";
+import { TEMP_DB_BACKUP_DIR } from "@/lib/db/const";
 import { dbUploadSchema } from "@/lib/db/schemas";
 import { DbUploadResult } from "@/lib/db/types";
 import fs from "fs/promises";
@@ -24,14 +24,14 @@ export async function POST(req: NextRequest) {
 
     // --- 古い一時ファイルの削除とフォルダの再作成 ---
     // recursive: true で中身ごと削除、force: true で存在しなくてもエラーにしない
-    await fs.rm(TEMP_BACKUP_DIR, { recursive: true, force: true });
+    await fs.rm(TEMP_DB_BACKUP_DIR, { recursive: true, force: true });
     // recursive: true で親ディレクトリ含めて確実に作成
-    await fs.mkdir(TEMP_BACKUP_DIR, { recursive: true });
+    await fs.mkdir(TEMP_DB_BACKUP_DIR, { recursive: true });
     // --------------------------------------------
 
     // 一時ディレクトリに保存
     const tmpFileName = `upload_${uuidv4()}.sql`; // ユーザーから渡されたファイル名は使用しない（セキュリティのため）
-    const tmpPath = path.join(TEMP_BACKUP_DIR, tmpFileName);
+    const tmpPath = path.join(TEMP_DB_BACKUP_DIR, tmpFileName);
 
     await fs.writeFile(tmpPath, buffer);
 

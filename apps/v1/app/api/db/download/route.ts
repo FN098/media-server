@@ -1,4 +1,4 @@
-import { BACKUP_DIR } from "@/lib/db/const";
+import { DB_BACKUP_DIR } from "@/lib/db/const";
 import { getMimetype } from "@/lib/media/mimetype";
 import fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
@@ -29,7 +29,7 @@ export function GET(req: NextRequest) {
       );
     }
 
-    const filePath = path.join(BACKUP_DIR, fileName);
+    const filePath = path.join(DB_BACKUP_DIR, fileName);
 
     // ファイルの存在確認
     if (!fs.existsSync(filePath)) {
