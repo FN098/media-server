@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import {
   Tooltip,
   TooltipContent,
@@ -71,51 +72,57 @@ export function FavoriteButton({
     },
   }[variant];
 
+  const button = (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={handleClick}
+      onMouseDown={handleInteraction}
+      onMouseUp={handleInteraction}
+      onTouchStart={handleInteraction}
+      onTouchEnd={handleInteraction}
+      className={cn(
+        "flex items-center gap-1 justify-center transition-all active:scale-90 group/fav outline-none",
+        styles.container,
+        // お気に入り時は枠線を少し目立たせる（任意）
+        isFavorite && variant !== "list" && "border-yellow-400/30",
+        className
+      )}
+    >
+      <Star
+        className={cn(
+          styles.star,
+          "transition-colors",
+          isFavorite
+            ? "fill-yellow-400 text-yellow-400" // お気に入りなら黄色（評価nullでも）
+            : variant === "list"
+              ? "text-muted-foreground opacity-40"
+              : "text-white opacity-70 group-hover/fav:opacity-100"
+        )}
+      />
+
+      {/* 評価値がある場合のみ数字を表示 */}
+      {isFavorite && rating !== null && (
+        <span
+          className={cn("font-bold text-yellow-400 tabular-nums", styles.text)}
+        >
+          {rating}
+        </span>
+      )}
+    </button>
+  );
+
+  const isMobile = useIsMobile();
+
+  // モバイルなら Tooltip 使わない
+  if (isMobile) {
+    return button;
+  }
+
   return (
     <TooltipProvider delayDuration={400}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={handleClick}
-            onMouseDown={handleInteraction}
-            onMouseUp={handleInteraction}
-            onTouchStart={handleInteraction}
-            onTouchEnd={handleInteraction}
-            className={cn(
-              "flex items-center gap-1 justify-center transition-all active:scale-90 group/fav outline-none",
-              styles.container,
-              // お気に入り時は枠線を少し目立たせる（任意）
-              isFavorite && variant !== "list" && "border-yellow-400/30",
-              className
-            )}
-          >
-            <Star
-              className={cn(
-                styles.star,
-                "transition-colors",
-                isFavorite
-                  ? "fill-yellow-400 text-yellow-400" // お気に入りなら黄色（評価nullでも）
-                  : variant === "list"
-                    ? "text-muted-foreground opacity-40"
-                    : "text-white opacity-70 group-hover/fav:opacity-100"
-              )}
-            />
-
-            {/* 評価値がある場合のみ数字を表示 */}
-            {isFavorite && rating !== null && (
-              <span
-                className={cn(
-                  "font-bold text-yellow-400 tabular-nums",
-                  styles.text
-                )}
-              >
-                {rating}
-              </span>
-            )}
-          </button>
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
         <TooltipContent side="top" align="center">
           <div className="flex items-center gap-2 text-xs font-medium">
             <span>お気に入りをトグル</span>
