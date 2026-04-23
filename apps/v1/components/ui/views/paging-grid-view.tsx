@@ -71,6 +71,7 @@ export function PagingGridView({
 
   // ビューコンテナ
   const containerRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   // グリッドの列数
   const [columnCount, setColumnCount] = useState(0);
@@ -174,10 +175,9 @@ export function PagingGridView({
   // 列数の動的計算
   useEffect(() => {
     const updateColumns = () => {
-      if (containerRef.current) {
+      if (gridRef.current) {
         const gridStyle = window.getComputedStyle(
-          containerRef.current.querySelector(":scope > .grid") ??
-            containerRef.current
+          gridRef.current.querySelector(":scope > .grid") ?? gridRef.current
         );
         const cols = gridStyle.gridTemplateColumns.split(" ").length;
         setColumnCount(cols || 1);
@@ -185,7 +185,7 @@ export function PagingGridView({
     };
 
     const observer = new ResizeObserver(updateColumns);
-    if (containerRef.current) observer.observe(containerRef.current);
+    if (gridRef.current) observer.observe(gridRef.current);
     updateColumns();
     return () => observer.disconnect();
   }, []);
@@ -316,12 +316,13 @@ export function PagingGridView({
 
   return (
     <div
+      ref={containerRef}
       className="h-full flex flex-col relative outline-none"
       tabIndex={0} // フォーカス可能にし、keydownイベントを拾う
       onKeyDown={handleKeyDown}
     >
       <div
-        ref={containerRef}
+        ref={gridRef}
         className={cn(
           "flex-1 overflow-y-auto p-4 grid gap-4 auto-rows-max",
           isMobile
