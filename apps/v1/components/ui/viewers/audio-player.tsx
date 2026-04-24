@@ -102,7 +102,9 @@ export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   }, []);
 
-  // ショートカット
+  // ===== ショートカット =====
+
+  // Space: 再生/一時停止
   useHotkeys(
     "space",
     (e) => {
@@ -111,6 +113,8 @@ export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
     },
     { scopes: ["viewer", "tag-editor"], enabled: active }
   );
+
+  // ↑: 10秒進む
   useHotkeys(
     "arrowup",
     (e) => {
@@ -120,6 +124,8 @@ export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
     },
     { scopes: ["viewer", "tag-editor"], enabled: active }
   );
+
+  // ↓: 10秒戻る
   useHotkeys(
     "arrowdown",
     (e) => {
@@ -129,6 +135,8 @@ export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
     },
     { scopes: ["viewer", "tag-editor"], enabled: active }
   );
+
+  // R: リプレイ有効/無効
   useHotkeys("r", () => toggleRepeating(), {
     scopes: ["viewer", "tag-editor"],
     enabled: active,

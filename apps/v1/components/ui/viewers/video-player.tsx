@@ -59,11 +59,9 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
     }
   };
 
-  // ショートカット
+  // ===== ショートカット =====
+
   // Space: 再生/一時停止
-  // ↑: 10秒進む
-  // ↓: 10秒戻る
-  // F11: フルスクリーン
   useHotkeys(
     "space",
     (e) => {
@@ -72,6 +70,8 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
     },
     { scopes: ["viewer", "tag-editor"], enabled: active }
   );
+
+  // ↑: 10秒進む
   useHotkeys(
     "arrowup",
     (e) => {
@@ -81,6 +81,8 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
     },
     { scopes: ["viewer", "tag-editor"], enabled: active }
   );
+
+  // ↓: 10秒戻る
   useHotkeys(
     "arrowdown",
     (e) => {
@@ -90,6 +92,8 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
     },
     { scopes: ["viewer", "tag-editor"], enabled: active }
   );
+
+  // F11: フルスクリーン
   useHotkeys(
     "f11",
     (e) => {
@@ -106,11 +110,11 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
 
   return (
     <div
-      className="relative group overflow-hidden bg-black mx-auto shadow-lg"
-      style={{
-        width: "min(100%, calc(100vh * 16 / 9))",
-        aspectRatio: "16/9",
-      }}
+      className={cn(
+        "relative w-full h-full min-h-0 overflow-hidden bg-black mx-auto shadow-lg",
+        "flex items-center justify-center",
+        "touch-action-auto"
+      )}
     >
       {/* サムネイル */}
       <div
@@ -130,10 +134,13 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
         {/* ロード中のみスピナーを表示 */}
         {!isVideoReady && <LoadingSpinner />}
       </div>
+
       {/* 動画本体 */}
       <div
-        className={cn("absolute inset-0 w-full h-full")}
-        onPointerDownCapture={(e) => e.stopPropagation()}
+        className={cn(
+          "relative w-full h-full flex items-center justify-center",
+          !active && "invisible"
+        )}
       >
         {active && (
           <MuxPlayer
@@ -146,6 +153,7 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}
             className="w-full h-full object-contain"
+            style={{ aspectRatio: "auto" }}
           />
         )}
       </div>
