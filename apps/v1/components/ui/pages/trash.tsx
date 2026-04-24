@@ -27,6 +27,7 @@ import { useViewerControl } from "@/hooks/use-viewer-control";
 import {
   createMediaOnlyFilter,
   createSearchFilter,
+  withDirectoryControl,
 } from "@/lib/filter/factory";
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
@@ -92,7 +93,12 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   // フィルターパイプライン
   const pipeline = useMemo(
-    () => [createSearchFilter(queryFilterValue)],
+    () => [
+      withDirectoryControl(
+        createSearchFilter(queryFilterValue),
+        "apply-filter"
+      ),
+    ],
     [queryFilterValue]
   );
 

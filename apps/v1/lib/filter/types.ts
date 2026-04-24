@@ -1,5 +1,8 @@
 import { MediaFsNodeType } from "@/lib/media/types";
 
+// ===== 共通フィルターオプション =====
+export type DirectoryPassMode = "always" | "never" | "apply-filter";
+
 // ===== クエリフィルター =====
 export type QueryFilterValue = {
   query?: string | null;

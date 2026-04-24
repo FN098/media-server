@@ -1,4 +1,5 @@
 import {
+  DirectoryPassMode,
   FavoriteFilterValue,
   MediaTypeFilterValue,
   QueryFilterValue,
@@ -8,6 +9,19 @@ import {
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/japanese";
+
+export function withDirectoryControl(
+  filter: MediaNodeFilter,
+  mode: DirectoryPassMode = "always"
+): MediaNodeFilter {
+  return (node) => {
+    if (node.isDirectory) {
+      if (mode === "always") return true;
+      if (mode === "never") return false;
+    }
+    return filter(node);
+  };
+}
 
 export function createSearchFilter(value: QueryFilterValue): MediaNodeFilter {
   const trimmed = value.query?.trim();

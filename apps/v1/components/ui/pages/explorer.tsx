@@ -51,6 +51,7 @@ import {
   createRatingFilter,
   createSearchFilter,
   createTagFilter,
+  withDirectoryControl,
 } from "@/lib/filter/factory";
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
@@ -150,11 +151,17 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // フィルターパイプライン
   const pipeline = useMemo(
     () => [
-      createSearchFilter(queryFilterValue),
-      createMediaTypeFilter(mediaTypeFilterValue),
-      createRatingFilter(ratingFilterValue),
-      createTagFilter(tagFilterValue),
-      createFavoriteFilter(favoriteFilterValue),
+      withDirectoryControl(
+        createSearchFilter(queryFilterValue),
+        "apply-filter"
+      ),
+      withDirectoryControl(
+        createMediaTypeFilter(mediaTypeFilterValue),
+        "apply-filter"
+      ),
+      withDirectoryControl(createRatingFilter(ratingFilterValue), "always"),
+      withDirectoryControl(createTagFilter(tagFilterValue), "always"),
+      withDirectoryControl(createFavoriteFilter(favoriteFilterValue), "always"),
     ],
     [
       queryFilterValue,
