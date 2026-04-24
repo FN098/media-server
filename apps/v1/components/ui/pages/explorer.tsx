@@ -750,17 +750,17 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 ]}
               />
 
+              {/* お気に入りフィルター */}
+              <FavoriteFilterSelect
+                value={favoriteFilterValue}
+                onChange={applyFavoriteFilterValue}
+              />
+
               {/* 種別フィルター */}
               <MediaTypeFilterMultiSelect
                 value={mediaTypeFilterValue}
                 onChange={applyMediaTypeFilterValue}
                 displayTypes={["image", "video", "audio"]}
-              />
-
-              {/* お気に入りフィルター */}
-              <FavoriteFilterSelect
-                value={favoriteFilterValue}
-                onChange={applyFavoriteFilterValue}
               />
 
               {/* 評価フィルター */}
