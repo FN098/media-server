@@ -682,6 +682,8 @@ export function MediaViewer({
         keyboard={{ enabled: true }}
         zoom={true}
         className="h-full w-full"
+        noSwiping={true}
+        noSwipingSelector=".swiper-no-swiping"
       >
         {allSlides.map((slide, i) => {
           const active = currentSlideIndex === i;

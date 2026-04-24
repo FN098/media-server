@@ -152,7 +152,7 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
             onLoadedData={handleLoadedData}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain swiper-no-swiping"
             style={{ aspectRatio: "auto" }}
           />
         )}
