@@ -1,8 +1,8 @@
 import { cn } from "@/shadcn/lib/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 type MarqueeTextProps = {
-  text: string;
+  children: React.ReactNode;
   className?: string;
   speed?: number;
   delay?: number;
@@ -10,7 +10,7 @@ type MarqueeTextProps = {
 };
 
 export function MarqueeText({
-  text,
+  children,
   className,
   speed = 40,
   delay = 0.5,
@@ -107,7 +107,7 @@ export function MarqueeText({
           } as React.CSSProperties
         }
       >
-        {text}
+        {children}
       </span>
     </div>
   );

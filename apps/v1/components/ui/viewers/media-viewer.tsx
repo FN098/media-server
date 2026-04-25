@@ -486,15 +486,16 @@ export function MediaViewer({
             {/* ファイル情報 */}
             <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0 select-text">
               <span className="text-white md:text-lg font-medium drop-shadow-md">
-                <ClickToCopy>
-                  <MarqueeText
-                    key={currentIndex}
-                    text={currentNode?.title ?? currentNode?.name ?? "no title"}
-                    autoplay={isMobile}
-                    speed={40}
-                    delay={1}
-                  />
-                </ClickToCopy>
+                <MarqueeText
+                  key={currentIndex}
+                  autoplay={isMobile}
+                  speed={40}
+                  delay={1}
+                >
+                  <ClickToCopy>
+                    {currentNode?.title ?? currentNode?.name ?? "no title"}
+                  </ClickToCopy>
+                </MarqueeText>
               </span>
               <span className="text-white/60 text-sm">
                 {currentIndex + 1} / {allNodes.length}

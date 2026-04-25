@@ -547,10 +547,9 @@ function Cell({
 
             {/* Info Overlays */}
             <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
-              <MarqueeText
-                text={node.title ?? node.name}
-                className="text-[11px] font-medium text-white text-center"
-              />
+              <MarqueeText className="text-[11px] font-medium text-white text-center">
+                {node.title ?? node.name}
+              </MarqueeText>
             </div>
 
             {/* Actions */}

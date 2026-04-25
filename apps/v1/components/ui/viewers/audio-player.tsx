@@ -190,7 +190,7 @@ export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
         {/* メタデータ */}
         <div className="text-center w-full">
           <h3 className="text-white text-lg font-semibold truncate px-4">
-            <MarqueeText autoplay text={media.title ?? media.name} />
+            <MarqueeText autoplay>{media.title ?? media.name}</MarqueeText>
           </h3>
           <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase mt-1">
             Audio Track
