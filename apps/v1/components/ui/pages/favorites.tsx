@@ -475,7 +475,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             className="z-40" // DropdownMenu より小さくする
             inlineActions={[
               {
-                title: "タグ編集",
+                label: "タグ編集",
                 onClick: handleOpenTagEditor,
                 icon: TagIcon,
               },

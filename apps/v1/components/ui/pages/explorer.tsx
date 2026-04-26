@@ -860,34 +860,34 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             className="z-40" // DropdownMenu より小さくする
             inlineActions={[
               {
-                title: "タグ編集",
+                label: "タグ編集",
                 onClick: handleOpenTagEditor,
                 icon: TagIcon,
               },
             ]}
             menuActions={[
               {
-                title: "お気に入り登録",
+                label: "お気に入り登録",
                 onClick: handleOpenFavoriteAddDialog,
                 icon: Star,
               },
               {
-                title: "お気に入り解除",
+                label: "お気に入り解除",
                 onClick: handleOpenFavoriteRemoveDialog,
                 icon: StarOff,
               },
               {
-                title: "移動",
+                label: "移動",
                 onClick: handleOpenMoveDialogSelected,
                 icon: FolderPlus,
               },
               {
-                title: "コピー",
+                label: "コピー",
                 onClick: handleOpenCopyDialogSelected,
                 icon: Copy,
               },
               {
-                title: "削除",
+                label: "削除",
                 onClick: handleOpenDeleteDialogSelected,
                 icon: Trash2,
                 className: "text-destructive",

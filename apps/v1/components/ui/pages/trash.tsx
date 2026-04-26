@@ -499,12 +499,12 @@ export function Trash({ listing }: { listing: MediaListing }) {
             className="z-40"
             menuActions={[
               {
-                title: "復元",
+                label: "復元",
                 onClick: handleOpenRestoreDialogSelected,
                 icon: RotateCcw,
               },
               {
-                title: "完全に削除",
+                label: "完全に削除",
                 onClick: openDeleteDialogSelected,
                 icon: Trash2,
                 className: "text-destructive",

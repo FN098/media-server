@@ -12,7 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LucideIcon, MoreVertical, X } from "lucide-react";
 
 type Action = {
-  title: string;
+  label: string;
   onClick: () => void;
   icon: LucideIcon;
   disabled?: boolean;
@@ -92,7 +92,7 @@ export function SelectionBar({
                       )}
                       onClick={action.onClick}
                       disabled={action.disabled}
-                      title={action.title}
+                      title={action.label}
                     >
                       <action.icon size={18} />
                     </Button>
@@ -120,7 +120,7 @@ export function SelectionBar({
                           className={action.className}
                         >
                           <action.icon className="mr-2 h-4 w-4" />{" "}
-                          {action.title}
+                          {action.label}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
