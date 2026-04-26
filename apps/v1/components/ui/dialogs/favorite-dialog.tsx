@@ -34,7 +34,7 @@ export function FavoriteDialog({
   const [isPending, startTransition] = useTransition();
   const count = targetNodes.length;
 
-  const handleConfirm = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleApply = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
     e.preventDefault();
 
@@ -87,7 +87,7 @@ export function FavoriteDialog({
           <AlertDialogCancel disabled={isPending}>キャンセル</AlertDialogCancel>
           <AlertDialogAction
             autoFocus
-            onClick={handleConfirm}
+            onClick={handleApply}
             disabled={isPending}
           >
             {isPending ? (

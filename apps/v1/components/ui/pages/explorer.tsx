@@ -911,7 +911,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             previewPath={previewPath}
           />
 
-          {/* お気に入り警告ダイアログ */}
+          {/* お気に入りダイアログ */}
           <FavoriteDialog
             open={isFavoriteDialogOpen}
             onOpenChange={handleFavoriteDialogOpenChange}
