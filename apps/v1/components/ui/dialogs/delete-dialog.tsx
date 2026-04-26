@@ -1,4 +1,7 @@
-import { deleteNodesAction } from "@/actions/media-actions";
+import {
+  deleteNodesAction,
+  deleteNodesPermanentlyAction,
+} from "@/actions/media-actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,22 +32,37 @@ export function DeleteDialog({
   const [isPending, startTransition] = useTransition();
   const count = targetNodes.length;
 
-  // 削除実行
-  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleApply = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
     e.preventDefault();
 
-    startTransition(async () => {
-      const paths = targetNodes.map((n) => n.path);
-      const result = await deleteNodesAction(paths);
+    if (permanent) {
+      // 完全に削除
+      startTransition(async () => {
+        const paths = targetNodes.map((n) => n.path);
+        const result = await deleteNodesPermanentlyAction(paths);
 
-      if (result.failed === 0) {
-        toast.success(`${result.success}件をゴミ箱に移動しました`);
-        onOpenChange(false);
-      } else {
-        toast.error(`${result.failed}件の削除に失敗しました`);
-      }
-    });
+        if (result.failed === 0) {
+          toast.success(`${result.success}件のアイテムを完全に削除しました`);
+          onOpenChange(false);
+        } else {
+          toast.error(`${result.failed}件の削除に失敗しました`);
+        }
+      });
+    } else {
+      // ゴミ箱に移動
+      startTransition(async () => {
+        const paths = targetNodes.map((n) => n.path);
+        const result = await deleteNodesAction(paths);
+
+        if (result.failed === 0) {
+          toast.success(`${result.success}件をゴミ箱に移動しました`);
+          onOpenChange(false);
+        } else {
+          toast.error(`${result.failed}件の削除に失敗しました`);
+        }
+      });
+    }
   };
 
   return (
@@ -79,7 +97,7 @@ export function DeleteDialog({
           <AlertDialogCancel disabled={isPending}>キャンセル</AlertDialogCancel>
           <AlertDialogAction
             autoFocus
-            onClick={handleDelete}
+            onClick={handleApply}
             disabled={isPending}
             className="bg-destructive text-white hover:bg-destructive/90"
           >
