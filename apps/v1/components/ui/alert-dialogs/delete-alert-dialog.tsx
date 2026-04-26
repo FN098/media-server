@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shadcn/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 import { useTransition } from "react";
 
 interface DeleteAlertDialogProps {
@@ -27,10 +28,17 @@ export function DeleteAlertDialog({
 }: DeleteAlertDialogProps) {
   const [isPending, startTransition] = useTransition();
 
-  const handleConfirm = () => {
+  const handleConfirm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
+    e.preventDefault();
+
     startTransition(async () => {
-      await onConfirm();
-      onOpenChange(false);
+      try {
+        await onConfirm();
+        onOpenChange(false);
+      } catch (error) {
+        console.error("削除に失敗しました", error);
+      }
     });
   };
 
@@ -67,13 +75,14 @@ export function DeleteAlertDialog({
             disabled={isPending}
             className="bg-destructive text-white hover:bg-destructive/90"
           >
-            {isPending
-              ? permanent
-                ? "完全削除中..."
-                : "削除中..."
-              : permanent
-                ? "完全に削除する"
-                : "削除する"}
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {permanent ? "完全削除中..." : "削除中..."}
+              </>
+            ) : (
+              <>{permanent ? "完全に削除する" : "削除する"}</>
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
