@@ -1,3 +1,4 @@
+import { deleteNodesAction } from "@/actions/media-actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,41 +11,48 @@ import {
 } from "@/shadcn/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
 import { useTransition } from "react";
+import { toast } from "sonner";
 
-interface DeleteAlertDialogProps {
+interface DeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  count: number;
-  onConfirm: () => Promise<void>;
+  targetNodes: { path: string; name: string }[];
   permanent?: boolean;
 }
 
-export function DeleteAlertDialog({
+export function DeleteDialog({
   open,
   onOpenChange,
-  count,
-  onConfirm,
+  targetNodes,
   permanent = false,
-}: DeleteAlertDialogProps) {
+}: DeleteDialogProps) {
   const [isPending, startTransition] = useTransition();
+  const count = targetNodes.length;
 
-  const handleConfirm = (e: React.MouseEvent<HTMLButtonElement>) => {
+  // 削除実行
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
     e.preventDefault();
 
     startTransition(async () => {
-      try {
-        await onConfirm();
+      const paths = targetNodes.map((n) => n.path);
+      const result = await deleteNodesAction(paths);
+
+      if (result.failed === 0) {
+        toast.success(`${result.success}件をゴミ箱に移動しました`);
         onOpenChange(false);
-      } catch (error) {
-        console.error(error);
+      } else {
+        toast.error(`${result.failed}件の削除に失敗しました`);
       }
     });
   };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent onEscapeKeyDown={(e) => e.stopPropagation()}>
+      <AlertDialogContent
+        onEscapeKeyDown={(e) => e.stopPropagation()}
+        className="focus:outline-none"
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>
             {permanent ? "アイテムの完全削除" : "アイテムの削除"}
@@ -71,7 +79,7 @@ export function DeleteAlertDialog({
           <AlertDialogCancel disabled={isPending}>キャンセル</AlertDialogCancel>
           <AlertDialogAction
             autoFocus
-            onClick={handleConfirm}
+            onClick={handleDelete}
             disabled={isPending}
             className="bg-destructive text-white hover:bg-destructive/90"
           >

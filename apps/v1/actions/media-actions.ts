@@ -53,9 +53,10 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
     // 存在確認
     if (await existsPath(destRealPath)) {
-      throw new Error(
-        `同名の項目が既に存在します。: ${basename(destRealPath)}`
-      );
+      return {
+        success: false,
+        error: `同名の項目が既に存在します。: ${basename(destRealPath)}`,
+      };
     }
 
     const stats = await lstat(srcRealPath);

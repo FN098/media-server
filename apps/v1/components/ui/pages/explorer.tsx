@@ -2,7 +2,6 @@
 
 import { visitFolderAction } from "@/actions/folder-actions";
 import {
-  deleteNodesAction,
   touchMediaTimestampAction,
   updatePreviewAction,
 } from "@/actions/media-actions";
@@ -10,13 +9,13 @@ import {
   enqueueCreateSingleThumbJobAction,
   enqueueCreateThumbsJobAction,
 } from "@/actions/thumb-actions";
-import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
 import { FavoriteAlertDialog } from "@/components/ui/alert-dialogs/favorite-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
+import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
@@ -523,23 +522,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     setDeleteTargets(selectedNodes);
   };
 
-  // 削除実行
-  const handleDeleteDialogConfirm = async () => {
-    const paths = deleteTargets.map((n) => n.path);
-    const result = await deleteNodesAction(paths);
-
-    if (result.failed === 0) {
-      toast.success(`${result.success}件のアイテムをゴミ箱に移動しました`);
-      handleResetSelection();
-    } else {
-      toast.error(`${result.failed}件の削除に失敗しました`);
-    }
-  };
-
   // 後始末
   const handleDeleteDialogOpenChange = (open: boolean) => {
     if (!open) {
       setDeleteTargets([]);
+      handleResetSelection();
     }
   };
 
@@ -938,11 +925,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           />
 
           {/* 削除警告ダイアログ */}
-          <DeleteAlertDialog
+          <DeleteDialog
             open={isDeleteMode}
-            onConfirm={handleDeleteDialogConfirm}
             onOpenChange={handleDeleteDialogOpenChange}
-            count={deleteTargets.length}
+            targetNodes={deleteTargets}
           />
 
           {/* プレビュー設定ダイアログ */}

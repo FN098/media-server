@@ -1,13 +1,10 @@
 "use client";
 
-import {
-  deleteNodesPermanentlyAction,
-  restoreNodesAction,
-} from "@/actions/media-actions";
-import { DeleteAlertDialog } from "@/components/ui/alert-dialogs/delete-alert-dialog";
+import { restoreNodesAction } from "@/actions/media-actions";
 import { RestoreAlertDialog } from "@/components/ui/alert-dialogs/restore-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
+import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { SortSelect } from "@/components/ui/selects/sort-select";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
@@ -265,23 +262,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
     setDeleteTargets(selectedNodes);
   };
 
-  // 削除実行
-  const handleDeleteDialogConfirm = async () => {
-    const paths = deleteTargets.map((n) => n.path);
-    const result = await deleteNodesPermanentlyAction(paths);
-
-    if (result.failed === 0) {
-      toast.success(`${result.success}件のアイテムを完全に削除しました`);
-      handleResetSelection();
-    } else {
-      toast.error(`${result.failed}件の削除に失敗しました`);
-    }
-  };
-
   // 後始末
   const handleDeleteDialogOpenChange = (open: boolean) => {
     if (!open) {
       setDeleteTargets([]);
+      handleResetSelection();
     }
   };
 
@@ -513,11 +498,10 @@ export function Trash({ listing }: { listing: MediaListing }) {
           />
 
           {/* 削除警告ダイアログ */}
-          <DeleteAlertDialog
+          <DeleteDialog
             open={isDeleteMode}
-            onConfirm={handleDeleteDialogConfirm}
             onOpenChange={handleDeleteDialogOpenChange}
-            count={deleteTargets.length}
+            targetNodes={deleteTargets}
             permanent
           />
 
