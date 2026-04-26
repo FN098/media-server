@@ -1,10 +1,9 @@
 "use client";
 
-import { restoreNodesAction } from "@/actions/media-actions";
-import { RestoreAlertDialog } from "@/components/ui/alert-dialogs/restore-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
+import { RestoreDialog } from "@/components/ui/dialogs/restore-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { SortSelect } from "@/components/ui/selects/sort-select";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
@@ -227,23 +226,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
     setRestoreTargets(selectedNodes);
   };
 
-  // 復元実行
-  const handleRestoreDialogConfirm = async () => {
-    const paths = restoreTargets.map((n) => n.path);
-    const result = await restoreNodesAction(paths);
-
-    if (result.failed === 0) {
-      toast.success(`${result.success}件のアイテムを復元しました`);
-      handleResetSelection();
-    } else {
-      toast.error(`${result.failed}件の復元に失敗しました`);
-    }
-  };
-
   // 後始末
   const handleRestoreDialogOpenChange = (open: boolean) => {
     if (!open) {
       setRestoreTargets([]);
+      handleResetSelection();
     }
   };
 
@@ -283,9 +270,10 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   // 現在のスコープ
   const activeScope = useMemo<(typeof allScopes)[number]>(() => {
-    if (isViewerMode) return "viewer";
-    return "trash";
-  }, [isViewerMode]);
+    if (isDeleteMode || isRestoreMode) return "dialog";
+    else if (isViewerMode) return "viewer";
+    else return "trash";
+  }, [isDeleteMode, isRestoreMode, isViewerMode]);
 
   // デバッグ用
   useEffect(() => console.debug({ activeScope }), [activeScope]);
@@ -505,12 +493,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
             permanent
           />
 
-          {/* 復元警告ダイアログ */}
-          <RestoreAlertDialog
+          {/* 復元ダイアログ */}
+          <RestoreDialog
             open={isRestoreMode}
-            onConfirm={handleRestoreDialogConfirm}
             onOpenChange={handleRestoreDialogOpenChange}
-            count={restoreTargets.length}
+            targetNodes={restoreTargets}
           />
 
           {/* フォルダナビゲーション */}
