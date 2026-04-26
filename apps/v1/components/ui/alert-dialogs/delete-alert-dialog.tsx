@@ -37,7 +37,7 @@ export function DeleteAlertDialog({
         await onConfirm();
         onOpenChange(false);
       } catch (error) {
-        console.error("削除に失敗しました", error);
+        console.error(error);
       }
     });
   };

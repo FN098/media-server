@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shadcn/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 import { useTransition } from "react";
 
 interface FavoriteAlertDialogProps {
@@ -27,10 +28,17 @@ export function FavoriteAlertDialog({
 }: FavoriteAlertDialogProps) {
   const [isPending, startTransition] = useTransition();
 
-  const handleConfirm = () => {
+  const handleConfirm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
+    e.preventDefault();
+
     startTransition(async () => {
-      await onConfirm();
-      onOpenChange(false);
+      try {
+        await onConfirm();
+        onOpenChange(false);
+      } catch (error) {
+        console.error(error);
+      }
     });
   };
 
@@ -56,7 +64,14 @@ export function FavoriteAlertDialog({
             onClick={handleConfirm}
             disabled={isPending}
           >
-            {mode === "add" ? "追加する" : "解除する"}
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {mode === "add" ? "追加中..." : "解除中..."}
+              </>
+            ) : (
+              <>{mode === "add" ? "追加する" : "解除する"}</>
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

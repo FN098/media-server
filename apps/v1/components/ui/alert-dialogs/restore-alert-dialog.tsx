@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shadcn/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 import { useTransition } from "react";
 
 interface RestoreAlertDialogProps {
@@ -28,9 +29,14 @@ export function RestoreAlertDialog({
   const handleConfirm = (e: React.MouseEvent) => {
     // AlertDialogActionのデフォルトの閉じ動作を防ぎ、処理完了後に手動で閉じる
     e.preventDefault();
+
     startTransition(async () => {
-      await onConfirm();
-      onOpenChange(false);
+      try {
+        await onConfirm();
+        onOpenChange(false);
+      } catch (error) {
+        console.error(error);
+      }
     });
   };
 
@@ -52,7 +58,14 @@ export function RestoreAlertDialog({
             disabled={isPending}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            {isPending ? "復元中..." : "復元する"}
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                復元中...
+              </>
+            ) : (
+              "復元する"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
