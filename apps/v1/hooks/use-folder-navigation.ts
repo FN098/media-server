@@ -10,8 +10,8 @@ type Options = {
 };
 
 type NavigateOptions = {
-  deleted?: boolean;
-  newTab?: boolean;
+  deleted?: boolean; // 削除済みの場合は遷移先を変える
+  newTab?: boolean; // 新しいタブで開く
   at?: IndexLike | null; // ビューア用
 };
 
@@ -25,18 +25,17 @@ export function useFolderNavigation(options?: Options) {
   // フォルダに移動
   const navigate = useCallback(
     (path: string, options?: NavigateOptions) => {
-      const basePath =
-        resolveClientPath(path, { isDeleted: options?.deleted }) || path;
-
+      const { deleted, at, newTab } = options || {};
+      const basePath = resolveClientPath(path, { isDeleted: deleted }) || path;
       const params = new URLSearchParams(searchParams.toString());
 
-      if (options?.at) {
-        params.set(atKey, String(options.at));
-      } else if (options?.at === null) {
+      if (at) {
+        params.set(atKey, String(at));
+      } else if (at === null) {
         params.delete(atKey);
       }
 
-      if (options?.newTab) {
+      if (newTab) {
         window.open(`${basePath}?${params.toString()}`, "_blank", "noreferrer");
       } else {
         router.push(`${basePath}?${params.toString()}`, { scroll: false });
