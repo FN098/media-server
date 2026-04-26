@@ -497,7 +497,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
             ]}
           />
 
-          {/* 削除警告ダイアログ */}
+          {/* 削除ダイアログ */}
           <DeleteDialog
             open={isDeleteMode}
             onOpenChange={handleDeleteDialogOpenChange}

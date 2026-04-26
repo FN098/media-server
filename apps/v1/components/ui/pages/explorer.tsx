@@ -9,13 +9,16 @@ import {
   enqueueCreateSingleThumbJobAction,
   enqueueCreateThumbsJobAction,
 } from "@/actions/thumb-actions";
-import { FavoriteAlertDialog } from "@/components/ui/alert-dialogs/favorite-alert-dialog";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
 import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
+import {
+  FavoriteDialog,
+  FavoriteDialogMode,
+} from "@/components/ui/dialogs/favorite-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
@@ -283,22 +286,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== お気に入り =====
 
-  const {
-    toggleFavorite,
-    updateFavorite,
-    updateMultipleFavorites,
-    deleteMultipleFavorites,
-  } = useFavoritesContext();
-
-  type FavoriteDialogMode = "add" | "remove";
+  const { toggleFavorite, updateFavorite } = useFavoritesContext();
 
   // お気に入りダイアログ制御
-  const [favoriteDialogTargets, setFavoriteDialogTargets] = useState<
-    MediaNode[]
-  >([]);
+  const [favoriteTargets, setFavoriteDialogTargets] = useState<MediaNode[]>([]);
   const [favoriteDialogMode, setFavoriteDialogMode] =
     useState<FavoriteDialogMode>("add");
-  const isFavoriteDialogOpen = favoriteDialogTargets.length > 0;
+  const isFavoriteDialogOpen = favoriteTargets.length > 0;
 
   // お気に入り登録/解除
   const handleToggleFavorite = async (node: MediaNode) => {
@@ -332,31 +326,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     setFavoriteDialogTargets(selectedNodes);
   };
 
-  // 一括お気に入り登録
-  const handleUpdateMultipleFavoritesSelected = async () => {
-    const result = await updateMultipleFavorites(
-      favoriteDialogTargets.map((n) => n.path),
-      {
-        rating: null,
-        skipIfAlreadyFavorite: true,
-      }
-    );
-    if (result.success) {
-      toast.success("お気に入りが更新されました。");
-    } else {
-      toast.error(result.error);
-    }
-  };
-
-  // 一括お気に入り解除
-  const handleDeleteMultipleFavoritesSelected = async () => {
-    const result = await deleteMultipleFavorites(
-      favoriteDialogTargets.map((n) => n.path)
-    );
-    if (result.success) {
-      toast.success("お気に入りが解除されました。");
-    } else {
-      toast.error(result.error);
+  // 後始末
+  const handleFavoriteDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setFavoriteDialogTargets([]);
     }
   };
 
@@ -924,7 +897,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             initialDirPath={initialCopyDialogDirPath}
           />
 
-          {/* 削除警告ダイアログ */}
+          {/* 削除ダイアログ */}
           <DeleteDialog
             open={isDeleteMode}
             onOpenChange={handleDeleteDialogOpenChange}
@@ -939,20 +912,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           />
 
           {/* お気に入り警告ダイアログ */}
-          <FavoriteAlertDialog
+          <FavoriteDialog
             open={isFavoriteDialogOpen}
-            onOpenChange={(open) => {
-              if (!open) {
-                setFavoriteDialogTargets([]);
-              }
-            }}
+            onOpenChange={handleFavoriteDialogOpenChange}
+            targetNodes={favoriteTargets}
             mode={favoriteDialogMode}
-            count={favoriteDialogTargets.length}
-            onConfirm={
-              favoriteDialogMode === "add"
-                ? handleUpdateMultipleFavoritesSelected
-                : handleDeleteMultipleFavoritesSelected
-            }
           />
 
           {/* フォルダナビゲーション */}
