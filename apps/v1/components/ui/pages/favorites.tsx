@@ -449,7 +449,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
                 menuConfig={{
                   enabled: {
                     pinHeader: true,
-                    toggleFavorite: false,
+                    toggleFavorite: true,
                     changeRating: true,
                     delete: false,
                     deletePermanently: false,
