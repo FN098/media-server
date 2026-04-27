@@ -110,16 +110,15 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         WHERE dirPath = ${srcVirtualPath} OR dirPath LIKE CONCAT(${srcVirtualPath}, '/%')
       `;
 
-      // プレビューの更新
+      // プレビューの更新（フォルダ）
       if (isDirectory) {
-        // 1. リネーム先に既に存在するレコードを削除 (上書きを許容するため)
-        //    自分自身だけでなく、配下のパスも重複する可能性があるため一括削除
+        // リネーム先の重複を削除（上書き許容）
         await tx.$executeRaw`
           DELETE FROM FolderMeta 
           WHERE path = ${destVirtualPath} OR path LIKE CONCAT(${destVirtualPath}, '/%')
         `;
 
-        // 2. 既存レコードの path と previewPath を一括更新
+        // path と previewPath を一括置換
         await tx.$executeRaw`
           UPDATE FolderMeta
           SET 
@@ -138,9 +137,26 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         `;
       } else {
         // ファイル単体のリネームの場合
-        // 他のフォルダの previewPath として使われていた場合の更新
         await tx.$executeRaw`
           UPDATE FolderMeta SET previewPath = ${destVirtualPath} WHERE previewPath = ${srcVirtualPath}
+        `;
+      }
+
+      // プレビューの更新（メディア）
+      if (isDirectory) {
+        await tx.$executeRaw`
+          UPDATE Media
+          SET previewPath = CASE
+            WHEN previewPath = ${srcVirtualPath} THEN ${destVirtualPath}
+            WHEN previewPath LIKE CONCAT(${srcVirtualPath}, '/%')
+              THEN REPLACE(previewPath, CONCAT(${srcVirtualPath}, '/'), CONCAT(${destVirtualPath}, '/'))
+            ELSE previewPath
+          END
+          WHERE previewPath = ${srcVirtualPath} OR previewPath LIKE CONCAT(${srcVirtualPath}, '/%')
+        `;
+      } else {
+        await tx.$executeRaw`
+          UPDATE Media SET previewPath = ${destVirtualPath} WHERE previewPath = ${srcVirtualPath}
         `;
       }
     });
@@ -251,7 +267,7 @@ export async function moveNodesAction(
           WHERE dirPath = ${srcVirtualPath} OR dirPath LIKE CONCAT(${srcVirtualPath}, '/%')
         `;
 
-        // プレビューの更新
+        // プレビューの更新（フォルダ）
         if (isDirectory) {
           // リネーム先の重複を削除（上書き許容）
           await tx.$executeRaw`
@@ -278,15 +294,26 @@ export async function moveNodesAction(
           `;
         } else {
           // ファイル単体の移動の場合
-          await tx.$executeRaw`DELETE FROM FolderMeta WHERE path = ${destVirtualPath}`;
-
-          await tx.$executeRaw`
-            UPDATE FolderMeta SET path = ${destVirtualPath} WHERE path = ${srcVirtualPath}
-          `;
-
-          // 他のフォルダの表紙(previewPath)として使われていた場合、その参照も更新
           await tx.$executeRaw`
             UPDATE FolderMeta SET previewPath = ${destVirtualPath} WHERE previewPath = ${srcVirtualPath}
+          `;
+        }
+
+        // プレビューの更新（メディア）
+        if (isDirectory) {
+          await tx.$executeRaw`
+            UPDATE Media
+            SET previewPath = CASE
+              WHEN previewPath = ${srcVirtualPath} THEN ${destVirtualPath}
+              WHEN previewPath LIKE CONCAT(${srcVirtualPath}, '/%')
+                THEN REPLACE(previewPath, CONCAT(${srcVirtualPath}, '/'), CONCAT(${destVirtualPath}, '/'))
+              ELSE previewPath
+            END
+            WHERE previewPath = ${srcVirtualPath} OR previewPath LIKE CONCAT(${srcVirtualPath}, '/%')
+          `;
+        } else {
+          await tx.$executeRaw`
+            UPDATE Media SET previewPath = ${destVirtualPath} WHERE previewPath = ${srcVirtualPath}
           `;
         }
       });
