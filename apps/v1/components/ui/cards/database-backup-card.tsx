@@ -395,18 +395,20 @@ export function DatabaseBackupCard() {
                   )}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="max-h-[400px]">
+              <SelectContent
+                position="popper"
+                sideOffset={4}
+                className="max-h-[400px] w-[var(--radix-select-trigger-width)]"
+              >
                 {isListing ? (
-                  <SelectItem value="loading">
-                    <div className="flex items-center gap-2 text-xs">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      リストを取得中...
-                    </div>
-                  </SelectItem>
+                  <div className="flex items-center justify-center p-4 gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    リストを取得中...
+                  </div>
                 ) : displayBackupFiles.length === 0 ? (
-                  <SelectItem value="empty">
+                  <div className="p-4 text-center text-sm text-muted-foreground">
                     バックアップが見つかりません
-                  </SelectItem>
+                  </div>
                 ) : (
                   displayBackupFiles.map((file) => (
                     <SelectItem
