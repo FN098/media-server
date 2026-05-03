@@ -16,6 +16,7 @@ import { LucideIcon } from "lucide-react";
 
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 
+// forceMobile オプション追加
 function Sidebar({
   side = "left",
   variant = "sidebar",
@@ -28,7 +29,7 @@ function Sidebar({
   side?: "left" | "right";
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
-  forceMobile?: true; // 追加
+  forceMobile?: true;
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
@@ -37,7 +38,7 @@ function Sidebar({
       <div
         data-slot="sidebar"
         className={cn(
-          "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
+          "flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground",
           className
         )}
         {...props}
@@ -47,6 +48,7 @@ function Sidebar({
     );
   }
 
+  // forceMobile が true なら強制的にモバイル版を使用
   if (isMobile || forceMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
@@ -54,7 +56,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -74,7 +76,7 @@ function Sidebar({
 
   return (
     <div
-      className="group peer text-sidebar-foreground hidden md:block"
+      className="group peer hidden text-sidebar-foreground md:block"
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
@@ -111,7 +113,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+          className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>
@@ -120,10 +122,11 @@ function Sidebar({
   );
 }
 
-type SidebarTriggerProps = React.ComponentProps<typeof Button> & {
+// icon, open オプションを追加
+interface SidebarTriggerProps extends React.ComponentProps<typeof Button> {
   icon: LucideIcon;
   open: boolean;
-};
+}
 
 function SidebarTrigger({
   className,
@@ -148,7 +151,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <Icon className="h-5 w-5" />
+      <Icon />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

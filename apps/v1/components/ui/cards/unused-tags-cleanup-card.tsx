@@ -6,14 +6,6 @@ import {
 } from "@/actions/tag-actions";
 import { UnusedTagItem } from "@/lib/tag/types";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shadcn-overrides/components/ui/table";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -33,6 +25,13 @@ import {
   CardTitle,
 } from "@/shadcn/components/ui/card";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shadcn/components/ui/table";
 import { CheckCircle2, Loader2, Search, Tag, Trash2 } from "lucide-react";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -116,7 +115,8 @@ export function UnusedTagsCleanupCard() {
             </div>
           ) : tags.length > 0 ? (
             <div className="max-h-[300px] overflow-y-auto border-t">
-              <Table noWrapper>
+              {/* NOTE: shadcn の Table だとヘッダーの sticky が効かない */}
+              <table className="w-full caption-bottom text-sm">
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="w-[50px] sticky top-0 bg-background z-10 shadow-[sm]">
@@ -145,7 +145,7 @@ export function UnusedTagsCleanupCard() {
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+              </table>
             </div>
           ) : (
             <div className="h-[100px] flex items-center justify-center gap-2 text-sm text-green-600 font-medium">

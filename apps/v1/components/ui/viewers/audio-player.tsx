@@ -2,11 +2,12 @@ import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { MediaNode } from "@/lib/media/types";
 import { resolveMediaUrl } from "@/lib/media/url";
+import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/shadcn-overrides/components/ui/tooltip";
+} from "@/shadcn/components/ui/tooltip";
 import {
   Music,
   Pause,
@@ -301,13 +302,10 @@ function PlayerButton({
           {children}
         </button>
       </TooltipTrigger>
-      <TooltipContent
-        side="bottom"
-        className="bg-white/10 border-white/20 backdrop-blur-md text-white"
-        sideOffset={20}
-      >
-        <p>
-          {label} <span className="text-white/40 ml-1">[{shortcut}]</span>
+      <TooltipContent side="bottom" sideOffset={20}>
+        <p className="flex gap-2">
+          <span>{label}</span>
+          <Kbd>{shortcut}</Kbd>
         </p>
       </TooltipContent>
     </Tooltip>
