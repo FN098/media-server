@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
+import { Kbd } from "@/shadcn/components/ui/kbd";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -561,7 +562,7 @@ export function MediaViewer({
                       <span>フォルダを開く</span>
                       {!isMobile && (
                         <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <kbd className="rounded border px-1.5 py-0.5">O</kbd>
+                          <Kbd>O</Kbd>
                         </div>
                       )}
                     </DropdownMenuItem>
@@ -576,7 +577,7 @@ export function MediaViewer({
                       <span>前のフォルダを開く</span>
                       {!isMobile && (
                         <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <kbd className="rounded border px-1.5 py-0.5">P</kbd>
+                          <Kbd>P</Kbd>
                         </div>
                       )}
                     </DropdownMenuItem>
@@ -591,7 +592,7 @@ export function MediaViewer({
                       <span>次のフォルダを開く</span>
                       {!isMobile && (
                         <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <kbd className="rounded border px-1.5 py-0.5">N</kbd>
+                          <Kbd>N</Kbd>
                         </div>
                       )}
                     </DropdownMenuItem>
@@ -603,7 +604,7 @@ export function MediaViewer({
                       <span>全画面表示</span>
                       {!isMobile && (
                         <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <kbd className="rounded border px-1.5 py-0.5">F</kbd>
+                          <Kbd>F</Kbd>
                         </div>
                       )}
                     </DropdownMenuItem>
@@ -619,7 +620,7 @@ export function MediaViewer({
                       <span>タグを編集</span>
                       {!isMobile && (
                         <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <kbd className="rounded border px-1.5 py-0.5">T</kbd>
+                          <Kbd>T</Kbd>
                         </div>
                       )}
                     </DropdownMenuItem>
@@ -644,9 +645,7 @@ export function MediaViewer({
                       <span className="text-destructive">削除</span>
                       {!isMobile && (
                         <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <kbd className="rounded border px-1.5 py-0.5">
-                            Del
-                          </kbd>
+                          <Kbd>Del</Kbd>
                         </div>
                       )}
                     </DropdownMenuItem>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
+import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
@@ -126,7 +127,7 @@ export function FavoriteButton({
         <TooltipContent side="top" align="center">
           <div className="flex items-center gap-2 text-xs font-medium">
             <span>お気に入りをトグル</span>
-            <kbd className="rounded border px-1.5 py-0.5">S</kbd>
+            <Kbd>S</Kbd>
           </div>
         </TooltipContent>
       </Tooltip>

@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
+import { Kbd } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import {
@@ -124,7 +125,7 @@ export function ActionsDropdownMenu({
             <span>フォルダを開く</span>
             {!isMobile && (
               <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                <kbd className="rounded border px-1.5 py-0.5">O</kbd>
+                <Kbd>O</Kbd>
               </div>
             )}
           </DropdownMenuItem>

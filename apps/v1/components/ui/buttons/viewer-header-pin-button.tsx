@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
+import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
@@ -41,7 +42,7 @@ export function ViewerHeaderPinButton({
         <TooltipContent side="top" align="center">
           <div className="flex items-center gap-2 text-xs font-medium">
             <span>ピン留め</span>
-            <kbd className="rounded border px-1.5 py-0.5">H</kbd>
+            <Kbd>H</Kbd>
           </div>
         </TooltipContent>
       </Tooltip>

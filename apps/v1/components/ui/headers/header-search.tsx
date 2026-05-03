@@ -5,6 +5,7 @@ import { useMounted } from "@/hooks/use-mounted";
 import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
+import { Kbd } from "@/shadcn/components/ui/kbd";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -91,8 +92,8 @@ export function HeaderSearch() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <kbd className="rounded border px-1.5 py-0.5">Ctrl</kbd>
-            <kbd className="rounded border px-1.5 py-0.5">K</kbd>
+            <Kbd>Ctrl</Kbd>
+            <Kbd>K</Kbd>
           </motion.div>
         )}
       </AnimatePresence>
