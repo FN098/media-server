@@ -1,5 +1,4 @@
 import { APP_CONFIG } from "@/app.config";
-import { CarouselDemo } from "@/components/ui/demo/caroucel-demo";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function SandboxPage() {
-  return <CarouselDemo />;
+  return <>No content</>;
 }
