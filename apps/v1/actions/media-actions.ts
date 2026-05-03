@@ -675,11 +675,7 @@ export async function cleanupGhostMediaAction(
   }
 }
 
-/**
- * プレビューパスを更新する
- * targetPath: 設定対象（ファイル or フォルダ）
- * previewResourcePath: プレビュー画像として使うファイルのパス
- */
+// プレビュー更新
 export async function updatePreviewAction(
   targetPath: string,
   previewResourcePath: string | null
@@ -712,6 +708,7 @@ export async function updatePreviewAction(
   }
 }
 
+// タイムスタンプ更新
 export async function touchMediaTimestampAction(targetPath: string) {
   try {
     // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
