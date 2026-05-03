@@ -69,6 +69,12 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         destVirtualPath,
         isDirectory
       );
+
+      if (isDirectory) {
+        // recursive: true で中身ごと削除。force: true で存在しなくてもエラーにしない
+        await rm(destThumbPath, { recursive: true, force: true });
+      }
+
       await rename(srcThumbPath, destThumbPath);
     } catch (e) {
       console.error("rename thumbnail error:", e);
@@ -226,6 +232,12 @@ export async function moveNodesAction(
           destVirtualPath,
           isDirectory
         );
+
+        if (isDirectory) {
+          // recursive: true で中身ごと削除。force: true で存在しなくてもエラーにしない
+          await rm(destThumbPath, { recursive: true, force: true });
+        }
+
         await rename(srcThumbPath, destThumbPath);
       } catch (e) {
         console.error("rename thumbnail error:", e);
