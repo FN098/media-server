@@ -33,6 +33,38 @@ type SearchFavoriteResult = {
   total: number; // limit を考慮しない全件数
 };
 
+type FavoriteWithMedia = Prisma.FavoriteGetPayload<{
+  select: ReturnType<typeof getSelect>;
+}>;
+
+function getSelect() {
+  return {
+    rating: true,
+    createdAt: true,
+    media: {
+      select: {
+        id: true,
+        path: true,
+        title: true,
+        fileMtime: true,
+        fileSize: true,
+        previewPath: true,
+        type: true,
+        mediaTags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    },
+  } as const satisfies Prisma.FavoriteSelect;
+}
+
 function buildWhere({
   userId,
   mediaType,
@@ -159,71 +191,87 @@ function buildOrderBy({
   }
 }
 
+function mapToMediaNode(f: FavoriteWithMedia): MediaNode {
+  return {
+    id: f.media.id,
+    name: path.basename(f.media.path),
+    path: f.media.path,
+    type:
+      (f.media.type as MediaType) ??
+      detectMediaType(basename(f.media.path)) ??
+      "file",
+    isDirectory: false,
+    size: Number(f.media.fileSize),
+    mtime: f.media.fileMtime,
+    title: f.media.title ?? null,
+    tags: f.media.mediaTags.map((t) => ({
+      id: t.tag.id,
+      name: t.tag.name,
+    })),
+    rating: f.rating ?? null,
+    favoritedAt: f.createdAt,
+    previewPath: f.media.previewPath,
+  };
+}
+
 export async function searchFavoriteMediaNodes(
   params: SearchFavoriteParams
 ): Promise<SearchFavoriteResult> {
   const { limit: take, seed, shuffle } = params;
-
+  const select = getSelect();
   const where = buildWhere(params);
-  const orderBy = buildOrderBy(params);
-  const select = {
-    rating: true,
-    createdAt: true,
-    media: {
-      select: {
-        id: true,
-        path: true,
-        title: true,
-        fileMtime: true,
-        fileSize: true,
-        previewPath: true,
-        type: true,
-        mediaTags: {
-          select: {
-            tag: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
-    },
-  };
 
-  // 並列でクエリ実行
-  const [favorites, total] = await Promise.all([
-    prisma.favorite.findMany({ where, select, orderBy, take }),
-    prisma.favorite.count({ where }),
-  ]);
+  // 全体件数を取得
+  const total = await prisma.favorite.count({ where });
+  if (total === 0) return { nodes: [], total: 0 };
+
+  let favorites: FavoriteWithMedia[];
+
+  if (shuffle) {
+    // IDだけを全件取得
+    const allRecords = await prisma.favorite.findMany({
+      where,
+      select: { mediaId: true },
+    });
+
+    let targetMediaIds = allRecords.map((r) => r.mediaId);
+
+    // シャッフル
+    targetMediaIds = seed
+      ? shuffleArrayWithSeed(targetMediaIds, seed)
+      : shuffleArray(targetMediaIds);
+
+    // limit分切り出し
+    const slicedMediaIds = take
+      ? targetMediaIds.slice(0, take)
+      : targetMediaIds;
+
+    // 詳細データ取得
+    const detailedFavorites = await prisma.favorite.findMany({
+      where: {
+        userId: params.userId,
+        mediaId: { in: slicedMediaIds },
+      },
+      select,
+    });
+
+    // 元のシャッフル順に並び替え
+    const favoriteMap = new Map(detailedFavorites.map((f) => [f.media.id, f]));
+    favorites = slicedMediaIds
+      .map((mId) => favoriteMap.get(mId))
+      .filter((f): f is FavoriteWithMedia => !!f);
+  } else {
+    // 通常取得
+    favorites = await prisma.favorite.findMany({
+      where,
+      select,
+      orderBy: buildOrderBy(params),
+      take,
+    });
+  }
 
   // 結果を加工
-  let nodes = favorites.map(
-    (f) =>
-      ({
-        id: f.media.id,
-        name: path.basename(f.media.path),
-        path: f.media.path,
-        type: f.media.type ?? detectMediaType(basename(f.media.path)) ?? "file",
-        isDirectory: false,
-        size: Number(f.media.fileSize),
-        mtime: f.media.fileMtime,
-        title: f.media.title ?? null,
-        tags: f.media.mediaTags.map((t) => ({
-          id: t.tag.id,
-          name: t.tag.name,
-        })),
-        rating: f.rating ?? null,
-        favoritedAt: f.createdAt,
-        previewPath: f.media.previewPath,
-      }) satisfies MediaNode
-  );
-
-  // limit 後にシャッフル（IDをすべて取得してシャッフルするのは重過ぎるため、シンプルさを優先）
-  if (shuffle) {
-    nodes = seed ? shuffleArrayWithSeed(nodes, seed) : shuffleArray(nodes);
-  }
+  const nodes = favorites.map((f) => mapToMediaNode(f));
 
   return { nodes, total };
 }
