@@ -916,6 +916,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 onClose={closeViewer}
                 onOpenPrev={handleOpenPrevFolder}
                 onOpenNext={handleOpenNextFolder}
+                onDelete={handleOpenDeleteDialogSingle}
               />
             </ScrollLockProvider>
           )}

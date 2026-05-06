@@ -545,6 +545,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
                 menuItems={menuItems}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
+                onOpenParent={handleOpenParentFolder}
               />
             </ScrollLockProvider>
           )}
