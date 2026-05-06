@@ -321,7 +321,7 @@ export function GhostThumbCleanupCard() {
                 <AlertDialogCancel>キャンセル</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
-                  className="bg-destructive text-white hover:bg-destructive/90"
+                  className="bg-destructive hover:bg-destructive/90"
                 >
                   削除を実行
                 </AlertDialogAction>
