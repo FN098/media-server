@@ -14,9 +14,8 @@ import {
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
-import { getErrorMessage } from "@/lib/utils/error";
 import { existsPath } from "@/lib/utils/fs";
-import { constants } from "fs";
+import { constants, Dirent } from "fs";
 import {
   access,
   cp,
@@ -28,10 +27,11 @@ import {
   stat,
 } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import path, { basename, dirname, join } from "path";
+import { basename, dirname, join } from "path";
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
+  // バリデーション
   const validation = fsNameSchema.safeParse(newName);
 
   if (!validation.success) {
@@ -41,49 +41,95 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     };
   }
 
+  if (sourcePath === "/") {
+    return {
+      success: false,
+      error: "ルートディレクトリはリネームできません。",
+    };
+  }
+
+  const srcVirtualPath = sourcePath;
+  const destVirtualPath = join(dirname(srcVirtualPath), newName.trim()).replace(
+    /\\/g,
+    "/"
+  );
+
+  const srcRealPath = getServerMediaPath(srcVirtualPath);
+  const destRealPath = getServerMediaPath(destVirtualPath);
+
+  // 存在確認
+  if (await existsPath(destRealPath)) {
+    return {
+      success: false,
+      error: `同名の項目が既に存在します。: ${basename(destRealPath)}`,
+    };
+  }
+
+  let stats: Awaited<ReturnType<typeof lstat>>;
   try {
-    const srcVirtualPath = sourcePath;
-    const destVirtualPath =
-      srcVirtualPath === "/"
-        ? `/${newName.trim()}`
-        : join(dirname(srcVirtualPath), newName.trim()).replace(/\\/g, "/");
+    stats = await lstat(srcRealPath);
+  } catch {
+    return {
+      success: false,
+      error: `移動元が見つかりません: ${basename(srcVirtualPath)}`,
+    };
+  }
+  const isDirectory = stats.isDirectory();
 
-    const srcRealPath = getServerMediaPath(srcVirtualPath);
-    const destRealPath = getServerMediaPath(destVirtualPath);
+  const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
+  const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
 
-    // 存在確認
-    if (await existsPath(destRealPath)) {
+  // サムネイルリネーム
+  let thumbRenamed = false;
+  try {
+    if (isDirectory) {
+      await rm(destThumbPath, { recursive: true, force: true });
+    }
+  } catch (e) {
+    console.error("Thumbnail Dir Remove Error:", e);
+    return {
+      success: false,
+      error: "サムネイル処理中にエラーが発生しました。",
+    };
+  }
+
+  try {
+    await rename(srcThumbPath, destThumbPath);
+    thumbRenamed = true;
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.error("Thumbnail Rename Error:", e);
       return {
         success: false,
-        error: `同名の項目が既に存在します。: ${basename(destRealPath)}`,
+        error: "サムネイル処理中にエラーが発生しました。",
       };
     }
+    // ENOENT はスキップ
+  }
 
-    const stats = await lstat(srcRealPath);
-    const isDirectory = stats.isDirectory();
+  // FS更新
+  try {
+    await rename(srcRealPath, destRealPath);
+  } catch (e) {
+    console.error("File Rename Error:", e);
 
-    // サムネイルリネーム（本体リネーム前に実行しないと、サムネイル作成コマンドが走ってしまいロックされてエラーになる）
-    try {
-      const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
-      const destThumbPath = getServerMediaThumbPath(
-        destVirtualPath,
-        isDirectory
-      );
-
-      if (isDirectory) {
-        // recursive: true で中身ごと削除。force: true で存在しなくてもエラーにしない
-        await rm(destThumbPath, { recursive: true, force: true });
+    // サムネイルロールバック
+    if (thumbRenamed) {
+      try {
+        await rename(destThumbPath, srcThumbPath);
+      } catch (e) {
+        console.error("Thumbnail Rollback Error:", e);
       }
-
-      await rename(srcThumbPath, destThumbPath);
-    } catch (e) {
-      console.error("rename thumbnail error:", e);
     }
 
-    // FS更新
-    await rename(srcRealPath, destRealPath);
+    return {
+      success: false,
+      error: "ファイルリネーム中にエラーが発生しました。",
+    };
+  }
 
-    // DB更新
+  // DB更新
+  try {
     await prisma.$transaction(async (tx) => {
       // 自分自身の更新
       await tx.$executeRaw`
@@ -167,10 +213,25 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       }
     });
   } catch (error) {
-    console.error("Rename Error:", error);
+    console.error("DB Rename Error:", error);
+
+    // FSロールバック
+    try {
+      await rename(destRealPath, srcRealPath);
+    } catch (e) {
+      console.error("File Rollback Error:", e);
+    }
+
+    // サムネイルロールバック
+    try {
+      await rename(destThumbPath, srcThumbPath);
+    } catch (e) {
+      console.error("Thumbnail Rollback Error:", e);
+    }
+
     return {
       success: false,
-      error: "リネーム中にエラーが発生しました。権限などを確認してください。",
+      error: "DB更新中にエラーが発生しました。",
     };
   }
 
@@ -202,51 +263,93 @@ export async function moveNodesAction(
       continue;
     }
 
+    const srcName = srcVirtualPath.split("/").pop() || "";
+    const destVirtualPath =
+      destDirPath === "/"
+        ? `/${srcName}`
+        : `${destDirPath}/${srcName}`.replace(/\/+/g, "/");
+
+    const srcRealPath = getServerMediaPath(srcVirtualPath);
+    const destRealPath = getServerMediaPath(destVirtualPath);
+
+    // 存在確認
+    if (await existsPath(destRealPath)) {
+      results.failed++;
+      results.errors.push(
+        `移動先に同名の項目が存在します: ${basename(destRealPath)}`
+      );
+      continue;
+    }
+
+    let stats: Awaited<ReturnType<typeof lstat>>;
     try {
-      const srcName = srcVirtualPath.split("/").pop() || "";
-      const destVirtualPath =
-        destDirPath === "/"
-          ? `/${srcName}`
-          : `${destDirPath}/${srcName}`.replace(/\/+/g, "/");
+      stats = await lstat(srcRealPath);
+    } catch {
+      results.failed++;
+      results.errors.push(
+        `移動元が見つかりません: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
+    const isDirectory = stats.isDirectory();
 
-      const srcRealPath = getServerMediaPath(srcVirtualPath);
-      const destRealPath = getServerMediaPath(destVirtualPath);
+    const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
+    const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
 
-      // 存在確認
-      if (await existsPath(destRealPath)) {
-        throw new Error(
-          `移動先に同名の項目が存在します: ${basename(destRealPath)}`
-        );
+    // サムネイル移動
+    let thumbMoved = false;
+    try {
+      if (isDirectory) {
+        await rm(destThumbPath, { recursive: true, force: true });
       }
+    } catch (e) {
+      console.error(`Thumbnail Dir Remove Error [${srcVirtualPath}]:`, e);
+      results.failed++;
+      results.errors.push(
+        `サムネイル処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
 
-      const stats = await lstat(srcRealPath);
-      const isDirectory = stats.isDirectory();
-
-      // サムネイルリネーム（本体リネーム前に実行しないと、サムネイル作成コマンドが走ってしまいロックされてエラーになる）
-      try {
-        const srcThumbPath = getServerMediaThumbPath(
-          srcVirtualPath,
-          isDirectory
+    try {
+      await rename(srcThumbPath, destThumbPath);
+      thumbMoved = true;
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+        console.error(`Thumbnail Rename Error [${srcVirtualPath}]:`, e);
+        results.failed++;
+        results.errors.push(
+          `サムネイル処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
         );
-        const destThumbPath = getServerMediaThumbPath(
-          destVirtualPath,
-          isDirectory
-        );
-
-        if (isDirectory) {
-          // recursive: true で中身ごと削除。force: true で存在しなくてもエラーにしない
-          await rm(destThumbPath, { recursive: true, force: true });
-        }
-
-        await rename(srcThumbPath, destThumbPath);
-      } catch (e) {
-        console.error("rename thumbnail error:", e);
+        continue;
       }
+      // ENOENT はスキップ（サムネイル未生成）
+    }
 
-      // FS更新
+    // FS移動
+    try {
       await rename(srcRealPath, destRealPath);
+    } catch (e) {
+      console.error(`File Move Error [${srcVirtualPath}]:`, e);
 
-      // DB更新
+      // サムネイルロールバック
+      if (thumbMoved) {
+        try {
+          await rename(destThumbPath, srcThumbPath);
+        } catch (re) {
+          console.error(`Thumbnail Rollback Error [${srcVirtualPath}]:`, re);
+        }
+      }
+
+      results.failed++;
+      results.errors.push(
+        `ファイル移動中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
+
+    // DB更新
+    try {
       await prisma.$transaction(async (tx) => {
         // 自分自身の更新
         await tx.$executeRaw`
@@ -332,10 +435,32 @@ export async function moveNodesAction(
 
       results.success++;
     } catch (error) {
-      console.error(`Move Error [${srcVirtualPath}]:`, error);
+      console.error(`DB Move Error [${srcVirtualPath}]:`, error);
+
+      // FSロールバック
+      try {
+        await rename(destRealPath, srcRealPath);
+      } catch (re) {
+        console.error(`File Rollback Error [${srcVirtualPath}]:`, re);
+      }
+
+      // サムネイルロールバック
+      if (thumbMoved) {
+        try {
+          await rename(destThumbPath, srcThumbPath);
+        } catch (re) {
+          console.error(`Thumbnail Rollback Error [${srcVirtualPath}]:`, re);
+        }
+      }
+
       results.failed++;
-      results.errors.push(getErrorMessage(error));
+      results.errors.push(
+        `DB更新中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
     }
+
+    results.success++;
   }
 
   // キャッシュの更新
@@ -364,52 +489,70 @@ export async function copyNodesAction(
       continue;
     }
 
-    try {
-      const srcName = srcVirtualPath.split("/").pop() || "";
-      const destVirtualPath =
-        destDirPath === "/"
-          ? `/${srcName}`
-          : `${destDirPath}/${srcName}`.replace(/\/+/g, "/");
+    const srcName = srcVirtualPath.split("/").pop() || "";
+    const destVirtualPath =
+      destDirPath === "/"
+        ? `/${srcName}`
+        : `${destDirPath}/${srcName}`.replace(/\/+/g, "/");
 
-      const srcRealPath = getServerMediaPath(srcVirtualPath);
-      const destRealPath = getServerMediaPath(destVirtualPath);
+    const srcRealPath = getServerMediaPath(srcVirtualPath);
+    const destRealPath = getServerMediaPath(destVirtualPath);
 
-      // 存在確認
-      if (await existsPath(destRealPath)) {
-        throw new Error(
-          `コピー先に同名の項目が存在します: ${basename(destRealPath)}`
-        );
-      }
-
-      const stats = await lstat(srcRealPath);
-      const isDirectory = stats.isDirectory();
-
-      // FS コピー（ディレクトリは再帰的に）
-      await cp(srcRealPath, destRealPath, { recursive: isDirectory });
-
-      // サムネイルのコピー（失敗しても本体コピーは続行）
-      try {
-        const srcThumbPath = getServerMediaThumbPath(
-          srcVirtualPath,
-          isDirectory
-        );
-        const destThumbPath = getServerMediaThumbPath(
-          destVirtualPath,
-          isDirectory
-        );
-        await cp(srcThumbPath, destThumbPath, { recursive: isDirectory });
-      } catch (e) {
-        console.error("copy thumbnail error:", e);
-      }
-
-      // NOTE: DB 登録はしない（新規として扱う）
-
-      results.success++;
-    } catch (error) {
-      console.error(`Copy Error [${srcVirtualPath}]:`, error);
+    // 存在確認
+    if (await existsPath(destRealPath)) {
       results.failed++;
-      results.errors.push(getErrorMessage(error));
+      results.errors.push(
+        `コピー先に同名の項目が存在します: ${basename(destRealPath)}`
+      );
+      continue;
     }
+
+    let stats: Awaited<ReturnType<typeof lstat>>;
+    try {
+      stats = await lstat(srcRealPath);
+    } catch {
+      results.failed++;
+      results.errors.push(
+        `コピー元が見つかりません: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
+    const isDirectory = stats.isDirectory();
+
+    // FSコピー
+    try {
+      await cp(srcRealPath, destRealPath, { recursive: isDirectory });
+    } catch (e) {
+      console.error(`File Copy Error [${srcVirtualPath}]:`, e);
+
+      // ロールバック（中途半端なコピー結果を削除）
+      try {
+        await rm(destRealPath, { recursive: true, force: true });
+      } catch (re) {
+        console.error(`File Rollback Error [${srcVirtualPath}]:`, re);
+      }
+
+      results.failed++;
+      results.errors.push(
+        `ファイルコピー中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
+
+    // サムネイルコピー（失敗しても本体コピーは続行）
+    const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
+    const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
+    try {
+      await cp(srcThumbPath, destThumbPath, { recursive: isDirectory });
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+        // ENOENT 以外は警告ログだけ残す（本体コピーは成功しているので続行）
+        console.error(`Thumbnail Copy Error [${srcVirtualPath}]:`, e);
+      }
+    }
+
+    // NOTE: DB 登録はしない（新規として扱う）
+    results.success++;
   }
 
   // キャッシュの更新
@@ -420,60 +563,81 @@ export async function copyNodesAction(
 
 // サブフォルダ一覧
 export async function getSubDirectoriesAction(dirPath: string) {
-  try {
-    const realPath = getServerMediaPath(dirPath);
-    const entries = await readdir(realPath, { withFileTypes: true });
+  if (!dirPath) {
+    return { success: false, error: "パスが指定されていません" };
+  }
 
-    return {
-      success: true,
-      directories: entries
-        .filter((e) => e.isDirectory())
-        .filter((e) => !isBlockedServerPath(path.join(realPath, e.name)))
-        .map((e) => ({
-          name: e.name,
-          path: join(dirPath, e.name).replace(/\\/g, "/"),
-        })),
-    };
-  } catch (error) {
-    console.error(`Sub Directories Error [${dirPath}]:`, error);
+  const realPath = getServerMediaPath(dirPath);
+
+  let entries: Dirent[];
+  try {
+    entries = await readdir(realPath, { withFileTypes: true });
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+      return { success: false, error: "フォルダが見つかりません" };
+    }
+    if ((e as NodeJS.ErrnoException).code === "EACCES") {
+      return { success: false, error: "フォルダへのアクセス権がありません" };
+    }
+    console.error(`Sub Directories Error [${dirPath}]:`, e);
     return { success: false, error: "フォルダ一覧の取得に失敗しました" };
   }
+
+  return {
+    success: true,
+    directories: entries
+      .filter((e) => e.isDirectory())
+      .filter((e) => !isBlockedServerPath(join(realPath, e.name)))
+      .map((e) => ({
+        name: e.name,
+        path: join(dirPath, e.name).replace(/\\/g, "/"),
+      })),
+  };
 }
 
 // フォルダプレビュー用ファイル一覧
 export async function getFolderMediaFilesAction(dirPath: string) {
-  try {
-    const realPath = getServerMediaPath(dirPath);
-    const entries = await readdir(realPath, { withFileTypes: true });
-
-    const mediaFiles = entries
-      .filter((e) => e.isFile()) // ファイルのみ対象
-      .filter((e) => {
-        const mimeType = getMimetype(e.name);
-        return (
-          mimeType.startsWith("image/") ||
-          mimeType.startsWith("video/") ||
-          mimeType.startsWith("audio/")
-        );
-      })
-      .map((e) => ({
-        name: e.name,
-        // 仮想パスを生成
-        path: join(dirPath, e.name).replace(/\\/g, "/"),
-        type: getMimetype(e.name).startsWith("video/") ? "video" : "image",
-      }));
-
-    return {
-      success: true,
-      files: mediaFiles,
-    };
-  } catch (error) {
-    console.error(`Get Media Files Error [${dirPath}]:`, error);
-    return {
-      success: false,
-      error: "メディアファイルの取得に失敗しました",
-    };
+  if (!dirPath) {
+    return { success: false, error: "パスが指定されていません" };
   }
+
+  const realPath = getServerMediaPath(dirPath);
+
+  let entries: Dirent[];
+  try {
+    entries = await readdir(realPath, { withFileTypes: true });
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+      return { success: false, error: "フォルダが見つかりません" };
+    }
+    if ((e as NodeJS.ErrnoException).code === "EACCES") {
+      return { success: false, error: "フォルダへのアクセス権がありません" };
+    }
+    console.error(`Sub Directories Error [${dirPath}]:`, e);
+    return { success: false, error: "ファイル一覧の取得に失敗しました" };
+  }
+
+  const mediaFiles = entries
+    .filter((e) => e.isFile()) // ファイルのみ対象
+    .filter((e) => {
+      const mimeType = getMimetype(e.name);
+      return (
+        mimeType.startsWith("image/") ||
+        mimeType.startsWith("video/") ||
+        mimeType.startsWith("audio/")
+      );
+    })
+    .map((e) => ({
+      name: e.name,
+      // 仮想パスを生成
+      path: join(dirPath, e.name).replace(/\\/g, "/"),
+      type: getMimetype(e.name).startsWith("video/") ? "video" : "image",
+    }));
+
+  return {
+    success: true,
+    files: mediaFiles,
+  };
 }
 
 // 再帰的な移動
@@ -512,22 +676,37 @@ export async function deleteNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of sourcePaths) {
+    const destVirtualPath = srcVirtualPath;
+
+    const srcRealPath = getServerMediaPath(srcVirtualPath);
+    const destRealPath = getServerMediaTrashPath(destVirtualPath);
+
+    // 移動先フォルダ作成
     try {
-      const destVirtualPath = srcVirtualPath;
-
-      const srcRealPath = getServerMediaPath(srcVirtualPath);
-      const destRealPath = getServerMediaTrashPath(destVirtualPath);
-
-      // FS更新
       await mkdir(dirname(destRealPath), { recursive: true });
-      await recursiveMergeMove(srcRealPath, destRealPath);
-
-      results.success++;
-    } catch (error) {
-      console.error(`Delete Error [${srcVirtualPath}]:`, error);
+    } catch (e) {
+      console.error(`Directory Create Error [${destRealPath}]:`, e);
       results.failed++;
-      results.errors.push(getErrorMessage(error));
+      results.errors.push(
+        `フォルダ処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
     }
+
+    // FS移動
+    try {
+      await recursiveMergeMove(srcRealPath, destRealPath);
+    } catch (e) {
+      console.error(`File Move Error [${srcVirtualPath}]:`, e);
+      results.failed++;
+      results.errors.push(
+        `削除中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
+
+    // NOTE: DB削除はしない（フォルダ同期時に自動削除）
+    results.success++;
   }
 
   // キャッシュの更新
@@ -542,23 +721,22 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const virtualPath of sourcePaths) {
+    const realPath = getServerMediaTrashPath(virtualPath);
+
+    // FS削除
     try {
-      const realPath = getServerMediaTrashPath(virtualPath);
-
-      // 存在確認
-      if (!(await existsPath(realPath))) {
-        throw new Error(`削除対象の項目が存在しません: ${basename(realPath)}`);
-      }
-
-      // FS削除
       await rm(realPath, { recursive: true, force: true });
-
-      results.success++;
     } catch (error) {
       console.error(`Permanent Delete Error [${virtualPath}]:`, error);
       results.failed++;
-      results.errors.push(getErrorMessage(error));
+      results.errors.push(
+        `削除中にエラーが発生しました: ${basename(virtualPath)}`
+      );
+      continue;
     }
+
+    // NOTE: DB削除はしない（フォルダ同期時に自動削除）
+    results.success++;
   }
 
   // キャッシュの更新
@@ -572,22 +750,36 @@ export async function restoreNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of sourcePaths) {
+    const destVirtualPath = srcVirtualPath;
+
+    const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
+    const destRealPath = getServerMediaPath(destVirtualPath);
+
+    // 移動先フォルダ作成
     try {
-      const destVirtualPath = srcVirtualPath;
-
-      const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
-      const destRealPath = getServerMediaPath(destVirtualPath);
-
-      // FS更新
       await mkdir(dirname(destRealPath), { recursive: true });
-      await recursiveMergeMove(srcRealPath, destRealPath);
-
-      results.success++;
-    } catch (error) {
-      console.error(`Restore Error [${srcVirtualPath}]:`, error);
+    } catch (e) {
+      console.error(`Directory Create Error [${destRealPath}]:`, e);
       results.failed++;
-      results.errors.push(getErrorMessage(error));
+      results.errors.push(
+        `フォルダ処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
     }
+
+    // FS移動
+    try {
+      await recursiveMergeMove(srcRealPath, destRealPath);
+    } catch (e) {
+      console.error(`File Move Error [${srcVirtualPath}]:`, e);
+      results.failed++;
+      results.errors.push(
+        `復元中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
+    }
+
+    results.success++;
   }
 
   // キャッシュの更新
@@ -663,21 +855,17 @@ export async function scanGhostMediaAction(options?: GhostMediaScanOptions) {
 export async function cleanupGhostMediaAction(
   ids: string[]
 ): Promise<GhostMediaDeleteResult> {
-  try {
-    if (!ids || ids.length === 0) {
-      return { success: true, deletedCount: 0 };
-    }
+  if (!ids || ids.length === 0) {
+    return { success: true, deletedCount: 0 };
+  }
 
-    const deleteResult = await prisma.media.deleteMany({
+  let deleteResult: { count: number };
+  try {
+    deleteResult = await prisma.media.deleteMany({
       where: {
         id: { in: ids },
       },
     });
-
-    return {
-      success: true,
-      deletedCount: deleteResult.count,
-    };
   } catch (error) {
     console.error("Cleanup Ghost Media Error:", error);
     return {
@@ -685,6 +873,11 @@ export async function cleanupGhostMediaAction(
       error: "削除中に予期せぬエラーが発生しました。",
     };
   }
+
+  return {
+    success: true,
+    deletedCount: deleteResult.count,
+  };
 }
 
 // プレビュー更新
@@ -692,47 +885,52 @@ export async function updatePreviewAction(
   targetPath: string,
   previewResourcePath: string | null
 ) {
-  try {
-    const realPath = getServerMediaPath(targetPath);
-    const s = await stat(realPath);
-    const isDirectory = s.isDirectory();
+  const realPath = getServerMediaPath(targetPath);
+  const s = await stat(realPath);
+  const isDirectory = s.isDirectory();
 
-    if (isDirectory) {
-      // フォルダメタデータの更新
+  if (isDirectory) {
+    // フォルダデータの更新
+    try {
       await prisma.folderMeta.upsert({
         where: { path: targetPath },
         update: { previewPath: previewResourcePath },
         create: { path: targetPath, previewPath: previewResourcePath },
       });
-    } else {
-      // メディア（ファイル）データの更新
+    } catch (error) {
+      console.error("Update Preview Error:", error);
+      return { success: false, error: "プレビューの更新に失敗しました。" };
+    }
+  } else {
+    // ファイルデータの更新
+    try {
       await prisma.media.update({
         where: { path: targetPath },
         data: { previewPath: previewResourcePath },
       });
+    } catch (error) {
+      console.error("Update Preview Error:", error);
+      return { success: false, error: "プレビューの更新に失敗しました。" };
     }
-
-    revalidatePath("/explorer");
-    return { success: true };
-  } catch (error) {
-    console.error("Update Preview Error:", error);
-    return { success: false, error: "プレビューの更新に失敗しました。" };
   }
+
+  revalidatePath("/explorer");
+
+  return { success: true };
 }
 
 // タイムスタンプ更新
 export async function touchMediaTimestampAction(targetPath: string) {
+  // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
   try {
-    // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
-
     await prisma.media.update({
       where: { path: targetPath },
       data: { fileMtime: new Date() },
     });
-
-    return { success: true };
   } catch (error) {
     console.error("Touch Media Timestamp Error:", error);
     return { success: false, error: "タイムスタンプの更新に失敗しました。" };
   }
+
+  return { success: true };
 }
