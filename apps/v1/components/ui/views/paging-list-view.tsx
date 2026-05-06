@@ -16,7 +16,7 @@ import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/format";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import { useMediaActionsContext } from "@/providers/media-actions-provider";
+import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -33,9 +33,12 @@ import React, {
 interface PagingListViewProps {
   allNodes: MediaNode[];
   initialScrollPath?: string | null;
+  focusOnPageChange?: boolean;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
-  focusOnPageChange?: boolean;
+  onSelectionChange?: () => void;
+  onOpen?: (node: MediaNode) => void;
+  onThumbError?: (node: MediaNode) => void;
 }
 
 const GRID_TEMPLATE =
@@ -44,9 +47,12 @@ const GRID_TEMPLATE =
 export function PagingListView({
   allNodes,
   initialScrollPath,
+  focusOnPageChange = false,
   onPageChange,
   onScrollRestored,
-  focusOnPageChange = false,
+  onSelectionChange,
+  onOpen,
+  onThumbError,
 }: PagingListViewProps) {
   const {
     page: currentPage,
@@ -65,10 +71,6 @@ export function PagingListView({
     enterSelectionMode,
     selectPaths,
   } = usePathSelectionContext();
-
-  const {
-    actions: { onOpen },
-  } = useMediaActionsContext();
 
   const isMobile = useIsMobile();
 
@@ -182,7 +184,7 @@ export function PagingListView({
       // Enterで開く
       if (e.key === "Enter" && currentPath) {
         const node = allNodes[currentIndex];
-        if (node) void onOpen?.(node);
+        if (node) onOpen?.(node);
         return;
       }
 
@@ -297,6 +299,9 @@ export function PagingListView({
             globalIndex={(currentPage - 1) * pageSize + index}
             allNodes={allNodes}
             isMobile={isMobile}
+            onOpen={onOpen}
+            onSelectionChange={onSelectionChange}
+            onThumbError={onThumbError}
           />
         ))}
       </div>
@@ -338,6 +343,8 @@ interface DataRowProps {
   allNodes: MediaNode[];
   isMobile: boolean;
   onSelectionChange?: () => void;
+  onOpen?: (node: MediaNode) => void;
+  onThumbError?: (node: MediaNode) => void;
 }
 
 function DataRow({
@@ -346,12 +353,13 @@ function DataRow({
   allNodes,
   isMobile,
   onSelectionChange,
+  onOpen,
 }: DataRowProps) {
   // メディア判定
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り機能
-  const { getFavorite } = useFavoritesContext();
+  const { getFavorite, toggleFavorite, updateFavorite } = useFavoritesContext();
   const { isFavorite, rating } = getFavorite(node.path);
 
   // 選択機能
@@ -374,11 +382,10 @@ function DataRow({
 
   const isSelected = isSelectedPath(node.path);
 
-  // アクションメニュー
-  const { actions } = useMediaActionsContext();
-  const { onOpen, onToggleFavorite, onChangeRating } = actions;
-  const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
-  const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
+  // メニュー
+  const { items: menuItems } = useMenuItemsContext();
+  const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
   // 長押しで選択モード
   const handleLongPress = useCallback(() => {
@@ -442,7 +449,7 @@ function DataRow({
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (isMobile || e.ctrlKey || e.metaKey || e.shiftKey) return;
     e.preventDefault();
-    void onOpen?.(node);
+    onOpen?.(node);
   };
 
   // タップで開く（モバイル）
@@ -463,24 +470,21 @@ function DataRow({
       return;
     }
 
-    void onOpen?.(node);
+    onOpen?.(node);
   };
 
   return (
     <HoverPreviewPortal
       node={node}
       enabled={
-        isMediaNode &&
-        !isMobile &&
-        !actionDropdownMenuOpen &&
-        !actionContextMenuOpen
+        isMediaNode && !isMobile && !dropdownMenuOpen && !contextMenuOpen
       }
     >
       <ActionsContextMenu
-        actions={actions}
-        open={actionContextMenuOpen}
-        onOpenChange={setActionContextMenuOpen}
         node={node}
+        menuItems={menuItems}
+        open={contextMenuOpen}
+        onOpenChange={setContextMenuOpen}
         disabled={isMobile}
       >
         <div
@@ -574,12 +578,12 @@ function DataRow({
                 variant="list"
                 rating={rating}
                 isFavorite={isFavorite}
-                onClick={() => void onToggleFavorite?.(node)}
+                onClick={() => void toggleFavorite(node.path)}
               />
             ) : (
               <FavoriteRating
                 value={rating}
-                onChange={(value) => void onChangeRating?.(node, value)}
+                onChange={(value) => void updateFavorite(node.path, value)}
               />
             )}
           </div>
@@ -587,10 +591,10 @@ function DataRow({
           {/* Actions */}
           <div className="flex justify-center">
             <ActionsDropdownMenu
-              actions={actions}
-              open={actionDropdownMenuOpen}
-              onOpenChange={setActionDropdownMenuOpen}
               node={node}
+              menuItems={menuItems}
+              open={dropdownMenuOpen}
+              onOpenChange={setDropdownMenuOpen}
             />
           </div>
         </div>

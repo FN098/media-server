@@ -28,8 +28,9 @@ import {
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MenuItemDef } from "@/lib/menu-items/types";
 import { useHistoryContext } from "@/providers/history-provider";
-import { MediaActionsProvider } from "@/providers/media-actions-provider";
+import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
@@ -39,9 +40,11 @@ import {
   ArrowDownAz,
   CalendarArrowDown,
   RotateCcw,
+  RotateCcwIcon,
   Sparkle,
   Sparkles,
   Trash2,
+  Trash2Icon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
@@ -190,6 +193,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     replaceSelection,
     selectPaths,
     clearSelection,
+    hasSelection,
   } = usePathSelectionContext();
 
   const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
@@ -245,7 +249,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   };
 
   // 削除ダイアログを開く（選択）
-  const openDeleteDialogSelected = () => {
+  const handleOpenDeleteDialogSelected = () => {
     setDeleteTargets(selectedNodes);
   };
 
@@ -301,7 +305,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   });
 
   // Delete: 削除
-  useHotkeys("delete", () => openDeleteDialogSelected(), {
+  useHotkeys("delete", () => handleOpenDeleteDialogSelected(), {
     scopes: "trash",
   });
 
@@ -333,19 +337,35 @@ export function Trash({ listing }: { listing: MediaListing }) {
     scopes: ["trash", "viewer"],
   });
 
+  // ===== メニュー =====
+
+  const menuItems: MenuItemDef[] = [
+    {
+      key: "restore",
+      type: "action",
+      icon: RotateCcwIcon,
+      label: "復元",
+      onClick: hasSelection
+        ? handleOpenRestoreDialogSelected
+        : handleOpenRestoreDialogSingle,
+    },
+    {
+      key: "delete",
+      type: "action",
+      icon: Trash2Icon,
+      variant: "destructive",
+      label: "削除",
+      onClick: hasSelection
+        ? handleOpenDeleteDialogSelected
+        : handleOpenDeleteDialogSingle,
+    },
+  ];
+
   // ===== その他 =====
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
-      <MediaActionsProvider
-        actions={{
-          onOpen: handleOpen,
-          onOpenNextFolder: () => handleOpenNextFolder(),
-          onOpenPrevFolder: () => handleOpenPrevFolder(),
-          onDeletePermanently: handleOpenDeleteDialogSingle,
-          onRestore: handleOpenRestoreDialogSingle,
-        }}
-      >
+      <MenuItemsProvider items={menuItems}>
         <div
           className={cn(
             "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
@@ -418,6 +438,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
+                onOpen={handleOpen}
                 focusOnPageChange
               />
             </div>
@@ -430,6 +451,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
+                onOpen={handleOpen}
                 focusOnPageChange
               />
             </div>
@@ -441,23 +463,9 @@ export function Trash({ listing }: { listing: MediaListing }) {
               <MediaViewer
                 allNodes={mediaOnly}
                 initialIndex={initialViewerIndex}
+                menuItems={menuItems}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
-                menuConfig={{
-                  enabled: {
-                    pinHeader: true,
-                    toggleFavorite: false,
-                    changeRating: false,
-                    delete: false,
-                    deletePermanently: true,
-                    editTags: false,
-                    openNextFolder: true,
-                    openParentFolder: false,
-                    openPrevFolder: true,
-                    restore: true,
-                    toggleFullscreen: true,
-                  },
-                }}
               />
             </ScrollLockProvider>
           )}
@@ -478,7 +486,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
               },
               {
                 label: "完全に削除",
-                onClick: openDeleteDialogSelected,
+                onClick: handleOpenDeleteDialogSelected,
                 icon: Trash2,
                 className: "text-destructive",
               },
@@ -507,7 +515,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
             isDeleted
           />
         </div>
-      </MediaActionsProvider>
+      </MenuItemsProvider>
     </PagingProvider>
   );
 }

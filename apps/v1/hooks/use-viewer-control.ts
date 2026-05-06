@@ -63,7 +63,7 @@ export function useViewerControl(nodes: MediaNode[], options?: Options) {
 
   return {
     index,
-    isOpen: modal,
+    isOpen: !!modal,
     open,
     close,
   };

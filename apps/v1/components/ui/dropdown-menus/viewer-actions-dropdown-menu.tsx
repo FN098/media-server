@@ -2,8 +2,7 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import { MenuItemDef, MenuItemVariant } from "@/lib/menu-items/types";
-import { Button } from "@/shadcn/components/ui/button";
+import { MenuItemDef } from "@/lib/menu-items/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,26 +15,25 @@ import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 
-const variantClass: Record<MenuItemVariant, string> = {
+const variantClass = {
   default: "",
   destructive: "text-destructive focus:text-destructive",
-};
+  success: "text-success focus:text-success",
+} as const;
 
-interface ActionsDropdownMenuProps {
+interface ViewerActionsDropdownMenuProps {
   node: MediaNode;
   menuItems: MenuItemDef[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  className?: string;
 }
 
-export function ActionsDropdownMenu({
+export function ViewerActionsDropdownMenu({
   node,
   menuItems,
   open: controlledOpen,
   onOpenChange: onControlledOpenChange,
-  className,
-}: ActionsDropdownMenuProps) {
+}: ViewerActionsDropdownMenuProps) {
   const isMobile = useIsMobile();
   const mounted = useMounted();
 
@@ -50,15 +48,13 @@ export function ActionsDropdownMenu({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn("h-8 w-8 rounded-full", className)}
+        <button
           onPointerDown={(e) => e.preventDefault()}
           onClick={() => setOpen(!open)}
+          className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
         >
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+          <MoreVertical size={24} />
+        </button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="min-w-48">

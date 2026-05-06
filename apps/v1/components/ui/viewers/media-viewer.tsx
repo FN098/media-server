@@ -2,8 +2,8 @@
 
 import { APP_CONFIG } from "@/app.config";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
-import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { ViewerHeaderPinButton } from "@/components/ui/buttons/viewer-header-pin-button";
+import { ViewerActionsDropdownMenu } from "@/components/ui/dropdown-menus/viewer-actions-dropdown-menu";
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
@@ -14,32 +14,12 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
+import { MenuItemDef } from "@/lib/menu-items/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import { useMediaActionsContext } from "@/providers/media-actions-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shadcn/components/ui/dropdown-menu";
-import { Kbd } from "@/shadcn/components/ui/kbd";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  Folder,
-  FolderInput,
-  FolderOutput,
-  Loader2,
-  Maximize,
-  MoreVertical,
-  RotateCcw,
-  TagIcon,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
@@ -49,31 +29,17 @@ import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
-type ActionMenuConfig = {
-  enabled: {
-    pinHeader?: boolean;
-    toggleFavorite?: boolean;
-    changeRating?: boolean;
-    openParentFolder?: boolean;
-    openPrevFolder?: boolean;
-    openNextFolder?: boolean;
-    toggleFullscreen?: boolean;
-    editTags?: boolean;
-    restore?: boolean;
-    delete?: boolean;
-    deletePermanently?: boolean;
-  };
-};
-
-type ActionKey = keyof ActionMenuConfig["enabled"];
-
 interface MediaViewerProps {
   allNodes: MediaNode[];
   initialIndex?: number;
+  shortcutEnabled?: boolean;
+  menuItems?: MenuItemDef[];
   onIndexChange?: (index: number) => void;
   onClose?: () => void;
-  shortcutEnabled?: boolean;
-  menuConfig?: ActionMenuConfig;
+  onOpenPrev?: () => void;
+  onOpenNext?: () => void;
+  onOpenParent?: (node: MediaNode) => void;
+  onDelete?: (node: MediaNode) => void;
 }
 
 const firstPageDummy = { type: "dummy_first", path: "first-page" } as const;
@@ -91,70 +57,16 @@ type Slide =
 export function MediaViewer({
   allNodes,
   initialIndex = 0,
+  shortcutEnabled = true,
+  menuItems,
   onIndexChange,
   onClose,
-  shortcutEnabled = true,
-  menuConfig,
+  onOpenPrev,
+  onOpenNext,
+  onOpenParent,
+  onDelete,
 }: MediaViewerProps) {
   const [isPending, startTransition] = useTransition();
-
-  // ===== アクション =====
-
-  const {
-    actions: {
-      onEditTags,
-      onDelete,
-      onDeletePermanently,
-      onRestore,
-      onOpenPrevFolder,
-      onOpenNextFolder,
-      onOpenParentFolder,
-    },
-  } = useMediaActionsContext();
-
-  const isEnabled = (key: ActionKey) => !!menuConfig?.enabled[key];
-
-  const handleEditTags = () => {
-    if (onEditTags && currentNode) {
-      void onEditTags(currentNode);
-    }
-  };
-
-  const handleRestore = () => {
-    if (onRestore && currentNode) {
-      void onRestore(currentNode);
-    }
-  };
-
-  const handleDelete = () => {
-    if (onDelete && currentNode) {
-      void onDelete(currentNode);
-    }
-  };
-
-  const handleDeletePermanently = () => {
-    if (onDeletePermanently && currentNode) {
-      void onDeletePermanently(currentNode);
-    }
-  };
-
-  const handleOpenPrevFolder = () => {
-    if (onOpenPrevFolder && currentNode) {
-      void onOpenPrevFolder(currentNode);
-    }
-  };
-
-  const handleOpenNextFolder = () => {
-    if (onOpenNextFolder && currentNode) {
-      void onOpenNextFolder(currentNode);
-    }
-  };
-
-  const handleOpenParent = () => {
-    if (onOpenParentFolder && currentNode) {
-      void onOpenParentFolder(currentNode);
-    }
-  };
 
   // ===== ヘッダー =====
 
@@ -184,8 +96,8 @@ export function MediaViewer({
     setCurrentNode(allNodes[currentIndex] ?? null);
   }, [currentIndex, allNodes]);
 
-  const hasPrev = isEnabled("openPrevFolder");
-  const hasNext = isEnabled("openNextFolder");
+  const hasPrev = !!onOpenPrev;
+  const hasNext = !!onOpenNext;
 
   const swiperRef = useRef<SwiperClass | null>(null);
   const lastViewedPathRef = useRef<string | null>(
@@ -241,11 +153,11 @@ export function MediaViewer({
 
     // フォルダ遷移
     if (hasPrev && slide === prevFolderNav) {
-      handleOpenPrevFolder();
+      onOpenPrev();
       return;
     }
     if (hasNext && slide === nextFolderNav) {
-      handleOpenNextFolder();
+      onOpenNext();
       return;
     }
 
@@ -379,9 +291,9 @@ export function MediaViewer({
   });
 
   // Delete: 削除
-  useHotkeys("delete", () => handleDelete(), {
+  useHotkeys("delete", () => onDelete?.(currentNode!), {
     scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && isEnabled("delete"),
+    enabled: shortcutEnabled && !!currentNode,
   });
 
   // Enter / Space: ヘッダーの表示切替（固定されていない場合のみ）
@@ -403,19 +315,19 @@ export function MediaViewer({
   // S: お気に入りの切り替え
   useHotkeys("s", () => handleToggleFavorite(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && isEnabled("toggleFavorite"),
+    enabled: shortcutEnabled,
   });
 
   // F: 全画面表示
   useHotkeys("f", () => toggleFullscreen(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && isEnabled("toggleFullscreen"),
+    enabled: shortcutEnabled,
   });
 
   // O: フォルダを開く
-  useHotkeys("o", () => handleOpenParent(), {
+  useHotkeys("o", () => onOpenParent?.(currentNode!), {
     scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && isEnabled("openParentFolder"),
+    enabled: shortcutEnabled && !!currentNode,
   });
 
   // H: ヘッダーの固定切り替え
@@ -427,7 +339,7 @@ export function MediaViewer({
     },
     {
       scopes: ["viewer", "tag-editor"],
-      enabled: shortcutEnabled && isEnabled("pinHeader"),
+      enabled: shortcutEnabled,
     }
   );
 
@@ -440,7 +352,7 @@ export function MediaViewer({
     },
     {
       scopes: ["viewer", "tag-editor"],
-      enabled: shortcutEnabled && isEnabled("changeRating"),
+      enabled: shortcutEnabled,
     }
   );
 
@@ -505,163 +417,31 @@ export function MediaViewer({
 
             <div className="flex items-center gap-4">
               {/* ヘッダー固定ピン */}
-              {isEnabled("pinHeader") && (
-                <ViewerHeaderPinButton
-                  enabled={isHeaderPinned}
-                  onClick={toggleIsHeaderPinned}
+              <ViewerHeaderPinButton
+                enabled={isHeaderPinned}
+                onClick={toggleIsHeaderPinned}
+              />
+
+              {/* お気に入りボタン */}
+              {!!currentNode && isMedia(currentNode.type) && (
+                <FavoriteButton
+                  variant="viewer"
+                  rating={rating}
+                  isFavorite={isFavorite}
+                  onClick={handleToggleFavorite}
+                  disabled={isPending}
                 />
               )}
 
-              {/* お気に入りボタン */}
-              {isEnabled("toggleFavorite") &&
-                !!currentNode &&
-                isMedia(currentNode.type) && (
-                  <FavoriteButton
-                    variant="viewer"
-                    rating={rating}
-                    isFavorite={isFavorite}
-                    onClick={handleToggleFavorite}
-                    disabled={isPending}
-                  />
-                )}
-
               {/* メニュー */}
-              <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
-                    aria-label="Open menu"
-                  >
-                    <MoreVertical size={28} />
-                  </button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent
-                  align="end"
-                  className="flex flex-col min-w-48 gap-2"
-                >
-                  {isEnabled("changeRating") && (
-                    <DropdownMenuItem
-                      className="flex justify-center"
-                      disabled={!currentNode}
-                    >
-                      <FavoriteRating
-                        value={rating}
-                        onChange={handleChangeRating}
-                        variant="menu"
-                      />
-                    </DropdownMenuItem>
-                  )}
-
-                  {isEnabled("openParentFolder") && (
-                    <DropdownMenuItem
-                      onClick={() => handleOpenParent()}
-                      disabled={!currentNode}
-                    >
-                      <Folder className="mr-2 h-4 w-4" />
-                      <span>フォルダを開く</span>
-                      {!isMobile && (
-                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <Kbd>O</Kbd>
-                        </div>
-                      )}
-                    </DropdownMenuItem>
-                  )}
-
-                  {isEnabled("openPrevFolder") && (
-                    <DropdownMenuItem
-                      onClick={() => handleOpenPrevFolder()}
-                      disabled={!hasPrev}
-                    >
-                      <FolderOutput className="mr-2 h-4 w-4" />
-                      <span>前のフォルダを開く</span>
-                      {!isMobile && (
-                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <Kbd>P</Kbd>
-                        </div>
-                      )}
-                    </DropdownMenuItem>
-                  )}
-
-                  {isEnabled("openNextFolder") && (
-                    <DropdownMenuItem
-                      onClick={() => handleOpenNextFolder()}
-                      disabled={!hasNext}
-                    >
-                      <FolderInput className="mr-2 h-4 w-4" />
-                      <span>次のフォルダを開く</span>
-                      {!isMobile && (
-                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <Kbd>N</Kbd>
-                        </div>
-                      )}
-                    </DropdownMenuItem>
-                  )}
-
-                  {isEnabled("toggleFullscreen") && (
-                    <DropdownMenuItem onClick={toggleFullscreen}>
-                      <Maximize className="mr-2 h-4 w-4" />
-                      <span>全画面表示</span>
-                      {!isMobile && (
-                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <Kbd>F</Kbd>
-                        </div>
-                      )}
-                    </DropdownMenuItem>
-                  )}
-
-                  {isEnabled("editTags") && (
-                    <DropdownMenuItem
-                      onClick={handleEditTags}
-                      disabled={!currentNode}
-                      className="relative"
-                    >
-                      <TagIcon className="mr-2 h-4 w-4" />
-                      <span>タグを編集</span>
-                      {!isMobile && (
-                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <Kbd>T</Kbd>
-                        </div>
-                      )}
-                    </DropdownMenuItem>
-                  )}
-
-                  {isEnabled("restore") && (
-                    <DropdownMenuItem
-                      onClick={handleRestore}
-                      disabled={!currentNode}
-                    >
-                      <RotateCcw className="mr-2 h-4 w-4" />
-                      <span>復元</span>
-                    </DropdownMenuItem>
-                  )}
-
-                  {isEnabled("delete") && (
-                    <DropdownMenuItem
-                      onClick={handleDelete}
-                      disabled={!currentNode}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span className="text-destructive">削除</span>
-                      {!isMobile && (
-                        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                          <Kbd>Del</Kbd>
-                        </div>
-                      )}
-                    </DropdownMenuItem>
-                  )}
-
-                  {isEnabled("deletePermanently") && (
-                    <DropdownMenuItem
-                      onClick={handleDeletePermanently}
-                      disabled={!currentNode}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span className="text-destructive">完全に削除</span>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {currentNode && menuItems && (
+                <ViewerActionsDropdownMenu
+                  node={currentNode}
+                  menuItems={menuItems}
+                  open={isMenuOpen}
+                  onOpenChange={setIsMenuOpen}
+                />
+              )}
             </div>
           </motion.div>
         )}

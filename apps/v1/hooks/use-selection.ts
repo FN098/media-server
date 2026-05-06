@@ -98,6 +98,7 @@ export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
     exitSelectionMode,
 
     // 選択操作
+    hasSelection: selectedCount > 0,
     selectedCount,
     selectedKeys,
     isSelected,

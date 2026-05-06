@@ -7,6 +7,7 @@ export function usePathSelection(initialSelectedPaths?: Iterable<string>) {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
+    hasSelection,
     selectedCount,
     selectedKeys,
     isSelected,
@@ -31,6 +32,7 @@ export function usePathSelection(initialSelectedPaths?: Iterable<string>) {
     exitSelectionMode,
 
     // 選択操作
+    hasSelection,
     selectedCount,
     selectedPaths: selectedKeys,
     isSelectedPath: isSelected,

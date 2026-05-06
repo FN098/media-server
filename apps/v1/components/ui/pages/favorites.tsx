@@ -1,6 +1,12 @@
 "use client";
 
+import {
+  touchMediaTimestampAction,
+  updatePreviewAction,
+} from "@/actions/media-actions";
+import { enqueueCreateSingleThumbJobAction } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
+import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
@@ -24,10 +30,11 @@ import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MenuItemDef } from "@/lib/menu-items/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
-import { MediaActionsProvider } from "@/providers/media-actions-provider";
+import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
@@ -35,8 +42,15 @@ import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import { ArrowDownAz, Sparkle, TagIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import {
+  ArrowDownAz,
+  ExternalLinkIcon,
+  FolderIcon,
+  ListFilterPlusIcon,
+  Sparkle,
+  TagIcon,
+} from "lucide-react";
+import { useEffect, useMemo, useTransition } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
@@ -177,26 +191,35 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   // ===== お気に入り =====
 
-  const { toggleFavorite, updateFavorite } = useFavoritesContext();
+  const { updateFavorite, getFavorite, updateMultipleFavorites } =
+    useFavoritesContext();
+  const [updatingFavorite, startUpdatingFavorite] = useTransition();
 
-  // お気に入り登録/解除
-  const handleToggleFavorite = async (node: MediaNode) => {
-    const result = await toggleFavorite(node.path);
-    if (result.success) {
-      toast.success("お気に入りが更新されました。");
-    } else {
-      toast.error(result.error);
-    }
+  // レーティング更新（単体）
+  const handleChangeRatingSingle = (node: MediaNode, rating: number | null) => {
+    if (updatingFavorite) return;
+    startUpdatingFavorite(async () => {
+      const result = await updateFavorite(node.path, rating);
+      if (result.success) {
+        toast.success("レーティングが更新されました。");
+      } else {
+        toast.error(result.error);
+      }
+    });
   };
 
-  // レーティング更新
-  const handleChangeRating = async (node: MediaNode, rating: number | null) => {
-    const result = await updateFavorite(node.path, rating);
-    if (result.success) {
-      toast.success("レーティングが更新されました。");
-    } else {
-      toast.error(result.error);
-    }
+  // レーティング更新（選択）
+  const handleChangeRatingSelected = (rating: number | null) => {
+    if (updatingFavorite) return;
+    startUpdatingFavorite(async () => {
+      const paths = selectedNodes.map((n) => n.path);
+      const result = await updateMultipleFavorites(paths, { rating });
+      if (result.success) {
+        toast.success("レーティングが更新されました。");
+      } else {
+        toast.error(result.error);
+      }
+    });
   };
 
   // ===== 選択 =====
@@ -209,6 +232,8 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     replaceSelection,
     selectPaths,
     clearSelection,
+    selectedCount,
+    hasSelection,
   } = usePathSelectionContext();
 
   const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
@@ -240,11 +265,6 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     return "default";
   }, [isViewerMode]);
 
-  const handleEditTags = (node: MediaNode) => {
-    handleSelect(node);
-    handleOpenTagEditor();
-  };
-
   // タグエディタを表示
   const handleOpenTagEditor = () => {
     setIsTagEditMode(true);
@@ -258,6 +278,36 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   // タグエディタを表示/非表示
   const handleToggleTagEditor = () => {
     setIsTagEditMode((prev) => !prev);
+  };
+
+  // ===== サムネイル =====
+
+  const [isUpdatingThumb, startUpdatingThumb] = useTransition();
+
+  const updateThumb = async (node: MediaNode) => {
+    // サムネイルを再作成（強制）
+    await enqueueCreateSingleThumbJobAction(node.path, { force: true });
+
+    // DBのタイムスタンプを更新（サムネイルのキャッシュを上書き）
+    if (!node.isDirectory) {
+      const touched = await touchMediaTimestampAction(node.path);
+      if (touched.error) toast.error(touched.error);
+    }
+
+    // プレビュー設定を解除
+    const updated = await updatePreviewAction(node.path, null);
+    if (updated.error) toast.error(updated.error);
+
+    // ブラウザキャッシュ更新のため、一時的にタイムスタンプを変更
+    node.mtime = new Date();
+  };
+
+  // サムネイル更新（単体）
+  const handleUpdateThumbSingle = (node: MediaNode) => {
+    if (isUpdatingThumb) return;
+    startUpdatingThumb(async () => {
+      await updateThumb(node);
+    });
   };
 
   // ===== ショートカット =====
@@ -323,6 +373,61 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     { scopes: "favorites" }
   );
 
+  // ===== メニュー =====
+
+  const menuItems: MenuItemDef[] = [
+    {
+      key: "rating",
+      type: "custom",
+      render: (node) => {
+        const { rating } = getFavorite(node.path);
+        return (
+          <FavoriteRating
+            value={rating}
+            onChange={(newRating) =>
+              hasSelection
+                ? handleChangeRatingSelected(newRating)
+                : handleChangeRatingSingle(node, newRating)
+            }
+            variant="menu"
+          />
+        );
+      },
+    },
+    {
+      key: "openFolder",
+      type: "action",
+      icon: FolderIcon,
+      label: "フォルダを開く",
+      onClick: handleOpenParentFolder,
+      hidden: () => selectedCount > 1,
+    },
+    {
+      key: "openInNewTab",
+      type: "action",
+      icon: ExternalLinkIcon,
+      label: "新しいタブで開く",
+      onClick: handleOpenInNewTab,
+      hidden: () => selectedCount > 1,
+    },
+    {
+      key: "editTags",
+      type: "action",
+      icon: TagIcon,
+      label: "タグ編集",
+      onClick: handleOpenTagEditor,
+    },
+    {
+      key: "addTagFilter",
+      type: "action",
+      icon: ListFilterPlusIcon,
+      label: "タグをフィルターに追加",
+      onClick: handleAddTagFilter,
+      hidden: (node) =>
+        !node.tags || node.tags.length === 0 || selectedCount > 1,
+    },
+  ];
+
   // ===== その他 =====
 
   // モバイル判定
@@ -330,17 +435,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>
-      <MediaActionsProvider
-        actions={{
-          onOpen: handleOpen,
-          onOpenInNewTab: handleOpenInNewTab,
-          onOpenParentFolder: handleOpenParentFolder,
-          onToggleFavorite: handleToggleFavorite,
-          onChangeRating: handleChangeRating,
-          onEditTags: handleEditTags,
-          onAddTagFilter: handleAddTagFilter,
-        }}
-      >
+      <MenuItemsProvider items={menuItems}>
         <div
           className={cn(
             "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
@@ -421,6 +516,8 @@ export function Favorites({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
+                onThumbError={handleUpdateThumbSingle}
+                onOpen={handleOpen}
                 focusOnPageChange
               />
             </div>
@@ -433,6 +530,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
+                onOpen={handleOpen}
                 focusOnPageChange
               />
             </div>
@@ -444,23 +542,9 @@ export function Favorites({ listing }: { listing: MediaListing }) {
               <MediaViewer
                 allNodes={mediaOnly}
                 initialIndex={initialViewerIndex}
+                menuItems={menuItems}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
-                menuConfig={{
-                  enabled: {
-                    pinHeader: true,
-                    toggleFavorite: true,
-                    changeRating: true,
-                    delete: false,
-                    deletePermanently: false,
-                    editTags: true,
-                    openNextFolder: false,
-                    openParentFolder: true,
-                    openPrevFolder: false,
-                    restore: false,
-                    toggleFullscreen: true,
-                  },
-                }}
               />
             </ScrollLockProvider>
           )}
@@ -491,7 +575,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             opacity={tagEditMode === "default" ? 100 : 0}
           />
         </div>
-      </MediaActionsProvider>
+      </MenuItemsProvider>
     </PagingProvider>
   );
 }

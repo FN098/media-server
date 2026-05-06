@@ -13,7 +13,7 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import { useMediaActionsContext } from "@/providers/media-actions-provider";
+import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -30,17 +30,23 @@ import React, {
 interface PagingGridViewProps {
   allNodes: MediaNode[];
   initialScrollPath?: string | null;
+  focusOnPageChange?: boolean;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
-  focusOnPageChange?: boolean;
+  onSelectionChange?: () => void;
+  onOpen?: (node: MediaNode) => void;
+  onThumbError?: (node: MediaNode) => void;
 }
 
 export function PagingGridView({
   allNodes,
   initialScrollPath,
+  focusOnPageChange = false,
   onPageChange,
   onScrollRestored,
-  focusOnPageChange = false,
+  onSelectionChange,
+  onOpen,
+  onThumbError,
 }: PagingGridViewProps) {
   const {
     page: currentPage,
@@ -59,10 +65,6 @@ export function PagingGridView({
     enterSelectionMode,
     selectPaths,
   } = usePathSelectionContext();
-
-  const {
-    actions: { onOpen },
-  } = useMediaActionsContext();
 
   const isMobile = useIsMobile();
 
@@ -211,7 +213,7 @@ export function PagingGridView({
       // Enterで開く
       if (e.key === "Enter" && currentPath) {
         const node = allNodes[currentIndex];
-        if (node) void onOpen?.(node);
+        if (node) onOpen?.(node);
         return;
       }
 
@@ -337,6 +339,9 @@ export function PagingGridView({
             globalIndex={(currentPage - 1) * pageSize + index}
             allNodes={allNodes}
             isMobile={isMobile}
+            onOpen={onOpen}
+            onSelectionChange={onSelectionChange}
+            onThumbError={onThumbError}
           />
         ))}
       </div>
@@ -357,6 +362,8 @@ interface CellProps {
   allNodes: MediaNode[];
   isMobile: boolean;
   onSelectionChange?: () => void;
+  onOpen?: (node: MediaNode) => void;
+  onThumbError?: (node: MediaNode) => void;
 }
 
 function Cell({
@@ -365,12 +372,14 @@ function Cell({
   allNodes,
   isMobile,
   onSelectionChange,
+  onOpen,
+  onThumbError,
 }: CellProps) {
   // メディア判定
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り機能
-  const { getFavorite } = useFavoritesContext();
+  const { getFavorite, toggleFavorite } = useFavoritesContext();
   const { isFavorite, rating } = getFavorite(node.path);
 
   // 選択機能
@@ -392,11 +401,10 @@ function Cell({
   } = usePathSelectionContext();
   const isSelected = isSelectedPath(node.path);
 
-  // アクションメニュー
-  const { actions } = useMediaActionsContext();
-  const { onOpen, onToggleFavorite, onUpdateThumb } = actions;
-  const [actionDropdownMenuOpen, setActionDropdownMenuOpen] = useState(false);
-  const [actionContextMenuOpen, setActionContextMenuOpen] = useState(false);
+  // メニュー
+  const { items: menuItems } = useMenuItemsContext();
+  const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
   // 長押しで選択モード
   const handleLongPress = useCallback(() => {
@@ -460,7 +468,7 @@ function Cell({
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (isMobile || e.ctrlKey || e.metaKey || e.shiftKey) return;
     e.preventDefault();
-    void onOpen?.(node);
+    onOpen?.(node);
   };
 
   // タップで開く（モバイル）
@@ -481,7 +489,7 @@ function Cell({
       return;
     }
 
-    void onOpen?.(node);
+    onOpen?.(node);
   };
 
   return (
@@ -489,17 +497,14 @@ function Cell({
       <HoverPreviewPortal
         node={node}
         enabled={
-          isMediaNode &&
-          !isMobile &&
-          !actionDropdownMenuOpen &&
-          !actionContextMenuOpen
+          isMediaNode && !isMobile && !dropdownMenuOpen && !contextMenuOpen
         }
       >
         <ActionsContextMenu
-          actions={actions}
-          open={actionContextMenuOpen}
-          onOpenChange={setActionContextMenuOpen}
           node={node}
+          menuItems={menuItems}
+          open={contextMenuOpen}
+          onOpenChange={setContextMenuOpen}
           disabled={isMobile}
         >
           <div
@@ -522,7 +527,7 @@ function Cell({
             <MediaThumb
               node={node}
               className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-              onError={() => void onUpdateThumb?.(node)}
+              onError={() => onThumbError?.(node)}
               showIcon
             />
 
@@ -554,12 +559,12 @@ function Cell({
 
             {/* Actions */}
             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
-              {onToggleFavorite && !isSelectionMode && isMediaNode && (
+              {!isSelectionMode && isMediaNode && (
                 <FavoriteButton
                   variant="grid"
                   rating={rating}
                   isFavorite={isFavorite}
-                  onClick={() => void onToggleFavorite?.(node)}
+                  onClick={() => void toggleFavorite(node.path)}
                 />
               )}
 
@@ -571,10 +576,10 @@ function Cell({
                   )}
                 >
                   <ActionsDropdownMenu
-                    actions={actions}
-                    open={actionDropdownMenuOpen}
-                    onOpenChange={setActionDropdownMenuOpen}
                     node={node}
+                    menuItems={menuItems}
+                    open={dropdownMenuOpen}
+                    onOpenChange={setDropdownMenuOpen}
                     className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white rounded-full"
                   />
                 </div>
