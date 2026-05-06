@@ -74,6 +74,7 @@ import {
   CalendarArrowDown,
   Copy,
   FolderPlus,
+  RefreshCw,
   Sparkle,
   Sparkles,
   Star,
@@ -530,8 +531,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     }
   }, [listing.path]);
 
-  // サムネイル更新
-  const handleUpdateThumb = async (node: MediaNode) => {
+  // サムネイル更新（単体）
+  const handleUpdateThumbSingle = async (node: MediaNode) => {
     // サムネイルを再作成（強制）
     await enqueueCreateSingleThumbJobAction(node.path, { force: true });
 
@@ -547,6 +548,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
     // ブラウザキャッシュ更新のため、一時的にタイムスタンプを変更
     node.mtime = new Date();
+  };
+
+  // サムネイル更新（選択）
+  const handleUpdateThumbSelected = async () => {
+    for (const n of selectedNodes) {
+      await handleUpdateThumbSingle(n);
+    }
   };
 
   // ===== ショートカット =====
@@ -658,7 +666,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           onEditTags: handleEditTags,
           onAddTagFilter: handleAddTagFilter,
           onSetAsPreview: handleOpenApplyPreviewDialog,
-          onUpdateThumb: handleUpdateThumb,
+          onUpdateThumb: handleUpdateThumbSingle,
         }}
       >
         <div
@@ -845,6 +853,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 label: "コピー",
                 onClick: handleOpenCopyDialogSelected,
                 icon: Copy,
+              },
+              {
+                label: "サムネイル更新",
+                onClick: () => void handleUpdateThumbSelected(),
+                icon: RefreshCw,
               },
               {
                 label: "削除",
