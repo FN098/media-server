@@ -154,6 +154,18 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
       // 訪問履歴の更新
       await tx.$executeRaw`
+        DELETE FROM VisitedFolder
+        WHERE (
+          dirPath = ${destVirtualPath}
+          OR dirPath LIKE CONCAT(${destVirtualPath}, '/%')
+        )
+        AND (
+          dirPath != ${srcVirtualPath}
+          AND dirPath NOT LIKE CONCAT(${srcVirtualPath}, '/%')
+        )
+      `;
+
+      await tx.$executeRaw`
         UPDATE VisitedFolder 
         SET dirPath = CASE 
           WHEN dirPath = ${srcVirtualPath} THEN ${destVirtualPath}
@@ -373,6 +385,18 @@ export async function moveNodesAction(
         }
 
         // 訪問履歴の更新
+        await tx.$executeRaw`
+          DELETE FROM VisitedFolder
+          WHERE (
+            dirPath = ${destVirtualPath}
+            OR dirPath LIKE CONCAT(${destVirtualPath}, '/%')
+          )
+          AND (
+            dirPath != ${srcVirtualPath}
+            AND dirPath NOT LIKE CONCAT(${srcVirtualPath}, '/%')
+          )
+        `;
+
         await tx.$executeRaw`
           UPDATE VisitedFolder 
           SET dirPath = CASE 
