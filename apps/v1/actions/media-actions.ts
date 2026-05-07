@@ -31,9 +31,17 @@ import { basename, dirname, join } from "path";
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
+  // 正規化
+  const normalizedSourcePath = sourcePath.replace(/^\/+/, "");
+  if (normalizedSourcePath === "") {
+    return {
+      success: false,
+      error: "ルートディレクトリはリネームできません。",
+    };
+  }
+
   // バリデーション
   const validation = fsNameSchema.safeParse(newName);
-
   if (!validation.success) {
     return {
       success: false,
@@ -41,14 +49,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     };
   }
 
-  if (sourcePath === "/") {
-    return {
-      success: false,
-      error: "ルートディレクトリはリネームできません。",
-    };
-  }
-
-  const srcVirtualPath = sourcePath;
+  const srcVirtualPath = normalizedSourcePath;
   const destVirtualPath = join(dirname(srcVirtualPath), newName.trim()).replace(
     /\\/g,
     "/"
@@ -262,11 +263,17 @@ export async function moveNodesAction(
 ) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  for (const srcVirtualPath of sourcePaths) {
+  // 正規化
+  const normalizedDestDirPath = destDirPath.replace(/^\//, "");
+  const normalizedSourcePaths = sourcePaths.map((path) =>
+    path.replace(/^\//, "")
+  );
+
+  for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
     if (
-      destDirPath === srcVirtualPath ||
-      destDirPath.startsWith(srcVirtualPath + "/")
+      normalizedDestDirPath === srcVirtualPath ||
+      normalizedDestDirPath.startsWith(srcVirtualPath + "/")
     ) {
       results.failed++;
       results.errors.push(
@@ -277,9 +284,9 @@ export async function moveNodesAction(
 
     const srcName = srcVirtualPath.split("/").pop() || "";
     const destVirtualPath =
-      destDirPath === "/"
-        ? `/${srcName}`
-        : `${destDirPath}/${srcName}`.replace(/\/+/g, "/");
+      normalizedDestDirPath === ""
+        ? srcName
+        : `${normalizedDestDirPath}/${srcName}`;
 
     const srcRealPath = getServerMediaPath(srcVirtualPath);
     const destRealPath = getServerMediaPath(destVirtualPath);
@@ -293,6 +300,7 @@ export async function moveNodesAction(
       continue;
     }
 
+    // ディレクトリ判定
     let stats: Awaited<ReturnType<typeof lstat>>;
     try {
       stats = await lstat(srcRealPath);
@@ -500,11 +508,17 @@ export async function copyNodesAction(
 ) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  for (const srcVirtualPath of sourcePaths) {
+  // 正規化
+  const normalizedDestDirPath = destDirPath.replace(/^\//, "");
+  const normalizedSourcePaths = sourcePaths.map((path) =>
+    path.replace(/^\//, "")
+  );
+
+  for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
     if (
-      destDirPath === srcVirtualPath ||
-      destDirPath.startsWith(srcVirtualPath + "/")
+      normalizedDestDirPath === srcVirtualPath ||
+      normalizedDestDirPath.startsWith(srcVirtualPath + "/")
     ) {
       results.failed++;
       results.errors.push(
@@ -515,9 +529,9 @@ export async function copyNodesAction(
 
     const srcName = srcVirtualPath.split("/").pop() || "";
     const destVirtualPath =
-      destDirPath === "/"
-        ? `/${srcName}`
-        : `${destDirPath}/${srcName}`.replace(/\/+/g, "/");
+      normalizedDestDirPath === ""
+        ? srcName
+        : `${normalizedDestDirPath}/${srcName}`;
 
     const srcRealPath = getServerMediaPath(srcVirtualPath);
     const destRealPath = getServerMediaPath(destVirtualPath);
@@ -531,6 +545,7 @@ export async function copyNodesAction(
       continue;
     }
 
+    // ディレクトリ判定
     let stats: Awaited<ReturnType<typeof lstat>>;
     try {
       stats = await lstat(srcRealPath);
