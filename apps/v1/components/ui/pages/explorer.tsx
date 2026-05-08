@@ -425,6 +425,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const handleRenameDialogOpenChange = (open: boolean) => {
     if (!open) {
       setRenameTarget(null);
+      clearSelection();
     }
   };
 
