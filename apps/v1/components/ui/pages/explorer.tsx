@@ -458,6 +458,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const handleOpenMoveDialogSingle = (node: MediaNode) => {
     setMoveTargets([node]);
   };
+
   // 移動ダイアログを開く（選択）
   const handleOpenMoveDialogSelected = () => {
     setMoveTargets(selectedNodes);
