@@ -407,18 +407,12 @@ function Cell({
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
   // 長押しで選択モード
-  const handleLongPress = useCallback(() => {
+  const handleLongPress = () => {
     enterSelectionMode();
     replaceSelection(node.path);
     setLastSelectedPath(node.path);
     onSelectionChange?.();
-  }, [
-    enterSelectionMode,
-    replaceSelection,
-    node.path,
-    setLastSelectedPath,
-    onSelectionChange,
-  ]);
+  };
 
   // 長押し判定
   const { start, stop, isLongPressed } = useLongPress({
@@ -458,6 +452,38 @@ function Cell({
       exitSelectionMode();
       replaceSelection(node.path);
       setAnchorPath(node.path); // 次のShift操作の起点更新
+    }
+
+    setLastSelectedPath(node.path);
+    onSelectionChange?.();
+  };
+
+  // 右クリックで選択（PC）
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (isMobile) return;
+
+    if (e.shiftKey && anchorPath !== null) {
+      // Shift: アンカーから範囲選択
+      enterSelectionMode();
+      const anchorIdx = allNodes.findIndex((n) => n.path === anchorPath);
+      if (anchorIdx !== -1) {
+        const startIdx = Math.min(anchorIdx, globalIndex);
+        const endIdx = Math.max(anchorIdx, globalIndex);
+        const paths = allNodes.slice(startIdx, endIdx + 1).map((n) => n.path);
+        selectPaths(paths);
+      }
+    } else if (e.ctrlKey || e.metaKey) {
+      // Ctrl: トグル追加
+      enterSelectionMode();
+      togglePath(node.path);
+      setAnchorPath(node.path);
+    } else {
+      // 通常: 未選択なら単独選択、選択済みなら維持（複数選択を崩さない）
+      if (!isSelected) {
+        exitSelectionMode();
+        replaceSelection(node.path);
+        setAnchorPath(node.path);
+      }
     }
 
     setLastSelectedPath(node.path);
@@ -517,6 +543,7 @@ function Cell({
             onTouchMove={stop}
             onClick={isMobile ? handleTap : handleClick}
             onDoubleClick={!isMobile ? handleDoubleClick : undefined}
+            onContextMenu={!isMobile ? handleContextMenu : undefined}
             className={cn(
               "relative w-full h-full overflow-hidden rounded-xl border bg-card transition-all duration-200 select-none cursor-pointer",
               isSelected
