@@ -511,6 +511,7 @@ function DataRow({
 
   return (
     <HoverPreviewPortal
+      key={node.id}
       node={node}
       enabled={
         isMediaNode && !isMobile && !dropdownMenuOpen && !contextMenuOpen

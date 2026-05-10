@@ -531,6 +531,7 @@ function Cell({
   return (
     <div className="relative group aspect-[3/4] sm:aspect-[4/5]">
       <HoverPreviewPortal
+        key={node.id}
         node={node}
         enabled={
           isMediaNode && !isMobile && !dropdownMenuOpen && !contextMenuOpen
