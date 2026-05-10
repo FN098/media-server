@@ -331,7 +331,7 @@ function HeaderRow() {
       <div className="hidden md:block">Updated</div>
       <div className="hidden md:block">Size</div>
       <div className="hidden md:block">Last Viewed</div>
-      <div className="text-center">Rating</div>
+      <div className="text-center">Favorite</div>
       <div className="text-center">Actions</div>
     </div>
   );
