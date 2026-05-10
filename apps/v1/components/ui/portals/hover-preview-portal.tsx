@@ -4,7 +4,7 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface Coords {
@@ -26,7 +26,7 @@ interface HoverPreviewPortalProps {
   maxWidth?: number;
 }
 
-export const HoverPreviewPortal = memo(function HoverPreviewPortal({
+export function HoverPreviewPortal({
   node,
   children,
   enabled = true,
@@ -38,43 +38,42 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
   const [hasEverHovered, setHasEverHovered] = useState(false);
   const [imageSize, setImageSize] = useState<Size | null>(null);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!enabled) return;
+  // マウスカーソルに追従するように座標を再計算
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!enabled) return;
 
-      const aspectRatio = imageSize
-        ? imageSize.width / imageSize.height
-        : 16 / 9;
+    const aspectRatio = imageSize ? imageSize.width / imageSize.height : 16 / 9;
 
-      const width = Math.min(maxWidth, maxWidth * aspectRatio);
+    const width = Math.min(maxWidth, maxWidth * aspectRatio);
 
-      let x = e.clientX + 20;
-      let y = e.clientY + 20;
+    let x = e.clientX + 20;
+    let y = e.clientY + 20;
 
-      // 画面外へのはみ出し判定（高さは中身に応じて変わるため、多めに見積もるか固定にします）
-      if (x + width > window.innerWidth) {
-        x = e.clientX - width - 20;
-      }
-      // y軸の調整（タグが多い場合に備えて）
-      if (y + 400 > window.innerHeight) {
-        y = Math.max(20, window.innerHeight - 400);
-      }
+    // 画面外へのはみ出し判定（高さは中身に応じて変わるため、多めに見積もるか固定にします）
+    if (x + width > window.innerWidth) {
+      x = e.clientX - width - 20;
+    }
+    // y軸の調整（タグが多い場合に備えて）
+    if (y + 400 > window.innerHeight) {
+      y = Math.max(20, window.innerHeight - 400);
+    }
 
-      setCoords({ x, y, width, height: 0 }); // heightはCSSの auto で処理
-    },
-    [enabled, imageSize, maxWidth]
-  );
+    setCoords({ x, y, width, height: 0 }); // heightはCSSの auto で処理
+  };
 
-  const handleMouseEnter = useCallback(() => {
+  // カーソルがホバーしたら表示
+  const handleMouseEnter = () => {
     if (!enabled) return;
     setHasEverHovered(true);
     setVisible(true);
-  }, [enabled]);
+  };
 
-  const handleMouseLeave = useCallback(() => {
+  // カーソルが外れたら非表示
+  const handleMouseLeave = () => {
     setVisible(false);
-  }, []);
+  };
 
+  // 画像ロード時に画像サイズを取得
   const handleImageLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       const img = e.currentTarget;
@@ -160,7 +159,7 @@ export const HoverPreviewPortal = memo(function HoverPreviewPortal({
       {portalContent && createPortal(portalContent, document.body)}
     </div>
   );
-});
+}
 
 const TagItem = ({ name }: { name: string }) => (
   <span className="px-2 py-0.5 text-[10px] font-medium bg-secondary text-secondary-foreground rounded-md border border-primary/5 whitespace-nowrap">
