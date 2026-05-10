@@ -387,6 +387,16 @@ function DataRow({
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
+  // ドロップダウンメニュー表示で選択切り替え
+  const handleDropdownMenuOpenChange = (open: boolean) => {
+    if (open) {
+      replaceSelection(node.path);
+      setLastSelectedPath(node.path);
+      onSelectionChange?.();
+    }
+    setDropdownMenuOpen(open);
+  };
+
   // 長押しで選択モード
   const handleLongPress = () => {
     enterSelectionMode();
@@ -621,7 +631,7 @@ function DataRow({
               node={node}
               menuItems={menuItems}
               open={dropdownMenuOpen}
-              onOpenChange={setDropdownMenuOpen}
+              onOpenChange={handleDropdownMenuOpenChange}
             />
           </div>
         </div>

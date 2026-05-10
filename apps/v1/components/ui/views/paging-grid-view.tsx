@@ -406,6 +406,16 @@ function Cell({
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
+  // ドロップダウンメニュー表示で選択切り替え
+  const handleDropdownMenuOpenChange = (open: boolean) => {
+    if (open) {
+      replaceSelection(node.path);
+      setLastSelectedPath(node.path);
+      onSelectionChange?.();
+    }
+    setDropdownMenuOpen(open);
+  };
+
   // 長押しで選択モード
   const handleLongPress = () => {
     enterSelectionMode();
@@ -606,7 +616,7 @@ function Cell({
                     node={node}
                     menuItems={menuItems}
                     open={dropdownMenuOpen}
-                    onOpenChange={setDropdownMenuOpen}
+                    onOpenChange={handleDropdownMenuOpenChange}
                     className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white rounded-full"
                   />
                 </div>
