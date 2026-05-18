@@ -112,4 +112,4 @@ COPY --from=deps /app/package.json ./
 COPY apps/v1/prisma ./prisma
 COPY apps/v1/prisma.config.ts ./
 
-CMD ["pnpm", "prisma", "migrate", "deploy"]
+CMD ["./node_modules/.bin/prisma", "migrate", "deploy"]
