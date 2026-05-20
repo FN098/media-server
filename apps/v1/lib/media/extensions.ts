@@ -25,19 +25,25 @@ export const audioExtensions = [
   ".opus",
 ] as const;
 
-export const mediaExtensions = {
-  image: imageExtensions,
-  video: videoExtensions,
-  audio: audioExtensions,
-} as const;
-
-export const allMediaExtensions = [
+export const mediaExtensions = [
   ...imageExtensions,
   ...videoExtensions,
   ...audioExtensions,
 ] as const;
 
-export type MediaExt =
-  | (typeof imageExtensions)[number]
-  | (typeof videoExtensions)[number]
-  | (typeof audioExtensions)[number];
+export type ImageExtension = (typeof imageExtensions)[number];
+export type VideoExtension = (typeof videoExtensions)[number];
+export type AudioExtension = (typeof audioExtensions)[number];
+export type MediaExtension = ImageExtension | VideoExtension | AudioExtension;
+
+function createGuard<const T extends readonly string[]>(values: T) {
+  const set = new Set(values);
+
+  return (value: unknown): value is T[number] =>
+    typeof value === "string" && set.has(value);
+}
+
+export const isImageExtension = createGuard(imageExtensions);
+export const isVideoExtension = createGuard(videoExtensions);
+export const isAudioExtension = createGuard(audioExtensions);
+export const isMediaExtension = createGuard(mediaExtensions);

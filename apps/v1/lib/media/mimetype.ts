@@ -1,7 +1,7 @@
-import { MediaExt } from "@/lib/media/extensions";
+import { MediaExtension } from "@/lib/media/extensions";
 import { getExtension } from "@/lib/utils/filename";
 
-export const MIME_MAP: Record<MediaExt, string> = {
+export const MIME_MAP: Record<MediaExtension, string> = {
   // images
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -30,5 +30,5 @@ export const MIME_MAP: Record<MediaExt, string> = {
 export function getMimetype(filePath: string): string {
   const ext = getExtension(filePath, { withDot: true, case: "lower" });
 
-  return MIME_MAP[ext as MediaExt] ?? "application/octet-stream";
+  return MIME_MAP[ext as MediaExtension] ?? "application/octet-stream";
 }

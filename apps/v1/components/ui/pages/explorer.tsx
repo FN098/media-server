@@ -16,6 +16,7 @@ import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
 import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
+import { ExtractDialog } from "@/components/ui/dialogs/extract-dialog";
 import {
   FavoriteDialog,
   FavoriteDialogMode,
@@ -47,6 +48,7 @@ import { useSort } from "@/hooks/use-sort";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
+import { isArchiveFile } from "@/lib/archive/extensions";
 import {
   createFavoriteFilter,
   createMediaOnlyFilter,
@@ -81,6 +83,7 @@ import {
   FolderPlus,
   ImagePlusIcon,
   ListFilterPlusIcon,
+  PackageOpenIcon,
   PencilIcon,
   RefreshCw,
   RefreshCwIcon,
@@ -411,6 +414,24 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     setIsTagEditMode((prev) => !prev);
   };
 
+  // ===== 解凍 =====
+
+  const [extractTarget, setExtractTarget] = useState<MediaNode | null>(null);
+  const isExtractMode = !!extractTarget;
+
+  // 削除ダイアログを開く（単体）
+  const handleOpenExtractDialog = (node: MediaNode) => {
+    setExtractTarget(node);
+  };
+
+  // 後始末
+  const handleExtractDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setExtractTarget(null);
+      handleResetSelection();
+    }
+  };
+
   // ===== リネーム =====
 
   const [renameTarget, setRenameTarget] = useState<MediaNode | null>(null);
@@ -702,6 +723,14 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       hidden: () => selectedCount > 1,
     },
     {
+      key: "extractArchive",
+      type: "action",
+      icon: PackageOpenIcon,
+      label: "解凍",
+      onClick: handleOpenExtractDialog,
+      hidden: (node) => !isArchiveFile(node.path),
+    },
+    {
       key: "rename",
       type: "action",
       icon: PencilIcon,
@@ -980,6 +1009,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             onClose={handleCloseTagEditor}
             mode={tagEditMode}
             opacity={tagEditMode === "default" ? 100 : 0}
+          />
+
+          <ExtractDialog
+            open={isExtractMode}
+            onOpenChange={handleExtractDialogOpenChange}
+            targetNode={extractTarget}
           />
 
           {/* リネームダイアログ */}

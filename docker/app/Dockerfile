@@ -51,6 +51,7 @@ FROM base AS runner
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     default-mysql-client \
+    p7zip-full \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

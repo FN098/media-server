@@ -6,11 +6,13 @@ FROM node:25-slim
 # ffmpeg: 動画サムネイル生成
 # default-mysql-client: DB バックアップ・リストア
 # ca-certificates: github 公開キー検証
+# p7zip-full: 圧縮ファイル解凍
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     ffmpeg \
     default-mysql-client \
     ca-certificates \
+    p7zip-full \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
