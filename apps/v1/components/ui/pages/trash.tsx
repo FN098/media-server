@@ -333,6 +333,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   useHotkeys("p", () => handleOpenPrevFolder(), {
     scopes: ["trash", "viewer"],
   });
+
   useHotkeys("n", () => handleOpenNextFolder(), {
     scopes: ["trash", "viewer"],
   });
@@ -360,8 +361,6 @@ export function Trash({ listing }: { listing: MediaListing }) {
         : handleOpenDeleteDialogSingle,
     },
   ];
-
-  // ===== その他 =====
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>

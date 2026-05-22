@@ -37,6 +37,7 @@ import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useFavoriteFilter } from "@/hooks/use-favorite-filter";
 import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
 import { useFolderNavigation } from "@/hooks/use-folder-navigation";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useParentPathname } from "@/hooks/use-parent-pathname";
@@ -81,6 +82,7 @@ import {
   ExternalLinkIcon,
   FolderInputIcon,
   FolderPlus,
+  FullscreenIcon,
   ImagePlusIcon,
   ListFilterPlusIcon,
   PackageOpenIcon,
@@ -606,6 +608,14 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     });
   };
 
+  // ===== モバイル =====
+
+  const isMobile = useIsMobile();
+
+  // ===== フルスクリーン =====
+
+  const { toggleFullscreen } = useFullscreen();
+
   // ===== ショートカット =====
 
   // スコープ切り替えフック
@@ -689,6 +699,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   useHotkeys("p", () => handleOpenPrevFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
+
   useHotkeys("n", () => handleOpenNextFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
@@ -721,6 +732,14 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       label: "新しいタブで開く",
       onClick: handleOpenInNewTab,
       hidden: () => selectedCount > 1,
+    },
+    {
+      key: "toggleFullscreen",
+      type: "action",
+      icon: FullscreenIcon,
+      label: "全画面",
+      onClick: toggleFullscreen,
+      hidden: () => !isViewerMode,
     },
     {
       key: "extractArchive",
@@ -802,11 +821,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
         : handleOpenDeleteDialogSingle,
     },
   ];
-
-  // ===== その他 =====
-
-  // モバイル判定
-  const isMobile = useIsMobile();
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>

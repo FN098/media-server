@@ -310,6 +310,10 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     });
   };
 
+  // ===== モバイル =====
+
+  const isMobile = useIsMobile();
+
   // ===== ショートカット =====
 
   // スコープ切り替えフック
@@ -427,11 +431,6 @@ export function Favorites({ listing }: { listing: MediaListing }) {
         !node.tags || node.tags.length === 0 || selectedCount > 1,
     },
   ];
-
-  // ===== その他 =====
-
-  // モバイル判定
-  const isMobile = useIsMobile();
 
   return (
     <PagingProvider totalItems={filteredNodes.length} defaultPageSize={48}>

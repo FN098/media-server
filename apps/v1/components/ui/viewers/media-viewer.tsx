@@ -88,13 +88,11 @@ export function MediaViewer({
   // ===== スライド移動 =====
 
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
-  const [currentNode, setCurrentNode] = useState<MediaNode | null>(
-    allNodes[currentIndex] ?? null
-  );
 
-  useEffect(() => {
-    setCurrentNode(allNodes[currentIndex] ?? null);
-  }, [currentIndex, allNodes]);
+  const currentNode = useMemo(
+    () => allNodes[currentIndex] ?? null,
+    [allNodes, currentIndex]
+  );
 
   const hasPrev = !!onOpenPrev;
   const hasNext = !!onOpenNext;
@@ -168,7 +166,6 @@ export function MediaViewer({
     const node = allNodes[index];
     if (node) {
       setCurrentIndex(index);
-      setCurrentNode(node);
       updateTitle(node);
       onIndexChange?.(index);
 
@@ -254,7 +251,6 @@ export function MediaViewer({
     const slideIndex = getSlideIndex(index);
 
     setCurrentIndex(index);
-    setCurrentNode(allNodes[index]);
     setCurrentSlideIndex(slideIndex);
     updateTitle(allNodes[index]);
     onIndexChange?.(index);
@@ -282,6 +278,14 @@ export function MediaViewer({
     }
   };
 
+  // ===== モバイル =====
+
+  const isMobile = useIsMobile();
+
+  // ===== フルスクリーン =====
+
+  const { toggleFullscreen } = useFullscreen();
+
   // ===== ショートカット =====
 
   // Escape / Backspace: 閉じる
@@ -291,7 +295,7 @@ export function MediaViewer({
   });
 
   // Delete: 削除
-  useHotkeys("delete", () => onDelete?.(currentNode!), {
+  useHotkeys("delete", () => onDelete?.(currentNode), {
     scopes: ["viewer", "tag-editor"],
     enabled: shortcutEnabled && !!currentNode,
   });
@@ -303,13 +307,14 @@ export function MediaViewer({
   });
 
   // 左右キー / A, D: 前後のメディアに移動
-  useHotkeys(["arrowleft", "a"], () => swiperRef.current!.slidePrev(), {
+  useHotkeys(["arrowleft", "a"], () => swiperRef.current?.slidePrev(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && !!swiperRef.current,
+    enabled: shortcutEnabled,
   });
-  useHotkeys(["arrowright", "d"], () => swiperRef.current!.slideNext(), {
+
+  useHotkeys(["arrowright", "d"], () => swiperRef.current?.slideNext(), {
     scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && !!swiperRef.current,
+    enabled: shortcutEnabled,
   });
 
   // S: お気に入りの切り替え
@@ -319,13 +324,14 @@ export function MediaViewer({
   });
 
   // F: 全画面表示
+  // TODO: fix
   useHotkeys("f", () => toggleFullscreen(), {
     scopes: ["viewer", "tag-editor"],
     enabled: shortcutEnabled,
   });
 
   // O: フォルダを開く
-  useHotkeys("o", () => onOpenParent?.(currentNode!), {
+  useHotkeys("o", () => onOpenParent?.(currentNode), {
     scopes: ["viewer", "tag-editor"],
     enabled: shortcutEnabled && !!currentNode,
   });
@@ -355,12 +361,6 @@ export function MediaViewer({
       enabled: shortcutEnabled,
     }
   );
-
-  // ===== その他 =====
-
-  const isMobile = useIsMobile();
-
-  const { toggleFullscreen } = useFullscreen();
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
