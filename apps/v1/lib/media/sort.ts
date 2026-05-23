@@ -13,32 +13,44 @@ export function sortNames(names: string[]): string[] {
 export function sortNodes<
   T extends {
     name: string;
-    path: string;
     isDirectory: boolean;
   },
 >(nodes: T[], options?: SortOptions<T>): T[] {
-  const { key = "name", direction = "asc" } = options ?? {};
+  const { key = "name", direction = "asc", valueMapper } = options ?? {};
 
   // 昇順(asc) or 降順(desc)
   const modifier = direction === "asc" ? 1 : -1;
 
+  const getValue = (node: T, key: keyof T) =>
+    valueMapper ? valueMapper(node, key) : node[key];
+
   return [...nodes].sort((a, b) => {
-    // 1. フォルダ優先
+    // フォルダ優先
     if (a.isDirectory !== b.isDirectory) {
       return a.isDirectory ? -1 : 1;
     }
 
-    // 2. 指定されたキーで比較
-    if (key === "name" || key === "path") {
-      return collator.compare(String(a[key]), String(b[key])) * modifier;
+    const valA = getValue(a, key);
+    const valB = getValue(b, key);
+
+    // string 比較
+    if (typeof valA === "string" && typeof valB === "string") {
+      const result = collator.compare(valA, valB);
+      return result !== 0
+        ? result * modifier
+        : collator.compare(a.name, b.name);
     }
 
-    const valA = a[key] ?? 0;
-    const valB = b[key] ?? 0;
+    // undefined/null は最後
+    if (valA == null && valB != null) return 1;
+    if (valA != null && valB == null) return -1;
+    if (valA == null && valB == null) {
+      return collator.compare(a.name, b.name);
+    }
 
-    if (valA < valB) return -1 * modifier;
-    if (valA > valB) return 1 * modifier;
+    if (valA! < valB!) return -1 * modifier;
+    if (valA! > valB!) return 1 * modifier;
 
-    return 0;
+    return collator.compare(a.name, b.name);
   });
 }

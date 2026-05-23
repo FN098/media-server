@@ -92,6 +92,8 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   const sorted = sortNodes(merged, {
     key: sortKey,
     direction: sortDirection,
+    valueMapper: (node, key) =>
+      node.isDirectory && key === "rating" ? node["averageRating"] : node[key],
   });
 
   // フォーマット

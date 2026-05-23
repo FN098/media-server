@@ -70,6 +70,7 @@ export type SortDirection = "asc" | "desc";
 export type SortOptions<T> = {
   key?: keyof T;
   direction?: SortDirection;
+  valueMapper?: (node: T, key: keyof T) => unknown;
 };
 
 export type SortKeyOf<T> = SortOptions<T>["key"];
