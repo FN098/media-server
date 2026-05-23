@@ -2,7 +2,11 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import { MenuItemDef, MenuItemVariant } from "@/lib/menu-items/types";
+import {
+  MenuItemDef,
+  MenuItemVariant,
+  NodeContext,
+} from "@/lib/menu-items/types";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -17,7 +21,7 @@ const variantClass: Record<MenuItemVariant, string> = {
 
 interface ActionsContextMenuProps {
   node: MediaNode;
-  menuItems: MenuItemDef[];
+  menuItems: MenuItemDef<NodeContext>[];
   children: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -35,7 +39,7 @@ export function ActionsContextMenu({
   const mounted = useMounted();
   if (!mounted || disabled) return <>{children}</>;
 
-  const visibleItems = menuItems.filter((item) => !item.hidden?.(node));
+  const visibleItems = menuItems.filter((item) => !item.hidden?.({ node }));
 
   return (
     <ContextMenu modal={open} onOpenChange={onOpenChange}>
@@ -45,7 +49,7 @@ export function ActionsContextMenu({
           if (item.type === "custom") {
             return (
               <ContextMenuItem key={item.key} className="flex justify-center">
-                {item.render(node)}
+                {item.render({ node })}
               </ContextMenuItem>
             );
           }
@@ -57,10 +61,10 @@ export function ActionsContextMenu({
             <ContextMenuItem
               key={item.key}
               className={variantClass[variant]}
-              disabled={item.disabled?.(node)}
+              disabled={item.disabled?.({ node })}
               onClick={(e) => {
                 e.stopPropagation();
-                void item.onClick(node);
+                void item.onClick({ node });
               }}
             >
               <Icon className="mr-2 h-4 w-4" />

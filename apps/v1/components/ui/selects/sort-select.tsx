@@ -24,7 +24,7 @@ type SelectOption = {
 interface SortSelectProps {
   value: SortValue | null;
   onChange: (value: SortValue | null) => void;
-  options: SelectOption[];
+  options: readonly SelectOption[];
 }
 
 function combine(value: SortValue): string {

@@ -62,7 +62,12 @@ import {
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
-import { MenuItemDef } from "@/lib/menu-items/types";
+import {
+  MenuItemDef,
+  MultipleNodesContext,
+  NodeContext,
+} from "@/lib/menu-items/types";
+import { averageBy } from "@/lib/utils/math";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
@@ -75,9 +80,8 @@ import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import {
-  ArrowDownAz,
-  CalendarArrowDown,
-  Copy,
+  ArrowDownAzIcon,
+  CalendarArrowDownIcon,
   CopyIcon,
   ExternalLinkIcon,
   FolderInputIcon,
@@ -87,13 +91,11 @@ import {
   ListFilterPlusIcon,
   PackageOpenIcon,
   PencilIcon,
-  RefreshCw,
   RefreshCwIcon,
-  Sparkle,
-  Star,
-  StarOff,
+  SparkleIcon,
+  StarIcon,
+  StarOffIcon,
   TagIcon,
-  Trash2,
   Trash2Icon,
 } from "lucide-react";
 import { dirname } from "path";
@@ -142,6 +144,37 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // NOTE: 並び替え処理はサーバーサイドで実施
   const { value: sortValue, apply: applySortValue } = useSort();
+
+  const sortOptions = useMemo(
+    () =>
+      [
+        {
+          value: {
+            sort: "name",
+            direction: "asc",
+          },
+          label: "名前順 (A-Z)",
+          icon: ArrowDownAzIcon,
+        },
+        {
+          value: {
+            sort: "rating",
+            direction: "desc",
+          },
+          label: "評価順",
+          icon: SparkleIcon,
+        },
+        {
+          value: {
+            sort: "mtime",
+            direction: "desc",
+          },
+          label: "更新順",
+          icon: CalendarArrowDownIcon,
+        },
+      ] as const,
+    []
+  );
 
   // ===== フィルタリング =====
 
@@ -713,11 +746,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== メニュー =====
 
-  const menuItems: MenuItemDef[] = [
+  const menuItems: MenuItemDef<NodeContext>[] = [
     {
       key: "rating",
       type: "custom",
-      render: (node) => {
+      render: ({ node }) => {
         const { rating } = getFavorite(node.path);
         return (
           <FavoriteRating
@@ -727,7 +760,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 ? handleChangeRatingSelected(newRating)
                 : handleChangeRatingSingle(node, newRating)
             }
-            variant="menu"
           />
         );
       },
@@ -737,7 +769,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: ExternalLinkIcon,
       label: "新しいタブで開く",
-      onClick: handleOpenInNewTab,
+      onClick: ({ node }) => handleOpenInNewTab(node),
       hidden: () => selectedCount > 1,
     },
     {
@@ -753,15 +785,15 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: PackageOpenIcon,
       label: "解凍",
-      onClick: handleOpenExtractDialog,
-      hidden: (node) => !isArchiveFile(node.path),
+      onClick: ({ node }) => handleOpenExtractDialog(node),
+      hidden: ({ node }) => !isArchiveFile(node.path),
     },
     {
       key: "rename",
       type: "action",
       icon: PencilIcon,
       label: "名前の変更",
-      onClick: handleOpenRenameDialog,
+      onClick: ({ node }) => handleOpenRenameDialog(node),
       hidden: () => selectedCount > 1,
     },
     {
@@ -769,18 +801,20 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: FolderInputIcon,
       label: "移動",
-      onClick: hasSelection
-        ? handleOpenMoveDialogSelected
-        : handleOpenMoveDialogSingle,
+      onClick: ({ node }) =>
+        hasSelection
+          ? handleOpenMoveDialogSelected()
+          : handleOpenMoveDialogSingle(node),
     },
     {
       key: "copy",
       type: "action",
       icon: CopyIcon,
       label: "コピー",
-      onClick: hasSelection
-        ? handleOpenCopyDialogSelected
-        : handleOpenCopyDialogSingle,
+      onClick: ({ node }) =>
+        hasSelection
+          ? handleOpenCopyDialogSelected()
+          : handleOpenCopyDialogSingle(node),
     },
     {
       key: "editTags",
@@ -794,8 +828,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: ListFilterPlusIcon,
       label: "タグをフィルターに追加",
-      onClick: handleAddTagFilter,
-      hidden: (node) =>
+      onClick: ({ node }) => handleAddTagFilter(node),
+      hidden: ({ node }) =>
         !node.tags || node.tags.length === 0 || selectedCount > 1,
     },
     {
@@ -803,8 +837,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: ImagePlusIcon,
       label: "プレビューに設定",
-      onClick: handleOpenApplyPreviewDialog,
-      hidden: (node) =>
+      onClick: ({ node }) => handleOpenApplyPreviewDialog(node),
+      hidden: ({ node }) =>
         (node.type !== "image" && node.type !== "video") || selectedCount > 1,
     },
     {
@@ -812,9 +846,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: RefreshCwIcon,
       label: "サムネイルを更新",
-      onClick: hasSelection
-        ? handleUpdateThumbSelected
-        : handleUpdateThumbSingle,
+      onClick: ({ node }) =>
+        hasSelection
+          ? handleUpdateThumbSelected()
+          : handleUpdateThumbSingle(node),
       hidden: () => isViewerMode,
     },
     {
@@ -823,9 +858,85 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       icon: Trash2Icon,
       variant: "destructive",
       label: "削除",
-      onClick: hasSelection
-        ? handleOpenDeleteDialogSelected
-        : handleOpenDeleteDialogSingle,
+      onClick: ({ node }) =>
+        hasSelection
+          ? handleOpenDeleteDialogSelected()
+          : handleOpenDeleteDialogSingle(node),
+    },
+  ];
+
+  const selectionBarInlineMenuItems: MenuItemDef<MultipleNodesContext>[] = [
+    {
+      key: "editTags",
+      type: "action",
+      icon: TagIcon,
+      label: "タグ編集",
+      onClick: handleOpenTagEditor,
+    },
+  ];
+
+  const selectionBarMenuItems: MenuItemDef<MultipleNodesContext>[] = [
+    {
+      key: "rating",
+      type: "custom",
+      render: ({ nodes }) => {
+        const filtered = nodes.filter((n) => n.rating != null);
+        const averageRating = averageBy(filtered, (n) => n.rating!);
+
+        return (
+          <FavoriteRating
+            value={averageRating}
+            onChange={(newRating) =>
+              hasSelection
+                ? handleChangeRatingSelected(newRating)
+                : handleChangeRatingSingle(nodes[0], newRating)
+            }
+          />
+        );
+      },
+    },
+    {
+      key: "add-favorites",
+      type: "action",
+      icon: StarIcon,
+      label: "お気に入り登録",
+      onClick: handleOpenFavoriteAddDialog,
+    },
+    {
+      key: "remove-favorites",
+      type: "action",
+      icon: StarOffIcon,
+      label: "お気に入り解除",
+      onClick: handleOpenFavoriteRemoveDialog,
+    },
+    {
+      key: "move",
+      type: "action",
+      icon: FolderInputIcon,
+      label: "移動",
+      onClick: handleOpenMoveDialogSelected,
+    },
+    {
+      key: "copy",
+      type: "action",
+      icon: CopyIcon,
+      label: "コピー",
+      onClick: handleOpenCopyDialogSelected,
+    },
+    {
+      key: "update-thumb",
+      type: "action",
+      icon: RefreshCwIcon,
+      label: "サムネイル更新",
+      onClick: handleUpdateThumbSelected,
+    },
+    {
+      key: "delete",
+      type: "action",
+      variant: "destructive",
+      icon: Trash2Icon,
+      label: "削除",
+      onClick: handleOpenDeleteDialogSelected,
     },
   ];
 
@@ -845,32 +956,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               <SortSelect
                 value={sortValue}
                 onChange={applySortValue}
-                options={[
-                  {
-                    value: {
-                      sort: "name",
-                      direction: "asc",
-                    },
-                    label: "名前順 (A-Z)",
-                    icon: ArrowDownAz,
-                  },
-                  {
-                    value: {
-                      sort: "rating",
-                      direction: "desc",
-                    },
-                    label: "評価順",
-                    icon: Sparkle,
-                  },
-                  {
-                    value: {
-                      sort: "mtime",
-                      direction: "desc",
-                    },
-                    label: "更新順",
-                    icon: CalendarArrowDown,
-                  },
-                ]}
+                options={sortOptions}
               />
 
               {/* お気に入りフィルター */}
@@ -973,46 +1059,9 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             onSelectAll={handleSelectAll}
             onClose={handleResetSelection}
             className="z-40" // DropdownMenu より小さくする
-            inlineActions={[
-              {
-                label: "タグ編集",
-                onClick: handleOpenTagEditor,
-                icon: TagIcon,
-              },
-            ]}
-            menuActions={[
-              {
-                label: "お気に入り登録",
-                onClick: handleOpenFavoriteAddDialog,
-                icon: Star,
-              },
-              {
-                label: "お気に入り解除",
-                onClick: handleOpenFavoriteRemoveDialog,
-                icon: StarOff,
-              },
-              {
-                label: "移動",
-                onClick: handleOpenMoveDialogSelected,
-                icon: FolderPlus,
-              },
-              {
-                label: "コピー",
-                onClick: handleOpenCopyDialogSelected,
-                icon: Copy,
-              },
-              {
-                label: "サムネイル更新",
-                onClick: () => void handleUpdateThumbSelected(),
-                icon: RefreshCw,
-              },
-              {
-                label: "削除",
-                onClick: handleOpenDeleteDialogSelected,
-                icon: Trash2,
-                className: "text-destructive",
-              },
-            ]}
+            context={{ nodes: selectedNodes }}
+            menuItems={selectionBarMenuItems}
+            inlineMenuItems={selectionBarInlineMenuItems}
           />
 
           {/* タグエディター */}
@@ -1024,6 +1073,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             opacity={tagEditMode === "default" ? 100 : 0}
           />
 
+          {/* 解凍ダイアログ */}
           <ExtractDialog
             open={isExtractMode}
             onOpenChange={handleExtractDialogOpenChange}

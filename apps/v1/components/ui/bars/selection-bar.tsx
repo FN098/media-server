@@ -1,4 +1,5 @@
 import { AnimatedCheckCircle } from "@/components/ui/icons/animated-check-circle";
+import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -9,15 +10,8 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { LucideIcon, MoreVertical, X } from "lucide-react";
-
-type Action = {
-  label: string;
-  onClick: () => void;
-  icon: LucideIcon;
-  disabled?: boolean;
-  className?: string;
-};
+import { MoreVertical, X } from "lucide-react";
+import React from "react";
 
 interface SelectionBarProps {
   open: boolean;
@@ -25,8 +19,9 @@ interface SelectionBarProps {
   totalCount: number;
   onSelectAll: () => void;
   onClose: () => void;
-  inlineActions?: Action[];
-  menuActions?: Action[];
+  context: MultipleNodesContext;
+  inlineMenuItems?: MenuItemDef<MultipleNodesContext>[];
+  menuItems?: MenuItemDef<MultipleNodesContext>[];
   className?: string;
 }
 
@@ -36,12 +31,19 @@ export function SelectionBar({
   totalCount,
   onSelectAll,
   onClose,
-  inlineActions,
-  menuActions,
+  context,
+  inlineMenuItems,
+  menuItems,
   className,
 }: SelectionBarProps) {
   const isAllSelected = count > 0 && count === totalCount;
   const isMobile = useIsMobile();
+
+  const displayInlineMenuItems =
+    inlineMenuItems?.filter((item) => !item.hidden?.(context)) ?? [];
+
+  const displayMenuItems =
+    menuItems?.filter((item) => !item.hidden?.(context)) ?? [];
 
   return (
     <AnimatePresence>
@@ -80,26 +82,32 @@ export function SelectionBar({
             <div className="flex gap-1 items-center">
               <div className="flex gap-1 items-center">
                 {/* インラインアクション */}
-                {inlineActions &&
-                  inlineActions.map((action, index) => (
+                {displayInlineMenuItems.map((item, index) => {
+                  if (item.type === "custom") {
+                    return (
+                      <React.Fragment key={item.key}>
+                        {item.render(context)}
+                      </React.Fragment>
+                    );
+                  }
+
+                  return (
                     <Button
                       key={index}
                       variant="ghost"
                       size="icon"
-                      className={cn(
-                        "rounded-xl w-10 h-10 p-0",
-                        action.className
-                      )}
-                      onClick={action.onClick}
-                      disabled={action.disabled}
-                      title={action.label}
+                      className={cn("rounded-xl w-10 h-10 p-0", item.className)}
+                      onClick={() => void item.onClick(context)}
+                      disabled={item.disabled?.(context)}
+                      title={item.label}
                     >
-                      <action.icon size={18} />
+                      <item.icon className="h-[18px] w-[18px]" />
                     </Button>
-                  ))}
+                  );
+                })}
 
                 {/* メニューアクション */}
-                {menuActions && (
+                {displayMenuItems && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -112,17 +120,27 @@ export function SelectionBar({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {menuActions.map((action, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={action.onClick}
-                          disabled={action.disabled}
-                          className={action.className}
-                        >
-                          <action.icon className="mr-2 h-4 w-4" />{" "}
-                          {action.label}
-                        </DropdownMenuItem>
-                      ))}
+                      {displayMenuItems.map((item, index) => {
+                        if (item.type === "custom") {
+                          return (
+                            <React.Fragment key={item.key}>
+                              {item.render(context)}
+                            </React.Fragment>
+                          );
+                        }
+
+                        return (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => void item.onClick(context)}
+                            disabled={item.disabled?.(context)}
+                            className={item.className}
+                            title={item.label}
+                          >
+                            <item.icon className="mr-2 h-4 w-4" /> {item.label}
+                          </DropdownMenuItem>
+                        );
+                      })}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}

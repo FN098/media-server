@@ -31,7 +31,11 @@ import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
-import { MenuItemDef } from "@/lib/menu-items/types";
+import {
+  MenuItemDef,
+  MultipleNodesContext,
+  NodeContext,
+} from "@/lib/menu-items/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
@@ -88,6 +92,29 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   // NOTE: 並び替え処理はサーバーサイドで実施
   const { value: sortValue, apply: applySortValue } = useSort();
+
+  const sortOptions = useMemo(
+    () =>
+      [
+        {
+          value: {
+            sort: "path",
+            direction: "asc",
+          },
+          label: "パス順 (A-Z)",
+          icon: ArrowDownAz,
+        },
+        {
+          value: {
+            sort: "rating",
+            direction: "desc",
+          },
+          label: "評価順",
+          icon: Sparkle,
+        },
+      ] as const,
+    []
+  );
 
   // ===== フィルタリング =====
 
@@ -390,11 +417,11 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   // ===== メニュー =====
 
-  const menuItems: MenuItemDef[] = [
+  const menuItems: MenuItemDef<NodeContext>[] = [
     {
       key: "rating",
       type: "custom",
-      render: (node) => {
+      render: ({ node }) => {
         const { rating } = getFavorite(node.path);
         return (
           <FavoriteRating
@@ -404,7 +431,6 @@ export function Favorites({ listing }: { listing: MediaListing }) {
                 ? handleChangeRatingSelected(newRating)
                 : handleChangeRatingSingle(node, newRating)
             }
-            variant="menu"
           />
         );
       },
@@ -414,7 +440,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: FolderIcon,
       label: "フォルダを開く",
-      onClick: handleOpenParentFolder,
+      onClick: ({ node }) => handleOpenParentFolder(node),
       hidden: () => selectedCount > 1,
     },
     {
@@ -422,7 +448,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: ExternalLinkIcon,
       label: "新しいタブで開く",
-      onClick: handleOpenInNewTab,
+      onClick: ({ node }) => handleOpenInNewTab(node),
       hidden: () => selectedCount > 1,
     },
     {
@@ -445,9 +471,19 @@ export function Favorites({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: ListFilterPlusIcon,
       label: "タグをフィルターに追加",
-      onClick: handleAddTagFilter,
-      hidden: (node) =>
+      onClick: ({ node }) => handleAddTagFilter(node),
+      hidden: ({ node }) =>
         !node.tags || node.tags.length === 0 || selectedCount > 1,
+    },
+  ];
+
+  const selectionBarInlineMenuItems: MenuItemDef<MultipleNodesContext>[] = [
+    {
+      key: "editTags",
+      type: "action",
+      icon: TagIcon,
+      label: "タグ編集",
+      onClick: handleOpenTagEditor,
     },
   ];
 
@@ -467,24 +503,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
               <SortSelect
                 value={sortValue}
                 onChange={applySortValue}
-                options={[
-                  {
-                    value: {
-                      sort: "path",
-                      direction: "asc",
-                    },
-                    label: "パス順 (A-Z)",
-                    icon: ArrowDownAz,
-                  },
-                  {
-                    value: {
-                      sort: "rating",
-                      direction: "desc",
-                    },
-                    label: "評価順",
-                    icon: Sparkle,
-                  },
-                ]}
+                options={sortOptions}
               />
 
               {/* 種別フィルター */}
@@ -576,13 +595,8 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             onSelectAll={handleSelectAll}
             onClose={handleResetSelection}
             className="z-40" // DropdownMenu より小さくする
-            inlineActions={[
-              {
-                label: "タグ編集",
-                onClick: handleOpenTagEditor,
-                icon: TagIcon,
-              },
-            ]}
+            context={{ nodes: selectedNodes }}
+            inlineMenuItems={selectionBarInlineMenuItems}
           />
 
           {/* タグエディター */}

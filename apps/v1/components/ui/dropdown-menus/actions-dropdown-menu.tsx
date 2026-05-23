@@ -2,7 +2,11 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import { MenuItemDef, MenuItemVariant } from "@/lib/menu-items/types";
+import {
+  MenuItemDef,
+  MenuItemVariant,
+  NodeContext,
+} from "@/lib/menu-items/types";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -23,7 +27,7 @@ const variantClass: Record<MenuItemVariant, string> = {
 
 interface ActionsDropdownMenuProps {
   node: MediaNode;
-  menuItems: MenuItemDef[];
+  menuItems: MenuItemDef<NodeContext>[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   className?: string;
@@ -45,7 +49,7 @@ export function ActionsDropdownMenu({
 
   if (!mounted) return null;
 
-  const visibleItems = menuItems.filter((item) => !item.hidden?.(node));
+  const visibleItems = menuItems.filter((item) => !item.hidden?.({ node }));
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -66,7 +70,7 @@ export function ActionsDropdownMenu({
           if (item.type === "custom") {
             return (
               <DropdownMenuItem key={item.key} className="flex justify-center">
-                {item.render(node)}
+                {item.render({ node })}
               </DropdownMenuItem>
             );
           }
@@ -78,10 +82,10 @@ export function ActionsDropdownMenu({
             <DropdownMenuItem
               key={item.key}
               className={cn("relative", variantClass[variant])}
-              disabled={item.disabled?.(node)}
+              disabled={item.disabled?.({ node })}
               onClick={(e) => {
                 e.stopPropagation();
-                void item.onClick(node);
+                void item.onClick({ node });
               }}
             >
               <Icon className="mr-2 h-4 w-4" />

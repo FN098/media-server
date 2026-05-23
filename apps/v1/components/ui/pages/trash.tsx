@@ -29,7 +29,11 @@ import {
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
-import { MenuItemDef } from "@/lib/menu-items/types";
+import {
+  MenuItemDef,
+  MultipleNodesContext,
+  NodeContext,
+} from "@/lib/menu-items/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
@@ -41,10 +45,8 @@ import {
   ArrowDownAz,
   CalendarArrowDown,
   FullscreenIcon,
-  RotateCcw,
   RotateCcwIcon,
   Sparkle,
-  Trash2,
   Trash2Icon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -83,6 +85,37 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   // NOTE: 並び替え処理はサーバーサイドで実施
   const { value: sortValue, apply: applySortValue } = useSort();
+
+  const sortOptions = useMemo(
+    () =>
+      [
+        {
+          value: {
+            sort: "name",
+            direction: "asc",
+          },
+          label: "名前順 (A-Z)",
+          icon: ArrowDownAz,
+        },
+        {
+          value: {
+            sort: "rating",
+            direction: "desc",
+          },
+          label: "評価順",
+          icon: Sparkle,
+        },
+        {
+          value: {
+            sort: "mtime",
+            direction: "desc",
+          },
+          label: "更新順",
+          icon: CalendarArrowDown,
+        },
+      ] as const,
+    []
+  );
 
   // ===== フィルタリング =====
 
@@ -345,7 +378,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
 
   // ===== メニュー =====
 
-  const menuItems: MenuItemDef[] = [
+  const menuItems: MenuItemDef<NodeContext>[] = [
     {
       key: "toggleFullscreen",
       type: "action",
@@ -359,9 +392,10 @@ export function Trash({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: RotateCcwIcon,
       label: "復元",
-      onClick: hasSelection
-        ? handleOpenRestoreDialogSelected
-        : handleOpenRestoreDialogSingle,
+      onClick: ({ node }) =>
+        hasSelection
+          ? handleOpenRestoreDialogSelected()
+          : handleOpenRestoreDialogSingle(node),
     },
     {
       key: "delete",
@@ -369,9 +403,28 @@ export function Trash({ listing }: { listing: MediaListing }) {
       icon: Trash2Icon,
       variant: "destructive",
       label: "削除",
-      onClick: hasSelection
-        ? handleOpenDeleteDialogSelected
-        : handleOpenDeleteDialogSingle,
+      onClick: ({ node }) =>
+        hasSelection
+          ? handleOpenDeleteDialogSelected()
+          : handleOpenDeleteDialogSingle(node),
+    },
+  ];
+
+  const selectionBarMenuItems: MenuItemDef<MultipleNodesContext>[] = [
+    {
+      key: "restore",
+      type: "action",
+      icon: RotateCcwIcon,
+      label: "復元",
+      onClick: handleOpenRestoreDialogSelected,
+    },
+    {
+      key: "delete-permamently",
+      type: "action",
+      icon: Trash2Icon,
+      label: "完全に削除",
+      className: "text-destructive",
+      onClick: handleOpenDeleteDialogSelected,
     },
   ];
 
@@ -391,32 +444,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
               <SortSelect
                 value={sortValue}
                 onChange={applySortValue}
-                options={[
-                  {
-                    value: {
-                      sort: "name",
-                      direction: "asc",
-                    },
-                    label: "名前順 (A-Z)",
-                    icon: ArrowDownAz,
-                  },
-                  {
-                    value: {
-                      sort: "rating",
-                      direction: "desc",
-                    },
-                    label: "評価順",
-                    icon: Sparkle,
-                  },
-                  {
-                    value: {
-                      sort: "mtime",
-                      direction: "desc",
-                    },
-                    label: "更新順",
-                    icon: CalendarArrowDown,
-                  },
-                ]}
+                options={sortOptions}
               />
 
               {/* リセット */}
@@ -482,19 +510,8 @@ export function Trash({ listing }: { listing: MediaListing }) {
             onSelectAll={handleSelectAll}
             onClose={handleResetSelection}
             className="z-40"
-            menuActions={[
-              {
-                label: "復元",
-                onClick: handleOpenRestoreDialogSelected,
-                icon: RotateCcw,
-              },
-              {
-                label: "完全に削除",
-                onClick: handleOpenDeleteDialogSelected,
-                icon: Trash2,
-                className: "text-destructive",
-              },
-            ]}
+            context={{ nodes: selectedNodes }}
+            menuItems={selectionBarMenuItems}
           />
 
           {/* 削除ダイアログ */}

@@ -2,7 +2,7 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import { MenuItemDef } from "@/lib/menu-items/types";
+import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,7 @@ const variantClass = {
 
 interface ViewerActionsDropdownMenuProps {
   node: MediaNode;
-  menuItems: MenuItemDef[];
+  menuItems: MenuItemDef<NodeContext>[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -43,7 +43,7 @@ export function ViewerActionsDropdownMenu({
 
   if (!mounted) return null;
 
-  const visibleItems = menuItems.filter((item) => !item.hidden?.(node));
+  const visibleItems = menuItems.filter((item) => !item.hidden?.({ node }));
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -62,7 +62,7 @@ export function ViewerActionsDropdownMenu({
           if (item.type === "custom") {
             return (
               <DropdownMenuItem key={item.key} className="flex justify-center">
-                {item.render(node)}
+                {item.render({ node })}
               </DropdownMenuItem>
             );
           }
@@ -74,10 +74,10 @@ export function ViewerActionsDropdownMenu({
             <DropdownMenuItem
               key={item.key}
               className={cn("relative", variantClass[variant])}
-              disabled={item.disabled?.(node)}
+              disabled={item.disabled?.({ node })}
               onClick={(e) => {
                 e.stopPropagation();
-                void item.onClick(node);
+                void item.onClick({ node });
               }}
             >
               <Icon className="mr-2 h-4 w-4" />

@@ -1,10 +1,10 @@
 "use client";
 
-import { MenuItemDef } from "@/lib/menu-items/types";
+import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { createContext, ReactNode, useContext } from "react";
 
 interface MenuItemsContextType {
-  items: MenuItemDef[];
+  items: MenuItemDef<NodeContext>[];
 }
 
 const MenuItemsContext = createContext<MenuItemsContextType | undefined>(
@@ -16,7 +16,7 @@ export function MenuItemsProvider({
   items,
 }: {
   children: ReactNode;
-  items: MenuItemDef[];
+  items: MenuItemDef<NodeContext>[];
 }) {
   return (
     <MenuItemsContext.Provider value={{ items }}>

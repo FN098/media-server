@@ -2,24 +2,33 @@ import { MediaNode } from "@/lib/media/types";
 
 export type MenuItemVariant = "default" | "destructive";
 
-interface BaseMenuItem {
+interface BaseMenuItem<T> {
   key: string;
-  hidden?: (node: MediaNode) => boolean;
-  disabled?: (node: MediaNode) => boolean;
+  hidden?: (context: T) => boolean;
+  disabled?: (context: T) => boolean;
+  className?: string;
 }
 
-export interface ActionMenuItem extends BaseMenuItem {
+export interface ActionMenuItem<T> extends BaseMenuItem<T> {
   type: "action";
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  onClick: (node: MediaNode) => void | Promise<void>;
+  onClick: (context: T) => void | Promise<void>;
   variant?: MenuItemVariant;
   kbd?: string;
 }
 
-export interface CustomMenuItem extends BaseMenuItem {
+export interface CustomMenuItem<T> extends BaseMenuItem<T> {
   type: "custom";
-  render: (node: MediaNode) => React.ReactNode;
+  render: (context: T) => React.ReactNode;
 }
 
-export type MenuItemDef = ActionMenuItem | CustomMenuItem;
+export type MenuItemDef<T> = ActionMenuItem<T> | CustomMenuItem<T>;
+
+export type NodeContext = {
+  node: MediaNode;
+};
+
+export type MultipleNodesContext = {
+  nodes: MediaNode[];
+};
