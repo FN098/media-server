@@ -177,7 +177,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
         createMediaTypeFilter(mediaTypeFilterValue),
         "apply-filter"
       ),
-      withDirectoryControl(createRatingFilter(ratingFilterValue), "always"),
+      withDirectoryControl(
+        createRatingFilter(ratingFilterValue),
+        "apply-filter"
+      ),
       withDirectoryControl(createTagFilter(tagFilterValue), "always"),
       withDirectoryControl(createFavoriteFilter(favoriteFilterValue), "always"),
     ],

@@ -53,7 +53,7 @@ export function createTagFilter(value: TagFilterValue): MediaNodeFilter {
 
 export function createRatingFilter(value: RatingFilterValue): MediaNodeFilter {
   return (node: MediaNode) => {
-    const rating = node.rating;
+    const rating = node.isDirectory ? node.averageRating : node.rating;
 
     switch (value.mode) {
       case "all":
@@ -98,9 +98,12 @@ export function createFavoriteFilter(
     switch (value.mode) {
       case "only_favorites":
         return !!node.favoritedAt;
+
       case "exclude_favorites":
         return !node.favoritedAt;
+
       case "all":
+
       default:
         return true;
     }
