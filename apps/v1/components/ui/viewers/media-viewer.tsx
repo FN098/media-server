@@ -13,7 +13,7 @@ import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { MenuItemDef } from "@/lib/menu-items/types";
+import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -32,7 +32,7 @@ interface MediaViewerProps {
   allNodes: MediaNode[];
   initialIndex?: number;
   shortcutEnabled?: boolean;
-  menuItems?: MenuItemDef[];
+  menuItems?: MenuItemDef<NodeContext>[];
   onIndexChange?: (index: number) => void;
   onClose?: () => void;
   onOpenPrev?: () => void;
