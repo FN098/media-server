@@ -771,21 +771,23 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       render: ({ node, closeMenu }) => {
         const { rating } = getFavorite(node.path);
         return (
-          <FavoriteRatingInput
-            value={rating}
-            onChange={(newRating) =>
-              hasSelection
-                ? handleChangeRatingSelected({
-                    newRating,
-                    onSuccess: closeMenu,
-                  })
-                : handleChangeRatingSingle({
-                    node,
-                    newRating,
-                    onSuccess: closeMenu,
-                  })
-            }
-          />
+          <div className="w-full flex justify-center">
+            <FavoriteRatingInput
+              value={rating}
+              onChange={(newRating) =>
+                hasSelection
+                  ? handleChangeRatingSelected({
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
+                  : handleChangeRatingSingle({
+                      node,
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
+              }
+            />
+          </div>
         );
       },
     },

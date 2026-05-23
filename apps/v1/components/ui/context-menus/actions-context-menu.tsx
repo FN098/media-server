@@ -55,7 +55,7 @@ export function ActionsContextMenu({
         {visibleItems.map((item) => {
           if (item.type === "custom") {
             return (
-              <ContextMenuItem key={item.key} className="flex justify-center">
+              <ContextMenuItem key={item.key}>
                 {item.render({ node, closeMenu })}
               </ContextMenuItem>
             );
