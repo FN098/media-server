@@ -1,13 +1,15 @@
 import { cn } from "@/shadcn/lib/utils";
 import { Star } from "lucide-react";
 
+interface AverageRatingBadgeProps {
+  rating: number;
+  className?: string;
+}
+
 export const AverageRatingBadge = ({
   rating,
   className,
-}: {
-  rating: number;
-  className?: string;
-}) => {
+}: AverageRatingBadgeProps) => {
   const rounded = Math.round(rating * 10) / 10;
 
   return (

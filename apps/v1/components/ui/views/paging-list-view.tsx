@@ -1,9 +1,10 @@
 "use client";
 
 import { AverageRatingBadge } from "@/components/ui/badges/average-rating-badge";
+import { FavoriteRatingDisplay } from "@/components/ui/badges/favorite-rating-display";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
-import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating";
+import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
@@ -610,8 +611,19 @@ function DataRow({
             onClick={(e) => e.stopPropagation()}
           >
             {node.isDirectory ? (
-              node.averageRating && (
-                <AverageRatingBadge rating={node.averageRating} />
+              node.averageRating ? (
+                <>
+                  <FavoriteRatingDisplay
+                    value={node.averageRating}
+                    className="hidden md:flex"
+                  />
+                  <AverageRatingBadge
+                    rating={node.averageRating}
+                    className="flex md:hidden"
+                  />
+                </>
+              ) : (
+                <span className="italic text-muted-foreground">-</span>
               )
             ) : isMobile ? (
               <FavoriteButton

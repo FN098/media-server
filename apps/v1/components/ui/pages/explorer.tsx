@@ -10,7 +10,7 @@ import {
   enqueueCreateThumbsJobAction,
 } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating";
+import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";

@@ -6,7 +6,7 @@ import {
 } from "@/actions/media-actions";
 import { enqueueCreateSingleThumbJobAction } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating";
+import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
