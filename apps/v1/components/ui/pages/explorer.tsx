@@ -348,12 +348,21 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const isFavoriteDialogOpen = favoriteTargets.length > 0;
 
   // レーティング更新（単体）
-  const handleChangeRatingSingle = (node: MediaNode, rating: number | null) => {
+  const handleChangeRatingSingle = ({
+    node,
+    newRating,
+    onSuccess,
+  }: {
+    node: MediaNode;
+    newRating: number | null;
+    onSuccess?: () => void;
+  }) => {
     if (updatingFavorite) return;
     startUpdatingFavorite(async () => {
-      const result = await updateFavorite(node.path, rating);
+      const result = await updateFavorite(node.path, newRating);
       if (result.success) {
-        toast.success("レーティングが更新されました。");
+        toast.success("レーティングが更新されました。", { duration: 500 });
+        onSuccess?.();
       } else {
         toast.error(result.error);
       }
@@ -361,13 +370,22 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   };
 
   // レーティング更新（選択）
-  const handleChangeRatingSelected = (rating: number | null) => {
+  const handleChangeRatingSelected = ({
+    newRating,
+    onSuccess,
+  }: {
+    newRating: number | null;
+    onSuccess?: () => void;
+  }) => {
     if (updatingFavorite) return;
     startUpdatingFavorite(async () => {
       const paths = selectedNodes.map((n) => n.path);
-      const result = await updateMultipleFavorites(paths, { rating });
+      const result = await updateMultipleFavorites(paths, {
+        rating: newRating,
+      });
       if (result.success) {
-        toast.success("レーティングが更新されました。");
+        toast.success("レーティングが更新されました。", { duration: 500 });
+        onSuccess?.();
       } else {
         toast.error(result.error);
       }
@@ -750,15 +768,22 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     {
       key: "rating",
       type: "custom",
-      render: ({ node }) => {
+      render: ({ node, closeMenu }) => {
         const { rating } = getFavorite(node.path);
         return (
           <FavoriteRatingInput
             value={rating}
             onChange={(newRating) =>
               hasSelection
-                ? handleChangeRatingSelected(newRating)
-                : handleChangeRatingSingle(node, newRating)
+                ? handleChangeRatingSelected({
+                    newRating,
+                    onSuccess: closeMenu,
+                  })
+                : handleChangeRatingSingle({
+                    node,
+                    newRating,
+                    onSuccess: closeMenu,
+                  })
             }
           />
         );
@@ -879,7 +904,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     {
       key: "rating",
       type: "custom",
-      render: ({ nodes }) => {
+      render: ({ nodes, closeMenu }) => {
         const filtered = nodes.filter((n) => n.rating != null);
         const averageRating = averageBy(filtered, (n) => n.rating!);
 
@@ -889,8 +914,15 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               value={averageRating}
               onChange={(newRating) =>
                 hasSelection
-                  ? handleChangeRatingSelected(newRating)
-                  : handleChangeRatingSingle(nodes[0], newRating)
+                  ? handleChangeRatingSelected({
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
+                  : handleChangeRatingSingle({
+                      node: nodes[0],
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
               }
             />
           </div>

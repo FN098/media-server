@@ -18,7 +18,7 @@ import { Kbd } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const variantClass: Record<MenuItemVariant, string> = {
   default: "",
@@ -31,6 +31,7 @@ interface ActionsDropdownMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export function ActionsDropdownMenu({
@@ -39,6 +40,7 @@ export function ActionsDropdownMenu({
   open: controlledOpen,
   onOpenChange: onControlledOpenChange,
   className,
+  disabled = false,
 }: ActionsDropdownMenuProps) {
   const isMobile = useIsMobile();
   const mounted = useMounted();
@@ -46,10 +48,14 @@ export function ActionsDropdownMenu({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const setOpen = onControlledOpenChange ?? setInternalOpen;
+  const closeMenu = () => setOpen(false);
 
-  if (!mounted) return null;
+  const visibleItems = useMemo(
+    () => menuItems.filter((item) => !item.hidden?.({ node })),
+    [menuItems, node]
+  );
 
-  const visibleItems = menuItems.filter((item) => !item.hidden?.({ node }));
+  if (!mounted || disabled) return null;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -70,7 +76,7 @@ export function ActionsDropdownMenu({
           if (item.type === "custom") {
             return (
               <DropdownMenuItem key={item.key} className="flex justify-center">
-                {item.render({ node })}
+                {item.render({ node, closeMenu })}
               </DropdownMenuItem>
             );
           }
@@ -85,7 +91,7 @@ export function ActionsDropdownMenu({
               disabled={item.disabled?.({ node })}
               onClick={(e) => {
                 e.stopPropagation();
-                void item.onClick({ node });
+                void item.onClick({ node, closeMenu });
               }}
             >
               <Icon className="mr-2 h-4 w-4" />

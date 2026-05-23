@@ -27,8 +27,10 @@ export type MenuItemDef<T> = ActionMenuItem<T> | CustomMenuItem<T>;
 
 export type NodeContext = {
   node: MediaNode;
+  closeMenu?: () => void;
 };
 
 export type MultipleNodesContext = {
   nodes: MediaNode[];
+  closeMenu?: () => void;
 };

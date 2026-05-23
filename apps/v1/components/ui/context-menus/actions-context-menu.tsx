@@ -13,6 +13,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/shadcn/components/ui/context-menu";
+import { useMemo } from "react";
 
 const variantClass: Record<MenuItemVariant, string> = {
   default: "",
@@ -37,9 +38,15 @@ export function ActionsContextMenu({
   disabled = false,
 }: ActionsContextMenuProps) {
   const mounted = useMounted();
-  if (!mounted || disabled) return <>{children}</>;
 
-  const visibleItems = menuItems.filter((item) => !item.hidden?.({ node }));
+  const visibleItems = useMemo(
+    () => menuItems.filter((item) => !item.hidden?.({ node })),
+    [menuItems, node]
+  );
+
+  const closeMenu = () => onOpenChange?.(false);
+
+  if (!mounted || disabled) return children;
 
   return (
     <ContextMenu modal={open} onOpenChange={onOpenChange}>
@@ -49,7 +56,7 @@ export function ActionsContextMenu({
           if (item.type === "custom") {
             return (
               <ContextMenuItem key={item.key} className="flex justify-center">
-                {item.render({ node })}
+                {item.render({ node, closeMenu })}
               </ContextMenuItem>
             );
           }
@@ -64,7 +71,7 @@ export function ActionsContextMenu({
               disabled={item.disabled?.({ node })}
               onClick={(e) => {
                 e.stopPropagation();
-                void item.onClick({ node });
+                void item.onClick({ node, closeMenu });
               }}
             >
               <Icon className="mr-2 h-4 w-4" />

@@ -37,6 +37,7 @@ import {
   NodeContext,
 } from "@/lib/menu-items/types";
 import { getParentDirPath } from "@/lib/path/helpers";
+import { averageBy } from "@/lib/utils/math";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
@@ -225,12 +226,21 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   const [updatingFavorite, startUpdatingFavorite] = useTransition();
 
   // レーティング更新（単体）
-  const handleChangeRatingSingle = (node: MediaNode, rating: number | null) => {
+  const handleChangeRatingSingle = ({
+    node,
+    newRating,
+    onSuccess,
+  }: {
+    node: MediaNode;
+    newRating: number | null;
+    onSuccess?: () => void;
+  }) => {
     if (updatingFavorite) return;
     startUpdatingFavorite(async () => {
-      const result = await updateFavorite(node.path, rating);
+      const result = await updateFavorite(node.path, newRating);
       if (result.success) {
-        toast.success("レーティングが更新されました。");
+        toast.success("レーティングが更新されました。", { duration: 500 });
+        onSuccess?.();
       } else {
         toast.error(result.error);
       }
@@ -238,13 +248,22 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   };
 
   // レーティング更新（選択）
-  const handleChangeRatingSelected = (rating: number | null) => {
+  const handleChangeRatingSelected = ({
+    newRating,
+    onSuccess,
+  }: {
+    newRating: number | null;
+    onSuccess?: () => void;
+  }) => {
     if (updatingFavorite) return;
     startUpdatingFavorite(async () => {
       const paths = selectedNodes.map((n) => n.path);
-      const result = await updateMultipleFavorites(paths, { rating });
+      const result = await updateMultipleFavorites(paths, {
+        rating: newRating,
+      });
       if (result.success) {
-        toast.success("レーティングが更新されました。");
+        toast.success("レーティングが更新されました。", { duration: 500 });
+        onSuccess?.();
       } else {
         toast.error(result.error);
       }
@@ -421,7 +440,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     {
       key: "rating",
       type: "custom",
-      render: ({ node }) => {
+      render: ({ node, closeMenu }) => {
         const { rating } = getFavorite(node.path);
         return (
           <div className="w-full flex justify-center p-1">
@@ -429,8 +448,15 @@ export function Favorites({ listing }: { listing: MediaListing }) {
               value={rating}
               onChange={(newRating) =>
                 hasSelection
-                  ? handleChangeRatingSelected(newRating)
-                  : handleChangeRatingSingle(node, newRating)
+                  ? handleChangeRatingSelected({
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
+                  : handleChangeRatingSingle({
+                      node,
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
               }
             />
           </div>
@@ -486,6 +512,37 @@ export function Favorites({ listing }: { listing: MediaListing }) {
       icon: TagIcon,
       label: "タグ編集",
       onClick: handleOpenTagEditor,
+    },
+  ];
+
+  const selectionBarMenuItems: MenuItemDef<MultipleNodesContext>[] = [
+    {
+      key: "rating",
+      type: "custom",
+      render: ({ nodes, closeMenu }) => {
+        const filtered = nodes.filter((n) => n.rating != null);
+        const averageRating = averageBy(filtered, (n) => n.rating!);
+
+        return (
+          <div className="w-full flex justify-center p-1">
+            <FavoriteRatingInput
+              value={averageRating}
+              onChange={(newRating) =>
+                hasSelection
+                  ? handleChangeRatingSelected({
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
+                  : handleChangeRatingSingle({
+                      node: nodes[0],
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
+              }
+            />
+          </div>
+        );
+      },
     },
   ];
 
@@ -599,6 +656,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             className="z-40" // DropdownMenu より小さくする
             context={{ nodes: selectedNodes }}
             inlineMenuItems={selectionBarInlineMenuItems}
+            menuItems={selectionBarMenuItems}
           />
 
           {/* タグエディター */}
