@@ -614,7 +614,6 @@ function DataRow({
               node={node}
               rating={rating}
               isFavorite={isFavorite}
-              isMobile={isMobile}
               toggleFavorite={toggleFavorite}
               updateFavorite={updateFavorite}
             />
@@ -639,7 +638,6 @@ interface RatingCellProps {
   node: MediaNode;
   rating: number | null;
   isFavorite: boolean;
-  isMobile: boolean;
   toggleFavorite: (path: string) => Promise<unknown>;
   updateFavorite: (path: string, value: number | null) => Promise<unknown>;
 }
@@ -648,7 +646,6 @@ function RatingCell({
   node,
   rating,
   isFavorite,
-  isMobile,
   toggleFavorite,
   updateFavorite,
 }: RatingCellProps) {
@@ -671,21 +668,20 @@ function RatingCell({
     );
   }
 
-  if (isMobile) {
-    return (
+  return (
+    <>
+      <FavoriteRatingInput
+        value={rating}
+        onChange={(value) => void updateFavorite(node.path, value)}
+        className="hidden md:flex"
+      />
       <FavoriteButton
         variant="list"
         rating={rating}
         isFavorite={isFavorite}
         onClick={() => void toggleFavorite(node.path)}
+        className="flex md:hidden"
       />
-    );
-  }
-
-  return (
-    <FavoriteRatingInput
-      value={rating}
-      onChange={(value) => void updateFavorite(node.path, value)}
-    />
+    </>
   );
 }
