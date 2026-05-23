@@ -82,7 +82,7 @@ export function SelectionBar({
             <div className="flex gap-1 items-center">
               <div className="flex gap-1 items-center">
                 {/* インラインアクション */}
-                {displayInlineMenuItems.map((item, index) => {
+                {displayInlineMenuItems.map((item) => {
                   if (item.type === "custom") {
                     return (
                       <React.Fragment key={item.key}>
@@ -93,8 +93,10 @@ export function SelectionBar({
 
                   return (
                     <Button
-                      key={index}
-                      variant="ghost"
+                      key={item.key}
+                      variant={
+                        item.variant === "destructive" ? "destructive" : "ghost"
+                      }
                       size="icon"
                       className={cn("rounded-xl w-10 h-10 p-0", item.className)}
                       onClick={() => void item.onClick(context)}
@@ -107,7 +109,7 @@ export function SelectionBar({
                 })}
 
                 {/* メニューアクション */}
-                {displayMenuItems && (
+                {displayMenuItems.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -120,7 +122,7 @@ export function SelectionBar({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {displayMenuItems.map((item, index) => {
+                      {displayMenuItems.map((item) => {
                         if (item.type === "custom") {
                           return (
                             <React.Fragment key={item.key}>
@@ -131,10 +133,14 @@ export function SelectionBar({
 
                         return (
                           <DropdownMenuItem
-                            key={index}
+                            key={item.key}
                             onClick={() => void item.onClick(context)}
                             disabled={item.disabled?.(context)}
-                            className={item.className}
+                            className={cn(
+                              item.variant === "destructive" &&
+                                "text-destructive focus:text-destructive",
+                              item.className
+                            )}
                             title={item.label}
                           >
                             <item.icon className="mr-2 h-4 w-4" /> {item.label}
