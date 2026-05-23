@@ -424,14 +424,16 @@ export function Favorites({ listing }: { listing: MediaListing }) {
       render: ({ node }) => {
         const { rating } = getFavorite(node.path);
         return (
-          <FavoriteRatingInput
-            value={rating}
-            onChange={(newRating) =>
-              hasSelection
-                ? handleChangeRatingSelected(newRating)
-                : handleChangeRatingSingle(node, newRating)
-            }
-          />
+          <div className="w-full flex justify-center p-1">
+            <FavoriteRatingInput
+              value={rating}
+              onChange={(newRating) =>
+                hasSelection
+                  ? handleChangeRatingSelected(newRating)
+                  : handleChangeRatingSingle(node, newRating)
+              }
+            />
+          </div>
         );
       },
     },

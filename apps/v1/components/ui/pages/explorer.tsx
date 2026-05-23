@@ -884,14 +884,16 @@ export function Explorer({ listing }: { listing: MediaListing }) {
         const averageRating = averageBy(filtered, (n) => n.rating!);
 
         return (
-          <FavoriteRatingInput
-            value={averageRating}
-            onChange={(newRating) =>
-              hasSelection
-                ? handleChangeRatingSelected(newRating)
-                : handleChangeRatingSingle(nodes[0], newRating)
-            }
-          />
+          <div className="w-full flex justify-center p-1">
+            <FavoriteRatingInput
+              value={averageRating}
+              onChange={(newRating) =>
+                hasSelection
+                  ? handleChangeRatingSelected(newRating)
+                  : handleChangeRatingSingle(nodes[0], newRating)
+              }
+            />
+          </div>
         );
       },
     },
