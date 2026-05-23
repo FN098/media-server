@@ -42,7 +42,6 @@ import {
   RotateCcw,
   RotateCcwIcon,
   Sparkle,
-  Sparkles,
   Trash2,
   Trash2Icon,
 } from "lucide-react";
@@ -394,14 +393,6 @@ export function Trash({ listing }: { listing: MediaListing }) {
                     },
                     label: "評価順",
                     icon: Sparkle,
-                  },
-                  {
-                    value: {
-                      sort: "favoriteCount",
-                      direction: "desc",
-                    },
-                    label: "人気順",
-                    icon: Sparkles,
                   },
                   {
                     value: {

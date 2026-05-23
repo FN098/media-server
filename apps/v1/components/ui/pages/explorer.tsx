@@ -90,7 +90,6 @@ import {
   RefreshCw,
   RefreshCwIcon,
   Sparkle,
-  Sparkles,
   Star,
   StarOff,
   TagIcon,
@@ -857,14 +856,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                     },
                     label: "評価順",
                     icon: Sparkle,
-                  },
-                  {
-                    value: {
-                      sort: "favoriteCount",
-                      direction: "desc",
-                    },
-                    label: "人気順",
-                    icon: Sparkles,
                   },
                   {
                     value: {
