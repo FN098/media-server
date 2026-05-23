@@ -51,7 +51,7 @@ export function ActionsContextMenu({
         {visibleItems.map((item) => {
           if (item.type === "custom") {
             return (
-              <ContextMenuItem key={item.key}>
+              <ContextMenuItem asChild key={item.key}>
                 {item.render({ node })}
               </ContextMenuItem>
             );

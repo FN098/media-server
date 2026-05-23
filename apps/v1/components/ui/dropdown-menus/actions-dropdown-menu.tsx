@@ -75,7 +75,7 @@ export function ActionsDropdownMenu({
         {visibleItems.map((item) => {
           if (item.type === "custom") {
             return (
-              <DropdownMenuItem key={item.key} className="flex justify-center">
+              <DropdownMenuItem asChild key={item.key}>
                 {item.render({ node, closeMenu })}
               </DropdownMenuItem>
             );
