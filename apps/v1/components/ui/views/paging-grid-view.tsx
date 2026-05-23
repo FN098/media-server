@@ -90,21 +90,21 @@ export function PagingGridView({
 
   // 初期スクロール対象をアンカーに設定
   useEffect(() => {
-    if (!initialScrollTargetIndex) return;
-    setAnchorPath(allNodes[initialScrollTargetIndex].path);
-  }, [initialScrollTargetIndex, allNodes, setAnchorPath]);
+    if (!initialScrollPath) return;
+    setAnchorPath(initialScrollPath);
+  }, [initialScrollPath, setAnchorPath]);
 
   // 初期スクロール対象を選択状態に設定
   useEffect(() => {
-    if (!initialScrollTargetIndex) return;
-    replaceSelection(allNodes[initialScrollTargetIndex].path);
-  }, [initialScrollTargetIndex, allNodes, replaceSelection]);
+    if (!initialScrollPath) return;
+    replaceSelection(initialScrollPath);
+  }, [initialScrollPath, replaceSelection]);
 
   // 初期スクロール対象を最終選択パスに設定
   useEffect(() => {
-    if (!initialScrollTargetIndex) return;
-    setLastSelectedPath(allNodes[initialScrollTargetIndex].path);
-  }, [initialScrollTargetIndex, allNodes, setLastSelectedPath]);
+    if (!initialScrollPath) return;
+    setLastSelectedPath(initialScrollPath);
+  }, [initialScrollPath, setLastSelectedPath]);
 
   // 初期スクロール対象ページを特定する
   const initialScrollTargetPage = useMemo(() => {
