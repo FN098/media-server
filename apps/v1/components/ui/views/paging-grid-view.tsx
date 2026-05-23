@@ -1,6 +1,6 @@
 "use client";
 
-import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
+import { AverageRatingBadge } from "@/components/ui/badges/average-rating-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
@@ -626,9 +626,11 @@ function Cell({
 
             {/* Badges */}
             <div className="absolute flex flex-col bottom-8 right-2 gap-1 items-end">
-              {node.isDirectory && !!node.favoriteCount && (
-                <FavoriteCountBadge count={node.favoriteCount} />
-              )}
+              {node.isDirectory &&
+                !!node.favoriteCount &&
+                node.averageRating && (
+                  <AverageRatingBadge rating={node.averageRating} />
+                )}
               {node.isDirectory && (
                 <FolderStatusBadge date={node.lastViewedAt} />
               )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { FavoriteCountBadge } from "@/components/ui/badges/favorite-count-badge";
+import { AverageRatingBadge } from "@/components/ui/badges/average-rating-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
@@ -331,7 +331,7 @@ function HeaderRow() {
       <div className="hidden md:block">Updated</div>
       <div className="hidden md:block">Size</div>
       <div className="hidden md:block">Last Viewed</div>
-      <div className="text-center">Favorite</div>
+      <div className="text-center">Rating</div>
       <div className="text-center">Actions</div>
     </div>
   );
@@ -610,7 +610,9 @@ function DataRow({
             onClick={(e) => e.stopPropagation()}
           >
             {node.isDirectory ? (
-              <FavoriteCountBadge count={node.favoriteCount ?? 0} />
+              node.averageRating && (
+                <AverageRatingBadge rating={node.averageRating} />
+              )
             ) : isMobile ? (
               <FavoriteButton
                 variant="list"

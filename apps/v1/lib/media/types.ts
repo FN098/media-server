@@ -36,6 +36,7 @@ export type MediaNode = MediaFsNode & {
   title?: string | null;
   lastViewedAt?: Date | null;
   favoriteCount?: number | null;
+  averageRating?: number | null;
   tags?: MediaNodeTag[] | null;
   previewPath?: string | null; // サムネイルやプレビュー画像のパス
   rating: number | null; // 1-5の整数 または 未評価 (null)
@@ -81,6 +82,7 @@ export type FolderVisitedInfo = {
 export type FolderFavoriteInfo = {
   path: string;
   favoriteMediaCount: number;
+  averageRating: number | null;
 };
 
 export type FolderMeta = {

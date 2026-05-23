@@ -40,6 +40,7 @@ export function mergeFsWithDb({
         title: dbNode?.title ?? null,
         lastViewedAt: visited?.lastViewedAt ?? null,
         favoriteCount: fav?.favoriteMediaCount,
+        averageRating: fav?.averageRating,
         tags: null,
         previewPath: meta?.previewPath,
         rating: null,

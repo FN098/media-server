@@ -97,24 +97,35 @@ export async function getFolderFavoriteInfo(
   dirPaths: string[],
   userId: string
 ): Promise<FolderFavoriteInfo[]> {
-  // 1. クエリの「準備」だけを行う（まだ実行しない）
+  // 1. 各ディレクトリごとの集計クエリ（Promise）の配列を作成
   const tasks = dirPaths.map((d) =>
-    prisma.favorite.count({
+    prisma.favorite.aggregate({
       where: {
         userId,
         media: { path: { startsWith: d + "/" } },
       },
+      _count: {
+        _all: true, // お気に入り登録されている総数
+      },
+      _avg: {
+        rating: true, // ratingの平均値（nullのレコードは自動で除外されて計算されます）
+      },
     })
   );
 
-  // 2. クエリを一括で DB に送信
-  const counts = await prisma.$transaction(tasks);
+  // 2. トランザクションで一括実行
+  const results = await prisma.$transaction(tasks);
 
-  // 3. 結果をマッピング
-  return dirPaths.map((d, index) => ({
-    path: d,
-    favoriteMediaCount: counts[index],
-  }));
+  // 3. 結果をマッピングして返す
+  return dirPaths.map((d, index) => {
+    const aggregateResult = results[index];
+
+    return {
+      path: d,
+      favoriteMediaCount: aggregateResult._count._all,
+      averageRating: aggregateResult._avg.rating,
+    };
+  });
 }
 
 // フォルダメタ情報取得
