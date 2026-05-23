@@ -12,6 +12,7 @@ import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
 import { useFolderNavigation } from "@/hooks/use-folder-navigation";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { useParentPathname } from "@/hooks/use-parent-pathname";
 import { useQueryFilter } from "@/hooks/use-query-filter";
@@ -39,6 +40,7 @@ import { cn } from "@/shadcn/lib/utils";
 import {
   ArrowDownAz,
   CalendarArrowDown,
+  FullscreenIcon,
   RotateCcw,
   RotateCcwIcon,
   Sparkle,
@@ -260,6 +262,10 @@ export function Trash({ listing }: { listing: MediaListing }) {
     }
   };
 
+  // ===== フルスクリーン =====
+
+  const fullscreen = useFullscreen();
+
   // ===== ショートカット =====
 
   // スコープを切り替えるフック
@@ -340,6 +346,14 @@ export function Trash({ listing }: { listing: MediaListing }) {
   // ===== メニュー =====
 
   const menuItems: MenuItemDef[] = [
+    {
+      key: "toggleFullscreen",
+      type: "action",
+      icon: FullscreenIcon,
+      label: "全画面",
+      onClick: fullscreen.toggleFullscreen,
+      hidden: () => !isViewerMode || !fullscreen.isSupported,
+    },
     {
       key: "restore",
       type: "action",

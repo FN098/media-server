@@ -1,47 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 
 export function useFullscreen() {
-  const [isFullscreen, setIsFullscreen] = useState(
-    typeof document == "object" && !!document.fullscreenElement
-  );
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  // 状態を同期するためのイベントリスナー
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    const handler = () => forceUpdate();
+
     document.addEventListener("fullscreenchange", handler);
-    return () => document.removeEventListener("fullscreenchange", handler);
+    return () => {
+      document.removeEventListener("fullscreenchange", handler);
+    };
   }, []);
 
+  const isSupported =
+    typeof document.documentElement.requestFullscreen === "function";
+
+  const isFullscreen = !!document.fullscreenElement;
+
   // 全画面にする
-  const enterFullscreen = (element = document.documentElement) => {
-    if (!document.fullscreenElement) {
-      element.requestFullscreen().catch((err) => {
-        console.error(`Error attempting to enable full-screen mode:`, err);
-      });
-    }
+  const enterFullscreen = async (element = document.documentElement) => {
+    if (!isSupported || document.fullscreenElement) return;
+    await element.requestFullscreen();
   };
 
   // 全画面を解除する
-  const exitFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch((err) => {
-        console.error(`Error attempting to exit full-screen mode:`, err);
-      });
-    }
+  const exitFullscreen = async () => {
+    if (!isSupported || !document.fullscreenElement) return;
+    await document.exitFullscreen();
   };
 
   // 切り替え
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      enterFullscreen();
+
+  const toggleFullscreen = async () => {
+    if (document.fullscreenElement) {
+      await exitFullscreen();
     } else {
-      exitFullscreen();
+      await enterFullscreen();
     }
   };
 
   return {
+    isSupported,
     isFullscreen,
     enterFullscreen,
     exitFullscreen,

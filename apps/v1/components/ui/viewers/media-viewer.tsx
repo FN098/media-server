@@ -11,7 +11,6 @@ import { ImageViewer } from "@/components/ui/viewers/image-viewer";
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
-import { useFullscreen } from "@/hooks/use-fullscreen";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
@@ -282,10 +281,6 @@ export function MediaViewer({
 
   const isMobile = useIsMobile();
 
-  // ===== フルスクリーン =====
-
-  const { toggleFullscreen } = useFullscreen();
-
   // ===== ショートカット =====
 
   // Escape / Backspace: 閉じる
@@ -319,13 +314,6 @@ export function MediaViewer({
 
   // S: お気に入りの切り替え
   useHotkeys("s", () => handleToggleFavorite(), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled,
-  });
-
-  // F: 全画面表示
-  // TODO: fix
-  useHotkeys("f", () => toggleFullscreen(), {
     scopes: ["viewer", "tag-editor"],
     enabled: shortcutEnabled,
   });

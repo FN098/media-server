@@ -19,6 +19,7 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useFolderNavigation } from "@/hooks/use-folder-navigation";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
@@ -46,6 +47,7 @@ import {
   ArrowDownAz,
   ExternalLinkIcon,
   FolderIcon,
+  FullscreenIcon,
   ListFilterPlusIcon,
   Sparkle,
   TagIcon,
@@ -314,6 +316,10 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   const isMobile = useIsMobile();
 
+  // ===== フルスクリーン =====
+
+  const fullscreen = useFullscreen();
+
   // ===== ショートカット =====
 
   // スコープ切り替えフック
@@ -354,6 +360,11 @@ export function Favorites({ listing }: { listing: MediaListing }) {
 
   // T: タグエディタ
   useHotkeys("t", () => handleToggleTagEditor(), {
+    scopes: ["favorites", "viewer", "tag-editor"],
+  });
+
+  // F: 全画面表示
+  useHotkeys("f", () => void fullscreen.toggleFullscreen(), {
     scopes: ["favorites", "viewer", "tag-editor"],
   });
 
@@ -413,6 +424,14 @@ export function Favorites({ listing }: { listing: MediaListing }) {
       label: "新しいタブで開く",
       onClick: handleOpenInNewTab,
       hidden: () => selectedCount > 1,
+    },
+    {
+      key: "toggleFullscreen",
+      type: "action",
+      icon: FullscreenIcon,
+      label: "全画面",
+      onClick: fullscreen.toggleFullscreen,
+      hidden: () => !isViewerMode || !fullscreen.isSupported,
     },
     {
       key: "editTags",

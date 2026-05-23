@@ -616,7 +616,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== フルスクリーン =====
 
-  const { toggleFullscreen } = useFullscreen();
+  const fullscreen = useFullscreen();
 
   // ===== ショートカット =====
 
@@ -669,6 +669,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // T: タグエディタ
   useHotkeys("t", () => handleToggleTagEditMode(), {
+    scopes: ["explorer", "viewer", "tag-editor"],
+  });
+
+  // F: 全画面表示
+  useHotkeys("f", () => void fullscreen.toggleFullscreen(), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
 
@@ -740,8 +745,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: FullscreenIcon,
       label: "全画面",
-      onClick: toggleFullscreen,
-      hidden: () => !isViewerMode,
+      onClick: fullscreen.toggleFullscreen,
+      hidden: () => !isViewerMode || !fullscreen.isSupported,
     },
     {
       key: "extractArchive",
