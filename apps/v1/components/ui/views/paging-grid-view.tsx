@@ -540,7 +540,6 @@ function Cell({
         <ActionsContextMenu
           node={node}
           menuItems={menuItems}
-          open={contextMenuOpen}
           onOpenChange={setContextMenuOpen}
           disabled={isMobile}
         >

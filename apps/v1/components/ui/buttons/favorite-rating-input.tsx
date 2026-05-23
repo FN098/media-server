@@ -19,7 +19,6 @@ export function FavoriteRatingInput({
   return (
     <div
       className={cn("flex items-center gap-0", className)}
-      onClick={(e) => e.stopPropagation()}
       onMouseLeave={() => setHoverRating(null)}
     >
       {[1, 2, 3, 4, 5].map((num) => {
@@ -30,9 +29,7 @@ export function FavoriteRatingInput({
             key={num}
             type="button"
             onMouseEnter={() => setHoverRating(num)}
-            onClick={(e) => {
-              e.stopPropagation();
-
+            onClick={() => {
               const next = value === num ? null : num;
               onChange(next);
 
