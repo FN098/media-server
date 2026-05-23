@@ -610,34 +610,14 @@ function DataRow({
             className="flex justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {node.isDirectory ? (
-              node.averageRating ? (
-                <>
-                  <FavoriteRatingDisplay
-                    value={node.averageRating}
-                    className="hidden md:flex"
-                  />
-                  <AverageRatingBadge
-                    rating={node.averageRating}
-                    className="flex md:hidden"
-                  />
-                </>
-              ) : (
-                <span className="italic text-muted-foreground">-</span>
-              )
-            ) : isMobile ? (
-              <FavoriteButton
-                variant="list"
-                rating={rating}
-                isFavorite={isFavorite}
-                onClick={() => void toggleFavorite(node.path)}
-              />
-            ) : (
-              <FavoriteRatingInput
-                value={rating}
-                onChange={(value) => void updateFavorite(node.path, value)}
-              />
-            )}
+            <RatingCell
+              node={node}
+              rating={rating}
+              isFavorite={isFavorite}
+              isMobile={isMobile}
+              toggleFavorite={toggleFavorite}
+              updateFavorite={updateFavorite}
+            />
           </div>
 
           {/* Actions */}
@@ -652,5 +632,60 @@ function DataRow({
         </div>
       </ActionsContextMenu>
     </HoverPreviewPortal>
+  );
+}
+
+interface RatingCellProps {
+  node: MediaNode;
+  rating: number | null;
+  isFavorite: boolean;
+  isMobile: boolean;
+  toggleFavorite: (path: string) => Promise<unknown>;
+  updateFavorite: (path: string, value: number | null) => Promise<unknown>;
+}
+
+function RatingCell({
+  node,
+  rating,
+  isFavorite,
+  isMobile,
+  toggleFavorite,
+  updateFavorite,
+}: RatingCellProps) {
+  if (node.isDirectory) {
+    if (!node.averageRating) {
+      return <span className="italic text-muted-foreground">-</span>;
+    }
+
+    return (
+      <>
+        <FavoriteRatingDisplay
+          value={node.averageRating}
+          className="hidden md:flex"
+        />
+        <AverageRatingBadge
+          rating={node.averageRating}
+          className="flex md:hidden"
+        />
+      </>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <FavoriteButton
+        variant="list"
+        rating={rating}
+        isFavorite={isFavorite}
+        onClick={() => void toggleFavorite(node.path)}
+      />
+    );
+  }
+
+  return (
+    <FavoriteRatingInput
+      value={rating}
+      onChange={(value) => void updateFavorite(node.path, value)}
+    />
   );
 }
