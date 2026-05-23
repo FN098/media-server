@@ -3,7 +3,7 @@
 import { AverageRatingBadge } from "@/components/ui/badges/average-rating-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
-import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
+import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating";
 import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
@@ -621,7 +621,7 @@ function DataRow({
                 onClick={() => void toggleFavorite(node.path)}
               />
             ) : (
-              <FavoriteRating
+              <FavoriteRatingInput
                 value={rating}
                 onChange={(value) => void updateFavorite(node.path, value)}
               />

@@ -10,7 +10,7 @@ import {
   enqueueCreateThumbsJobAction,
 } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
+import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
@@ -753,7 +753,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       render: ({ node }) => {
         const { rating } = getFavorite(node.path);
         return (
-          <FavoriteRating
+          <FavoriteRatingInput
             value={rating}
             onChange={(newRating) =>
               hasSelection
@@ -884,7 +884,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
         const averageRating = averageBy(filtered, (n) => n.rating!);
 
         return (
-          <FavoriteRating
+          <FavoriteRatingInput
             value={averageRating}
             onChange={(newRating) =>
               hasSelection

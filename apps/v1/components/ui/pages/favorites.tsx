@@ -6,7 +6,7 @@ import {
 } from "@/actions/media-actions";
 import { enqueueCreateSingleThumbJobAction } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteRating } from "@/components/ui/buttons/favorite-rating";
+import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
@@ -424,7 +424,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
       render: ({ node }) => {
         const { rating } = getFavorite(node.path);
         return (
-          <FavoriteRating
+          <FavoriteRatingInput
             value={rating}
             onChange={(newRating) =>
               hasSelection
