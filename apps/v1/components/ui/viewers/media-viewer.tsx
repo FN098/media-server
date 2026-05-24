@@ -1,15 +1,11 @@
 "use client";
 
 import { APP_CONFIG } from "@/app.config";
+import { MediaViewerHeader } from "@/components/ui/viewers/components/media-viewer-header";
+import { MediaViewerSlides } from "@/components/ui/viewers/components/media-viewer-slides";
 import { useMediaViewerFavorite } from "@/components/ui/viewers/hooks/use-media-viewer-favorite";
 import { useMediaViewerHotkeys } from "@/components/ui/viewers/hooks/use-media-viewer-hotkeys";
 import { useMediaViewerNavigation } from "@/components/ui/viewers/hooks/use-media-viewer-navigation";
-import {
-  ContentSlide,
-  getSlideIndex,
-} from "@/components/ui/viewers/lib/media-viewer/slides";
-import { MediaViewerHeader } from "@/components/ui/viewers/media-viewer-header";
-import { MediaViewerSlideRenderer } from "@/components/ui/viewers/media-viewer-slide-renderer";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { MediaNode } from "@/lib/media/types";
@@ -19,8 +15,6 @@ import { useCallback, useEffect, useState } from "react";
 import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
-import { Navigation, Virtual, Zoom } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
 
 interface MediaViewerProps {
   allNodes: MediaNode[];
@@ -109,33 +103,6 @@ export function MediaViewer({
       interactHeader,
     });
 
-  // ===== 画像 =====
-
-  // マウスホイールでズーム
-  const handleWheel = useCallback(
-    (e: React.WheelEvent, slide: ContentSlide) => {
-      if (slide.node.type !== "image") return;
-
-      const swiper = swiperRef.current;
-      if (!swiper?.zoom) return;
-
-      const currentScale = swiper.zoom.scale;
-      const delta = e.deltaY < 0 ? 0.2 : -0.2;
-      const newScale = Math.min(Math.max(currentScale + delta, 1), 3);
-
-      if (newScale === 1) {
-        swiper.zoom.out();
-      } else {
-        swiper.zoom.in(newScale);
-      }
-    },
-    [swiperRef]
-  );
-
-  // ===== オーディオ =====
-
-  const [isRepeating, setIsRepeating] = useState(false);
-
   // ===== ショートカット =====
   useMediaViewerHotkeys({
     enabled: hotkeysEnabled,
@@ -181,43 +148,15 @@ export function MediaViewer({
       />
 
       {/* メディアコンテンツ */}
-      <Swiper
-        onSwiper={(swiper) => {
-          swiperRef.current = swiper;
-          setCurrentSlideIndex(swiper.activeIndex);
-        }}
-        modules={[Virtual, Navigation, Zoom]}
-        initialSlide={getSlideIndex(initialIndex, hasPrev)}
+      <MediaViewerSlides
+        allSlides={allSlides}
+        currentSlideIndex={currentSlideIndex}
+        initialIndex={initialIndex}
+        hasPrev={hasPrev}
+        swiperRef={swiperRef}
         onSlideChange={onSlideChange}
-        virtual
-        zoom
-        className="h-full w-full"
-      >
-        {allSlides.map((slide, i) => {
-          const active = currentSlideIndex === i;
-
-          return (
-            <SwiperSlide
-              key={slide.key}
-              virtualIndex={i}
-              onWheel={
-                slide.type === "content"
-                  ? (e) => handleWheel(e, slide)
-                  : undefined
-              }
-            >
-              <div className="w-full h-full flex items-center justify-center">
-                <MediaViewerSlideRenderer
-                  slide={slide}
-                  active={active}
-                  isRepeating={isRepeating}
-                  onRepeatingChange={setIsRepeating}
-                />
-              </div>
-            </SwiperSlide>
-          );
-        })}
-      </Swiper>
+        setCurrentSlideIndex={setCurrentSlideIndex}
+      />
     </div>
   );
 }
