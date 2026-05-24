@@ -7,7 +7,7 @@ interface ResetButtonProps {
   isVisible: boolean;
 }
 
-export const ResetButton = ({ onClick, isVisible }: ResetButtonProps) => {
+export function ResetButton({ onClick, isVisible }: ResetButtonProps) {
   return (
     <div
       className={cn(
@@ -26,4 +26,4 @@ export const ResetButton = ({ onClick, isVisible }: ResetButtonProps) => {
       </Button>
     </div>
   );
-};
+}

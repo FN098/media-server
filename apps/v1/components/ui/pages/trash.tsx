@@ -153,7 +153,8 @@ export function Trash({ listing }: { listing: MediaListing }) {
   );
 
   // 検索パラメータリセット用
-  const { hasSearchParams, clearSearchParams } = useSearchParamsControl();
+  const { hasResettableSearchParams, clearSearchParams } =
+    useSearchParamsControl({ keep: ["viewMode"] });
 
   // ===== ビューア =====
 
@@ -450,7 +451,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
               {/* リセット */}
               <ResetButton
                 onClick={clearSearchParams}
-                isVisible={hasSearchParams}
+                isVisible={hasResettableSearchParams}
               />
             </div>
 
