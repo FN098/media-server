@@ -79,11 +79,10 @@ export function PagingListView({
   // 現在のページのノードを取得
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
 
-  //最大サイズと合計サイズを計算（比率計算の基準値）
-  const { maxSize, totalSize } = useMemo(() => {
+  //合計サイズを計算（比率計算の基準値）
+  const { totalSize } = useMemo(() => {
     const sizes = allNodes.map((n) => n.size ?? 0);
     return {
-      maxSize: sizes.length > 0 ? Math.max(...sizes) : 0,
       totalSize: sizes.reduce((acc, size) => acc + size, 0), // ページ内の合計値
     };
   }, [allNodes]);
@@ -310,7 +309,6 @@ export function PagingListView({
             globalIndex={(currentPage - 1) * pageSize + index}
             allNodes={allNodes}
             isMobile={isMobile}
-            maxSize={maxSize}
             totalSize={totalSize}
             onOpen={onOpen}
             onSelectionChange={onSelectionChange}
@@ -355,7 +353,6 @@ interface DataRowProps {
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
-  maxSize: number;
   totalSize: number;
   onSelectionChange?: () => void;
   onOpen?: (node: MediaNode) => void;
@@ -367,7 +364,6 @@ function DataRow({
   globalIndex,
   allNodes,
   isMobile,
-  maxSize,
   totalSize,
   onSelectionChange,
   onOpen,
@@ -526,12 +522,6 @@ function DataRow({
     onOpen?.(node);
   };
 
-  // サイズ比率の計算 (0% 〜 100%)
-  const sizeRatio = useMemo(() => {
-    if (!node.size || maxSize === 0) return 0;
-    return Math.min((node.size / maxSize) * 100, 100);
-  }, [node.size, maxSize]);
-
   // 合計サイズに対するこのノードの占有率（%）
   const occupancyPercent = useMemo(() => {
     if (!node.size || totalSize === 0) return 0;
@@ -623,7 +613,6 @@ function DataRow({
             size={node.size}
             fileCount={node.fileCount}
             occupancyPercent={occupancyPercent}
-            sizeRatio={sizeRatio}
           />
 
           {/* Last Viewed */}

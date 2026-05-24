@@ -4,13 +4,11 @@ interface SizeBarProps {
   pattern?: "A" | "B" | "C";
   size?: number;
   fileCount?: number;
-  sizeRatio: number;
   occupancyPercent: number;
 }
 
 export function SizeBar({
   pattern,
-  sizeRatio,
   size,
   fileCount,
   occupancyPercent,
@@ -21,10 +19,10 @@ export function SizeBar({
       <div className="hidden md:flex items-center gap-3 relative w-full h-full pr-4 overflow-hidden select-none">
         {/* 棒グラフ */}
         <div className="relative w-20 h-4 bg-muted rounded-full overflow-hidden shrink-0 flex items-center justify-center">
-          {sizeRatio > 0 && (
+          {occupancyPercent > 0 && (
             <div
               className="absolute left-0 top-0 bottom-0 bg-primary/70 rounded-full transition-all duration-300"
-              style={{ width: `${sizeRatio}%` }}
+              style={{ width: `${occupancyPercent}%` }}
             />
           )}
 
@@ -55,11 +53,11 @@ export function SizeBar({
     return (
       <div className="hidden md:flex items-center relative w-full h-full pl-2 pr-4 overflow-hidden">
         {/* 棒グラフ */}
-        {sizeRatio > 0 && (
+        {occupancyPercent > 0 && (
           <div
             className="absolute left-2 bg-primary/10 rounded-md pointer-events-none transition-all duration-300 h-7"
             style={{
-              width: `calc(${sizeRatio}% - 24px)`,
+              width: `calc(${occupancyPercent}% - 24px)`,
               minWidth: "48px", // テキストが乗る最小限の土台を確保
             }}
           />
@@ -91,10 +89,10 @@ export function SizeBar({
     <div className="hidden md:flex items-center relative w-full h-full pl-2 pr-4 overflow-hidden select-none">
       {/* 棒グラフ */}
       <div className="relative w-full h-8 bg-muted rounded-md overflow-hidden shrink-0 flex items-center justify-center">
-        {sizeRatio > 0 && (
+        {occupancyPercent > 0 && (
           <div
             className="absolute left-0 top-0 bottom-0 bg-primary/15 transition-all duration-300"
-            style={{ width: `${sizeRatio}%` }}
+            style={{ width: `${occupancyPercent}%` }}
           />
         )}
 
