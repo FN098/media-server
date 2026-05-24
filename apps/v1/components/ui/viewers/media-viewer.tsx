@@ -1,6 +1,7 @@
 "use client";
 
 import { APP_CONFIG } from "@/app.config";
+import { useMediaViewerHotkeys } from "@/components/ui/viewers/hooks/use-media-viewer-hotkeys";
 import {
   ContentSlide,
   buildMediaViewerSlides,
@@ -16,7 +17,6 @@ import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -27,7 +27,7 @@ import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 interface MediaViewerProps {
   allNodes: MediaNode[];
   initialIndex?: number;
-  shortcutEnabled?: boolean;
+  hotkeysEnabled?: boolean;
   menuItems?: MenuItemDef<NodeContext>[];
   onIndexChange?: (index: number) => void;
   onClose?: () => void;
@@ -40,7 +40,7 @@ interface MediaViewerProps {
 export function MediaViewer({
   allNodes,
   initialIndex = 0,
-  shortcutEnabled = true,
+  hotkeysEnabled = true,
   menuItems,
   onIndexChange,
   onClose,
@@ -162,9 +162,6 @@ export function MediaViewer({
   // スワイプ時の移動処理
   const handleSwipe = useCallback(
     (swiper: SwiperClass) => {
-      debugger;
-      setCurrentSlideIndex(swiper.activeIndex);
-
       const slide = allSlides[swiper.activeIndex];
       if (!slide) return;
 
@@ -175,6 +172,8 @@ export function MediaViewer({
         if (slide.direction === "next") onOpenNext?.();
         return;
       }
+
+      setCurrentSlideIndex(swiper.activeIndex);
 
       const index = getMediaIndex(swiper.activeIndex, hasPrev);
       const node = allNodes[index];
@@ -244,73 +243,20 @@ export function MediaViewer({
   const [isRepeating, setIsRepeating] = useState(false);
 
   // ===== ショートカット =====
-
-  // Escape / Backspace: 閉じる
-  useHotkeys(["escape", "backspace"], () => onClose?.(), {
-    scopes: "viewer",
-    enabled: shortcutEnabled && !!onClose,
+  useMediaViewerHotkeys({
+    enabled: hotkeysEnabled,
+    swiperRef,
+    currentNode,
+    isHeaderPinned,
+    toggleHeaderVisibility,
+    toggleIsHeaderPinned,
+    interactHeader,
+    onClose,
+    onDelete,
+    onOpenParent,
+    onToggleFavorite: () => void handleToggleFavorite(),
+    onChangeRating: (rating) => void handleChangeRating(rating),
   });
-
-  // Delete: 削除
-  useHotkeys("delete", () => onDelete?.(currentNode), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && !!currentNode,
-  });
-
-  // Enter / Space: ヘッダーの表示切替（固定されていない場合のみ）
-  useHotkeys(["enter", "space"], () => toggleHeaderVisibility(), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && !isHeaderPinned,
-  });
-
-  // 左右キー / A, D: 前後のメディアに移動
-  useHotkeys(["arrowleft", "a"], () => swiperRef.current?.slidePrev(), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled,
-  });
-
-  useHotkeys(["arrowright", "d"], () => swiperRef.current?.slideNext(), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled,
-  });
-
-  // S: お気に入りの切り替え
-  useHotkeys("s", () => void handleToggleFavorite(), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled,
-  });
-
-  // O: フォルダを開く
-  useHotkeys("o", () => onOpenParent?.(currentNode), {
-    scopes: ["viewer", "tag-editor"],
-    enabled: shortcutEnabled && !!currentNode,
-  });
-
-  // H: ヘッダーの固定切り替え
-  useHotkeys(
-    "h",
-    () => {
-      toggleIsHeaderPinned();
-      interactHeader();
-    },
-    {
-      scopes: ["viewer", "tag-editor"],
-      enabled: shortcutEnabled,
-    }
-  );
-
-  // 0~5: お気に入り評価の設定
-  useHotkeys(
-    "0,1,2,3,4,5",
-    (event) => {
-      const rating = parseInt(event.key);
-      void handleChangeRating(rating === 0 ? null : rating);
-    },
-    {
-      scopes: ["viewer", "tag-editor"],
-      enabled: shortcutEnabled,
-    }
-  );
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
