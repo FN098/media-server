@@ -83,7 +83,7 @@ export function PagingListView({
   const { totalSize } = useMemo(() => {
     const sizes = allNodes.map((n) => n.size ?? 0);
     return {
-      totalSize: sizes.reduce((acc, size) => acc + size, 0), // ページ内の合計値
+      totalSize: sizes.reduce((acc, size) => acc + size, 0),
     };
   }, [allNodes]);
 

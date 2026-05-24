@@ -12,6 +12,7 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
+import { formatBytes } from "@/lib/utils/format";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { usePagingContext } from "@/providers/paging-provider";
@@ -70,6 +71,14 @@ export function PagingGridView({
 
   // 現在のページのノード
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
+
+  //合計サイズを計算（比率計算の基準値）
+  const { totalSize } = useMemo(() => {
+    const sizes = allNodes.map((n) => n.size ?? 0);
+    return {
+      totalSize: sizes.reduce((acc, size) => acc + size, 0),
+    };
+  }, [allNodes]);
 
   // ビューコンテナ
   const containerRef = useRef<HTMLDivElement>(null);
@@ -339,6 +348,7 @@ export function PagingGridView({
             globalIndex={(currentPage - 1) * pageSize + index}
             allNodes={allNodes}
             isMobile={isMobile}
+            totalSize={totalSize}
             onOpen={onOpen}
             onSelectionChange={onSelectionChange}
             onThumbError={onThumbError}
@@ -361,6 +371,7 @@ interface CellProps {
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
+  totalSize: number;
   onSelectionChange?: () => void;
   onOpen?: (node: MediaNode) => void;
   onThumbError?: (node: MediaNode) => void;
@@ -371,6 +382,7 @@ function Cell({
   globalIndex,
   allNodes,
   isMobile,
+  totalSize,
   onSelectionChange,
   onOpen,
   onThumbError,
@@ -528,6 +540,14 @@ function Cell({
     onOpen?.(node);
   };
 
+  // 合計サイズに対するこのノードの占有率（%）
+  const occupancyPercent = useMemo(() => {
+    if (!node.size || totalSize === 0) return 0;
+    return (node.size / totalSize) * 100;
+  }, [node.size, totalSize]);
+
+  const title = node.title ?? node.name;
+
   return (
     <div className="relative group aspect-[3/4] sm:aspect-[4/5]">
       <HoverPreviewPortal
@@ -588,9 +608,12 @@ function Cell({
             </div>
 
             {/* Info Overlays */}
-            <div className="absolute bottom-0 left-0 right-0 p-2 z-10">
+            <div
+              className="absolute bottom-0 left-0 right-0 p-2 z-10"
+              title={title}
+            >
               <MarqueeText className="text-[11px] font-medium text-white text-center">
-                {node.title ?? node.name}
+                {title}
               </MarqueeText>
             </div>
 
@@ -623,15 +646,34 @@ function Cell({
               )}
             </div>
 
-            {/* Badges */}
+            {/* Badges — 右下 */}
             <div className="absolute flex flex-col bottom-8 right-2 gap-1 items-end">
-              {node.isDirectory &&
-                !!node.favoriteCount &&
-                node.averageRating && (
-                  <AverageRatingBadge rating={node.averageRating} />
-                )}
+              {node.isDirectory && node.averageRating && (
+                <AverageRatingBadge rating={node.averageRating} />
+              )}
               {node.isDirectory && (
                 <FolderStatusBadge date={node.lastViewedAt} />
+              )}
+            </div>
+
+            {/* Size / FileCount / Occupancy — 左下 */}
+            <div className="absolute bottom-8 left-2 flex flex-col gap-1 items-start z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {node.fileCount != null && (
+                <span className="text-[10px] text-white/80 bg-black/40 backdrop-blur-sm rounded px-1.5 py-0.5 tabular-nums leading-none">
+                  {node.fileCount} files
+                </span>
+              )}
+
+              {node.size != null && (
+                <span className="text-[10px] text-white/80 bg-black/40 backdrop-blur-sm rounded px-1.5 py-0.5 tabular-nums leading-none">
+                  {formatBytes(node.size)}
+                </span>
+              )}
+
+              {occupancyPercent > 0 && (
+                <span className="text-[10px] text-white/70 bg-black/30 backdrop-blur-sm rounded px-1.5 py-0.5 tabular-nums leading-none">
+                  {occupancyPercent.toFixed(1)}%
+                </span>
               )}
             </div>
           </div>
