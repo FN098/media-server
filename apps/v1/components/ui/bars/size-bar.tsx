@@ -21,7 +21,7 @@ export function SizeBar({
         <div className="relative w-20 h-4 bg-muted rounded-full overflow-hidden shrink-0 flex items-center justify-center">
           {occupancyPercent > 0 && (
             <div
-              className="absolute left-0 top-0 bottom-0 bg-primary/70 rounded-full transition-all duration-300"
+              className="absolute left-0 top-0 bottom-0 bg-primary/70 rounded-l-full transition-all duration-300"
               style={{ width: `${occupancyPercent}%` }}
             />
           )}
