@@ -81,11 +81,11 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import {
   ArrowDownAzIcon,
-  ArrowDownWideNarrowIcon,
   CalendarArrowDownIcon,
   ClockIcon,
   CopyIcon,
   ExternalLinkIcon,
+  FileStackIcon,
   FolderInputIcon,
   FolderPlus,
   FullscreenIcon,
@@ -99,6 +99,7 @@ import {
   StarsIcon,
   TagIcon,
   Trash2Icon,
+  WeightIcon,
 } from "lucide-react";
 import { dirname } from "path";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -172,7 +173,15 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             direction: "desc",
           },
           label: "サイズ",
-          icon: ArrowDownWideNarrowIcon,
+          icon: WeightIcon,
+        },
+        {
+          value: {
+            sort: "fileCount",
+            direction: "desc",
+          },
+          label: "ファイル数",
+          icon: FileStackIcon,
         },
         {
           value: {

@@ -43,7 +43,9 @@ interface PagingListViewProps {
 }
 
 const GRID_TEMPLATE =
-  "grid-cols-[40px_1fr_40px_80px] md:grid-cols-[40px_1fr_80px_140px_100px_140px_80px_80px]";
+  "grid-cols-[40px_1fr_40px_80px] md:grid-cols-[40px_1fr_80px_140px_180px_140px_80px_80px]";
+
+const SIZE_PATTERN: "A" | "B" = "B";
 
 export function PagingListView({
   allNodes,
@@ -525,6 +527,8 @@ function DataRow({
     return Math.min((node.size / maxSize) * 100, 100);
   }, [node.size, maxSize]);
 
+  const title = node.title ?? node.name;
+
   return (
     <HoverPreviewPortal
       key={node.id}
@@ -579,8 +583,8 @@ function DataRow({
               className="w-5 h-5 shrink-0 opacity-70"
             />
             <div className="flex flex-col min-w-0">
-              <span className="truncate font-medium">
-                {node.title ?? node.name}
+              <span className="truncate font-medium" title={title}>
+                {title}
               </span>
               <span className="md:hidden text-[10px] text-muted-foreground truncate">
                 {node.isDirectory
@@ -603,20 +607,58 @@ function DataRow({
           </div>
 
           {/* Size */}
-          <div className="hidden md:flex items-center relative w-full h-full pr-4 overflow-hidden">
-            {/* 棒グラフ */}
-            {sizeRatio > 0 && (
-              <div
-                className="absolute bg-primary/15 rounded-md pointer-events-none transition-all duration-300 h-6"
-                style={{
-                  width: `calc(${sizeRatio}% - 24px)`,
-                }}
-              />
-            )}
-            <span className="z-10 text-muted-foreground text-xs tabular-nums select-none px-2">
-              {node.size ? formatBytes(node.size) : "-"}
-            </span>
-          </div>
+          {SIZE_PATTERN === "A" && (
+            <div className="hidden md:flex items-center gap-3 relative w-full h-full pr-4 overflow-hidden select-none">
+              {/* 棒グラフ */}
+              <div className="relative w-20 h-2 bg-muted rounded-full overflow-hidden shrink-0">
+                {sizeRatio > 0 && (
+                  <div
+                    className="h-full bg-primary/70 rounded-full transition-all duration-300"
+                    style={{ width: `${sizeRatio}%` }}
+                  />
+                )}
+              </div>
+
+              {/* テキスト */}
+              <div className="flex flex-col min-w-0">
+                <span className="text-foreground font-medium text-xs tabular-nums">
+                  {node.size ? formatBytes(node.size) : "-"}
+                </span>
+                {node.fileCount ? (
+                  <span className="text-[10px] text-muted-foreground/80 tracking-wider">
+                    {node.fileCount} files
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          )}
+
+          {SIZE_PATTERN === "B" && (
+            <div className="hidden md:flex items-center relative w-full h-full pr-4 overflow-hidden">
+              {/* 棒グラフ：left-2から開始し、右側のパディング分（計24px）を引いた幅にする */}
+              {sizeRatio > 0 && (
+                <div
+                  className="absolute left-0 bg-primary/10 rounded-md pointer-events-none transition-all duration-300 h-7"
+                  style={{
+                    width: `calc(${sizeRatio}% - 24px)`,
+                    minWidth: "48px", // テキストが乗る最小限の土台を確保
+                  }}
+                />
+              )}
+
+              {/* コンテンツ：z-10で前面に出し、左右の余白を整える */}
+              <div className="z-10 flex items-baseline gap-1.5 pl-2 select-none">
+                <span className="text-foreground font-semibold text-xs tabular-nums">
+                  {node.size ? formatBytes(node.size) : "-"}
+                </span>
+                {node.fileCount ? (
+                  <span className="text-[10px] text-muted-foreground font-normal border-l pl-1.5 border-muted-foreground/30">
+                    {node.fileCount} files
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          )}
 
           {/* Last Viewed */}
           <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
