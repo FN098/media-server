@@ -1,6 +1,7 @@
 "use client";
 
 import { APP_CONFIG } from "@/app.config";
+import { useMediaViewerFavorite } from "@/components/ui/viewers/hooks/use-media-viewer-favorite";
 import { useMediaViewerHotkeys } from "@/components/ui/viewers/hooks/use-media-viewer-hotkeys";
 import { useMediaViewerNavigation } from "@/components/ui/viewers/hooks/use-media-viewer-navigation";
 import {
@@ -13,10 +14,8 @@ import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
-import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
@@ -104,59 +103,11 @@ export function MediaViewer({
 
   // ===== お気に入り =====
 
-  const { toggleFavorite, updateFavorite, getFavorite } = useFavoritesContext();
-
-  const { isFavorite = false, rating = null } = currentNode
-    ? getFavorite(currentNode.path)
-    : {};
-
-  // お気に入り状態トグル
-  const handleToggleFavorite = useCallback(async () => {
-    if (!currentNode) return;
-
-    try {
-      const { isFavorite } = getFavorite(currentNode.path);
-      const nextIsFavorite = !isFavorite;
-
-      await toggleFavorite(currentNode.path);
-
-      toast.info(
-        nextIsFavorite
-          ? "⭐お気に入りに登録しました"
-          : "お気に入りを解除しました",
-        { duration: 1000 }
-      );
-
-      interactHeader();
-    } catch (e) {
-      console.error(e);
-      toast.error("お気に入りの更新に失敗しました");
-    }
-  }, [currentNode, getFavorite, toggleFavorite, interactHeader]);
-
-  // レーティングを更新
-  const handleChangeRating = useCallback(
-    async (rating: number | null) => {
-      if (!currentNode) return;
-
-      try {
-        await updateFavorite(currentNode.path, rating);
-
-        toast.info(
-          rating != null
-            ? "⭐レーティングを更新しました"
-            : "レーティングを解除しました",
-          { duration: 1000 }
-        );
-
-        interactHeader();
-      } catch (e) {
-        console.error(e);
-        toast.error("お気に入りの更新に失敗しました");
-      }
-    },
-    [currentNode, updateFavorite, interactHeader]
-  );
+  const { isFavorite, rating, toggleFavorite, changeRating } =
+    useMediaViewerFavorite({
+      currentNode,
+      interactHeader,
+    });
 
   // ===== 画像 =====
 
@@ -197,8 +148,8 @@ export function MediaViewer({
     onClose,
     onDelete,
     onOpenParent,
-    onToggleFavorite: () => void handleToggleFavorite(),
-    onChangeRating: (rating) => void handleChangeRating(rating),
+    onToggleFavorite: toggleFavorite,
+    onChangeRating: changeRating,
   });
 
   return (
@@ -225,7 +176,7 @@ export function MediaViewer({
         menuItems={menuItems}
         isFavorite={isFavorite}
         rating={rating}
-        onToggleFavorite={() => void handleToggleFavorite()}
+        onToggleFavorite={toggleFavorite}
         onClose={onClose}
       />
 
