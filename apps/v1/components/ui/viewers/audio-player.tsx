@@ -154,7 +154,7 @@ export function AudioPlayer({
   return (
     <div className="w-full h-full flex items-center justify-center">
       {/* プレーヤー本体 */}
-      <div className="relative flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] border border-white/10 shadow-2xl">
+      <div className="relative flex flex-col items-center gap-8 p-10 w-full max-w-sm bg-white/5 rounded-[40px] border border-white/10 shadow-2xl overflow-hidden">
         {/* リピートバッジ */}
         <PlayerButton
           onClick={toggleRepeating}
@@ -170,7 +170,7 @@ export function AudioPlayer({
         </PlayerButton>
 
         {media.previewPath && (
-          <div className="absolute inset-0 -z-10 opacity-20 blur-3xl scale-150 pointer-events-none">
+          <div className="absolute inset-0 -z-10 opacity-20 blur-3xl scale-150">
             <MediaThumb node={media} className="w-full h-full object-cover" />
           </div>
         )}
