@@ -2,10 +2,9 @@
 
 import { APP_CONFIG } from "@/app.config";
 import { useMediaViewerHotkeys } from "@/components/ui/viewers/hooks/use-media-viewer-hotkeys";
+import { useMediaViewerNavigation } from "@/components/ui/viewers/hooks/use-media-viewer-navigation";
 import {
   ContentSlide,
-  buildMediaViewerSlides,
-  getMediaIndex,
   getSlideIndex,
 } from "@/components/ui/viewers/lib/media-viewer/slides";
 import { MediaViewerHeader } from "@/components/ui/viewers/media-viewer-header";
@@ -16,13 +15,13 @@ import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
-import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 interface MediaViewerProps {
   allNodes: MediaNode[];
@@ -66,29 +65,6 @@ export function MediaViewer({
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
 
-  // ===== ナビゲーション =====
-
-  const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
-  const currentNode = useMemo(
-    () => allNodes[currentIndex] ?? null,
-    [allNodes, currentIndex]
-  );
-
-  const hasPrev = !!onOpenPrev;
-  const hasNext = !!onOpenNext;
-
-  const swiperRef = useRef<SwiperClass | null>(null);
-  const lastViewedPathRef = useRef<string | null>(
-    allNodes[initialIndex]?.path ?? null
-  );
-
-  const allSlides = useMemo(
-    () => buildMediaViewerSlides({ nodes: allNodes, hasPrev, hasNext }),
-    [allNodes, hasPrev, hasNext]
-  );
-
   // ===== タイトル =====
 
   const { setTitle } = useDocumentTitle();
@@ -100,6 +76,31 @@ export function MediaViewer({
     },
     [setTitle]
   );
+
+  // ===== ナビゲーション =====
+
+  const {
+    hasPrev,
+    currentIndex,
+    currentSlideIndex,
+    currentNode,
+    allSlides,
+    swiperRef,
+    onSlideChange,
+    setCurrentSlideIndex,
+  } = useMediaViewerNavigation({
+    allNodes,
+    initialIndex,
+    onIndexChange,
+    onOpenPrev,
+    onOpenNext,
+    onNodeChange: updateTitle,
+  });
+
+  // 初回マウント時にタイトル設定
+  useEffect(() => {
+    if (currentNode) updateTitle(currentNode);
+  }, [currentNode, updateTitle]);
 
   // ===== お気に入り =====
 
@@ -157,64 +158,6 @@ export function MediaViewer({
     [currentNode, updateFavorite, interactHeader]
   );
 
-  // ===== スワイプ =====
-
-  // スワイプ時の移動処理
-  const handleSwipe = useCallback(
-    (swiper: SwiperClass) => {
-      const slide = allSlides[swiper.activeIndex];
-      if (!slide) return;
-
-      if (slide.type === "empty") return;
-
-      if (slide.type === "navigation") {
-        if (slide.direction === "prev") onOpenPrev?.();
-        if (slide.direction === "next") onOpenNext?.();
-        return;
-      }
-
-      setCurrentSlideIndex(swiper.activeIndex);
-
-      const index = getMediaIndex(swiper.activeIndex, hasPrev);
-      const node = allNodes[index];
-      if (!node) return;
-
-      setCurrentIndex(index);
-      updateTitle(node);
-      onIndexChange?.(index);
-      lastViewedPathRef.current = node.path;
-    },
-    [
-      allSlides,
-      hasPrev,
-      allNodes,
-      updateTitle,
-      onIndexChange,
-      onOpenPrev,
-      onOpenNext,
-    ]
-  );
-
-  // ===== 復元 =====
-
-  // リスト更新時に直前に見ていたファイルを復元
-  useEffect(() => {
-    const path = lastViewedPathRef.current;
-    if (!path) return;
-
-    const index = allNodes.findIndex((n) => n.path === path);
-    if (index === -1 || index === currentIndex) return;
-
-    const slideIndex = getSlideIndex(index, hasPrev);
-
-    setCurrentIndex(index);
-    setCurrentSlideIndex(slideIndex);
-    updateTitle(allNodes[index]);
-    onIndexChange?.(index);
-
-    swiperRef.current?.slideTo(slideIndex, 0);
-  }, [allNodes, currentIndex, hasPrev, onIndexChange, updateTitle]);
-
   // ===== 画像 =====
 
   // マウスホイールでズーム
@@ -235,7 +178,7 @@ export function MediaViewer({
         swiper.zoom.in(newScale);
       }
     },
-    []
+    [swiperRef]
   );
 
   // ===== オーディオ =====
@@ -294,7 +237,7 @@ export function MediaViewer({
         }}
         modules={[Virtual, Navigation, Zoom]}
         initialSlide={getSlideIndex(initialIndex, hasPrev)}
-        onSlideChange={handleSwipe}
+        onSlideChange={onSlideChange}
         virtual
         zoom
         className="h-full w-full"
