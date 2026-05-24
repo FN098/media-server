@@ -6,6 +6,7 @@ import {
   getFolderFavoriteInfo,
   getFolderMetas,
   getFolderVisitedInfo,
+  updateFolderCache,
 } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/format";
 import { getMediaFsListing } from "@/lib/media/fs";
@@ -78,6 +79,15 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
       getFolderFavoriteInfo(dirPaths, user.id),
       getFolderMetas(dirPaths),
     ]);
+
+  // フォルダメタデータ更新
+  void updateFolderCache({
+    path: currentVirtualPath,
+    directFiles: fsNodes
+      .filter((node) => !node.isDirectory)
+      .map((n) => ({ fileSize: n.size ?? 0 })), // 現在のフォルダ直下のファイル群
+    subFolderMetas: folderMetas, // 直下の子フォルダたちのメタ情報（すでにお互いの合計を持っている）
+  });
 
   // マージ
   const merged = mergeFsWithDb({

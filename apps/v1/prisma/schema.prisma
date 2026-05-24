@@ -122,6 +122,8 @@ model FolderMeta {
   title       String? // フォルダに別名をつけたい場合
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  totalSize   BigInt   @default(0)
+  fileCount   Int      @default(0)
 
   @@index([path])
 }

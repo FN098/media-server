@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `FolderMeta` ADD COLUMN `fileCount` INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN `totalSize` BIGINT NOT NULL DEFAULT 0;

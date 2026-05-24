@@ -44,6 +44,8 @@ export function mergeFsWithDb({
         tags: null,
         previewPath: meta?.previewPath,
         rating: null,
+        size: meta?.totalSize,
+        fileCount: meta?.fileCount,
       } satisfies MediaNode;
     } else {
       // ファイル

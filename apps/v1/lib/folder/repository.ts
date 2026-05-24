@@ -133,19 +133,57 @@ export async function getFolderMetas(
   dirPaths: string[]
 ): Promise<FolderMeta[]> {
   const metas = await prisma.folderMeta.findMany({
-    where: {
-      path: { in: dirPaths },
-    },
-    select: {
-      path: true,
-      previewPath: true,
-      title: true,
-    },
+    where: { path: { in: dirPaths } },
   });
 
   return metas.map((m) => ({
-    path: m.path,
-    previewPath: m.previewPath,
-    title: m.title,
+    ...m,
+    totalSize: Number(m.totalSize),
   }));
+}
+
+// フォルダメタ情報更新
+export async function updateFolderCache({
+  path,
+  directFiles,
+  subFolderMetas,
+}: {
+  path: string;
+  directFiles: { fileSize: number | null }[];
+  subFolderMetas: { totalSize: number; fileCount: number }[]; // 先ほど取得した子フォルダのメタ情報
+}) {
+  // 1. 直下のファイルサイズを合計
+  const directFilesSize = directFiles.reduce(
+    (acc, f) => acc + (f.fileSize ?? 0),
+    0
+  );
+  const directFilesCount = directFiles.length;
+
+  // 2. 直下の子フォルダたちが持っている「それぞれの配下合計」を合算
+  const subFoldersSize = subFolderMetas.reduce(
+    (acc, m) => acc + m.totalSize,
+    0
+  );
+  const subFoldersCount = subFolderMetas.reduce(
+    (acc, m) => acc + m.fileCount,
+    0
+  );
+
+  // 3. 自分自身の合計値を確定
+  const totalSize = directFilesSize + subFoldersSize;
+  const fileCount = directFilesCount + subFoldersCount;
+
+  // 4. DB の FolderMeta に保存 (既存レコードがなければ作成、あれば更新)
+  await prisma.folderMeta.upsert({
+    where: { path },
+    create: {
+      path,
+      totalSize,
+      fileCount,
+    },
+    update: {
+      totalSize,
+      fileCount,
+    },
+  });
 }

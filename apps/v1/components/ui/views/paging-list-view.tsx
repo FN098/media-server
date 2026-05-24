@@ -589,7 +589,7 @@ function DataRow({
 
           {/* Size */}
           <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
-            {node.isDirectory ? "-" : formatBytes(node.size)}
+            {node.size ? formatBytes(node.size) : "-"}
           </div>
 
           {/* Last Viewed */}

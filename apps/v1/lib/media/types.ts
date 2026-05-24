@@ -42,6 +42,7 @@ export type MediaNode = MediaFsNode & {
   rating: number | null; // 1-5の整数 または 未評価 (null)
   isDeleted?: boolean;
   favoritedAt?: Date;
+  fileCount?: number;
 };
 
 export type MediaListing = {
@@ -90,6 +91,8 @@ export type FolderMeta = {
   path: string;
   previewPath: string | null;
   title: string | null;
+  totalSize: number;
+  fileCount: number;
 };
 
 export type MediaNodeFilter = (node: MediaNode) => boolean;
