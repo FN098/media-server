@@ -17,7 +17,7 @@ import {
   RotateCcw,
   RotateCw,
 } from "lucide-react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 interface AudioPlayerProps {
@@ -27,10 +27,27 @@ interface AudioPlayerProps {
 
 export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
   const playerRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(active);
   const [isRepeating, setIsRepeating] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+
+  const prevActiveRef = useRef(active);
+
+  useLayoutEffect(() => {
+    if (prevActiveRef.current === active) return;
+    prevActiveRef.current = active;
+
+    const audio = playerRef.current;
+    if (!audio) return;
+
+    if (active) {
+      audio.play().catch(() => {});
+    } else {
+      audio.pause();
+    }
+    // isPlaying は onPlay/onPause で自動追従
+  }, [active]);
 
   // 再生率を計算 (0 ~ 100)
   const progress = duration ? (currentTime / duration) * 100 : 0;
