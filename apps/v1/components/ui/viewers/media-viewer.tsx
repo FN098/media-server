@@ -11,7 +11,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
@@ -89,11 +89,6 @@ export function MediaViewer({
     onOpenNext,
     onNodeChange: updateTitle,
   });
-
-  // 初回マウント時にタイトル設定
-  useEffect(() => {
-    if (currentNode) updateTitle(currentNode);
-  }, [currentNode, updateTitle]);
 
   // ===== お気に入り =====
 
