@@ -525,7 +525,7 @@ function DataRow({
   // 合計サイズに対するこのノードの占有率（%）
   const occupancyPercent = useMemo(() => {
     if (!node.size || totalSize === 0) return 0;
-    return Math.ceil((node.size / totalSize) * 100);
+    return (node.size / totalSize) * 100;
   }, [node.size, totalSize]);
 
   const title = node.title ?? node.name;

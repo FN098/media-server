@@ -11,8 +11,10 @@ export function SizeBar({
   pattern,
   size,
   fileCount,
-  occupancyPercent,
+  occupancyPercent: rawOccupancyPercent,
 }: SizeBarProps) {
+  const occupancyPercent = Math.ceil(rawOccupancyPercent);
+
   // Aパターン
   if (pattern === "A") {
     return (
