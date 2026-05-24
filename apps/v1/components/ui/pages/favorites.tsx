@@ -50,12 +50,14 @@ import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import {
   ArrowDownAz,
+  CalendarArrowDownIcon,
   ExternalLinkIcon,
   FolderIcon,
   FullscreenIcon,
   ListFilterPlusIcon,
-  Sparkle,
+  StarsIcon,
   TagIcon,
+  WeightIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useTransition } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
@@ -102,16 +104,32 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             sort: "path",
             direction: "asc",
           },
-          label: "パス順 (A-Z)",
+          label: "ファイルパス",
           icon: ArrowDownAz,
+        },
+        {
+          value: {
+            sort: "mtime",
+            direction: "desc",
+          },
+          label: "更新日",
+          icon: CalendarArrowDownIcon,
+        },
+        {
+          value: {
+            sort: "size",
+            direction: "desc",
+          },
+          label: "サイズ",
+          icon: WeightIcon,
         },
         {
           value: {
             sort: "rating",
             direction: "desc",
           },
-          label: "評価順",
-          icon: Sparkle,
+          label: "評価",
+          icon: StarsIcon,
         },
       ] as const,
     []

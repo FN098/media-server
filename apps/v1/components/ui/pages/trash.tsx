@@ -44,10 +44,13 @@ import { cn } from "@/shadcn/lib/utils";
 import {
   ArrowDownAz,
   CalendarArrowDown,
+  ClockIcon,
+  FileStackIcon,
   FullscreenIcon,
   RotateCcwIcon,
-  Sparkle,
+  StarsIcon,
   Trash2Icon,
+  WeightIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
@@ -94,24 +97,48 @@ export function Trash({ listing }: { listing: MediaListing }) {
             sort: "name",
             direction: "asc",
           },
-          label: "名前順 (A-Z)",
+          label: "名前",
           icon: ArrowDownAz,
-        },
-        {
-          value: {
-            sort: "rating",
-            direction: "desc",
-          },
-          label: "評価順",
-          icon: Sparkle,
         },
         {
           value: {
             sort: "mtime",
             direction: "desc",
           },
-          label: "更新順",
+          label: "更新日",
           icon: CalendarArrowDown,
+        },
+        {
+          value: {
+            sort: "size",
+            direction: "desc",
+          },
+          label: "サイズ",
+          icon: WeightIcon,
+        },
+        {
+          value: {
+            sort: "fileCount",
+            direction: "desc",
+          },
+          label: "ファイル数",
+          icon: FileStackIcon,
+        },
+        {
+          value: {
+            sort: "lastViewed",
+            direction: "desc",
+          },
+          label: "訪問日",
+          icon: ClockIcon,
+        },
+        {
+          value: {
+            sort: "rating",
+            direction: "desc",
+          },
+          label: "評価",
+          icon: StarsIcon,
         },
       ] as const,
     []
