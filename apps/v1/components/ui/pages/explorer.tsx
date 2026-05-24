@@ -81,6 +81,7 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import {
   ArrowDownAzIcon,
+  ArrowDownWideNarrowIcon,
   CalendarArrowDownIcon,
   CopyIcon,
   ExternalLinkIcon,
@@ -153,24 +154,32 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             sort: "name",
             direction: "asc",
           },
-          label: "名前順 (A-Z)",
+          label: "名前 (A-Z)",
           icon: ArrowDownAzIcon,
-        },
-        {
-          value: {
-            sort: "rating",
-            direction: "desc",
-          },
-          label: "評価順",
-          icon: SparkleIcon,
         },
         {
           value: {
             sort: "mtime",
             direction: "desc",
           },
-          label: "更新順",
+          label: "更新日",
           icon: CalendarArrowDownIcon,
+        },
+        {
+          value: {
+            sort: "size",
+            direction: "desc",
+          },
+          label: "サイズ",
+          icon: ArrowDownWideNarrowIcon,
+        },
+        {
+          value: {
+            sort: "rating",
+            direction: "desc",
+          },
+          label: "評価",
+          icon: SparkleIcon,
         },
       ] as const,
     []
