@@ -6,19 +6,20 @@ import {
   getSlideIndex,
   MediaViewerSlide,
 } from "@/components/ui/viewers/lib/media-viewer/slides";
-import { useCallback, useState } from "react";
+import { RefObject, useCallback, useState } from "react";
 import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+import { Swiper as SwiperType } from "swiper/types";
 
 interface MediaViewerSlidesProps {
   allSlides: MediaViewerSlide[];
   currentSlideIndex: number;
   initialIndex: number;
   hasPrev: boolean;
-  swiperRef: React.MutableRefObject<SwiperClass | null>;
+  swiperRef: RefObject<SwiperType | null>;
   onSlideChange: (swiper: SwiperClass) => void;
   setCurrentSlideIndex: (index: number) => void;
 }

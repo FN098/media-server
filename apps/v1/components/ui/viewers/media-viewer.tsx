@@ -104,6 +104,7 @@ export function MediaViewer({
     });
 
   // ===== ショートカット =====
+
   useMediaViewerHotkeys({
     enabled: hotkeysEnabled,
     swiperRef,
