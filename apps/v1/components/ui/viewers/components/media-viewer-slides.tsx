@@ -68,6 +68,7 @@ export function MediaViewerSlides({
       virtual
       zoom
       className="h-full w-full"
+      noSwipingSelector="button, input, [data-no-swipe]"
     >
       {allSlides.map((slide, i) => {
         const active = currentSlideIndex === i;

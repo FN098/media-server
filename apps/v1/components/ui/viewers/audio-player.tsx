@@ -82,7 +82,9 @@ export function AudioPlayer({
   }, [playerRef, setIsPlaying]);
 
   // リピート再生
-  const toggleRepeating = () => onRepeatingChange?.(!isRepeating);
+  const toggleRepeating = () => {
+    onRepeatingChange?.(!isRepeating);
+  };
 
   // シーク
   const seek = useCallback((seconds: number) => {
@@ -163,13 +165,12 @@ export function AudioPlayer({
           }`}
           label="Repeat"
           shortcut="R"
-          onPointerDownCapture={(e) => e.stopPropagation()}
         >
           {isRepeating ? <Repeat1 size={20} /> : <Repeat size={20} />}
         </PlayerButton>
 
         {media.previewPath && (
-          <div className="absolute inset-0 -z-10 opacity-20 blur-3xl scale-150">
+          <div className="absolute inset-0 -z-10 opacity-20 blur-3xl scale-150 pointer-events-none">
             <MediaThumb node={media} className="w-full h-full object-cover" />
           </div>
         )}
@@ -205,10 +206,7 @@ export function AudioPlayer({
         </div>
 
         {/* カスタムシークバー */}
-        <div
-          className="w-full px-2"
-          onPointerDownCapture={(e) => e.stopPropagation()}
-        >
+        <div className="w-full px-2">
           <input
             type="range"
             min="0"
@@ -232,10 +230,7 @@ export function AudioPlayer({
         </div>
 
         {/* メイン操作系 */}
-        <div
-          className="flex items-center gap-10"
-          onPointerDownCapture={(e) => e.stopPropagation()}
-        >
+        <div className="flex items-center gap-10">
           {/* 10秒戻る */}
           <PlayerButton
             onClick={() => seek(-10)}
