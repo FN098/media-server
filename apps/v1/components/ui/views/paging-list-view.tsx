@@ -78,6 +78,12 @@ export function PagingListView({
   // 現在のページのノードを取得
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
 
+  // 現在表示されているページ内での最大サイズを特定（比率計算の基準値）
+  const maxSize = useMemo(() => {
+    const sizes = currentNodes.map((n) => n.size ?? 0);
+    return sizes.length > 0 ? Math.max(...sizes) : 0;
+  }, [currentNodes]);
+
   // ビューコンテナ
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -300,6 +306,7 @@ export function PagingListView({
             globalIndex={(currentPage - 1) * pageSize + index}
             allNodes={allNodes}
             isMobile={isMobile}
+            maxSize={maxSize}
             onOpen={onOpen}
             onSelectionChange={onSelectionChange}
             onThumbError={onThumbError}
@@ -343,6 +350,7 @@ interface DataRowProps {
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
+  maxSize: number;
   onSelectionChange?: () => void;
   onOpen?: (node: MediaNode) => void;
   onThumbError?: (node: MediaNode) => void;
@@ -353,6 +361,7 @@ function DataRow({
   globalIndex,
   allNodes,
   isMobile,
+  maxSize,
   onSelectionChange,
   onOpen,
 }: DataRowProps) {
@@ -510,6 +519,12 @@ function DataRow({
     onOpen?.(node);
   };
 
+  // サイズ比率の計算 (0% 〜 100%)
+  const sizeRatio = useMemo(() => {
+    if (!node.size || maxSize === 0) return 0;
+    return Math.min((node.size / maxSize) * 100, 100);
+  }, [node.size, maxSize]);
+
   return (
     <HoverPreviewPortal
       key={node.id}
@@ -588,8 +603,19 @@ function DataRow({
           </div>
 
           {/* Size */}
-          <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
-            {node.size ? formatBytes(node.size) : "-"}
+          <div className="hidden md:flex items-center relative w-full h-full pr-4 overflow-hidden">
+            {/* 棒グラフ */}
+            {sizeRatio > 0 && (
+              <div
+                className="absolute bg-primary/15 rounded-md pointer-events-none transition-all duration-300 h-6"
+                style={{
+                  width: `calc(${sizeRatio}% - 24px)`,
+                }}
+              />
+            )}
+            <span className="z-10 text-muted-foreground text-xs tabular-nums select-none px-2">
+              {node.size ? formatBytes(node.size) : "-"}
+            </span>
           </div>
 
           {/* Last Viewed */}
