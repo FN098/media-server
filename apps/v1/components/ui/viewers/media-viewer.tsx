@@ -8,12 +8,20 @@ import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
+import {
+  ContentSlide,
+  MediaViewerSlide,
+  buildMediaViewerSlides,
+  getMediaIndex,
+  getSlideIndex,
+} from "@/components/ui/viewers/lib/media-viewer/slides";
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
+import { assertNever } from "@/lib/utils/assert";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -35,62 +43,6 @@ import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 
-//
-// 型
-//
-
-type EmptySlide = {
-  key: string;
-  type: "empty";
-  position: "first" | "last";
-};
-
-type NavigationSlide = {
-  key: string;
-  type: "navigation";
-  direction: "next" | "prev";
-};
-
-type ContentSlide = {
-  key: string;
-  type: "content";
-  node: MediaNode;
-};
-
-type MediaViewerSlide = EmptySlide | NavigationSlide | ContentSlide;
-
-const firstSlide: EmptySlide = {
-  key: ":first-slide",
-  type: "empty",
-  position: "first",
-};
-
-const lastSlide: EmptySlide = {
-  key: ":last-slide",
-  type: "empty",
-  position: "last",
-};
-
-const prevSlide: NavigationSlide = {
-  key: ":prev-slide",
-  type: "navigation",
-  direction: "prev",
-};
-
-const nextSlide: NavigationSlide = {
-  key: ":next-slide",
-  type: "navigation",
-  direction: "next",
-};
-
-function assertNever(x: unknown): never {
-  throw new Error(`Unexpected value: ${JSON.stringify(x)}`);
-}
-
-//
-// Props
-//
-
 interface MediaViewerProps {
   allNodes: MediaNode[];
   initialIndex?: number;
@@ -103,10 +55,6 @@ interface MediaViewerProps {
   onOpenParent?: (node: MediaNode) => void;
   onDelete?: (node: MediaNode) => void;
 }
-
-//
-// Main
-//
 
 export function MediaViewer({
   allNodes,
@@ -157,36 +105,10 @@ export function MediaViewer({
     allNodes[initialIndex]?.path ?? null
   );
 
-  const getMediaOffset = useCallback(() => 1 + (hasPrev ? 1 : 0), [hasPrev]);
-
-  const getSlideIndex = useCallback(
-    (mediaIndex: number) => mediaIndex + getMediaOffset(),
-    [getMediaOffset]
+  const allSlides = useMemo(
+    () => buildMediaViewerSlides({ nodes: allNodes, hasPrev, hasNext }),
+    [allNodes, hasPrev, hasNext]
   );
-
-  // 仮想スライド構成
-  // [前へ] -> [最初のページ] -> [メディア一覧] -> [最後のページ] -> [次へ]
-  const allSlides = useMemo(() => {
-    const slides: MediaViewerSlide[] = allNodes.map((node) => ({
-      key: node.id ?? node.path,
-      type: "content",
-      node,
-    }));
-
-    // 前側のスライドを追加
-    slides.unshift(firstSlide);
-    if (hasPrev) {
-      slides.unshift(prevSlide);
-    }
-
-    // 後側のスライドを追加
-    slides.push(lastSlide);
-    if (hasNext) {
-      slides.push(nextSlide);
-    }
-
-    return slides;
-  }, [allNodes, hasPrev, hasNext]);
 
   // ===== タイトル =====
 
@@ -285,7 +207,7 @@ export function MediaViewer({
         return;
       }
 
-      const index = swiper.activeIndex - getMediaOffset();
+      const index = getMediaIndex(swiper.activeIndex, hasPrev);
       const node = allNodes[index];
       if (!node) return;
 
@@ -296,12 +218,12 @@ export function MediaViewer({
     },
     [
       allSlides,
+      hasPrev,
       allNodes,
-      getMediaOffset,
-      onIndexChange,
-      onOpenNext,
-      onOpenPrev,
       updateTitle,
+      onIndexChange,
+      onOpenPrev,
+      onOpenNext,
     ]
   );
 
@@ -315,7 +237,7 @@ export function MediaViewer({
     const index = allNodes.findIndex((n) => n.path === path);
     if (index === -1 || index === currentIndex) return;
 
-    const slideIndex = getSlideIndex(index);
+    const slideIndex = getSlideIndex(index, hasPrev);
 
     setCurrentIndex(index);
     setCurrentSlideIndex(slideIndex);
@@ -323,7 +245,7 @@ export function MediaViewer({
     onIndexChange?.(index);
 
     swiperRef.current?.slideTo(slideIndex, 0);
-  }, [allNodes, currentIndex, getSlideIndex, onIndexChange, updateTitle]);
+  }, [allNodes, currentIndex, hasPrev, onIndexChange, updateTitle]);
 
   // ===== モバイル =====
 
@@ -573,7 +495,7 @@ export function MediaViewer({
           setCurrentSlideIndex(swiper.activeIndex);
         }}
         modules={[Virtual, Navigation, Zoom]}
-        initialSlide={getSlideIndex(initialIndex)}
+        initialSlide={getSlideIndex(initialIndex, hasPrev)}
         onSlideChange={handleSwipe}
         virtual
         zoom
