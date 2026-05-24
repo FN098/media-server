@@ -281,6 +281,10 @@ export function MediaViewer({
 
   const isMobile = useIsMobile();
 
+  // ===== リピート再生 =====
+
+  const [isRepeating, setIsRepeating] = useState(false);
+
   // ===== ショートカット =====
 
   // Escape / Backspace: 閉じる
@@ -506,7 +510,12 @@ export function MediaViewer({
                   <VideoPlayer media={slide} active={active} />
                 ) : slide.type === "audio" ? (
                   // オーディオ
-                  <AudioPlayer media={slide} active={active} />
+                  <AudioPlayer
+                    media={slide}
+                    active={active}
+                    isRepeating={isRepeating}
+                    onRepeatingChange={setIsRepeating}
+                  />
                 ) : (
                   <div className="text-white/50 text-sm">
                     Unsupported file type: {slide.type}

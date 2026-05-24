@@ -17,31 +17,26 @@ import {
   RotateCcw,
   RotateCw,
 } from "lucide-react";
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 interface AudioPlayerProps {
   media: MediaNode;
   active?: boolean;
+  isRepeating?: boolean;
+  onRepeatingChange?: (value: boolean) => void;
 }
 
-export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
+export function AudioPlayer({
+  media,
+  active = true,
+  isRepeating = false,
+  onRepeatingChange,
+}: AudioPlayerProps) {
   const playerRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isRepeating, setIsRepeating] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-
-  useLayoutEffect(() => {
-    const audio = playerRef.current;
-    // active: true → false になる直前のクリーンアップ
-    return () => {
-      if (audio) {
-        audio.pause();
-        audio.src = ""; // WebKit に再生リソースを完全に手放させる
-      }
-    };
-  }, [active]);
 
   // 再生率を計算 (0 ~ 100)
   const progress = duration ? (currentTime / duration) * 100 : 0;
@@ -87,7 +82,7 @@ export function AudioPlayer({ media, active = true }: AudioPlayerProps) {
   }, [playerRef, setIsPlaying]);
 
   // リピート再生
-  const toggleRepeating = () => setIsRepeating((prev) => !prev);
+  const toggleRepeating = () => onRepeatingChange?.(!isRepeating);
 
   // シーク
   const seek = useCallback((seconds: number) => {
