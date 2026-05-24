@@ -19,7 +19,14 @@ import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-p
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 import "swiper/css";
@@ -27,6 +34,62 @@ import "swiper/css/virtual";
 import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+
+//
+// 型
+//
+
+type EmptySlide = {
+  key: string;
+  type: "empty";
+  position: "first" | "last";
+};
+
+type NavigationSlide = {
+  key: string;
+  type: "navigation";
+  direction: "next" | "prev";
+};
+
+type ContentSlide = {
+  key: string;
+  type: "content";
+  node: MediaNode;
+};
+
+type MediaViewerSlide = EmptySlide | NavigationSlide | ContentSlide;
+
+const firstSlide: EmptySlide = {
+  key: ":first-slide",
+  type: "empty",
+  position: "first",
+};
+
+const lastSlide: EmptySlide = {
+  key: ":last-slide",
+  type: "empty",
+  position: "last",
+};
+
+const prevSlide: NavigationSlide = {
+  key: ":prev-slide",
+  type: "navigation",
+  direction: "prev",
+};
+
+const nextSlide: NavigationSlide = {
+  key: ":next-slide",
+  type: "navigation",
+  direction: "next",
+};
+
+function assertNever(x: unknown): never {
+  throw new Error(`Unexpected value: ${JSON.stringify(x)}`);
+}
+
+//
+// Props
+//
 
 interface MediaViewerProps {
   allNodes: MediaNode[];
@@ -41,17 +104,9 @@ interface MediaViewerProps {
   onDelete?: (node: MediaNode) => void;
 }
 
-const firstPageDummy = { type: "dummy_first", path: "first-page" } as const;
-const prevFolderNav = { type: "nav_prev", path: "prev-loader" } as const;
-const nextFolderNav = { type: "nav_next", path: "next-loader" } as const;
-const lastPageDummy = { type: "dummy_last", path: "last-page" } as const;
-
-type Slide =
-  | MediaNode
-  | typeof firstPageDummy
-  | typeof prevFolderNav
-  | typeof nextFolderNav
-  | typeof lastPageDummy;
+//
+// Main
+//
 
 export function MediaViewer({
   allNodes,
@@ -84,9 +139,10 @@ export function MediaViewer({
     disabled: isHovered || isMenuOpen || isHeaderPinned,
   });
 
-  // ===== スライド移動 =====
+  // ===== ナビゲーション =====
 
   const [currentIndex, setCurrentIndex] = useState<number>(initialIndex);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const currentNode = useMemo(
     () => allNodes[currentIndex] ?? null,
@@ -101,86 +157,48 @@ export function MediaViewer({
     allNodes[initialIndex]?.path ?? null
   );
 
+  const getMediaOffset = useCallback(() => 1 + (hasPrev ? 1 : 0), [hasPrev]);
+
+  const getSlideIndex = useCallback(
+    (mediaIndex: number) => mediaIndex + getMediaOffset(),
+    [getMediaOffset]
+  );
+
   // 仮想スライド構成
-  // [最初のページダミー] → [前のフォルダナビ] → [メディア配列] → [次のフォルダナビ] → [最後のページダミー]
+  // [前へ] -> [最初のページ] -> [メディア一覧] -> [最後のページ] -> [次へ]
   const allSlides = useMemo(() => {
-    const slides: Slide[] = [...allNodes];
+    const slides: MediaViewerSlide[] = allNodes.map((node) => ({
+      key: node.id ?? node.path,
+      type: "content",
+      node,
+    }));
 
     // 前側のスライドを追加
+    slides.unshift(firstSlide);
     if (hasPrev) {
-      slides.unshift(firstPageDummy);
-      slides.unshift(prevFolderNav);
-    } else {
-      slides.unshift(firstPageDummy);
+      slides.unshift(prevSlide);
     }
 
     // 後側のスライドを追加
+    slides.push(lastSlide);
     if (hasNext) {
-      slides.push(lastPageDummy);
-      slides.push(nextFolderNav);
-    } else {
-      slides.push(lastPageDummy);
+      slides.push(nextSlide);
     }
 
     return slides;
   }, [allNodes, hasPrev, hasNext]);
-
-  // 実際のメディアインデックスからスライドインデックスへの変換
-  const getSlideIndex = (mediaIndex: number): number => {
-    let offset = 1; // firstPageDummy
-    if (hasPrev) offset += 1; // prevFolderNav
-    return mediaIndex + offset;
-  };
-
-  // スワイプ制御用
-  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(
-    getSlideIndex(initialIndex)
-  );
-
-  // スワイプ時の移動処理
-  const handleSwipe = (swiper: SwiperClass) => {
-    setCurrentSlideIndex(swiper.activeIndex);
-
-    const slide = allSlides[swiper.activeIndex];
-
-    // ダミーページの場合は何もしない
-    if (slide === firstPageDummy || slide === lastPageDummy) {
-      return;
-    }
-
-    // フォルダ遷移
-    if (hasPrev && slide === prevFolderNav) {
-      onOpenPrev();
-      return;
-    }
-    if (hasNext && slide === nextFolderNav) {
-      onOpenNext();
-      return;
-    }
-
-    // メディアノードの場合のみ状態更新
-    let offset = 1; // firstPageDummy
-    if (hasPrev) offset += 1; // prevFolderNav
-    const index = swiper.activeIndex - offset;
-    const node = allNodes[index];
-    if (node) {
-      setCurrentIndex(index);
-      updateTitle(node);
-      onIndexChange?.(index);
-
-      lastViewedPathRef.current = node.path;
-    }
-  };
 
   // ===== タイトル =====
 
   const { setTitle } = useDocumentTitle();
 
   // タイトルにファイルタイトルまたはファイル名を設定
-  const updateTitle = (node: MediaNode) => {
-    const { title, name } = node;
-    setTitle(`${title ?? name} | ${APP_CONFIG.meta.title}`);
-  };
+  const updateTitle = useCallback(
+    (node: MediaNode) => {
+      setTitle(`${node.title ?? node.name} | ${APP_CONFIG.meta.title}`);
+    },
+    [setTitle]
+  );
 
   // ===== お気に入り =====
 
@@ -191,52 +209,103 @@ export function MediaViewer({
     : {};
 
   // お気に入り状態トグル
-  const handleToggleFavorite = () => {
-    startTransition(async () => {
-      try {
-        if (!currentNode) return;
-        const { isFavorite } = getFavorite(currentNode.path);
-        const nextIsFavorite = !isFavorite;
+  const handleToggleFavorite = useCallback(async () => {
+    if (!currentNode) return;
 
-        await toggleFavorite(currentNode.path);
+    try {
+      const { isFavorite } = getFavorite(currentNode.path);
+      const nextIsFavorite = !isFavorite;
 
-        const message = nextIsFavorite
+      await toggleFavorite(currentNode.path);
+
+      startTransition(() => {});
+
+      toast.info(
+        nextIsFavorite
           ? "⭐お気に入りに登録しました"
-          : "お気に入りを解除しました";
-        toast.info(message, { duration: 1000 });
+          : "お気に入りを解除しました",
+        { duration: 1000 }
+      );
 
-        interactHeader();
-      } catch (e) {
-        console.error(e);
-        toast.error("お気に入りの更新に失敗しました");
-      }
-    });
-  };
+      interactHeader();
+    } catch (e) {
+      console.error(e);
+      toast.error("お気に入りの更新に失敗しました");
+    }
+  }, [
+    currentNode,
+    getFavorite,
+    toggleFavorite,
+    interactHeader,
+    startTransition,
+  ]);
 
   // レーティングを更新
-  const handleChangeRating = (rating: number | null) => {
-    startTransition(async () => {
+  const handleChangeRating = useCallback(
+    async (rating: number | null) => {
+      if (!currentNode) return;
+
       try {
-        if (!currentNode) return;
-        const node = currentNode;
+        await updateFavorite(currentNode.path, rating);
 
-        await updateFavorite(node.path, rating);
+        startTransition(() => {});
 
-        const message =
+        toast.info(
           rating != null
             ? "⭐レーティングを更新しました"
-            : "レーティングを解除しました";
-        toast.info(message, { duration: 1000 });
+            : "レーティングを解除しました",
+          { duration: 1000 }
+        );
 
         interactHeader();
       } catch (e) {
         console.error(e);
         toast.error("お気に入りの更新に失敗しました");
       }
-    });
-  };
+    },
+    [currentNode, updateFavorite, interactHeader, startTransition]
+  );
 
-  // ===== ナビゲーション =====
+  // ===== スワイプ =====
+
+  // スワイプ時の移動処理
+  const handleSwipe = useCallback(
+    (swiper: SwiperClass) => {
+      debugger;
+      setCurrentSlideIndex(swiper.activeIndex);
+
+      const slide = allSlides[swiper.activeIndex];
+      if (!slide) return;
+
+      if (slide.type === "empty") return;
+
+      if (slide.type === "navigation") {
+        if (slide.direction === "prev") onOpenPrev?.();
+        if (slide.direction === "next") onOpenNext?.();
+        return;
+      }
+
+      const index = swiper.activeIndex - getMediaOffset();
+      const node = allNodes[index];
+      if (!node) return;
+
+      setCurrentIndex(index);
+      updateTitle(node);
+      onIndexChange?.(index);
+      lastViewedPathRef.current = node.path;
+    },
+    [
+      allSlides,
+      allNodes,
+      getMediaOffset,
+      onIndexChange,
+      onOpenNext,
+      onOpenPrev,
+      updateTitle,
+    ]
+  );
+
+  // ===== 復元 =====
 
   // リスト更新時に直前に見ていたファイルを復元
   useEffect(() => {
@@ -244,8 +313,7 @@ export function MediaViewer({
     if (!path) return;
 
     const index = allNodes.findIndex((n) => n.path === path);
-    if (index === -1) return;
-    if (index === currentIndex) return;
+    if (index === -1 || index === currentIndex) return;
 
     const slideIndex = getSlideIndex(index);
 
@@ -255,40 +323,43 @@ export function MediaViewer({
     onIndexChange?.(index);
 
     swiperRef.current?.slideTo(slideIndex, 0);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- この処理は allNodes だけに依存させる
-  }, [allNodes]);
-
-  // ===== ズーム =====
-
-  // マウスホイールでズーム
-  const handleWheel = (e: React.WheelEvent) => {
-    const swiper = swiperRef.current;
-    if (!swiper?.zoom) return;
-
-    const currentScale = swiper.zoom.scale;
-    const delta = e.deltaY < 0 ? 0.2 : -0.2;
-    const newScale = Math.min(Math.max(currentScale + delta, 1), 3);
-
-    if (newScale === 1) {
-      swiper.zoom.out();
-    } else {
-      swiper.zoom.in(newScale);
-    }
-  };
+  }, [allNodes, currentIndex, getSlideIndex, onIndexChange, updateTitle]);
 
   // ===== モバイル =====
 
   const isMobile = useIsMobile();
 
-  // ===== リピート再生 =====
+  // ===== 画像 =====
+
+  // マウスホイールでズーム
+  const handleWheel = useCallback(
+    (e: React.WheelEvent, slide: ContentSlide) => {
+      if (slide.node.type !== "image") return;
+
+      const swiper = swiperRef.current;
+      if (!swiper?.zoom) return;
+
+      const currentScale = swiper.zoom.scale;
+      const delta = e.deltaY < 0 ? 0.2 : -0.2;
+      const newScale = Math.min(Math.max(currentScale + delta, 1), 3);
+
+      if (newScale === 1) {
+        swiper.zoom.out();
+      } else {
+        swiper.zoom.in(newScale);
+      }
+    },
+    []
+  );
+
+  // ===== オーディオ =====
 
   const [isRepeating, setIsRepeating] = useState(false);
 
   // ===== ショートカット =====
 
   // Escape / Backspace: 閉じる
-  useHotkeys(["escape", "backspace"], () => onClose!(), {
+  useHotkeys(["escape", "backspace"], () => onClose?.(), {
     scopes: "viewer",
     enabled: shortcutEnabled && !!onClose,
   });
@@ -317,7 +388,7 @@ export function MediaViewer({
   });
 
   // S: お気に入りの切り替え
-  useHotkeys("s", () => handleToggleFavorite(), {
+  useHotkeys("s", () => void handleToggleFavorite(), {
     scopes: ["viewer", "tag-editor"],
     enabled: shortcutEnabled,
   });
@@ -346,13 +417,69 @@ export function MediaViewer({
     "0,1,2,3,4,5",
     (event) => {
       const rating = parseInt(event.key);
-      handleChangeRating(rating === 0 ? null : rating);
+      void handleChangeRating(rating === 0 ? null : rating);
     },
     {
       scopes: ["viewer", "tag-editor"],
       enabled: shortcutEnabled,
     }
   );
+
+  // ===== レンダリング =====
+
+  const renderSlideContent = (slide: MediaViewerSlide, active: boolean) => {
+    switch (slide.type) {
+      case "empty":
+        return slide.position === "first" ? (
+          <div className="flex flex-col items-center justify-center text-white/70">
+            <ChevronLeft className="mb-4" size={64} strokeWidth={1} />
+            <p className="text-xl font-medium mb-2">最初のページです</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-white/70">
+            <ChevronRight className="mb-4" size={64} strokeWidth={1} />
+            <p className="text-xl font-medium mb-2">最後のページです</p>
+          </div>
+        );
+
+      case "navigation":
+        return (
+          <div className="flex flex-col items-center justify-center text-white/50">
+            <Loader2 className="animate-spin mb-4" size={48} />
+            <p>
+              {slide.direction === "prev"
+                ? "前のフォルダへ..."
+                : "次のフォルダへ..."}
+            </p>
+          </div>
+        );
+
+      case "content":
+        switch (slide.node.type) {
+          case "image":
+            return <ImageViewer media={slide.node} active={active} />;
+
+          case "video":
+            return <VideoPlayer media={slide.node} active={active} />;
+
+          case "audio":
+            return (
+              <AudioPlayer
+                media={slide.node}
+                active={active}
+                isRepeating={isRepeating}
+                onRepeatingChange={setIsRepeating}
+              />
+            );
+
+          default:
+            return assertNever(slide.node);
+        }
+
+      default:
+        return assertNever(slide);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
@@ -383,7 +510,6 @@ export function MediaViewer({
             <button
               onClick={onClose}
               className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full mr-4"
-              aria-label="Close viewer"
             >
               <ArrowLeft size={28} />
             </button>
@@ -402,6 +528,7 @@ export function MediaViewer({
                   </ClickToCopy>
                 </MarqueeText>
               </span>
+
               <span className="text-white/60 text-sm">
                 {currentIndex + 1} / {allNodes.length}
               </span>
@@ -420,7 +547,7 @@ export function MediaViewer({
                   variant="viewer"
                   rating={rating}
                   isFavorite={isFavorite}
-                  onClick={handleToggleFavorite}
+                  onClick={() => void handleToggleFavorite()}
                   disabled={isPending}
                 />
               )}
@@ -441,86 +568,32 @@ export function MediaViewer({
 
       {/* メディアコンテンツ */}
       <Swiper
-        onSwiper={(swiper) => (swiperRef.current = swiper)}
+        onSwiper={(swiper) => {
+          swiperRef.current = swiper;
+          setCurrentSlideIndex(swiper.activeIndex);
+        }}
         modules={[Virtual, Navigation, Zoom]}
         initialSlide={getSlideIndex(initialIndex)}
         onSlideChange={handleSwipe}
-        virtual={{
-          enabled: true,
-          slides: allSlides,
-          addSlidesBefore: 3,
-          addSlidesAfter: 3,
-        }}
-        keyboard={{ enabled: true }}
-        zoom={true}
+        virtual
+        zoom
         className="h-full w-full"
-        noSwiping={true}
-        noSwipingSelector=".swiper-no-swiping"
       >
         {allSlides.map((slide, i) => {
           const active = currentSlideIndex === i;
-          const isFirstPage = slide === firstPageDummy;
-          const isLastPage = slide === lastPageDummy;
-          const isPrevFolder = slide === prevFolderNav;
-          const isNextFolder = slide === nextFolderNav;
 
           return (
             <SwiperSlide
-              key={slide.path}
+              key={slide.key}
               virtualIndex={i}
-              className="flex items-center justify-center"
-              onWheel={handleWheel}
+              onWheel={
+                slide.type === "content"
+                  ? (e) => handleWheel(e, slide)
+                  : undefined
+              }
             >
               <div className="w-full h-full flex items-center justify-center">
-                {isFirstPage ? (
-                  // 最初のページダミー
-                  <div className="flex flex-col items-center justify-center text-white/70">
-                    <ChevronLeft className="mb-4" size={64} strokeWidth={1} />
-                    <p className="text-xl font-medium mb-2">最初のページです</p>
-                    {hasPrev && (
-                      <p className="text-sm text-white/50">
-                        前のフォルダに移動するにはもう一度左にスワイプ
-                      </p>
-                    )}
-                  </div>
-                ) : isLastPage ? (
-                  // 最後のページダミー
-                  <div className="flex flex-col items-center justify-center text-white/70">
-                    <ChevronRight className="mb-4" size={64} strokeWidth={1} />
-                    <p className="text-xl font-medium mb-2">最後のページです</p>
-                    {hasNext && (
-                      <p className="text-sm text-white/50">
-                        次のフォルダに移動するにはもう一度右にスワイプ
-                      </p>
-                    )}
-                  </div>
-                ) : isPrevFolder || isNextFolder ? (
-                  // 次・前のフォルダ
-                  <div className="flex flex-col items-center justify-center text-white/50">
-                    <Loader2 className="animate-spin mb-4" size={48} />
-                    <p>
-                      {isPrevFolder ? "前のフォルダへ..." : "次のフォルダへ..."}
-                    </p>
-                  </div>
-                ) : slide.type === "image" ? (
-                  // 画像
-                  <ImageViewer media={slide} active={active} />
-                ) : slide.type === "video" ? (
-                  // 動画
-                  <VideoPlayer media={slide} active={active} />
-                ) : slide.type === "audio" ? (
-                  // オーディオ
-                  <AudioPlayer
-                    media={slide}
-                    active={active}
-                    isRepeating={isRepeating}
-                    onRepeatingChange={setIsRepeating}
-                  />
-                ) : (
-                  <div className="text-white/50 text-sm">
-                    Unsupported file type: {slide.type}
-                  </div>
-                )}
+                {renderSlideContent(slide, active)}
               </div>
             </SwiperSlide>
           );
