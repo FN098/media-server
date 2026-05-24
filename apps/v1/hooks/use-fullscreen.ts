@@ -7,7 +7,6 @@ export function useFullscreen() {
 
   useEffect(() => {
     const handler = () => forceUpdate();
-
     document.addEventListener("fullscreenchange", handler);
     return () => {
       document.removeEventListener("fullscreenchange", handler);
@@ -15,9 +14,11 @@ export function useFullscreen() {
   }, []);
 
   const isSupported =
+    typeof document !== "undefined" &&
     typeof document.documentElement.requestFullscreen === "function";
 
-  const isFullscreen = !!document.fullscreenElement;
+  const isFullscreen =
+    typeof document !== "undefined" && !!document.fullscreenElement;
 
   // 全画面にする
   const enterFullscreen = async (element = document.documentElement) => {
