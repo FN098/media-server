@@ -6,27 +6,23 @@ import { ViewerHeaderPinButton } from "@/components/ui/buttons/viewer-header-pin
 import { ViewerActionsDropdownMenu } from "@/components/ui/dropdown-menus/viewer-actions-dropdown-menu";
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
-import { AudioPlayer } from "@/components/ui/viewers/audio-player";
-import { ImageViewer } from "@/components/ui/viewers/image-viewer";
 import {
   ContentSlide,
-  MediaViewerSlide,
   buildMediaViewerSlides,
   getMediaIndex,
   getSlideIndex,
 } from "@/components/ui/viewers/lib/media-viewer/slides";
-import { VideoPlayer } from "@/components/ui/viewers/video-player";
+import { MediaViewerSlideRenderer } from "@/components/ui/viewers/media-viewer-slide-renderer";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
-import { assertNever } from "@/lib/utils/assert";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -347,62 +343,6 @@ export function MediaViewer({
     }
   );
 
-  // ===== レンダリング =====
-
-  const renderSlideContent = (slide: MediaViewerSlide, active: boolean) => {
-    switch (slide.type) {
-      case "empty":
-        return slide.position === "first" ? (
-          <div className="flex flex-col items-center justify-center text-white/70">
-            <ChevronLeft className="mb-4" size={64} strokeWidth={1} />
-            <p className="text-xl font-medium mb-2">最初のページです</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center text-white/70">
-            <ChevronRight className="mb-4" size={64} strokeWidth={1} />
-            <p className="text-xl font-medium mb-2">最後のページです</p>
-          </div>
-        );
-
-      case "navigation":
-        return (
-          <div className="flex flex-col items-center justify-center text-white/50">
-            <Loader2 className="animate-spin mb-4" size={48} />
-            <p>
-              {slide.direction === "prev"
-                ? "前のフォルダへ..."
-                : "次のフォルダへ..."}
-            </p>
-          </div>
-        );
-
-      case "content":
-        switch (slide.node.type) {
-          case "image":
-            return <ImageViewer media={slide.node} active={active} />;
-
-          case "video":
-            return <VideoPlayer media={slide.node} active={active} />;
-
-          case "audio":
-            return (
-              <AudioPlayer
-                media={slide.node}
-                active={active}
-                isRepeating={isRepeating}
-                onRepeatingChange={setIsRepeating}
-              />
-            );
-
-          default:
-            return assertNever(slide.node);
-        }
-
-      default:
-        return assertNever(slide);
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
       {/* ヘッダーエリア（インタラクション検知用） */}
@@ -515,7 +455,12 @@ export function MediaViewer({
               }
             >
               <div className="w-full h-full flex items-center justify-center">
-                {renderSlideContent(slide, active)}
+                <MediaViewerSlideRenderer
+                  slide={slide}
+                  active={active}
+                  isRepeating={isRepeating}
+                  onRepeatingChange={setIsRepeating}
+                />
               </div>
             </SwiperSlide>
           );
