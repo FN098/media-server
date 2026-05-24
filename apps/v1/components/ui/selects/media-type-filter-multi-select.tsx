@@ -91,7 +91,7 @@ export function MediaTypeFilterMultiSelect({
           {value.types.length === 0 && (
             <>
               <FileType className="h-4 w-4 shrink-0" />
-              <span className="text-sm font-medium">種別で絞り込む</span>
+              <span className="text-sm font-medium">種別フィルタ</span>
             </>
           )}
 

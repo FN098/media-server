@@ -288,7 +288,7 @@ export function TagFilterDialog({
           onPointerDown={activate}
         >
           <Tag className="h-4 w-4" />
-          <span>タグで絞り込む</span>
+          <span>タグフィルタ</span>
           {hasSelection && (
             <Badge
               variant="default"

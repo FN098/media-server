@@ -203,7 +203,7 @@ function StarPicker({ value, onChange }: StarPickerProps) {
           <button
             key={v}
             type="button"
-            onClick={() => onChange(v as RatingValue)}
+            onClick={() => onChange(v)}
             className={cn(
               "flex items-center justify-between w-full px-3 py-2 rounded-lg border text-sm transition-all",
               selected
@@ -211,7 +211,7 @@ function StarPicker({ value, onChange }: StarPickerProps) {
                 : "border-border bg-transparent text-muted-foreground hover:border-primary/40 hover:bg-accent"
             )}
           >
-            <StarDisplay rating={v as RatingValue} size={13} />
+            <StarDisplay rating={v} size={13} />
             {selected && (
               <span className="text-[10px] font-medium text-primary">
                 選択中
@@ -309,7 +309,7 @@ export function RatingFilterDialog({
           ) : (
             <>
               <Star className="h-4 w-4" />
-              <span>評価で絞り込む</span>
+              <span>評価フィルタ</span>
             </>
           )}
         </Button>
