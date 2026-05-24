@@ -32,7 +32,6 @@ interface MediaViewerHeaderProps {
 
   isFavorite: boolean;
   rating: number | null;
-  isPending: boolean;
 
   onToggleFavorite: () => void;
   onClose?: () => void;
@@ -56,7 +55,6 @@ export function MediaViewerHeader({
 
   isFavorite,
   rating,
-  isPending,
 
   onToggleFavorite,
   onClose,
@@ -119,7 +117,6 @@ export function MediaViewerHeader({
                 rating={rating}
                 isFavorite={isFavorite}
                 onClick={onToggleFavorite}
-                disabled={isPending}
               />
             )}
 

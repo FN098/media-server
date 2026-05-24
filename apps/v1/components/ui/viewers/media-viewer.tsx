@@ -15,14 +15,7 @@ import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 import "swiper/css";
@@ -56,8 +49,6 @@ export function MediaViewer({
   onOpenParent,
   onDelete,
 }: MediaViewerProps) {
-  const [isPending, startTransition] = useTransition();
-
   // ===== ヘッダー =====
 
   const [isHovered, setIsHovered] = useState(false);
@@ -128,8 +119,6 @@ export function MediaViewer({
 
       await toggleFavorite(currentNode.path);
 
-      startTransition(() => {});
-
       toast.info(
         nextIsFavorite
           ? "⭐お気に入りに登録しました"
@@ -142,13 +131,7 @@ export function MediaViewer({
       console.error(e);
       toast.error("お気に入りの更新に失敗しました");
     }
-  }, [
-    currentNode,
-    getFavorite,
-    toggleFavorite,
-    interactHeader,
-    startTransition,
-  ]);
+  }, [currentNode, getFavorite, toggleFavorite, interactHeader]);
 
   // レーティングを更新
   const handleChangeRating = useCallback(
@@ -157,8 +140,6 @@ export function MediaViewer({
 
       try {
         await updateFavorite(currentNode.path, rating);
-
-        startTransition(() => {});
 
         toast.info(
           rating != null
@@ -173,7 +154,7 @@ export function MediaViewer({
         toast.error("お気に入りの更新に失敗しました");
       }
     },
-    [currentNode, updateFavorite, interactHeader, startTransition]
+    [currentNode, updateFavorite, interactHeader]
   );
 
   // ===== スワイプ =====
@@ -355,7 +336,6 @@ export function MediaViewer({
         menuItems={menuItems}
         isFavorite={isFavorite}
         rating={rating}
-        isPending={isPending}
         onToggleFavorite={() => void handleToggleFavorite()}
         onClose={onClose}
       />
