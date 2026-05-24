@@ -6,6 +6,7 @@ import {
   getSlideIndex,
   MediaViewerSlide,
 } from "@/components/ui/viewers/lib/media-viewer/slides";
+import { clamp } from "@/lib/utils/clamp";
 import { RefObject, useCallback, useState } from "react";
 import "swiper/css";
 import "swiper/css/virtual";
@@ -44,7 +45,7 @@ export function MediaViewerSlides({
 
       const currentScale = swiper.zoom.scale;
       const delta = e.deltaY < 0 ? 0.2 : -0.2;
-      const newScale = Math.min(Math.max(currentScale + delta, 1), 3);
+      const newScale = clamp(currentScale + delta, 1, 3);
 
       if (newScale === 1) {
         swiper.zoom.out();
