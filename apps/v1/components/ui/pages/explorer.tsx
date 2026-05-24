@@ -83,6 +83,7 @@ import {
   ArrowDownAzIcon,
   ArrowDownWideNarrowIcon,
   CalendarArrowDownIcon,
+  ClockIcon,
   CopyIcon,
   ExternalLinkIcon,
   FolderInputIcon,
@@ -93,9 +94,9 @@ import {
   PackageOpenIcon,
   PencilIcon,
   RefreshCwIcon,
-  SparkleIcon,
   StarIcon,
   StarOffIcon,
+  StarsIcon,
   TagIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -154,7 +155,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             sort: "name",
             direction: "asc",
           },
-          label: "名前 (A-Z)",
+          label: "名前",
           icon: ArrowDownAzIcon,
         },
         {
@@ -175,11 +176,19 @@ export function Explorer({ listing }: { listing: MediaListing }) {
         },
         {
           value: {
+            sort: "lastViewed",
+            direction: "desc",
+          },
+          label: "訪問日",
+          icon: ClockIcon,
+        },
+        {
+          value: {
             sort: "rating",
             direction: "desc",
           },
           label: "評価",
-          icon: SparkleIcon,
+          icon: StarsIcon,
         },
       ] as const,
     []
