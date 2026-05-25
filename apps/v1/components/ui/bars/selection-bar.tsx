@@ -40,10 +40,10 @@ export function SelectionBar({
   const isAllSelected = count > 0 && count === totalCount;
   const isMobile = useIsMobile();
 
-  const displayInlineMenuItems =
+  const visibleInlineMenuItems =
     inlineMenuItems?.filter((item) => !item.hidden?.(context)) ?? [];
 
-  const displayMenuItems =
+  const visibleMenuItems =
     menuItems?.filter((item) => !item.hidden?.(context)) ?? [];
 
   return (
@@ -83,7 +83,7 @@ export function SelectionBar({
             <div className="flex gap-1 items-center">
               <div className="flex gap-1 items-center">
                 {/* インラインアクション */}
-                {displayInlineMenuItems.map((item) => {
+                {visibleInlineMenuItems.map((item) => {
                   if (item.type === "custom") {
                     return (
                       <React.Fragment key={item.key}>
@@ -116,7 +116,7 @@ export function SelectionBar({
                 })}
 
                 {/* メニューアクション */}
-                {displayMenuItems.length > 0 && (
+                {visibleMenuItems.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -129,7 +129,7 @@ export function SelectionBar({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {displayMenuItems.map((item) => {
+                      {visibleMenuItems.map((item) => {
                         if (item.type === "custom") {
                           return (
                             <React.Fragment key={item.key}>
