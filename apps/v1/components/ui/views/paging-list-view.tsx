@@ -43,8 +43,14 @@ interface PagingListViewProps {
   onThumbError?: (node: MediaNode) => void;
 }
 
-const GRID_TEMPLATE =
-  "grid-cols-[40px_1fr_40px_80px] md:grid-cols-[40px_1fr_80px_140px_180px_140px_80px_80px]";
+// スマホ: Checkbox, Name, Rating, Actions
+// タブレット: Checkbox, Name, Type, Size, Rating, Actions
+// PC: Checkbox, Name, Type, Updated, Size, Last Viewed, Rating, Actions
+const GRID_TEMPLATE = cn(
+  "grid-cols-[40px_1fr_40px_80px]",
+  "md:grid-cols-[40px_1fr_80px_180px_80px_80px]",
+  "lg:grid-cols-[40px_1fr_80px_140px_180px_140px_80px_80px]"
+);
 
 export function PagingListView({
   allNodes,
@@ -330,7 +336,7 @@ function HeaderRow() {
   return (
     <div
       className={cn(
-        "grid items-center h-10 border-b bg-muted/30 text-xs font-semibold text-muted-foreground z-10",
+        "grid items-center h-10 border-b bg-muted/30 text-xs font-semibold text-muted-foreground z-10 min-w-0",
         GRID_TEMPLATE
       )}
     >
@@ -339,9 +345,9 @@ function HeaderRow() {
       </div>
       <div>Name</div>
       <div className="hidden md:block">Type</div>
-      <div className="hidden md:block">Updated</div>
+      <div className="hidden lg:block">Updated</div>
       <div className="hidden md:block">Size</div>
-      <div className="hidden md:block">Last Viewed</div>
+      <div className="hidden lg:block">Last Viewed</div>
       <div className="text-center">Rating</div>
       <div className="text-center">Actions</div>
     </div>
@@ -603,20 +609,22 @@ function DataRow({
           </div>
 
           {/* Updated */}
-          <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
+          <div className="hidden lg:block text-muted-foreground text-xs tabular-nums">
             <LocalDate value={node.mtime} />
           </div>
 
           {/* Size */}
-          <SizeBar
-            pattern="A"
-            size={node.size}
-            fileCount={node.fileCount}
-            occupancyPercent={occupancyPercent}
-          />
+          <div className="hidden md:block min-w-0 overflow-hidden">
+            <SizeBar
+              pattern="A"
+              size={node.size}
+              fileCount={node.fileCount}
+              occupancyPercent={occupancyPercent}
+            />
+          </div>
 
           {/* Last Viewed */}
-          <div className="hidden md:block text-muted-foreground text-xs tabular-nums">
+          <div className="hidden lg:block text-muted-foreground text-xs tabular-nums">
             {node.isDirectory ? (
               <FolderStatusBadge
                 date={node.lastViewedAt}
