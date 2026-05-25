@@ -797,6 +797,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       key: "rating",
       type: "custom",
       render: ({ node, closeMenu }) => {
+        if (node.isDirectory) return null;
+
         const { rating } = getFavorite(node.path);
         return (
           <div className="w-full flex justify-center">
