@@ -214,7 +214,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   // ファイル/フォルダオープン
   const handleOpen = (node: MediaNode) => {
     if (node.isDirectory) {
-      openFolder(node.path, { deleted: true });
+      openFolder(node.path, { deleted: true, resetPage: true });
       return;
     }
 

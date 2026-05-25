@@ -201,7 +201,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   // ファイル/フォルダオープン
   const handleOpen = (node: MediaNode) => {
     if (node.isDirectory) {
-      openFolder(node.path);
+      openFolder(node.path, { resetPage: true });
       return;
     }
 
