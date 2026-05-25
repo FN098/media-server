@@ -49,7 +49,6 @@ import "swiper/css/virtual";
 import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
-import { Swiper as SwiperType } from "swiper/types";
 
 interface MediaViewerProps {
   allNodes: MediaNode[];
@@ -359,7 +358,7 @@ interface MediaViewerSlidesProps {
   currentSlideIndex: number;
   initialIndex: number;
   hasPrev: boolean;
-  swiperRef: RefObject<SwiperType | null>;
+  swiperRef: RefObject<SwiperClass | null>;
   onSlideChange: (swiper: SwiperClass) => void;
   setCurrentSlideIndex: (index: number) => void;
   isRepeating: boolean;
@@ -401,6 +400,8 @@ function MediaViewerSlides({
 
   // TODO: useMediaViewerNavigation に移動
   const goNext = useCallback(() => {
+    if (allSlides.length === 0) return;
+
     const swiper = swiperRef.current;
     if (!swiper) return;
 
@@ -551,6 +552,7 @@ interface ImageSlideProps {
   active: boolean;
   isSlideshowEnabled: boolean;
   onNext: () => void;
+  delay?: number;
 }
 
 function ImageSlide({
@@ -558,13 +560,14 @@ function ImageSlide({
   active,
   isSlideshowEnabled,
   onNext,
+  delay = 5000,
 }: ImageSlideProps) {
   useEffect(() => {
     if (!active || !isSlideshowEnabled) return;
 
-    const timer = setTimeout(onNext, 5000);
+    const timer = setTimeout(onNext, delay);
     return () => clearTimeout(timer);
-  }, [active, isSlideshowEnabled, onNext]);
+  }, [active, delay, isSlideshowEnabled, onNext]);
 
   return <ImageViewer media={media} active={active} />;
 }
