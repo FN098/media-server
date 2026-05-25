@@ -6,6 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
@@ -91,6 +92,12 @@ export function SelectionBar({
                     );
                   }
 
+                  if (item.type === "separator") {
+                    return (
+                      <div key={item.key} className="w-px h-6 bg-border mx-1" />
+                    );
+                  }
+
                   return (
                     <Button
                       key={item.key}
@@ -129,6 +136,10 @@ export function SelectionBar({
                               {item.render(context)}
                             </React.Fragment>
                           );
+                        }
+
+                        if (item.type === "separator") {
+                          return <DropdownMenuSeparator key={item.key} />;
                         }
 
                         return (
