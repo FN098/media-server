@@ -3,7 +3,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { ViewerHeaderPinButton } from "@/components/ui/buttons/viewer-header-pin-button";
-import { ViewerActionsDropdownMenu } from "@/components/ui/dropdown-menus/viewer-actions-dropdown-menu";
+import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
@@ -27,12 +27,21 @@ import { clamp } from "@/lib/utils/clamp";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  PauseIcon,
+  PlayIcon,
+} from "lucide-react";
 import {
   Dispatch,
   RefObject,
   SetStateAction,
   useCallback,
+  useEffect,
+  useMemo,
   useState,
 } from "react";
 import "swiper/css";
@@ -141,6 +150,26 @@ export function MediaViewer({
     onChangeRating: changeRating,
   });
 
+  // ===== 音声 =====
+
+  const [isRepeating, setIsRepeating] = useState(false);
+
+  // ===== スライドショー =====
+
+  const [isSlideshowEnabled, setIsSlideshowEnabled] = useState(false);
+
+  const handleToggleSlideshow = useCallback(() => {
+    setIsSlideshowEnabled((prev) => {
+      const next = !prev;
+
+      if (next) {
+        setIsRepeating(false);
+      }
+
+      return next;
+    });
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
       {/* ヘッダーエリア（インタラクション検知用） */}
@@ -167,6 +196,8 @@ export function MediaViewer({
         rating={rating}
         onToggleFavorite={toggleFavorite}
         onClose={onClose}
+        isSlideshowEnabled={isSlideshowEnabled}
+        onToggleSlideshow={handleToggleSlideshow}
       />
 
       {/* メディアコンテンツ */}
@@ -178,6 +209,9 @@ export function MediaViewer({
         swiperRef={swiperRef}
         onSlideChange={onSlideChange}
         setCurrentSlideIndex={setCurrentSlideIndex}
+        isRepeating={isRepeating}
+        setIsRepeating={setIsRepeating}
+        isSlideshowEnabled={isSlideshowEnabled}
       />
     </div>
   );
@@ -188,23 +222,19 @@ interface MediaViewerHeaderProps {
   currentNode: MediaNode | null;
   currentIndex: number;
   totalCount: number;
-
   isHeaderPinned: boolean;
   toggleIsHeaderPinned: () => void;
-
   isHovered: boolean;
   setIsHovered: Dispatch<SetStateAction<boolean>>;
-
   isMenuOpen: boolean;
   setIsMenuOpen: Dispatch<SetStateAction<boolean>>;
-
   menuItems?: MenuItemDef<NodeContext>[];
-
   isFavorite: boolean;
   rating: number | null;
-
   onToggleFavorite: () => void;
   onClose?: () => void;
+  isSlideshowEnabled: boolean;
+  onToggleSlideshow: () => void;
 }
 
 function MediaViewerHeader({
@@ -212,24 +242,41 @@ function MediaViewerHeader({
   currentNode,
   currentIndex,
   totalCount,
-
   isHeaderPinned,
   toggleIsHeaderPinned,
-
   setIsHovered,
-
   isMenuOpen,
   setIsMenuOpen,
-
-  menuItems,
-
+  menuItems = [],
   isFavorite,
   rating,
-
   onToggleFavorite,
   onClose,
+  isSlideshowEnabled,
+  onToggleSlideshow,
 }: MediaViewerHeaderProps) {
   const isMobile = useIsMobile();
+
+  const newMenuItems = useMemo(() => {
+    const items = [...menuItems];
+
+    if (items.length > 0) {
+      items.push({
+        key: `separator-${items.length}`,
+        type: "separator",
+      });
+    }
+
+    items.push({
+      key: "toggle-slideshow",
+      type: "action",
+      label: isSlideshowEnabled ? "スライドショー停止" : "スライドショー開始",
+      icon: isSlideshowEnabled ? PauseIcon : PlayIcon,
+      onClick: onToggleSlideshow,
+    });
+
+    return items;
+  }, [isSlideshowEnabled, menuItems, onToggleSlideshow]);
 
   return (
     <AnimatePresence>
@@ -272,6 +319,7 @@ function MediaViewerHeader({
 
             <span className="text-white/60 text-sm">
               {currentIndex + 1} / {totalCount}
+              {isSlideshowEnabled && " • スライドショー"}
             </span>
           </div>
 
@@ -290,12 +338,13 @@ function MediaViewerHeader({
               />
             )}
 
-            {currentNode && menuItems && (
-              <ViewerActionsDropdownMenu
+            {currentNode && (
+              <ActionsDropdownMenu
                 node={currentNode}
-                menuItems={menuItems}
+                menuItems={newMenuItems}
                 open={isMenuOpen}
                 onOpenChange={setIsMenuOpen}
+                triggerType="large"
               />
             )}
           </div>
@@ -313,6 +362,9 @@ interface MediaViewerSlidesProps {
   swiperRef: RefObject<SwiperType | null>;
   onSlideChange: (swiper: SwiperClass) => void;
   setCurrentSlideIndex: (index: number) => void;
+  isRepeating: boolean;
+  setIsRepeating: (value: boolean) => void;
+  isSlideshowEnabled: boolean;
 }
 
 function MediaViewerSlides({
@@ -323,9 +375,10 @@ function MediaViewerSlides({
   swiperRef,
   onSlideChange,
   setCurrentSlideIndex,
+  isRepeating,
+  setIsRepeating,
+  isSlideshowEnabled,
 }: MediaViewerSlidesProps) {
-  const [isRepeating, setIsRepeating] = useState(false);
-
   const handleWheel = useCallback(
     (e: React.WheelEvent, slide: ContentSlide) => {
       if (slide.node.type !== "image") return;
@@ -345,6 +398,24 @@ function MediaViewerSlides({
     },
     [swiperRef]
   );
+
+  // TODO: useMediaViewerNavigation に移動
+  const goNext = useCallback(() => {
+    const swiper = swiperRef.current;
+    if (!swiper) return;
+
+    const start = swiper.activeIndex;
+
+    for (let offset = 1; offset <= allSlides.length; offset++) {
+      const index = (start + offset) % allSlides.length;
+      const slide = allSlides[index];
+
+      if (slide.type === "content") {
+        swiper.slideTo(index);
+        return;
+      }
+    }
+  }, [swiperRef, allSlides]);
 
   return (
     <Swiper
@@ -379,6 +450,8 @@ function MediaViewerSlides({
                 active={active}
                 isRepeating={isRepeating}
                 onRepeatingChange={setIsRepeating}
+                isSlideshowEnabled={isSlideshowEnabled}
+                onNext={goNext}
               />
             </div>
           </SwiperSlide>
@@ -393,6 +466,8 @@ interface MediaViewerSlideRendererProps {
   active: boolean;
   isRepeating: boolean;
   onRepeatingChange: (value: boolean) => void;
+  isSlideshowEnabled: boolean;
+  onNext: () => void;
 }
 
 function MediaViewerSlideRenderer({
@@ -400,6 +475,8 @@ function MediaViewerSlideRenderer({
   active,
   isRepeating,
   onRepeatingChange,
+  isSlideshowEnabled,
+  onNext,
 }: MediaViewerSlideRendererProps) {
   switch (slide.type) {
     case "empty":
@@ -430,18 +507,33 @@ function MediaViewerSlideRenderer({
     case "content":
       switch (slide.node.type) {
         case "image":
-          return <ImageViewer media={slide.node} active={active} />;
+          return (
+            <ImageSlide
+              media={slide.node}
+              active={active}
+              isSlideshowEnabled={isSlideshowEnabled}
+              onNext={onNext}
+            />
+          );
 
         case "video":
-          return <VideoPlayer media={slide.node} active={active} />;
+          return (
+            <VideoPlayer
+              media={slide.node}
+              active={active}
+              onEnded={isSlideshowEnabled ? onNext : undefined}
+            />
+          );
 
         case "audio":
           return (
             <AudioPlayer
               media={slide.node}
               active={active}
-              isRepeating={isRepeating}
+              isRepeating={isRepeating && !isSlideshowEnabled}
               onRepeatingChange={onRepeatingChange}
+              disableRepeat={isSlideshowEnabled}
+              onEnded={isSlideshowEnabled ? onNext : undefined}
             />
           );
 
@@ -452,4 +544,27 @@ function MediaViewerSlideRenderer({
     default:
       return assertNever(slide);
   }
+}
+
+interface ImageSlideProps {
+  media: MediaNode;
+  active: boolean;
+  isSlideshowEnabled: boolean;
+  onNext: () => void;
+}
+
+function ImageSlide({
+  media,
+  active,
+  isSlideshowEnabled,
+  onNext,
+}: ImageSlideProps) {
+  useEffect(() => {
+    if (!active || !isSlideshowEnabled) return;
+
+    const timer = setTimeout(onNext, 5000);
+    return () => clearTimeout(timer);
+  }, [active, isSlideshowEnabled, onNext]);
+
+  return <ImageViewer media={media} active={active} />;
 }

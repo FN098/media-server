@@ -25,6 +25,8 @@ interface AudioPlayerProps {
   active?: boolean;
   isRepeating?: boolean;
   onRepeatingChange?: (value: boolean) => void;
+  disableRepeat?: boolean;
+  onEnded?: () => void;
 }
 
 export function AudioPlayer({
@@ -32,6 +34,8 @@ export function AudioPlayer({
   active = true,
   isRepeating = false,
   onRepeatingChange,
+  disableRepeat,
+  onEnded,
 }: AudioPlayerProps) {
   const playerRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -64,8 +68,9 @@ export function AudioPlayer({
       playerRef.current.play().catch(() => {});
     } else {
       setIsPlaying(false);
+      onEnded?.();
     }
-  }, [isRepeating, playerRef, setIsPlaying]);
+  }, [isRepeating, onEnded]);
 
   // 再生・一時停止
   const togglePlaying = useCallback(() => {
@@ -165,6 +170,7 @@ export function AudioPlayer({
           }`}
           label="Repeat"
           shortcut="R"
+          disabled={disableRepeat}
         >
           {isRepeating ? <Repeat1 size={20} /> : <Repeat size={20} />}
         </PlayerButton>
@@ -295,11 +301,12 @@ function PlayerButton({
   label,
   shortcut,
   className,
+  ...rest
 }: PlayerButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <button onClick={onClick} className={className}>
+        <button onClick={onClick} className={className} {...rest}>
           {children}
         </button>
       </TooltipTrigger>

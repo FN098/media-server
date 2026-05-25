@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { Kbd } from "@/shadcn/components/ui/kbd";
@@ -32,6 +33,8 @@ interface ActionsDropdownMenuProps {
   onOpenChange?: (open: boolean) => void;
   className?: string;
   disabled?: boolean;
+  hidden?: boolean;
+  triggerType?: "default" | "large";
 }
 
 export function ActionsDropdownMenu({
@@ -40,7 +43,9 @@ export function ActionsDropdownMenu({
   open: controlledOpen,
   onOpenChange: onControlledOpenChange,
   className,
-  disabled = false,
+  disabled,
+  hidden,
+  triggerType = "default",
 }: ActionsDropdownMenuProps) {
   const isMobile = useIsMobile();
   const mounted = useMounted();
@@ -55,20 +60,34 @@ export function ActionsDropdownMenu({
     [menuItems, node]
   );
 
-  if (!mounted || disabled) return null;
+  if (!mounted || hidden) return null;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn("h-8 w-8 rounded-full", className)}
-          onPointerDown={(e) => e.preventDefault()}
-          onClick={() => setOpen(!open)}
-        >
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+        {triggerType === "default" ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("h-8 w-8 rounded-full", className)}
+            onClick={() => setOpen(!open)}
+            disabled={disabled}
+          >
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        ) : (
+          <button
+            onPointerDown={(e) => e.preventDefault()}
+            className={cn(
+              "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
+              className
+            )}
+            onClick={() => setOpen(!open)}
+            disabled={disabled}
+          >
+            <MoreVertical size={24} />
+          </button>
+        )}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="min-w-48">
@@ -79,6 +98,10 @@ export function ActionsDropdownMenu({
                 {item.render({ node, closeMenu })}
               </DropdownMenuItem>
             );
+          }
+
+          if (item.type === "separator") {
+            return <DropdownMenuSeparator key={item.key} />;
           }
 
           const Icon = item.icon;

@@ -11,9 +11,14 @@ import { useHotkeys } from "react-hotkeys-hook";
 type VideoPlayerProps = {
   media: MediaFsNode;
   active?: boolean;
+  onEnded?: () => void;
 };
 
-export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
+export function VideoPlayer({
+  media,
+  active = true,
+  onEnded,
+}: VideoPlayerProps) {
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
 
@@ -39,6 +44,7 @@ export function VideoPlayer({ media, active = true }: VideoPlayerProps) {
   // 再生が終わったらストレージから削除する
   const handleEnded = () => {
     localStorage.removeItem(storageKey);
+    onEnded?.();
   };
 
   const seek = (amount: number) => {

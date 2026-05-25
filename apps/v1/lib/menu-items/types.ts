@@ -23,7 +23,14 @@ export interface CustomMenuItem<T> extends BaseMenuItem<T> {
   render: (context: T) => React.ReactNode;
 }
 
-export type MenuItemDef<T> = ActionMenuItem<T> | CustomMenuItem<T>;
+export interface SeparatorMenuItem<T> extends BaseMenuItem<T> {
+  type: "separator";
+}
+
+export type MenuItemDef<T> =
+  | ActionMenuItem<T>
+  | CustomMenuItem<T>
+  | SeparatorMenuItem<T>;
 
 export type NodeContext = {
   node: MediaNode;
