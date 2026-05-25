@@ -34,7 +34,6 @@ export function useViewMode(options?: Options) {
 
   const value = (searchParams.get(viewModeKey) as ViewMode) || defaultViewMode;
 
-  // apply: URLを更新して状態を変更
   const apply = useCallback(
     (next: ViewMode) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -50,7 +49,6 @@ export function useViewMode(options?: Options) {
     [defaultViewMode, navigate, pathname, searchParams, viewModeKey]
   );
 
-  // reset: デフォルトの状態に戻す
   const reset = useCallback(
     () => apply(defaultViewMode),
     [apply, defaultViewMode]
