@@ -65,16 +65,21 @@ export function usePaging(totalItems: number, options?: Options) {
     [totalItems, pageSize]
   );
 
+  const efficientPage = useMemo(
+    () => clamp(page, 1, totalPages),
+    [page, totalPages]
+  );
+
   const paginate = useCallback(
     <T>(items: T[]): T[] => {
-      const start = (page - 1) * pageSize;
+      const start = (efficientPage - 1) * pageSize;
       return items.slice(start, start + pageSize);
     },
-    [page, pageSize]
+    [efficientPage, pageSize]
   );
 
   return {
-    page,
+    page: efficientPage,
     setPage,
     pageSize,
     setPageSize,

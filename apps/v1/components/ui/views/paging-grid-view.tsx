@@ -12,7 +12,6 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
-import { clamp } from "@/lib/utils/clamp";
 import { formatBytes } from "@/lib/utils/format";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
@@ -50,8 +49,13 @@ export function PagingGridView({
   onOpen,
   onThumbError,
 }: PagingGridViewProps) {
-  const { page, pageSize, totalPages, setPage, paginate } = usePagingContext();
-  const currentPage = clamp(page, 1, totalPages);
+  const {
+    page: currentPage,
+    pageSize,
+    totalPages,
+    setPage,
+    paginate,
+  } = usePagingContext();
 
   const {
     lastSelectedPath,
