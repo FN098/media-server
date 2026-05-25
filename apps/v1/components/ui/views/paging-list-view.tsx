@@ -32,6 +32,15 @@ import React, {
   useState,
 } from "react";
 
+// スマホ: Checkbox, Name, Rating, Actions
+// タブレット: Checkbox, Name, Type, Size, Rating, Actions
+// PC: Checkbox, Name, Type, Updated, Size, Last Viewed, Rating, Actions
+const GRID_TEMPLATE = cn(
+  "grid-cols-[40px_1fr_40px_80px]",
+  "md:grid-cols-[40px_1fr_80px_180px_80px_80px]",
+  "lg:grid-cols-[40px_1fr_80px_140px_180px_140px_80px_80px]"
+);
+
 interface PagingListViewProps {
   allNodes: MediaNode[];
   initialScrollPath?: string | null;
@@ -42,15 +51,6 @@ interface PagingListViewProps {
   onOpen?: (node: MediaNode) => void;
   onThumbError?: (node: MediaNode) => void;
 }
-
-// スマホ: Checkbox, Name, Rating, Actions
-// タブレット: Checkbox, Name, Type, Size, Rating, Actions
-// PC: Checkbox, Name, Type, Updated, Size, Last Viewed, Rating, Actions
-const GRID_TEMPLATE = cn(
-  "grid-cols-[40px_1fr_40px_80px]",
-  "md:grid-cols-[40px_1fr_80px_180px_80px_80px]",
-  "lg:grid-cols-[40px_1fr_80px_140px_180px_140px_80px_80px]"
-);
 
 export function PagingListView({
   allNodes,
