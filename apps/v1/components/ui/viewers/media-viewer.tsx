@@ -25,7 +25,6 @@ import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { assertNever } from "@/lib/utils/assert";
 import { clamp } from "@/lib/utils/clamp";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
-import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -254,8 +253,6 @@ function MediaViewerHeader({
   isSlideshowEnabled,
   onToggleSlideshow,
 }: MediaViewerHeaderProps) {
-  const isMobile = useIsMobile();
-
   const newMenuItems = useMemo(() => {
     const items = [...menuItems];
 
@@ -304,12 +301,7 @@ function MediaViewerHeader({
           {/* ファイル情報 */}
           <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0 select-text">
             <span className="text-white md:text-lg font-medium drop-shadow-md">
-              <MarqueeText
-                key={currentIndex}
-                autoplay={isMobile}
-                speed={40}
-                delay={1}
-              >
+              <MarqueeText key={currentIndex} speed={40} delay={1}>
                 <ClickToCopy>
                   {currentNode?.title ?? currentNode?.name ?? "no title"}
                 </ClickToCopy>
