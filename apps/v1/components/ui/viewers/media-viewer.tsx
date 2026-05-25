@@ -318,7 +318,7 @@ function MediaViewerHeader({
 
             <span className="text-white/60 text-sm">
               {currentIndex + 1} / {totalCount}
-              {isSlideshowEnabled && " • スライドショー"}
+              {/* {isSlideshowEnabled && " • スライドショー"} */}
             </span>
           </div>
 
