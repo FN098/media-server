@@ -2,7 +2,7 @@ import {
   buildMediaViewerSlides,
   getMediaIndex,
   getSlideIndex,
-} from "@/components/ui/viewers/lib/media-viewer/slides";
+} from "@/components/ui/viewers/lib/slides";
 import { MediaNode } from "@/lib/media/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SwiperClass } from "swiper/react";
