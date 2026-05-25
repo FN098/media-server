@@ -15,6 +15,7 @@ import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useLongPress } from "@/hooks/use-long-press";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaNode } from "@/lib/media/types";
+import { clamp } from "@/lib/utils/clamp";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/format";
 import { useFavoritesContext } from "@/providers/favorites-provider";
@@ -62,13 +63,8 @@ export function PagingListView({
   onOpen,
   onThumbError,
 }: PagingListViewProps) {
-  const {
-    page: currentPage,
-    pageSize,
-    totalPages,
-    setPage,
-    paginate,
-  } = usePagingContext();
+  const { page, pageSize, totalPages, setPage, paginate } = usePagingContext();
+  const currentPage = clamp(page, 1, totalPages);
 
   const {
     lastSelectedPath,
@@ -167,17 +163,6 @@ export function PagingListView({
       }
     }
   }, [currentPage, pageSize, initialScrollTargetIndex, onScrollRestored]);
-
-  // 範囲外アクセスでページリセット
-  useEffect(() => {
-    // currentPage は 1 以上であることが保証されているため、上限のみチェック
-    if (currentPage > 1 && allNodes.length > 0) {
-      const maxPage = Math.ceil(allNodes.length / pageSize);
-      if (currentPage > maxPage) {
-        setPage(1);
-      }
-    }
-  }, [allNodes.length, pageSize, currentPage, setPage]);
 
   // ページ更新ハンドラ
   const handlePageChange = (page: number) => {
