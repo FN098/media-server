@@ -5,10 +5,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 type Options = {
-  defaultPageSize?: number;
-  pageKey?: string; // パラメータ名（デフォルト "page"）
-  pageSizeKey?: string; // パラメータ名（デフォルト "pageSize"）
-  history?: "push" | "replace";
+  defaultPageSize?: number; // デフォルト: 48
+  pageKey?: string; // デフォルト: "page"
+  pageSizeKey?: string; // デフォルト: "pageSize"
+  history?: "push" | "replace"; // デフォルト: "replace"
 };
 
 const MIN_PAGE = 1;

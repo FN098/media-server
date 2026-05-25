@@ -2,27 +2,37 @@
 
 import { ViewMode } from "@/lib/view-mode";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 type Options = {
   viewModeKey?: string; // デフォルト: "viewMode"
   defaultViewMode?: ViewMode; // デフォルト: "grid"
+  history?: "push" | "replace"; // デフォルト: "replace"
 };
 
 export function useViewMode(options?: Options) {
+  const {
+    viewModeKey = "viewMode",
+    defaultViewMode = "grid",
+    history = "replace",
+  } = options || {};
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // キー名とデフォルト値の設定
-  const { viewModeKey = "viewMode", defaultViewMode = "grid" } = options || {};
+  const navigate = useCallback(
+    (url: string) => {
+      if (history === "push") {
+        router.push(url, { scroll: false });
+      } else {
+        router.replace(url, { scroll: false });
+      }
+    },
+    [history, router]
+  );
 
-  // 現在の値をURLから取得
-  const viewMode =
-    (searchParams.get(viewModeKey) as ViewMode) || defaultViewMode;
-
-  // value: 現在の状態
-  const value = useMemo(() => viewMode, [viewMode]);
+  const value = (searchParams.get(viewModeKey) as ViewMode) || defaultViewMode;
 
   // apply: URLを更新して状態を変更
   const apply = useCallback(
@@ -35,9 +45,9 @@ export function useViewMode(options?: Options) {
         params.set(viewModeKey, next);
       }
 
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      navigate(`${pathname}?${params.toString()}`);
     },
-    [defaultViewMode, pathname, router, searchParams, viewModeKey]
+    [defaultViewMode, navigate, pathname, searchParams, viewModeKey]
   );
 
   // reset: デフォルトの状態に戻す
