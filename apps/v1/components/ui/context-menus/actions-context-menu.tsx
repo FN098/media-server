@@ -11,6 +11,7 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/shadcn/components/ui/context-menu";
 import React, { useMemo } from "react";
@@ -55,6 +56,10 @@ export function ActionsContextMenu({
                 {item.render({ node })}
               </ContextMenuItem>
             );
+          }
+
+          if (item.type === "separator") {
+            return <ContextMenuSeparator key={item.key} />;
           }
 
           const Icon = item.icon;
