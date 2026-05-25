@@ -1,3 +1,4 @@
+import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { MediaNode } from "@/lib/media/types";
 import { resolveMediaUrl } from "@/lib/media/url";
@@ -203,7 +204,7 @@ export function AudioPlayer({
         {/* メタデータ */}
         <div className="text-center w-full">
           <h3 className="text-white text-lg font-semibold truncate px-4">
-            {media.title ?? media.name}
+            <MarqueeText>{media.title ?? media.name}</MarqueeText>
           </h3>
           <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase mt-1">
             Audio Track
