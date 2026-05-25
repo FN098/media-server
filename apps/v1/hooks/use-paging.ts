@@ -8,6 +8,7 @@ type Options = {
   defaultPageSize?: number;
   pageKey?: string; // パラメータ名（デフォルト "page"）
   pageSizeKey?: string; // パラメータ名（デフォルト "pageSize"）
+  history?: "push" | "replace";
 };
 
 const MIN_PAGE = 1;
@@ -20,11 +21,23 @@ export function usePaging(totalItems: number, options?: Options) {
     defaultPageSize = 48,
     pageKey = "page",
     pageSizeKey = "pageSize",
+    history = "push",
   } = options ?? {};
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const navigate = useCallback(
+    (url: string) => {
+      if (history === "push") {
+        router.push(url, { scroll: false });
+      } else {
+        router.replace(url, { scroll: false });
+      }
+    },
+    [history, router]
+  );
 
   const page = useMemo(() => {
     const value = searchParams.get(pageKey);
@@ -38,9 +51,9 @@ export function usePaging(totalItems: number, options?: Options) {
       const newPage = clamp(page, MIN_PAGE, MAX_PAGE);
       const params = new URLSearchParams(searchParams.toString());
       params.set(pageKey, newPage.toString());
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      navigate(`${pathname}?${params.toString()}`);
     },
-    [searchParams, pageKey, router, pathname]
+    [searchParams, pageKey, navigate, pathname]
   );
 
   const pageSize = useMemo(() => {
@@ -54,32 +67,26 @@ export function usePaging(totalItems: number, options?: Options) {
     (pageSize: number) => {
       const newPageSize = clamp(pageSize, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
       const params = new URLSearchParams(searchParams.toString());
-      params.set(pageKey, newPageSize.toString());
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      params.set(pageSizeKey, newPageSize.toString());
+      navigate(`${pathname}?${params.toString()}`);
     },
-    [searchParams, pageKey, router, pathname]
+    [searchParams, pageSizeKey, navigate, pathname]
   );
 
-  const totalPages = useMemo(
-    () => Math.ceil(totalItems / pageSize),
-    [totalItems, pageSize]
-  );
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-  const efficientPage = useMemo(
-    () => clamp(page, 1, totalPages),
-    [page, totalPages]
-  );
+  const effectivePage = clamp(page, 1, totalPages);
 
   const paginate = useCallback(
     <T>(items: T[]): T[] => {
-      const start = (efficientPage - 1) * pageSize;
+      const start = (effectivePage - 1) * pageSize;
       return items.slice(start, start + pageSize);
     },
-    [efficientPage, pageSize]
+    [effectivePage, pageSize]
   );
 
   return {
-    page: efficientPage,
+    page: effectivePage,
     setPage,
     pageSize,
     setPageSize,

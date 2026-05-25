@@ -11,13 +11,15 @@ export function PagingProvider({
   children,
   totalItems,
   defaultPageSize,
+  history,
 }: {
   children: ReactNode;
   totalItems: number;
   defaultPageSize?: number;
+  history?: "push" | "replace";
 }) {
   // フックを呼び出し
-  const value = usePaging(totalItems, { defaultPageSize });
+  const value = usePaging(totalItems, { defaultPageSize, history });
 
   return (
     <PagingContext.Provider value={value}>{children}</PagingContext.Provider>
