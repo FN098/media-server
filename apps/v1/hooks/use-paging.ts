@@ -21,7 +21,7 @@ export function usePaging(totalItems: number, options?: Options) {
     defaultPageSize = 48,
     pageKey = "page",
     pageSizeKey = "pageSize",
-    history = "push",
+    history = "replace",
   } = options ?? {};
 
   const router = useRouter();

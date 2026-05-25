@@ -566,11 +566,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   ];
 
   return (
-    <PagingProvider
-      totalItems={filteredNodes.length}
-      defaultPageSize={48}
-      history="replace"
-    >
+    <PagingProvider totalItems={filteredNodes.length}>
       <MenuItemsProvider items={menuItems}>
         <div
           className={cn(
