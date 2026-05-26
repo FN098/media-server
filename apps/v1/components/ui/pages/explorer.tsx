@@ -26,6 +26,7 @@ import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
+import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -103,7 +104,6 @@ import {
 } from "lucide-react";
 import { dirname } from "path";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
 export function Explorer({ listing }: { listing: MediaListing }) {
@@ -700,104 +700,27 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== フルスクリーン =====
 
-  const fullscreen = useFullscreen();
+  const { isSupported: isFullscreenSupported, toggleFullscreen } =
+    useFullscreen();
 
   // ===== ショートカット =====
 
-  // スコープ切り替えフック
-  const { enableScope, disableScope } = useHotkeysContext();
-
-  // ショートカット利用可能スコープ
-  const allScopes = useMemo(
-    () => ["explorer", "tag-editor", "viewer", "dialog"] as const,
-    []
-  );
-
-  // 現在のスコープ
-  const activeScope = useMemo<(typeof allScopes)[number]>(() => {
-    if (isRenameMode || isMoveMode || isDeleteMode) return "dialog";
-    else if (isTagEditMode) return "tag-editor";
-    else if (isViewerMode) return "viewer";
-    else return "explorer";
-  }, [isDeleteMode, isMoveMode, isRenameMode, isTagEditMode, isViewerMode]);
-
-  // デバッグ用
-  useEffect(() => console.debug({ activeScope }), [activeScope]);
-
-  // スコープの排他的制御
-  useEffect(() => {
-    // 該当スコープを有効にし、それ以外を無効にする
-    allScopes.forEach((s) => {
-      if (s === activeScope) {
-        enableScope(s);
-      } else {
-        disableScope(s);
-      }
-    });
-  }, [activeScope, allScopes, disableScope, enableScope]);
-
-  // Escape: 選択解除
-  useHotkeys("escape", () => handleResetSelection(), {
-    scopes: "explorer",
-  });
-
-  // Backspace: 一つ上のフォルダを開く
-  useHotkeys("backspace", () => navigateToParent(), {
-    scopes: ["explorer"],
-  });
-
-  // Delete: 削除
-  useHotkeys("delete", () => handleOpenDeleteDialogSelected(), {
-    scopes: "explorer",
-  });
-
-  // T: タグエディタ
-  useHotkeys("t", () => handleToggleTagEditMode(), {
-    scopes: ["explorer", "viewer", "tag-editor"],
-  });
-
-  // F: 全画面表示
-  useHotkeys("f", () => void fullscreen.toggleFullscreen(), {
-    scopes: ["explorer", "viewer", "tag-editor"],
-  });
-
-  // Ctrl + A: 全選択
-  useHotkeys(
-    "ctrl+a",
-    (e) => {
-      e.preventDefault();
-      handleSelectAll();
-    },
-    { scopes: ["explorer", "tag-editor"] }
-  );
-
-  // Ctrl + K: 検索
-  useHotkeys(
-    "ctrl+k",
-    (e) => {
-      e.preventDefault();
-      focusSearch();
-    },
-    { scopes: "explorer" }
-  );
-
-  // F2: リネーム
-  useHotkeys("f2", () => setRenameTarget(selectedNodes[0]), {
-    scopes: ["explorer", "viewer"],
-  });
-
-  // P/N: 前/次のフォルダを開く
-  useHotkeys("p", () => handleOpenPrevFolder("first"), {
-    scopes: ["explorer", "viewer", "tag-editor"],
-  });
-
-  useHotkeys("n", () => handleOpenNextFolder("first"), {
-    scopes: ["explorer", "viewer", "tag-editor"],
-  });
-
-  // R: フィルタリセット
-  useHotkeys("r", () => clearSearchParams(), {
-    scopes: ["explorer"],
+  useExplorerHotkeys({
+    enabled: true,
+    isDialogMode: isRenameMode || isMoveMode || isDeleteMode,
+    isTagEditorMode: isTagEditMode,
+    isViewerMode: isViewerMode,
+    onResetSelection: handleResetSelection,
+    onGoBack: navigateToParent,
+    onDelete: handleOpenDeleteDialogSelected,
+    onEditTags: handleToggleTagEditMode,
+    onToggleFullscreen: () => void toggleFullscreen(),
+    onSelectAll: handleSelectAll,
+    onFocusSearch: focusSearch,
+    onRename: () => setRenameTarget(selectedNodes[0]),
+    onOpenPrevFolder: () => handleOpenPrevFolder("first"),
+    onOpenNextFolder: () => handleOpenNextFolder("first"),
+    onResetFilter: clearSearchParams,
   });
 
   // ===== メニュー =====
@@ -844,8 +767,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: FullscreenIcon,
       label: "全画面",
-      onClick: fullscreen.toggleFullscreen,
-      hidden: () => !isViewerMode || !fullscreen.isSupported,
+      onClick: toggleFullscreen,
+      hidden: () => !isViewerMode || !isFullscreenSupported,
     },
     {
       key: "extractArchive",

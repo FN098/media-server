@@ -33,7 +33,6 @@ export function useFullscreen() {
   };
 
   // 切り替え
-
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) {
       await exitFullscreen();
