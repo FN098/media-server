@@ -9,8 +9,64 @@ import {
   TooltipTrigger,
 } from "@/shadcn/components/ui/tooltip";
 import { cn } from "@/shadcn/lib/utils";
+import { cva } from "class-variance-authority";
 import { Star } from "lucide-react";
 import React from "react";
+
+const buttonVariants = cva(
+  "flex items-center gap-1 justify-center transition-all active:scale-90 group/fav outline-none",
+  {
+    variants: {
+      variant: {
+        default: "h-9 bg-transparent hover:bg-muted/50",
+        small:
+          "h-8 bg-black/60 backdrop-blur-md border border-white/10 shadow-lg rounded-full",
+        large:
+          "h-11 bg-white/10 backdrop-blur-md border border-white/10 shadow-lg rounded-full",
+      },
+      sizeMode: {
+        iconOnly: "p-0",
+        withText: "px-2",
+      },
+    },
+    compoundVariants: [
+      { variant: "small", sizeMode: "iconOnly", className: "w-8" },
+      { variant: "small", sizeMode: "withText", className: "min-w-[32px]" },
+      { variant: "large", sizeMode: "iconOnly", className: "w-11" },
+      { variant: "large", sizeMode: "withText", className: "min-w-[44px]" },
+      {
+        variant: "default",
+        sizeMode: "iconOnly",
+        className: "w-9 rounded-full",
+      },
+      { variant: "default", sizeMode: "withText", className: "w-auto" },
+    ],
+    defaultVariants: {
+      variant: "default",
+      sizeMode: "iconOnly",
+    },
+  }
+);
+
+const starVariants = cva("transition-colors", {
+  variants: {
+    variant: {
+      default: "h-5 w-5",
+      small: "h-4 w-4",
+      large: "h-6 w-6",
+    },
+  },
+});
+
+const textVariants = cva("font-bold text-yellow-400 tabular-nums", {
+  variants: {
+    variant: {
+      default: "text-[11px]",
+      small: "text-[10px]",
+      large: "text-sm",
+    },
+  },
+});
 
 interface FavoriteButtonProps extends React.ComponentProps<"button"> {
   isFavorite: boolean;
@@ -52,46 +108,15 @@ function Trigger({
 }: FavoriteButtonProps) {
   const iconOnly = rating == null;
 
-  // スタイル設定の定義
-  const styles = {
-    default: {
-      container: cn(
-        "h-9",
-        iconOnly ? "w-9 rounded-full p-0" : "w-auto px-2",
-        "bg-transparent hover:bg-muted/50"
-      ),
-      star: "h-5 w-5",
-      text: "text-[11px]",
-    },
-    small: {
-      container: cn(
-        "h-8 backdrop-blur-md border border-white/10 shadow-lg",
-        iconOnly
-          ? "w-8 rounded-full bg-black/60 p-0"
-          : "min-w-[32px] px-2 rounded-full bg-black/60"
-      ),
-      star: "h-4 w-4",
-      text: "text-[10px]",
-    },
-    large: {
-      container: cn(
-        "h-11 backdrop-blur-md border border-white/10 shadow-lg",
-        iconOnly
-          ? "w-11 rounded-full bg-white/10 p-0"
-          : "min-w-[44px] px-3 rounded-full bg-white/10"
-      ),
-      star: "h-6 w-6",
-      text: "text-sm",
-    },
-  }[variant];
-
   return (
     <button
       type="button"
       className={cn(
-        "flex items-center gap-1 justify-center transition-all active:scale-90 group/fav outline-none",
-        styles.container,
-        // お気に入り時は枠線を少し目立たせる（任意）
+        buttonVariants({
+          variant,
+          sizeMode: iconOnly ? "iconOnly" : "withText",
+        }),
+        // 「お気に入り状態」などの動的な枠線は、ここでインラインで足す方が圧倒的に見やすい
         isFavorite && variant !== "default" && "border-yellow-400/30",
         className
       )}
@@ -99,23 +124,17 @@ function Trigger({
     >
       <Star
         className={cn(
-          styles.star,
-          "transition-colors",
+          starVariants({ variant }),
           isFavorite
-            ? "fill-yellow-400 text-yellow-400" // お気に入りなら黄色（評価nullでも）
+            ? "fill-yellow-400 text-yellow-400"
             : variant === "default"
               ? "text-muted-foreground opacity-40"
               : "text-white opacity-70 group-hover/fav:opacity-100"
         )}
       />
 
-      {/* 評価値がある場合のみ数字を表示 */}
       {isFavorite && rating !== null && (
-        <span
-          className={cn("font-bold text-yellow-400 tabular-nums", styles.text)}
-        >
-          {rating}
-        </span>
+        <span className={cn(textVariants({ variant }))}>{rating}</span>
       )}
     </button>
   );
