@@ -25,7 +25,13 @@ import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
-import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
+import { useCopyDialog } from "@/components/ui/pages/hooks/dialogs/use-copy-dialog";
+import { useCreateFolderDialog } from "@/components/ui/pages/hooks/dialogs/use-create-folder-dialog";
+import { useDeleteDialog } from "@/components/ui/pages/hooks/dialogs/use-delete-dialog";
+import { useExtractDialog } from "@/components/ui/pages/hooks/dialogs/use-extract-dialog";
+import { useMoveDialog } from "@/components/ui/pages/hooks/dialogs/use-move-dialog";
+import { usePreviewDialog } from "@/components/ui/pages/hooks/dialogs/use-preview-dialog";
+import { useRenameDialog } from "@/components/ui/pages/hooks/dialogs/use-rename-dialog";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
@@ -479,52 +485,81 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== ダイアログ =====
 
+  // リネーム
+  const {
+    renameTarget,
+    setRenameTarget,
+    isRenameMode,
+    handleOpenRenameDialog,
+    handleRenameDialogOpenChange,
+  } = useRenameDialog({});
+
+  // 解凍
   const {
     extractTargets,
     isExtractMode,
     handleOpenExtractDialogSingle,
     handleOpenExtractDialogSelected,
     handleExtractDialogOpenChange,
+  } = useExtractDialog({
+    selectedNodes,
+    onClose: handleResetSelection,
+  });
 
-    renameTarget,
-    setRenameTarget,
-    isRenameMode,
-    handleOpenRenameDialog,
-    handleRenameDialogOpenChange,
-
+  // フォルダ作成
+  const {
     isCreateFolderMode,
     handleOpenCreateFolderDialog,
     handleCreateFolderDialogOpenChange,
+  } = useCreateFolderDialog({
+    targetDirPath: listing.path,
+  });
 
+  // 移動
+  const {
     moveTargets,
     isMoveMode,
     initialMoveDialogDirPath,
     handleOpenMoveDialogSingle,
     handleOpenMoveDialogSelected,
     handleMoveDialogOpenChange,
+  } = useMoveDialog({
+    selectedNodes,
+    onClose: handleResetSelection,
+  });
 
+  // コピー
+  const {
     copyTargets,
     isCopyMode,
     initialCopyDialogDirPath,
     handleOpenCopyDialogSingle,
     handleOpenCopyDialogSelected,
     handleCopyDialogOpenChange,
+  } = useCopyDialog({
+    selectedNodes,
+    onClose: handleResetSelection,
+  });
 
+  // 削除
+  const {
     deleteTargets,
     isDeleteMode,
     handleOpenDeleteDialogSingle,
     handleOpenDeleteDialogSelected,
     handleDeleteDialogOpenChange,
+  } = useDeleteDialog({
+    selectedNodes,
+    onClose: handleResetSelection,
+  });
 
+  // プレビュー設定
+  const {
     previewPath,
     isFolderPreviewMode,
     handleOpenApplyPreviewDialog,
     handleApplyPreviewDialogOpenChange,
-  } = useExplorerDialogs({
-    currentDirPath: listing.path,
-    selectedNodes,
-    onClose: handleResetSelection,
-  });
+  } = usePreviewDialog({});
 
   // ===== サムネイル =====
 
