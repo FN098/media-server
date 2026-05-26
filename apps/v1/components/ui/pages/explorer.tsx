@@ -18,8 +18,8 @@ import { FolderNavigation } from "@/components/ui/navigations/folder-navigation"
 import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenu } from "@/components/ui/pages/hooks/use-explorer-menu";
+import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/components/ui/pages/hooks/use-explorer-selectionbar";
-import { useSelectionHandlers } from "@/components/ui/pages/hooks/use-selection-handlers";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -266,7 +266,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     const media = mediaOnly[index];
     if (!media) return;
 
-    handleSelect(media);
+    selection.replace(media);
 
     if (lastHistory?.type === "file") {
       replaceHistoryLast(toHistoryItem(media));
@@ -371,7 +371,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   }) => {
     if (updatingFavorite) return;
     startUpdatingFavorite(async () => {
-      const paths = selectedNodes.map((n) => n.path);
+      const paths = selection.nodes.map((n) => n.path);
       const result = await updateMultipleFavorites(paths, {
         rating: newRating,
       });
@@ -386,16 +386,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== 選択 =====
 
-  const {
-    isSelectionMode,
-    selectedCount,
-    clearSelection,
-    hasSelection,
-    selectedNodes,
-    handleSelect,
-    handleSelectAll,
-    handleResetSelection,
-  } = useSelectionHandlers({
+  const selection = useExplorerSelection({
     allNodes,
     currentNodes: filteredNodes,
   });
@@ -410,8 +401,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   const dialogs = useExplorerDialogs({
     currentDir: listing.path,
-    selectedNodes,
-    clearSelection,
+    selectedNodes: selection.nodes,
+    clearSelection: selection.reset,
   });
 
   const {
@@ -467,7 +458,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const handleUpdateThumbSelected = () => {
     if (isUpdatingThumb) return;
     startUpdatingThumb(async () => {
-      for (const node of selectedNodes) {
+      for (const node of selection.nodes) {
         await updateThumb(node);
       }
     });
@@ -491,14 +482,14 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     isDialogMode: isDialogOpen,
     isTagEditorMode: tagEditor.isOpen,
     isViewerMode: isViewerMode,
-    onResetSelection: handleResetSelection,
+    onResetSelection: selection.reset,
     onGoBack: navigateToParent,
     onDelete: deleteDialog.openSelected,
     onEditTags: tagEditor.open,
     onToggleFullscreen: handleToggleFullscreen,
-    onSelectAll: handleSelectAll,
+    onSelectAll: selection.selectAll,
     onFocusSearch: focusSearch,
-    onRename: () => renameDialog.setTarget(selectedNodes[0]),
+    onRename: () => renameDialog.setTarget(selection.nodes[0]),
     onOpenPrevFolder: () => handleOpenPrevFolder("first"),
     onOpenNextFolder: () => handleOpenNextFolder("first"),
     onResetFilter: clearSearchParams,
@@ -507,8 +498,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== メニュー =====
 
   const menu = useExplorerMenu({
-    hasSelection,
-    selectedCount,
+    hasSelection: selection.hasSelection,
+    selectedCount: selection.count,
     isViewerMode,
     isFullscreenSupported,
     getFavorite,
@@ -533,7 +524,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   });
 
   const selectionbar = useExplorerSelectionbar({
-    hasSelection,
+    hasSelection: selection.hasSelection,
     onChangeRating: handleChangeRatingSingle,
     onChangeRatingSelected: handleChangeRatingSelected,
     onMoveSelected: moveDialog.openSelected,
@@ -659,13 +650,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
           {/* 選択バー */}
           <SelectionBar
-            open={isSelectionMode && !tagEditor.isOpen}
-            count={selectedNodes.length}
+            open={selection.hasSelection && !tagEditor.isOpen}
+            count={selection.count}
             totalCount={filteredNodes.length}
-            onSelectAll={handleSelectAll}
-            onClose={handleResetSelection}
+            onSelectAll={selection.selectAll}
+            onClose={selection.reset}
             className="z-40" // DropdownMenu より小さくする
-            context={{ nodes: selectedNodes }}
+            context={selection}
             menuItems={selectionbar.menu.items}
             inlineMenuItems={selectionbar.menu.inlineItems}
           />
@@ -673,7 +664,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {/* タグエディター */}
           <TagEditSheet
             open={tagEditor.isOpen}
-            targetNodes={selectedNodes}
+            targetNodes={selection.nodes}
             onClose={tagEditor.close}
             mode={tagEditor.mode}
             opacity={tagEditor.mode === "default" ? 100 : 0}
@@ -682,6 +673,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {/* フォルダナビゲーション */}
           <FolderNavigation prevPath={listing.prev} nextPath={listing.next} />
 
+          {/* ダイアログ */}
           <ExplorerDialogs {...dialogs} />
         </div>
       </MenuItemsProvider>
