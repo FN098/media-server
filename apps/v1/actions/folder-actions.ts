@@ -1,16 +1,18 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
-import { updateVisitedFolder } from "@/lib/folder/repository";
+import { getRecentFolders, updateVisitedFolder } from "@/lib/folder/repository";
 import { fsNameSchema } from "@/lib/media/schemas";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
+import { basename } from "path";
 
 // フォルダ訪問履歴更新
 export async function visitFolderAction(dirPath: string): Promise<void> {
   const user = await resolveCurrentUserOrThrow();
+
   await updateVisitedFolder(dirPath, user.id);
 
   // キャッシュの更新
@@ -62,6 +64,27 @@ export async function createFolderAction(
     return {
       success: false,
       error: "フォルダ作成中にエラーが発生しました。",
+    };
+  }
+}
+
+// 最近訪問したフォルダを取得（移動用）
+export async function getRecentFoldersAction() {
+  try {
+    const user = await resolveCurrentUserOrThrow();
+    const folders = await getRecentFolders(user.id, 10);
+    return {
+      success: true,
+      data: folders.map((f) => ({
+        path: f.dirPath,
+        name: basename(f.dirPath),
+      })),
+    };
+  } catch (error) {
+    console.error("Get Recent Folders Error:", error);
+    return {
+      success: false,
+      error: "フォルダ取得中にエラーが発生しました。",
     };
   }
 }
