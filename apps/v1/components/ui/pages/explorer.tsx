@@ -10,7 +10,6 @@ import {
   enqueueCreateThumbsJobAction,
 } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
@@ -27,6 +26,7 @@ import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
+import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -50,7 +50,6 @@ import { useSort } from "@/hooks/use-sort";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
-import { isArchiveFile } from "@/lib/archive/extensions";
 import {
   createFavoriteFilter,
   createMediaOnlyFilter,
@@ -63,12 +62,6 @@ import {
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
-import {
-  MenuItemDef,
-  MultipleNodesContext,
-  NodeContext,
-} from "@/lib/menu-items/types";
-import { averageBy } from "@/lib/utils/math";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
@@ -84,22 +77,9 @@ import {
   ArrowDownAzIcon,
   CalendarArrowDownIcon,
   ClockIcon,
-  CopyIcon,
-  ExternalLinkIcon,
   FileStackIcon,
-  FolderInputIcon,
   FolderPlus,
-  FullscreenIcon,
-  ImagePlusIcon,
-  ListFilterPlusIcon,
-  PackageOpenIcon,
-  PencilIcon,
-  RefreshCwIcon,
-  StarIcon,
-  StarOffIcon,
   StarsIcon,
-  TagIcon,
-  Trash2Icon,
   WeightIcon,
 } from "lucide-react";
 import { dirname } from "path";
@@ -703,6 +683,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const { isSupported: isFullscreenSupported, toggleFullscreen } =
     useFullscreen();
 
+  const handleToggleFullscreen = () => void toggleFullscreen();
+
   // ===== ショートカット =====
 
   useExplorerHotkeys({
@@ -714,7 +696,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onGoBack: navigateToParent,
     onDelete: handleOpenDeleteDialogSelected,
     onEditTags: handleToggleTagEditMode,
-    onToggleFullscreen: () => void toggleFullscreen(),
+    onToggleFullscreen: handleToggleFullscreen,
     onSelectAll: handleSelectAll,
     onFocusSearch: focusSearch,
     onRename: () => setRenameTarget(selectedNodes[0]),
@@ -725,222 +707,35 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== メニュー =====
 
-  const menuItems: MenuItemDef<NodeContext>[] = [
-    {
-      key: "rating",
-      type: "custom",
-      render: ({ node, closeMenu }) => {
-        if (node.isDirectory) return null;
-
-        const { rating } = getFavorite(node.path);
-        return (
-          <div className="w-full flex justify-center">
-            <FavoriteRatingInput
-              value={rating}
-              onChange={(newRating) =>
-                hasSelection
-                  ? handleChangeRatingSelected({
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-                  : handleChangeRatingSingle({
-                      node,
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-              }
-            />
-          </div>
-        );
-      },
-    },
-    {
-      key: "openInNewTab",
-      type: "action",
-      icon: ExternalLinkIcon,
-      label: "新しいタブで開く",
-      onClick: ({ node }) => handleOpenInNewTab(node),
-      hidden: () => selectedCount > 1,
-    },
-    {
-      key: "toggleFullscreen",
-      type: "action",
-      icon: FullscreenIcon,
-      label: "全画面",
-      onClick: toggleFullscreen,
-      hidden: () => !isViewerMode || !isFullscreenSupported,
-    },
-    {
-      key: "extractArchive",
-      type: "action",
-      icon: PackageOpenIcon,
-      label: "解凍",
-      onClick: ({ node }) =>
-        hasSelection
-          ? handleOpenExtractDialogSelected()
-          : handleOpenExtractDialogSingle(node),
-      hidden: ({ node }) => !isArchiveFile(node.path),
-    },
-    {
-      key: "rename",
-      type: "action",
-      icon: PencilIcon,
-      label: "名前の変更",
-      onClick: ({ node }) => handleOpenRenameDialog(node),
-      hidden: () => selectedCount > 1,
-    },
-    {
-      key: "move",
-      type: "action",
-      icon: FolderInputIcon,
-      label: "移動",
-      onClick: ({ node }) =>
-        hasSelection
-          ? handleOpenMoveDialogSelected()
-          : handleOpenMoveDialogSingle(node),
-    },
-    {
-      key: "copy",
-      type: "action",
-      icon: CopyIcon,
-      label: "コピー",
-      onClick: ({ node }) =>
-        hasSelection
-          ? handleOpenCopyDialogSelected()
-          : handleOpenCopyDialogSingle(node),
-    },
-    {
-      key: "editTags",
-      type: "action",
-      icon: TagIcon,
-      label: "タグ編集",
-      onClick: handleOpenTagEditor,
-    },
-    {
-      key: "addTagFilter",
-      type: "action",
-      icon: ListFilterPlusIcon,
-      label: "タグをフィルターに追加",
-      onClick: ({ node }) => handleAddTagFilter(node),
-      hidden: ({ node }) =>
-        !node.tags || node.tags.length === 0 || selectedCount > 1,
-    },
-    {
-      key: "setAsPreview",
-      type: "action",
-      icon: ImagePlusIcon,
-      label: "プレビューに設定",
-      onClick: ({ node }) => handleOpenApplyPreviewDialog(node),
-      hidden: ({ node }) =>
-        (node.type !== "image" && node.type !== "video") || selectedCount > 1,
-    },
-    {
-      key: "updateThumb",
-      type: "action",
-      icon: RefreshCwIcon,
-      label: "サムネイルを更新",
-      onClick: ({ node }) =>
-        hasSelection
-          ? handleUpdateThumbSelected()
-          : handleUpdateThumbSingle(node),
-      hidden: () => isViewerMode,
-    },
-    {
-      key: "delete",
-      type: "action",
-      icon: Trash2Icon,
-      variant: "destructive",
-      label: "削除",
-      onClick: ({ node }) =>
-        hasSelection
-          ? handleOpenDeleteDialogSelected()
-          : handleOpenDeleteDialogSingle(node),
-    },
-  ];
-
-  const selectionBarInlineMenuItems: MenuItemDef<MultipleNodesContext>[] = [
-    {
-      key: "editTags",
-      type: "action",
-      icon: TagIcon,
-      label: "タグ編集",
-      onClick: handleOpenTagEditor,
-    },
-  ];
-
-  const selectionBarMenuItems: MenuItemDef<MultipleNodesContext>[] = [
-    {
-      key: "rating",
-      type: "custom",
-      render: ({ nodes, closeMenu }) => {
-        const filtered = nodes.filter((n) => n.rating != null);
-        const averageRating = averageBy(filtered, (n) => n.rating!);
-
-        return (
-          <div className="w-full flex justify-center p-1">
-            <FavoriteRatingInput
-              value={averageRating}
-              onChange={(newRating) =>
-                hasSelection
-                  ? handleChangeRatingSelected({
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-                  : handleChangeRatingSingle({
-                      node: nodes[0],
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-              }
-            />
-          </div>
-        );
-      },
-    },
-    {
-      key: "add-favorites",
-      type: "action",
-      icon: StarIcon,
-      label: "お気に入り登録",
-      onClick: handleOpenFavoriteAddDialog,
-    },
-    {
-      key: "remove-favorites",
-      type: "action",
-      icon: StarOffIcon,
-      label: "お気に入り解除",
-      onClick: handleOpenFavoriteRemoveDialog,
-    },
-    {
-      key: "move",
-      type: "action",
-      icon: FolderInputIcon,
-      label: "移動",
-      onClick: handleOpenMoveDialogSelected,
-    },
-    {
-      key: "copy",
-      type: "action",
-      icon: CopyIcon,
-      label: "コピー",
-      onClick: handleOpenCopyDialogSelected,
-    },
-    {
-      key: "update-thumb",
-      type: "action",
-      icon: RefreshCwIcon,
-      label: "サムネイル更新",
-      onClick: handleUpdateThumbSelected,
-    },
-    {
-      key: "delete",
-      type: "action",
-      variant: "destructive",
-      icon: Trash2Icon,
-      label: "削除",
-      onClick: handleOpenDeleteDialogSelected,
-    },
-  ];
+  const { menuItems, selectionBarInlineMenuItems, selectionBarMenuItems } =
+    useExplorerMenuItems({
+      hasSelection,
+      selectedCount,
+      isViewerMode,
+      isFullscreenSupported,
+      getFavorite,
+      onOpenInNewTab: handleOpenInNewTab,
+      onExtract: handleOpenExtractDialogSingle,
+      onExtractSelected: handleOpenExtractDialogSelected,
+      onChangeRating: handleChangeRatingSingle,
+      onChangeRatingSelected: handleChangeRatingSelected,
+      onToggleFullscreen: handleToggleFullscreen,
+      onRename: handleOpenRenameDialog,
+      onMove: handleOpenMoveDialogSingle,
+      onMoveSelected: handleOpenMoveDialogSelected,
+      onCopy: handleOpenCopyDialogSingle,
+      onCopySelected: handleOpenCopyDialogSelected,
+      onEditTags: handleOpenTagEditor,
+      onEditTagsSelected: handleOpenTagEditor,
+      onAddTagsToFilter: handleAddTagFilter,
+      onApplyAsPreview: handleOpenApplyPreviewDialog,
+      onUpdateThumb: handleUpdateThumbSingle,
+      onUpdateThumbSelected: handleUpdateThumbSelected,
+      onDelete: handleOpenDeleteDialogSingle,
+      onDeleteSelected: handleOpenDeleteDialogSelected,
+      onAddFavoriteSelected: handleOpenFavoriteAddDialog,
+      onRemoveFavoriteSelected: handleOpenFavoriteRemoveDialog,
+    });
 
   return (
     <PagingProvider totalItems={filteredNodes.length}>
