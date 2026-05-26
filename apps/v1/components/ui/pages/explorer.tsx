@@ -431,7 +431,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     handleResetSelection,
   } = useExplorerSelection({
     allNodes,
-    filteredNodes,
+    currentNodes: filteredNodes,
   });
 
   // ===== タグエディタ =====

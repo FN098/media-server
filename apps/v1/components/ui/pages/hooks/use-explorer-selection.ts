@@ -4,12 +4,12 @@ import { usePathSelectionContext } from "@/providers/path-selection-provider";
 
 interface UseExplorerSelectionProps {
   allNodes: MediaNode[];
-  filteredNodes: MediaNode[];
+  currentNodes: MediaNode[];
 }
 
 export function useExplorerSelection({
   allNodes,
-  filteredNodes,
+  currentNodes,
 }: UseExplorerSelectionProps) {
   const {
     isSelectionMode,
@@ -30,7 +30,7 @@ export function useExplorerSelection({
   };
 
   const handleSelectAll = () => {
-    selectPaths(filteredNodes.map((n) => n.path));
+    selectPaths(currentNodes.map((n) => n.path));
     enterSelectionMode();
   };
 
