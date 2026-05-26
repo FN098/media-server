@@ -8,37 +8,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/shadcn/components/ui/tooltip";
+import { cn } from "@/shadcn/lib/utils";
 import { Pin, PinOff } from "lucide-react";
 
-interface ViewerHeaderPinButtonProps {
-  enabled: boolean;
-  onClick: () => void;
+interface ViewerHeaderPinButtonProps extends React.ComponentProps<"button"> {
+  isPinned: boolean;
 }
 
-export function ViewerHeaderPinButton({
-  enabled,
-  onClick,
-}: ViewerHeaderPinButtonProps) {
-  const button = (
-    <button
-      className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none"
-      onClick={onClick}
-    >
-      {enabled ? <PinOff size={28} /> : <Pin size={28} />}
-    </button>
-  );
-
+export function ViewerHeaderPinButton(props: ViewerHeaderPinButtonProps) {
   const isMobile = useIsMobile();
 
   // モバイルなら Tooltip 使わない
   if (isMobile) {
-    return button;
+    return <Trigger {...props} />;
   }
 
   return (
     <TooltipProvider delayDuration={400}>
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipTrigger asChild>
+          <Trigger {...props} />
+        </TooltipTrigger>
         <TooltipContent side="top" align="center">
           <div className="flex items-center gap-2 text-xs font-medium">
             <span>ピン留め</span>
@@ -47,5 +37,23 @@ export function ViewerHeaderPinButton({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
+  );
+}
+
+interface TriggerProps extends React.ComponentProps<"button"> {
+  isPinned: boolean;
+}
+
+function Trigger({ isPinned, className, ...rest }: TriggerProps) {
+  return (
+    <button
+      className={cn(
+        "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
+        className
+      )}
+      {...rest}
+    >
+      {isPinned ? <PinOff size={28} /> : <Pin size={28} />}
+    </button>
   );
 }

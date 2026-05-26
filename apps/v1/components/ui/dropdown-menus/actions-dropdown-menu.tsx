@@ -87,18 +87,14 @@ export function ActionsDropdownMenu({
   );
 }
 
-interface ActionDropdownMenuTriggerProps {
+interface ActionDropdownMenuTriggerProps extends React.ComponentProps<"button"> {
   triggerType?: "default" | "large";
-  className?: string;
-  disabled?: boolean;
-  onToggle?: () => void;
 }
 
 function ActionDropdownMenuTrigger({
   triggerType = "default",
   className,
-  disabled,
-  onToggle,
+  ...rest
 }: ActionDropdownMenuTriggerProps) {
   if (triggerType === "large") {
     return (
@@ -107,10 +103,9 @@ function ActionDropdownMenuTrigger({
           "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
           className
         )}
-        onClick={onToggle}
-        disabled={disabled}
+        {...rest}
       >
-        <MoreVertical size={24} />
+        <MoreVertical size={28} />
       </button>
     );
   }
@@ -120,8 +115,7 @@ function ActionDropdownMenuTrigger({
       variant="ghost"
       size="icon"
       className={cn("h-8 w-8 rounded-full", className)}
-      onClick={onToggle}
-      disabled={disabled}
+      {...rest}
     >
       <MoreVertical className="h-4 w-4" />
     </Button>

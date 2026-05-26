@@ -12,32 +12,50 @@ import { cn } from "@/shadcn/lib/utils";
 import { Star } from "lucide-react";
 import React from "react";
 
-interface FavoriteButtonProps {
+interface FavoriteButtonProps extends React.ComponentProps<"button"> {
   isFavorite: boolean;
   rating: number | null;
-  onClick: () => void;
   variant?: "grid" | "viewer" | "list";
-  disabled?: boolean;
-  className?: string;
 }
 
-export function FavoriteButton({
+export function FavoriteButton(props: FavoriteButtonProps) {
+  const isMobile = useIsMobile();
+
+  // モバイルなら Tooltip 使わない
+  if (isMobile) {
+    return <Trigger {...props} />;
+  }
+
+  return (
+    <TooltipProvider delayDuration={400}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Trigger {...props} />
+        </TooltipTrigger>
+        <TooltipContent side="top" align="center">
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <span>お気に入りをトグル</span>
+            <Kbd>S</Kbd>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+interface TriggerProps extends React.ComponentProps<"button"> {
+  isFavorite: boolean;
+  rating: number | null;
+  variant?: "grid" | "viewer" | "list";
+}
+
+function Trigger({
   isFavorite,
   rating,
-  onClick,
   variant = "grid",
-  disabled,
   className,
-}: FavoriteButtonProps) {
-  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
-    e.stopPropagation();
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onClick();
-  };
-
+  ...rest
+}: TriggerProps) {
   const iconOnly = rating == null;
 
   // スタイル設定の定義
@@ -73,15 +91,9 @@ export function FavoriteButton({
     },
   }[variant];
 
-  const button = (
+  return (
     <button
       type="button"
-      disabled={disabled}
-      onClick={handleClick}
-      onMouseDown={handleInteraction}
-      onMouseUp={handleInteraction}
-      onTouchStart={handleInteraction}
-      onTouchEnd={handleInteraction}
       className={cn(
         "flex items-center gap-1 justify-center transition-all active:scale-90 group/fav outline-none",
         styles.container,
@@ -89,6 +101,7 @@ export function FavoriteButton({
         isFavorite && variant !== "list" && "border-yellow-400/30",
         className
       )}
+      {...rest}
     >
       <Star
         className={cn(
@@ -111,26 +124,5 @@ export function FavoriteButton({
         </span>
       )}
     </button>
-  );
-
-  const isMobile = useIsMobile();
-
-  // モバイルなら Tooltip 使わない
-  if (isMobile) {
-    return button;
-  }
-
-  return (
-    <TooltipProvider delayDuration={400}>
-      <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent side="top" align="center">
-          <div className="flex items-center gap-2 text-xs font-medium">
-            <span>お気に入りをトグル</span>
-            <Kbd>S</Kbd>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   );
 }
