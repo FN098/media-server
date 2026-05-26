@@ -375,7 +375,7 @@ export async function moveNodesAction(
         await tx.$executeRaw`
           UPDATE Media SET 
             path = ${destVirtualPath}, 
-            dirPath = ${destDirPath} 
+            dirPath = ${normalizedDestDirPath} 
           WHERE path = ${srcVirtualPath}
         `;
 
