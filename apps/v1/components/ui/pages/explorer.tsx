@@ -19,7 +19,6 @@ import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dia
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
 import { useSelectionHandlers } from "@/components/ui/pages/hooks/use-selection-handlers";
-import { useTagEditorHandlers } from "@/components/ui/pages/hooks/use-tag-editor-handlers";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -39,6 +38,7 @@ import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSort } from "@/hooks/use-sort";
+import { useTagEditorControl } from "@/hooks/use-tag-editor-control";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
@@ -401,13 +401,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== タグエディタ =====
 
-  const {
-    isTagEditorOpen,
-    tagEditMode,
-    handleOpenTagEditor,
-    handleCloseTagEditor,
-    handleToggleTagEditMode,
-  } = useTagEditorHandlers({
+  const tagEditor = useTagEditorControl({
     isViewerMode,
   });
 
@@ -494,12 +488,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   useExplorerHotkeys({
     enabled: true,
     isDialogMode: isDialogOpen,
-    isTagEditorMode: isTagEditorOpen,
+    isTagEditorMode: tagEditor.isOpen,
     isViewerMode: isViewerMode,
     onResetSelection: handleResetSelection,
     onGoBack: navigateToParent,
     onDelete: deleteDialog.openSelected,
-    onEditTags: handleToggleTagEditMode,
+    onEditTags: tagEditor.open,
     onToggleFullscreen: handleToggleFullscreen,
     onSelectAll: handleSelectAll,
     onFocusSearch: focusSearch,
@@ -529,8 +523,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       onMoveSelected: moveDialog.openSelected,
       onCopy: copyDialog.open,
       onCopySelected: copyDialog.openSelected,
-      onEditTags: handleOpenTagEditor,
-      onEditTagsSelected: handleOpenTagEditor,
+      onEditTags: tagEditor.open,
+      onEditTagsSelected: tagEditor.open,
       onAddTagsToFilter: handleAddTagFilter,
       onApplyAsPreview: previewDialog.open,
       onUpdateThumb: handleUpdateThumbSingle,
@@ -655,7 +649,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
           {/* 選択バー */}
           <SelectionBar
-            open={isSelectionMode && !isTagEditorOpen}
+            open={isSelectionMode && !tagEditor.isOpen}
             count={selectedNodes.length}
             totalCount={filteredNodes.length}
             onSelectAll={handleSelectAll}
@@ -668,11 +662,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
           {/* タグエディター */}
           <TagEditSheet
-            open={isTagEditorOpen}
+            open={tagEditor.isOpen}
             targetNodes={selectedNodes}
-            onClose={handleCloseTagEditor}
-            mode={tagEditMode}
-            opacity={tagEditMode === "default" ? 100 : 0}
+            onClose={tagEditor.close}
+            mode={tagEditor.mode}
+            opacity={tagEditor.mode === "default" ? 100 : 0}
           />
 
           {/* フォルダナビゲーション */}
