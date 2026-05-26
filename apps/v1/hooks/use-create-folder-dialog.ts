@@ -1,19 +1,19 @@
 import { useCallback, useState } from "react";
 
 type UseCreateFolderDialogProps = {
-  targetDirPath: string;
+  parentDirPath: string;
 };
 
 export function useCreateFolderDialog({
-  targetDirPath,
+  parentDirPath,
 }: UseCreateFolderDialogProps) {
   const [folderPath, setFolderPath] = useState<string | null>(null);
 
   const isOpen = !!folderPath;
 
   const open = useCallback(() => {
-    setFolderPath(targetDirPath);
-  }, [targetDirPath]);
+    setFolderPath(parentDirPath);
+  }, [parentDirPath]);
 
   const onOpenChange = useCallback((open: boolean) => {
     if (!open) {
@@ -22,6 +22,7 @@ export function useCreateFolderDialog({
   }, []);
 
   return {
+    parentDirPath,
     folderPath,
     setFolderPath,
     isOpen,

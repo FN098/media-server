@@ -34,7 +34,7 @@ export function useExplorerDialogs({
   });
 
   const createFolderDialog = useCreateFolderDialog({
-    targetDirPath: currentDir,
+    parentDirPath: currentDir,
   });
 
   const deleteDialog = useDeleteDialog({
