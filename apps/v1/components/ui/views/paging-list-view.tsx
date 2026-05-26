@@ -695,7 +695,7 @@ function RatingCell({
         className="hidden md:flex"
       />
       <FavoriteButton
-        variant="list"
+        variant="default"
         rating={rating}
         isFavorite={isFavorite}
         onClick={() => void toggleFavorite(node.path)}

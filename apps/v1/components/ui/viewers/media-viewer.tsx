@@ -316,13 +316,13 @@ function MediaViewerHeader({
 
           <div className="flex items-center gap-4">
             <ViewerHeaderPinButton
-              enabled={isHeaderPinned}
+              isPinned={isHeaderPinned}
               onClick={toggleIsHeaderPinned}
             />
 
             {!!currentNode && isMedia(currentNode.type) && (
               <FavoriteButton
-                variant="viewer"
+                variant="large"
                 rating={rating}
                 isFavorite={isFavorite}
                 onClick={onToggleFavorite}

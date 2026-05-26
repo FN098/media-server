@@ -610,7 +610,7 @@ function Cell({
             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
               {!isSelectionMode && isMediaNode && (
                 <FavoriteButton
-                  variant="grid"
+                  variant="small"
                   rating={rating}
                   isFavorite={isFavorite}
                   onClick={() => void toggleFavorite(node.path)}

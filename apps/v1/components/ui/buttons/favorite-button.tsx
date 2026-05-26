@@ -15,7 +15,7 @@ import React from "react";
 interface FavoriteButtonProps extends React.ComponentProps<"button"> {
   isFavorite: boolean;
   rating: number | null;
-  variant?: "grid" | "viewer" | "list";
+  variant?: "default" | "small" | "large";
 }
 
 export function FavoriteButton(props: FavoriteButtonProps) {
@@ -43,24 +43,27 @@ export function FavoriteButton(props: FavoriteButtonProps) {
   );
 }
 
-interface TriggerProps extends React.ComponentProps<"button"> {
-  isFavorite: boolean;
-  rating: number | null;
-  variant?: "grid" | "viewer" | "list";
-}
-
 function Trigger({
   isFavorite,
   rating,
-  variant = "grid",
+  variant = "default",
   className,
   ...rest
-}: TriggerProps) {
+}: FavoriteButtonProps) {
   const iconOnly = rating == null;
 
   // スタイル設定の定義
   const styles = {
-    grid: {
+    default: {
+      container: cn(
+        "h-9",
+        iconOnly ? "w-9 rounded-full p-0" : "w-auto px-2",
+        "bg-transparent hover:bg-muted/50"
+      ),
+      star: "h-5 w-5",
+      text: "text-[11px]",
+    },
+    small: {
       container: cn(
         "h-8 backdrop-blur-md border border-white/10 shadow-lg",
         iconOnly
@@ -70,7 +73,7 @@ function Trigger({
       star: "h-4 w-4",
       text: "text-[10px]",
     },
-    viewer: {
+    large: {
       container: cn(
         "h-11 backdrop-blur-md border border-white/10 shadow-lg",
         iconOnly
@@ -79,15 +82,6 @@ function Trigger({
       ),
       star: "h-6 w-6",
       text: "text-sm",
-    },
-    list: {
-      container: cn(
-        "h-9",
-        iconOnly ? "w-9 rounded-full p-0" : "w-auto px-2",
-        "bg-transparent hover:bg-muted/50"
-      ),
-      star: "h-5 w-5",
-      text: "text-[11px]",
     },
   }[variant];
 
@@ -98,7 +92,7 @@ function Trigger({
         "flex items-center gap-1 justify-center transition-all active:scale-90 group/fav outline-none",
         styles.container,
         // お気に入り時は枠線を少し目立たせる（任意）
-        isFavorite && variant !== "list" && "border-yellow-400/30",
+        isFavorite && variant !== "default" && "border-yellow-400/30",
         className
       )}
       {...rest}
@@ -109,7 +103,7 @@ function Trigger({
           "transition-colors",
           isFavorite
             ? "fill-yellow-400 text-yellow-400" // お気に入りなら黄色（評価nullでも）
-            : variant === "list"
+            : variant === "default"
               ? "text-muted-foreground opacity-40"
               : "text-white opacity-70 group-hover/fav:opacity-100"
         )}
