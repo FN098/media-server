@@ -25,6 +25,7 @@ import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
+import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
@@ -82,7 +83,6 @@ import {
   StarsIcon,
   WeightIcon,
 } from "lucide-react";
-import { dirname } from "path";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -477,155 +477,54 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     setIsTagEditMode((prev) => !prev);
   };
 
-  // ===== 解凍 =====
+  // ===== ダイアログ =====
 
-  const [extractTargets, setExtractTargets] = useState<MediaNode[]>([]);
-  const isExtractMode = !!extractTargets && extractTargets.length > 0;
+  const {
+    extractTargets,
+    isExtractMode,
+    handleOpenExtractDialogSingle,
+    handleOpenExtractDialogSelected,
+    handleExtractDialogOpenChange,
 
-  // 削除ダイアログを開く（単体）
-  const handleOpenExtractDialogSingle = (node: MediaNode) => {
-    setExtractTargets([node]);
-  };
+    renameTarget,
+    setRenameTarget,
+    isRenameMode,
+    handleOpenRenameDialog,
+    handleRenameDialogOpenChange,
 
-  // 削除ダイアログを開く（複数）
-  const handleOpenExtractDialogSelected = () => {
-    setExtractTargets(selectedNodes);
-  };
+    isCreateFolderMode,
+    handleOpenCreateFolderDialog,
+    handleCreateFolderDialogOpenChange,
 
-  // 後始末
-  const handleExtractDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setExtractTargets([]);
-      handleResetSelection();
-    }
-  };
+    moveTargets,
+    isMoveMode,
+    initialMoveDialogDirPath,
+    handleOpenMoveDialogSingle,
+    handleOpenMoveDialogSelected,
+    handleMoveDialogOpenChange,
 
-  // ===== リネーム =====
+    copyTargets,
+    isCopyMode,
+    initialCopyDialogDirPath,
+    handleOpenCopyDialogSingle,
+    handleOpenCopyDialogSelected,
+    handleCopyDialogOpenChange,
 
-  const [renameTarget, setRenameTarget] = useState<MediaNode | null>(null);
-  const isRenameMode = !!renameTarget;
+    deleteTargets,
+    isDeleteMode,
+    handleOpenDeleteDialogSingle,
+    handleOpenDeleteDialogSelected,
+    handleDeleteDialogOpenChange,
 
-  // リネームダイアログを開く
-  const handleOpenRenameDialog = (node: MediaNode) => {
-    setRenameTarget(node);
-  };
-
-  // 後始末
-  const handleRenameDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setRenameTarget(null);
-      clearSelection();
-    }
-  };
-
-  // ===== フォルダ作成 =====
-
-  const [folderDir, setFolderDir] = useState<string | null>(null);
-  const isCreateFolderMode = !!folderDir;
-
-  // フォルダ作成ダイアログを開く
-  const handleOpenCreateFolderDialog = () => {
-    setFolderDir(listing.path);
-  };
-
-  // 後始末
-  const handleCreateFolderDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setFolderDir(null);
-    }
-  };
-
-  // ===== 移動 =====
-
-  // 移動対象のノードリストを管理
-  const [moveTargets, setMoveTargets] = useState<MediaNode[]>([]);
-  const isMoveMode = moveTargets.length > 0;
-  const initialMoveDialogDirPath =
-    moveTargets.length > 0 ? dirname(moveTargets[0]?.path) : undefined;
-
-  // 移動ダイアログを開く（単体）
-  const handleOpenMoveDialogSingle = (node: MediaNode) => {
-    setMoveTargets([node]);
-  };
-
-  // 移動ダイアログを開く（選択）
-  const handleOpenMoveDialogSelected = () => {
-    setMoveTargets(selectedNodes);
-  };
-
-  // 後始末
-  const handleMoveDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setMoveTargets([]);
-      if (isSelectionMode) handleResetSelection();
-    }
-  };
-
-  // ===== コピー =====
-
-  // 移動対象のノードリストを管理
-  const [copyTargets, setCopyTargets] = useState<MediaNode[]>([]);
-  const isCopyMode = copyTargets.length > 0;
-  const initialCopyDialogDirPath =
-    copyTargets.length > 0 ? dirname(copyTargets[0]?.path) : undefined;
-
-  // コピーダイアログを開く（単体）
-  const handleOpenCopyDialogSingle = (node: MediaNode) => {
-    setCopyTargets([node]);
-  };
-  // コピーダイアログを開く（選択）
-  const handleOpenCopyDialogSelected = () => {
-    setCopyTargets(selectedNodes);
-  };
-
-  // 後始末
-  const handleCopyDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setCopyTargets([]);
-      if (isSelectionMode) handleResetSelection();
-    }
-  };
-
-  // ===== 削除 =====
-
-  const [deleteTargets, setDeleteTargets] = useState<MediaNode[]>([]);
-  const isDeleteMode = deleteTargets.length > 0;
-
-  // 削除ダイアログを開く（単体）
-  const handleOpenDeleteDialogSingle = (node: MediaNode) => {
-    setDeleteTargets([node]);
-  };
-
-  // 削除ダイアログを開く（選択）
-  const handleOpenDeleteDialogSelected = () => {
-    setDeleteTargets(selectedNodes);
-  };
-
-  // 後始末
-  const handleDeleteDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setDeleteTargets([]);
-      handleResetSelection();
-    }
-  };
-
-  // ===== プレビュー設定 =====
-
-  const [previewPath, setPreviewPath] = useState<string | null>(null);
-
-  const isFolderPreviewMode = previewPath != null;
-
-  // プレビュー設定ダイアログを開く
-  const handleOpenApplyPreviewDialog = (node: MediaNode) => {
-    setPreviewPath(node.path);
-  };
-
-  // 後始末
-  const handleApplyPreviewDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setPreviewPath(null);
-    }
-  };
+    previewPath,
+    isFolderPreviewMode,
+    handleOpenApplyPreviewDialog,
+    handleApplyPreviewDialogOpenChange,
+  } = useExplorerDialogs({
+    currentDirPath: listing.path,
+    selectedNodes,
+    onClose: handleResetSelection,
+  });
 
   // ===== サムネイル =====
 
