@@ -40,11 +40,7 @@ export function ViewerHeaderPinButton(props: ViewerHeaderPinButtonProps) {
   );
 }
 
-interface TriggerProps extends React.ComponentProps<"button"> {
-  isPinned: boolean;
-}
-
-function Trigger({ isPinned, className, ...rest }: TriggerProps) {
+function Trigger({ isPinned, className, ...rest }: ViewerHeaderPinButtonProps) {
   return (
     <button
       className={cn(
