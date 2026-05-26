@@ -28,7 +28,7 @@ import { FolderNavigation } from "@/components/ui/navigations/folder-navigation"
 import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
-import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
+import { useSelectionHandlers } from "@/components/ui/pages/hooks/use-selection-handlers";
 import { useTagEditorHandlers } from "@/components/ui/pages/hooks/use-tag-editor-handlers";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
@@ -429,7 +429,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     handleSelect,
     handleSelectAll,
     handleResetSelection,
-  } = useExplorerSelection({
+  } = useSelectionHandlers({
     allNodes,
     currentNodes: filteredNodes,
   });

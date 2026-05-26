@@ -1,16 +1,15 @@
-import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { MediaNode } from "@/lib/media/types";
+import { SelectableNode, useSelectedNodes } from "@/hooks/use-selected-nodes";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 
-interface UseExplorerSelectionProps {
-  allNodes: MediaNode[];
-  currentNodes: MediaNode[];
+interface UseSelectionHandlersProps<T> {
+  allNodes: T[];
+  currentNodes: T[];
 }
 
-export function useExplorerSelection({
+export function useSelectionHandlers<T extends SelectableNode>({
   allNodes,
   currentNodes,
-}: UseExplorerSelectionProps) {
+}: UseSelectionHandlersProps<T>) {
   const {
     isSelectionMode,
     enterSelectionMode,
@@ -25,7 +24,7 @@ export function useExplorerSelection({
 
   const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
 
-  const handleSelect = (node: MediaNode) => {
+  const handleSelect = (node: T) => {
     replaceSelection(node.path);
   };
 

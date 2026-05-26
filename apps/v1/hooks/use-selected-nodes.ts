@@ -1,12 +1,16 @@
 "use client";
 
-import { MediaNode } from "@/lib/media/types";
 import { useMemo } from "react";
 
 type DirectoryBehavior = "include" | "exclude";
 
-export function useSelectedNodes(
-  nodes: MediaNode[],
+export type SelectableNode = {
+  path: string;
+  isDirectory: boolean;
+};
+
+export function useSelectedNodes<T extends SelectableNode>(
+  nodes: T[],
   selectedPaths: Iterable<string>,
   options?: {
     activated?: boolean; // デフォルト: true
@@ -40,7 +44,7 @@ export function useSelectedNodes(
 
         return node;
       })
-      .filter((node): node is MediaNode => node !== null);
+      .filter((node): node is T => node !== null);
   }, [activated, directoryBehavior, nodeMap, selectedPaths]);
 
   const selectedCount = selectedNodes.length;
