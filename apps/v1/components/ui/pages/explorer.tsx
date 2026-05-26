@@ -16,10 +16,7 @@ import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
 import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
 import { ExtractDialog } from "@/components/ui/dialogs/extract-dialog";
-import {
-  FavoriteDialog,
-  FavoriteDialogMode,
-} from "@/components/ui/dialogs/favorite-dialog";
+import { FavoriteDialog } from "@/components/ui/dialogs/favorite-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
@@ -82,7 +79,7 @@ import {
   StarsIcon,
   WeightIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 
 export function Explorer({ listing }: { listing: MediaListing }) {
@@ -348,12 +345,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     useFavoritesContext();
   const [updatingFavorite, startUpdatingFavorite] = useTransition();
 
-  // お気に入りダイアログ制御
-  const [favoriteTargets, setFavoriteDialogTargets] = useState<MediaNode[]>([]);
-  const [favoriteDialogMode, setFavoriteDialogMode] =
-    useState<FavoriteDialogMode>("add");
-  const isFavoriteDialogOpen = favoriteTargets.length > 0;
-
   // レーティング更新（単体）
   const handleChangeRatingSingle = ({
     node,
@@ -399,25 +390,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     });
   };
 
-  // お気に入り登録ダイアログを開く
-  const handleOpenFavoriteAddDialog = () => {
-    setFavoriteDialogMode("add");
-    setFavoriteDialogTargets(selectedNodes);
-  };
-
-  // お気に入り解除ダイアログを開く
-  const handleOpenFavoriteRemoveDialog = () => {
-    setFavoriteDialogMode("remove");
-    setFavoriteDialogTargets(selectedNodes);
-  };
-
-  // 後始末
-  const handleFavoriteDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setFavoriteDialogTargets([]);
-    }
-  };
-
   // ===== 選択 =====
 
   const {
@@ -457,6 +429,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     deleteDialog,
     extractDialog,
     previewDialog,
+    favoriteDialog,
   } = useExplorerDialogs({
     currentDir: listing.path,
     selectedNodes,
@@ -569,8 +542,9 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       onUpdateThumbSelected: handleUpdateThumbSelected,
       onDelete: deleteDialog.open,
       onDeleteSelected: deleteDialog.openSelected,
-      onAddFavoriteSelected: handleOpenFavoriteAddDialog,
-      onRemoveFavoriteSelected: handleOpenFavoriteRemoveDialog,
+      onAddFavoriteSelected: () => favoriteDialog.openSelected({ mode: "add" }),
+      onRemoveFavoriteSelected: () =>
+        favoriteDialog.openSelected({ mode: "remove" }),
     });
 
   return (
@@ -762,10 +736,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
           {/* お気に入りダイアログ */}
           <FavoriteDialog
-            open={isFavoriteDialogOpen}
-            onOpenChange={handleFavoriteDialogOpenChange}
-            targetNodes={favoriteTargets}
-            mode={favoriteDialogMode}
+            open={favoriteDialog.isOpen}
+            onOpenChange={favoriteDialog.onOpenChange}
+            targets={favoriteDialog.targets}
+            mode={favoriteDialog.mode}
           />
 
           {/* フォルダナビゲーション */}

@@ -18,21 +18,21 @@ export type FavoriteDialogMode = "add" | "remove";
 interface FavoriteAlertDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetNodes: { path: string; name: string }[];
+  targets: { path: string; name: string }[];
   mode: FavoriteDialogMode;
 }
 
 export function FavoriteDialog({
   open,
   onOpenChange,
-  targetNodes,
+  targets,
   mode,
 }: FavoriteAlertDialogProps) {
   const { updateMultipleFavorites, deleteMultipleFavorites } =
     useFavoritesContext();
 
   const [isPending, startTransition] = useTransition();
-  const count = targetNodes.length;
+  const count = targets.length;
 
   const handleApply = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
@@ -40,7 +40,7 @@ export function FavoriteDialog({
 
     if (mode === "add") {
       startTransition(async () => {
-        const paths = targetNodes.map((n) => n.path);
+        const paths = targets.map((n) => n.path);
         const result = await updateMultipleFavorites(paths, {
           rating: null,
           skipIfAlreadyFavorite: true,
@@ -56,7 +56,7 @@ export function FavoriteDialog({
 
     if (mode === "remove") {
       startTransition(async () => {
-        const paths = targetNodes.map((n) => n.path);
+        const paths = targets.map((n) => n.path);
         const result = await deleteMultipleFavorites(paths);
         if (result.success) {
           toast.success("お気に入りが解除されました。");
