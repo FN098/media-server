@@ -28,6 +28,7 @@ import { FolderNavigation } from "@/components/ui/navigations/folder-navigation"
 import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
+import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
 import { useTagEditorControl } from "@/components/ui/pages/hooks/use-tag-editor-control";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
@@ -47,7 +48,6 @@ import { useParentPathname } from "@/hooks/use-parent-pathname";
 import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useRatingFilter } from "@/hooks/use-rating-filter";
 import { useSearchParamsControl } from "@/hooks/use-search-params-control";
-import { useSelectedNodes } from "@/hooks/use-selected-nodes";
 import { useSort } from "@/hooks/use-sort";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
@@ -68,7 +68,6 @@ import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -423,34 +422,17 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   const {
     isSelectionMode,
-    enterSelectionMode,
-    exitSelectionMode,
-    selectedPaths,
     selectedCount,
-    replaceSelection,
-    selectPaths,
     clearSelection,
     hasSelection,
-  } = usePathSelectionContext();
-
-  const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
-
-  // 選択
-  const handleSelect = (node: MediaNode) => {
-    replaceSelection(node.path);
-  };
-
-  // 全選択
-  const handleSelectAll = () => {
-    selectPaths(filteredNodes.map((n) => n.path));
-    enterSelectionMode();
-  };
-
-  // 選択解除
-  const handleResetSelection = () => {
-    clearSelection();
-    exitSelectionMode();
-  };
+    selectedNodes,
+    handleSelect,
+    handleSelectAll,
+    handleResetSelection,
+  } = useExplorerSelection({
+    allNodes,
+    filteredNodes,
+  });
 
   // ===== タグエディタ =====
 
