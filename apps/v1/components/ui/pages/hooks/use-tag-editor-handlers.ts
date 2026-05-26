@@ -2,13 +2,13 @@ import { TagEditMode } from "@/components/ui/sheets/tag-edit-sheet/types";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useCallback, useMemo } from "react";
 
-type UseTagEditorControlProps = {
+type UseTagEditorHandlersProps = {
   isViewerMode: boolean;
 };
 
-export function useTagEditorControl({
+export function useTagEditorHandlers({
   isViewerMode,
-}: UseTagEditorControlProps) {
+}: UseTagEditorHandlersProps) {
   const {
     isTagEditMode: isTagEditorOpen,
     setIsTagEditMode: setIsTagEditorOpen,

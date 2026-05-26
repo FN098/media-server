@@ -29,7 +29,7 @@ import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dia
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
 import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
-import { useTagEditorControl } from "@/components/ui/pages/hooks/use-tag-editor-control";
+import { useTagEditorHandlers } from "@/components/ui/pages/hooks/use-tag-editor-handlers";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -442,7 +442,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     handleOpenTagEditor,
     handleCloseTagEditor,
     handleToggleTagEditMode,
-  } = useTagEditorControl({
+  } = useTagEditorHandlers({
     isViewerMode,
   });
 
