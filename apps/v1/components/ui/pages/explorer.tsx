@@ -17,7 +17,8 @@ import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
-import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
+import { useExplorerMenu } from "@/components/ui/pages/hooks/use-explorer-menu";
+import { useExplorerSelectionbar } from "@/components/ui/pages/hooks/use-explorer-selectionbar";
 import { useSelectionHandlers } from "@/components/ui/pages/hooks/use-selection-handlers";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
@@ -505,40 +506,49 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== メニュー =====
 
-  const { menuItems, selectionBarInlineMenuItems, selectionBarMenuItems } =
-    useExplorerMenuItems({
-      hasSelection,
-      selectedCount,
-      isViewerMode,
-      isFullscreenSupported,
-      getFavorite,
-      onOpenInNewTab: handleOpenInNewTab,
-      onExtract: extractDialog.open,
-      onExtractSelected: extractDialog.openSelected,
-      onChangeRating: handleChangeRatingSingle,
-      onChangeRatingSelected: handleChangeRatingSelected,
-      onToggleFullscreen: handleToggleFullscreen,
-      onRename: renameDialog.open,
-      onMove: moveDialog.open,
-      onMoveSelected: moveDialog.openSelected,
-      onCopy: copyDialog.open,
-      onCopySelected: copyDialog.openSelected,
-      onEditTags: tagEditor.open,
-      onEditTagsSelected: tagEditor.open,
-      onAddTagsToFilter: handleAddTagFilter,
-      onApplyAsPreview: previewDialog.open,
-      onUpdateThumb: handleUpdateThumbSingle,
-      onUpdateThumbSelected: handleUpdateThumbSelected,
-      onDelete: deleteDialog.open,
-      onDeleteSelected: deleteDialog.openSelected,
-      onAddFavoriteSelected: () => favoriteDialog.openSelected({ mode: "add" }),
-      onRemoveFavoriteSelected: () =>
-        favoriteDialog.openSelected({ mode: "remove" }),
-    });
+  const menu = useExplorerMenu({
+    hasSelection,
+    selectedCount,
+    isViewerMode,
+    isFullscreenSupported,
+    getFavorite,
+    onOpenInNewTab: handleOpenInNewTab,
+    onExtract: extractDialog.open,
+    onExtractSelected: extractDialog.openSelected,
+    onChangeRating: handleChangeRatingSingle,
+    onChangeRatingSelected: handleChangeRatingSelected,
+    onToggleFullscreen: handleToggleFullscreen,
+    onRename: renameDialog.open,
+    onMove: moveDialog.open,
+    onMoveSelected: moveDialog.openSelected,
+    onCopy: copyDialog.open,
+    onCopySelected: copyDialog.openSelected,
+    onEditTags: tagEditor.open,
+    onAddTagsToFilter: handleAddTagFilter,
+    onApplyAsPreview: previewDialog.open,
+    onUpdateThumb: handleUpdateThumbSingle,
+    onUpdateThumbSelected: handleUpdateThumbSelected,
+    onDelete: deleteDialog.open,
+    onDeleteSelected: deleteDialog.openSelected,
+  });
+
+  const selectionbar = useExplorerSelectionbar({
+    hasSelection,
+    onChangeRating: handleChangeRatingSingle,
+    onChangeRatingSelected: handleChangeRatingSelected,
+    onMoveSelected: moveDialog.openSelected,
+    onCopySelected: copyDialog.openSelected,
+    onEditTagsSelected: tagEditor.open,
+    onUpdateThumbSelected: handleUpdateThumbSelected,
+    onDeleteSelected: deleteDialog.openSelected,
+    onAddFavoriteSelected: () => favoriteDialog.openSelected({ mode: "add" }),
+    onRemoveFavoriteSelected: () =>
+      favoriteDialog.openSelected({ mode: "remove" }),
+  });
 
   return (
     <PagingProvider totalItems={filteredNodes.length}>
-      <MenuItemsProvider items={menuItems}>
+      <MenuItemsProvider items={menu.items}>
         <div
           className={cn(
             "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
@@ -637,7 +647,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               <MediaViewer
                 allNodes={mediaOnly}
                 initialIndex={initialViewerIndex}
-                menuItems={menuItems}
+                menuItems={menu.items}
                 onIndexChange={handleViewerIndexChange}
                 onClose={closeViewer}
                 onOpenPrev={handleOpenPrevFolder}
@@ -656,8 +666,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             onClose={handleResetSelection}
             className="z-40" // DropdownMenu より小さくする
             context={{ nodes: selectedNodes }}
-            menuItems={selectionBarMenuItems}
-            inlineMenuItems={selectionBarInlineMenuItems}
+            menuItems={selectionbar.menu.items}
+            inlineMenuItems={selectionbar.menu.inlineItems}
           />
 
           {/* タグエディター */}
