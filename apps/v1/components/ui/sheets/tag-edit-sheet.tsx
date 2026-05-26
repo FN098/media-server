@@ -30,6 +30,7 @@ interface TagEditSheetProps {
   targetNodes: MediaNode[];
   mode?: TagEditMode;
   opacity?: number; // 背景の不透明度 (0~100)
+  onOpacityChange?: (opacity: number) => void;
   edit?: boolean;
   onClose: () => void;
   autoBlur?: boolean; // 編集モード切り替え時に自動で背景ブラーを有効化
@@ -39,7 +40,8 @@ export function TagEditSheet({
   open,
   targetNodes,
   mode = "default",
-  opacity: initialOpacity,
+  opacity: controlledOpacity,
+  onOpacityChange: onControlledOpacityChange,
   edit,
   onClose,
   autoBlur = true,
@@ -75,7 +77,9 @@ export function TagEditSheet({
   const resetEditingMode = () => handleEditingModeChange("view");
 
   // 不透明度
-  const [opacity, setOpacity] = useState(initialOpacity ?? editor.opacity);
+  const [internalOpacity, setInternalOpacity] = useState(editor.opacity);
+  const opacity = controlledOpacity ?? internalOpacity;
+  const setOpacity = onControlledOpacityChange ?? setInternalOpacity;
   const handleOpacityChange = (opacity: number) => {
     setOpacity(opacity);
     editor.setOpacity(opacity);
