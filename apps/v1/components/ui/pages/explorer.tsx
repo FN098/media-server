@@ -499,18 +499,23 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== 解凍 =====
 
-  const [extractTarget, setExtractTarget] = useState<MediaNode | null>(null);
-  const isExtractMode = !!extractTarget;
+  const [extractTargets, setExtractTargets] = useState<MediaNode[]>([]);
+  const isExtractMode = !!extractTargets && extractTargets.length > 0;
 
   // 削除ダイアログを開く（単体）
-  const handleOpenExtractDialog = (node: MediaNode) => {
-    setExtractTarget(node);
+  const handleOpenExtractDialogSingle = (node: MediaNode) => {
+    setExtractTargets([node]);
+  };
+
+  // 削除ダイアログを開く（複数）
+  const handleOpenExtractDialogSelected = () => {
+    setExtractTargets(selectedNodes);
   };
 
   // 後始末
   const handleExtractDialogOpenChange = (open: boolean) => {
     if (!open) {
-      setExtractTarget(null);
+      setExtractTargets([]);
       handleResetSelection();
     }
   };
@@ -842,7 +847,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: PackageOpenIcon,
       label: "解凍",
-      onClick: ({ node }) => handleOpenExtractDialog(node),
+      onClick: ({ node }) =>
+        hasSelection
+          ? handleOpenExtractDialogSelected()
+          : handleOpenExtractDialogSingle(node),
       hidden: ({ node }) => !isArchiveFile(node.path),
     },
     {
@@ -1143,7 +1151,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           <ExtractDialog
             open={isExtractMode}
             onOpenChange={handleExtractDialogOpenChange}
-            targetNode={extractTarget}
+            targetNodes={extractTargets}
           />
 
           {/* リネームダイアログ */}
