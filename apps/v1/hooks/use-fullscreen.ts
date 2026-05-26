@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 
 export function useFullscreen() {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
@@ -21,25 +21,28 @@ export function useFullscreen() {
     typeof document !== "undefined" && !!document.fullscreenElement;
 
   // 全画面にする
-  const enterFullscreen = async (element = document.documentElement) => {
-    if (!isSupported || document.fullscreenElement) return;
-    await element.requestFullscreen();
-  };
+  const enterFullscreen = useCallback(
+    async (element = document.documentElement) => {
+      if (!isSupported || document.fullscreenElement) return;
+      await element.requestFullscreen();
+    },
+    [isSupported]
+  );
 
   // 全画面を解除する
-  const exitFullscreen = async () => {
+  const exitFullscreen = useCallback(async () => {
     if (!isSupported || !document.fullscreenElement) return;
     await document.exitFullscreen();
-  };
+  }, [isSupported]);
 
   // 切り替え
-  const toggleFullscreen = async () => {
+  const toggleFullscreen = useCallback(async () => {
     if (document.fullscreenElement) {
       await exitFullscreen();
     } else {
       await enterFullscreen();
     }
-  };
+  }, [enterFullscreen, exitFullscreen]);
 
   return {
     isSupported,
