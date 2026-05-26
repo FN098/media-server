@@ -34,6 +34,7 @@ import { usePreviewDialog } from "@/components/ui/pages/hooks/dialogs/use-previe
 import { useRenameDialog } from "@/components/ui/pages/hooks/dialogs/use-rename-dialog";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
+import { useTagEditorControl } from "@/components/ui/pages/hooks/use-tag-editor-control";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -76,7 +77,6 @@ import { PagingProvider } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
-import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
@@ -460,28 +460,15 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== タグエディタ =====
 
-  const { isTagEditMode, setIsTagEditMode } = useTagEditorContext();
-
-  // タグエディタの起動モード
-  const tagEditMode = useMemo(() => {
-    if (isViewerMode) return "single";
-    return "default";
-  }, [isViewerMode]);
-
-  // タグエディタを開く
-  const handleOpenTagEditor = () => {
-    setIsTagEditMode(true);
-  };
-
-  // タグエディタを閉じる
-  const handleCloseTagEditor = () => {
-    setIsTagEditMode(false);
-  };
-
-  // タグエディタを表示/非表示
-  const handleToggleTagEditMode = () => {
-    setIsTagEditMode((prev) => !prev);
-  };
+  const {
+    isTagEditMode,
+    tagEditMode,
+    handleOpenTagEditor,
+    handleCloseTagEditor,
+    handleToggleTagEditMode,
+  } = useTagEditorControl({
+    isViewerMode,
+  });
 
   // ===== ダイアログ =====
 
