@@ -795,6 +795,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
 
+  // R: フィルタリセット
+  useHotkeys("r", () => clearSearchParams(), {
+    scopes: ["explorer"],
+  });
+
   // ===== メニュー =====
 
   const menuItems: MenuItemDef<NodeContext>[] = [

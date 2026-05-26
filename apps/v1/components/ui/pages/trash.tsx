@@ -404,6 +404,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
     scopes: ["trash", "viewer"],
   });
 
+  // R: フィルタリセット
+  useHotkeys("r", () => clearSearchParams(), {
+    scopes: ["trash"],
+  });
+
   // ===== メニュー =====
 
   const menuItems: MenuItemDef<NodeContext>[] = [

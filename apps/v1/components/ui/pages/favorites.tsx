@@ -453,6 +453,11 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     { scopes: "favorites" }
   );
 
+  // R: フィルタリセット
+  useHotkeys("r", () => clearSearchParams(), {
+    scopes: ["favorites"],
+  });
+
   // ===== メニュー =====
 
   const menuItems: MenuItemDef<NodeContext>[] = [
