@@ -25,13 +25,7 @@ import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
-import { useCopyDialog } from "@/components/ui/pages/hooks/dialogs/use-copy-dialog";
-import { useCreateFolderDialog } from "@/components/ui/pages/hooks/dialogs/use-create-folder-dialog";
-import { useDeleteDialog } from "@/components/ui/pages/hooks/dialogs/use-delete-dialog";
-import { useExtractDialog } from "@/components/ui/pages/hooks/dialogs/use-extract-dialog";
-import { useMoveDialog } from "@/components/ui/pages/hooks/dialogs/use-move-dialog";
-import { usePreviewDialog } from "@/components/ui/pages/hooks/dialogs/use-preview-dialog";
-import { useRenameDialog } from "@/components/ui/pages/hooks/dialogs/use-rename-dialog";
+import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenuItems } from "@/components/ui/pages/hooks/use-explorer-menu-items";
 import { useTagEditorControl } from "@/components/ui/pages/hooks/use-tag-editor-control";
@@ -461,7 +455,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== タグエディタ =====
 
   const {
-    isTagEditMode,
+    isTagEditorOpen,
     tagEditMode,
     handleOpenTagEditor,
     handleCloseTagEditor,
@@ -472,81 +466,20 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== ダイアログ =====
 
-  // リネーム
   const {
-    renameTarget,
-    setRenameTarget,
-    isRenameMode,
-    handleOpenRenameDialog,
-    handleRenameDialogOpenChange,
-  } = useRenameDialog({});
-
-  // 解凍
-  const {
-    extractTargets,
-    isExtractMode,
-    handleOpenExtractDialogSingle,
-    handleOpenExtractDialogSelected,
-    handleExtractDialogOpenChange,
-  } = useExtractDialog({
+    isDialogOpen,
+    renameDialog,
+    moveDialog,
+    copyDialog,
+    createFolderDialog,
+    deleteDialog,
+    extractDialog,
+    previewDialog,
+  } = useExplorerDialogs({
+    currentDir: listing.path,
     selectedNodes,
-    onClose: handleResetSelection,
+    clearSelection,
   });
-
-  // フォルダ作成
-  const {
-    isCreateFolderMode,
-    handleOpenCreateFolderDialog,
-    handleCreateFolderDialogOpenChange,
-  } = useCreateFolderDialog({
-    targetDirPath: listing.path,
-  });
-
-  // 移動
-  const {
-    moveTargets,
-    isMoveMode,
-    initialMoveDialogDirPath,
-    handleOpenMoveDialogSingle,
-    handleOpenMoveDialogSelected,
-    handleMoveDialogOpenChange,
-  } = useMoveDialog({
-    selectedNodes,
-    onClose: handleResetSelection,
-  });
-
-  // コピー
-  const {
-    copyTargets,
-    isCopyMode,
-    initialCopyDialogDirPath,
-    handleOpenCopyDialogSingle,
-    handleOpenCopyDialogSelected,
-    handleCopyDialogOpenChange,
-  } = useCopyDialog({
-    selectedNodes,
-    onClose: handleResetSelection,
-  });
-
-  // 削除
-  const {
-    deleteTargets,
-    isDeleteMode,
-    handleOpenDeleteDialogSingle,
-    handleOpenDeleteDialogSelected,
-    handleDeleteDialogOpenChange,
-  } = useDeleteDialog({
-    selectedNodes,
-    onClose: handleResetSelection,
-  });
-
-  // プレビュー設定
-  const {
-    previewPath,
-    isFolderPreviewMode,
-    handleOpenApplyPreviewDialog,
-    handleApplyPreviewDialogOpenChange,
-  } = usePreviewDialog({});
 
   // ===== サムネイル =====
 
@@ -610,17 +543,17 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   useExplorerHotkeys({
     enabled: true,
-    isDialogMode: isRenameMode || isMoveMode || isDeleteMode,
-    isTagEditorMode: isTagEditMode,
+    isDialogMode: isDialogOpen,
+    isTagEditorMode: isTagEditorOpen,
     isViewerMode: isViewerMode,
     onResetSelection: handleResetSelection,
     onGoBack: navigateToParent,
-    onDelete: handleOpenDeleteDialogSelected,
+    onDelete: deleteDialog.openSelected,
     onEditTags: handleToggleTagEditMode,
     onToggleFullscreen: handleToggleFullscreen,
     onSelectAll: handleSelectAll,
     onFocusSearch: focusSearch,
-    onRename: () => setRenameTarget(selectedNodes[0]),
+    onRename: () => renameDialog.setTarget(selectedNodes[0]),
     onOpenPrevFolder: () => handleOpenPrevFolder("first"),
     onOpenNextFolder: () => handleOpenNextFolder("first"),
     onResetFilter: clearSearchParams,
@@ -636,24 +569,24 @@ export function Explorer({ listing }: { listing: MediaListing }) {
       isFullscreenSupported,
       getFavorite,
       onOpenInNewTab: handleOpenInNewTab,
-      onExtract: handleOpenExtractDialogSingle,
-      onExtractSelected: handleOpenExtractDialogSelected,
+      onExtract: extractDialog.open,
+      onExtractSelected: extractDialog.openSelected,
       onChangeRating: handleChangeRatingSingle,
       onChangeRatingSelected: handleChangeRatingSelected,
       onToggleFullscreen: handleToggleFullscreen,
-      onRename: handleOpenRenameDialog,
-      onMove: handleOpenMoveDialogSingle,
-      onMoveSelected: handleOpenMoveDialogSelected,
-      onCopy: handleOpenCopyDialogSingle,
-      onCopySelected: handleOpenCopyDialogSelected,
+      onRename: renameDialog.open,
+      onMove: moveDialog.open,
+      onMoveSelected: moveDialog.openSelected,
+      onCopy: copyDialog.open,
+      onCopySelected: copyDialog.openSelected,
       onEditTags: handleOpenTagEditor,
       onEditTagsSelected: handleOpenTagEditor,
       onAddTagsToFilter: handleAddTagFilter,
-      onApplyAsPreview: handleOpenApplyPreviewDialog,
+      onApplyAsPreview: previewDialog.open,
       onUpdateThumb: handleUpdateThumbSingle,
       onUpdateThumbSelected: handleUpdateThumbSelected,
-      onDelete: handleOpenDeleteDialogSingle,
-      onDeleteSelected: handleOpenDeleteDialogSelected,
+      onDelete: deleteDialog.open,
+      onDeleteSelected: deleteDialog.openSelected,
       onAddFavoriteSelected: handleOpenFavoriteAddDialog,
       onRemoveFavoriteSelected: handleOpenFavoriteRemoveDialog,
     });
@@ -705,7 +638,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
               />
 
               {/* 新規フォルダ作成 */}
-              <Button variant="outline" onClick={handleOpenCreateFolderDialog}>
+              <Button variant="outline" onClick={createFolderDialog.open}>
                 <FolderPlus className="h-4 w-4" />
                 新規フォルダ
               </Button>
@@ -764,14 +697,14 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 onClose={closeViewer}
                 onOpenPrev={handleOpenPrevFolder}
                 onOpenNext={handleOpenNextFolder}
-                onDelete={handleOpenDeleteDialogSingle}
+                onDelete={deleteDialog.open}
               />
             </ScrollLockProvider>
           )}
 
           {/* 選択バー */}
           <SelectionBar
-            open={isSelectionMode && !isTagEditMode}
+            open={isSelectionMode && !isTagEditorOpen}
             count={selectedNodes.length}
             totalCount={filteredNodes.length}
             onSelectAll={handleSelectAll}
@@ -784,7 +717,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
           {/* タグエディター */}
           <TagEditSheet
-            open={isTagEditMode}
+            open={isTagEditorOpen}
             targetNodes={selectedNodes}
             onClose={handleCloseTagEditor}
             mode={tagEditMode}
@@ -793,56 +726,56 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
           {/* 解凍ダイアログ */}
           <ExtractDialog
-            open={isExtractMode}
-            onOpenChange={handleExtractDialogOpenChange}
-            targetNodes={extractTargets}
+            open={extractDialog.isOpen}
+            onOpenChange={extractDialog.onOpenChange}
+            targets={extractDialog.targets}
           />
 
           {/* リネームダイアログ */}
           <RenameDialog
-            open={isRenameMode}
-            onOpenChange={handleRenameDialogOpenChange}
-            sourcePath={renameTarget?.path ?? ""}
-            currentName={renameTarget?.name ?? ""}
-            isDirectory={renameTarget?.isDirectory}
+            open={renameDialog.isOpen}
+            onOpenChange={renameDialog.onOpenChange}
+            sourcePath={renameDialog.target?.path ?? ""}
+            currentName={renameDialog.target?.name ?? ""}
+            isDirectory={renameDialog.target?.isDirectory}
           />
 
           {/* フォルダ作成ダイアログ */}
           <CreateFolderDialog
-            key={`create-folder-${isCreateFolderMode}`}
-            open={isCreateFolderMode}
-            onOpenChange={handleCreateFolderDialogOpenChange}
+            key={`create-folder-${createFolderDialog.isOpen}`}
+            open={createFolderDialog.isOpen}
+            onOpenChange={createFolderDialog.onOpenChange}
             parentPath={listing.path}
           />
 
           {/* 移動ダイアログ */}
           <MoveDialog
-            open={isMoveMode}
-            onOpenChange={handleMoveDialogOpenChange}
-            sourceNodes={moveTargets}
-            initialDirPath={initialMoveDialogDirPath}
+            open={moveDialog.isOpen}
+            onOpenChange={moveDialog.onOpenChange}
+            sourceNodes={moveDialog.targets}
+            initialDirPath={moveDialog.initialDir}
           />
 
           {/* コピーダイアログ */}
           <CopyDialog
-            open={isCopyMode}
-            onOpenChange={handleCopyDialogOpenChange}
-            sourceNodes={copyTargets}
-            initialDirPath={initialCopyDialogDirPath}
+            open={copyDialog.isOpen}
+            onOpenChange={copyDialog.onOpenChange}
+            sourceNodes={copyDialog.targets}
+            initialDirPath={copyDialog.initialDir}
           />
 
           {/* 削除ダイアログ */}
           <DeleteDialog
-            open={isDeleteMode}
-            onOpenChange={handleDeleteDialogOpenChange}
-            targetNodes={deleteTargets}
+            open={deleteDialog.isOpen}
+            onOpenChange={deleteDialog.onOpenChange}
+            targets={deleteDialog.targets}
           />
 
           {/* プレビュー設定ダイアログ */}
           <ApplyPreviewDialog
-            open={isFolderPreviewMode}
-            onOpenChange={handleApplyPreviewDialogOpenChange}
-            previewPath={previewPath}
+            open={previewDialog.isOpen}
+            onOpenChange={previewDialog.onOpenChange}
+            previewPath={previewDialog.previewPath}
           />
 
           {/* お気に入りダイアログ */}

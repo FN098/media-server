@@ -19,18 +19,18 @@ import { toast } from "sonner";
 interface DeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetNodes: { path: string; name: string }[];
+  targets: { path: string; name: string }[];
   permanent?: boolean;
 }
 
 export function DeleteDialog({
   open,
   onOpenChange,
-  targetNodes,
+  targets,
   permanent = false,
 }: DeleteDialogProps) {
   const [isPending, startTransition] = useTransition();
-  const count = targetNodes.length;
+  const count = targets.length;
 
   const handleApply = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
@@ -39,7 +39,7 @@ export function DeleteDialog({
     if (permanent) {
       // 完全に削除
       startTransition(async () => {
-        const paths = targetNodes.map((n) => n.path);
+        const paths = targets.map((n) => n.path);
         const result = await deleteNodesPermanentlyAction(paths);
 
         if (result.failed === 0) {
@@ -52,7 +52,7 @@ export function DeleteDialog({
     } else {
       // ゴミ箱に移動
       startTransition(async () => {
-        const paths = targetNodes.map((n) => n.path);
+        const paths = targets.map((n) => n.path);
         const result = await deleteNodesAction(paths);
 
         if (result.failed === 0) {

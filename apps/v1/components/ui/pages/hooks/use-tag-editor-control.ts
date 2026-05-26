@@ -9,7 +9,10 @@ type UseTagEditorControlProps = {
 export function useTagEditorControl({
   isViewerMode,
 }: UseTagEditorControlProps) {
-  const { isTagEditMode, setIsTagEditMode } = useTagEditorContext();
+  const {
+    isTagEditMode: isTagEditorOpen,
+    setIsTagEditMode: setIsTagEditorOpen,
+  } = useTagEditorContext();
 
   const tagEditMode = useMemo<TagEditMode>(() => {
     if (isViewerMode) return "single";
@@ -17,19 +20,19 @@ export function useTagEditorControl({
   }, [isViewerMode]);
 
   const handleOpenTagEditor = useCallback(() => {
-    setIsTagEditMode(true);
-  }, [setIsTagEditMode]);
+    setIsTagEditorOpen(true);
+  }, [setIsTagEditorOpen]);
 
   const handleCloseTagEditor = useCallback(() => {
-    setIsTagEditMode(false);
-  }, [setIsTagEditMode]);
+    setIsTagEditorOpen(false);
+  }, [setIsTagEditorOpen]);
 
   const handleToggleTagEditMode = useCallback(() => {
-    setIsTagEditMode((prev) => !prev);
-  }, [setIsTagEditMode]);
+    setIsTagEditorOpen((prev) => !prev);
+  }, [setIsTagEditorOpen]);
 
   return {
-    isTagEditMode,
+    isTagEditorOpen,
     tagEditMode,
     handleOpenTagEditor,
     handleCloseTagEditor,

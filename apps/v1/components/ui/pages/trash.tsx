@@ -551,7 +551,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
           <DeleteDialog
             open={isDeleteMode}
             onOpenChange={handleDeleteDialogOpenChange}
-            targetNodes={deleteTargets}
+            targets={deleteTargets}
             permanent
           />
 

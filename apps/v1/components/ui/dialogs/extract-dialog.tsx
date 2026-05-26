@@ -16,30 +16,30 @@ import { toast } from "sonner";
 interface ExtractDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetNodes: { path: string; name: string }[] | null;
+  targets: { path: string; name: string }[] | null;
 }
 
 export function ExtractDialog({
   open,
   onOpenChange,
-  targetNodes,
+  targets,
 }: ExtractDialogProps) {
   const [isPending, startTransition] = useTransition();
 
-  if (!targetNodes || targetNodes.length === 0) return null;
+  if (!targets || targets.length === 0) return null;
 
   const handleApply = (e: React.MouseEvent<HTMLButtonElement>) => {
     // 重要: デフォルトの「クリックしたらダイアログを自動で閉じる」動作をキャンセル
     e.preventDefault();
 
     startTransition(async () => {
-      const result = await extractMultipleArchivesNodeAction(targetNodes);
+      const result = await extractMultipleArchivesNodeAction(targets);
 
       if (result.success) {
         toast.success(
-          targetNodes.length === 1
-            ? `${targetNodes[0].name} の解凍が完了しました`
-            : `${targetNodes.length} 件の解凍が完了しました`
+          targets.length === 1
+            ? `${targets[0].name} の解凍が完了しました`
+            : `${targets.length} 件の解凍が完了しました`
         );
         onOpenChange(false); // 成功時のみモーダルを閉じる
       } else {
@@ -57,9 +57,9 @@ export function ExtractDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>アーカイブの解凍</AlertDialogTitle>
           <AlertDialogDescription>
-            {targetNodes.length === 1
-              ? `「${targetNodes[0].name}」を現在のディレクトリに解凍します。`
-              : `${targetNodes.length} 件を現在のディレクトリに解凍します。`}
+            {targets.length === 1
+              ? `「${targets[0].name}」を現在のディレクトリに解凍します。`
+              : `${targets.length} 件を現在のディレクトリに解凍します。`}
             <br />
             同名のフォルダがある場合は、自動的に連番（ (1)
             など）が付与されます。
