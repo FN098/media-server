@@ -1,7 +1,7 @@
 "use client";
 
 import { useFavorites } from "@/hooks/use-favorites";
-import { FavoriteValue } from "@/lib/favorite/types";
+import { Favorite } from "@/lib/favorite/types";
 import { createContext, useContext } from "react";
 
 type FavoritesContextType = ReturnType<typeof useFavorites>;
@@ -15,7 +15,7 @@ export function FavoritesProvider({
   favorites,
 }: {
   children: React.ReactNode;
-  favorites?: FavoriteValue[];
+  favorites?: Favorite[];
 }) {
   const value = useFavorites(favorites);
 

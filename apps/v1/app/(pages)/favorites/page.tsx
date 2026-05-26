@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
-import { FavoriteSortKey, FavoriteValue } from "@/lib/favorite/types";
+import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import {
   RatingFilterMode,
   RatingOperator,
@@ -94,7 +94,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
         path: n.path,
         rating: n.rating,
         favoritedAt: n.favoritedAt,
-      }) satisfies FavoriteValue
+      }) satisfies Favorite
   );
 
   const key = hashObject(searchParams);

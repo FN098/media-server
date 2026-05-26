@@ -1,6 +1,6 @@
 import { MediaNode } from "@/lib/media/types";
 
-export type FavoriteValue = {
+export type Favorite = {
   path: string;
   rating: number | null;
   favoritedAt?: Date;

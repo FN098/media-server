@@ -8,7 +8,7 @@ import {
   updateFavoriteAction,
   updateMultipleFavoritesAction,
 } from "@/actions/favorite-actions";
-import { FavoriteValue } from "@/lib/favorite/types";
+import { Favorite } from "@/lib/favorite/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type FavoriteMsg =
@@ -17,7 +17,7 @@ type FavoriteMsg =
   | { type: "UPDATE_MANY"; paths: string[]; rating: number | null }
   | { type: "DELETE_MANY"; paths: string[] };
 
-export function useFavorites(initialData?: FavoriteValue[]) {
+export function useFavorites(initialData?: Favorite[]) {
   const [favorites, setFavorites] = useState(
     () =>
       new Map(

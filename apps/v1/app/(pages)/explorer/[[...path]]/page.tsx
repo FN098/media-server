@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { Explorer } from "@/components/ui/pages/explorer";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
-import { FavoriteValue } from "@/lib/favorite/types";
+import { Favorite } from "@/lib/favorite/types";
 import {
   getFolderFavoriteInfo,
   getFolderMetas,
@@ -114,14 +114,16 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     nodes: formatted,
   };
 
-  const favorites = listing.nodes.map(
-    (n) =>
-      ({
-        path: n.path,
-        rating: n.rating,
-        favoritedAt: n.favoritedAt,
-      }) satisfies FavoriteValue
-  );
+  const favorites = listing.nodes
+    .filter((n) => n.favoritedAt)
+    .map(
+      (n) =>
+        ({
+          path: n.path,
+          rating: n.rating,
+          favoritedAt: n.favoritedAt,
+        }) satisfies Favorite
+    );
 
   return (
     <PathSelectionProvider>
