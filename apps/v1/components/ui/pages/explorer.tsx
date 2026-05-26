@@ -650,7 +650,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
           {/* 選択バー */}
           <SelectionBar
-            open={selection.hasSelection && !tagEditor.isOpen}
+            open={selection.isSelectionMode && !tagEditor.isOpen}
             count={selection.count}
             totalCount={filteredNodes.length}
             onSelectAll={selection.selectAll}

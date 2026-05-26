@@ -12,6 +12,7 @@ export function useExplorerSelection({
   currentNodes,
 }: UseExplorerSelectionProps) {
   const {
+    isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
     selectedPaths,
@@ -39,6 +40,7 @@ export function useExplorerSelection({
   };
 
   return {
+    isSelectionMode,
     hasSelection,
     nodes: selectedNodes,
     count: selectedCount,
