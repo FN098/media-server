@@ -53,7 +53,6 @@ export function ActionsDropdownMenu({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const setOpen = onControlledOpenChange ?? setInternalOpen;
-  const closeMenu = () => setOpen(false);
 
   const visibleItems = useMemo(
     () => menuItems.filter((item) => !item.hidden?.({ node })),
@@ -65,69 +64,114 @@ export function ActionsDropdownMenu({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        {triggerType === "default" ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn("h-8 w-8 rounded-full", className)}
-            onClick={() => setOpen(!open)}
-            disabled={disabled}
-          >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        ) : (
-          <button
-            onPointerDown={(e) => e.preventDefault()}
-            className={cn(
-              "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
-              className
-            )}
-            onClick={() => setOpen(!open)}
-            disabled={disabled}
-          >
-            <MoreVertical size={24} />
-          </button>
-        )}
+        <ActionDropdownMenuTrigger
+          triggerType={triggerType}
+          className={className}
+          disabled={disabled}
+          onToggle={() => setOpen(!open)}
+        />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="min-w-48">
-        {visibleItems.map((item) => {
-          if (item.type === "custom") {
-            return (
-              <DropdownMenuItem asChild key={item.key}>
-                {item.render({ node, closeMenu })}
-              </DropdownMenuItem>
-            );
-          }
-
-          if (item.type === "separator") {
-            return <DropdownMenuSeparator key={item.key} />;
-          }
-
-          const Icon = item.icon;
-          const variant = item.variant ?? "default";
-
-          return (
-            <DropdownMenuItem
-              key={item.key}
-              className={cn("relative", variantClass[variant])}
-              disabled={item.disabled?.({ node })}
-              onClick={(e) => {
-                e.stopPropagation();
-                void item.onClick({ node, closeMenu });
-              }}
-            >
-              <Icon className="mr-2 h-4 w-4" />
-              {item.label}
-              {!isMobile && item.kbd && (
-                <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-                  <Kbd>{item.kbd}</Kbd>
-                </div>
-              )}
-            </DropdownMenuItem>
-          );
-        })}
+        {visibleItems.map((item) => (
+          <ActionDropdownMenuItem
+            key={item.key}
+            node={node}
+            item={item}
+            closeMenu={() => setOpen(false)}
+            isMobile={isMobile}
+          />
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+interface ActionDropdownMenuTriggerProps {
+  triggerType?: "default" | "large";
+  className?: string;
+  disabled?: boolean;
+  onToggle?: () => void;
+}
+
+function ActionDropdownMenuTrigger({
+  triggerType = "default",
+  className,
+  disabled,
+  onToggle,
+}: ActionDropdownMenuTriggerProps) {
+  if (triggerType === "large") {
+    return (
+      <button
+        className={cn(
+          "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
+          className
+        )}
+        onClick={onToggle}
+        disabled={disabled}
+      >
+        <MoreVertical size={24} />
+      </button>
+    );
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn("h-8 w-8 rounded-full", className)}
+      onClick={onToggle}
+      disabled={disabled}
+    >
+      <MoreVertical className="h-4 w-4" />
+    </Button>
+  );
+}
+
+interface ActionDropdownMenuItemProps {
+  node: MediaNode;
+  item: MenuItemDef<NodeContext>;
+  closeMenu: () => void;
+  isMobile: boolean;
+}
+
+function ActionDropdownMenuItem({
+  node,
+  item,
+  closeMenu,
+  isMobile,
+}: ActionDropdownMenuItemProps) {
+  if (item.type === "custom") {
+    return (
+      <DropdownMenuItem asChild>
+        {item.render({ node, closeMenu })}
+      </DropdownMenuItem>
+    );
+  }
+
+  if (item.type === "separator") {
+    return <DropdownMenuSeparator />;
+  }
+
+  const Icon = item.icon;
+  const variant = item.variant ?? "default";
+
+  return (
+    <DropdownMenuItem
+      className={cn("relative", variantClass[variant])}
+      disabled={item.disabled?.({ node })}
+      onClick={(e) => {
+        e.stopPropagation();
+        void item.onClick({ node, closeMenu });
+      }}
+    >
+      <Icon className="mr-2 h-4 w-4" />
+      {item.label}
+      {!isMobile && item.kbd && (
+        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+          <Kbd>{item.kbd}</Kbd>
+        </div>
+      )}
+    </DropdownMenuItem>
   );
 }
