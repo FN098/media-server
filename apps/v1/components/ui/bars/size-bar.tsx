@@ -26,7 +26,7 @@ export function SizeBar({
             />
           )}
 
-          {occupancyPercent > 0 && (
+          {occupancyPercent >= 0 && (
             <span className="z-10 text-[9px] font-bold text-muted-foreground mix-blend-difference tracking-tighter scale-90 origin-center">
               {occupancyPercent}%
             </span>
@@ -35,10 +35,10 @@ export function SizeBar({
 
         <div className="flex flex-col min-w-0">
           <span className="text-foreground font-medium text-xs tabular-nums">
-            {size ? formatBytes(size) : "-"}
+            {size != null ? formatBytes(size) : "-"}
           </span>
 
-          {fileCount ? (
+          {fileCount != null ? (
             <span className="text-[10px] text-muted-foreground/80 tracking-wider">
               {fileCount} files
             </span>
@@ -63,7 +63,7 @@ export function SizeBar({
 
         <div className="z-10 flex items-baseline gap-1.5 pl-2 select-none">
           <span className="text-foreground font-semibold text-xs tabular-nums">
-            {size ? formatBytes(size) : "-"}
+            {size != null ? formatBytes(size) : "-"}
           </span>
 
           {occupancyPercent > 0 && (
@@ -72,7 +72,7 @@ export function SizeBar({
             </span>
           )}
 
-          {fileCount ? (
+          {fileCount != null ? (
             <span className="text-[10px] text-muted-foreground font-normal border-l pl-1.5 border-muted-foreground/30">
               {fileCount} files
             </span>
@@ -92,14 +92,14 @@ export function SizeBar({
 
         <div className="z-10 flex items-center justify-center gap-2 px-3 w-full text-xs tabular-nums font-medium">
           <span className="text-foreground">
-            {size ? formatBytes(size) : "-"}
+            {size != null ? formatBytes(size) : "-"}
           </span>
 
           <span className="text-[10px] text-primary font-semibold bg-background/60 px-1 rounded-sm">
             {occupancyPercent}%
           </span>
 
-          {fileCount ? (
+          {fileCount != null ? (
             <span className="text-[10px] text-muted-foreground/80 font-normal border-l pl-2 border-muted-foreground/30">
               {fileCount} files
             </span>
