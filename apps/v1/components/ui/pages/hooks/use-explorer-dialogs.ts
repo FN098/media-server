@@ -44,7 +44,6 @@ export function useExplorerDialogs({
 
   const extractDialog = useExtractDialog({
     selectedNodes,
-    clearSelection,
   });
 
   const previewDialog = usePreviewDialog();
