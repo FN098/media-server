@@ -1,6 +1,6 @@
 import { visitFolderAction } from "@/actions/folder-actions";
-import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
-import { ExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
+import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
+import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { FolderNavigation } from "@/hooks/use-folder-navigation";
 import { History, toHistoryItem } from "@/hooks/use-history";
 import { useMediaIndex } from "@/hooks/use-media-index";

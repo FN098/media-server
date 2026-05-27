@@ -1,4 +1,4 @@
-import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
+import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";

@@ -1,10 +1,10 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
-import { ExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
-import { ExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-favorites";
-import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
-import { ExplorerNavigation } from "@/components/ui/pages/hooks/use-explorer-navigation";
-import { ExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
-import { ExplorerThumbs } from "@/components/ui/pages/hooks/use-explorer-thumb";
+import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
+import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
+import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
+import { ExplorerNavigation } from "@/components/ui/pages/explorer/hooks/use-explorer-navigation";
+import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
+import { ExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumb";
 import { Fullscreen } from "@/hooks/use-fullscreen";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
 import { ViewerNavigation } from "@/hooks/use-viewer-control";

@@ -1,7 +1,7 @@
-import { ExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
-import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
-import { ExplorerNavigation } from "@/components/ui/pages/hooks/use-explorer-navigation";
-import { ExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
+import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
+import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
+import { ExplorerNavigation } from "@/components/ui/pages/explorer/hooks/use-explorer-navigation";
+import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { Fullscreen } from "@/hooks/use-fullscreen";
 import { SearchFocus } from "@/hooks/use-search-focus";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";

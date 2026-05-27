@@ -6,7 +6,7 @@ import { ExtractDialog } from "@/components/ui/dialogs/extract-dialog";
 import { FavoriteDialog } from "@/components/ui/dialogs/favorite-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
-import { ExplorerDialogs as ExplorerDialogsType } from "@/components/ui/pages/hooks/use-explorer-dialogs";
+import { ExplorerDialogs as ExplorerDialogsType } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 
 type ExplorerDialogsProps = {
   dialogs: ExplorerDialogsType;

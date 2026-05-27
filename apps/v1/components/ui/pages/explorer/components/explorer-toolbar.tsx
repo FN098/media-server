@@ -1,9 +1,9 @@
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
-import { ExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
-import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
-import { ExplorerSort } from "@/components/ui/pages/hooks/use-explorer-sort";
+import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
+import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
+import { ExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
