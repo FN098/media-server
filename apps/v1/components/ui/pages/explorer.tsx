@@ -425,7 +425,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   const fullscreen = useFullscreen();
 
-  // ===== ショートカット =====
+  // ===== キーボードショートカット =====
 
   useExplorerHotkeys({
     enabled: true,
@@ -445,7 +445,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onResetFilter: clearSearchParams,
   });
 
-  // ===== メニュー =====
+  // ===== 右クリックメニュー/ドロップダウンメニュー =====
 
   const menu = useExplorerMenu({
     hasSelection: selection.hasSelection,
@@ -467,11 +467,13 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onEditTags: tagEditor.open,
     onAddTagsToFilter: handleAddTagFilter,
     onApplyAsPreview: previewDialog.open,
-    onUpdateThumb: thumb.update,
-    onUpdateThumbSelected: thumb.updateSelected,
+    onUpdateThumb: (node) => void thumb.update(node),
+    onUpdateThumbSelected: () => void thumb.updateSelected(),
     onDelete: deleteDialog.open,
     onDeleteSelected: deleteDialog.openSelected,
   });
+
+  // ===== 選択バー =====
 
   const selectionbar = useExplorerSelectionbar({
     hasSelection: selection.hasSelection,
@@ -480,7 +482,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onMoveSelected: moveDialog.openSelected,
     onCopySelected: copyDialog.openSelected,
     onEditTagsSelected: tagEditor.open,
-    onUpdateThumbSelected: thumb.updateSelected,
+    onUpdateThumbSelected: () => void thumb.updateSelected(),
     onDeleteSelected: deleteDialog.openSelected,
     onAddFavoriteSelected: () => favoriteDialog.openSelected({ mode: "add" }),
     onRemoveFavoriteSelected: () =>
@@ -562,7 +564,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
-                onThumbError={thumb.update}
+                onThumbError={(node) => void thumb.update(node)}
                 onOpen={handleOpen}
                 focusOnPageChange
               />

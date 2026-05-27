@@ -43,7 +43,10 @@ export async function enqueueCreateThumbsJobAction(
 
   if (!locked) {
     // すでに処理中
-    return;
+    return {
+      success: false,
+      error: "locked",
+    };
   }
 
   await thumbQueue.add(
@@ -60,6 +63,10 @@ export async function enqueueCreateThumbsJobAction(
       lifo: true,
     }
   );
+
+  return {
+    success: true,
+  };
 }
 
 // サムネ生成ジョブ登録（ファイル単位）
@@ -74,7 +81,10 @@ export async function enqueueCreateSingleThumbJobAction(
 
   if (!locked) {
     // すでに処理中
-    return;
+    return {
+      success: false,
+      error: "locked",
+    };
   }
 
   await thumbQueue.add(
@@ -91,6 +101,10 @@ export async function enqueueCreateSingleThumbJobAction(
       lifo: true,
     }
   );
+
+  return {
+    success: true,
+  };
 }
 
 /**
