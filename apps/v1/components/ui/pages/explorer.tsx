@@ -36,30 +36,14 @@ interface ExplorerProps {
 }
 
 export function Explorer({ listing }: ExplorerProps) {
-  // ===== 検索 =====
-
   const searchFocus = useSearchFocusContext();
-
-  // ===== ビューモード =====
-
   const viewMode = useViewMode();
-
-  // ===== 並び替え =====
-
   const sort = useExplorerSort();
-
-  // ===== フィルタリング =====
-
   const filtering = useExplorerFiltering({ listing });
-
-  // ===== 選択 =====
-
   const selection = useExplorerSelection({
     listing,
     filtering,
   });
-
-  // ===== ナビゲーション =====
 
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation({});
@@ -73,19 +57,13 @@ export function Explorer({ listing }: ExplorerProps) {
     folder,
   });
 
-  // ===== お気に入り =====
-
   const favorites = useExplorerFavorites({
     targetNodes: selection.selectedNodes,
   });
 
-  // ===== タグエディタ =====
-
   const tagEditor = useTagEditorControl({
     targetCount: selection.selectedCount,
   });
-
-  // ===== ダイアログ =====
 
   const dialogs = useExplorerDialogs({
     currentDir: listing.path,
@@ -93,18 +71,12 @@ export function Explorer({ listing }: ExplorerProps) {
     clearSelection: selection.reset,
   });
 
-  // ===== サムネイル =====
-
   const thumbs = useExplorerThumbs({
     currentDir: listing.path,
     selectedNodes: selection.selectedNodes,
   });
 
-  // ===== フルスクリーン =====
-
   const fullscreen = useFullscreen();
-
-  // ===== キーボードショートカット =====
 
   useExplorerHotkeys({
     enabled: true,
@@ -118,8 +90,6 @@ export function Explorer({ listing }: ExplorerProps) {
     searchFocus,
   });
 
-  // ===== 右クリックメニュー/ドロップダウンメニュー =====
-
   const menu = useExplorerMenu({
     filtering,
     selection,
@@ -131,8 +101,6 @@ export function Explorer({ listing }: ExplorerProps) {
     favorites,
     thumbs,
   });
-
-  // ===== 選択バー =====
 
   const selectionbar = useExplorerSelectionbar({
     dialogs,
@@ -151,11 +119,13 @@ export function Explorer({ listing }: ExplorerProps) {
           tabIndex={-1}
         >
           {/* ツールバー */}
-          <ExplorerToolbar
-            sort={sort}
-            filtering={filtering}
-            dialogs={dialogs}
-          />
+          {!viewer.isOpen && (
+            <ExplorerToolbar
+              sort={sort}
+              filtering={filtering}
+              dialogs={dialogs}
+            />
+          )}
 
           {/* グリッドビュー */}
           {viewMode.value === "grid" && !viewer.isOpen && (
