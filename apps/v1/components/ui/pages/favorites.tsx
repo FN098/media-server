@@ -1,696 +1,176 @@
 "use client";
 
-import {
-  touchMediaTimestampAction,
-  updatePreviewAction,
-} from "@/actions/media-actions";
-import { enqueueCreateSingleThumbJobAction } from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
-import { ResetButton } from "@/components/ui/buttons/reset-button";
-import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
-import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
-import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
-import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
-import { SortSelect } from "@/components/ui/selects/sort-select";
+import { FavoritesDialogs } from "@/components/ui/pages/favorites/components/favorites-dialogs";
+import { FavoritesToolbar } from "@/components/ui/pages/favorites/components/favorites-toolbar";
+import { useFavoritesDialogs } from "@/components/ui/pages/favorites/hooks/use-favorites-dialogs";
+import { useFavoritesFavorites } from "@/components/ui/pages/favorites/hooks/use-favorites-favorites";
+import { useFavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
+import { useFavoritesHotkeys } from "@/components/ui/pages/favorites/hooks/use-favorites-hotkeys";
+import { useFavoritesMenu } from "@/components/ui/pages/favorites/hooks/use-favorites-menu";
+import { useFavoritesNavigation } from "@/components/ui/pages/favorites/hooks/use-favorites-navigation";
+import { useFavoritesSelection } from "@/components/ui/pages/favorites/hooks/use-favorites-selection";
+import { useFavoritesSelectionbar } from "@/components/ui/pages/favorites/hooks/use-favorites-selectionbar";
+import { useFavoritesSort } from "@/components/ui/pages/favorites/hooks/use-favorites-sort";
+import { useFavoritesThumbs } from "@/components/ui/pages/favorites/hooks/use-favorites-thumbs";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
-import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { useMediaIndex } from "@/hooks/use-media-index";
-import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
-import { useRatingFilter } from "@/hooks/use-rating-filter";
-import { useSearchParamsControl } from "@/hooks/use-search-params-control";
-import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { useSort } from "@/hooks/use-sort";
-import { useTagFilter } from "@/hooks/use-tag-filter";
+import { useTagEditorControl } from "@/hooks/use-tag-editor-control";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerNavigation } from "@/hooks/use-viewer-control";
-import { isMedia } from "@/lib/media/media-types";
-import { MediaListing, MediaNode } from "@/lib/media/types";
-import {
-  MenuItemDef,
-  MultipleNodesContext,
-  NodeContext,
-} from "@/lib/menu-items/types";
-import { getParentDirPath } from "@/lib/path/helpers";
-import { averageBy } from "@/lib/utils/math";
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
-import { useTagEditorContext } from "@/providers/tag-editor-provider";
-import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  ArrowDownAz,
-  CalendarArrowDownIcon,
-  ExternalLinkIcon,
-  FolderIcon,
-  FullscreenIcon,
-  ListFilterPlusIcon,
-  StarsIcon,
-  TagIcon,
-  WeightIcon,
-} from "lucide-react";
-import { useEffect, useMemo, useTransition } from "react";
-import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
-import { toast } from "sonner";
 
 export function Favorites({ listing }: { listing: MediaListing }) {
-  // ===== 検索 =====
+  const searchFocus = useSearchFocusContext();
+  const viewMode = useViewMode();
+  const sort = useFavoritesSort();
+  const filtering = useFavoritesFiltering({ listing });
+  const selection = useFavoritesSelection({
+    listing,
+    filtering,
+  });
 
-  const { trigger: focusSearch } = useSearchFocusContext();
+  const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
+  const folder = useFolderNavigation({});
+  const history = useHistoryContext();
+  const navigation = useFavoritesNavigation({
+    filtering,
+    selection,
+    viewer,
+    history,
+    folder,
+  });
 
-  // ===== ビューモード =====
+  const favorites = useFavoritesFavorites({
+    targetNodes: selection.selectedNodes,
+  });
 
-  const { value: viewMode } = useViewMode();
+  const tagEditor = useTagEditorControl({
+    targetCount: selection.selectedCount,
+  });
 
-  // ===== 訪問履歴 =====
+  const dialogs = useFavoritesDialogs();
 
-  const {
-    last: lastHistory,
-    pushHistory,
-    toHistoryItem,
-    popHistory,
-    replaceHistoryLast,
-  } = useHistoryContext();
-
-  useEffect(() => {
-    pushHistory({ path: listing.path, type: "directory" });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleScrollRestored = () => {
-    popHistory();
-  };
-
-  // ===== 並び替え =====
-
-  // NOTE: 並び替え処理はサーバーサイドで実施
-  const { value: sortValue, apply: applySortValue } = useSort();
-
-  const sortOptions = useMemo(
-    () =>
-      [
-        {
-          value: {
-            sort: "path",
-            direction: "asc",
-          },
-          label: "ファイルパス",
-          icon: ArrowDownAz,
-        },
-        {
-          value: {
-            sort: "mtime",
-            direction: "desc",
-          },
-          label: "更新日",
-          icon: CalendarArrowDownIcon,
-        },
-        {
-          value: {
-            sort: "size",
-            direction: "desc",
-          },
-          label: "サイズ",
-          icon: WeightIcon,
-        },
-        {
-          value: {
-            sort: "rating",
-            direction: "desc",
-          },
-          label: "評価",
-          icon: StarsIcon,
-        },
-      ] as const,
-    []
-  );
-
-  // ===== フィルタリング =====
-
-  const allNodes = listing.nodes;
-
-  // 種別フィルター
-  const { value: mediaTypeFilterValue, apply: applyMediaTypeFilterValue } =
-    useMediaTypeFilter();
-
-  // 評価フィルター
-  const { value: ratingFilterValue, apply: applyRatingFilterValue } =
-    useRatingFilter();
-
-  // タグフィルター
-  const { value: tagFilterValue, apply: applyTagFilterValue } = useTagFilter();
-
-  // フィルター結果
-  const filteredNodes = allNodes; // サーバーサイドでフィルター済み
-  const mediaOnly = filteredNodes; // サーバーサイドでフィルター済み
-  const filteredCount = filteredNodes.length;
-  const totalCount = listing.total ?? allNodes.length;
-  const isFiltered = totalCount !== filteredCount;
-
-  // タグをフィルターに追加
-  const handleAddTagFilter = (node: MediaNode) => {
-    if (!node.tags || node.tags.length === 0) return;
-    applyTagFilterValue({
-      mode: tagFilterValue.mode,
-      tags: [...tagFilterValue.tags, ...node.tags],
-    });
-  };
-
-  // 検索パラメータリセット用
-  const { hasResettableSearchParams, clearSearchParams } =
-    useSearchParamsControl({ keep: ["viewMode"] });
-
-  // ===== ビューア =====
-
-  const {
-    index: initialViewerIndex,
-    isOpen: isViewerMode,
-    open: openViewer,
-    close: closeViewer,
-  } = useViewerNavigation(mediaOnly);
-
-  // ビューアスライド移動時の処理
-  const handleViewerIndexChange = (index: number) => {
-    const media = mediaOnly[index];
-    if (!media) return;
-
-    handleSelect(media);
-
-    if (lastHistory?.type === "file") {
-      replaceHistoryLast(toHistoryItem(media));
-    } else {
-      pushHistory(toHistoryItem(media));
-    }
-  };
-
-  // ===== ナビゲーション =====
-
-  const { navigate: openFolder } = useFolderNavigation();
-  const { getMediaIndex } = useMediaIndex(mediaOnly);
-
-  // ファイル/フォルダオープン
-  const handleOpen = (node: MediaNode) => {
-    if (node.isDirectory) {
-      openFolder(node.path, { resetPage: true });
-      return;
-    }
-
-    if (isMedia(node.type)) {
-      const index = getMediaIndex(node.path);
-      if (index == null) return;
-      openViewer({ at: index });
-      return;
-    }
-
-    toast.warning("このファイル形式は対応していません");
-  };
-
-  // 新しいタブで開く
-  const handleOpenInNewTab = (node: MediaNode) => {
-    if (node.isDirectory) {
-      openFolder(node.path, { newTab: true });
-      return;
-    }
-
-    if (isMedia(node.type)) {
-      const index = getMediaIndex(node.path);
-      if (index == null) return;
-      openViewer({ at: index, newTab: true });
-      return;
-    }
-
-    toast.warning("このファイル形式は対応していません");
-  };
-
-  // 親フォルダを開く
-  const handleOpenParentFolder = (node: MediaNode) => {
-    const parentDir = getParentDirPath(node.path);
-    openFolder(parentDir, { at: null });
-  };
-
-  // ===== お気に入り =====
-
-  const { updateFavorite, getFavorite, updateMultipleFavorites } =
-    useFavoritesContext();
-  const [updatingFavorite, startUpdatingFavorite] = useTransition();
-
-  // レーティング更新（単体）
-  const handleChangeRatingSingle = ({
-    node,
-    newRating,
-    onSuccess,
-  }: {
-    node: MediaNode;
-    newRating: number | null;
-    onSuccess?: () => void;
-  }) => {
-    if (updatingFavorite) return;
-    startUpdatingFavorite(async () => {
-      const result = await updateFavorite(node.path, newRating);
-      if (result.success) {
-        toast.success("レーティングが更新されました。", { duration: 500 });
-        onSuccess?.();
-      } else {
-        toast.error(result.error);
-      }
-    });
-  };
-
-  // レーティング更新（選択）
-  const handleChangeRatingSelected = ({
-    newRating,
-    onSuccess,
-  }: {
-    newRating: number | null;
-    onSuccess?: () => void;
-  }) => {
-    if (updatingFavorite) return;
-    startUpdatingFavorite(async () => {
-      const paths = selectedNodes.map((n) => n.path);
-      const result = await updateMultipleFavorites(paths, {
-        rating: newRating,
-      });
-      if (result.success) {
-        toast.success("レーティングが更新されました。", { duration: 500 });
-        onSuccess?.();
-      } else {
-        toast.error(result.error);
-      }
-    });
-  };
-
-  // ===== 選択 =====
-
-  const {
-    isSelectionMode,
-    enterSelectionMode,
-    exitSelectionMode,
-    selectedPaths,
-    replaceSelection,
-    selectPaths,
-    clearSelection,
-    selectedCount,
-    hasSelection,
-  } = usePathSelectionContext();
-
-  const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
-
-  // 選択
-  const handleSelect = (node: MediaNode) => {
-    replaceSelection(node.path);
-  };
-
-  // 全選択
-  const handleSelectAll = () => {
-    selectPaths(filteredNodes.map((n) => n.path));
-    enterSelectionMode();
-  };
-
-  // 選択解除
-  const handleResetSelection = () => {
-    clearSelection();
-    exitSelectionMode();
-  };
-
-  // ===== タグエディタ =====
-
-  const { isTagEditMode, setIsTagEditMode } = useTagEditorContext();
-
-  // タグエディタの起動モード
-  const tagEditMode = useMemo(() => {
-    if (isViewerMode) return "single";
-    return "default";
-  }, [isViewerMode]);
-
-  // タグエディタを表示
-  const handleOpenTagEditor = () => {
-    setIsTagEditMode(true);
-  };
-
-  // タグエディタを非表示
-  const handleCloseTagEditor = () => {
-    setIsTagEditMode(false);
-  };
-
-  // タグエディタを表示/非表示
-  const handleToggleTagEditor = () => {
-    setIsTagEditMode((prev) => !prev);
-  };
-
-  // ===== サムネイル =====
-
-  const [isUpdatingThumb, startUpdatingThumb] = useTransition();
-
-  const updateThumb = async (node: MediaNode) => {
-    // サムネイルを再作成（強制）
-    await enqueueCreateSingleThumbJobAction(node.path, { force: true });
-
-    // DBのタイムスタンプを更新（サムネイルのキャッシュを上書き）
-    if (!node.isDirectory) {
-      const touched = await touchMediaTimestampAction(node.path);
-      if (touched.error) toast.error(touched.error);
-    }
-
-    // プレビュー設定を解除
-    const updated = await updatePreviewAction(node.path, null);
-    if (updated.error) toast.error(updated.error);
-
-    // ブラウザキャッシュ更新のため、一時的にタイムスタンプを変更
-    node.mtime = new Date();
-  };
-
-  // サムネイル更新（単体）
-  const handleUpdateThumbSingle = (node: MediaNode) => {
-    if (isUpdatingThumb) return;
-    startUpdatingThumb(async () => {
-      await updateThumb(node);
-    });
-  };
-
-  // ===== モバイル =====
-
-  const isMobile = useIsMobile();
-
-  // ===== フルスクリーン =====
+  const thumbs = useFavoritesThumbs({
+    selectedNodes: selection.selectedNodes,
+  });
 
   const fullscreen = useFullscreen();
 
-  // ===== ショートカット =====
-
-  // スコープ切り替えフック
-  const { enableScope, disableScope } = useHotkeysContext();
-
-  // ショートカット利用可能スコープ
-  const allScopes = useMemo(
-    () => ["favorites", "tag-editor", "viewer", "dialog"] as const,
-    []
-  );
-
-  // 現在のスコープ
-  const activeScope = useMemo<(typeof allScopes)[number]>(() => {
-    if (isTagEditMode) return "tag-editor";
-    else if (isViewerMode) return "viewer";
-    else return "favorites";
-  }, [isTagEditMode, isViewerMode]);
-
-  // デバッグ用
-  useEffect(() => console.debug({ activeScope }), [activeScope]);
-
-  // スコープの排他的制御
-  useEffect(() => {
-    // 該当スコープを有効にし、それ以外を無効にする
-    allScopes.forEach((s) => {
-      if (s === activeScope) {
-        enableScope(s);
-      } else {
-        disableScope(s);
-      }
-    });
-  }, [activeScope, allScopes, disableScope, enableScope]);
-
-  // Escape: 選択解除
-  useHotkeys("escape", () => handleResetSelection(), {
-    scopes: "favorites",
+  useFavoritesHotkeys({
+    enabled: true,
+    filtering,
+    selection,
+    dialogs,
+    tagEditor,
+    viewer,
+    fullscreen,
+    searchFocus,
   });
 
-  // T: タグエディタ
-  useHotkeys("t", () => handleToggleTagEditor(), {
-    scopes: ["favorites", "viewer", "tag-editor"],
+  const menu = useFavoritesMenu({
+    filtering,
+    selection,
+    tagEditor,
+    navigation,
+    viewer,
+    fullscreen,
+    favorites,
   });
 
-  // F: 全画面表示
-  useHotkeys("f", () => void fullscreen.toggle(), {
-    scopes: ["favorites", "viewer", "tag-editor"],
+  const selectionbar = useFavoritesSelectionbar({
+    tagEditor,
+    favorites,
   });
-
-  // Ctrl + A: 全選択
-  useHotkeys(
-    "ctrl+a",
-    (e) => {
-      e.preventDefault();
-      handleSelectAll();
-    },
-    { scopes: ["favorites", "tag-editor"] }
-  );
-
-  // Ctrl + K: 検索
-  useHotkeys(
-    "ctrl+k",
-    (e) => {
-      e.preventDefault();
-      focusSearch();
-    },
-    { scopes: "favorites" }
-  );
-
-  // R: フィルタリセット
-  useHotkeys("r", () => clearSearchParams(), {
-    scopes: ["favorites"],
-  });
-
-  // ===== メニュー =====
-
-  const menuItems: MenuItemDef<NodeContext>[] = [
-    {
-      key: "rating",
-      type: "custom",
-      render: ({ node, closeMenu }) => {
-        const { rating } = getFavorite(node.path);
-        return (
-          <div className="w-full flex justify-center p-1">
-            <FavoriteRatingInput
-              value={rating}
-              onChange={(newRating) =>
-                hasSelection
-                  ? handleChangeRatingSelected({
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-                  : handleChangeRatingSingle({
-                      node,
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-              }
-            />
-          </div>
-        );
-      },
-    },
-    {
-      key: "openFolder",
-      type: "action",
-      icon: FolderIcon,
-      label: "フォルダを開く",
-      onClick: ({ node }) => handleOpenParentFolder(node),
-      hidden: () => selectedCount > 1,
-    },
-    {
-      key: "openInNewTab",
-      type: "action",
-      icon: ExternalLinkIcon,
-      label: "新しいタブで開く",
-      onClick: ({ node }) => handleOpenInNewTab(node),
-      hidden: () => selectedCount > 1,
-    },
-    {
-      key: "toggleFullscreen",
-      type: "action",
-      icon: FullscreenIcon,
-      label: "全画面",
-      onClick: fullscreen.toggle,
-      hidden: () => !isViewerMode || !fullscreen.isSupported,
-    },
-    {
-      key: "editTags",
-      type: "action",
-      icon: TagIcon,
-      label: "タグ編集",
-      onClick: handleOpenTagEditor,
-    },
-    {
-      key: "addTagFilter",
-      type: "action",
-      icon: ListFilterPlusIcon,
-      label: "タグをフィルターに追加",
-      onClick: ({ node }) => handleAddTagFilter(node),
-      hidden: ({ node }) =>
-        !node.tags || node.tags.length === 0 || selectedCount > 1,
-    },
-  ];
-
-  const selectionBarInlineMenuItems: MenuItemDef<MultipleNodesContext>[] = [
-    {
-      key: "editTags",
-      type: "action",
-      icon: TagIcon,
-      label: "タグ編集",
-      onClick: handleOpenTagEditor,
-    },
-  ];
-
-  const selectionBarMenuItems: MenuItemDef<MultipleNodesContext>[] = [
-    {
-      key: "rating",
-      type: "custom",
-      render: ({ nodes, closeMenu }) => {
-        const filtered = nodes.filter((n) => n.rating != null);
-        const averageRating = averageBy(filtered, (n) => n.rating!);
-
-        return (
-          <div className="w-full flex justify-center p-1">
-            <FavoriteRatingInput
-              value={averageRating}
-              onChange={(newRating) =>
-                hasSelection
-                  ? handleChangeRatingSelected({
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-                  : handleChangeRatingSingle({
-                      node: nodes[0],
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-              }
-            />
-          </div>
-        );
-      },
-    },
-  ];
 
   return (
-    <PagingProvider totalItems={filteredNodes.length}>
-      <MenuItemsProvider items={menuItems}>
+    <PagingProvider totalItems={filtering.filteredCount}>
+      <MenuItemsProvider items={menu.items}>
         <div
           className={cn(
             "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
           )}
           tabIndex={-1}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-            {/* 操作メニュー */}
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
-              {/* 並び替え */}
-              <SortSelect
-                value={sortValue}
-                onChange={applySortValue}
-                options={sortOptions}
-              />
-
-              {/* 種別フィルター */}
-              <MediaTypeFilterMultiSelect
-                value={mediaTypeFilterValue}
-                onChange={applyMediaTypeFilterValue}
-                displayTypes={["image", "video", "audio"]}
-              />
-
-              {/* 評価フィルター */}
-              <RatingFilterDialog
-                value={ratingFilterValue}
-                onChange={applyRatingFilterValue}
-              />
-
-              {/* タグフィルター */}
-              <TagFilterDialog
-                value={tagFilterValue}
-                onChange={applyTagFilterValue}
-                relatedNodes={mediaOnly}
-                autoFocusInput={!isMobile}
-              />
-
-              {/* シャッフルボタン */}
-              <ShuffleButton />
-
-              {/* リセットボタン */}
-              <ResetButton
-                onClick={clearSearchParams}
-                isVisible={hasResettableSearchParams}
-              />
-            </div>
-
-            {/* 件数 */}
-            <FilterResultText
-              totalCount={totalCount}
-              filteredCount={filteredCount}
-              isFiltered={isFiltered}
-              className="ml-auto min-w-[120px] text-right"
-            />
-          </div>
+          {/* ツールバー */}
+          {!viewer.isOpen && (
+            <FavoritesToolbar sort={sort} filtering={filtering} />
+          )}
 
           {/* グリッドビュー */}
-          {viewMode === "grid" && !isViewerMode && (
+          {viewMode.value === "grid" && !viewer.isOpen && (
             <div className="flex-1">
               <PagingGridView
-                allNodes={filteredNodes}
-                initialScrollPath={lastHistory?.path}
-                onScrollRestored={handleScrollRestored}
-                onThumbError={handleUpdateThumbSingle}
-                onOpen={handleOpen}
+                allNodes={filtering.filteredNodes}
+                initialScrollPath={history.last?.path}
+                onScrollRestored={navigation.onScrollRestored}
+                onThumbError={(node) => void thumbs.update(node)}
+                onOpen={navigation.open}
                 focusOnPageChange
               />
             </div>
           )}
 
           {/* リストビュー */}
-          {viewMode === "list" && !isViewerMode && (
+          {viewMode.value === "list" && !viewer.isOpen && (
             <div className="flex-1">
               <PagingListView
-                allNodes={filteredNodes}
-                initialScrollPath={lastHistory?.path}
-                onScrollRestored={handleScrollRestored}
-                onOpen={handleOpen}
+                allNodes={filtering.filteredNodes}
+                initialScrollPath={history.last?.path}
+                onScrollRestored={navigation.onScrollRestored}
+                onOpen={navigation.open}
                 focusOnPageChange
               />
             </div>
           )}
 
           {/* ビューワ */}
-          {isViewerMode && (
+          {viewer.isOpen && (
             <ScrollLockProvider>
               <MediaViewer
-                allNodes={mediaOnly}
-                initialIndex={initialViewerIndex}
-                menuItems={menuItems}
-                onIndexChange={handleViewerIndexChange}
-                onClose={closeViewer}
-                onOpenParent={handleOpenParentFolder}
+                allNodes={filtering.mediaOnly}
+                initialIndex={viewer.index}
+                menuItems={menu.items}
+                onIndexChange={navigation.onIndexChange}
+                onClose={viewer.close}
               />
             </ScrollLockProvider>
           )}
 
           {/* 選択バー */}
           <SelectionBar
-            open={isSelectionMode && !isTagEditMode}
-            count={selectedNodes.length}
-            totalCount={filteredNodes.length}
-            onSelectAll={handleSelectAll}
-            onClose={handleResetSelection}
+            open={selection.isSelectionMode && !tagEditor.isOpen}
+            count={selection.selectedCount}
+            totalCount={filtering.filteredCount}
+            onSelectAll={selection.selectAll}
+            onClose={selection.reset}
             className="z-40" // DropdownMenu より小さくする
-            context={{ nodes: selectedNodes }}
-            inlineMenuItems={selectionBarInlineMenuItems}
-            menuItems={selectionBarMenuItems}
+            context={{ nodes: selection.selectedNodes }}
+            menuItems={selectionbar.menu.items}
+            inlineMenuItems={selectionbar.menu.inlineItems}
           />
 
           {/* タグエディター */}
           <TagEditSheet
-            open={isTagEditMode}
-            targetNodes={selectedNodes}
-            onClose={handleCloseTagEditor}
-            mode={tagEditMode}
-            opacity={tagEditMode === "default" ? 100 : 0}
+            open={tagEditor.isOpen}
+            targetNodes={selection.selectedNodes}
+            onClose={tagEditor.close}
+            mode={tagEditor.mode}
+            opacity={tagEditor.mode === "default" ? 100 : 0}
           />
+
+          {/* ダイアログ */}
+          <FavoritesDialogs dialogs={dialogs} />
         </div>
       </MenuItemsProvider>
     </PagingProvider>

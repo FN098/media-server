@@ -13,7 +13,7 @@ import { useExplorerNavigation } from "@/components/ui/pages/explorer/hooks/use-
 import { useExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/components/ui/pages/explorer/hooks/use-explorer-selectionbar";
 import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
-import { useExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumb";
+import { useExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumbs";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";

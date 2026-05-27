@@ -1,7 +1,7 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
-import { ExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumb";
+import { ExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumbs";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { averageBy } from "@/lib/utils/math";

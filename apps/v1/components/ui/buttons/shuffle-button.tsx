@@ -14,7 +14,7 @@ import { Shuffle } from "lucide-react";
 export function ShuffleButton() {
   const { enabled, update, reset } = useShuffle();
 
-  const handleToggle = () => {
+  const toggle = () => {
     if (enabled) {
       reset();
     } else {
@@ -29,7 +29,7 @@ export function ShuffleButton() {
           <Button
             variant={enabled ? "default" : "outline"}
             size="default"
-            onClick={handleToggle}
+            onToggle={toggle}
             aria-label="シャッフル切り替え"
             className={cn(
               "gap-2 h-9 w-full",
