@@ -1,5 +1,8 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
-import { MediaNode } from "@/lib/media/types";
+import { ExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
+import { ExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-favorites";
+import { ExplorerThumbs } from "@/components/ui/pages/hooks/use-explorer-thumb";
+import { TagEditorControl } from "@/hooks/use-tag-editor-control";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { averageBy } from "@/lib/utils/math";
 import {
@@ -13,38 +16,21 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
-type UseExplorerSelectionbarProps = {
-  hasSelection: boolean;
-  onChangeRating: (props: {
-    node: MediaNode;
-    newRating: number | null;
-    onSuccess?: () => void;
-  }) => void;
-  onChangeRatingSelected: (props: {
-    newRating: number | null;
-    onSuccess?: () => void;
-  }) => void;
-  onMoveSelected: () => void;
-  onCopySelected: () => void;
-  onEditTagsSelected: () => void;
-  onUpdateThumbSelected: () => void;
-  onDeleteSelected: () => void;
-  onAddFavoriteSelected: () => void;
-  onRemoveFavoriteSelected: () => void;
-};
+interface UseExplorerSelectionbarProps {
+  dialogs: ExplorerDialogs;
+  tagEditor: TagEditorControl;
+  favorites: ExplorerFavorites;
+  thumbs: ExplorerThumbs;
+}
 
 export function useExplorerSelectionbar({
-  hasSelection,
-  onChangeRatingSelected,
-  onChangeRating,
-  onMoveSelected,
-  onCopySelected,
-  onEditTagsSelected,
-  onUpdateThumbSelected,
-  onDeleteSelected,
-  onAddFavoriteSelected,
-  onRemoveFavoriteSelected,
+  dialogs,
+  tagEditor,
+  favorites,
+  thumbs,
 }: UseExplorerSelectionbarProps) {
+  const { favoriteDialog, deleteDialog, copyDialog, moveDialog } = dialogs;
+
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
     () => [
       {
@@ -52,96 +38,88 @@ export function useExplorerSelectionbar({
         type: "action",
         icon: TagIcon,
         label: "タグ編集",
-        onClick: onEditTagsSelected,
+        onClick: tagEditor.open,
       },
     ],
-    [onEditTagsSelected]
+    [tagEditor.open]
   );
 
-  const menuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
-    () => [
-      {
-        key: "rating",
-        type: "custom",
-        render: ({ nodes, closeMenu }) => {
-          const filtered = nodes.filter((n) => n.rating != null);
-          const averageRating = averageBy(filtered, (n) => n.rating!);
+  const menuItems = useMemo(
+    () =>
+      [
+        {
+          key: "rating",
+          type: "custom",
+          render: ({ nodes, closeMenu }) => {
+            const filtered = nodes.filter((n) => n.rating != null);
+            const averageRating = averageBy(filtered, (n) => n.rating!);
 
-          return (
-            <div className="w-full flex justify-center p-1">
-              <FavoriteRatingInput
-                value={averageRating}
-                onChange={(newRating) =>
-                  hasSelection
-                    ? onChangeRatingSelected({
-                        newRating,
-                        onSuccess: closeMenu,
-                      })
-                    : onChangeRating({
-                        node: nodes[0],
-                        newRating,
-                        onSuccess: closeMenu,
-                      })
-                }
-              />
-            </div>
-          );
+            return (
+              <div className="w-full flex justify-center p-1">
+                <FavoriteRatingInput
+                  value={averageRating}
+                  onChange={(newRating) =>
+                    favorites.updateSelected({
+                      newRating,
+                      onSuccess: closeMenu,
+                    })
+                  }
+                />
+              </div>
+            );
+          },
         },
-      },
-      {
-        key: "add-favorites",
-        type: "action",
-        icon: StarIcon,
-        label: "お気に入り登録",
-        onClick: onAddFavoriteSelected,
-      },
-      {
-        key: "remove-favorites",
-        type: "action",
-        icon: StarOffIcon,
-        label: "お気に入り解除",
-        onClick: onRemoveFavoriteSelected,
-      },
-      {
-        key: "move",
-        type: "action",
-        icon: FolderInputIcon,
-        label: "移動",
-        onClick: onMoveSelected,
-      },
-      {
-        key: "copy",
-        type: "action",
-        icon: CopyIcon,
-        label: "コピー",
-        onClick: onCopySelected,
-      },
-      {
-        key: "update-thumb",
-        type: "action",
-        icon: RefreshCwIcon,
-        label: "サムネイル更新",
-        onClick: onUpdateThumbSelected,
-      },
-      {
-        key: "delete",
-        type: "action",
-        variant: "destructive",
-        icon: Trash2Icon,
-        label: "削除",
-        onClick: onDeleteSelected,
-      },
-    ],
+        {
+          key: "add-favorites",
+          type: "action",
+          icon: StarIcon,
+          label: "お気に入り登録",
+          onClick: () => favoriteDialog.openSelected({ mode: "add" }),
+        },
+        {
+          key: "remove-favorites",
+          type: "action",
+          icon: StarOffIcon,
+          label: "お気に入り解除",
+          onClick: () => favoriteDialog.openSelected({ mode: "remove" }),
+        },
+        {
+          key: "move",
+          type: "action",
+          icon: FolderInputIcon,
+          label: "移動",
+          onClick: moveDialog.openSelected,
+        },
+        {
+          key: "copy",
+          type: "action",
+          icon: CopyIcon,
+          label: "コピー",
+          onClick: copyDialog.openSelected,
+        },
+        {
+          key: "update-thumb",
+          type: "action",
+          icon: RefreshCwIcon,
+          label: "サムネイル更新",
+          onClick: () => void thumbs.updateSelected(),
+        },
+        {
+          key: "delete",
+          type: "action",
+          variant: "destructive",
+          icon: Trash2Icon,
+          label: "削除",
+          onClick: deleteDialog.openSelected,
+        },
+      ] satisfies MenuItemDef<MultipleNodesContext>[],
     [
-      hasSelection,
-      onAddFavoriteSelected,
-      onChangeRating,
-      onChangeRatingSelected,
-      onCopySelected,
-      onDeleteSelected,
-      onMoveSelected,
-      onRemoveFavoriteSelected,
-      onUpdateThumbSelected,
+      copyDialog.openSelected,
+      deleteDialog.openSelected,
+      favoriteDialog,
+      favorites,
+      moveDialog.openSelected,
+      thumbs,
     ]
   );
 

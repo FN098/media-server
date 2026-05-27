@@ -93,16 +93,6 @@ export function Explorer({ listing }: ExplorerProps) {
     clearSelection: selection.reset,
   });
 
-  const {
-    deleteDialog,
-    renameDialog,
-    extractDialog,
-    favoriteDialog,
-    previewDialog,
-    moveDialog,
-    copyDialog,
-  } = dialogs;
-
   // ===== サムネイル =====
 
   const thumbs = useExplorerThumbs({
@@ -131,45 +121,24 @@ export function Explorer({ listing }: ExplorerProps) {
   // ===== 右クリックメニュー/ドロップダウンメニュー =====
 
   const menu = useExplorerMenu({
-    hasSelection: selection.hasSelection,
-    selectedCount: selection.selectedCount,
-    isViewerMode: viewer.isOpen,
-    isFullscreenSupported: fullscreen.isSupported,
-    getFavorite: favorites.get,
-    onOpenInNewTab: navigation.openInNewTab,
-    onExtract: extractDialog.open,
-    onExtractSelected: extractDialog.openSelected,
-    onChangeRating: favorites.update,
-    onChangeRatingSelected: favorites.updateSelected,
-    onToggleFullscreen: () => void fullscreen.toggle(),
-    onRename: renameDialog.open,
-    onMove: moveDialog.open,
-    onMoveSelected: moveDialog.openSelected,
-    onCopy: copyDialog.open,
-    onCopySelected: copyDialog.openSelected,
-    onEditTags: tagEditor.open,
-    onAddTagsToFilter: filtering.addTagFilter,
-    onApplyAsPreview: previewDialog.open,
-    onUpdateThumb: (node) => void thumbs.update(node),
-    onUpdateThumbSelected: () => void thumbs.updateSelected(),
-    onDelete: deleteDialog.open,
-    onDeleteSelected: deleteDialog.openSelected,
+    filtering,
+    selection,
+    dialogs,
+    tagEditor,
+    navigation,
+    viewer,
+    fullscreen,
+    favorites,
+    thumbs,
   });
 
   // ===== 選択バー =====
 
   const selectionbar = useExplorerSelectionbar({
-    hasSelection: selection.hasSelection,
-    onChangeRating: favorites.update,
-    onChangeRatingSelected: favorites.updateSelected,
-    onMoveSelected: moveDialog.openSelected,
-    onCopySelected: copyDialog.openSelected,
-    onEditTagsSelected: tagEditor.open,
-    onUpdateThumbSelected: () => void thumbs.updateSelected(),
-    onDeleteSelected: deleteDialog.openSelected,
-    onAddFavoriteSelected: () => favoriteDialog.openSelected({ mode: "add" }),
-    onRemoveFavoriteSelected: () =>
-      favoriteDialog.openSelected({ mode: "remove" }),
+    dialogs,
+    tagEditor,
+    favorites,
+    thumbs,
   });
 
   return (
@@ -226,7 +195,7 @@ export function Explorer({ listing }: ExplorerProps) {
                 onClose={viewer.close}
                 onOpenPrev={navigation.openPrevFolder}
                 onOpenNext={navigation.openNextFolder}
-                onDelete={deleteDialog.open}
+                onDelete={dialogs.deleteDialog.open}
               />
             </ScrollLockProvider>
           )}

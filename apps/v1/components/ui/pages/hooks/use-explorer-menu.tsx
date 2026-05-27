@@ -4,12 +4,11 @@ import { ExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-favo
 import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
 import { ExplorerNavigation } from "@/components/ui/pages/hooks/use-explorer-navigation";
 import { ExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
+import { ExplorerThumbs } from "@/components/ui/pages/hooks/use-explorer-thumb";
 import { Fullscreen } from "@/hooks/use-fullscreen";
-import { SearchFocus } from "@/hooks/use-search-focus";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
 import { ViewerNavigation } from "@/hooks/use-viewer-control";
 import { isArchiveFile } from "@/lib/archive/extensions";
-import { getFavorite } from "@/lib/favorite/repository";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   CopyIcon,
@@ -34,12 +33,11 @@ interface UseExplorerMenuProps {
   navigation: ExplorerNavigation;
   viewer: ViewerNavigation;
   fullscreen: Fullscreen;
-  searchFocus: SearchFocus;
-  favorirtes: ExplorerFavorites;
+  favorites: ExplorerFavorites;
+  thumbs: ExplorerThumbs;
 }
 
 export function useExplorerMenu({
-  enabled,
   filtering,
   selection,
   dialogs,
@@ -47,9 +45,20 @@ export function useExplorerMenu({
   navigation,
   viewer,
   fullscreen,
-  searchFocus,
   favorites,
+  thumbs,
 }: UseExplorerMenuProps) {
+  const { hasSelection, selectedCount } = selection;
+
+  const {
+    copyDialog,
+    deleteDialog,
+    extractDialog,
+    moveDialog,
+    previewDialog,
+    renameDialog,
+  } = dialogs;
+
   const items: MenuItemDef<NodeContext>[] = useMemo(
     () => [
       {
@@ -65,11 +74,11 @@ export function useExplorerMenu({
                 value={rating}
                 onChange={(newRating) =>
                   hasSelection
-                    ? onChangeRatingSelected({
+                    ? favorites.updateSelected({
                         newRating,
                         onSuccess: closeMenu,
                       })
-                    : onChangeRating({
+                    : favorites.update({
                         node,
                         newRating,
                         onSuccess: closeMenu,
@@ -85,7 +94,7 @@ export function useExplorerMenu({
         type: "action",
         icon: ExternalLinkIcon,
         label: "新しいタブで開く",
-        onClick: ({ node }) => onOpenInNewTab(node),
+        onClick: ({ node }) => navigation.openInNewTab(node),
         hidden: () => selectedCount > 1,
       },
       {
@@ -93,8 +102,8 @@ export function useExplorerMenu({
         type: "action",
         icon: FullscreenIcon,
         label: "全画面",
-        onClick: onToggleFullscreen,
-        hidden: () => !isViewerMode || !isFullscreenSupported,
+        onClick: () => void fullscreen.toggle(),
+        hidden: () => !viewer.isOpen || !fullscreen.isSupported,
       },
       {
         key: "extractArchive",
@@ -102,7 +111,9 @@ export function useExplorerMenu({
         icon: PackageOpenIcon,
         label: "解凍",
         onClick: ({ node }) =>
-          hasSelection ? onExtractSelected() : onExtract(node),
+          hasSelection
+            ? extractDialog.openSelected()
+            : extractDialog.open(node),
         hidden: ({ node }) => !isArchiveFile(node.path),
       },
       {
@@ -110,7 +121,7 @@ export function useExplorerMenu({
         type: "action",
         icon: PencilIcon,
         label: "名前の変更",
-        onClick: ({ node }) => onRename(node),
+        onClick: ({ node }) => renameDialog.open(node),
         hidden: () => selectedCount > 1,
       },
       {
@@ -118,37 +129,40 @@ export function useExplorerMenu({
         type: "action",
         icon: FolderInputIcon,
         label: "移動",
-        onClick: ({ node }) => (hasSelection ? onMoveSelected() : onMove(node)),
+        onClick: ({ node }) =>
+          hasSelection ? moveDialog.openSelected() : moveDialog.open(node),
       },
       {
         key: "copy",
         type: "action",
         icon: CopyIcon,
         label: "コピー",
-        onClick: ({ node }) => (hasSelection ? onCopySelected() : onCopy(node)),
+        onClick: ({ node }) =>
+          hasSelection ? copyDialog.openSelected() : copyDialog.open(node),
       },
       {
         key: "editTags",
         type: "action",
         icon: TagIcon,
         label: "タグ編集",
-        onClick: ({ node }) => onEditTags(node),
+        onClick: () => (hasSelection ? tagEditor.open() : tagEditor.open()),
       },
       {
         key: "addTagFilter",
         type: "action",
         icon: ListFilterPlusIcon,
         label: "タグをフィルターに追加",
-        onClick: ({ node }) => onAddTagsToFilter(node),
-        hidden: ({ node }) =>
+        onClick: ({ node }) => filtering.addTagFilter(node),
+        disabled: ({ node }) =>
           !node.tags || node.tags.length === 0 || selectedCount > 1,
+        hidden: ({ node }) => node.isDirectory,
       },
       {
         key: "setAsPreview",
         type: "action",
         icon: ImagePlusIcon,
         label: "プレビューに設定",
-        onClick: ({ node }) => onApplyAsPreview(node),
+        onClick: ({ node }) => previewDialog.open(node),
         hidden: ({ node }) =>
           (node.type !== "image" && node.type !== "video") || selectedCount > 1,
       },
@@ -158,8 +172,10 @@ export function useExplorerMenu({
         icon: RefreshCwIcon,
         label: "サムネイルを更新",
         onClick: ({ node }) =>
-          hasSelection ? onUpdateThumbSelected() : onUpdateThumb(node),
-        hidden: () => isViewerMode,
+          hasSelection
+            ? void thumbs.updateSelected()
+            : void thumbs.update(node),
+        hidden: () => viewer.isOpen,
       },
       {
         key: "delete",
@@ -168,33 +184,25 @@ export function useExplorerMenu({
         variant: "destructive",
         label: "削除",
         onClick: ({ node }) =>
-          hasSelection ? onDeleteSelected() : onDelete(node),
+          hasSelection ? deleteDialog.openSelected() : deleteDialog.open(node),
       },
     ],
     [
-      getFavorite,
+      copyDialog,
+      deleteDialog,
+      extractDialog,
+      moveDialog,
+      previewDialog,
+      renameDialog,
+      favorites,
+      filtering,
+      fullscreen,
       hasSelection,
-      isFullscreenSupported,
-      isViewerMode,
-      onAddTagsToFilter,
-      onApplyAsPreview,
-      onChangeRating,
-      onChangeRatingSelected,
-      onCopy,
-      onCopySelected,
-      onDelete,
-      onDeleteSelected,
-      onEditTags,
-      onExtract,
-      onExtractSelected,
-      onMove,
-      onMoveSelected,
-      onOpenInNewTab,
-      onRename,
-      onToggleFullscreen,
-      onUpdateThumb,
-      onUpdateThumbSelected,
+      navigation,
       selectedCount,
+      tagEditor,
+      thumbs,
+      viewer.isOpen,
     ]
   );
 

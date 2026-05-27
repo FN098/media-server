@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+export type ExplorerThumbs = ReturnType<typeof useExplorerThumbs>;
+
 interface UseExplorerThumbsProps {
   currentDir: string;
   selectedNodes: MediaNode[];
