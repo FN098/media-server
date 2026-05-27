@@ -1,14 +1,6 @@
 "use client";
 
 import { visitFolderAction } from "@/actions/folder-actions";
-import {
-  touchMediaTimestampAction,
-  updatePreviewAction,
-} from "@/actions/media-actions";
-import {
-  enqueueCreateSingleThumbJobAction,
-  enqueueCreateThumbsJobAction,
-} from "@/actions/thumb-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ExplorerDialogs } from "@/components/ui/dialogs/explorer-dialogs";
@@ -20,6 +12,7 @@ import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hot
 import { useExplorerMenu } from "@/components/ui/pages/hooks/use-explorer-menu";
 import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/components/ui/pages/hooks/use-explorer-selectionbar";
+import { useExplorerThumb } from "@/components/ui/pages/hooks/use-explorer-thumb";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -419,50 +412,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== サムネイル =====
 
-  const [isUpdatingThumb, startUpdatingThumb] = useTransition();
-
-  // サムネイル自動作成
-  useEffect(() => {
-    if (listing.path) {
-      void enqueueCreateThumbsJobAction(listing.path);
-    }
-  }, [listing.path]);
-
-  const updateThumb = async (node: MediaNode) => {
-    // サムネイルを再作成（強制）
-    await enqueueCreateSingleThumbJobAction(node.path, { force: true });
-
-    // DBのタイムスタンプを更新（サムネイルのキャッシュを上書き）
-    if (!node.isDirectory) {
-      const touched = await touchMediaTimestampAction(node.path);
-      if (touched.error) toast.error(touched.error);
-    }
-
-    // プレビュー設定を解除
-    const updated = await updatePreviewAction(node.path, null);
-    if (updated.error) toast.error(updated.error);
-
-    // ブラウザキャッシュ更新のため、一時的にタイムスタンプを変更
-    node.mtime = new Date();
-  };
-
-  // サムネイル更新（単体）
-  const handleUpdateThumbSingle = (node: MediaNode) => {
-    if (isUpdatingThumb) return;
-    startUpdatingThumb(async () => {
-      await updateThumb(node);
-    });
-  };
-
-  // サムネイル更新（選択）
-  const handleUpdateThumbSelected = () => {
-    if (isUpdatingThumb) return;
-    startUpdatingThumb(async () => {
-      for (const node of selection.nodes) {
-        await updateThumb(node);
-      }
-    });
-  };
+  const thumb = useExplorerThumb({
+    currentDir: listing.path,
+    selectedNodes: selection.nodes,
+  });
 
   // ===== モバイル =====
 
@@ -517,8 +470,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onEditTags: tagEditor.open,
     onAddTagsToFilter: handleAddTagFilter,
     onApplyAsPreview: previewDialog.open,
-    onUpdateThumb: handleUpdateThumbSingle,
-    onUpdateThumbSelected: handleUpdateThumbSelected,
+    onUpdateThumb: thumb.update,
+    onUpdateThumbSelected: thumb.updateSelected,
     onDelete: deleteDialog.open,
     onDeleteSelected: deleteDialog.openSelected,
   });
@@ -530,7 +483,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onMoveSelected: moveDialog.openSelected,
     onCopySelected: copyDialog.openSelected,
     onEditTagsSelected: tagEditor.open,
-    onUpdateThumbSelected: handleUpdateThumbSelected,
+    onUpdateThumbSelected: thumb.updateSelected,
     onDeleteSelected: deleteDialog.openSelected,
     onAddFavoriteSelected: () => favoriteDialog.openSelected({ mode: "add" }),
     onRemoveFavoriteSelected: () =>
@@ -612,7 +565,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
-                onThumbError={handleUpdateThumbSingle}
+                onThumbError={thumb.update}
                 onOpen={handleOpen}
                 focusOnPageChange
               />
