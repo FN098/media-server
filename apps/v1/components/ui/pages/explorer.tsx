@@ -423,10 +423,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== フルスクリーン =====
 
-  const { isSupported: isFullscreenSupported, toggleFullscreen } =
-    useFullscreen();
-
-  const handleToggleFullscreen = () => void toggleFullscreen();
+  const fullscreen = useFullscreen();
 
   // ===== ショートカット =====
 
@@ -439,7 +436,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onGoBack: navigateToParent,
     onDelete: deleteDialog.openSelected,
     onEditTags: tagEditor.open,
-    onToggleFullscreen: handleToggleFullscreen,
+    onToggleFullscreen: () => void fullscreen.toggle(),
     onSelectAll: selection.selectAll,
     onFocusSearch: focusSearch,
     onRename: () => renameDialog.setTarget(selection.nodes[0]),
@@ -454,14 +451,14 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     hasSelection: selection.hasSelection,
     selectedCount: selection.count,
     isViewerMode,
-    isFullscreenSupported,
+    isFullscreenSupported: fullscreen.isSupported,
     getFavorite,
     onOpenInNewTab: handleOpenInNewTab,
     onExtract: extractDialog.open,
     onExtractSelected: extractDialog.openSelected,
     onChangeRating: handleChangeRatingSingle,
     onChangeRatingSelected: handleChangeRatingSelected,
-    onToggleFullscreen: handleToggleFullscreen,
+    onToggleFullscreen: () => void fullscreen.toggle(),
     onRename: renameDialog.open,
     onMove: moveDialog.open,
     onMoveSelected: moveDialog.openSelected,

@@ -417,7 +417,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: FullscreenIcon,
       label: "全画面",
-      onClick: fullscreen.toggleFullscreen,
+      onClick: fullscreen.toggle,
       hidden: () => !isViewerMode || !fullscreen.isSupported,
     },
     {

@@ -429,7 +429,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   });
 
   // F: 全画面表示
-  useHotkeys("f", () => void fullscreen.toggleFullscreen(), {
+  useHotkeys("f", () => void fullscreen.toggle(), {
     scopes: ["favorites", "viewer", "tag-editor"],
   });
 
@@ -508,7 +508,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
       type: "action",
       icon: FullscreenIcon,
       label: "全画面",
-      onClick: fullscreen.toggleFullscreen,
+      onClick: fullscreen.toggle,
       hidden: () => !isViewerMode || !fullscreen.isSupported,
     },
     {

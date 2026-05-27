@@ -20,8 +20,7 @@ export function useFullscreen() {
   const isFullscreen =
     typeof document !== "undefined" && !!document.fullscreenElement;
 
-  // 全画面にする
-  const enterFullscreen = useCallback(
+  const enter = useCallback(
     async (element = document.documentElement) => {
       if (!isSupported || document.fullscreenElement) return;
       await element.requestFullscreen();
@@ -29,26 +28,24 @@ export function useFullscreen() {
     [isSupported]
   );
 
-  // 全画面を解除する
-  const exitFullscreen = useCallback(async () => {
+  const exit = useCallback(async () => {
     if (!isSupported || !document.fullscreenElement) return;
     await document.exitFullscreen();
   }, [isSupported]);
 
-  // 切り替え
-  const toggleFullscreen = useCallback(async () => {
+  const toggle = useCallback(async () => {
     if (document.fullscreenElement) {
-      await exitFullscreen();
+      await exit();
     } else {
-      await enterFullscreen();
+      await enter();
     }
-  }, [enterFullscreen, exitFullscreen]);
+  }, [enter, exit]);
 
   return {
     isSupported,
     isFullscreen,
-    enterFullscreen,
-    exitFullscreen,
-    toggleFullscreen,
+    enter,
+    exit,
+    toggle,
   };
 }
