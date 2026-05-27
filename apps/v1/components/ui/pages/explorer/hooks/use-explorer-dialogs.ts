@@ -14,12 +14,14 @@ type UseExplorerDialogsProps = {
   currentDir: string;
   selectedNodes: MediaNode[];
   clearSelection: () => void;
+  onSelectionChange: (nodes: MediaNode[]) => void;
 };
 
 export function useExplorerDialogs({
   currentDir,
   selectedNodes,
   clearSelection,
+  onSelectionChange,
 }: UseExplorerDialogsProps) {
   const renameDialog = useRenameDialog<MediaNode>();
 
@@ -40,8 +42,7 @@ export function useExplorerDialogs({
   });
 
   const deleteDialog = useDeleteDialog({
-    selectedNodes,
-    clearSelection,
+    onSelectionChange,
   });
 
   const extractDialog = useExtractDialog({

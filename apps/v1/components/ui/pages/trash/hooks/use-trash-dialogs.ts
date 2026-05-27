@@ -7,15 +7,16 @@ export type TrashDialogs = ReturnType<typeof useTrashDialogs>;
 type UseTrashDialogsProps = {
   selectedNodes: MediaNode[];
   clearSelection: () => void;
+  onSelectionChange: (nodes: MediaNode[]) => void;
 };
 
 export function useTrashDialogs({
   selectedNodes,
   clearSelection,
+  onSelectionChange,
 }: UseTrashDialogsProps) {
   const deleteDialog = useDeleteDialog({
-    selectedNodes,
-    clearSelection,
+    onSelectionChange,
   });
 
   const restoreDialog = useRestoreDialog({

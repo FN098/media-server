@@ -66,9 +66,13 @@ export function useExplorerHotkeys({
     scopes: ["explorer"],
   });
 
-  useHotkeys("delete", () => dialogs.deleteDialog.openSelected(), {
-    scopes: "explorer",
-  });
+  useHotkeys(
+    "delete",
+    () => dialogs.deleteDialog.openTargets(selection.selectedNodes),
+    {
+      scopes: "explorer",
+    }
+  );
 
   useHotkeys("t", () => tagEditor.toggle(), {
     scopes: ["explorer", "viewer", "tag-editor"],

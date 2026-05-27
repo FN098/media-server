@@ -69,6 +69,7 @@ export function Explorer({ listing }: ExplorerProps) {
     currentDir: listing.path,
     selectedNodes: selection.selectedNodes,
     clearSelection: selection.reset,
+    onSelectionChange: selection.selectTargets,
   });
 
   const thumbs = useExplorerThumbs({

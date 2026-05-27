@@ -83,7 +83,7 @@ export function ExplorerToolbar({
               (node) =>
                 !node.isDirectory && !favorites.get(node.path).isFavorite
             );
-            selection.selectNodes(targets);
+            selection.selectTargets(targets);
             dialogs.deleteDialog.openTargets(targets);
           }}
         >
