@@ -132,10 +132,7 @@ export function useExplorerMenu({
         icon: FolderInputIcon,
         label: "移動",
         onClick: ({ node }) =>
-          moveDialog.open({
-            targets: hasSelection ? selectedNodes : [node],
-            initialDir: listing.path,
-          }),
+          moveDialog.open(hasSelection ? selectedNodes : [node], listing.path),
       },
       {
         key: "copy",
