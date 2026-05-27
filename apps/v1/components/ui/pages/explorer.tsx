@@ -3,10 +3,10 @@
 import { visitFolderAction } from "@/actions/folder-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
-import { ExplorerDialogs } from "@/components/ui/dialogs/explorer-dialogs";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
+import { ExplorerDialogs } from "@/components/ui/pages/components/explorer-dialogs";
 import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-favorites";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
