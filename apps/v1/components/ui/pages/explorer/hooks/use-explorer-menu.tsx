@@ -148,6 +148,7 @@ export function useExplorerMenu({
         icon: TagIcon,
         label: "タグ編集",
         onClick: () => (hasSelection ? tagEditor.open() : tagEditor.open()),
+        hidden: ({ node }) => node.isDirectory,
       },
       {
         key: "addTagFilter",
