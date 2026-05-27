@@ -12,7 +12,7 @@ import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hot
 import { useExplorerMenu } from "@/components/ui/pages/hooks/use-explorer-menu";
 import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/components/ui/pages/hooks/use-explorer-selectionbar";
-import { useExplorerThumb } from "@/components/ui/pages/hooks/use-explorer-thumb";
+import { useExplorerThumbs } from "@/components/ui/pages/hooks/use-explorer-thumb";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
@@ -412,7 +412,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== サムネイル =====
 
-  const thumb = useExplorerThumb({
+  const thumbs = useExplorerThumbs({
     currentDir: listing.path,
     selectedNodes: selection.nodes,
   });
@@ -467,8 +467,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onEditTags: tagEditor.open,
     onAddTagsToFilter: handleAddTagFilter,
     onApplyAsPreview: previewDialog.open,
-    onUpdateThumb: (node) => void thumb.update(node),
-    onUpdateThumbSelected: () => void thumb.updateSelected(),
+    onUpdateThumb: (node) => void thumbs.update(node),
+    onUpdateThumbSelected: () => void thumbs.updateSelected(),
     onDelete: deleteDialog.open,
     onDeleteSelected: deleteDialog.openSelected,
   });
@@ -482,7 +482,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onMoveSelected: moveDialog.openSelected,
     onCopySelected: copyDialog.openSelected,
     onEditTagsSelected: tagEditor.open,
-    onUpdateThumbSelected: () => void thumb.updateSelected(),
+    onUpdateThumbSelected: () => void thumbs.updateSelected(),
     onDeleteSelected: deleteDialog.openSelected,
     onAddFavoriteSelected: () => favoriteDialog.openSelected({ mode: "add" }),
     onRemoveFavoriteSelected: () =>
@@ -564,7 +564,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
                 allNodes={filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
-                onThumbError={(node) => void thumb.update(node)}
+                onThumbError={(node) => void thumbs.update(node)}
                 onOpen={handleOpen}
                 focusOnPageChange
               />

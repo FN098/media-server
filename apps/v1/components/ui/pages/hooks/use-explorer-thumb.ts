@@ -11,17 +11,17 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-interface UseExplorerThumbProps {
+interface UseExplorerThumbsProps {
   currentDir: string;
   selectedNodes: MediaNode[];
   autoCreateThumbs?: boolean;
 }
 
-export function useExplorerThumb({
+export function useExplorerThumbs({
   currentDir,
   selectedNodes,
   autoCreateThumbs = true,
-}: UseExplorerThumbProps) {
+}: UseExplorerThumbsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
