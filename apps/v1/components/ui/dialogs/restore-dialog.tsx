@@ -16,23 +16,23 @@ import { toast } from "sonner";
 interface RestoreDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targetNodes: { path: string; name: string }[];
+  targets: { path: string; name: string }[];
 }
 
 export function RestoreDialog({
   open,
   onOpenChange,
-  targetNodes,
+  targets,
 }: RestoreDialogProps) {
   const [isPending, startTransition] = useTransition();
-  const count = targetNodes.length;
+  const count = targets.length;
 
   const handleApply = (e: React.MouseEvent) => {
     // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
     e.preventDefault();
 
     startTransition(async () => {
-      const paths = targetNodes.map((n) => n.path);
+      const paths = targets.map((n) => n.path);
       const result = await restoreNodesAction(paths);
 
       if (result.failed === 0) {
