@@ -29,7 +29,7 @@ export function ShuffleButton() {
           <Button
             variant={enabled ? "default" : "outline"}
             size="default"
-            onToggle={toggle}
+            onClick={toggle}
             aria-label="シャッフル切り替え"
             className={cn(
               "gap-2 h-9 w-full",
