@@ -1,11 +1,9 @@
 "use client";
 
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
-import { ResetButton } from "@/components/ui/buttons/reset-button";
-import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
-import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { ExplorerDialogs } from "@/components/ui/pages/components/explorer-dialogs";
+import { ExplorerToolbar } from "@/components/ui/pages/components/explorer-toolbar";
 import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-favorites";
 import { useExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
@@ -16,11 +14,7 @@ import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-s
 import { useExplorerSelectionbar } from "@/components/ui/pages/hooks/use-explorer-selectionbar";
 import { useExplorerSort } from "@/components/ui/pages/hooks/use-explorer-sort";
 import { useExplorerThumbs } from "@/components/ui/pages/hooks/use-explorer-thumb";
-import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
-import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
-import { SortSelect } from "@/components/ui/selects/sort-select";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
-import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
@@ -32,10 +26,7 @@ import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
-import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
-import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import { FolderPlus } from "lucide-react";
 
 export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== 検索 =====
@@ -98,7 +89,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     previewDialog,
     moveDialog,
     copyDialog,
-    createFolderDialog,
   } = dialogs;
 
   // ===== サムネイル =====
@@ -107,10 +97,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     currentDir: listing.path,
     selectedNodes: selection.nodes,
   });
-
-  // ===== モバイル =====
-
-  const isMobile = useIsMobile();
 
   // ===== フルスクリーン =====
 
@@ -189,64 +175,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           )}
           tabIndex={-1}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-            {/* 操作メニュー */}
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
-              {/* 並び替え */}
-              <SortSelect
-                value={sort.value}
-                onChange={sort.apply}
-                options={sort.options}
-              />
-
-              {/* お気に入りフィルター */}
-              <FavoriteFilterSelect
-                value={filtering.controls.favorite.value}
-                onChange={filtering.controls.favorite.apply}
-              />
-
-              {/* 種別フィルター */}
-              <MediaTypeFilterMultiSelect
-                value={filtering.controls.mediaType.value}
-                onChange={filtering.controls.mediaType.apply}
-                displayTypes={["image", "video", "audio"]}
-              />
-
-              {/* 評価フィルター */}
-              <RatingFilterDialog
-                value={filtering.controls.rating.value}
-                onChange={filtering.controls.rating.apply}
-              />
-
-              {/* タグフィルター */}
-              <TagFilterDialog
-                value={filtering.controls.tag.value}
-                onChange={filtering.controls.tag.apply}
-                relatedNodes={filtering.mediaOnly}
-                autoFocusInput={!isMobile}
-              />
-
-              {/* 新規フォルダ作成 */}
-              <Button variant="outline" onClick={createFolderDialog.open}>
-                <FolderPlus className="h-4 w-4" />
-                新規フォルダ
-              </Button>
-
-              {/* リセット */}
-              <ResetButton
-                onClick={filtering.reset}
-                isVisible={filtering.canReset}
-              />
-            </div>
-
-            {/* 件数 */}
-            <FilterResultText
-              totalCount={filtering.totalCount}
-              filteredCount={filtering.filteredCount}
-              isFiltered={filtering.isFiltered}
-              className="ml-auto min-w-[120px] text-right"
-            />
-          </div>
+          {/* ツールバー */}
+          <ExplorerToolbar
+            sort={sort}
+            filtering={filtering}
+            dialogs={dialogs}
+          />
 
           {/* グリッドビュー */}
           {viewMode.value === "grid" && !navigation.isViewerOpen && (

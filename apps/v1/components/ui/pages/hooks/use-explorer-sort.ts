@@ -8,6 +8,8 @@ import {
   WeightIcon,
 } from "lucide-react";
 
+export type ExplorerSort = ReturnType<typeof useExplorerSort>;
+
 export const options = [
   {
     value: {

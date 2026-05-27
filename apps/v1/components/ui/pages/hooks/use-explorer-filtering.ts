@@ -17,6 +17,8 @@ import {
 import { MediaNode } from "@/lib/media/types";
 import { useCallback, useMemo } from "react";
 
+export type ExplorerFiltering = ReturnType<typeof useExplorerFiltering>;
+
 interface UseExplorerFilteringProps {
   allNodes: MediaNode[];
 }

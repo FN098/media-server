@@ -8,6 +8,8 @@ import { usePreviewDialog } from "@/hooks/use-preview-dialog";
 import { useRenameDialog } from "@/hooks/use-rename-dialog";
 import { MediaNode } from "@/lib/media/types";
 
+export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;
+
 type UseExplorerDialogsProps = {
   currentDir: string;
   selectedNodes: MediaNode[];
