@@ -9,6 +9,7 @@ import { FolderNavigation } from "@/components/ui/navigations/folder-navigation"
 import { ExplorerDialogs } from "@/components/ui/pages/components/explorer-dialogs";
 import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 import { useExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-favorites";
+import { useExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenu } from "@/components/ui/pages/hooks/use-explorer-menu";
 import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
@@ -22,30 +23,14 @@ import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import { useFavoriteFilter } from "@/hooks/use-favorite-filter";
-import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
 import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useMediaIndex } from "@/hooks/use-media-index";
-import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
 import { useParentPathname } from "@/hooks/use-parent-pathname";
-import { useQueryFilter } from "@/hooks/use-query-filter";
-import { useRatingFilter } from "@/hooks/use-rating-filter";
-import { useSearchParamsControl } from "@/hooks/use-search-params-control";
 import { useSort } from "@/hooks/use-sort";
 import { useTagEditorControl } from "@/hooks/use-tag-editor-control";
-import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { useViewerControl } from "@/hooks/use-viewer-control";
-import {
-  createFavoriteFilter,
-  createMediaOnlyFilter,
-  createMediaTypeFilter,
-  createRatingFilter,
-  createSearchFilter,
-  createTagFilter,
-  withDirectoryControl,
-} from "@/lib/filter/factory";
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
@@ -168,82 +153,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== フィルタリング =====
 
-  const allNodes = listing.nodes;
-
-  // クエリフィルター
-  const { value: queryFilterValue } = useQueryFilter();
-
-  // 種別フィルター
-  const { value: mediaTypeFilterValue, apply: applyMediaTypeFilterValue } =
-    useMediaTypeFilter();
-
-  // 評価フィルター
-  const { value: ratingFilterValue, apply: applyRatingFilterValue } =
-    useRatingFilter();
-
-  // タグフィルター
-  const { value: tagFilterValue, apply: applyTagFilterValue } = useTagFilter();
-
-  // お気に入りフィルター
-  const { value: favoriteFilterValue, apply: applyFavoriteFilterValue } =
-    useFavoriteFilter();
-
-  // フィルターパイプライン
-  const pipeline = useMemo(
-    () => [
-      withDirectoryControl(
-        createSearchFilter(queryFilterValue),
-        "apply-filter"
-      ),
-      withDirectoryControl(
-        createMediaTypeFilter(mediaTypeFilterValue),
-        "apply-filter"
-      ),
-      withDirectoryControl(
-        createRatingFilter(ratingFilterValue),
-        "apply-filter"
-      ),
-      withDirectoryControl(createTagFilter(tagFilterValue), "always"),
-      withDirectoryControl(createFavoriteFilter(favoriteFilterValue), "always"),
-    ],
-    [
-      queryFilterValue,
-      mediaTypeFilterValue,
-      ratingFilterValue,
-      tagFilterValue,
-      favoriteFilterValue,
-    ]
-  );
-
-  // フィルター結果
-  const {
-    filtered: filteredNodes,
-    filteredCount,
-    totalCount,
-    isFiltered,
-  } = useFilteredNodes(allNodes, pipeline);
-
-  // 「メディアのみ」のフィルターパイプライン
-  const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
-
-  // 「メディアのみ」のリスト
-  const { filtered: mediaOnly } = useFilteredNodes(
-    filteredNodes,
-    mediaOnlyPipeline
-  );
-
-  // タグをフィルターに追加
-  const handleAddTagFilter = (node: MediaNode) => {
-    if (!node.tags || node.tags.length === 0) return;
-    applyTagFilterValue({
-      mode: tagFilterValue.mode,
-      tags: [...tagFilterValue.tags, ...node.tags],
-    });
-  };
-
-  // 検索パラメータリセット用
-  const { hasResettableSearchParams, clearSearchParams } =
-    useSearchParamsControl({ keep: ["viewMode"] });
+  const filtering = useExplorerFiltering({ allNodes: listing.nodes });
 
   // ===== ビューア =====
 
@@ -252,11 +162,11 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     isOpen: isViewerMode,
     open: openViewer,
     close: closeViewer,
-  } = useViewerControl(mediaOnly);
+  } = useViewerControl(filtering.mediaOnly);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {
-    const media = mediaOnly[index];
+    const media = filtering.mediaOnly[index];
     if (!media) return;
 
     selection.replace(media);
@@ -273,7 +183,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const { navigate: openFolder } = useFolderNavigation();
 
   // インデックス計算
-  const { getMediaIndex } = useMediaIndex(mediaOnly);
+  const { getMediaIndex } = useMediaIndex(filtering.mediaOnly);
 
   // ファイル/フォルダオープン
   const handleOpen = (node: MediaNode) => {
@@ -329,8 +239,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== 選択 =====
 
   const selection = useExplorerSelection({
-    allNodes,
-    currentNodes: filteredNodes,
+    allNodes: listing.nodes,
+    currentNodes: filtering.filteredNodes,
   });
 
   // ===== お気に入り =====
@@ -395,7 +305,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onRename: () => renameDialog.setTarget(selection.nodes[0]),
     onOpenPrevFolder: () => handleOpenPrevFolder("first"),
     onOpenNextFolder: () => handleOpenNextFolder("first"),
-    onResetFilter: clearSearchParams,
+    onResetFilter: filtering.reset,
   });
 
   // ===== 右クリックメニュー/ドロップダウンメニュー =====
@@ -418,7 +328,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onCopy: copyDialog.open,
     onCopySelected: copyDialog.openSelected,
     onEditTags: tagEditor.open,
-    onAddTagsToFilter: handleAddTagFilter,
+    onAddTagsToFilter: filtering.addTagFilter,
     onApplyAsPreview: previewDialog.open,
     onUpdateThumb: (node) => void thumbs.update(node),
     onUpdateThumbSelected: () => void thumbs.updateSelected(),
@@ -443,7 +353,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   });
 
   return (
-    <PagingProvider totalItems={filteredNodes.length}>
+    <PagingProvider totalItems={filtering.filteredCount}>
       <MenuItemsProvider items={menu.items}>
         <div
           className={cn(
@@ -463,28 +373,28 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
               {/* お気に入りフィルター */}
               <FavoriteFilterSelect
-                value={favoriteFilterValue}
-                onChange={applyFavoriteFilterValue}
+                value={filtering.controls.favorite.value}
+                onChange={filtering.controls.favorite.apply}
               />
 
               {/* 種別フィルター */}
               <MediaTypeFilterMultiSelect
-                value={mediaTypeFilterValue}
-                onChange={applyMediaTypeFilterValue}
+                value={filtering.controls.mediaType.value}
+                onChange={filtering.controls.mediaType.apply}
                 displayTypes={["image", "video", "audio"]}
               />
 
               {/* 評価フィルター */}
               <RatingFilterDialog
-                value={ratingFilterValue}
-                onChange={applyRatingFilterValue}
+                value={filtering.controls.rating.value}
+                onChange={filtering.controls.rating.apply}
               />
 
               {/* タグフィルター */}
               <TagFilterDialog
-                value={tagFilterValue}
-                onChange={applyTagFilterValue}
-                relatedNodes={mediaOnly}
+                value={filtering.controls.tag.value}
+                onChange={filtering.controls.tag.apply}
+                relatedNodes={filtering.mediaOnly}
                 autoFocusInput={!isMobile}
               />
 
@@ -496,16 +406,16 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
               {/* リセット */}
               <ResetButton
-                onClick={clearSearchParams}
-                isVisible={hasResettableSearchParams}
+                onClick={filtering.reset}
+                isVisible={filtering.canReset}
               />
             </div>
 
             {/* 件数 */}
             <FilterResultText
-              totalCount={totalCount}
-              filteredCount={filteredCount}
-              isFiltered={isFiltered}
+              totalCount={filtering.totalCount}
+              filteredCount={filtering.filteredCount}
+              isFiltered={filtering.isFiltered}
               className="ml-auto min-w-[120px] text-right"
             />
           </div>
@@ -514,7 +424,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {viewMode.value === "grid" && !isViewerMode && (
             <div className="flex-1">
               <PagingGridView
-                allNodes={filteredNodes}
+                allNodes={filtering.filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
                 onThumbError={(node) => void thumbs.update(node)}
@@ -528,7 +438,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {viewMode.value === "list" && !isViewerMode && (
             <div className="flex-1">
               <PagingListView
-                allNodes={filteredNodes}
+                allNodes={filtering.filteredNodes}
                 initialScrollPath={lastHistory?.path}
                 onScrollRestored={handleScrollRestored}
                 onOpen={handleOpen}
@@ -541,7 +451,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {isViewerMode && (
             <ScrollLockProvider>
               <MediaViewer
-                allNodes={mediaOnly}
+                allNodes={filtering.mediaOnly}
                 initialIndex={initialViewerIndex}
                 menuItems={menu.items}
                 onIndexChange={handleViewerIndexChange}
@@ -557,7 +467,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           <SelectionBar
             open={selection.isSelectionMode && !tagEditor.isOpen}
             count={selection.count}
-            totalCount={filteredNodes.length}
+            totalCount={filtering.filteredCount}
             onSelectAll={selection.selectAll}
             onClose={selection.reset}
             className="z-40" // DropdownMenu より小さくする
