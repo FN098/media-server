@@ -39,7 +39,7 @@ export function useExplorerSelection({
     [replaceSelection]
   );
 
-  const selectTargets = useCallback(
+  const select = useCallback(
     (nodes: MediaNode[]) => {
       const targets = nodes.map((n) => n.path);
       selectPaths(targets);
@@ -50,8 +50,8 @@ export function useExplorerSelection({
   );
 
   const selectAll = useCallback(() => {
-    selectTargets(currentNodes);
-  }, [currentNodes, selectTargets]);
+    select(currentNodes);
+  }, [currentNodes, select]);
 
   const reset = useCallback(() => {
     clearSelection();
@@ -64,8 +64,8 @@ export function useExplorerSelection({
     selectedNodes,
     selectedCount,
     replace,
+    select,
     selectAll,
-    selectTargets,
     reset,
   };
 }

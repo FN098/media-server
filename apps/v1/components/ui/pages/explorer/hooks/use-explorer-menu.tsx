@@ -9,6 +9,7 @@ import { Fullscreen } from "@/hooks/use-fullscreen";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
 import { ViewerNavigation } from "@/hooks/use-viewer-control";
 import { isArchiveFile } from "@/lib/archive/extensions";
+import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   CopyIcon,
@@ -26,6 +27,7 @@ import {
 import { useMemo } from "react";
 
 interface UseExplorerMenuProps {
+  listing: MediaListing;
   filtering: ExplorerFiltering;
   selection: ExplorerSelection;
   dialogs: ExplorerDialogs;
@@ -38,6 +40,7 @@ interface UseExplorerMenuProps {
 }
 
 export function useExplorerMenu({
+  listing,
   filtering,
   selection,
   dialogs,
@@ -48,7 +51,7 @@ export function useExplorerMenu({
   favorites,
   thumbs,
 }: UseExplorerMenuProps) {
-  const { hasSelection, selectedCount } = selection;
+  const { hasSelection, selectedCount, selectedNodes } = selection;
 
   const {
     copyDialog,
@@ -74,7 +77,8 @@ export function useExplorerMenu({
                 value={rating}
                 onChange={(newRating) =>
                   hasSelection
-                    ? favorites.updateSelected({
+                    ? // TODO
+                      favorites.updateSelected({
                         newRating,
                         onSuccess: closeMenu,
                       })
@@ -111,9 +115,7 @@ export function useExplorerMenu({
         icon: PackageOpenIcon,
         label: "解凍",
         onClick: ({ node }) =>
-          hasSelection
-            ? extractDialog.openSelected()
-            : extractDialog.open(node),
+          extractDialog.open(hasSelection ? selectedNodes : [node]),
         hidden: ({ node }) => !isArchiveFile(node.path),
       },
       {
@@ -130,7 +132,10 @@ export function useExplorerMenu({
         icon: FolderInputIcon,
         label: "移動",
         onClick: ({ node }) =>
-          hasSelection ? moveDialog.openSelected() : moveDialog.open(node),
+          moveDialog.open({
+            targets: hasSelection ? selectedNodes : [node],
+            initialDir: listing.path,
+          }),
       },
       {
         key: "copy",
@@ -138,7 +143,7 @@ export function useExplorerMenu({
         icon: CopyIcon,
         label: "コピー",
         onClick: ({ node }) =>
-          hasSelection ? copyDialog.openSelected() : copyDialog.open(node),
+          copyDialog.open(hasSelection ? selectedNodes : [node], listing.path),
       },
       {
         key: "editTags",
@@ -162,7 +167,7 @@ export function useExplorerMenu({
         type: "action",
         icon: ImagePlusIcon,
         label: "プレビューに設定",
-        onClick: ({ node }) => previewDialog.open(node),
+        onClick: ({ node }) => previewDialog.open(node.path),
         hidden: ({ node }) =>
           (node.type !== "image" && node.type !== "video") || selectedCount > 1,
       },
@@ -184,25 +189,27 @@ export function useExplorerMenu({
         variant: "destructive",
         label: "削除",
         onClick: ({ node }) =>
-          hasSelection ? deleteDialog.openSelected() : deleteDialog.open(node),
+          deleteDialog.open(hasSelection ? selectedNodes : [node]),
       },
     ],
     [
-      copyDialog,
-      deleteDialog,
-      extractDialog,
-      moveDialog,
-      previewDialog,
-      renameDialog,
       favorites,
-      filtering,
-      fullscreen,
       hasSelection,
       navigation,
       selectedCount,
-      tagEditor,
-      thumbs,
+      fullscreen,
       viewer.isOpen,
+      extractDialog,
+      selectedNodes,
+      renameDialog,
+      moveDialog,
+      listing.path,
+      copyDialog,
+      tagEditor,
+      filtering,
+      previewDialog,
+      thumbs,
+      deleteDialog,
     ]
   );
 

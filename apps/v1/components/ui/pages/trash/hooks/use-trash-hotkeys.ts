@@ -66,9 +66,13 @@ export function useTrashHotkeys({
     scopes: ["trash"],
   });
 
-  useHotkeys("delete", () => dialogs.deleteDialog.openSelected(), {
-    scopes: "trash",
-  });
+  useHotkeys(
+    "delete",
+    () => dialogs.deleteDialog.open(selection.selectedNodes),
+    {
+      scopes: "trash",
+    }
+  );
 
   useHotkeys("t", () => tagEditor.toggle(), {
     scopes: ["trash", "viewer", "tag-editor"],

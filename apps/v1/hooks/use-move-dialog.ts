@@ -1,45 +1,56 @@
 import { useCallback, useState } from "react";
 
-type UseMoveDialogProps<T> = {
-  initialDir: string;
-  selectedNodes: T[];
-  clearSelection: () => void;
-};
+type MoveDialogContext<T> =
+  | {
+      isOpen: true;
+      initialDir: string;
+      targets: T[];
+    }
+  | { isOpen: false };
 
-export function useMoveDialog<T>({
-  initialDir,
-  selectedNodes,
-  clearSelection,
-}: UseMoveDialogProps<T>) {
+interface UseMoveDialogProps<T> {
+  onChange?: (context: MoveDialogContext<T>) => void;
+}
+
+export function useMoveDialog<T>({ onChange }: UseMoveDialogProps<T>) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [initialDir, setInitialDir] = useState<string>("");
   const [targets, setTargets] = useState<T[]>([]);
 
-  const isOpen = targets.length > 0;
+  const open = useCallback(
+    (targets: T[], initialDir: string) => {
+      onChange?.({
+        isOpen: true,
+        initialDir,
+        targets,
+      });
+      setTargets(targets);
+      setInitialDir(initialDir);
+      setIsOpen(true);
+    },
+    [onChange]
+  );
 
-  const open = useCallback((node: T) => {
-    setTargets([node]);
-  }, []);
-
-  const openSelected = useCallback(() => {
-    setTargets(selectedNodes);
-  }, [selectedNodes]);
+  const close = useCallback(() => {
+    onChange?.({ isOpen: false });
+    setTargets([]);
+    setIsOpen(false);
+  }, [onChange]);
 
   const onOpenChange = useCallback(
     (open: boolean) => {
       if (!open) {
-        setTargets([]);
-        clearSelection();
+        close();
       }
     },
-    [clearSelection]
+    [close]
   );
 
   return {
     initialDir,
     targets,
-    setTargets,
     isOpen,
     open,
-    openSelected,
     onOpenChange,
   };
 }

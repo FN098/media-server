@@ -1,18 +1,22 @@
 import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialogs";
+import { TrashSelection } from "@/components/ui/pages/trash/hooks/use-trash-selection";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { RotateCcwIcon, TagIcon, Trash2Icon } from "lucide-react";
 import { useMemo } from "react";
 
 interface UseTrashSelectionbarProps {
+  selection: TrashSelection;
   dialogs: TrashDialogs;
   tagEditor: TagEditorControl;
 }
 
 export function useTrashSelectionbar({
+  selection,
   dialogs,
   tagEditor,
 }: UseTrashSelectionbarProps) {
+  const { selectedNodes } = selection;
   const { deleteDialog, restoreDialog } = dialogs;
 
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
@@ -36,7 +40,7 @@ export function useTrashSelectionbar({
           type: "action",
           icon: RotateCcwIcon,
           label: "復元",
-          onClick: restoreDialog.openSelected,
+          onClick: () => restoreDialog.open(selectedNodes),
         },
         {
           key: "delete",
@@ -44,10 +48,10 @@ export function useTrashSelectionbar({
           variant: "destructive",
           icon: Trash2Icon,
           label: "削除",
-          onClick: deleteDialog.openSelected,
+          onClick: () => deleteDialog.open(selectedNodes),
         },
       ] satisfies MenuItemDef<MultipleNodesContext>[],
-    [restoreDialog.openSelected, deleteDialog.openSelected]
+    [restoreDialog, selectedNodes, deleteDialog]
   );
 
   return {

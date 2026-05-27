@@ -47,7 +47,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
         key={`create-folder-${createFolderDialog.isOpen}`}
         open={createFolderDialog.isOpen}
         onOpenChange={createFolderDialog.onOpenChange}
-        parentPath={createFolderDialog.parentDirPath}
+        parentPath={createFolderDialog.parentPath}
       />
 
       {/* 移動ダイアログ */}
@@ -55,7 +55,6 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
         open={moveDialog.isOpen}
         onOpenChange={moveDialog.onOpenChange}
         sourceNodes={moveDialog.targets}
-        initialDirPath={moveDialog.initialDir}
       />
 
       {/* コピーダイアログ */}
@@ -63,7 +62,6 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
         open={copyDialog.isOpen}
         onOpenChange={copyDialog.onOpenChange}
         sourceNodes={copyDialog.targets}
-        initialDirPath={copyDialog.initialDir}
       />
 
       {/* 削除ダイアログ */}

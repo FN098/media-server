@@ -4,29 +4,29 @@ import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
-import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { ExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
 import { SortSelect } from "@/components/ui/selects/sort-select";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
+import { MediaListing } from "@/lib/media/types";
 import { Button } from "@/shadcn/components/ui/button";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { FolderPlus, TrashIcon } from "lucide-react";
 
 interface ExplorerToolbarProps {
+  listing: MediaListing;
   sort: ExplorerSort;
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
-  selection: ExplorerSelection;
   favorites: ExplorerFavorites;
 }
 
 export function ExplorerToolbar({
+  listing,
   sort,
   filtering,
   dialogs,
-  selection,
   favorites,
 }: ExplorerToolbarProps) {
   const isMobile = useIsMobile();
@@ -69,7 +69,10 @@ export function ExplorerToolbar({
         />
 
         {/* 新規フォルダ */}
-        <Button variant="outline" onClick={dialogs.createFolderDialog.open}>
+        <Button
+          variant="outline"
+          onClick={() => dialogs.createFolderDialog.open(listing.path)}
+        >
           <FolderPlus className="h-4 w-4" />
           新規フォルダ
         </Button>
@@ -83,8 +86,7 @@ export function ExplorerToolbar({
               (node) =>
                 !node.isDirectory && !favorites.get(node.path).isFavorite
             );
-            selection.selectTargets(targets);
-            dialogs.deleteDialog.openTargets(targets);
+            dialogs.deleteDialog.open(targets);
           }}
         >
           <TrashIcon className="h-4 w-4" />

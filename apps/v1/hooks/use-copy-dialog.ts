@@ -1,45 +1,54 @@
 import { useCallback, useState } from "react";
 
-type UseCopyDialogProps<T> = {
-  initialDir: string;
-  selectedNodes: T[];
-  clearSelection: () => void;
-};
+type CopyDialogContext<T> =
+  | {
+      isOpen: true;
+      initialDir: string;
+      targets: T[];
+    }
+  | { isOpen: false };
 
-export function useCopyDialog<T>({
-  initialDir,
-  selectedNodes,
-  clearSelection,
-}: UseCopyDialogProps<T>) {
+interface UseCopyDialogProps<T> {
+  onChange?: (context: CopyDialogContext<T>) => void;
+}
+
+export function useCopyDialog<T>({ onChange }: UseCopyDialogProps<T>) {
+  const [isOpen, setIsOpen] = useState(false);
   const [targets, setTargets] = useState<T[]>([]);
 
-  const isOpen = targets.length > 0;
+  const open = useCallback(
+    (targets: T[], initialDir: string) => {
+      onChange?.({
+        isOpen: true,
+        initialDir,
+        targets,
+      });
+      setTargets(targets);
+      setIsOpen(true);
+    },
+    [onChange]
+  );
 
-  const open = useCallback((node: T) => {
-    setTargets([node]);
-  }, []);
-
-  const openSelected = useCallback(() => {
-    setTargets(selectedNodes);
-  }, [selectedNodes]);
+  const close = useCallback(() => {
+    onChange?.({ isOpen: false });
+    setTargets([]);
+    setIsOpen(false);
+  }, [onChange]);
 
   const onOpenChange = useCallback(
     (open: boolean) => {
       if (!open) {
-        setTargets([]);
-        clearSelection();
+        close();
       }
     },
-    [clearSelection]
+    [close]
   );
 
   return {
-    initialDir,
     targets,
-    setTargets,
     isOpen,
     open,
-    openSelected,
+    close,
     onOpenChange,
   };
 }

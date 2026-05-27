@@ -27,7 +27,7 @@ export function useTrashMenu({
   viewer,
   fullscreen,
 }: UseTrashMenuProps) {
-  const { hasSelection, selectedCount } = selection;
+  const { hasSelection, selectedCount, selectedNodes } = selection;
   const { deleteDialog, restoreDialog } = dialogs;
 
   const items: MenuItemDef<NodeContext>[] = useMemo(
@@ -54,9 +54,7 @@ export function useTrashMenu({
         icon: RotateCcwIcon,
         label: "復元",
         onClick: ({ node }) =>
-          hasSelection
-            ? restoreDialog.openSelected()
-            : restoreDialog.open(node),
+          restoreDialog.open(hasSelection ? selectedNodes : [node]),
       },
       {
         key: "delete",
@@ -65,7 +63,7 @@ export function useTrashMenu({
         variant: "destructive",
         label: "削除",
         onClick: ({ node }) =>
-          hasSelection ? deleteDialog.openSelected() : deleteDialog.open(node),
+          deleteDialog.open(hasSelection ? selectedNodes : [node]),
       },
     ],
     [
@@ -73,8 +71,9 @@ export function useTrashMenu({
       selectedCount,
       fullscreen,
       viewer.isOpen,
-      hasSelection,
       restoreDialog,
+      hasSelection,
+      selectedNodes,
       deleteDialog,
     ]
   );

@@ -39,6 +39,16 @@ export function useFavoritesSelection({
     [replaceSelection]
   );
 
+  const select = useCallback(
+    (nodes: MediaNode[]) => {
+      const targets = nodes.map((n) => n.path);
+      selectPaths(targets);
+      if (targets.length > 0) enterSelectionMode();
+      else exitSelectionMode();
+    },
+    [enterSelectionMode, exitSelectionMode, selectPaths]
+  );
+
   const selectAll = useCallback(() => {
     selectPaths(currentNodes.map((n) => n.path));
     enterSelectionMode();
@@ -55,6 +65,7 @@ export function useFavoritesSelection({
     selectedNodes,
     selectedCount,
     replace,
+    select,
     selectAll,
     reset,
   };

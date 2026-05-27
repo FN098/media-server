@@ -66,10 +66,7 @@ export function Explorer({ listing }: ExplorerProps) {
   });
 
   const dialogs = useExplorerDialogs({
-    currentDir: listing.path,
-    selectedNodes: selection.selectedNodes,
-    clearSelection: selection.reset,
-    onSelectionChange: selection.selectTargets,
+    selection,
   });
 
   const thumbs = useExplorerThumbs({
@@ -92,6 +89,7 @@ export function Explorer({ listing }: ExplorerProps) {
   });
 
   const menu = useExplorerMenu({
+    listing,
     filtering,
     selection,
     dialogs,
@@ -104,6 +102,8 @@ export function Explorer({ listing }: ExplorerProps) {
   });
 
   const selectionbar = useExplorerSelectionbar({
+    listing,
+    selection,
     dialogs,
     tagEditor,
     favorites,
@@ -122,11 +122,11 @@ export function Explorer({ listing }: ExplorerProps) {
           {/* ツールバー */}
           {!viewer.isOpen && (
             <ExplorerToolbar
+              listing={listing}
               sort={sort}
               filtering={filtering}
               dialogs={dialogs}
               favorites={favorites}
-              selection={selection}
             />
           )}
 
@@ -168,7 +168,7 @@ export function Explorer({ listing }: ExplorerProps) {
                 onClose={viewer.close}
                 onOpenPrev={navigation.openPrevFolder}
                 onOpenNext={navigation.openNextFolder}
-                onDelete={dialogs.deleteDialog.open}
+                onDelete={(node) => dialogs.deleteDialog.open([node])}
               />
             </ScrollLockProvider>
           )}

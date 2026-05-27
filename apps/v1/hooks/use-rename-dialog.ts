@@ -1,23 +1,46 @@
 import { useCallback, useState } from "react";
 
-export function useRenameDialog<T>() {
+type RenameDialogContext<T> =
+  | {
+      isOpen: true;
+      target: T;
+    }
+  | { isOpen: false };
+
+type UseRenameDialogProps<T> = {
+  onChange?: (context: RenameDialogContext<T>) => void;
+};
+
+export function useRenameDialog<T>({ onChange }: UseRenameDialogProps<T>) {
+  const [isOpen, setIsOpen] = useState(false);
   const [target, setTarget] = useState<T | null>(null);
 
-  const isOpen = !!target;
-
-  const open = useCallback((node: T) => {
-    setTarget(node);
-  }, []);
+  const open = useCallback(
+    (node: T) => {
+      onChange?.({
+        isOpen: true,
+        target: node,
+      });
+      setTarget(node);
+      setIsOpen(true);
+    },
+    [onChange]
+  );
 
   const close = useCallback(() => {
+    onChange?.({ isOpen: false });
     setTarget(null);
-  }, []);
+    setIsOpen(false);
+  }, [onChange]);
 
-  const onOpenChange = useCallback((open: boolean) => {
-    if (!open) {
-      setTarget(null);
-    }
-  }, []);
+  const onOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        close();
+      }
+    },
+    [close]
+  );
 
   return { target, isOpen, open, close, onOpenChange };
 }

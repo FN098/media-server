@@ -1,38 +1,37 @@
 import { useCallback, useState } from "react";
 
+type DeleteDialogContext<T> =
+  | {
+      isOpen: true;
+      targets: T[];
+    }
+  | { isOpen: false };
+
 type UseDeleteDialogProps<T> = {
-  onSelectionChange: (nodes: T[]) => void;
+  onChange?: (context: DeleteDialogContext<T>) => void;
 };
 
-export function useDeleteDialog<T>({
-  onSelectionChange,
-}: UseDeleteDialogProps<T>) {
+export function useDeleteDialog<T>({ onChange }: UseDeleteDialogProps<T>) {
+  const [isOpen, setIsOpen] = useState(false);
   const [targets, setTargets] = useState<T[]>([]);
 
-  const isOpen = targets.length > 0;
-
   const open = useCallback(
-    (node: T) => {
-      const targets = [node];
-
-      onSelectionChange(targets);
-      setTargets(targets);
-    },
-    [onSelectionChange]
-  );
-
-  const openTargets = useCallback(
     (targets: T[]) => {
-      onSelectionChange(targets);
+      onChange?.({
+        isOpen: true,
+        targets,
+      });
       setTargets(targets);
+      setIsOpen(true);
     },
-    [onSelectionChange]
+    [onChange]
   );
 
   const close = useCallback(() => {
+    onChange?.({ isOpen: false });
     setTargets([]);
-    onSelectionChange([]);
-  }, [onSelectionChange]);
+    setIsOpen(false);
+  }, [onChange]);
 
   const onOpenChange = useCallback(
     (open: boolean) => {
@@ -47,7 +46,6 @@ export function useDeleteDialog<T>({
     targets,
     isOpen,
     open,
-    openTargets,
     close,
     onOpenChange,
   };

@@ -57,8 +57,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   });
 
   const dialogs = useTrashDialogs({
-    selectedNodes: selection.selectedNodes,
-    clearSelection: selection.reset,
+    selection,
   });
 
   const thumbs = useTrashThumbs({
@@ -89,6 +88,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   });
 
   const selectionbar = useTrashSelectionbar({
+    selection,
     dialogs,
     tagEditor,
   });
@@ -143,7 +143,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
                 onClose={viewer.close}
                 onOpenPrev={navigation.openPrevFolder}
                 onOpenNext={navigation.openNextFolder}
-                onDelete={dialogs.deleteDialog.open}
+                onDelete={(node) => dialogs.deleteDialog.open([node])}
               />
             </ScrollLockProvider>
           )}

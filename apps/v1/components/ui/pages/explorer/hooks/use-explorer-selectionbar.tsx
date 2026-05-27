@@ -1,8 +1,10 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
+import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { ExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumbs";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
+import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { averageBy } from "@/lib/utils/math";
 import {
@@ -17,6 +19,8 @@ import {
 import { useMemo } from "react";
 
 interface UseExplorerSelectionbarProps {
+  listing: MediaListing;
+  selection: ExplorerSelection;
   dialogs: ExplorerDialogs;
   tagEditor: TagEditorControl;
   favorites: ExplorerFavorites;
@@ -24,11 +28,15 @@ interface UseExplorerSelectionbarProps {
 }
 
 export function useExplorerSelectionbar({
+  listing,
+  selection,
   dialogs,
   tagEditor,
   favorites,
   thumbs,
 }: UseExplorerSelectionbarProps) {
+  const { selectedNodes } = selection;
+
   const { favoriteDialog, deleteDialog, copyDialog, moveDialog } = dialogs;
 
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
@@ -74,28 +82,28 @@ export function useExplorerSelectionbar({
           type: "action",
           icon: StarIcon,
           label: "お気に入り登録",
-          onClick: () => favoriteDialog.openSelected({ mode: "add" }),
+          onClick: () => favoriteDialog.open(selectedNodes, "add"),
         },
         {
           key: "remove-favorites",
           type: "action",
           icon: StarOffIcon,
           label: "お気に入り解除",
-          onClick: () => favoriteDialog.openSelected({ mode: "remove" }),
+          onClick: () => favoriteDialog.open(selectedNodes, "remove"),
         },
         {
           key: "move",
           type: "action",
           icon: FolderInputIcon,
           label: "移動",
-          onClick: moveDialog.openSelected,
+          onClick: () => moveDialog.open(selectedNodes, listing.path),
         },
         {
           key: "copy",
           type: "action",
           icon: CopyIcon,
           label: "コピー",
-          onClick: copyDialog.openSelected,
+          onClick: () => copyDialog.open(selectedNodes, listing.path),
         },
         {
           key: "update-thumb",
@@ -110,15 +118,17 @@ export function useExplorerSelectionbar({
           variant: "destructive",
           icon: Trash2Icon,
           label: "削除",
-          onClick: deleteDialog.openSelected,
+          onClick: () => deleteDialog.open(selectedNodes),
         },
       ] satisfies MenuItemDef<MultipleNodesContext>[],
     [
-      copyDialog.openSelected,
-      deleteDialog.openSelected,
+      copyDialog,
+      deleteDialog,
       favoriteDialog,
       favorites,
-      moveDialog.openSelected,
+      listing.path,
+      moveDialog,
+      selectedNodes,
       thumbs,
     ]
   );
