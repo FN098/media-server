@@ -72,11 +72,11 @@ import { toast } from "sonner";
 export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== 検索 =====
 
-  const { trigger: focusSearch } = useSearchFocusContext();
+  const searchFocus = useSearchFocusContext();
 
   // ===== ビューモード =====
 
-  const { value: viewMode } = useViewMode();
+  const viewMode = useViewMode();
 
   // ===== 訪問履歴 =====
 
@@ -438,7 +438,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onEditTags: tagEditor.open,
     onToggleFullscreen: () => void fullscreen.toggle(),
     onSelectAll: selection.selectAll,
-    onFocusSearch: focusSearch,
+    onFocusSearch: searchFocus.trigger,
     onRename: () => renameDialog.setTarget(selection.nodes[0]),
     onOpenPrevFolder: () => handleOpenPrevFolder("first"),
     onOpenNextFolder: () => handleOpenNextFolder("first"),
@@ -556,7 +556,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           </div>
 
           {/* グリッドビュー */}
-          {viewMode === "grid" && !isViewerMode && (
+          {viewMode.value === "grid" && !isViewerMode && (
             <div className="flex-1">
               <PagingGridView
                 allNodes={filteredNodes}
@@ -570,7 +570,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           )}
 
           {/* リストビュー */}
-          {viewMode === "list" && !isViewerMode && (
+          {viewMode.value === "list" && !isViewerMode && (
             <div className="flex-1">
               <PagingListView
                 allNodes={filteredNodes}
