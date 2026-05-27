@@ -1,6 +1,9 @@
 "use client";
 
-import { getRecentFoldersAction } from "@/actions/folder-actions";
+import {
+  getRecentFoldersAction,
+  togglePinVisitedFolderAction,
+} from "@/actions/folder-actions";
 import {
   getSubDirectoriesAction,
   moveNodesAction,
@@ -21,18 +24,22 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shadcn/components/ui/tabs";
+import { cn } from "@/shadcn/lib/utils";
 import {
   ChevronLeft,
   ChevronRight,
   Clock,
   Folder,
   FolderInput,
+  Pin,
 } from "lucide-react";
 import { dirname } from "path";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type DirectoryInfo = { name: string; path: string };
+
+type RecentDirectoryInfo = DirectoryInfo & { pinned: boolean };
 
 interface MoveDialogProps {
   open: boolean;
@@ -49,7 +56,7 @@ export function MoveDialog({
 }: MoveDialogProps) {
   const [currentPath, setCurrentPath] = useState(initialDirPath);
   const [dirs, setDirs] = useState<DirectoryInfo[]>([]);
-  const [recentDirs, setRecentDirs] = useState<DirectoryInfo[]>([]);
+  const [recentDirs, setRecentDirs] = useState<RecentDirectoryInfo[]>([]);
 
   const [activeTab, setActiveTab] = useState<string>("browse");
 
@@ -86,7 +93,7 @@ export function MoveDialog({
       if (result.success) {
         // 移動対象自身や子孫フォルダは履歴からも除外しておく
         const filtered = (result.data ?? []).filter(
-          (d: DirectoryInfo) =>
+          (d: RecentDirectoryInfo) =>
             !sourceNodes.some(
               (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
             )
@@ -136,6 +143,18 @@ export function MoveDialog({
     const path = parent === "." ? "/" : parent;
     openFolder(path);
   }, [currentPath, openFolder]);
+
+  // ピン留めトグル処理
+  const handleTogglePin = (path: string, currentPinned: boolean) => {
+    startNavigating(async () => {
+      const result = await togglePinVisitedFolderAction(path, currentPinned);
+      if (result.success) {
+        fetchRecentDirs();
+      } else {
+        toast.error(result.error || "ピン留めの更新に失敗しました");
+      }
+    });
+  };
 
   // ダイアログ初期化
   useEffect(() => {
@@ -245,27 +264,61 @@ export function MoveDialog({
                     </div>
                   ) : (
                     recentDirs.map((dir) => (
-                      <Button
+                      <div
                         key={dir.path}
-                        variant="ghost"
-                        className={`w-full justify-start hover:bg-primary/10 group text-left ${
-                          currentPath === dir.path
-                            ? "bg-primary/5 font-medium"
-                            : ""
-                        }`}
-                        onClick={() => handleSelectRecentFolder(dir.path)}
-                        disabled={isLoading}
+                        className="relative group/wrapper w-full"
                       >
-                        <Folder className="mr-2 h-4 w-4 text-amber-500 shrink-0" />
-                        <div className="flex flex-col items-start min-w-0">
-                          <span className="truncate w-full text-sm">
-                            {dir.name || dir.path.split("/").pop()}
-                          </span>
-                          <span className="text-xs text-muted-foreground truncate w-full">
-                            {dir.path}
-                          </span>
+                        {/* フォルダ選択ボタン */}
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-start hover:bg-primary/10 group text-left pl-3 pr-12 py-6 h-auto", // ピンボタンのスペース確保と高さを少し調整
+                            currentPath === dir.path &&
+                              "bg-primary/5 font-medium",
+                            dir.pinned && "bg-secondary/30" // ピン留め時の背景変更
+                          )}
+                          onClick={() => handleSelectRecentFolder(dir.path)}
+                          disabled={isLoading}
+                        >
+                          <Folder className="mr-2 h-4 w-4 text-amber-500 shrink-0" />
+                          <div className="flex flex-col items-start min-w-0 pr-2">
+                            <span className="truncate w-full text-sm">
+                              {dir.name || dir.path.split("/").pop()}
+                            </span>
+                            <span className="text-xs text-muted-foreground truncate w-full">
+                              {dir.path}
+                            </span>
+                          </div>
+                        </Button>
+
+                        {/* ピン留めボタン（絶対配置：ホバー時、またはピン留め中のみ表示） */}
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            disabled={isLoading}
+                            className={cn(
+                              "h-8 w-8 text-muted-foreground/50 hover:text-primary transition-opacity",
+                              !dir.pinned &&
+                                "opacity-0 group-hover/wrapper:opacity-100 focus:opacity-100"
+                            )}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation(); // フォルダ選択イベントへの伝播を防止
+                              handleTogglePin(dir.path, dir.pinned);
+                            }}
+                          >
+                            <Pin
+                              className={cn(
+                                "w-3.5 h-3.5 transition-transform duration-200",
+                                dir.pinned
+                                  ? "fill-primary text-primary rotate-0"
+                                  : "rotate-45"
+                              )}
+                            />
+                          </Button>
                         </div>
-                      </Button>
+                      </div>
                     ))
                   )}
                 </div>

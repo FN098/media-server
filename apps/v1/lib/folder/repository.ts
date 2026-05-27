@@ -14,11 +14,30 @@ export async function getRecentFolders(
   return await prisma.visitedFolder.findMany({
     where: { userId },
     take: length,
-    orderBy: { lastViewedAt: "desc" },
+    orderBy: [
+      { isPinned: "desc" }, // 1. ピン留めされているものを上へ
+      { lastViewedAt: "desc" }, // 2. その中で新しい順
+    ],
   });
 }
 
-// 最近訪れたフォルダを更新
+// 訪問済みフォルダのピン留めトグル
+export async function togglePinVisitedFolder(
+  userId: string,
+  dirPath: string,
+  currentPinned: boolean
+) {
+  return await prisma.visitedFolder.update({
+    where: {
+      userId_dirPath: { userId, dirPath },
+    },
+    data: {
+      isPinned: !currentPinned,
+    },
+  });
+}
+
+// 訪問済みフォルダを更新
 export async function updateVisitedFolder(
   dirPath: string,
   userId: string

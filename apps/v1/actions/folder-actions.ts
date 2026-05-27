@@ -1,7 +1,11 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
-import { getRecentFolders, updateVisitedFolder } from "@/lib/folder/repository";
+import {
+  getRecentFolders,
+  togglePinVisitedFolder,
+  updateVisitedFolder,
+} from "@/lib/folder/repository";
 import { fsNameSchema } from "@/lib/media/schemas";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
@@ -15,7 +19,6 @@ export async function visitFolderAction(dirPath: string): Promise<void> {
 
   await updateVisitedFolder(dirPath, user.id);
 
-  // キャッシュの更新
   revalidatePath("/dashboard");
 }
 
@@ -53,7 +56,6 @@ export async function createFolderAction(
 
     await mkdir(newRealPath, { recursive: true });
 
-    // キャッシュの更新
     revalidatePath("/explorer");
 
     return {
@@ -73,11 +75,13 @@ export async function getRecentFoldersAction() {
   try {
     const user = await resolveCurrentUserOrThrow();
     const folders = await getRecentFolders(user.id, 10);
+
     return {
       success: true,
       data: folders.map((f) => ({
         path: f.dirPath,
         name: basename(f.dirPath),
+        pinned: f.isPinned,
       })),
     };
   } catch (error) {
@@ -85,6 +89,29 @@ export async function getRecentFoldersAction() {
     return {
       success: false,
       error: "フォルダ取得中にエラーが発生しました。",
+    };
+  }
+}
+
+// フォルダ訪問履歴ピン留めトグル
+export async function togglePinVisitedFolderAction(
+  dirPath: string,
+  currentPinned: boolean
+) {
+  try {
+    const user = await resolveCurrentUserOrThrow();
+    await togglePinVisitedFolder(user.id, dirPath, currentPinned);
+
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Toggle Visited Folder Pinned Error:", error);
+    return {
+      success: false,
+      error: "フォルダ更新中にエラーが発生しました。",
     };
   }
 }

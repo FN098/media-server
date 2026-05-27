@@ -109,11 +109,12 @@ model VisitedFolder {
   userId       String
   dirPath      String
   lastViewedAt DateTime @updatedAt
+  isPinned     Boolean  @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, dirPath])
-  @@index([userId, lastViewedAt])
+  @@index([userId, isPinned, lastViewedAt])
 }
 
 model FolderMeta {
