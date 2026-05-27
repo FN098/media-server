@@ -21,6 +21,10 @@ export function useDeleteDialog<T>({
     setTargets(selectedNodes);
   }, [selectedNodes]);
 
+  const openTargets = useCallback((targets: T[]) => {
+    setTargets(targets);
+  }, []);
+
   const onOpenChange = useCallback(
     (open: boolean) => {
       if (!open) {
@@ -37,6 +41,7 @@ export function useDeleteDialog<T>({
     isOpen,
     open,
     openSelected,
+    openTargets,
     onOpenChange,
   };
 }

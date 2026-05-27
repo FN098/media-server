@@ -39,6 +39,14 @@ export function useExplorerSelection({
     [replaceSelection]
   );
 
+  const selectNodes = useCallback(
+    (nodes: MediaNode[]) => {
+      selectPaths(nodes.map((n) => n.path));
+      enterSelectionMode();
+    },
+    [enterSelectionMode, selectPaths]
+  );
+
   const selectAll = useCallback(() => {
     selectPaths(currentNodes.map((n) => n.path));
     enterSelectionMode();
@@ -56,6 +64,7 @@ export function useExplorerSelection({
     selectedCount,
     replace,
     selectAll,
+    selectNodes,
     reset,
   };
 }
