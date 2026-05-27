@@ -1,16 +1,23 @@
+import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
+import { useCallback } from "react";
+
+export type ExplorerSelection = ReturnType<typeof useExplorerSelection>;
 
 interface UseExplorerSelectionProps {
-  allNodes: MediaNode[];
-  currentNodes: MediaNode[];
+  listing: MediaListing;
+  filtering: ExplorerFiltering;
 }
 
 export function useExplorerSelection({
-  allNodes,
-  currentNodes,
+  listing,
+  filtering,
 }: UseExplorerSelectionProps) {
+  const { nodes: allNodes } = listing;
+  const { filteredNodes: currentNodes } = filtering;
+
   const {
     isSelectionMode,
     enterSelectionMode,
@@ -25,25 +32,28 @@ export function useExplorerSelection({
 
   const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
 
-  const replace = (node: MediaNode) => {
-    replaceSelection(node.path);
-  };
+  const replace = useCallback(
+    (node: MediaNode) => {
+      replaceSelection(node.path);
+    },
+    [replaceSelection]
+  );
 
-  const selectAll = () => {
+  const selectAll = useCallback(() => {
     selectPaths(currentNodes.map((n) => n.path));
     enterSelectionMode();
-  };
+  }, [currentNodes, enterSelectionMode, selectPaths]);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     clearSelection();
     exitSelectionMode();
-  };
+  }, [clearSelection, exitSelectionMode]);
 
   return {
     isSelectionMode,
     hasSelection,
-    nodes: selectedNodes,
-    count: selectedCount,
+    selectedNodes,
+    selectedCount,
     replace,
     selectAll,
     reset,

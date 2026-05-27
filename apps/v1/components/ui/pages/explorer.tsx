@@ -28,7 +28,11 @@ import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { cn } from "@/shadcn/lib/utils";
 
-export function Explorer({ listing }: { listing: MediaListing }) {
+interface ExplorerProps {
+  listing: MediaListing;
+}
+
+export function Explorer({ listing }: ExplorerProps) {
   // ===== 検索 =====
 
   const searchFocus = useSearchFocusContext();
@@ -43,40 +47,40 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== フィルタリング =====
 
-  const filtering = useExplorerFiltering({ allNodes: listing.nodes });
+  const filtering = useExplorerFiltering({ listing });
 
   // ===== 選択 =====
 
   const selection = useExplorerSelection({
-    allNodes: listing.nodes,
-    currentNodes: filtering.filteredNodes,
+    listing,
+    filtering,
   });
 
   // ===== ナビゲーション =====
 
   const navigation = useExplorerNavigation({
-    currentDir: listing.path,
-    prevDir: listing.prev,
-    nextDir: listing.next,
-    mediaOnly: filtering.mediaOnly,
-    onSelect: selection.replace,
+    listing,
+    filtering,
+    selection,
   });
 
   // ===== お気に入り =====
 
-  const favorites = useExplorerFavorites({ selectedNodes: selection.nodes });
+  const favorites = useExplorerFavorites({
+    targetNodes: selection.selectedNodes,
+  });
 
   // ===== タグエディタ =====
 
   const tagEditor = useTagEditorControl({
-    targetCount: selection.count,
+    targetCount: selection.selectedCount,
   });
 
   // ===== ダイアログ =====
 
   const dialogs = useExplorerDialogs({
     currentDir: listing.path,
-    selectedNodes: selection.nodes,
+    selectedNodes: selection.selectedNodes,
     clearSelection: selection.reset,
   });
 
@@ -95,7 +99,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   const thumbs = useExplorerThumbs({
     currentDir: listing.path,
-    selectedNodes: selection.nodes,
+    selectedNodes: selection.selectedNodes,
   });
 
   // ===== フルスクリーン =====
@@ -116,7 +120,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     onToggleFullscreen: () => void fullscreen.toggle(),
     onSelectAll: selection.selectAll,
     onFocusSearch: searchFocus.trigger,
-    onRename: () => renameDialog.setTarget(selection.nodes[0]),
+    onRename: () => renameDialog.setTarget(selection.selectedNodes[0]),
     onOpenPrevFolder: () => navigation.openPrevFolder("first"),
     onOpenNextFolder: () => navigation.openNextFolder("first"),
     onResetFilter: filtering.reset,
@@ -126,7 +130,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   const menu = useExplorerMenu({
     hasSelection: selection.hasSelection,
-    selectedCount: selection.count,
+    selectedCount: selection.selectedCount,
     isViewerMode: navigation.isViewerOpen,
     isFullscreenSupported: fullscreen.isSupported,
     getFavorite: favorites.get,
@@ -228,12 +232,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {/* 選択バー */}
           <SelectionBar
             open={selection.isSelectionMode && !tagEditor.isOpen}
-            count={selection.count}
+            count={selection.selectedCount}
             totalCount={filtering.filteredCount}
             onSelectAll={selection.selectAll}
             onClose={selection.reset}
             className="z-40" // DropdownMenu より小さくする
-            context={selection}
+            context={{ nodes: selection.selectedNodes }}
             menuItems={selectionbar.menu.items}
             inlineMenuItems={selectionbar.menu.inlineItems}
           />
@@ -241,7 +245,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           {/* タグエディター */}
           <TagEditSheet
             open={tagEditor.isOpen}
-            targetNodes={selection.nodes}
+            targetNodes={selection.selectedNodes}
             onClose={tagEditor.close}
             mode={tagEditor.mode}
             opacity={tagEditor.mode === "default" ? 100 : 0}

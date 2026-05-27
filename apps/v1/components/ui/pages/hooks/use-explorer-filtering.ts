@@ -14,16 +14,16 @@ import {
   createTagFilter,
   withDirectoryControl,
 } from "@/lib/filter/factory";
-import { MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useMemo } from "react";
 
 export type ExplorerFiltering = ReturnType<typeof useExplorerFiltering>;
 
 interface UseExplorerFilteringProps {
-  allNodes: MediaNode[];
+  listing: MediaListing;
 }
 
-export function useExplorerFiltering({ allNodes }: UseExplorerFilteringProps) {
+export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
   const queryFilter = useQueryFilter();
   const mediaTypeFilter = useMediaTypeFilter();
   const ratingFilter = useRatingFilter();
@@ -62,7 +62,7 @@ export function useExplorerFiltering({ allNodes }: UseExplorerFilteringProps) {
 
   // フィルター結果
   const { filtered, filteredCount, totalCount, isFiltered } = useFilteredNodes(
-    allNodes,
+    listing.nodes,
     pipeline
   );
 
