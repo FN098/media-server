@@ -70,7 +70,7 @@ export function useExplorerHotkeys({
     scopes: "explorer",
   });
 
-  useHotkeys("t", () => tagEditor.open(), {
+  useHotkeys("t", () => tagEditor.toggle(), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
 
