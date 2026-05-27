@@ -1,5 +1,3 @@
-"use client";
-
 import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
 import { useMemo } from "react";
 

@@ -18,10 +18,13 @@ import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
+import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTagEditorControl } from "@/hooks/use-tag-editor-control";
 import { useViewMode } from "@/hooks/use-view-mode";
+import { useViewerNavigation } from "@/hooks/use-viewer-control";
 import { MediaListing } from "@/lib/media/types";
+import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
@@ -58,10 +61,16 @@ export function Explorer({ listing }: ExplorerProps) {
 
   // ===== ナビゲーション =====
 
+  const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
+  const folder = useFolderNavigation({});
+  const history = useHistoryContext();
   const navigation = useExplorerNavigation({
     listing,
     filtering,
     selection,
+    viewer,
+    history,
+    folder,
   });
 
   // ===== お気に入り =====
@@ -85,7 +94,6 @@ export function Explorer({ listing }: ExplorerProps) {
   });
 
   const {
-    isDialogOpen,
     deleteDialog,
     renameDialog,
     extractDialog,
@@ -110,20 +118,14 @@ export function Explorer({ listing }: ExplorerProps) {
 
   useExplorerHotkeys({
     enabled: true,
-    isDialogMode: isDialogOpen,
-    isTagEditorMode: tagEditor.isOpen,
-    isViewerMode: navigation.isViewerOpen,
-    onResetSelection: selection.reset,
-    onGoBack: navigation.openParentFolder,
-    onDelete: deleteDialog.openSelected,
-    onEditTags: tagEditor.open,
-    onToggleFullscreen: () => void fullscreen.toggle(),
-    onSelectAll: selection.selectAll,
-    onFocusSearch: searchFocus.trigger,
-    onRename: () => renameDialog.setTarget(selection.selectedNodes[0]),
-    onOpenPrevFolder: () => navigation.openPrevFolder("first"),
-    onOpenNextFolder: () => navigation.openNextFolder("first"),
-    onResetFilter: filtering.reset,
+    filtering,
+    selection,
+    dialogs,
+    tagEditor,
+    navigation,
+    viewer,
+    fullscreen,
+    searchFocus,
   });
 
   // ===== 右クリックメニュー/ドロップダウンメニュー =====
@@ -131,7 +133,7 @@ export function Explorer({ listing }: ExplorerProps) {
   const menu = useExplorerMenu({
     hasSelection: selection.hasSelection,
     selectedCount: selection.selectedCount,
-    isViewerMode: navigation.isViewerOpen,
+    isViewerMode: viewer.isOpen,
     isFullscreenSupported: fullscreen.isSupported,
     getFavorite: favorites.get,
     onOpenInNewTab: navigation.openInNewTab,
@@ -187,12 +189,12 @@ export function Explorer({ listing }: ExplorerProps) {
           />
 
           {/* グリッドビュー */}
-          {viewMode.value === "grid" && !navigation.isViewerOpen && (
+          {viewMode.value === "grid" && !viewer.isOpen && (
             <div className="flex-1">
               <PagingGridView
                 allNodes={filtering.filteredNodes}
-                initialScrollPath={navigation.lastHistory?.path}
-                onScrollRestored={navigation.handleScrollRestored}
+                initialScrollPath={history.last?.path}
+                onScrollRestored={navigation.onScrollRestored}
                 onThumbError={(node) => void thumbs.update(node)}
                 onOpen={navigation.open}
                 focusOnPageChange
@@ -201,12 +203,12 @@ export function Explorer({ listing }: ExplorerProps) {
           )}
 
           {/* リストビュー */}
-          {viewMode.value === "list" && !navigation.isViewerOpen && (
+          {viewMode.value === "list" && !viewer.isOpen && (
             <div className="flex-1">
               <PagingListView
                 allNodes={filtering.filteredNodes}
-                initialScrollPath={navigation.lastHistory?.path}
-                onScrollRestored={navigation.handleScrollRestored}
+                initialScrollPath={history.last?.path}
+                onScrollRestored={navigation.onScrollRestored}
                 onOpen={navigation.open}
                 focusOnPageChange
               />
@@ -214,14 +216,14 @@ export function Explorer({ listing }: ExplorerProps) {
           )}
 
           {/* ビューワ */}
-          {navigation.isViewerOpen && (
+          {viewer.isOpen && (
             <ScrollLockProvider>
               <MediaViewer
                 allNodes={filtering.mediaOnly}
-                initialIndex={navigation.initialIndex}
+                initialIndex={viewer.index}
                 menuItems={menu.items}
-                onIndexChange={navigation.handleIndexChange}
-                onClose={navigation.closeViewer}
+                onIndexChange={navigation.onIndexChange}
+                onClose={viewer.close}
                 onOpenPrev={navigation.openPrevFolder}
                 onOpenNext={navigation.openNextFolder}
                 onDelete={deleteDialog.open}
@@ -255,7 +257,7 @@ export function Explorer({ listing }: ExplorerProps) {
           <FolderNavigation prevPath={listing.prev} nextPath={listing.next} />
 
           {/* ダイアログ */}
-          <ExplorerDialogs {...dialogs} />
+          <ExplorerDialogs dialogs={dialogs} />
         </div>
       </MenuItemsProvider>
     </PagingProvider>

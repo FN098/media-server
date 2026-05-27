@@ -2,9 +2,11 @@ import { TagEditMode } from "@/components/ui/sheets/tag-edit-sheet/types";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useCallback } from "react";
 
-type UseTagEditorHandlersProps = {
+export type TagEditorControl = ReturnType<typeof useTagEditorControl>;
+
+interface UseTagEditorHandlersProps {
   targetCount: number;
-};
+}
 
 export function useTagEditorControl({
   targetCount,

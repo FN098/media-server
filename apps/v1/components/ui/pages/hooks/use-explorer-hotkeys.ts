@@ -1,5 +1,11 @@
-"use client";
-
+import { ExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
+import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
+import { ExplorerNavigation } from "@/components/ui/pages/hooks/use-explorer-navigation";
+import { ExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
+import { Fullscreen } from "@/hooks/use-fullscreen";
+import { SearchFocus } from "@/hooks/use-search-focus";
+import { TagEditorControl } from "@/hooks/use-tag-editor-control";
+import { ViewerNavigation } from "@/hooks/use-viewer-control";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 
@@ -7,49 +13,37 @@ const ALL_SCOPES = ["explorer", "tag-editor", "viewer", "dialog"] as const;
 
 interface UseExplorerHotkeysProps {
   enabled: boolean;
-  isDialogMode: boolean;
-  isTagEditorMode: boolean;
-  isViewerMode: boolean;
-  onResetSelection: () => void;
-  onGoBack: () => void;
-  onDelete: () => void;
-  onEditTags: () => void;
-  onToggleFullscreen: () => void;
-  onSelectAll: () => void;
-  onFocusSearch: () => void;
-  onRename: () => void;
-  onOpenPrevFolder: () => void;
-  onOpenNextFolder: () => void;
-  onResetFilter: () => void;
+  filtering: ExplorerFiltering;
+  selection: ExplorerSelection;
+  dialogs: ExplorerDialogs;
+  tagEditor: TagEditorControl;
+  navigation: ExplorerNavigation;
+  viewer: ViewerNavigation;
+  fullscreen: Fullscreen;
+  searchFocus: SearchFocus;
 }
 
 export function useExplorerHotkeys({
   enabled,
-  isDialogMode,
-  isTagEditorMode,
-  isViewerMode,
-  onResetSelection,
-  onGoBack,
-  onDelete,
-  onEditTags,
-  onToggleFullscreen,
-  onSelectAll,
-  onFocusSearch,
-  onRename,
-  onOpenPrevFolder,
-  onOpenNextFolder,
-  onResetFilter,
+  filtering,
+  selection,
+  dialogs,
+  tagEditor,
+  navigation,
+  viewer,
+  fullscreen,
+  searchFocus,
 }: UseExplorerHotkeysProps) {
   // スコープ切り替えフック
   const { enableScope, disableScope } = useHotkeysContext();
 
   // 現在のスコープ
   const activeScope = useMemo<(typeof ALL_SCOPES)[number]>(() => {
-    if (isDialogMode) return "dialog";
-    else if (isTagEditorMode) return "tag-editor";
-    else if (isViewerMode) return "viewer";
+    if (dialogs.isOpen) return "dialog";
+    else if (tagEditor.isOpen) return "tag-editor";
+    else if (viewer.isOpen) return "viewer";
     else return "explorer";
-  }, [isDialogMode, isTagEditorMode, isViewerMode]);
+  }, [dialogs.isOpen, tagEditor.isOpen, viewer.isOpen]);
 
   // スコープの排他的制御
   useEffect(() => {
@@ -63,24 +57,24 @@ export function useExplorerHotkeys({
     });
   }, [activeScope, disableScope, enableScope]);
 
-  useHotkeys("escape", () => onResetSelection(), {
+  useHotkeys("escape", () => selection.reset(), {
     scopes: "explorer",
     enabled,
   });
 
-  useHotkeys("backspace", () => onGoBack(), {
+  useHotkeys("backspace", () => navigation.openParentFolder(), {
     scopes: ["explorer"],
   });
 
-  useHotkeys("delete", () => onDelete(), {
+  useHotkeys("delete", () => dialogs.deleteDialog.openSelected(), {
     scopes: "explorer",
   });
 
-  useHotkeys("t", () => onEditTags(), {
+  useHotkeys("t", () => tagEditor.open(), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
 
-  useHotkeys("f", () => onToggleFullscreen(), {
+  useHotkeys("f", () => void fullscreen.toggle(), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
 
@@ -88,7 +82,7 @@ export function useExplorerHotkeys({
     "ctrl+a",
     (e) => {
       e.preventDefault();
-      onSelectAll();
+      selection.selectAll();
     },
     { scopes: ["explorer", "tag-editor"] }
   );
@@ -97,24 +91,28 @@ export function useExplorerHotkeys({
     "ctrl+k",
     (e) => {
       e.preventDefault();
-      onFocusSearch();
+      searchFocus.trigger();
     },
     { scopes: "explorer" }
   );
 
-  useHotkeys("f2", () => onRename(), {
-    scopes: ["explorer", "viewer"],
-  });
+  useHotkeys(
+    "f2",
+    () => dialogs.renameDialog.open(selection.selectedNodes[0]),
+    {
+      scopes: ["explorer", "viewer"],
+    }
+  );
 
-  useHotkeys("p", () => onOpenPrevFolder, {
+  useHotkeys("p", () => navigation.openPrevFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
 
-  useHotkeys("n", () => onOpenNextFolder(), {
+  useHotkeys("n", () => navigation.openNextFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
   });
 
-  useHotkeys("r", () => onResetFilter(), {
+  useHotkeys("r", () => filtering.reset(), {
     scopes: ["explorer"],
   });
 }

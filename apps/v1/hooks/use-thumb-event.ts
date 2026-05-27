@@ -1,5 +1,3 @@
-"use client";
-
 import { getApiThumbEventsUrl } from "@/lib/path/helpers";
 import { ThumbCompletedEvent } from "@/workers/thumb/types";
 import { useCallback, useEffect, useRef } from "react";

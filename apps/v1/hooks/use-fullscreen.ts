@@ -1,6 +1,6 @@
-"use client";
-
 import { useCallback, useEffect, useReducer } from "react";
+
+export type Fullscreen = ReturnType<typeof useFullscreen>;
 
 export function useFullscreen() {
   const [, forceUpdate] = useReducer((x) => x + 1, 0);

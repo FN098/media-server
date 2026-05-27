@@ -1,5 +1,3 @@
-"use client";
-
 import { useTags } from "@/hooks/use-tags";
 import {
   TagFilterMode,

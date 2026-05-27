@@ -1,5 +1,3 @@
-"use client";
-
 import { MediaNode } from "@/lib/media/types";
 import { useCallback, useMemo } from "react";
 

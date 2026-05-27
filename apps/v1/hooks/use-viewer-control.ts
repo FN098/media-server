@@ -1,9 +1,9 @@
-"use client";
-
 import { IndexLike, parseIndexLike } from "@/lib/index-like";
 import { MediaNode } from "@/lib/media/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
+
+export type ViewerNavigation = ReturnType<typeof useViewerNavigation>;
 
 type OpenOptions = {
   at?: IndexLike;

@@ -1,5 +1,3 @@
-"use client";
-
 import { useSelection } from "@/hooks/use-selection";
 
 export function usePathSelection(initialSelectedPaths?: Iterable<string>) {

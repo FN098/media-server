@@ -1,6 +1,6 @@
-"use client";
-
 import { useCallback, useRef } from "react";
+
+export type SearchFocus = ReturnType<typeof useSearchFocus>;
 
 export function useSearchFocus() {
   // フォーカスを実行するための関数を保持する

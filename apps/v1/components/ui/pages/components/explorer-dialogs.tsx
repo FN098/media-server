@@ -6,20 +6,24 @@ import { ExtractDialog } from "@/components/ui/dialogs/extract-dialog";
 import { FavoriteDialog } from "@/components/ui/dialogs/favorite-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
-import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
+import { ExplorerDialogs as ExplorerDialogsType } from "@/components/ui/pages/hooks/use-explorer-dialogs";
 
-type ExplorerDialogsProps = ReturnType<typeof useExplorerDialogs>;
+type ExplorerDialogsProps = {
+  dialogs: ExplorerDialogsType;
+};
 
-export function ExplorerDialogs({
-  extractDialog,
-  renameDialog,
-  createFolderDialog,
-  copyDialog,
-  deleteDialog,
-  favoriteDialog,
-  moveDialog,
-  previewDialog,
-}: ExplorerDialogsProps) {
+export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
+  const {
+    copyDialog,
+    createFolderDialog,
+    deleteDialog,
+    extractDialog,
+    favoriteDialog,
+    moveDialog,
+    previewDialog,
+    renameDialog,
+  } = dialogs;
+
   return (
     <>
       {/* 解凍ダイアログ */}

@@ -1,6 +1,15 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
+import { ExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
+import { ExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-favorites";
+import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
+import { ExplorerNavigation } from "@/components/ui/pages/hooks/use-explorer-navigation";
+import { ExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
+import { Fullscreen } from "@/hooks/use-fullscreen";
+import { SearchFocus } from "@/hooks/use-search-focus";
+import { TagEditorControl } from "@/hooks/use-tag-editor-control";
+import { ViewerNavigation } from "@/hooks/use-viewer-control";
 import { isArchiveFile } from "@/lib/archive/extensions";
-import { MediaNode } from "@/lib/media/types";
+import { getFavorite } from "@/lib/favorite/repository";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   CopyIcon,
@@ -17,63 +26,29 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
-type UseExplorerMenuProps = {
-  hasSelection: boolean;
-  selectedCount: number;
-  isViewerMode: boolean;
-  isFullscreenSupported: boolean;
-  getFavorite: (path: string) => { rating: number | null };
-  onOpenInNewTab: (node: MediaNode) => void;
-  onExtract: (node: MediaNode) => void;
-  onExtractSelected: () => void;
-  onChangeRating: (props: {
-    node: MediaNode;
-    newRating: number | null;
-    onSuccess?: () => void;
-  }) => void;
-  onChangeRatingSelected: (props: {
-    newRating: number | null;
-    onSuccess?: () => void;
-  }) => void;
-  onToggleFullscreen: () => void;
-  onRename: (node: MediaNode) => void;
-  onMove: (node: MediaNode) => void;
-  onMoveSelected: () => void;
-  onCopy: (node: MediaNode) => void;
-  onCopySelected: () => void;
-  onEditTags: (node: MediaNode) => void;
-  onAddTagsToFilter: (node: MediaNode) => void;
-  onApplyAsPreview: (node: MediaNode) => void;
-  onUpdateThumb: (node: MediaNode) => void;
-  onUpdateThumbSelected: () => void;
-  onDelete: (node: MediaNode) => void;
-  onDeleteSelected: () => void;
-};
+interface UseExplorerMenuProps {
+  filtering: ExplorerFiltering;
+  selection: ExplorerSelection;
+  dialogs: ExplorerDialogs;
+  tagEditor: TagEditorControl;
+  navigation: ExplorerNavigation;
+  viewer: ViewerNavigation;
+  fullscreen: Fullscreen;
+  searchFocus: SearchFocus;
+  favorirtes: ExplorerFavorites;
+}
 
 export function useExplorerMenu({
-  hasSelection,
-  selectedCount,
-  isViewerMode,
-  isFullscreenSupported,
-  getFavorite,
-  onOpenInNewTab,
-  onExtractSelected,
-  onExtract,
-  onChangeRatingSelected,
-  onChangeRating,
-  onToggleFullscreen,
-  onRename,
-  onMove,
-  onMoveSelected,
-  onCopy,
-  onCopySelected,
-  onEditTags,
-  onAddTagsToFilter,
-  onApplyAsPreview,
-  onUpdateThumb,
-  onUpdateThumbSelected,
-  onDelete,
-  onDeleteSelected,
+  enabled,
+  filtering,
+  selection,
+  dialogs,
+  tagEditor,
+  navigation,
+  viewer,
+  fullscreen,
+  searchFocus,
+  favorites,
 }: UseExplorerMenuProps) {
   const items: MenuItemDef<NodeContext>[] = useMemo(
     () => [
@@ -83,7 +58,7 @@ export function useExplorerMenu({
         render: ({ node, closeMenu }) => {
           if (node.isDirectory) return null;
 
-          const { rating } = getFavorite(node.path);
+          const { rating } = favorites.get(node.path);
           return (
             <div className="w-full flex justify-center">
               <FavoriteRatingInput

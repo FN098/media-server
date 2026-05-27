@@ -9,17 +9,15 @@ export function useRenameDialog<T>() {
     setTarget(node);
   }, []);
 
+  const close = useCallback(() => {
+    setTarget(null);
+  }, []);
+
   const onOpenChange = useCallback((open: boolean) => {
     if (!open) {
       setTarget(null);
     }
   }, []);
 
-  return {
-    target,
-    setTarget,
-    isOpen,
-    open,
-    onOpenChange,
-  };
+  return { target, isOpen, open, close, onOpenChange };
 }

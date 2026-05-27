@@ -65,10 +65,10 @@ export function useExplorerDialogs({
     favoriteDialog,
   } as const;
 
-  const isDialogOpen = Object.values(all).some(({ isOpen }) => isOpen);
+  const isOpen = Object.values(all).some(({ isOpen }) => isOpen);
 
   return {
     ...all,
-    isDialogOpen,
+    isOpen,
   };
 }

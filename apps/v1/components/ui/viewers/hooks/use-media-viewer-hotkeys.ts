@@ -1,5 +1,3 @@
-"use client";
-
 import { MediaNode } from "@/lib/media/types";
 import { useHotkeys } from "react-hotkeys-hook";
 import { SwiperClass } from "swiper/react";

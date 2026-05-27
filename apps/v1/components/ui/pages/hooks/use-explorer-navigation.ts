@@ -1,35 +1,38 @@
 import { visitFolderAction } from "@/actions/folder-actions";
 import { ExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
 import { ExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
-import { useFolderNavigation } from "@/hooks/use-folder-navigation";
-import { toHistoryItem } from "@/hooks/use-history";
+import { FolderNavigation } from "@/hooks/use-folder-navigation";
+import { History, toHistoryItem } from "@/hooks/use-history";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { useParentPathname } from "@/hooks/use-parent-pathname";
-import { useViewerNavigation } from "@/hooks/use-viewer-control";
+import { ViewerNavigation } from "@/hooks/use-viewer-control";
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
-import { useHistoryContext } from "@/providers/history-provider";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
+
+export type ExplorerNavigation = ReturnType<typeof useExplorerNavigation>;
 
 interface UseExplorerNavigationProps {
   listing: MediaListing;
   filtering: ExplorerFiltering;
   selection: ExplorerSelection;
+  viewer: ViewerNavigation;
+  history: History;
+  folder: FolderNavigation;
 }
 
 export function useExplorerNavigation({
   listing,
   filtering,
   selection,
+  viewer,
+  history,
+  folder,
 }: UseExplorerNavigationProps) {
   const { path: currentDir, next: nextDir, prev: prevDir } = listing;
-  const { filteredNodes, mediaOnly } = filtering;
-
-  // ===== 訪問履歴 =====
-
-  const history = useHistoryContext();
+  const { mediaOnly } = filtering;
 
   // 初回マウント時に訪問履歴にプッシュ
   useEffect(() => {
@@ -38,7 +41,7 @@ export function useExplorerNavigation({
   }, []);
 
   // スクロール完了時に訪問履歴をポップ
-  const handleScrollRestored = () => {
+  const onScrollRestored = () => {
     history.pop();
   };
 
@@ -49,12 +52,8 @@ export function useExplorerNavigation({
     }
   }, [currentDir]);
 
-  // ===== ビューア =====
-
-  const viewer = useViewerNavigation({ nodes: filteredNodes });
-
   // ビューアスライド移動時の処理
-  const handleIndexChange = useCallback(
+  const onIndexChange = useCallback(
     (index: number) => {
       const media = mediaOnly[index];
       if (!media) return;
@@ -69,10 +68,6 @@ export function useExplorerNavigation({
     },
     [history, mediaOnly, selection]
   );
-
-  // ===== ナビゲーション =====
-
-  const folder = useFolderNavigation({});
 
   // インデックス計算
   const { getMediaIndex } = useMediaIndex(mediaOnly);
@@ -146,11 +141,7 @@ export function useExplorerNavigation({
     openPrevFolder,
     openNextFolder,
     openParentFolder: navigateToParent,
-    isViewerOpen: viewer.isOpen,
-    closeViewer: viewer.close,
-    initialIndex: viewer.index,
-    lastHistory: history.last,
-    handleScrollRestored,
-    handleIndexChange,
+    onScrollRestored,
+    onIndexChange,
   };
 }

@@ -1,7 +1,7 @@
-"use client";
-
 import { MediaNode } from "@/lib/media/types";
 import { useState } from "react";
+
+export type History = ReturnType<typeof useHistory>;
 
 type HistoryItem = {
   path: string;

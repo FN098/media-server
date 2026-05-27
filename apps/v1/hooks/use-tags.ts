@@ -1,5 +1,3 @@
-"use client";
-
 import { SearchTagsRequestParams, Tag } from "@/lib/tag/types";
 import {
   keepPreviousData,

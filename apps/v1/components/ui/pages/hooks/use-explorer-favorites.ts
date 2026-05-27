@@ -3,6 +3,8 @@ import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useCallback, useTransition } from "react";
 import { toast } from "sonner";
 
+export type ExplorerFavorites = ReturnType<typeof useExplorerFavorites>;
+
 type UpdateProps = {
   node: MediaNode;
   newRating: number | null;

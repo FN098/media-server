@@ -1,5 +1,3 @@
-"use client";
-
 import { enqueueCreateThumbsJobAction } from "@/actions/thumb-actions";
 import { useCallback } from "react";
 

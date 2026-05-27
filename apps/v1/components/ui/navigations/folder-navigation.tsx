@@ -5,15 +5,19 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { basename } from "path";
 
+interface FolderNavigationProps {
+  prevPath?: string | null;
+  nextPath?: string | null;
+  mode?: "explorer" | "trash";
+}
+
 export function FolderNavigation({
   prevPath,
   nextPath,
-  isDeleted,
-}: {
-  prevPath?: string | null;
-  nextPath?: string | null;
-  isDeleted?: boolean;
-}) {
+  mode = "explorer",
+}: FolderNavigationProps) {
+  const isDeleted = mode === "trash";
+
   const searchParams = useSearchParams();
   const params = new URLSearchParams(searchParams);
 

@@ -1,9 +1,9 @@
-"use client";
-
 import { IndexLike } from "@/lib/index-like";
 import { resolveClientPath } from "@/lib/path/resolvers";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+
+export type FolderNavigation = ReturnType<typeof useFolderNavigation>;
 
 type NavigateConfig = {
   path: string;

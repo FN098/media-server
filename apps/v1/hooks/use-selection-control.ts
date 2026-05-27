@@ -1,5 +1,3 @@
-"use client";
-
 import { MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useMemo } from "react";

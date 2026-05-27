@@ -1,5 +1,3 @@
-"use client";
-
 import { clamp } from "@/lib/utils/clamp";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
