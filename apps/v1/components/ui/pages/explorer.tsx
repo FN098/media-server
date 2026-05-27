@@ -8,6 +8,7 @@ import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { useExplorerDialogs } from "@/components/ui/pages/hooks/use-explorer-dialogs";
+import { useExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-favorites";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenu } from "@/components/ui/pages/hooks/use-explorer-menu";
 import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
@@ -48,7 +49,6 @@ import {
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
-import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
@@ -66,7 +66,7 @@ import {
   StarsIcon,
   WeightIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useTransition } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 export function Explorer({ listing }: { listing: MediaListing }) {
@@ -326,63 +326,16 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // 一つ上のフォルダを開く
   const { navigateToParent } = useParentPathname();
 
-  // ===== お気に入り =====
-
-  const { updateFavorite, getFavorite, updateMultipleFavorites } =
-    useFavoritesContext();
-  const [updatingFavorite, startUpdatingFavorite] = useTransition();
-
-  // レーティング更新（単体）
-  const handleChangeRatingSingle = ({
-    node,
-    newRating,
-    onSuccess,
-  }: {
-    node: MediaNode;
-    newRating: number | null;
-    onSuccess?: () => void;
-  }) => {
-    if (updatingFavorite) return;
-    startUpdatingFavorite(async () => {
-      const result = await updateFavorite(node.path, newRating);
-      if (result.success) {
-        toast.success("レーティングが更新されました。", { duration: 500 });
-        onSuccess?.();
-      } else {
-        toast.error(result.error);
-      }
-    });
-  };
-
-  // レーティング更新（選択）
-  const handleChangeRatingSelected = ({
-    newRating,
-    onSuccess,
-  }: {
-    newRating: number | null;
-    onSuccess?: () => void;
-  }) => {
-    if (updatingFavorite) return;
-    startUpdatingFavorite(async () => {
-      const paths = selection.nodes.map((n) => n.path);
-      const result = await updateMultipleFavorites(paths, {
-        rating: newRating,
-      });
-      if (result.success) {
-        toast.success("レーティングが更新されました。", { duration: 500 });
-        onSuccess?.();
-      } else {
-        toast.error(result.error);
-      }
-    });
-  };
-
   // ===== 選択 =====
 
   const selection = useExplorerSelection({
     allNodes,
     currentNodes: filteredNodes,
   });
+
+  // ===== お気に入り =====
+
+  const favorites = useExplorerFavorites({ selectedNodes: selection.nodes });
 
   // ===== タグエディタ =====
 
@@ -452,12 +405,12 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     selectedCount: selection.count,
     isViewerMode,
     isFullscreenSupported: fullscreen.isSupported,
-    getFavorite,
+    getFavorite: favorites.get,
     onOpenInNewTab: handleOpenInNewTab,
     onExtract: extractDialog.open,
     onExtractSelected: extractDialog.openSelected,
-    onChangeRating: handleChangeRatingSingle,
-    onChangeRatingSelected: handleChangeRatingSelected,
+    onChangeRating: favorites.update,
+    onChangeRatingSelected: favorites.updateSelected,
     onToggleFullscreen: () => void fullscreen.toggle(),
     onRename: renameDialog.open,
     onMove: moveDialog.open,
@@ -477,8 +430,8 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   const selectionbar = useExplorerSelectionbar({
     hasSelection: selection.hasSelection,
-    onChangeRating: handleChangeRatingSingle,
-    onChangeRatingSelected: handleChangeRatingSelected,
+    onChangeRating: favorites.update,
+    onChangeRatingSelected: favorites.updateSelected,
     onMoveSelected: moveDialog.openSelected,
     onCopySelected: copyDialog.openSelected,
     onEditTagsSelected: tagEditor.open,
