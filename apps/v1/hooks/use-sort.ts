@@ -2,12 +2,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import z from "zod";
 
-type Options = {
-  sortKey?: string; // デフォルト: "sort"
-  directionKey?: string; // デフォルト: "direction"
-  resetKeys?: string[]; // デフォルト: ["page"]
-};
-
 type SortValue = {
   sort: string; // 並び替えのフィールド名
   direction: "asc" | "desc"; // 並び替えの向き
@@ -15,17 +9,20 @@ type SortValue = {
 
 const directionSchema = z.enum(["asc", "desc"]).nullable();
 
-export function useSort(options?: Options) {
+interface UseSortProps {
+  sortKey?: string;
+  directionKey?: string;
+  resetKeys?: string[];
+}
+
+export function useSort({
+  sortKey = "sort",
+  directionKey = "direction",
+  resetKeys = ["page"],
+}: UseSortProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  // キー名とデフォルト値の設定
-  const {
-    sortKey = "sort",
-    directionKey = "direction",
-    resetKeys = ["page"],
-  } = options || {};
 
   // 現在の値をURLから取得
   const sort = searchParams.get(sortKey);

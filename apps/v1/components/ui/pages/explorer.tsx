@@ -14,6 +14,7 @@ import { useExplorerMenu } from "@/components/ui/pages/hooks/use-explorer-menu";
 import { useExplorerNavigation } from "@/components/ui/pages/hooks/use-explorer-navigation";
 import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/components/ui/pages/hooks/use-explorer-selectionbar";
+import { useExplorerSort } from "@/components/ui/pages/hooks/use-explorer-sort";
 import { useExplorerThumbs } from "@/components/ui/pages/hooks/use-explorer-thumb";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
@@ -24,7 +25,6 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { useSort } from "@/hooks/use-sort";
 import { useTagEditorControl } from "@/hooks/use-tag-editor-control";
 import { useViewMode } from "@/hooks/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
@@ -35,16 +35,7 @@ import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  ArrowDownAzIcon,
-  CalendarArrowDownIcon,
-  ClockIcon,
-  FileStackIcon,
-  FolderPlus,
-  StarsIcon,
-  WeightIcon,
-} from "lucide-react";
-import { useMemo } from "react";
+import { FolderPlus } from "lucide-react";
 
 export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== 検索 =====
@@ -57,63 +48,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   // ===== 並び替え =====
 
-  // NOTE: 並び替え処理はサーバーサイドで実施
-  const { value: sortValue, apply: applySortValue } = useSort();
-
-  const sortOptions = useMemo(
-    () =>
-      [
-        {
-          value: {
-            sort: "name",
-            direction: "asc",
-          },
-          label: "名前",
-          icon: ArrowDownAzIcon,
-        },
-        {
-          value: {
-            sort: "mtime",
-            direction: "desc",
-          },
-          label: "更新日",
-          icon: CalendarArrowDownIcon,
-        },
-        {
-          value: {
-            sort: "size",
-            direction: "desc",
-          },
-          label: "サイズ",
-          icon: WeightIcon,
-        },
-        {
-          value: {
-            sort: "fileCount",
-            direction: "desc",
-          },
-          label: "ファイル数",
-          icon: FileStackIcon,
-        },
-        {
-          value: {
-            sort: "lastViewed",
-            direction: "desc",
-          },
-          label: "訪問日",
-          icon: ClockIcon,
-        },
-        {
-          value: {
-            sort: "rating",
-            direction: "desc",
-          },
-          label: "評価",
-          icon: StarsIcon,
-        },
-      ] as const,
-    []
-  );
+  const sort = useExplorerSort();
 
   // ===== フィルタリング =====
 
@@ -259,9 +194,9 @@ export function Explorer({ listing }: { listing: MediaListing }) {
             <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
               {/* 並び替え */}
               <SortSelect
-                value={sortValue}
-                onChange={applySortValue}
-                options={sortOptions}
+                value={sort.value}
+                onChange={sort.apply}
+                options={sort.options}
               />
 
               {/* お気に入りフィルター */}
