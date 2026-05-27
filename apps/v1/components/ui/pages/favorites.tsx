@@ -28,7 +28,7 @@ import { useSelectedNodes } from "@/hooks/use-selected-nodes";
 import { useSort } from "@/hooks/use-sort";
 import { useTagFilter } from "@/hooks/use-tag-filter";
 import { useViewMode } from "@/hooks/use-view-mode";
-import { useViewerControl } from "@/hooks/use-viewer-control";
+import { useViewerNavigation } from "@/hooks/use-viewer-control";
 import { isMedia } from "@/lib/media/media-types";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import {
@@ -177,7 +177,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     isOpen: isViewerMode,
     open: openViewer,
     close: closeViewer,
-  } = useViewerControl(mediaOnly);
+  } = useViewerNavigation(mediaOnly);
 
   // ビューアスライド移動時の処理
   const handleViewerIndexChange = (index: number) => {

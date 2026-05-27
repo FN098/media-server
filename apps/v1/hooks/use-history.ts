@@ -17,7 +17,7 @@ export function useHistory(options: Options) {
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  const pushHistory = (item: HistoryItem) => {
+  const push = (item: HistoryItem) => {
     setHistory((prev) => {
       const last = prev.at(-1);
       if (last?.path === item.path && last.type === item.type) {
@@ -27,7 +27,7 @@ export function useHistory(options: Options) {
     });
   };
 
-  const replaceHistoryLast = (item: HistoryItem) => {
+  const replaceLast = (item: HistoryItem) => {
     setHistory((prev) => {
       if (prev.length === 0) return [item];
       const next = [...prev];
@@ -36,24 +36,23 @@ export function useHistory(options: Options) {
     });
   };
 
-  const popHistory = () => {
+  const pop = () => {
     setHistory((prev) => prev.slice(0, -1));
   };
 
   const last = history.at(-1);
 
-  const toHistoryItem = (media: MediaNode): HistoryItem => ({
-    path: media.path,
-    type: media.isDirectory ? "directory" : "file",
-  });
-
   return {
     history,
-    setHistory,
-    pushHistory,
-    replaceHistoryLast,
-    popHistory,
+    set: setHistory,
+    push,
+    replaceLast,
+    pop,
     last,
-    toHistoryItem,
   };
 }
+
+export const toHistoryItem = (media: MediaNode): HistoryItem => ({
+  path: media.path,
+  type: media.isDirectory ? "directory" : "file",
+});

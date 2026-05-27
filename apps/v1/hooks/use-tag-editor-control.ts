@@ -1,18 +1,15 @@
 import { TagEditMode } from "@/components/ui/sheets/tag-edit-sheet/types";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 type UseTagEditorHandlersProps = {
-  isViewerMode: boolean;
+  targetCount: number;
 };
 
 export function useTagEditorControl({
-  isViewerMode,
+  targetCount,
 }: UseTagEditorHandlersProps) {
-  const mode = useMemo<TagEditMode>(() => {
-    if (isViewerMode) return "single";
-    return "default";
-  }, [isViewerMode]);
+  const mode: TagEditMode = targetCount == 1 ? "single" : "default";
 
   const { isTagEditMode: isOpen, setIsTagEditMode: setIsOpen } =
     useTagEditorContext();

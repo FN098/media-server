@@ -1,6 +1,5 @@
 "use client";
 
-import { visitFolderAction } from "@/actions/folder-actions";
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
@@ -12,6 +11,7 @@ import { useExplorerFavorites } from "@/components/ui/pages/hooks/use-explorer-f
 import { useExplorerFiltering } from "@/components/ui/pages/hooks/use-explorer-filtering";
 import { useExplorerHotkeys } from "@/components/ui/pages/hooks/use-explorer-hotkeys";
 import { useExplorerMenu } from "@/components/ui/pages/hooks/use-explorer-menu";
+import { useExplorerNavigation } from "@/components/ui/pages/hooks/use-explorer-navigation";
 import { useExplorerSelection } from "@/components/ui/pages/hooks/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/components/ui/pages/hooks/use-explorer-selectionbar";
 import { useExplorerThumbs } from "@/components/ui/pages/hooks/use-explorer-thumb";
@@ -23,18 +23,11 @@ import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { useMediaIndex } from "@/hooks/use-media-index";
-import { useParentPathname } from "@/hooks/use-parent-pathname";
 import { useSort } from "@/hooks/use-sort";
 import { useTagEditorControl } from "@/hooks/use-tag-editor-control";
 import { useViewMode } from "@/hooks/use-view-mode";
-import { useViewerControl } from "@/hooks/use-viewer-control";
-import { IndexLike } from "@/lib/index-like";
-import { isMedia } from "@/lib/media/media-types";
-import { MediaListing, MediaNode } from "@/lib/media/types";
-import { useHistoryContext } from "@/providers/history-provider";
+import { MediaListing } from "@/lib/media/types";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
@@ -51,8 +44,7 @@ import {
   StarsIcon,
   WeightIcon,
 } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { toast } from "sonner";
+import { useMemo } from "react";
 
 export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== 検索 =====
@@ -62,34 +54,6 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== ビューモード =====
 
   const viewMode = useViewMode();
-
-  // ===== 訪問履歴 =====
-
-  const {
-    last: lastHistory,
-    pushHistory,
-    toHistoryItem,
-    popHistory,
-    replaceHistoryLast,
-  } = useHistoryContext();
-
-  // 初回マウント時に訪問履歴にプッシュ
-  useEffect(() => {
-    pushHistory({ path: listing.path, type: "directory" });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // スクロール完了時に訪問履歴をポップ
-  const handleScrollRestored = () => {
-    popHistory();
-  };
-
-  // フォルダ訪問履歴自動更新
-  useEffect(() => {
-    if (listing.path) {
-      void visitFolderAction(listing.path);
-    }
-  }, [listing.path]);
 
   // ===== 並び替え =====
 
@@ -155,92 +119,21 @@ export function Explorer({ listing }: { listing: MediaListing }) {
 
   const filtering = useExplorerFiltering({ allNodes: listing.nodes });
 
-  // ===== ビューア =====
-
-  const {
-    index: initialViewerIndex,
-    isOpen: isViewerMode,
-    open: openViewer,
-    close: closeViewer,
-  } = useViewerControl(filtering.mediaOnly);
-
-  // ビューアスライド移動時の処理
-  const handleViewerIndexChange = (index: number) => {
-    const media = filtering.mediaOnly[index];
-    if (!media) return;
-
-    selection.replace(media);
-
-    if (lastHistory?.type === "file") {
-      replaceHistoryLast(toHistoryItem(media));
-    } else {
-      pushHistory(toHistoryItem(media));
-    }
-  };
-
-  // ===== ナビゲーション =====
-
-  const { navigate: openFolder } = useFolderNavigation();
-
-  // インデックス計算
-  const { getMediaIndex } = useMediaIndex(filtering.mediaOnly);
-
-  // ファイル/フォルダオープン
-  const handleOpen = (node: MediaNode) => {
-    if (node.isDirectory) {
-      openFolder(node.path, { resetPage: true });
-      return;
-    }
-
-    if (isMedia(node.type)) {
-      const index = getMediaIndex(node.path);
-      if (index == null) return;
-      openViewer({ at: index });
-      return;
-    }
-
-    toast.warning("このファイル形式は対応していません");
-  };
-
-  // 新しいタブで開く
-  const handleOpenInNewTab = (node: MediaNode) => {
-    if (node.isDirectory) {
-      openFolder(node.path, { newTab: true });
-      return;
-    }
-
-    if (isMedia(node.type)) {
-      const index = getMediaIndex(node.path);
-      if (index == null) return;
-      openViewer({ at: index, newTab: true });
-      return;
-    }
-
-    toast.warning("このファイル形式は対応していません");
-  };
-
-  // 前のフォルダを開く
-  const handleOpenPrevFolder = (at: IndexLike = "last") => {
-    if (listing.prev) {
-      openFolder(listing.prev, { at });
-    }
-  };
-
-  // 次のフォルダを開く
-  const handleOpenNextFolder = (at: IndexLike = "first") => {
-    if (listing.next) {
-      openFolder(listing.next, { at });
-    }
-  };
-
-  // 一つ上のフォルダを開く
-  const { navigateToParent } = useParentPathname();
-
   // ===== 選択 =====
 
   const selection = useExplorerSelection({
     allNodes: listing.nodes,
     currentNodes: filtering.filteredNodes,
+  });
+
+  // ===== ナビゲーション =====
+
+  const navigation = useExplorerNavigation({
+    currentDir: listing.path,
+    prevDir: listing.prev,
+    nextDir: listing.next,
+    mediaOnly: filtering.mediaOnly,
+    onSelect: selection.replace,
   });
 
   // ===== お気に入り =====
@@ -250,7 +143,7 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   // ===== タグエディタ =====
 
   const tagEditor = useTagEditorControl({
-    isViewerMode,
+    targetCount: selection.count,
   });
 
   // ===== ダイアログ =====
@@ -294,17 +187,17 @@ export function Explorer({ listing }: { listing: MediaListing }) {
     enabled: true,
     isDialogMode: isDialogOpen,
     isTagEditorMode: tagEditor.isOpen,
-    isViewerMode: isViewerMode,
+    isViewerMode: navigation.isViewerOpen,
     onResetSelection: selection.reset,
-    onGoBack: navigateToParent,
+    onGoBack: navigation.openParentFolder,
     onDelete: deleteDialog.openSelected,
     onEditTags: tagEditor.open,
     onToggleFullscreen: () => void fullscreen.toggle(),
     onSelectAll: selection.selectAll,
     onFocusSearch: searchFocus.trigger,
     onRename: () => renameDialog.setTarget(selection.nodes[0]),
-    onOpenPrevFolder: () => handleOpenPrevFolder("first"),
-    onOpenNextFolder: () => handleOpenNextFolder("first"),
+    onOpenPrevFolder: () => navigation.openPrevFolder("first"),
+    onOpenNextFolder: () => navigation.openNextFolder("first"),
     onResetFilter: filtering.reset,
   });
 
@@ -313,10 +206,10 @@ export function Explorer({ listing }: { listing: MediaListing }) {
   const menu = useExplorerMenu({
     hasSelection: selection.hasSelection,
     selectedCount: selection.count,
-    isViewerMode,
+    isViewerMode: navigation.isViewerOpen,
     isFullscreenSupported: fullscreen.isSupported,
     getFavorite: favorites.get,
-    onOpenInNewTab: handleOpenInNewTab,
+    onOpenInNewTab: navigation.openInNewTab,
     onExtract: extractDialog.open,
     onExtractSelected: extractDialog.openSelected,
     onChangeRating: favorites.update,
@@ -421,43 +314,43 @@ export function Explorer({ listing }: { listing: MediaListing }) {
           </div>
 
           {/* グリッドビュー */}
-          {viewMode.value === "grid" && !isViewerMode && (
+          {viewMode.value === "grid" && !navigation.isViewerOpen && (
             <div className="flex-1">
               <PagingGridView
                 allNodes={filtering.filteredNodes}
-                initialScrollPath={lastHistory?.path}
-                onScrollRestored={handleScrollRestored}
+                initialScrollPath={navigation.lastHistory?.path}
+                onScrollRestored={navigation.handleScrollRestored}
                 onThumbError={(node) => void thumbs.update(node)}
-                onOpen={handleOpen}
+                onOpen={navigation.open}
                 focusOnPageChange
               />
             </div>
           )}
 
           {/* リストビュー */}
-          {viewMode.value === "list" && !isViewerMode && (
+          {viewMode.value === "list" && !navigation.isViewerOpen && (
             <div className="flex-1">
               <PagingListView
                 allNodes={filtering.filteredNodes}
-                initialScrollPath={lastHistory?.path}
-                onScrollRestored={handleScrollRestored}
-                onOpen={handleOpen}
+                initialScrollPath={navigation.lastHistory?.path}
+                onScrollRestored={navigation.handleScrollRestored}
+                onOpen={navigation.open}
                 focusOnPageChange
               />
             </div>
           )}
 
           {/* ビューワ */}
-          {isViewerMode && (
+          {navigation.isViewerOpen && (
             <ScrollLockProvider>
               <MediaViewer
                 allNodes={filtering.mediaOnly}
-                initialIndex={initialViewerIndex}
+                initialIndex={navigation.initialIndex}
                 menuItems={menu.items}
-                onIndexChange={handleViewerIndexChange}
-                onClose={closeViewer}
-                onOpenPrev={handleOpenPrevFolder}
-                onOpenNext={handleOpenNextFolder}
+                onIndexChange={navigation.handleIndexChange}
+                onClose={navigation.closeViewer}
+                onOpenPrev={navigation.openPrevFolder}
+                onOpenNext={navigation.openNextFolder}
                 onDelete={deleteDialog.open}
               />
             </ScrollLockProvider>

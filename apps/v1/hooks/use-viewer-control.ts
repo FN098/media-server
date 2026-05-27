@@ -5,23 +5,25 @@ import { MediaNode } from "@/lib/media/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-type Options = {
-  atKey?: string; // デフォルト: "at"
-  modalKey?: string; // デフォルト: "modal"
-};
-
 type OpenOptions = {
   at?: IndexLike;
   newTab?: boolean;
 };
 
-export function useViewerControl(nodes: MediaNode[], options?: Options) {
+interface UesViewerNavigationProps {
+  nodes: MediaNode[];
+  atKey?: string;
+  modalKey?: string;
+}
+
+export function useViewerNavigation({
+  nodes,
+  atKey = "at",
+  modalKey = "modal",
+}: UesViewerNavigationProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  // キー名とデフォルト値の設定
-  const { atKey = "at", modalKey = "modal" } = options || {};
 
   // 現在の値をURLから取得
   const at = searchParams.get(atKey) as IndexLike;
