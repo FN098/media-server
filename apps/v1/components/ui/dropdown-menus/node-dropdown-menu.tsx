@@ -19,7 +19,7 @@ import { Kbd } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 const variantClass: Record<MenuItemVariant, string> = {
   default: "",
@@ -54,11 +54,6 @@ export function NodeDropdownMenu({
   const open = controlledOpen ?? internalOpen;
   const setOpen = onControlledOpenChange ?? setInternalOpen;
 
-  const visibleItems = useMemo(
-    () => menuItems.filter((item) => !item.hidden?.({ node })),
-    [menuItems, node]
-  );
-
   if (!mounted || hidden) return null;
 
   return (
@@ -73,7 +68,7 @@ export function NodeDropdownMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="min-w-48">
-        {visibleItems.map((item) => (
+        {menuItems.map((item) => (
           <NodeDropdownMenuItem
             key={item.key}
             node={node}
@@ -135,6 +130,15 @@ function NodeDropdownMenuItem({
   closeMenu,
   isMobile,
 }: NodeDropdownMenuItemProps) {
+  // hidden の判定
+  if (item.hidden?.({ node })) return null;
+
+  // separator のレンダリング
+  if (item.type === "separator") {
+    return <DropdownMenuSeparator />;
+  }
+
+  // custom のレンダリング
   if (item.type === "custom") {
     return (
       <DropdownMenuItem asChild>
@@ -143,17 +147,15 @@ function NodeDropdownMenuItem({
     );
   }
 
-  if (item.type === "separator") {
-    return <DropdownMenuSeparator />;
-  }
-
+  // action のレンダリング
   const Icon = item.icon;
   const variant = item.variant ?? "default";
+  const isDisabled = item.disabled?.({ node });
 
   return (
     <DropdownMenuItem
       className={cn("relative", variantClass[variant])}
-      disabled={item.disabled?.({ node })}
+      disabled={isDisabled}
       onClick={(e) => {
         e.stopPropagation();
         void item.onClick({ node, closeMenu });
