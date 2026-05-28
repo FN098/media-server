@@ -15,7 +15,7 @@ export interface ActionMenuItem<T> extends BaseMenuItem<T> {
   icon: React.ComponentType<{ className?: string }>;
   onClick: (context: T) => void | Promise<void>;
   variant?: MenuItemVariant;
-  kbd?: string;
+  kbd?: string | string[];
 }
 
 export interface GroupMenuItem<

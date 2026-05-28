@@ -2,11 +2,8 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import {
-  MenuItemDef,
-  MenuItemVariant,
-  NodeContext,
-} from "@/lib/menu-items/types";
+import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
+import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -18,16 +15,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
-import { Kbd } from "@/shadcn/components/ui/kbd";
+import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
-import { useState } from "react";
-
-const variantClass: Record<MenuItemVariant, string> = {
-  default: "",
-  destructive: "text-destructive focus:text-destructive",
-};
+import { Fragment, useState } from "react";
 
 interface NodeDropdownMenuProps {
   node: MediaNode;
@@ -175,19 +167,30 @@ function NodeDropdownMenuItem({
 
     return (
       <DropdownMenuItem
-        className={cn("relative", variantClass[variant])}
+        className={cn(
+          "flex items-center justify-between gap-4",
+          variant === "destructive" && "text-destructive focus:text-destructive"
+        )}
         disabled={isDisabled}
         onClick={(e) => {
           e.stopPropagation();
           void item.onClick(context);
         }}
       >
-        <Icon className="mr-2 h-4 w-4" />
-        {item.label}
+        <div className="flex min-w-0 items-center">
+          <Icon className="mr-2 h-4 w-4 shrink-0" />
+          <span className="truncate">{item.label}</span>
+        </div>
+
         {!isMobile && item.kbd && (
-          <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-            <Kbd>{item.kbd}</Kbd>
-          </div>
+          <KbdGroup className="shrink-0">
+            {castArray(item.kbd).map((key, index) => (
+              <Fragment key={key}>
+                {index > 0 && <span>+</span>}
+                <Kbd>{key}</Kbd>
+              </Fragment>
+            ))}
+          </KbdGroup>
         )}
       </DropdownMenuItem>
     );

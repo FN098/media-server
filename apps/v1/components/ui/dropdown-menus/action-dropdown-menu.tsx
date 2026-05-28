@@ -1,4 +1,5 @@
 import { MenuItemDef } from "@/lib/menu-items/types";
+import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -10,8 +11,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
+import { cn } from "@/shadcn/lib/utils";
 import { ChevronRight, Wand2 } from "lucide-react";
+import { Fragment } from "react/jsx-runtime";
 
 interface ActionDropdownMenuProps<T> {
   items: MenuItemDef<T>[];
@@ -106,25 +110,35 @@ function ActionDropdownMenuItem<T>({
   // 通常アクション
   if (item.type === "action") {
     const Icon = item.icon;
+    const variant = item.variant ?? "default";
     const isDisabled = item.disabled?.(context);
 
     return (
       <DropdownMenuItem
+        className={cn(
+          "flex items-center justify-between gap-4",
+          variant === "destructive" && "text-destructive focus:text-destructive"
+        )}
         disabled={isDisabled}
         onClick={(e) => {
           e.stopPropagation();
           void item.onClick(context);
         }}
-        className={
-          item.variant === "destructive"
-            ? "text-destructive focus:text-destructive"
-            : ""
-        }
       >
-        <Icon className="mr-2 h-4 w-4" />
-        <span className="flex-grow">{item.label}</span>
+        <div className="flex min-w-0 items-center">
+          <Icon className="mr-2 h-4 w-4 shrink-0" />
+          <span className="truncate">{item.label}</span>
+        </div>
+
         {!isMobile && item.kbd && (
-          <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>
+          <KbdGroup className="shrink-0">
+            {castArray(item.kbd).map((key, index) => (
+              <Fragment key={key}>
+                {index > 0 && <span>+</span>}
+                <Kbd>{key}</Kbd>
+              </Fragment>
+            ))}
+          </KbdGroup>
         )}
       </DropdownMenuItem>
     );

@@ -58,7 +58,7 @@ export function useTrashMenu({
         label: "次のフォルダを開く",
         onClick: () => navigation.openNextFolder("first"),
         hidden: () => !viewer.isOpen,
-        kbd: "Ctrl + Right",
+        kbd: ["Ctrl", "Right"],
       },
       {
         key: "goto-prev-folder",
@@ -67,7 +67,7 @@ export function useTrashMenu({
         label: "前のフォルダを開く",
         onClick: () => navigation.openPrevFolder("first"),
         hidden: () => !viewer.isOpen,
-        kbd: "Ctrl + Left",
+        kbd: ["Ctrl", "Left"],
       },
       {
         key: "restore",

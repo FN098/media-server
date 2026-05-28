@@ -2,11 +2,8 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import {
-  MenuItemDef,
-  MenuItemVariant,
-  NodeContext,
-} from "@/lib/menu-items/types";
+import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
+import { castArray } from "@/lib/utils/array";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -17,13 +14,10 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/shadcn/components/ui/context-menu";
+import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
-import React from "react";
-
-const variantClass: Record<MenuItemVariant, string> = {
-  default: "",
-  destructive: "text-destructive focus:text-destructive",
-};
+import { cn } from "@/shadcn/lib/utils";
+import React, { Fragment } from "react";
 
 interface NodeContextMenuProps {
   node: MediaNode;
@@ -114,20 +108,34 @@ function NodeContextMenuItem({
   if (item.type === "action") {
     const Icon = item.icon;
     const variant = item.variant ?? "default";
+    const isDisabled = item.disabled?.(context);
 
     return (
       <ContextMenuItem
-        className={variantClass[variant]}
-        disabled={item.disabled?.(context)}
+        className={cn(
+          "flex items-center justify-between gap-4",
+          variant === "destructive" && "text-destructive focus:text-destructive"
+        )}
+        disabled={isDisabled}
         onClick={(e) => {
           e.stopPropagation();
           void item.onClick(context);
         }}
       >
-        <Icon className="mr-2 h-4 w-4" />
-        {item.label}
+        <div className="flex min-w-0 items-center">
+          <Icon className="mr-2 h-4 w-4 shrink-0" />
+          <span className="truncate">{item.label}</span>
+        </div>
+
         {!isMobile && item.kbd && (
-          <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>
+          <KbdGroup className="shrink-0">
+            {castArray(item.kbd).map((key, index) => (
+              <Fragment key={key}>
+                {index > 0 && <span>+</span>}
+                <Kbd>{key}</Kbd>
+              </Fragment>
+            ))}
+          </KbdGroup>
         )}
       </ContextMenuItem>
     );

@@ -1,5 +1,6 @@
 import { AnimatedCheckCircle } from "@/components/ui/icons/animated-check-circle";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
+import { castArray } from "@/lib/utils/array";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -12,9 +13,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { MoreVertical, X } from "lucide-react";
+import { Fragment } from "react/jsx-runtime";
 
 interface SelectionBarProps {
   open: boolean;
@@ -109,6 +112,7 @@ export function SelectionBar({
                           key={item.key}
                           item={item}
                           context={context}
+                          isMobile={isMobile}
                         />
                       ))}
                     </DropdownMenuContent>
@@ -182,9 +186,14 @@ function SelectionBarInlineMenuItem({
 interface SelectionBarMenuItemProps {
   item: MenuItemDef<MultipleNodesContext>;
   context: MultipleNodesContext;
+  isMobile: boolean;
 }
 
-function SelectionBarMenuItem({ item, context }: SelectionBarMenuItemProps) {
+function SelectionBarMenuItem({
+  item,
+  context,
+  isMobile,
+}: SelectionBarMenuItemProps) {
   if (item.hidden?.(context)) return null;
 
   // 区切り線
@@ -199,11 +208,11 @@ function SelectionBarMenuItem({ item, context }: SelectionBarMenuItemProps) {
 
   // 階層グループ
   if (item.type === "group") {
-    const SubIcon = item.icon;
+    const Icon = item.icon;
     return (
       <DropdownMenuSub>
         <DropdownMenuSubTrigger disabled={item.disabled?.(context)}>
-          {SubIcon && <SubIcon className="mr-2 h-4 w-4" />}
+          {Icon && <Icon className="mr-2 h-4 w-4" />}
           <span>{item.label}</span>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="w-[200px]">
@@ -212,6 +221,7 @@ function SelectionBarMenuItem({ item, context }: SelectionBarMenuItemProps) {
               key={child.key}
               item={child}
               context={context}
+              isMobile={isMobile}
             />
           ))}
         </DropdownMenuSubContent>
@@ -220,24 +230,41 @@ function SelectionBarMenuItem({ item, context }: SelectionBarMenuItemProps) {
   }
 
   // 通常アクション
-  const Icon = item.icon;
-  return (
-    <DropdownMenuItem
-      disabled={item.disabled?.(context)}
-      onClick={(e) => {
-        e.stopPropagation();
-        void item.onClick(context);
-      }}
-      className={cn(
-        item.variant === "destructive" &&
-          "text-destructive focus:text-destructive",
-        item.className
-      )}
-      title={item.label}
-    >
-      {Icon && <Icon className="mr-2 h-4 w-4" />}
-      <span className="flex-grow">{item.label}</span>
-      {item.kbd && <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>}
-    </DropdownMenuItem>
-  );
+  if (item.type === "action") {
+    const Icon = item.icon;
+    const variant = item.variant ?? "default";
+    const isDisabled = item.disabled?.(context);
+
+    return (
+      <DropdownMenuItem
+        className={cn(
+          "flex items-center justify-between gap-4",
+          variant === "destructive" && "text-destructive focus:text-destructive"
+        )}
+        disabled={isDisabled}
+        onClick={(e) => {
+          e.stopPropagation();
+          void item.onClick(context);
+        }}
+      >
+        <div className="flex min-w-0 items-center">
+          <Icon className="mr-2 h-4 w-4 shrink-0" />
+          <span className="truncate">{item.label}</span>
+        </div>
+
+        {!isMobile && item.kbd && (
+          <KbdGroup className="shrink-0">
+            {castArray(item.kbd).map((key, index) => (
+              <Fragment key={key}>
+                {index > 0 && <span>+</span>}
+                <Kbd>{key}</Kbd>
+              </Fragment>
+            ))}
+          </KbdGroup>
+        )}
+      </DropdownMenuItem>
+    );
+  }
+
+  return null;
 }
