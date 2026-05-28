@@ -11,7 +11,6 @@ import { useTrashMenu } from "@/components/ui/pages/trash/hooks/use-trash-menu";
 import { useTrashNavigation } from "@/components/ui/pages/trash/hooks/use-trash-navigation";
 import { useTrashSelection } from "@/components/ui/pages/trash/hooks/use-trash-selection";
 import { useTrashSelectionbar } from "@/components/ui/pages/trash/hooks/use-trash-selectionbar";
-import { useTrashSort } from "@/components/ui/pages/trash/hooks/use-trash-sort";
 import { useTrashThumbs } from "@/components/ui/pages/trash/hooks/use-trash-thumbs";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -33,7 +32,6 @@ import { cn } from "@/shadcn/lib/utils";
 export function Trash({ listing }: { listing: MediaListing }) {
   const searchFocus = useSearchFocusContext();
   const viewMode = useViewMode();
-  const sort = useTrashSort();
   const filtering = useTrashFiltering({ listing });
   const selection = useTrashSelection({ listing, filtering });
 
@@ -97,7 +95,9 @@ export function Trash({ listing }: { listing: MediaListing }) {
           tabIndex={-1}
         >
           {/* ツールバー */}
-          {!viewer.isOpen && <TrashToolbar sort={sort} filtering={filtering} />}
+          {!viewer.isOpen && (
+            <TrashToolbar filtering={filtering} dialogs={dialogs} />
+          )}
 
           {/* グリッドビュー */}
           {viewMode.value === "grid" && !viewer.isOpen && (

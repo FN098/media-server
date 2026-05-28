@@ -44,10 +44,7 @@ export const options = [
 ] as const;
 
 export function useTrashSort() {
-  const sort = useSort({});
+  const control = useSort({});
 
-  return {
-    ...sort,
-    options,
-  };
+  return { options, control };
 }

@@ -1,44 +1,41 @@
 import { ResetButton } from "@/components/ui/buttons/reset-button";
-import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
+import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
+import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialogs";
+import { useTrashFilter } from "@/components/ui/pages/trash/hooks/use-trash-filter";
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
-import { TrashSort } from "@/components/ui/pages/trash/hooks/use-trash-sort";
-import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
+import { useTrashSort } from "@/components/ui/pages/trash/hooks/use-trash-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 
 interface TrashToolbarProps {
-  sort: TrashSort;
   filtering: TrashFiltering;
+  dialogs: TrashDialogs;
 }
 
-export function TrashToolbar({ sort, filtering }: TrashToolbarProps) {
-  const isMobile = useIsMobile();
+export function TrashToolbar({ filtering, dialogs }: TrashToolbarProps) {
+  const sort = useTrashSort();
+  const filter = useTrashFilter({ filtering, dialogs });
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
-        {/* 並び替え */}
-        <SortDropdownMenu
-          value={sort.value}
-          onChange={sort.apply}
-          options={sort.options}
-        />
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-grow">
+        {/* ソート */}
+        <div className="w-full sm:w-[160px]">
+          <SortDropdownMenu
+            value={sort.control.value}
+            onChange={sort.control.apply}
+            options={sort.options}
+          />
+        </div>
 
-        {/* 種別フィルター */}
-        <MediaTypeFilterMultiSelect
-          value={filtering.controls.mediaType.value}
-          onChange={filtering.controls.mediaType.apply}
-          displayTypes={["image", "video", "audio"]}
-        />
-
-        {/* タグフィルター */}
-        <TagFilterDialog
-          value={filtering.controls.tag.value}
-          onChange={filtering.controls.tag.apply}
-          relatedNodes={filtering.mediaOnly}
-          autoFocusInput={!isMobile}
-        />
+        {/* フィルター */}
+        <div className="w-full sm:w-[160px]">
+          <FilterDropdownMenu
+            items={filter.menuItems}
+            onReset={filter.control.reset}
+            canReset={filter.control.canReset}
+          />
+        </div>
 
         {/* リセット */}
         <ResetButton onClick={filtering.reset} isVisible={filtering.canReset} />
