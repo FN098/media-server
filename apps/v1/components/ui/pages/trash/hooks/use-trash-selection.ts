@@ -37,10 +37,16 @@ export function useTrashSelection({
 
   // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
   useEffect(() => {
-    if (selectedNodes.length !== selectedCount) {
-      selectPaths(selectedNodes.map((node) => node.path));
+    const nextPaths = selectedNodes.map((n) => n.path);
+
+    const changed =
+      nextPaths.length !== selectedPaths.size ||
+      nextPaths.some((path) => !selectedPaths.has(path));
+
+    if (changed) {
+      selectPaths(nextPaths);
     }
-  }, [selectPaths, selectedCount, selectedNodes]);
+  }, [selectedNodes, selectedPaths, selectPaths]);
 
   const replace = useCallback(
     (node: MediaNode) => {
