@@ -69,16 +69,26 @@ export function useFavoritesFiltering({ listing }: UseFavoritesFilteringProps) {
 
   // タグをフィルターに追加
   const addTagFilter = useCallback(
-    (node: MediaNode) => {
-      if (!node.tags || node.tags.length === 0) return;
+    (targets: MediaNode | MediaNode[]) => {
+      const nodes = Array.isArray(targets) ? targets : [targets];
+
+      const tags = nodes.flatMap((node) => node.tags ?? []);
+
+      if (tags.length === 0) return;
 
       tagFilter.apply({
         mode: tagFilter.value.mode,
-        tags: [...tagFilter.value.tags, ...node.tags],
+        tags: [...tagFilter.value.tags, ...tags],
       });
     },
     [tagFilter]
   );
+
+  const canAddTagFilter = useCallback((targets: MediaNode | MediaNode[]) => {
+    const nodes = Array.isArray(targets) ? targets : [targets];
+
+    return nodes.some((node) => (node.tags?.length ?? 0) > 0);
+  }, []);
 
   // 検索パラメータリセット用
   const search = useSearchParamsControl({ keep: ["viewMode"] });
@@ -89,6 +99,7 @@ export function useFavoritesFiltering({ listing }: UseFavoritesFilteringProps) {
     totalCount,
     isFiltered,
     mediaOnly,
+    canAddTagFilter,
     addTagFilter,
     canReset: search.canClear,
     reset: search.clear,

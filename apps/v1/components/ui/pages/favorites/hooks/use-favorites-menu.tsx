@@ -96,9 +96,10 @@ export function useFavoritesMenu({
         type: "action",
         icon: ListFilterPlusIcon,
         label: "タグをフィルターに追加",
-        onClick: ({ node }) => filtering.addTagFilter(node),
+        onClick: ({ node }) =>
+          filtering.addTagFilter(hasSelection ? selectedNodes : node),
         disabled: ({ node }) =>
-          !node.tags || node.tags.length === 0 || selectedCount > 1,
+          !filtering.canAddTagFilter(hasSelection ? selectedNodes : node),
         hidden: ({ node }) => node.isDirectory,
       },
     ],
