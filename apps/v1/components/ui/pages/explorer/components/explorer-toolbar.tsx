@@ -39,27 +39,34 @@ export function ExplorerToolbar({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
+      {/* 左側：スマホでは縦並び(フル幅)、sm以上で自然な横並び */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-grow">
         {/* ソート */}
-        <SortDropdownMenu
-          value={sort.control.value}
-          onChange={sort.control.apply}
-          options={sort.options}
-        />
+        <div className="w-full sm:w-[160px]">
+          <SortDropdownMenu
+            value={sort.control.value}
+            onChange={sort.control.apply}
+            options={sort.options}
+          />
+        </div>
 
         {/* フィルター */}
-        <FilterDropdownMenu
-          items={filter.menuItems}
-          onReset={filter.control.reset}
-          canReset={filter.control.canReset}
-        />
+        <div className="w-full sm:w-[160px]">
+          <FilterDropdownMenu
+            items={filter.menuItems}
+            onReset={filter.control.reset}
+            canReset={filter.control.canReset}
+          />
+        </div>
 
         {/* アクション */}
-        <ActionDropdownMenu
-          items={action.toolbarActionItems}
-          context={actionContext}
-        />
+        <div className="w-full sm:w-[160px]">
+          <ActionDropdownMenu
+            items={action.toolbarActionItems}
+            context={actionContext}
+          />
+        </div>
       </div>
 
       {/* 件数 */}
@@ -67,7 +74,7 @@ export function ExplorerToolbar({
         totalCount={filtering.totalCount}
         filteredCount={filtering.filteredCount}
         isFiltered={filtering.isFiltered}
-        className="ml-auto min-w-[120px] text-right"
+        className="ml-auto sm:ml-auto min-w-[120px] text-right pt-2 sm:pt-0"
       />
 
       {/* ダイアログ */}

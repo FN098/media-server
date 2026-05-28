@@ -18,6 +18,13 @@ export interface ActionMenuItem<T> extends BaseMenuItem<T> {
   kbd?: string;
 }
 
+export interface GroupMenuItem<T> extends BaseMenuItem<T> {
+  type: "group";
+  label: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  children: MenuItemDef<T>[]; // 再帰的に自身を呼び出す
+}
+
 export interface CustomMenuItem<T> extends BaseMenuItem<T> {
   type: "custom";
   render: (context: T) => React.ReactNode;
@@ -30,7 +37,8 @@ export interface SeparatorMenuItem<T> extends BaseMenuItem<T> {
 export type MenuItemDef<T> =
   | ActionMenuItem<T>
   | CustomMenuItem<T>
-  | SeparatorMenuItem<T>;
+  | SeparatorMenuItem<T>
+  | GroupMenuItem<T>;
 
 export type NodeContext = {
   node: MediaNode;
