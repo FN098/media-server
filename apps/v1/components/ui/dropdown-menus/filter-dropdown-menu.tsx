@@ -135,7 +135,7 @@ function FilterDropdownMenuItem<T>({
           <DropdownMenuSubContent>
             {item.children.map((child) => (
               <FilterDropdownMenuItem
-                key={item.key}
+                key={child.key}
                 item={child}
                 context={context}
               />
