@@ -3,7 +3,7 @@
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
 import { FolderNavigation } from "@/components/ui/navigations/folder-navigation";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/components/explorer-dialogs";
-import { ExplorerToolbar } from "@/components/ui/pages/explorer/components/explorer-toolbar";
+import { ExplorerToolbar } from "@/components/ui/pages/explorer/components/explorer-toolbar-compact";
 import { useExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { useExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
 import { useExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
