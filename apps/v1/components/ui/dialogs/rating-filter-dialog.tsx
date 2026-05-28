@@ -103,7 +103,7 @@ function fromFilterInput(input: RatingFilterValue): {
   };
 }
 
-function describeFilter(input: RatingFilterValue): React.ReactNode {
+export function describeFilter(input: RatingFilterValue): React.ReactNode {
   if (input.mode === "all") return null;
 
   if (input.mode === "unrated") {
@@ -244,9 +244,6 @@ export function RatingFilterDialog({
   const [starValue, setStarValue] = useState<RatingValue>(3);
   const [betweenMin, setBetweenMin] = useState<RatingValue>(2);
   const [betweenMax, setBetweenMax] = useState<RatingValue>(4);
-
-  const isActive = value.mode !== "all";
-  const description = describeFilter(value);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {

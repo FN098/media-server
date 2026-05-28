@@ -1,4 +1,3 @@
-import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import {
@@ -43,7 +42,9 @@ export function ExplorerToolbar({
   const isMobile = useIsMobile();
 
   const favValue = filtering.controls.favorite.value.mode;
+
   const mediaTypeValue = filtering.controls.mediaType.value;
+
   const ratingValue = filtering.controls.rating.value;
   const isRatingActive = ratingValue.mode !== "all";
 
@@ -92,7 +93,11 @@ export function ExplorerToolbar({
           icon: ImageIcon,
           isActive: mediaTypeValue.types.includes("image"),
           onClick: () => {
-            filtering.controls.mediaType.apply({ types: ["image"] });
+            if (mediaTypeValue.types.includes("image")) {
+              filtering.controls.mediaType.reset();
+            } else {
+              filtering.controls.mediaType.apply({ types: ["image"] });
+            }
           },
         },
         {
@@ -101,7 +106,11 @@ export function ExplorerToolbar({
           icon: VideoIcon,
           isActive: mediaTypeValue.types.includes("video"),
           onClick: () => {
-            filtering.controls.mediaType.apply({ types: ["video"] });
+            if (mediaTypeValue.types.includes("video")) {
+              filtering.controls.mediaType.reset();
+            } else {
+              filtering.controls.mediaType.apply({ types: ["video"] });
+            }
           },
         },
         {
@@ -110,7 +119,11 @@ export function ExplorerToolbar({
           icon: MusicIcon,
           isActive: mediaTypeValue.types.includes("audio"),
           onClick: () => {
-            filtering.controls.mediaType.apply({ types: ["audio"] });
+            if (mediaTypeValue.types.includes("audio")) {
+              filtering.controls.mediaType.reset();
+            } else {
+              filtering.controls.mediaType.apply({ types: ["audio"] });
+            }
           },
         },
       ],
@@ -120,9 +133,6 @@ export function ExplorerToolbar({
       label: "評価...",
       icon: StarsIcon,
       isActive: isRatingActive,
-      iconClassName: isRatingActive
-        ? "fill-yellow-400 text-yellow-400"
-        : "text-muted-foreground",
       onClick: () => {
         dialogs.ratingFilterDialog.open(filtering.controls.rating.value);
       },
@@ -154,43 +164,46 @@ export function ExplorerToolbar({
           onChange={filtering.controls.rating.apply}
         />
 
-        {/* タグフィルター */}
-        <TagFilterDialog
-          value={filtering.controls.tag.value}
-          onChange={filtering.controls.tag.apply}
-          relatedNodes={filtering.mediaOnly}
-          autoFocusInput={!isMobile}
-        />
+        {/* TODO: FilterDropdownMenu にまとめる */}
+        <>
+          {/* タグフィルター */}
+          <TagFilterDialog
+            value={filtering.controls.tag.value}
+            onChange={filtering.controls.tag.apply}
+            relatedNodes={filtering.mediaOnly}
+            autoFocusInput={!isMobile}
+          />
+        </>
 
-        {/* 新規フォルダ */}
-        <Button
-          variant="outline"
-          onClick={() => dialogs.createFolderDialog.open(listing.path)}
-        >
-          <FolderPlus className="h-4 w-4" />
-          新規フォルダ
-        </Button>
+        {/* TODO: アクションメニューにまとめる */}
+        <>
+          {/* 新規フォルダ */}
+          <Button
+            variant="outline"
+            onClick={() => dialogs.createFolderDialog.open(listing.path)}
+          >
+            <FolderPlus className="h-4 w-4" />
+            新規フォルダ
+          </Button>
 
-        {/* お気に入り以外一括削除 */}
-        <Button
-          variant="outline"
-          onClick={() => {
-            // ファイルかつお気に入りでないものを抽出
-            const targets = filtering.filteredNodes.filter(
-              (node) =>
-                !node.isDirectory && !favorites.get(node.path).isFavorite
-            );
-            if (targets.length > 0) {
-              dialogs.deleteDialog.open(targets);
-            }
-          }}
-        >
-          <TrashIcon className="h-4 w-4" />
-          お気に入り以外一括削除
-        </Button>
-
-        {/* リセット */}
-        <ResetButton onClick={filtering.reset} isVisible={filtering.canReset} />
+          {/* お気に入り以外一括削除 */}
+          <Button
+            variant="outline"
+            onClick={() => {
+              // ファイルかつお気に入りでないものを抽出
+              const targets = filtering.filteredNodes.filter(
+                (node) =>
+                  !node.isDirectory && !favorites.get(node.path).isFavorite
+              );
+              if (targets.length > 0) {
+                dialogs.deleteDialog.open(targets);
+              }
+            }}
+          >
+            <TrashIcon className="h-4 w-4" />
+            お気に入り以外一括削除
+          </Button>
+        </>
       </div>
 
       {/* 件数 */}

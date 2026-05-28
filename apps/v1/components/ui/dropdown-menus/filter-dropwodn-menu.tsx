@@ -13,7 +13,13 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import { ChevronRight, Filter, LucideIcon, RotateCcw } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronRight,
+  Filter,
+  LucideIcon,
+  RotateCcw,
+} from "lucide-react";
 
 // 外から渡すメニュー項目の型定義（再帰構造）
 export type FilterMenuItem =
@@ -64,18 +70,28 @@ export function FilterDropdownMenu({
                 e.preventDefault();
               }
             }}
-            className={item.isActive ? "bg-accent font-medium" : ""}
+            className={cn(
+              "flex items-center justify-between gap-4 w-full cursor-pointer",
+              item.isActive ? "bg-accent/60 font-medium text-foreground" : ""
+            )}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 overflow-hidden truncate">
               {Icon && (
                 <Icon
                   className={cn(
-                    "h-4 w-4 shrink-0 text-muted-foreground",
+                    "h-4 w-4 shrink-0 transition-colors",
+                    item.isActive ? "" : "text-muted-foreground",
                     item.iconClassName
                   )}
                 />
               )}
-              <span>{item.label}</span>
+              <span className="truncate">{item.label}</span>
+            </div>
+
+            <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+              {item.isActive && (
+                <CheckIcon className="h-4 w-4 text-primary stroke-[2.5]" />
+              )}
             </div>
           </DropdownMenuItem>
         );
