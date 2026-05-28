@@ -1,90 +1,86 @@
-import { FilterMenuItem } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialogs";
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
-import { ImageIcon, Layers, MusicIcon, TagIcon, VideoIcon } from "lucide-react";
-import { useMemo } from "react";
+import { FilterMenuItem } from "@/lib/menu-items/types";
+import {
+  FileTypeIcon,
+  ImageIcon,
+  MusicIcon,
+  TagIcon,
+  VideoIcon,
+} from "lucide-react";
 
-export type TrashFilter = ReturnType<typeof useTrashFilter>;
-
-interface UseTrashFilterProps {
+interface TrashToolbarFilterContext {
   filtering: TrashFiltering;
   dialogs: TrashDialogs;
 }
 
-export function useTrashFilter({ filtering, dialogs }: UseTrashFilterProps) {
-  const mediaTypeValue = filtering.controls.mediaType.value;
-
-  const tagValue = filtering.controls.tag.value;
-  const isTagActive = tagValue.tags && tagValue.tags.length > 0;
-
-  const menuItems = useMemo(
-    () =>
-      [
-        {
-          type: "group",
-          label: "種別",
-          icon: Layers,
-          isActive: mediaTypeValue.types.length > 0,
-          children: [
-            {
-              type: "action",
-              label: "画像",
-              icon: ImageIcon,
-              isActive: mediaTypeValue.types.includes("image"),
-              onClick: () => {
-                if (mediaTypeValue.types.includes("image")) {
-                  filtering.controls.mediaType.reset();
-                } else {
-                  filtering.controls.mediaType.apply({ types: ["image"] });
-                }
-              },
-            },
-            {
-              type: "action",
-              label: "動画",
-              icon: VideoIcon,
-              isActive: mediaTypeValue.types.includes("video"),
-              onClick: () => {
-                if (mediaTypeValue.types.includes("video")) {
-                  filtering.controls.mediaType.reset();
-                } else {
-                  filtering.controls.mediaType.apply({ types: ["video"] });
-                }
-              },
-            },
-            {
-              type: "action",
-              label: "音声",
-              icon: MusicIcon,
-              isActive: mediaTypeValue.types.includes("audio"),
-              onClick: () => {
-                if (mediaTypeValue.types.includes("audio")) {
-                  filtering.controls.mediaType.reset();
-                } else {
-                  filtering.controls.mediaType.apply({ types: ["audio"] });
-                }
-              },
-            },
-          ],
+const toolbarFilterItems: FilterMenuItem<TrashToolbarFilterContext>[] = [
+  {
+    key: "file-type-filter-group",
+    type: "group",
+    label: "種別",
+    icon: FileTypeIcon,
+    isActive: (ctx) => ctx.filtering.controls.mediaType.value.types.length > 0,
+    children: [
+      {
+        key: "file-type-filter-image",
+        type: "action",
+        label: "画像",
+        icon: ImageIcon,
+        isActive: (ctx) =>
+          ctx.filtering.controls.mediaType.value.types.includes("image"),
+        onClick: (ctx) => {
+          if (ctx.filtering.controls.mediaType.value.types.includes("image")) {
+            ctx.filtering.controls.mediaType.reset();
+          } else {
+            ctx.filtering.controls.mediaType.apply({ types: ["image"] });
+          }
         },
-        {
-          type: "action",
-          label: "タグ...",
-          icon: TagIcon,
-          isActive: isTagActive,
-          onClick: () => {
-            dialogs.tagFilterDialog.open(filtering.controls.tag.value);
-          },
+      },
+      {
+        key: "file-type-filter-video",
+        type: "action",
+        label: "動画",
+        icon: VideoIcon,
+        isActive: (ctx) =>
+          ctx.filtering.controls.mediaType.value.types.includes("video"),
+        onClick: (ctx) => {
+          if (ctx.filtering.controls.mediaType.value.types.includes("video")) {
+            ctx.filtering.controls.mediaType.reset();
+          } else {
+            ctx.filtering.controls.mediaType.apply({ types: ["video"] });
+          }
         },
-      ] satisfies FilterMenuItem[],
-    [
-      dialogs.tagFilterDialog,
-      filtering.controls.mediaType,
-      filtering.controls.tag.value,
-      isTagActive,
-      mediaTypeValue.types,
-    ]
-  );
+      },
+      {
+        key: "file-type-filter-audio",
+        type: "action",
+        label: "音声",
+        icon: MusicIcon,
+        isActive: (ctx) =>
+          ctx.filtering.controls.mediaType.value.types.includes("audio"),
+        onClick: (ctx) => {
+          if (ctx.filtering.controls.mediaType.value.types.includes("audio")) {
+            ctx.filtering.controls.mediaType.reset();
+          } else {
+            ctx.filtering.controls.mediaType.apply({ types: ["audio"] });
+          }
+        },
+      },
+    ],
+  },
+  {
+    key: "tag-filter",
+    type: "action",
+    label: "タグ",
+    icon: TagIcon,
+    isActive: (ctx) => ctx.filtering.controls.tag.value.tags.length > 0,
+    onClick: (ctx) => {
+      ctx.dialogs.tagFilterDialog.open(ctx.filtering.controls.tag.value);
+    },
+  },
+];
 
-  return { menuItems, control: filtering };
+export function useTrashFilter() {
+  return { toolbarFilterItems };
 }

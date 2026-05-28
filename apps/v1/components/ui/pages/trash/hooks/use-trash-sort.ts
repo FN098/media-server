@@ -1,4 +1,3 @@
-import { useSort } from "@/hooks/use-sort";
 import {
   ALargeSmallIcon,
   CalendarIcon,
@@ -10,7 +9,7 @@ import {
 
 export type TrashSort = ReturnType<typeof useTrashSort>;
 
-export const options = [
+const toolbarSortItems = [
   {
     sort: "name",
     label: "名前",
@@ -44,7 +43,5 @@ export const options = [
 ] as const;
 
 export function useTrashSort() {
-  const control = useSort({});
-
-  return { options, control };
+  return { toolbarSortItems };
 }
