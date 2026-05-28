@@ -9,7 +9,7 @@ export type SelectableNode = {
 
 interface UseSelectedNodes<T> {
   nodes: T[];
-  selectedPaths: Iterable<string>;
+  selectedPaths: Set<string>;
   activated?: boolean;
   directoryBehavior?: DirectoryBehavior;
 }
@@ -20,33 +20,22 @@ export function useSelectedNodes<T extends SelectableNode>({
   activated = true,
   directoryBehavior = "include",
 }: UseSelectedNodes<T>) {
-  // O(1) で path => node を検索するための Map
-  const nodeMap = useMemo(() => {
-    return new Map(nodes.map((node) => [node.path, node]));
-  }, [nodes]);
-
   // 選択済みノードリスト
   const selectedNodes = useMemo(() => {
     if (!activated) return [];
 
-    return Array.from(selectedPaths)
-      .map((path) => {
-        const node = nodeMap.get(path);
-        if (!node) return null; // ノードが存在しない場合は選択から外す
-
-        if (node.isDirectory) {
-          switch (directoryBehavior) {
-            case "include":
-              return node;
-            case "exclude":
-              return null;
-          }
+    return nodes.filter((node) => {
+      if (node.isDirectory) {
+        switch (directoryBehavior) {
+          case "include":
+            return true;
+          case "exclude":
+            return false;
         }
-
-        return node;
-      })
-      .filter((node): node is T => node !== null);
-  }, [activated, directoryBehavior, nodeMap, selectedPaths]);
+      }
+      return selectedPaths.has(node.path);
+    });
+  }, [activated, directoryBehavior, nodes, selectedPaths]);
 
   const selectedCount = selectedNodes.length;
   const isSelected = selectedCount > 0;
