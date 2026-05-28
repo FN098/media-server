@@ -139,7 +139,7 @@ export function useExplorerMenu({
         type: "action",
         icon: TagIcon,
         label: "タグ編集",
-        onClick: () => (hasSelection ? tagEditor.open() : tagEditor.open()),
+        onClick: () => tagEditor.open(),
         hidden: ({ node }) => node.isDirectory,
       },
       {

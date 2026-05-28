@@ -89,7 +89,7 @@ export function useFavoritesMenu({
         type: "action",
         icon: TagIcon,
         label: "タグ編集",
-        onClick: () => (hasSelection ? tagEditor.open() : tagEditor.open()),
+        onClick: () => tagEditor.open(),
       },
       {
         key: "addTagFilter",
