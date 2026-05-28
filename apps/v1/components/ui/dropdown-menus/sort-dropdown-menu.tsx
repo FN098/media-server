@@ -32,17 +32,19 @@ interface SortDropdownMenuProps {
   value: SortValue | null;
   onChange: (value: SortValue | null) => void;
   options: readonly SortOption[];
+  placeholder?: string;
 }
 
 export function SortDropdownMenu({
   value,
   onChange,
   options,
+  placeholder = "ソート",
 }: SortDropdownMenuProps) {
   const currentOption = options.find((opt) => opt.sort === value?.sort);
   const currentLabel = currentOption
     ? `${currentOption.label} (${value?.direction === "asc" ? "昇順" : value?.direction === "desc" ? "降順" : ""})`
-    : "並び替え";
+    : placeholder;
 
   const handleSelect = (sort: string, direction: SortDirection) => {
     onChange({ sort, direction });
