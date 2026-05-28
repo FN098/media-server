@@ -3,9 +3,9 @@ import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-expl
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
-import { FolderPlus, TrashIcon } from "lucide-react";
+import { FolderPlus, Trash2Icon } from "lucide-react";
 
-export interface ToolbarActionContext {
+interface ToolbarActionContext {
   listing: MediaListing;
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
@@ -28,7 +28,7 @@ const toolbarActionItems: MenuItemDef<ToolbarActionContext>[] = [
     key: "delete-non-favorites",
     type: "action",
     label: "お気に入り以外一括削除",
-    icon: TrashIcon,
+    icon: Trash2Icon,
     variant: "destructive",
     disabled: (ctx) => !ctx.computed.hasNonFavoriteFiles,
     onClick: (ctx) => {
