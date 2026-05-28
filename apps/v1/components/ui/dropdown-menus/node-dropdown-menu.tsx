@@ -13,6 +13,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { Kbd } from "@/shadcn/components/ui/kbd";
@@ -54,6 +57,8 @@ export function NodeDropdownMenu({
   const open = controlledOpen ?? internalOpen;
   const setOpen = onControlledOpenChange ?? setInternalOpen;
 
+  const context = { node, closeMenu: () => setOpen(false) };
+
   if (!mounted || hidden) return null;
 
   return (
@@ -71,9 +76,8 @@ export function NodeDropdownMenu({
         {menuItems.map((item) => (
           <NodeDropdownMenuItem
             key={item.key}
-            node={node}
             item={item}
-            closeMenu={() => setOpen(false)}
+            context={context}
             isMobile={isMobile}
           />
         ))}
@@ -118,39 +122,55 @@ function NodeDropdownMenuTrigger({
 }
 
 interface NodeDropdownMenuItemProps {
-  node: MediaNode;
   item: MenuItemDef<NodeContext>;
-  closeMenu: () => void;
+  context: NodeContext;
   isMobile: boolean;
 }
 
 function NodeDropdownMenuItem({
-  node,
   item,
-  closeMenu,
+  context,
   isMobile,
 }: NodeDropdownMenuItemProps) {
-  // hidden の判定
-  if (item.hidden?.({ node })) return null;
+  if (item.hidden?.(context)) return null;
 
-  // separator のレンダリング
+  // 区切り線
   if (item.type === "separator") {
     return <DropdownMenuSeparator />;
   }
 
-  // custom のレンダリング
+  // カスタム
   if (item.type === "custom") {
+    return <DropdownMenuItem asChild>{item.render(context)}</DropdownMenuItem>;
+  }
+
+  // 階層グループ
+  if (item.type === "group") {
+    const SubIcon = item.icon;
     return (
-      <DropdownMenuItem asChild>
-        {item.render({ node, closeMenu })}
-      </DropdownMenuItem>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={item.disabled?.(context)}>
+          {SubIcon && <SubIcon className="mr-2 h-4 w-4" />}
+          <span>{item.label}</span>
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-[200px]">
+          {item.children.map((child) => (
+            <NodeDropdownMenuItem
+              key={child.key}
+              item={child}
+              context={context}
+              isMobile={isMobile}
+            />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
     );
   }
 
-  // action のレンダリング
+  // 通常アクション
   const Icon = item.icon;
   const variant = item.variant ?? "default";
-  const isDisabled = item.disabled?.({ node });
+  const isDisabled = item.disabled?.(context);
 
   return (
     <DropdownMenuItem
@@ -158,7 +178,7 @@ function NodeDropdownMenuItem({
       disabled={isDisabled}
       onClick={(e) => {
         e.stopPropagation();
-        void item.onClick({ node, closeMenu });
+        void item.onClick(context);
       }}
     >
       <Icon className="mr-2 h-4 w-4" />
