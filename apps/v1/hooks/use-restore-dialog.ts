@@ -11,7 +11,9 @@ type UseRestoreDialogProps<T> = {
   onChange?: (context: RestoreDialogContext<T>) => void;
 };
 
-export function useRestoreDialog<T>({ onChange }: UseRestoreDialogProps<T>) {
+export function useRestoreDialog<T>({
+  onChange,
+}: UseRestoreDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [targets, setTargets] = useState<T[]>([]);
 

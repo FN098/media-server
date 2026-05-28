@@ -7,6 +7,7 @@ import { useMoveDialog } from "@/hooks/use-move-dialog";
 import { usePreviewDialog } from "@/hooks/use-preview-dialog";
 import { useRenameDialog } from "@/hooks/use-rename-dialog";
 import { MediaNode } from "@/lib/media/types";
+import { useMemo } from "react";
 
 export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;
 
@@ -20,18 +21,34 @@ export function useExplorerDialogs() {
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog<MediaNode>();
 
-  const all = {
-    renameDialog,
-    moveDialog,
-    copyDialog,
-    createFolderDialog,
-    deleteDialog,
-    extractDialog,
-    previewDialog,
-    favoriteDialog,
-  } as const;
+  const all = useMemo(
+    () =>
+      ({
+        renameDialog,
+        moveDialog,
+        copyDialog,
+        createFolderDialog,
+        deleteDialog,
+        extractDialog,
+        previewDialog,
+        favoriteDialog,
+      }) as const,
+    [
+      copyDialog,
+      createFolderDialog,
+      deleteDialog,
+      extractDialog,
+      favoriteDialog,
+      moveDialog,
+      previewDialog,
+      renameDialog,
+    ]
+  );
 
-  const isOpen = Object.values(all).some(({ isOpen }) => isOpen);
+  const isOpen = useMemo(
+    () => Object.values(all).some(({ isOpen }) => isOpen),
+    [all]
+  );
 
   return {
     ...all,
