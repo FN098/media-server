@@ -43,37 +43,6 @@ export function SelectionBar({
   const isAllSelected = count > 0 && count === totalCount;
   const isMobile = useIsMobile();
 
-  // インライン（横並びボタン）専用の描画関数
-  const renderInlineItem = (item: MenuItemDef<MultipleNodesContext>) => {
-    if (item.type === "custom") {
-      return (
-        <React.Fragment key={item.key}>{item.render(context)}</React.Fragment>
-      );
-    }
-
-    if (item.type === "separator") {
-      return <div key={item.key} className="w-px h-6 bg-border mx-1" />;
-    }
-
-    // インライン側で「group」が来た場合は未対応（または非表示）にする安全策
-    if (item.type === "group") return null;
-
-    const Icon = item.icon;
-    return (
-      <Button
-        key={item.key}
-        variant={item.variant === "destructive" ? "destructive" : "ghost"}
-        size="icon"
-        className={cn("rounded-xl w-10 h-10 p-0", item.className)}
-        onClick={() => void item.onClick(context)}
-        disabled={item.disabled?.(context)}
-        title={item.label}
-      >
-        {Icon && <Icon className="h-[18px] w-[18px]" />}
-      </Button>
-    );
-  };
-
   return (
     <AnimatePresence>
       {open && (
@@ -113,10 +82,12 @@ export function SelectionBar({
             {/* アクションエリア */}
             <div className="flex gap-1 items-center">
               <div className="flex gap-1 items-center">
-                {/* 1. インラインアクション */}
-                {inlineMenuItems?.map(renderInlineItem)}
+                {/* インラインアクション */}
+                {inlineMenuItems?.map((item) =>
+                  renderInlineItem(item, context)
+                )}
 
-                {/* 2. ドロップダウンメニューアクション */}
+                {/* ドロップダウンメニューアクション */}
                 {menuItems && menuItems.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -162,6 +133,41 @@ export function SelectionBar({
   );
 }
 
+function renderInlineItem<T>(item: MenuItemDef<T>, context: T) {
+  if (item.hidden?.(context)) return null;
+
+  // 区切り線
+  if (item.type === "separator") {
+    return <div key={item.key} className="w-px h-6 bg-border mx-1" />;
+  }
+
+  // カスタム
+  if (item.type === "custom") {
+    return (
+      <React.Fragment key={item.key}>{item.render(context)}</React.Fragment>
+    );
+  }
+
+  // 階層グループ
+  if (item.type === "group") return null;
+
+  // 通常アクション
+  const Icon = item.icon;
+  return (
+    <Button
+      key={item.key}
+      variant={item.variant === "destructive" ? "destructive" : "ghost"}
+      size="icon"
+      className={cn("rounded-xl w-10 h-10 p-0", item.className)}
+      onClick={() => void item.onClick(context)}
+      disabled={item.disabled?.(context)}
+      title={item.label}
+    >
+      {Icon && <Icon className="h-[18px] w-[18px]" />}
+    </Button>
+  );
+}
+
 function RenderMenuItem<T>({
   item,
   context,
@@ -171,19 +177,19 @@ function RenderMenuItem<T>({
 }) {
   if (item.hidden?.(context)) return null;
 
-  // 1-1. 区切り線
+  // 区切り線
   if (item.type === "separator") {
     return <DropdownMenuSeparator key={item.key} />;
   }
 
-  // 1-2. カスタム
+  // カスタム
   if (item.type === "custom") {
     return (
       <React.Fragment key={item.key}>{item.render(context)}</React.Fragment>
     );
   }
 
-  // 1-3. 階層グループ
+  // 階層グループ
   if (item.type === "group") {
     const SubIcon = item.icon;
     return (
@@ -201,7 +207,7 @@ function RenderMenuItem<T>({
     );
   }
 
-  // 1-4. 通常アクション
+  // 通常アクション
   const Icon = item.icon;
   return (
     <DropdownMenuItem
