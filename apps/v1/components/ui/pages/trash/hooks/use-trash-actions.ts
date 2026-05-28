@@ -1,31 +1,27 @@
-import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
-import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
-import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialogs";
+import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
-import { FolderPlus } from "lucide-react";
+import { Trash2Icon } from "lucide-react";
 
-interface ToolbarActionContext {
+interface TrashToolbarActionContext {
   listing: MediaListing;
-  filtering: ExplorerFiltering;
-  dialogs: ExplorerDialogs;
-  favorites: ExplorerFavorites;
-  computed: {
-    hasNonFavoriteFiles: boolean;
-    nonFavoriteTargets: MediaNode[];
-  };
+  dialogs: TrashDialogs;
 }
 
-const toolbarActionItems: MenuItemDef<ToolbarActionContext>[] = [
+const toolbarActionItems: MenuItemDef<TrashToolbarActionContext>[] = [
   {
-    key: "create-folder",
+    key: "empty-current-dir",
     type: "action",
-    label: "新規フォルダ",
-    icon: FolderPlus,
-    onClick: (ctx) => ctx.dialogs.createFolderDialog.open(ctx.listing.path),
+    label: "このフォルダ内を完全に削除",
+    icon: Trash2Icon,
+    onClick: (ctx) => ctx.dialogs.deleteDialog.open(ctx.listing.nodes),
+    disabled: (ctx) => {
+      return ctx.listing.nodes.length === 0;
+    },
+    variant: "destructive",
   },
 ];
 
-export function useExplorerActions() {
+export function useTrashActions() {
   return { toolbarActionItems };
 }

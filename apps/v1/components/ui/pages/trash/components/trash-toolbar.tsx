@@ -1,24 +1,32 @@
-import { ResetButton } from "@/components/ui/buttons/reset-button";
+import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
+import { useTrashActions } from "@/components/ui/pages/trash/hooks/use-trash-actions";
 import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialogs";
 import { useTrashFilter } from "@/components/ui/pages/trash/hooks/use-trash-filter";
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
 import { useTrashSort } from "@/components/ui/pages/trash/hooks/use-trash-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useSort } from "@/hooks/use-sort";
+import { MediaListing } from "@/lib/media/types";
 import { useMemo } from "react";
 
 interface TrashToolbarProps {
+  listing: MediaListing;
   filtering: TrashFiltering;
   dialogs: TrashDialogs;
 }
 
-export function TrashToolbar({ filtering, dialogs }: TrashToolbarProps) {
+export function TrashToolbar({
+  listing,
+  filtering,
+  dialogs,
+}: TrashToolbarProps) {
   const sort = useSort();
 
   const { toolbarFilterItems } = useTrashFilter();
   const { toolbarSortItems } = useTrashSort();
+  const { toolbarActionItems } = useTrashActions();
 
   const filterContext = useMemo(() => {
     return {
@@ -26,6 +34,13 @@ export function TrashToolbar({ filtering, dialogs }: TrashToolbarProps) {
       dialogs,
     };
   }, [dialogs, filtering]);
+
+  const actionContext = useMemo(() => {
+    return {
+      listing,
+      dialogs,
+    };
+  }, [dialogs, listing]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
@@ -47,8 +62,13 @@ export function TrashToolbar({ filtering, dialogs }: TrashToolbarProps) {
           />
         </div>
 
-        {/* リセット */}
-        <ResetButton onClick={filtering.reset} isVisible={filtering.canReset} />
+        {/* アクション */}
+        <div className="w-full sm:w-[160px]">
+          <ActionDropdownMenu
+            items={toolbarActionItems}
+            context={actionContext}
+          />
+        </div>
       </div>
 
       {/* 件数 */}

@@ -16,10 +16,12 @@ import { Loader2 } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
+type DeletableNode = { path: string; name: string };
+
 interface DeleteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  targets: { path: string; name: string }[];
+  targets: DeletableNode[];
   permanent?: boolean;
 }
 

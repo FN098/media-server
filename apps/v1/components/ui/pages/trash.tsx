@@ -96,7 +96,11 @@ export function Trash({ listing }: { listing: MediaListing }) {
         >
           {/* ツールバー */}
           {!viewer.isOpen && (
-            <TrashToolbar filtering={filtering} dialogs={dialogs} />
+            <TrashToolbar
+              listing={listing}
+              filtering={filtering}
+              dialogs={dialogs}
+            />
           )}
 
           {/* グリッドビュー */}
