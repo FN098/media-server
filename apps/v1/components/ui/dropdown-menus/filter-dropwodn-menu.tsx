@@ -37,14 +37,14 @@ export type FilterMenuItem =
 
 interface FilterDropdownMenuProps {
   items: FilterMenuItem[];
-  label?: string; // ボタンのテキスト（デフォルト: "フィルター"）
+  placeholder?: string; // ボタンのテキスト（デフォルト: "フィルター"）
   onReset?: () => void; // フィルター全体のリセット処理
   canReset?: boolean; // リセットボタンを表示するかどうか（フィルターが適用されているかどうかのフラグとしても使用）
 }
 
 export function FilterDropdownMenu({
   items,
-  label = "フィルター",
+  placeholder = "フィルター",
   onReset,
   canReset = false,
 }: FilterDropdownMenuProps) {
@@ -137,7 +137,7 @@ export function FilterDropdownMenu({
                     : "text-muted-foreground"
                 }
               >
-                {label}
+                {placeholder}
               </span>
             </div>
             <ChevronRight className="h-4 w-4 shrink-0 opacity-50 rotate-90" />
