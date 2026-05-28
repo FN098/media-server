@@ -2,15 +2,15 @@ import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdo
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { ExplorerToolbarDialogs } from "@/components/ui/pages/explorer/components/explorer-dialogs";
-import {
-  ToolbarActionContext,
-  useExplorerActions,
-} from "@/components/ui/pages/explorer/hooks/use-explorer-actions";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
 import { useExplorerFilter } from "@/components/ui/pages/explorer/hooks/use-explorer-filter";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
+import {
+  ToolbarActionContext,
+  useExplorerToolbar,
+} from "@/components/ui/pages/explorer/hooks/use-explorer-toolbar";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaListing } from "@/lib/media/types";
 
@@ -29,7 +29,7 @@ export function ExplorerToolbar({
 }: ExplorerToolbarProps) {
   const sort = useExplorerSort();
   const filter = useExplorerFilter({ filtering, dialogs });
-  const action = useExplorerActions();
+  const toolbar = useExplorerToolbar();
 
   const actionContext: ToolbarActionContext = {
     listing,
@@ -63,7 +63,7 @@ export function ExplorerToolbar({
         {/* アクション */}
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
-            items={action.toolbarActionItems}
+            items={toolbar.actionItems}
             context={actionContext}
           />
         </div>

@@ -12,7 +12,7 @@ export interface ToolbarActionContext {
   favorites: ExplorerFavorites;
 }
 
-const toolbarActionItems: MenuItemDef<ToolbarActionContext>[] = [
+const actionItems: MenuItemDef<ToolbarActionContext>[] = [
   {
     key: "create-folder",
     type: "action",
@@ -41,8 +41,8 @@ const toolbarActionItems: MenuItemDef<ToolbarActionContext>[] = [
   },
 ];
 
-export function useExplorerActions() {
+export function useExplorerToolbar() {
   return {
-    toolbarActionItems,
+    actionItems,
   };
 }
