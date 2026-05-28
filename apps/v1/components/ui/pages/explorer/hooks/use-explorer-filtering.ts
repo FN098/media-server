@@ -61,16 +61,19 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
   );
 
   // フィルター結果
-  const { filtered, filteredCount, totalCount, isFiltered } = useFilteredNodes(
-    listing.nodes,
-    pipeline
-  );
+  const { filtered, filteredCount, totalCount, isFiltered } = useFilteredNodes({
+    targets: listing.nodes,
+    pipeline,
+  });
 
   // 「メディアのみ」のフィルターパイプライン
   const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
 
   // 「メディアのみ」のリスト
-  const { filtered: mediaOnly } = useFilteredNodes(filtered, mediaOnlyPipeline);
+  const { filtered: mediaOnly } = useFilteredNodes({
+    targets: filtered,
+    pipeline: mediaOnlyPipeline,
+  });
 
   // タグをフィルターに追加
   const addTagFilter = useCallback(
