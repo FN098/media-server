@@ -1,8 +1,8 @@
 import { ResetButton } from "@/components/ui/buttons/reset-button";
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
-import { SortDropdownMenuButton } from "@/components/ui/buttons/sort-dropdown-menu";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
+import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
 import { FavoritesSort } from "@/components/ui/pages/favorites/hooks/use-favorites-sort";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
@@ -21,7 +21,7 @@ export function FavoritesToolbar({ sort, filtering }: FavoritesToolbarProps) {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
       <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
         {/* 並び替え */}
-        <SortDropdownMenuButton
+        <SortDropdownMenu
           value={sort.value}
           onChange={sort.apply}
           options={sort.options}

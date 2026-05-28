@@ -28,17 +28,17 @@ type SortOption = {
   icon?: LucideIcon; // 選択項目のアイコン
 };
 
-interface SortDropdownMenuButtonProps {
+interface SortDropdownMenuProps {
   value: SortValue | null;
   onChange: (value: SortValue | null) => void;
   options: readonly SortOption[];
 }
 
-export function SortDropdownMenuButton({
+export function SortDropdownMenu({
   value,
   onChange,
   options,
-}: SortDropdownMenuButtonProps) {
+}: SortDropdownMenuProps) {
   const currentOption = options.find((opt) => opt.sort === value?.sort);
   const currentLabel = currentOption
     ? `${currentOption.label} (${value?.direction === "asc" ? "昇順" : value?.direction === "desc" ? "降順" : ""})`

@@ -1,6 +1,6 @@
 import { ResetButton } from "@/components/ui/buttons/reset-button";
-import { SortDropdownMenuButton } from "@/components/ui/buttons/sort-dropdown-menu";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
+import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
 import { TrashSort } from "@/components/ui/pages/trash/hooks/use-trash-sort";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
@@ -19,7 +19,7 @@ export function TrashToolbar({ sort, filtering }: TrashToolbarProps) {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
       <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
         {/* 並び替え */}
-        <SortDropdownMenuButton
+        <SortDropdownMenu
           value={sort.value}
           onChange={sort.apply}
           options={sort.options}
