@@ -62,7 +62,7 @@ function NodeContextMenuItem({
   context,
 }: {
   item: MenuItemDef<NodeContext>;
-  context: { node: MediaNode };
+  context: NodeContext;
 }) {
   if (item.hidden?.(context)) return null;
 
