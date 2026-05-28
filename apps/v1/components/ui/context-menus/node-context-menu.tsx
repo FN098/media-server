@@ -57,13 +57,12 @@ export function NodeContextMenu({
   );
 }
 
-function NodeContextMenuItem({
-  item,
-  context,
-}: {
+interface NodeContextMenuItemProps {
   item: MenuItemDef<NodeContext>;
   context: NodeContext;
-}) {
+}
+
+function NodeContextMenuItem({ item, context }: NodeContextMenuItemProps) {
   if (item.hidden?.(context)) return null;
 
   // 区切り線
@@ -98,6 +97,7 @@ function NodeContextMenuItem({
     );
   }
 
+  // 通常アクション
   const Icon = item.icon;
   const variant = item.variant ?? "default";
 
@@ -112,6 +112,7 @@ function NodeContextMenuItem({
     >
       <Icon className="mr-2 h-4 w-4" />
       {item.label}
+      {item.kbd && <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>}
     </ContextMenuItem>
   );
 }
