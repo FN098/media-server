@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 type DirectoryBehavior = "include" | "exclude";
 
-export type SelectableNode = {
+type SelectableNode = {
   path: string;
   isDirectory: boolean;
 };
@@ -20,8 +20,7 @@ export function useSelectedNodes<T extends SelectableNode>({
   activated = true,
   directoryBehavior = "include",
 }: UseSelectedNodes<T>) {
-  // 選択済みノードリスト
-  const selectedNodes = useMemo(() => {
+  return useMemo(() => {
     if (!activated) return [];
 
     return nodes.filter((node) => {
@@ -36,13 +35,4 @@ export function useSelectedNodes<T extends SelectableNode>({
       return selectedPaths.has(node.path);
     });
   }, [activated, directoryBehavior, nodes, selectedPaths]);
-
-  const selectedCount = selectedNodes.length;
-  const isSelected = selectedCount > 0;
-
-  return {
-    selectedNodes,
-    selectedCount,
-    isSelected,
-  };
 }

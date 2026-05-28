@@ -29,7 +29,7 @@ export function useTrashSelection({
     hasSelection,
   } = usePathSelectionContext();
 
-  const { selectedNodes } = useSelectedNodes({
+  const selectedNodes = useSelectedNodes({
     // IMPORTANT: フィルター済みノードを渡すと、無限レンダリングに陥るので、全ノードを渡す
     nodes: listing.nodes,
     selectedPaths,
