@@ -12,9 +12,12 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/shadcn/components/ui/context-menu";
-import React, { useMemo } from "react";
+import React from "react";
 
 const variantClass: Record<MenuItemVariant, string> = {
   default: "",
@@ -38,10 +41,7 @@ export function NodeContextMenu({
 }: NodeContextMenuProps) {
   const mounted = useMounted();
 
-  const visibleItems = useMemo(
-    () => menuItems.filter((item) => !item.hidden?.({ node })),
-    [menuItems, node]
-  );
+  const context = { node };
 
   if (!mounted || disabled) return children;
 
@@ -49,26 +49,53 @@ export function NodeContextMenu({
     <ContextMenu onOpenChange={onOpenChange}>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
-        {visibleItems.map((item) => (
-          <NodeContextMenuItem key={item.key} item={item} node={node} />
+        {menuItems.map((item) => (
+          <NodeContextMenuItem key={item.key} item={item} context={context} />
         ))}
       </ContextMenuContent>
     </ContextMenu>
   );
 }
 
-interface NodeContextMenuItemProps {
-  node: MediaNode;
+function NodeContextMenuItem({
+  item,
+  context,
+}: {
   item: MenuItemDef<NodeContext>;
-}
+  context: { node: MediaNode };
+}) {
+  if (item.hidden?.(context)) return null;
 
-function NodeContextMenuItem({ node, item }: NodeContextMenuItemProps) {
-  if (item.type === "custom") {
-    return <ContextMenuItem asChild>{item.render({ node })}</ContextMenuItem>;
-  }
-
+  // 区切り線
   if (item.type === "separator") {
     return <ContextMenuSeparator />;
+  }
+
+  // カスタム
+  if (item.type === "custom") {
+    return <ContextMenuItem asChild>{item.render(context)}</ContextMenuItem>;
+  }
+
+  // 階層グループ
+  if (item.type === "group") {
+    const SubIcon = item.icon;
+    return (
+      <ContextMenuSub>
+        <ContextMenuSubTrigger disabled={item.disabled?.(context)}>
+          {SubIcon && <SubIcon className="mr-2 h-4 w-4" />}
+          <span>{item.label}</span>
+        </ContextMenuSubTrigger>
+        <ContextMenuSubContent className="w-[200px]">
+          {item.children.map((child) => (
+            <NodeContextMenuItem
+              key={child.key}
+              item={child}
+              context={context}
+            />
+          ))}
+        </ContextMenuSubContent>
+      </ContextMenuSub>
+    );
   }
 
   const Icon = item.icon;
@@ -77,10 +104,10 @@ function NodeContextMenuItem({ node, item }: NodeContextMenuItemProps) {
   return (
     <ContextMenuItem
       className={variantClass[variant]}
-      disabled={item.disabled?.({ node })}
+      disabled={item.disabled?.(context)}
       onClick={(e) => {
         e.stopPropagation();
-        void item.onClick({ node });
+        void item.onClick(context);
       }}
     >
       <Icon className="mr-2 h-4 w-4" />
