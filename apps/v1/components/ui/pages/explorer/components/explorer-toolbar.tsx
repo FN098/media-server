@@ -12,6 +12,7 @@ import { useExplorerFilter } from "@/components/ui/pages/explorer/hooks/use-expl
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
+import { useSort } from "@/hooks/use-sort";
 import { MediaListing } from "@/lib/media/types";
 
 interface ExplorerToolbarProps {
@@ -27,9 +28,11 @@ export function ExplorerToolbar({
   dialogs,
   favorites,
 }: ExplorerToolbarProps) {
-  const sort = useExplorerSort();
+  const sort = useSort();
   const filter = useExplorerFilter({ filtering, dialogs });
-  const actions = useExplorerActions();
+
+  const { toolbarSortItems } = useExplorerSort();
+  const { toolbarActionItems } = useExplorerActions();
 
   const actionContext: ToolbarActionContext = {
     listing,
@@ -44,9 +47,9 @@ export function ExplorerToolbar({
         {/* ソート */}
         <div className="w-full sm:w-[160px]">
           <SortDropdownMenu
-            value={sort.control.value}
-            onChange={sort.control.apply}
-            options={sort.options}
+            value={sort.value}
+            onChange={sort.apply}
+            options={toolbarSortItems}
           />
         </div>
 
@@ -62,7 +65,7 @@ export function ExplorerToolbar({
         {/* アクション */}
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
-            items={actions.toolbarActionItems}
+            items={toolbarActionItems}
             context={actionContext}
           />
         </div>

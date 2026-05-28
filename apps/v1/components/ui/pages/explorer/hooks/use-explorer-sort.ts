@@ -1,4 +1,3 @@
-import { useSort } from "@/hooks/use-sort";
 import {
   ALargeSmallIcon,
   CalendarIcon,
@@ -10,7 +9,7 @@ import {
 
 export type ExplorerSort = ReturnType<typeof useExplorerSort>;
 
-const options = [
+const toolbarSortItems = [
   {
     sort: "name",
     label: "名前",
@@ -44,7 +43,5 @@ const options = [
 ] as const;
 
 export function useExplorerSort() {
-  const control = useSort({});
-
-  return { options, control };
+  return { toolbarSortItems };
 }

@@ -19,7 +19,7 @@ export function useSort({
   sortKey = "sort",
   directionKey = "direction",
   resetKeys = ["page"],
-}: UseSortProps) {
+}: UseSortProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
