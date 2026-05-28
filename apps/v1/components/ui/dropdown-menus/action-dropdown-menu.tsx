@@ -10,7 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
-import { ChevronRight, MoreVertical } from "lucide-react";
+import { ChevronRight, Wand2 } from "lucide-react";
 
 interface ActionDropdownMenuProps<T> {
   items: MenuItemDef<T>[];
@@ -30,7 +30,7 @@ export function ActionDropdownMenu<T>({
           className="w-full justify-between bg-background font-normal text-sm border border-input px-3 h-9"
         >
           <div className="flex items-center gap-2 overflow-hidden truncate">
-            <MoreVertical className="h-4 w-4 shrink-0 text-muted-foreground transition-colors" />
+            <Wand2 className="h-4 w-4 shrink-0 text-muted-foreground transition-colors" />
             <span className="text-foreground font-medium truncate">
               アクション
             </span>
