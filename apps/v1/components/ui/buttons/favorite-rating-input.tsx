@@ -6,12 +6,14 @@ interface FavoriteRatingInputProps {
   value: number | null;
   onChange: (newRating: number | null) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export function FavoriteRatingInput({
   value,
   onChange,
   className,
+  disabled,
 }: FavoriteRatingInputProps) {
   const [hoverRating, setHoverRating] = React.useState<number | null>(null);
   const displayValue = hoverRating ?? value ?? 0;
@@ -36,6 +38,7 @@ export function FavoriteRatingInput({
               if (next === null) setHoverRating(null);
             }}
             className="p-1 transition-transform active:scale-90"
+            disabled={disabled}
           >
             <Star
               className={cn(
