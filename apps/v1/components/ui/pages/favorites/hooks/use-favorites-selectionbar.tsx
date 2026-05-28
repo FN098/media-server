@@ -43,7 +43,8 @@ export function useFavoritesSelectionbar({
                 <FavoriteRatingInput
                   value={averageRating}
                   onChange={(newRating) =>
-                    favorites.updateSelected({
+                    favorites.update({
+                      targets: nodes,
                       newRating,
                       onSuccess: closeMenu,
                     })
