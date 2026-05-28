@@ -15,12 +15,22 @@ type FavoriteMsg =
   | { type: "UPDATE_MANY"; paths: string[]; rating: number | null }
   | { type: "DELETE_MANY"; paths: string[] };
 
-export function useFavorites(initialData?: Favorite[]) {
+interface UpdateMultipleFavoriteProps {
+  paths: string[];
+  newRating?: number | null;
+  skipIfAlreadyFavorite?: boolean;
+}
+
+interface UseFavoriteProps {
+  initialData?: Favorite[];
+}
+
+export function useFavorites({ initialData = [] }: UseFavoriteProps) {
   const [favorites, setFavorites] = useState(
     () =>
       new Map(
         initialData
-          ?.filter((f) => !!f.favoritedAt)
+          .filter((f) => !!f.favoritedAt)
           .map((f) => [f.path, f.rating]) ?? []
       )
   );
@@ -139,11 +149,11 @@ export function useFavorites(initialData?: Favorite[]) {
 
   // 一括お気に入り登録
   const updateMultipleFavorites = useCallback(
-    async (
-      paths: string[],
-      rating: number | null = null,
-      skipIfAlreadyFavorite = false
-    ) => {
+    async ({
+      paths,
+      newRating = null,
+      skipIfAlreadyFavorite = false,
+    }: UpdateMultipleFavoriteProps) => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);
@@ -151,7 +161,7 @@ export function useFavorites(initialData?: Favorite[]) {
         // すでにお気に入りの場合
         if (current.isFavorite) {
           // スキップ指定がある、または既に同じレーティングなら除外
-          if (skipIfAlreadyFavorite || current.rating === rating) {
+          if (skipIfAlreadyFavorite || current.rating === newRating) {
             return false;
           }
         }
@@ -169,16 +179,19 @@ export function useFavorites(initialData?: Favorite[]) {
       // 楽観的アップデート
       setFavorites((prev) => {
         const next = new Map(prev);
-        validPaths.forEach((path) => next.set(path, rating));
+        validPaths.forEach((path) => next.set(path, newRating));
         return next;
       });
 
       // タブ間同期 (メッセージ送信)
-      broadcast({ type: "UPDATE_MANY", paths: validPaths, rating });
+      broadcast({ type: "UPDATE_MANY", paths: validPaths, rating: newRating });
 
       // サーバー処理開始
       try {
-        const result = await updateMultipleFavoritesAction(validPaths, rating);
+        const result = await updateMultipleFavoritesAction(
+          validPaths,
+          newRating
+        );
 
         if (!result.success) {
           // 失敗時のロールバック

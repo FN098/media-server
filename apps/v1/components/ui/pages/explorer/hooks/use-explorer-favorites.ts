@@ -22,7 +22,10 @@ export function useExplorerFavorites() {
 
       startTransition(async () => {
         const paths = targets.map((target) => target.path);
-        const result = await updateMultipleFavorites(paths, newRating);
+        const result = await updateMultipleFavorites({
+          paths,
+          newRating,
+        });
 
         if (result.success) {
           toast.success("レーティングが更新されました。", { duration: 500 });

@@ -17,7 +17,7 @@ export function FavoritesProvider({
   children: React.ReactNode;
   favorites?: Favorite[];
 }) {
-  const value = useFavorites(favorites);
+  const value = useFavorites({ initialData: favorites });
 
   return (
     <FavoritesContext.Provider value={value}>

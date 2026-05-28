@@ -32,6 +32,7 @@ export function useFavoritesSelection({
     selectedPaths,
   });
 
+  // TODO: たまたま同じ数だけどパスが変わった場合、変な動きになる
   // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
   useEffect(() => {
     if (selectedNodes.length !== selectedCount) {

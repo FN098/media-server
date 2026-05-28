@@ -41,8 +41,8 @@ export function FavoriteDialog({
     if (mode === "add") {
       startTransition(async () => {
         const paths = targets.map((n) => n.path);
-        const result = await updateMultipleFavorites(paths, {
-          rating: null,
+        const result = await updateMultipleFavorites({
+          paths,
           skipIfAlreadyFavorite: true,
         });
         if (result.success) {
