@@ -8,7 +8,7 @@ import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
 import { LocalDate } from "@/components/ui/dates/local-date";
-import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
+import { NodeActionDropdownMenu } from "@/components/ui/dropdown-menus/node-action-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
@@ -640,7 +640,7 @@ function DataRow({
 
           {/* Actions */}
           <div className="flex justify-center">
-            <ActionsDropdownMenu
+            <NodeActionDropdownMenu
               node={node}
               menuItems={menuItems}
               open={dropdownMenuOpen}

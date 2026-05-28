@@ -26,7 +26,7 @@ const variantClass: Record<MenuItemVariant, string> = {
   destructive: "text-destructive focus:text-destructive",
 };
 
-interface ActionsDropdownMenuProps {
+interface NodeActionsDropdownMenuProps {
   node: MediaNode;
   menuItems: MenuItemDef<NodeContext>[];
   open?: boolean;
@@ -37,7 +37,7 @@ interface ActionsDropdownMenuProps {
   triggerType?: "default" | "large";
 }
 
-export function ActionsDropdownMenu({
+export function NodeActionDropdownMenu({
   node,
   menuItems,
   open: controlledOpen,
@@ -46,7 +46,7 @@ export function ActionsDropdownMenu({
   disabled,
   hidden,
   triggerType = "default",
-}: ActionsDropdownMenuProps) {
+}: NodeActionsDropdownMenuProps) {
   const isMobile = useIsMobile();
   const mounted = useMounted();
 

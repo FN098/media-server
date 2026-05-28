@@ -4,7 +4,7 @@ import { AverageRatingBadge } from "@/components/ui/badges/average-rating-badge"
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
-import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
+import { NodeActionDropdownMenu } from "@/components/ui/dropdown-menus/node-action-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
@@ -624,7 +624,7 @@ function Cell({
                     isMobile && "opacity-100"
                   )}
                 >
-                  <ActionsDropdownMenu
+                  <NodeActionDropdownMenu
                     node={node}
                     menuItems={menuItems}
                     open={dropdownMenuOpen}

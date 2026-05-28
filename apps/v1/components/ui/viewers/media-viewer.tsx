@@ -3,7 +3,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { ViewerHeaderPinButton } from "@/components/ui/buttons/viewer-header-pin-button";
-import { ActionsDropdownMenu } from "@/components/ui/dropdown-menus/actions-dropdown-menu";
+import { NodeActionDropdownMenu } from "@/components/ui/dropdown-menus/node-action-dropdown-menu";
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
@@ -330,7 +330,7 @@ function MediaViewerHeader({
             )}
 
             {currentNode && (
-              <ActionsDropdownMenu
+              <NodeActionDropdownMenu
                 node={currentNode}
                 menuItems={newMenuItems}
                 open={isMenuOpen}
