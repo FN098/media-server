@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterMenuItem } from "@/components/ui/pages/explorer/hooks/use-explorer-filter";
+import { FilterMenuItem } from "@/lib/menu-items/types";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
