@@ -15,7 +15,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/shadcn/components/ui/dialog";
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
@@ -227,16 +226,18 @@ function StarPicker({ value, onChange }: StarPickerProps) {
 // ─── メインコンポーネント ───────────────────────────────────────────────────────
 
 interface RatingFilterDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   value: RatingFilterValue;
   onChange: (value: RatingFilterValue) => void;
 }
 
 export function RatingFilterDialog({
+  open,
+  onOpenChange,
   value,
   onChange,
 }: RatingFilterDialogProps) {
-  const [open, setOpen] = useState(false);
-
   // ダイアログ内一時状態
   const [filterMode, setFilterMode] = useState<RatingFilterMode>("all");
   const [op, setOp] = useState<RatingOperator>("gte");
@@ -257,7 +258,7 @@ export function RatingFilterDialog({
       setBetweenMin(parsed.betweenMin);
       setBetweenMax(parsed.betweenMax);
     }
-    setOpen(nextOpen);
+    onOpenChange(nextOpen);
   };
 
   const handleClear = () => {
@@ -270,7 +271,7 @@ export function RatingFilterDialog({
 
   const handleApply = () => {
     onChange(toFilterInput(filterMode, op, starValue, betweenMin, betweenMax));
-    setOpen(false);
+    onOpenChange(false);
   };
 
   // between のとき min <= max を強制
@@ -278,12 +279,14 @@ export function RatingFilterDialog({
     setBetweenMin(v);
     if (v > betweenMax) setBetweenMax(v);
   };
+
   const handleBetweenMax = (v: RatingValue) => {
     setBetweenMax(v);
     if (v < betweenMin) setBetweenMin(v);
   };
 
   const mounted = useMounted();
+
   if (!mounted) {
     return (
       <div className="flex items-center">
@@ -294,27 +297,6 @@ export function RatingFilterDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "gap-2 h-9 w-full transition-colors",
-            isActive &&
-              "border-primary bg-primary/5 text-primary hover:bg-primary/10"
-          )}
-        >
-          {isActive && description ? (
-            <span>{description}</span>
-          ) : (
-            <>
-              <Star className="h-4 w-4" />
-              <span>評価フィルタ</span>
-            </>
-          )}
-        </Button>
-      </DialogTrigger>
-
       <DialogContent
         className="sm:max-w-[420px] flex flex-col p-0 overflow-hidden"
         onEscapeKeyDown={(e) => e.stopPropagation()}
