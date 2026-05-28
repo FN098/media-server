@@ -68,7 +68,7 @@ export function useExplorerHotkeys({
 
   useHotkeys(
     "delete",
-    () => dialogs.deleteDialog.openTargets(selection.selectedNodes),
+    () => dialogs.deleteDialog.open(selection.selectedNodes),
     {
       scopes: "explorer",
     }
