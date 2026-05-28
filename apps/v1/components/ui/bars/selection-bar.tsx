@@ -15,7 +15,6 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { MoreVertical, X } from "lucide-react";
-import React from "react";
 
 interface SelectionBarProps {
   open: boolean;
@@ -83,9 +82,13 @@ export function SelectionBar({
             <div className="flex gap-1 items-center">
               <div className="flex gap-1 items-center">
                 {/* インラインアクション */}
-                {inlineMenuItems?.map((item) =>
-                  renderInlineItem(item, context)
-                )}
+                {inlineMenuItems?.map((item) => (
+                  <SelectionBarInlineMenuItem
+                    key={item.key}
+                    item={item}
+                    context={context}
+                  />
+                ))}
 
                 {/* ドロップダウンメニューアクション */}
                 {menuItems && menuItems.length > 0 && (
@@ -102,7 +105,7 @@ export function SelectionBar({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {menuItems.map((item) => (
-                        <RenderMenuItem
+                        <SelectionBarMenuItem
                           key={item.key}
                           item={item}
                           context={context}
@@ -133,33 +136,41 @@ export function SelectionBar({
   );
 }
 
-function renderInlineItem<T>(item: MenuItemDef<T>, context: T) {
+interface SelectionBarInlineMenuItemProps {
+  item: MenuItemDef<MultipleNodesContext>;
+  context: MultipleNodesContext;
+}
+
+function SelectionBarInlineMenuItem({
+  item,
+  context,
+}: SelectionBarInlineMenuItemProps) {
   if (item.hidden?.(context)) return null;
 
   // 区切り線
   if (item.type === "separator") {
-    return <div key={item.key} className="w-px h-6 bg-border mx-1" />;
+    return <div className="w-px h-6 bg-border mx-1" />;
   }
 
   // カスタム
   if (item.type === "custom") {
-    return (
-      <React.Fragment key={item.key}>{item.render(context)}</React.Fragment>
-    );
+    return item.render(context);
   }
 
   // 階層グループ
-  if (item.type === "group") return null;
+  if (item.type === "group") return null; // インラインメニューではサポートしない
 
   // 通常アクション
   const Icon = item.icon;
   return (
     <Button
-      key={item.key}
       variant={item.variant === "destructive" ? "destructive" : "ghost"}
       size="icon"
       className={cn("rounded-xl w-10 h-10 p-0", item.className)}
-      onClick={() => void item.onClick(context)}
+      onClick={(e) => {
+        e.stopPropagation();
+        void item.onClick(context);
+      }}
       disabled={item.disabled?.(context)}
       title={item.label}
     >
@@ -168,39 +179,40 @@ function renderInlineItem<T>(item: MenuItemDef<T>, context: T) {
   );
 }
 
-function RenderMenuItem<T>({
-  item,
-  context,
-}: {
-  item: MenuItemDef<T>;
-  context: T;
-}) {
+interface SelectionBarMenuItemProps {
+  item: MenuItemDef<MultipleNodesContext>;
+  context: MultipleNodesContext;
+}
+
+function SelectionBarMenuItem({ item, context }: SelectionBarMenuItemProps) {
   if (item.hidden?.(context)) return null;
 
   // 区切り線
   if (item.type === "separator") {
-    return <DropdownMenuSeparator key={item.key} />;
+    return <DropdownMenuSeparator />;
   }
 
   // カスタム
   if (item.type === "custom") {
-    return (
-      <React.Fragment key={item.key}>{item.render(context)}</React.Fragment>
-    );
+    return item.render(context);
   }
 
   // 階層グループ
   if (item.type === "group") {
     const SubIcon = item.icon;
     return (
-      <DropdownMenuSub key={item.key}>
+      <DropdownMenuSub>
         <DropdownMenuSubTrigger disabled={item.disabled?.(context)}>
           {SubIcon && <SubIcon className="mr-2 h-4 w-4" />}
           <span>{item.label}</span>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="w-[200px]">
           {item.children.map((child) => (
-            <RenderMenuItem key={child.key} item={child} context={context} />
+            <SelectionBarMenuItem
+              key={child.key}
+              item={child}
+              context={context}
+            />
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -211,7 +223,6 @@ function RenderMenuItem<T>({
   const Icon = item.icon;
   return (
     <DropdownMenuItem
-      key={item.key}
       disabled={item.disabled?.(context)}
       onClick={(e) => {
         e.stopPropagation();
