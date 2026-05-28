@@ -57,7 +57,6 @@ export function SortDropdownMenu({
   return (
     <div className="w-full">
       <DropdownMenu>
-        {/* トリガー部分。見た目をSelect風に調整しています */}
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
