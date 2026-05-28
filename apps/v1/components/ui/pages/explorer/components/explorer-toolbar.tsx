@@ -32,27 +32,21 @@ export function ExplorerToolbar({
   const { toolbarSortItems } = useExplorerSort();
   const { toolbarActionItems } = useExplorerActions();
 
-  const computed = useMemo(() => {
+  const actionContext = useMemo(() => {
     const nonFavoriteTargets = filtering.filteredNodes.filter(
       (node) => !node.isDirectory && !favorites.get(node.path).isFavorite
     );
-
     return {
-      nonFavoriteTargets,
-      hasNonFavoriteFiles: nonFavoriteTargets.length > 0,
-    };
-  }, [favorites, filtering.filteredNodes]);
-
-  const actionContext = useMemo(
-    () => ({
       listing,
       filtering,
       dialogs,
       favorites,
-      computed,
-    }),
-    [listing, filtering, dialogs, favorites, computed]
-  );
+      computed: {
+        nonFavoriteTargets,
+        hasNonFavoriteFiles: nonFavoriteTargets.length > 0,
+      },
+    };
+  }, [listing, filtering, dialogs, favorites]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
