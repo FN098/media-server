@@ -12,7 +12,6 @@ import { useExplorerMenu } from "@/components/ui/pages/explorer/hooks/use-explor
 import { useExplorerNavigation } from "@/components/ui/pages/explorer/hooks/use-explorer-navigation";
 import { useExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/components/ui/pages/explorer/hooks/use-explorer-selectionbar";
-import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { useExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumbs";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -38,7 +37,6 @@ interface ExplorerProps {
 export function Explorer({ listing }: ExplorerProps) {
   const searchFocus = useSearchFocusContext();
   const viewMode = useViewMode();
-  const sort = useExplorerSort();
   const filtering = useExplorerFiltering({ listing });
   const selection = useExplorerSelection({ listing, filtering });
 
@@ -115,7 +113,6 @@ export function Explorer({ listing }: ExplorerProps) {
           {!viewer.isOpen && (
             <ExplorerToolbar
               listing={listing}
-              sort={sort}
               filtering={filtering}
               dialogs={dialogs}
               favorites={favorites}

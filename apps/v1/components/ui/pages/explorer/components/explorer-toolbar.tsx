@@ -4,9 +4,9 @@ import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropwo
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
-import { useExplorerFilterMenu } from "@/components/ui/pages/explorer/hooks/use-explorer-filter-menu";
+import { useExplorerFilter } from "@/components/ui/pages/explorer/hooks/use-explorer-filter";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
-import { ExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
+import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaListing } from "@/lib/media/types";
 import { Button } from "@/shadcn/components/ui/button";
@@ -15,7 +15,6 @@ import { FolderPlus, TrashIcon } from "lucide-react";
 
 interface ExplorerToolbarProps {
   listing: MediaListing;
-  sort: ExplorerSort;
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
   favorites: ExplorerFavorites;
@@ -23,28 +22,28 @@ interface ExplorerToolbarProps {
 
 export function ExplorerToolbar({
   listing,
-  sort,
   filtering,
   dialogs,
   favorites,
 }: ExplorerToolbarProps) {
-  const filter = useExplorerFilterMenu({ filtering, dialogs });
+  const sort = useExplorerSort();
+  const filter = useExplorerFilter({ filtering, dialogs });
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
       <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
         {/* ソート */}
         <SortDropdownMenu
-          value={sort.value}
-          onChange={sort.apply}
+          value={sort.control.value}
+          onChange={sort.control.apply}
           options={sort.options}
         />
 
         {/* フィルター */}
         <FilterDropdownMenu
           items={filter.menuItems}
-          onReset={filtering.reset}
-          canReset={filtering.canReset}
+          onReset={filter.control.reset}
+          canReset={filter.control.canReset}
         />
 
         {/* TODO: アクションメニューにまとめる */}

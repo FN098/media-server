@@ -10,7 +10,7 @@ import {
 
 export type ExplorerSort = ReturnType<typeof useExplorerSort>;
 
-export const options = [
+const options = [
   {
     sort: "name",
     label: "名前",
@@ -44,10 +44,7 @@ export const options = [
 ] as const;
 
 export function useExplorerSort() {
-  const sort = useSort({});
+  const control = useSort({});
 
-  return {
-    ...sort,
-    options,
-  };
+  return { options, control };
 }
