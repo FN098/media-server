@@ -114,7 +114,7 @@ export function useExplorerMenu({
         kbd: "Ctrl + Right",
       },
       {
-        key: "goto-next-folder",
+        key: "goto-prev-folder",
         type: "action",
         icon: MoveLeftIcon,
         label: "前のフォルダを開く",
