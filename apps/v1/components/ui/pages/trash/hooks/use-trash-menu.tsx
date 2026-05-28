@@ -7,6 +7,8 @@ import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   ExternalLinkIcon,
   FullscreenIcon,
+  MoveLeftIcon,
+  MoveRightIcon,
   RotateCcwIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -48,6 +50,24 @@ export function useTrashMenu({
         onClick: () => void fullscreen.toggle(),
         hidden: () => !viewer.isOpen || !fullscreen.isSupported,
         kbd: "F",
+      },
+      {
+        key: "goto-next-folder",
+        type: "action",
+        icon: MoveRightIcon,
+        label: "次のフォルダを開く",
+        onClick: () => navigation.openNextFolder("first"),
+        hidden: () => !viewer.isOpen,
+        kbd: "Ctrl + Right",
+      },
+      {
+        key: "goto-next-folder",
+        type: "action",
+        icon: MoveLeftIcon,
+        label: "前のフォルダを開く",
+        onClick: () => navigation.openPrevFolder("first"),
+        hidden: () => !viewer.isOpen,
+        kbd: "Ctrl + Left",
       },
       {
         key: "restore",
