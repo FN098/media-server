@@ -40,9 +40,7 @@ export function Explorer({ listing }: ExplorerProps) {
   const viewMode = useViewMode();
   const sort = useExplorerSort();
   const filtering = useExplorerFiltering({ listing });
-  const selection = useExplorerSelection({
-    filtering,
-  });
+  const selection = useExplorerSelection({ listing, filtering });
 
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation({});

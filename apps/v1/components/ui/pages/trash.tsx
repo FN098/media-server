@@ -35,9 +35,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   const viewMode = useViewMode();
   const sort = useTrashSort();
   const filtering = useTrashFiltering({ listing });
-  const selection = useTrashSelection({
-    filtering,
-  });
+  const selection = useTrashSelection({ listing, filtering });
 
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation({});

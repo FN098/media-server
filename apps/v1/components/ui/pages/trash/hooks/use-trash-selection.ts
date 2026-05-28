@@ -1,16 +1,20 @@
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useCallback, useEffect } from "react";
 
 export type TrashSelection = ReturnType<typeof useTrashSelection>;
 
 interface UseTrashSelectionProps {
+  listing: MediaListing;
   filtering: TrashFiltering;
 }
 
-export function useTrashSelection({ filtering }: UseTrashSelectionProps) {
+export function useTrashSelection({
+  listing,
+  filtering,
+}: UseTrashSelectionProps) {
   const { filteredNodes: currentNodes } = filtering;
 
   const {
@@ -26,7 +30,8 @@ export function useTrashSelection({ filtering }: UseTrashSelectionProps) {
   } = usePathSelectionContext();
 
   const { selectedNodes } = useSelectedNodes({
-    nodes: currentNodes,
+    // IMPORTANT: フィルター済みノードを渡すと、無限レンダリングに陥るので、全ノードを渡す
+    nodes: listing.nodes,
     selectedPaths,
   });
 

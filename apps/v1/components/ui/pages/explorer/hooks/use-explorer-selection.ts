@@ -1,16 +1,20 @@
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useCallback, useEffect } from "react";
 
 export type ExplorerSelection = ReturnType<typeof useExplorerSelection>;
 
 interface UseExplorerSelectionProps {
+  listing: MediaListing;
   filtering: ExplorerFiltering;
 }
 
-export function useExplorerSelection({ filtering }: UseExplorerSelectionProps) {
+export function useExplorerSelection({
+  listing,
+  filtering,
+}: UseExplorerSelectionProps) {
   const { filteredNodes: currentNodes } = filtering;
 
   const {
@@ -26,10 +30,12 @@ export function useExplorerSelection({ filtering }: UseExplorerSelectionProps) {
   } = usePathSelectionContext();
 
   const { selectedNodes } = useSelectedNodes({
-    nodes: currentNodes,
+    // IMPORTANT: フィルター済みノードを渡すと、無限レンダリングに陥るので、全ノードを渡す
+    nodes: listing.nodes,
     selectedPaths,
   });
 
+  // TODO: たまたま同じ数だけどパスが変わった場合、変な動きになるのでは？
   // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
   useEffect(() => {
     if (selectedNodes.length !== selectedCount) {

@@ -1,16 +1,18 @@
 import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useCallback, useEffect } from "react";
 
 export type FavoritesSelection = ReturnType<typeof useFavoritesSelection>;
 
 interface UseFavoritesSelectionProps {
+  listing: MediaListing;
   filtering: FavoritesFiltering;
 }
 
 export function useFavoritesSelection({
+  listing,
   filtering,
 }: UseFavoritesSelectionProps) {
   const { filteredNodes: currentNodes } = filtering;
@@ -28,11 +30,11 @@ export function useFavoritesSelection({
   } = usePathSelectionContext();
 
   const { selectedNodes } = useSelectedNodes({
-    nodes: currentNodes,
+    // IMPORTANT: フィルター済みノードを渡すと、無限レンダリングに陥るので、全ノードを渡す
+    nodes: listing.nodes,
     selectedPaths,
   });
 
-  // TODO: たまたま同じ数だけどパスが変わった場合、変な動きになる
   // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
   useEffect(() => {
     if (selectedNodes.length !== selectedCount) {

@@ -35,9 +35,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   const viewMode = useViewMode();
   const sort = useFavoritesSort();
   const filtering = useFavoritesFiltering({ listing });
-  const selection = useFavoritesSelection({
-    filtering,
-  });
+  const selection = useFavoritesSelection({ listing, filtering });
 
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation({});
