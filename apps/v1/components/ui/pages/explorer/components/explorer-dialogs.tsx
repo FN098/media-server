@@ -29,14 +29,22 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       {/* 解凍ダイアログ */}
       <ExtractDialog
         open={extractDialog.isOpen}
-        onOpenChange={extractDialog.onOpenChange}
+        onOpenChange={(open) => {
+          if (!open) {
+            extractDialog.close();
+          }
+        }}
         targets={extractDialog.targets}
       />
 
       {/* リネームダイアログ */}
       <RenameDialog
         open={renameDialog.isOpen}
-        onOpenChange={renameDialog.onOpenChange}
+        onOpenChange={(open) => {
+          if (!open) {
+            renameDialog.close();
+          }
+        }}
         sourcePath={renameDialog.target?.path ?? ""}
         currentName={renameDialog.target?.name ?? ""}
         isDirectory={renameDialog.target?.isDirectory}
@@ -46,42 +54,66 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       <CreateFolderDialog
         key={`create-folder-${createFolderDialog.isOpen}`}
         open={createFolderDialog.isOpen}
-        onOpenChange={createFolderDialog.onOpenChange}
+        onOpenChange={(open) => {
+          if (!open) {
+            createFolderDialog.close();
+          }
+        }}
         parentPath={createFolderDialog.parentPath}
       />
 
       {/* 移動ダイアログ */}
       <MoveDialog
         open={moveDialog.isOpen}
-        onOpenChange={moveDialog.onOpenChange}
+        onOpenChange={(open) => {
+          if (!open) {
+            moveDialog.close();
+          }
+        }}
         sourceNodes={moveDialog.targets}
       />
 
       {/* コピーダイアログ */}
       <CopyDialog
         open={copyDialog.isOpen}
-        onOpenChange={copyDialog.onOpenChange}
+        onOpenChange={(open) => {
+          if (!open) {
+            copyDialog.close();
+          }
+        }}
         sourceNodes={copyDialog.targets}
       />
 
       {/* 削除ダイアログ */}
       <DeleteDialog
         open={deleteDialog.isOpen}
-        onOpenChange={deleteDialog.onOpenChange}
+        onOpenChange={(open) => {
+          if (!open) {
+            deleteDialog.close();
+          }
+        }}
         targets={deleteDialog.targets}
       />
 
       {/* プレビュー設定ダイアログ */}
       <ApplyPreviewDialog
         open={previewDialog.isOpen}
-        onOpenChange={previewDialog.onOpenChange}
+        onOpenChange={(open) => {
+          if (!open) {
+            previewDialog.close();
+          }
+        }}
         previewPath={previewDialog.previewPath}
       />
 
       {/* お気に入りダイアログ */}
       <FavoriteDialog
         open={favoriteDialog.isOpen}
-        onOpenChange={favoriteDialog.onOpenChange}
+        onOpenChange={(open) => {
+          if (!open) {
+            favoriteDialog.close();
+          }
+        }}
         targets={favoriteDialog.targets}
         mode={favoriteDialog.mode}
       />

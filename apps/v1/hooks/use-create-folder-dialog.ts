@@ -35,20 +35,10 @@ export function useCreateFolderDialog({
     setIsOpen(false);
   }, [onChange]);
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        close();
-      }
-    },
-    [close]
-  );
-
   return {
     parentPath,
     isOpen,
     open,
     close,
-    onOpenChange,
   };
 }

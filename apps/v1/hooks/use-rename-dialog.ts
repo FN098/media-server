@@ -33,14 +33,5 @@ export function useRenameDialog<T>({ onChange }: UseRenameDialogProps<T> = {}) {
     setIsOpen(false);
   }, [onChange]);
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        close();
-      }
-    },
-    [close]
-  );
-
-  return { target, isOpen, open, close, onOpenChange };
+  return { target, isOpen, open, close };
 }

@@ -33,20 +33,10 @@ export function usePreviewDialog({ onChange }: UsePreviewDialogProps = {}) {
     setIsOpen(false);
   }, [onChange]);
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        close();
-      }
-    },
-    [close]
-  );
-
   return {
     previewPath,
-    setPreviewPath,
     isOpen,
     open,
-    onOpenChange,
+    close,
   };
 }

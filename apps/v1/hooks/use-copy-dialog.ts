@@ -35,20 +35,10 @@ export function useCopyDialog<T>({ onChange }: UseCopyDialogProps<T> = {}) {
     setIsOpen(false);
   }, [onChange]);
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        close();
-      }
-    },
-    [close]
-  );
-
   return {
     targets,
     isOpen,
     open,
     close,
-    onOpenChange,
   };
 }

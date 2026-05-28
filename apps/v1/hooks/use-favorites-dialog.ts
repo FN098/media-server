@@ -40,21 +40,11 @@ export function useFavoriteDialog<T>({
     setIsOpen(false);
   }, [onChange]);
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        close();
-      }
-    },
-    [close]
-  );
-
   return {
     targets,
     mode,
     isOpen,
     open,
     close,
-    onOpenChange,
   };
 }

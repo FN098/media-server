@@ -35,20 +35,10 @@ export function useExtractDialog<T>({
     setIsOpen(false);
   }, [onChange]);
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        close();
-      }
-    },
-    [close]
-  );
-
   return {
     targets,
     isOpen,
     open,
     close,
-    onOpenChange,
   };
 }

@@ -37,20 +37,11 @@ export function useMoveDialog<T>({ onChange }: UseMoveDialogProps<T> = {}) {
     setIsOpen(false);
   }, [onChange]);
 
-  const onOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        close();
-      }
-    },
-    [close]
-  );
-
   return {
     initialDir,
     targets,
     isOpen,
     open,
-    onOpenChange,
+    close,
   };
 }
