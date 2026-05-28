@@ -11,7 +11,7 @@ type UseRenameDialogProps<T> = {
   onChange?: (context: RenameDialogContext<T>) => void;
 };
 
-export function useRenameDialog<T>({ onChange }: UseRenameDialogProps<T>) {
+export function useRenameDialog<T>({ onChange }: UseRenameDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [target, setTarget] = useState<T | null>(null);
 

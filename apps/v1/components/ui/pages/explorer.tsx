@@ -57,17 +57,13 @@ export function Explorer({ listing }: ExplorerProps) {
     folder,
   });
 
-  const favorites = useExplorerFavorites({
-    targetNodes: selection.selectedNodes,
-  });
+  const favorites = useExplorerFavorites();
 
   const tagEditor = useTagEditorControl({
     targetCount: selection.selectedCount,
   });
 
-  const dialogs = useExplorerDialogs({
-    selection,
-  });
+  const dialogs = useExplorerDialogs();
 
   const thumbs = useExplorerThumbs({
     listing,

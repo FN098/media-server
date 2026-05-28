@@ -12,7 +12,7 @@ interface UseMoveDialogProps<T> {
   onChange?: (context: MoveDialogContext<T>) => void;
 }
 
-export function useMoveDialog<T>({ onChange }: UseMoveDialogProps<T>) {
+export function useMoveDialog<T>({ onChange }: UseMoveDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [initialDir, setInitialDir] = useState<string>("");
   const [targets, setTargets] = useState<T[]>([]);

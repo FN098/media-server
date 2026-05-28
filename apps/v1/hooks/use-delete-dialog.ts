@@ -11,7 +11,7 @@ type UseDeleteDialogProps<T> = {
   onChange?: (context: DeleteDialogContext<T>) => void;
 };
 
-export function useDeleteDialog<T>({ onChange }: UseDeleteDialogProps<T>) {
+export function useDeleteDialog<T>({ onChange }: UseDeleteDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [targets, setTargets] = useState<T[]>([]);
 

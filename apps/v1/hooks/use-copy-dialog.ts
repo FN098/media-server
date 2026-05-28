@@ -12,7 +12,7 @@ interface UseCopyDialogProps<T> {
   onChange?: (context: CopyDialogContext<T>) => void;
 }
 
-export function useCopyDialog<T>({ onChange }: UseCopyDialogProps<T>) {
+export function useCopyDialog<T>({ onChange }: UseCopyDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [targets, setTargets] = useState<T[]>([]);
 

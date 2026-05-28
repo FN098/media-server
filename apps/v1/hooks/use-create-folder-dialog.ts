@@ -11,7 +11,9 @@ interface CreateFolderDialogProps {
   onChange?: (context: CreateFolderDialogContext) => void;
 }
 
-export function useCreateFolderDialog({ onChange }: CreateFolderDialogProps) {
+export function useCreateFolderDialog({
+  onChange,
+}: CreateFolderDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [parentPath, setParentPath] = useState<string>("");
 

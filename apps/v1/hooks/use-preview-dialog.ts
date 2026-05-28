@@ -11,7 +11,7 @@ type UsePreviewDialogProps = {
   onChange?: (context: PreviewDialogContext) => void;
 };
 
-export function usePreviewDialog({ onChange }: UsePreviewDialogProps) {
+export function usePreviewDialog({ onChange }: UsePreviewDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [previewPath, setPreviewPath] = useState<string | null>(null);
 

@@ -11,7 +11,9 @@ type UseExtractDialogProps<T> = {
   onChange?: (context: ExtractDialogContext<T>) => void;
 };
 
-export function useExtractDialog<T>({ onChange }: UseExtractDialogProps<T>) {
+export function useExtractDialog<T>({
+  onChange,
+}: UseExtractDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [targets, setTargets] = useState<T[]>([]);
 

@@ -13,7 +13,9 @@ type UseFavoriteDialogProps<T> = {
   onChange?: (context: FavoriteDialogContext<T>) => void;
 };
 
-export function useFavoriteDialog<T>({ onChange }: UseFavoriteDialogProps<T>) {
+export function useFavoriteDialog<T>({
+  onChange,
+}: UseFavoriteDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [targets, setTargets] = useState<T[]>([]);
   const [mode, setMode] = useState<FavoriteDialogMode>("add");
