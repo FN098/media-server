@@ -99,7 +99,9 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
   }, []);
 
   // 検索パラメータリセット用
-  const search = useSearchParamsControl({ keep: ["viewMode"] });
+  const search = useSearchParamsControl({
+    keep: ["viewMode", "sort", "direction"],
+  });
 
   return {
     filteredNodes: filtered,
