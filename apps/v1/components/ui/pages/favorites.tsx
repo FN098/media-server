@@ -60,11 +60,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   });
 
   const dialogs = useFavoritesDialogs();
-
-  const thumbs = useFavoritesThumbs({
-    selectedNodes: selection.selectedNodes,
-  });
-
+  const thumbs = useFavoritesThumbs();
   const fullscreen = useFullscreen();
 
   useFavoritesHotkeys({

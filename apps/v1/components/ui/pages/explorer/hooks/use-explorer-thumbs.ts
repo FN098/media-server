@@ -6,7 +6,7 @@ import {
   enqueueCreateSingleThumbJobAction,
   enqueueCreateThumbsJobAction,
 } from "@/actions/thumb-actions";
-import { MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -14,14 +14,12 @@ import { toast } from "sonner";
 export type ExplorerThumbs = ReturnType<typeof useExplorerThumbs>;
 
 interface UseExplorerThumbsProps {
-  currentDir: string;
-  selectedNodes: MediaNode[];
+  listing: MediaListing;
   autoCreateThumbs?: boolean;
 }
 
 export function useExplorerThumbs({
-  currentDir,
-  selectedNodes,
+  listing,
   autoCreateThumbs = true,
 }: UseExplorerThumbsProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +27,8 @@ export function useExplorerThumbs({
 
   // 排他制御
   const updatingRef = useRef(false);
+
+  const currentDir = listing.path;
 
   // サムネイル自動作成
   useEffect(() => {
@@ -56,27 +56,30 @@ export function useExplorerThumbs({
     [router]
   );
 
-  const updateSelected = useCallback(async () => {
-    if (updatingRef.current) return;
+  const updateParallel = useCallback(
+    async (nodes: MediaNode[]) => {
+      if (updatingRef.current) return;
 
-    updatingRef.current = true;
-    setIsLoading(true);
+      updatingRef.current = true;
+      setIsLoading(true);
 
-    try {
-      // 並列化
-      await Promise.all(selectedNodes.map(updateThumb));
+      try {
+        // 並列化
+        await Promise.all(nodes.map(updateThumb));
 
-      router.refresh();
-    } finally {
-      updatingRef.current = false;
-      setIsLoading(false);
-    }
-  }, [router, selectedNodes]);
+        router.refresh();
+      } finally {
+        updatingRef.current = false;
+        setIsLoading(false);
+      }
+    },
+    [router]
+  );
 
   return {
     isLoading,
     update,
-    updateSelected,
+    updateParallel,
   };
 }
 

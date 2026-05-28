@@ -10,11 +10,9 @@ import { toast } from "sonner";
 
 export type FavoritesThumbs = ReturnType<typeof useFavoritesThumbs>;
 
-interface UseFavoritesThumbsProps {
-  selectedNodes: MediaNode[];
-}
+// interface UseFavoritesThumbsProps {}
 
-export function useFavoritesThumbs({ selectedNodes }: UseFavoritesThumbsProps) {
+export function useFavoritesThumbs() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -40,27 +38,30 @@ export function useFavoritesThumbs({ selectedNodes }: UseFavoritesThumbsProps) {
     [router]
   );
 
-  const updateSelected = useCallback(async () => {
-    if (updatingRef.current) return;
+  const updateParallel = useCallback(
+    async (nodes: MediaNode[]) => {
+      if (updatingRef.current) return;
 
-    updatingRef.current = true;
-    setIsLoading(true);
+      updatingRef.current = true;
+      setIsLoading(true);
 
-    try {
-      // 並列化
-      await Promise.all(selectedNodes.map(updateThumb));
+      try {
+        // 並列化
+        await Promise.all(nodes.map(updateThumb));
 
-      router.refresh();
-    } finally {
-      updatingRef.current = false;
-      setIsLoading(false);
-    }
-  }, [router, selectedNodes]);
+        router.refresh();
+      } finally {
+        updatingRef.current = false;
+        setIsLoading(false);
+      }
+    },
+    [router]
+  );
 
   return {
     isLoading,
     update,
-    updateSelected,
+    updateParallel,
   };
 }
 

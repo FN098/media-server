@@ -176,7 +176,7 @@ export function useExplorerMenu({
         label: "サムネイルを更新",
         onClick: ({ node }) =>
           hasSelection
-            ? void thumbs.updateSelected()
+            ? void thumbs.updateParallel(selectedNodes)
             : void thumbs.update(node),
         hidden: () => viewer.isOpen,
       },

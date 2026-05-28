@@ -110,7 +110,7 @@ export function useExplorerSelectionbar({
           type: "action",
           icon: RefreshCwIcon,
           label: "サムネイル更新",
-          onClick: () => void thumbs.updateSelected(),
+          onClick: () => void thumbs.updateParallel(selectedNodes),
         },
         {
           key: "delete",

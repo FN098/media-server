@@ -70,8 +70,7 @@ export function Explorer({ listing }: ExplorerProps) {
   });
 
   const thumbs = useExplorerThumbs({
-    currentDir: listing.path,
-    selectedNodes: selection.selectedNodes,
+    listing,
   });
 
   const fullscreen = useFullscreen();

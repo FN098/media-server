@@ -61,8 +61,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
   });
 
   const thumbs = useTrashThumbs({
-    currentDir: listing.path,
-    selectedNodes: selection.selectedNodes,
+    listing,
   });
 
   const fullscreen = useFullscreen();
