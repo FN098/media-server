@@ -64,6 +64,7 @@ export function useTrashHotkeys({
 
   useHotkeys("backspace", () => navigation.openParentFolder(), {
     scopes: ["trash"],
+    enabled,
   });
 
   useHotkeys(
@@ -71,15 +72,18 @@ export function useTrashHotkeys({
     () => dialogs.deleteDialog.open(selection.selectedNodes),
     {
       scopes: "trash",
+      enabled: enabled && selection.hasSelection,
     }
   );
 
   useHotkeys("t", () => tagEditor.toggle(), {
     scopes: ["trash", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys("f", () => void fullscreen.toggle(), {
     scopes: ["trash", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys(
@@ -88,7 +92,10 @@ export function useTrashHotkeys({
       e.preventDefault();
       selection.selectAll();
     },
-    { scopes: ["trash", "tag-editor"] }
+    {
+      scopes: ["trash", "tag-editor"],
+      enabled,
+    }
   );
 
   useHotkeys(
@@ -97,18 +104,24 @@ export function useTrashHotkeys({
       e.preventDefault();
       searchFocus.trigger();
     },
-    { scopes: "trash" }
+    {
+      scopes: "trash",
+      enabled,
+    }
   );
 
   useHotkeys("p", () => navigation.openPrevFolder("first"), {
     scopes: ["trash", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys("n", () => navigation.openNextFolder("first"), {
     scopes: ["trash", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys("r", () => filtering.reset(), {
     scopes: ["trash"],
+    enabled: enabled && filtering.canReset,
   });
 }

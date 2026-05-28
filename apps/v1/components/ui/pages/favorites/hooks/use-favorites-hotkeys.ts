@@ -61,10 +61,12 @@ export function useFavoritesHotkeys({
 
   useHotkeys("t", () => tagEditor.toggle(), {
     scopes: ["favorites", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys("f", () => void fullscreen.toggle(), {
     scopes: ["favorites", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys(
@@ -73,7 +75,10 @@ export function useFavoritesHotkeys({
       e.preventDefault();
       selection.selectAll();
     },
-    { scopes: ["favorites", "tag-editor"] }
+    {
+      scopes: ["favorites", "tag-editor"],
+      enabled,
+    }
   );
 
   useHotkeys(
@@ -82,10 +87,14 @@ export function useFavoritesHotkeys({
       e.preventDefault();
       searchFocus.trigger();
     },
-    { scopes: "favorites" }
+    {
+      scopes: "favorites",
+      enabled,
+    }
   );
 
   useHotkeys("r", () => filtering.reset(), {
     scopes: ["favorites"],
+    enabled: enabled && filtering.canReset,
   });
 }

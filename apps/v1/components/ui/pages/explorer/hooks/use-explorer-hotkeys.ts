@@ -64,6 +64,7 @@ export function useExplorerHotkeys({
 
   useHotkeys("backspace", () => navigation.openParentFolder(), {
     scopes: ["explorer"],
+    enabled,
   });
 
   useHotkeys(
@@ -71,15 +72,18 @@ export function useExplorerHotkeys({
     () => dialogs.deleteDialog.open(selection.selectedNodes),
     {
       scopes: "explorer",
+      enabled: enabled && selection.hasSelection,
     }
   );
 
   useHotkeys("t", () => tagEditor.toggle(), {
     scopes: ["explorer", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys("f", () => void fullscreen.toggle(), {
     scopes: ["explorer", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys(
@@ -88,7 +92,10 @@ export function useExplorerHotkeys({
       e.preventDefault();
       selection.selectAll();
     },
-    { scopes: ["explorer", "tag-editor"] }
+    {
+      scopes: ["explorer", "tag-editor"],
+      enabled,
+    }
   );
 
   useHotkeys(
@@ -97,7 +104,10 @@ export function useExplorerHotkeys({
       e.preventDefault();
       searchFocus.trigger();
     },
-    { scopes: "explorer" }
+    {
+      scopes: "explorer",
+      enabled,
+    }
   );
 
   useHotkeys(
@@ -105,18 +115,22 @@ export function useExplorerHotkeys({
     () => dialogs.renameDialog.open(selection.selectedNodes[0]),
     {
       scopes: ["explorer", "viewer"],
+      enabled: enabled && selection.hasSelection,
     }
   );
 
   useHotkeys("p", () => navigation.openPrevFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys("n", () => navigation.openNextFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
+    enabled,
   });
 
   useHotkeys("r", () => filtering.reset(), {
     scopes: ["explorer"],
+    enabled: enabled && filtering.canReset,
   });
 }
