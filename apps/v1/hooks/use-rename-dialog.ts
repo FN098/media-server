@@ -1,15 +1,15 @@
 import { useCallback, useState } from "react";
 
-type RenameDialogContext<T> =
+export type RenameDialogContext<T> =
   | {
       isOpen: true;
       target: T;
     }
   | { isOpen: false };
 
-type UseRenameDialogProps<T> = {
+interface UseRenameDialogProps<T> {
   onChange?: (context: RenameDialogContext<T>) => void;
-};
+}
 
 export function useRenameDialog<T>({ onChange }: UseRenameDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);

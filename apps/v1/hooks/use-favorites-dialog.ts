@@ -1,7 +1,7 @@
 import { FavoriteDialogMode } from "@/components/ui/dialogs/favorite-dialog";
 import { useCallback, useState } from "react";
 
-type FavoriteDialogContext<T> =
+export type FavoriteDialogContext<T> =
   | {
       isOpen: true;
       mode: FavoriteDialogMode;
@@ -9,9 +9,9 @@ type FavoriteDialogContext<T> =
     }
   | { isOpen: false };
 
-type UseFavoriteDialogProps<T> = {
+interface UseFavoriteDialogProps<T> {
   onChange?: (context: FavoriteDialogContext<T>) => void;
-};
+}
 
 export function useFavoriteDialog<T>({
   onChange,

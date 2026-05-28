@@ -1,15 +1,15 @@
 import { useCallback, useState } from "react";
 
-type DeleteDialogContext<T> =
+export type DeleteDialogContext<T> =
   | {
       isOpen: true;
       targets: T[];
     }
   | { isOpen: false };
 
-type UseDeleteDialogProps<T> = {
+interface UseDeleteDialogProps<T> {
   onChange?: (context: DeleteDialogContext<T>) => void;
-};
+}
 
 export function useDeleteDialog<T>({ onChange }: UseDeleteDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);

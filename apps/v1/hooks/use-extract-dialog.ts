@@ -1,15 +1,15 @@
 import { useCallback, useState } from "react";
 
-type ExtractDialogContext<T> =
+export type ExtractDialogContext<T> =
   | {
       isOpen: true;
       targets: T[];
     }
   | { isOpen: false };
 
-type UseExtractDialogProps<T> = {
+interface UseExtractDialogProps<T> {
   onChange?: (context: ExtractDialogContext<T>) => void;
-};
+}
 
 export function useExtractDialog<T>({
   onChange,

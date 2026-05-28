@@ -1,15 +1,15 @@
 import { useCallback, useState } from "react";
 
-type PreviewDialogContext =
+export type PreviewDialogContext =
   | {
       isOpen: true;
       previewPath: string;
     }
   | { isOpen: false };
 
-type UsePreviewDialogProps = {
+interface UsePreviewDialogProps {
   onChange?: (context: PreviewDialogContext) => void;
-};
+}
 
 export function usePreviewDialog({ onChange }: UsePreviewDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,15 +1,15 @@
 import { useCallback, useState } from "react";
 
-type RestoreDialogContext<T> =
+export type RestoreDialogContext<T> =
   | {
       isOpen: true;
       targets: T[];
     }
   | { isOpen: false };
 
-type UseRestoreDialogProps<T> = {
+interface UseRestoreDialogProps<T> {
   onChange?: (context: RestoreDialogContext<T>) => void;
-};
+}
 
 export function useRestoreDialog<T>({
   onChange,
