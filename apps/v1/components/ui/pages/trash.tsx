@@ -36,7 +36,6 @@ export function Trash({ listing }: { listing: MediaListing }) {
   const sort = useTrashSort();
   const filtering = useTrashFiltering({ listing });
   const selection = useTrashSelection({
-    listing,
     filtering,
   });
 

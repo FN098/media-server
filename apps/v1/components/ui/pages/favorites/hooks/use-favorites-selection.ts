@@ -1,21 +1,18 @@
 import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 export type FavoritesSelection = ReturnType<typeof useFavoritesSelection>;
 
 interface UseFavoritesSelectionProps {
-  listing: MediaListing;
   filtering: FavoritesFiltering;
 }
 
 export function useFavoritesSelection({
-  listing,
   filtering,
 }: UseFavoritesSelectionProps) {
-  const { nodes: allNodes } = listing;
   const { filteredNodes: currentNodes } = filtering;
 
   const {
@@ -31,9 +28,16 @@ export function useFavoritesSelection({
   } = usePathSelectionContext();
 
   const { selectedNodes } = useSelectedNodes({
-    nodes: allNodes,
+    nodes: currentNodes,
     selectedPaths,
   });
+
+  // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
+  useEffect(() => {
+    if (selectedNodes.length !== selectedCount) {
+      selectPaths(selectedNodes.map((node) => node.path));
+    }
+  }, [selectPaths, selectedCount, selectedNodes]);
 
   const replace = useCallback(
     (node: MediaNode) => {

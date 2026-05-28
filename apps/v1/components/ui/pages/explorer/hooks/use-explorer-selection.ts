@@ -1,21 +1,16 @@
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 export type ExplorerSelection = ReturnType<typeof useExplorerSelection>;
 
 interface UseExplorerSelectionProps {
-  listing: MediaListing;
   filtering: ExplorerFiltering;
 }
 
-export function useExplorerSelection({
-  listing,
-  filtering,
-}: UseExplorerSelectionProps) {
-  const { nodes: allNodes } = listing;
+export function useExplorerSelection({ filtering }: UseExplorerSelectionProps) {
   const { filteredNodes: currentNodes } = filtering;
 
   const {
@@ -31,11 +26,16 @@ export function useExplorerSelection({
   } = usePathSelectionContext();
 
   const { selectedNodes } = useSelectedNodes({
-    nodes: allNodes,
+    nodes: currentNodes,
     selectedPaths,
   });
 
-  console.log({ selectedNodes });
+  // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
+  useEffect(() => {
+    if (selectedNodes.length !== selectedCount) {
+      selectPaths(selectedNodes.map((node) => node.path));
+    }
+  }, [selectPaths, selectedCount, selectedNodes]);
 
   const replace = useCallback(
     (node: MediaNode) => {

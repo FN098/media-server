@@ -41,7 +41,6 @@ export function Explorer({ listing }: ExplorerProps) {
   const sort = useExplorerSort();
   const filtering = useExplorerFiltering({ listing });
   const selection = useExplorerSelection({
-    listing,
     filtering,
   });
 

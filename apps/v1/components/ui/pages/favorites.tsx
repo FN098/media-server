@@ -36,7 +36,6 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   const sort = useFavoritesSort();
   const filtering = useFavoritesFiltering({ listing });
   const selection = useFavoritesSelection({
-    listing,
     filtering,
   });
 
@@ -51,9 +50,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     folder,
   });
 
-  const favorites = useFavoritesFavorites({
-    targetNodes: selection.selectedNodes,
-  });
+  const favorites = useFavoritesFavorites();
 
   const tagEditor = useTagEditorControl({
     targetCount: selection.selectedCount,

@@ -1,21 +1,16 @@
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
 import { useSelectedNodes } from "@/hooks/use-selected-nodes";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 export type TrashSelection = ReturnType<typeof useTrashSelection>;
 
 interface UseTrashSelectionProps {
-  listing: MediaListing;
   filtering: TrashFiltering;
 }
 
-export function useTrashSelection({
-  listing,
-  filtering,
-}: UseTrashSelectionProps) {
-  const { nodes: allNodes } = listing;
+export function useTrashSelection({ filtering }: UseTrashSelectionProps) {
   const { filteredNodes: currentNodes } = filtering;
 
   const {
@@ -31,9 +26,16 @@ export function useTrashSelection({
   } = usePathSelectionContext();
 
   const { selectedNodes } = useSelectedNodes({
-    nodes: allNodes,
+    nodes: currentNodes,
     selectedPaths,
   });
+
+  // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
+  useEffect(() => {
+    if (selectedNodes.length !== selectedCount) {
+      selectPaths(selectedNodes.map((node) => node.path));
+    }
+  }, [selectPaths, selectedCount, selectedNodes]);
 
   const replace = useCallback(
     (node: MediaNode) => {
