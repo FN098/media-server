@@ -21,8 +21,6 @@ interface FilterDropdownMenuProps<T> {
   context: T;
   onReset?: () => void;
   canReset?: boolean;
-  triggerLabel?: string;
-  resetLabel?: string;
 }
 
 export function FilterDropdownMenu<T>({
@@ -30,8 +28,6 @@ export function FilterDropdownMenu<T>({
   context,
   onReset,
   canReset = false,
-  triggerLabel = "フィルター",
-  resetLabel = "フィルターをクリア",
 }: FilterDropdownMenuProps<T>) {
   return (
     <DropdownMenu>
@@ -54,7 +50,7 @@ export function FilterDropdownMenu<T>({
                   : "text-muted-foreground"
               }
             >
-              {triggerLabel}
+              フィルター
             </span>
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 opacity-50 rotate-90" />
@@ -71,7 +67,7 @@ export function FilterDropdownMenu<T>({
             >
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-4 w-4" />
-                <span>{resetLabel}</span>
+                <span>フィルターをクリア</span>
               </div>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

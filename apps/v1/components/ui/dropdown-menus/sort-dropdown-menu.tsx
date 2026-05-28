@@ -32,19 +32,18 @@ interface SortDropdownMenuProps {
   value: SortValue | null;
   onChange: (value: SortValue | null) => void;
   items: readonly SortMenuItem[];
-  placeholder?: string;
 }
 
 export function SortDropdownMenu({
   value,
   onChange,
   items,
-  placeholder = "ソート",
 }: SortDropdownMenuProps) {
-  const currentOption = items.find((opt) => opt.sort === value?.sort);
-  const currentLabel = currentOption
-    ? `${currentOption.label} (${value?.direction === "asc" ? "昇順" : value?.direction === "desc" ? "降順" : ""})`
-    : placeholder;
+  const currentItem = items.find((item) => item.sort === value?.sort);
+
+  const currentLabel = currentItem
+    ? `${currentItem.label} (${value?.direction === "asc" ? "昇順" : value?.direction === "desc" ? "降順" : ""})`
+    : "ソート";
 
   const handleSelect = (sort: string, direction: SortDirection) => {
     onChange({ sort, direction });
@@ -94,19 +93,19 @@ export function SortDropdownMenu({
           )}
 
           {/* 階層（サブメニュー）の生成 */}
-          {items.map((opt) => {
-            const Icon = opt.icon || ArrowUpDown;
-            const isSelectedField = value?.sort === opt.sort;
+          {items.map((item, index) => {
+            const Icon = item.icon || ArrowUpDown;
+            const isSelectedField = value?.sort === item.sort;
 
             return (
-              <DropdownMenuSub key={opt.sort}>
+              <DropdownMenuSub key={index}>
                 {/* 第一階層：項目名（名前、作成日など） */}
                 <DropdownMenuSubTrigger
                   className={cn(isSelectedField && "bg-accent font-medium")}
                 >
                   <div className="flex items-center gap-2">
                     <Icon className="h-4 w-4 text-muted-foreground" />
-                    <span>{opt.label}</span>
+                    <span>{item.label}</span>
                   </div>
                 </DropdownMenuSubTrigger>
 
@@ -114,7 +113,7 @@ export function SortDropdownMenu({
                   {/* 第二階層：昇順・降順 */}
                   <DropdownMenuSubContent>
                     <DropdownMenuItem
-                      onClick={() => handleSelect(opt.sort, "asc")}
+                      onClick={() => handleSelect(item.sort, "asc")}
                       className={cn(
                         isSelectedField &&
                           value?.direction === "asc" &&
@@ -124,7 +123,7 @@ export function SortDropdownMenu({
                       <span className="text-sm">昇順 (小さい順)</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleSelect(opt.sort, "desc")}
+                      onClick={() => handleSelect(item.sort, "desc")}
                       className={cn(
                         isSelectedField &&
                           value?.direction === "desc" &&

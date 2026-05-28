@@ -13,13 +13,12 @@ import {
 import { ChevronRight, MoreVertical } from "lucide-react";
 
 interface ActionDropdownMenuProps<T> {
-  triggerLabel?: string;
   items: MenuItemDef<T>[];
   context: T;
+  triggerLabel?: string;
 }
 
 export function ActionDropdownMenu<T>({
-  triggerLabel = "アクション",
   items,
   context,
 }: ActionDropdownMenuProps<T>) {
@@ -33,7 +32,7 @@ export function ActionDropdownMenu<T>({
           <div className="flex items-center gap-2 overflow-hidden truncate">
             <MoreVertical className="h-4 w-4 shrink-0 text-muted-foreground transition-colors" />
             <span className="text-foreground font-medium truncate">
-              {triggerLabel}
+              アクション
             </span>
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 opacity-50 rotate-90 ml-2" />
