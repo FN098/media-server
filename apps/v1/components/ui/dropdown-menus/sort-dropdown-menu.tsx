@@ -18,30 +18,30 @@ import { ArrowUpDown, ChevronRight, LucideIcon, RotateCcw } from "lucide-react";
 type SortDirection = "asc" | "desc";
 
 type SortValue = {
-  sort: string; // 並び替えのフィールド名
-  direction: SortDirection; // 並び替えの向き
+  sort: string;
+  direction: SortDirection;
 };
 
-type SortOption = {
-  sort: string; // 並び替えのフィールド名
-  label: string; // 選択項目の表示名
-  icon?: LucideIcon; // 選択項目のアイコン
+type SortMenuItem = {
+  sort: string;
+  label: string;
+  icon?: LucideIcon;
 };
 
 interface SortDropdownMenuProps {
   value: SortValue | null;
   onChange: (value: SortValue | null) => void;
-  options: readonly SortOption[];
+  items: readonly SortMenuItem[];
   placeholder?: string;
 }
 
 export function SortDropdownMenu({
   value,
   onChange,
-  options,
+  items,
   placeholder = "ソート",
 }: SortDropdownMenuProps) {
-  const currentOption = options.find((opt) => opt.sort === value?.sort);
+  const currentOption = items.find((opt) => opt.sort === value?.sort);
   const currentLabel = currentOption
     ? `${currentOption.label} (${value?.direction === "asc" ? "昇順" : value?.direction === "desc" ? "降順" : ""})`
     : placeholder;
@@ -94,7 +94,7 @@ export function SortDropdownMenu({
           )}
 
           {/* 階層（サブメニュー）の生成 */}
-          {options.map((opt) => {
+          {items.map((opt) => {
             const Icon = opt.icon || ArrowUpDown;
             const isSelectedField = value?.sort === opt.sort;
 

@@ -1,11 +1,6 @@
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
-import {
-  ActionMenuItem,
-  CustomMenuItem,
-  GroupMenuItem,
-  SeparatorMenuItem,
-} from "@/lib/menu-items/types";
+import { FilterMenuItem } from "@/lib/menu-items/types";
 import {
   FileTypeIcon,
   ImageIcon,
@@ -16,24 +11,12 @@ import {
   VideoIcon,
 } from "lucide-react";
 
-type WithFilterMeta<TItem, TContext> = TItem & {
-  isActive?: (context: TContext) => boolean;
-  iconClassName?: string | ((context: TContext) => string | undefined);
-  closeOnSelect?: boolean; // default: true
-};
-
-export type FilterMenuItem<T> =
-  | WithFilterMeta<ActionMenuItem<T>, T>
-  | WithFilterMeta<GroupMenuItem<T, FilterMenuItem<T>>, T>
-  | CustomMenuItem<T>
-  | SeparatorMenuItem<T>;
-
-interface ToolbarFilterContext {
+interface ExplorerToolbarFilterContext {
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
 }
 
-const toolbarFilterItems: FilterMenuItem<ToolbarFilterContext>[] = [
+const toolbarFilterItems: FilterMenuItem<ExplorerToolbarFilterContext>[] = [
   {
     key: "favorite-filter-group",
     type: "group",

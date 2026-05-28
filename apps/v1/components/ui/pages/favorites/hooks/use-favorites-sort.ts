@@ -1,4 +1,3 @@
-import { useSort } from "@/hooks/use-sort";
 import {
   ALargeSmallIcon,
   CalendarIcon,
@@ -8,7 +7,7 @@ import {
 
 export type FavoritesSort = ReturnType<typeof useFavoritesSort>;
 
-export const options = [
+export const toolbarSortItems = [
   {
     sort: "path",
     label: "ファイルパス",
@@ -32,7 +31,5 @@ export const options = [
 ] as const;
 
 export function useFavoritesSort() {
-  const control = useSort({});
-
-  return { options, control };
+  return { toolbarSortItems };
 }

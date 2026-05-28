@@ -64,7 +64,7 @@ export function ExplorerToolbar({
           <SortDropdownMenu
             value={sort.value}
             onChange={sort.apply}
-            options={toolbarSortItems}
+            items={toolbarSortItems}
           />
         </div>
 

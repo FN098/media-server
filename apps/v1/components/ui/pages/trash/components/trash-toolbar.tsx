@@ -24,7 +24,7 @@ export function TrashToolbar({ filtering, dialogs }: TrashToolbarProps) {
           <SortDropdownMenu
             value={sort.control.value}
             onChange={sort.control.apply}
-            options={sort.options}
+            items={sort.options}
           />
         </div>
 

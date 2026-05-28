@@ -52,3 +52,16 @@ export type MultipleNodesContext = {
   nodes: MediaNode[];
   closeMenu?: () => void;
 };
+
+// フィルター用
+export type WithFilterMeta<TItem, TContext> = TItem & {
+  isActive?: (context: TContext) => boolean;
+  iconClassName?: string | ((context: TContext) => string | undefined);
+  closeOnSelect?: boolean; // default: true
+};
+
+export type FilterMenuItem<T> =
+  | WithFilterMeta<ActionMenuItem<T>, T>
+  | WithFilterMeta<GroupMenuItem<T, FilterMenuItem<T>>, T>
+  | CustomMenuItem<T>
+  | SeparatorMenuItem<T>;

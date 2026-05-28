@@ -7,6 +7,8 @@ import { useFavoritesFilter } from "@/components/ui/pages/favorites/hooks/use-fa
 import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
 import { useFavoritesSort } from "@/components/ui/pages/favorites/hooks/use-favorites-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
+import { useSort } from "@/hooks/use-sort";
+import { useMemo } from "react";
 
 interface FavoritesToolbarProps {
   filtering: FavoritesFiltering;
@@ -17,8 +19,17 @@ export function FavoritesToolbar({
   filtering,
   dialogs,
 }: FavoritesToolbarProps) {
-  const sort = useFavoritesSort();
-  const filter = useFavoritesFilter({ filtering, dialogs });
+  const sort = useSort();
+
+  const { toolbarFilterItems } = useFavoritesFilter();
+  const { toolbarSortItems } = useFavoritesSort();
+
+  const filterContext = useMemo(() => {
+    return {
+      filtering,
+      dialogs,
+    };
+  }, [dialogs, filtering]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
@@ -26,18 +37,17 @@ export function FavoritesToolbar({
         {/* ソート */}
         <div className="w-full sm:w-[160px]">
           <SortDropdownMenu
-            value={sort.control.value}
-            onChange={sort.control.apply}
-            options={sort.options}
+            value={sort.value}
+            onChange={sort.apply}
+            items={toolbarSortItems}
           />
         </div>
 
         {/* フィルター */}
         <div className="w-full sm:w-[160px]">
           <FilterDropdownMenu
-            items={filter.menuItems}
-            onReset={filter.control.reset}
-            canReset={filter.control.canReset}
+            items={toolbarFilterItems}
+            context={filterContext}
           />
         </div>
 
