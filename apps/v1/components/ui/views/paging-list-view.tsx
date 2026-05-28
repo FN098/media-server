@@ -6,7 +6,7 @@ import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { SizeBar } from "@/components/ui/bars/size-bar";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
-import { ActionsContextMenu } from "@/components/ui/context-menus/actions-context-menu";
+import { NodeActionContextMenu } from "@/components/ui/context-menus/node-actions-context-menu";
 import { LocalDate } from "@/components/ui/dates/local-date";
 import { NodeActionDropdownMenu } from "@/components/ui/dropdown-menus/node-action-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
@@ -533,7 +533,7 @@ function DataRow({
         isMediaNode && !isMobile && !dropdownMenuOpen && !contextMenuOpen
       }
     >
-      <ActionsContextMenu
+      <NodeActionContextMenu
         node={node}
         menuItems={menuItems}
         onOpenChange={setContextMenuOpen}
@@ -648,7 +648,7 @@ function DataRow({
             />
           </div>
         </div>
-      </ActionsContextMenu>
+      </NodeActionContextMenu>
     </HoverPreviewPortal>
   );
 }

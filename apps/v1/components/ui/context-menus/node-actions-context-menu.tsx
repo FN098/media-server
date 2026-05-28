@@ -21,7 +21,7 @@ const variantClass: Record<MenuItemVariant, string> = {
   destructive: "text-destructive focus:text-destructive",
 };
 
-interface ActionsContextMenuProps {
+interface NodeActionContextMenuProps {
   node: MediaNode;
   menuItems: MenuItemDef<NodeContext>[];
   children: React.ReactNode;
@@ -29,13 +29,13 @@ interface ActionsContextMenuProps {
   disabled?: boolean;
 }
 
-export function ActionsContextMenu({
+export function NodeActionContextMenu({
   node,
   menuItems,
   children,
   onOpenChange,
   disabled = false,
-}: ActionsContextMenuProps) {
+}: NodeActionContextMenuProps) {
   const mounted = useMounted();
 
   const visibleItems = useMemo(
