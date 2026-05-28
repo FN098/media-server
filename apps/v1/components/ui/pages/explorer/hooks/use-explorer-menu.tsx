@@ -86,7 +86,7 @@ export function useExplorerMenu({
         },
       },
       {
-        key: "openInNewTab",
+        key: "open-in-new-tab",
         type: "action",
         icon: ExternalLinkIcon,
         label: "新しいタブで開く",
@@ -94,7 +94,7 @@ export function useExplorerMenu({
         hidden: () => selectedCount > 1,
       },
       {
-        key: "toggleFullscreen",
+        key: "toggle-fullscreen",
         type: "action",
         icon: FullscreenIcon,
         label: "全画面",
@@ -102,7 +102,7 @@ export function useExplorerMenu({
         hidden: () => !viewer.isOpen || !fullscreen.isSupported,
       },
       {
-        key: "extractArchive",
+        key: "extract-archive",
         type: "action",
         icon: PackageOpenIcon,
         label: "解凍",
@@ -135,7 +135,7 @@ export function useExplorerMenu({
           copyDialog.open(hasSelection ? selectedNodes : [node], listing.path),
       },
       {
-        key: "editTags",
+        key: "edit-tags",
         type: "action",
         icon: TagIcon,
         label: "タグ編集",
@@ -143,7 +143,7 @@ export function useExplorerMenu({
         hidden: ({ node }) => node.isDirectory,
       },
       {
-        key: "addTagFilter",
+        key: "add-tag-filter",
         type: "action",
         icon: ListFilterPlusIcon,
         label: "タグをフィルターに追加",
@@ -154,7 +154,7 @@ export function useExplorerMenu({
         hidden: ({ node }) => node.isDirectory,
       },
       {
-        key: "setAsPreview",
+        key: "set-as-preview",
         type: "action",
         icon: ImagePlusIcon,
         label: "プレビューに設定",
@@ -163,7 +163,7 @@ export function useExplorerMenu({
           (node.type !== "image" && node.type !== "video") || selectedCount > 1,
       },
       {
-        key: "updateThumb",
+        key: "update-thumb",
         type: "action",
         icon: RefreshCwIcon,
         label: "サムネイルを更新",
