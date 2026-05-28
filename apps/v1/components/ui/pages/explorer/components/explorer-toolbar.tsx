@@ -86,7 +86,9 @@ export function ExplorerToolbar({
               (node) =>
                 !node.isDirectory && !favorites.get(node.path).isFavorite
             );
-            dialogs.deleteDialog.open(targets);
+            if (targets.length > 0) {
+              dialogs.deleteDialog.open(targets);
+            }
           }}
         >
           <TrashIcon className="h-4 w-4" />
