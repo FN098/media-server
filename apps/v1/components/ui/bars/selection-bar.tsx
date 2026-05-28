@@ -7,6 +7,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
@@ -40,11 +43,36 @@ export function SelectionBar({
   const isAllSelected = count > 0 && count === totalCount;
   const isMobile = useIsMobile();
 
-  const visibleInlineMenuItems =
-    inlineMenuItems?.filter((item) => !item.hidden?.(context)) ?? [];
+  // インライン（横並びボタン）専用の描画関数
+  const renderInlineItem = (item: MenuItemDef<MultipleNodesContext>) => {
+    if (item.type === "custom") {
+      return (
+        <React.Fragment key={item.key}>{item.render(context)}</React.Fragment>
+      );
+    }
 
-  const visibleMenuItems =
-    menuItems?.filter((item) => !item.hidden?.(context)) ?? [];
+    if (item.type === "separator") {
+      return <div key={item.key} className="w-px h-6 bg-border mx-1" />;
+    }
+
+    // インライン側で「group」が来た場合は未対応（または非表示）にする安全策
+    if (item.type === "group") return null;
+
+    const Icon = item.icon;
+    return (
+      <Button
+        key={item.key}
+        variant={item.variant === "destructive" ? "destructive" : "ghost"}
+        size="icon"
+        className={cn("rounded-xl w-10 h-10 p-0", item.className)}
+        onClick={() => void item.onClick(context)}
+        disabled={item.disabled?.(context)}
+        title={item.label}
+      >
+        {Icon && <Icon className="h-[18px] w-[18px]" />}
+      </Button>
+    );
+  };
 
   return (
     <AnimatePresence>
@@ -60,6 +88,7 @@ export function SelectionBar({
           )}
         >
           <div className="flex items-center justify-between gap-2 p-2 bg-background/80 backdrop-blur-xl border rounded-2xl shadow-2xl">
+            {/* 全選択ボタン */}
             <Button
               variant="ghost"
               size="sm"
@@ -73,6 +102,7 @@ export function SelectionBar({
               {isAllSelected ? "全選択済み" : "すべて選択"}
             </Button>
 
+            {/* 選択件数表示 */}
             <div className="flex-1 text-center">
               <span className="text-sm font-bold">{count}</span>
               <span className="text-[10px] text-muted-foreground ml-1">
@@ -80,43 +110,14 @@ export function SelectionBar({
               </span>
             </div>
 
+            {/* アクションエリア */}
             <div className="flex gap-1 items-center">
               <div className="flex gap-1 items-center">
-                {/* インラインアクション */}
-                {visibleInlineMenuItems.map((item) => {
-                  if (item.type === "custom") {
-                    return (
-                      <React.Fragment key={item.key}>
-                        {item.render(context)}
-                      </React.Fragment>
-                    );
-                  }
+                {/* 1. インラインアクション */}
+                {inlineMenuItems?.map(renderInlineItem)}
 
-                  if (item.type === "separator") {
-                    return (
-                      <div key={item.key} className="w-px h-6 bg-border mx-1" />
-                    );
-                  }
-
-                  return (
-                    <Button
-                      key={item.key}
-                      variant={
-                        item.variant === "destructive" ? "destructive" : "ghost"
-                      }
-                      size="icon"
-                      className={cn("rounded-xl w-10 h-10 p-0", item.className)}
-                      onClick={() => void item.onClick(context)}
-                      disabled={item.disabled?.(context)}
-                      title={item.label}
-                    >
-                      <item.icon className="h-[18px] w-[18px]" />
-                    </Button>
-                  );
-                })}
-
-                {/* メニューアクション */}
-                {visibleMenuItems.length > 0 && (
+                {/* 2. ドロップダウンメニューアクション */}
+                {menuItems && menuItems.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -129,40 +130,22 @@ export function SelectionBar({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {visibleMenuItems.map((item) => {
-                        if (item.type === "custom") {
-                          return (
-                            <React.Fragment key={item.key}>
-                              {item.render(context)}
-                            </React.Fragment>
-                          );
-                        }
-
-                        if (item.type === "separator") {
-                          return <DropdownMenuSeparator key={item.key} />;
-                        }
-
-                        return (
-                          <DropdownMenuItem
-                            key={item.key}
-                            onClick={() => void item.onClick(context)}
-                            disabled={item.disabled?.(context)}
-                            className={cn(
-                              item.variant === "destructive" &&
-                                "text-destructive focus:text-destructive",
-                              item.className
-                            )}
-                            title={item.label}
-                          >
-                            <item.icon className="mr-2 h-4 w-4" /> {item.label}
-                          </DropdownMenuItem>
-                        );
-                      })}
+                      {menuItems.map((item) => (
+                        <RenderMenuItem
+                          key={item.key}
+                          item={item}
+                          context={context}
+                        />
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
               </div>
+
+              {/* 閉じるボタンとの区切り線 */}
               <div className="w-[1px] h-6 bg-border mx-1" />
+
+              {/* 閉じるボタン */}
               <Button
                 variant="ghost"
                 size="sm"
@@ -176,5 +159,68 @@ export function SelectionBar({
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+function RenderMenuItem<T>({
+  item,
+  context,
+}: {
+  item: MenuItemDef<T>;
+  context: T;
+}) {
+  if (item.hidden?.(context)) return null;
+
+  // 1-1. 区切り線
+  if (item.type === "separator") {
+    return <DropdownMenuSeparator key={item.key} />;
+  }
+
+  // 1-2. カスタム
+  if (item.type === "custom") {
+    return (
+      <React.Fragment key={item.key}>{item.render(context)}</React.Fragment>
+    );
+  }
+
+  // 1-3. 階層グループ
+  if (item.type === "group") {
+    const SubIcon = item.icon;
+    return (
+      <DropdownMenuSub key={item.key}>
+        <DropdownMenuSubTrigger disabled={item.disabled?.(context)}>
+          {SubIcon && <SubIcon className="mr-2 h-4 w-4" />}
+          <span>{item.label}</span>
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-[200px]">
+          {item.children.map((child) => (
+            <RenderMenuItem key={child.key} item={child} context={context} />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    );
+  }
+
+  // 1-4. 通常アクション
+  const Icon = item.icon;
+  return (
+    <DropdownMenuItem
+      key={item.key}
+      disabled={item.disabled?.(context)}
+      onClick={(e) => {
+        e.stopPropagation();
+        void item.onClick(context);
+      }}
+      className={cn(
+        item.variant === "destructive" &&
+          "text-destructive focus:text-destructive",
+        item.className
+      )}
+      title={item.label}
+    >
+      {Icon && <Icon className="mr-2 h-4 w-4" />}
+      <span className="flex-grow">{item.label}</span>
+      {item.kbd && <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>}
+    </DropdownMenuItem>
   );
 }
