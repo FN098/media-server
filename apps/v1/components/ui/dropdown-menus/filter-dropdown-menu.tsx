@@ -55,60 +55,58 @@ export function FilterDropdownMenu({
   canReset = false,
 }: FilterDropdownMenuProps) {
   return (
-    <div className="w-full">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full justify-between bg-background font-normal text-sm border border-input px-3 h-9"
-          >
-            <div className="flex items-center gap-2 overflow-hidden truncate">
-              <Filter
-                className={cn(
-                  "h-4 w-4 shrink-0 transition-colors",
-                  canReset
-                    ? "fill-primary text-primary" // 適用中は塗りつぶし
-                    : "text-muted-foreground"
-                )}
-              />
-              <span
-                className={
-                  canReset
-                    ? "text-foreground font-medium"
-                    : "text-muted-foreground"
-                }
-              >
-                {placeholder}
-              </span>
-            </div>
-            <ChevronRight className="h-4 w-4 shrink-0 opacity-50 rotate-90" />
-          </Button>
-        </DropdownMenuTrigger>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          className="w-full justify-between bg-background font-normal text-sm border border-input px-3 h-9"
+        >
+          <div className="flex items-center gap-2 overflow-hidden truncate">
+            <Filter
+              className={cn(
+                "h-4 w-4 shrink-0 transition-colors",
+                canReset
+                  ? "fill-primary text-primary" // 適用中は塗りつぶし
+                  : "text-muted-foreground"
+              )}
+            />
+            <span
+              className={
+                canReset
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground"
+              }
+            >
+              {placeholder}
+            </span>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 opacity-50 rotate-90" />
+        </Button>
+      </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="start" className="w-[200px]">
-          {/* 一括リセット */}
-          {canReset && onReset && (
-            <>
-              <DropdownMenuItem
-                onClick={onReset}
-                className="text-destructive focus:text-destructive focus:bg-destructive/10"
-              >
-                <div className="flex items-center gap-2">
-                  <RotateCcw className="h-4 w-4" />
-                  <span>フィルターをクリア</span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </>
-          )}
+      <DropdownMenuContent align="start" className="w-[200px]">
+        {/* 一括リセット */}
+        {canReset && onReset && (
+          <>
+            <DropdownMenuItem
+              onClick={onReset}
+              className="text-destructive focus:text-destructive focus:bg-destructive/10"
+            >
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4" />
+                <span>フィルターをクリア</span>
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
 
-          {/* 動的メニュー生成 */}
-          {items.map((item, index) => (
-            <FilterMenuItemRender key={`${item.label}-${index}`} item={item} />
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        {/* 動的メニュー生成 */}
+        {items.map((item, index) => (
+          <FilterMenuItemRender key={`${item.label}-${index}`} item={item} />
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

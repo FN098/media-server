@@ -32,10 +32,7 @@ export const options = [
 ] as const;
 
 export function useFavoritesSort() {
-  const sort = useSort({});
+  const control = useSort({});
 
-  return {
-    ...sort,
-    options,
-  };
+  return { options, control };
 }

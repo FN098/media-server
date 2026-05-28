@@ -6,14 +6,12 @@ import { ExplorerDialogs } from "@/components/ui/pages/explorer/components/explo
 import { ExplorerToolbar } from "@/components/ui/pages/explorer/components/explorer-toolbar";
 import { useExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { useExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
-import { useExplorerFilter } from "@/components/ui/pages/explorer/hooks/use-explorer-filter";
 import { useExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { useExplorerHotkeys } from "@/components/ui/pages/explorer/hooks/use-explorer-hotkeys";
 import { useExplorerMenu } from "@/components/ui/pages/explorer/hooks/use-explorer-menu";
 import { useExplorerNavigation } from "@/components/ui/pages/explorer/hooks/use-explorer-navigation";
 import { useExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/components/ui/pages/explorer/hooks/use-explorer-selectionbar";
-import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { useExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumbs";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -61,8 +59,6 @@ export function Explorer({ listing }: ExplorerProps) {
   });
 
   const dialogs = useExplorerDialogs();
-  const sort = useExplorerSort();
-  const filter = useExplorerFilter({ filtering, dialogs });
   const thumbs = useExplorerThumbs({ listing });
   const fullscreen = useFullscreen();
 
@@ -113,8 +109,6 @@ export function Explorer({ listing }: ExplorerProps) {
           {!viewer.isOpen && (
             <ExplorerToolbar
               listing={listing}
-              sort={sort}
-              filter={filter}
               filtering={filtering}
               dialogs={dialogs}
               favorites={favorites}

@@ -9,7 +9,7 @@ import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-expl
 import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import {
   ToolbarActionContext,
-  useExplorerToolbar,
+  useExplorerActions,
 } from "@/components/ui/pages/explorer/hooks/use-explorer-toolbar";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaListing } from "@/lib/media/types";
@@ -29,7 +29,7 @@ export function ExplorerToolbar({
 }: ExplorerToolbarProps) {
   const sort = useExplorerSort();
   const filter = useExplorerFilter({ filtering, dialogs });
-  const toolbar = useExplorerToolbar();
+  const actions = useExplorerActions();
 
   const actionContext: ToolbarActionContext = {
     listing,
@@ -40,7 +40,6 @@ export function ExplorerToolbar({
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
-      {/* 左側：スマホでは縦並び(フル幅)、sm以上で自然な横並び */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-grow">
         {/* ソート */}
         <div className="w-full sm:w-[160px]">
@@ -63,7 +62,7 @@ export function ExplorerToolbar({
         {/* アクション */}
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
-            items={toolbar.actionItems}
+            items={actions.toolbarActionItems}
             context={actionContext}
           />
         </div>

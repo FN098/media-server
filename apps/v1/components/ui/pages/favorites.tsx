@@ -96,7 +96,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
         >
           {/* ツールバー */}
           {!viewer.isOpen && (
-            <FavoritesToolbar sort={sort} filtering={filtering} />
+            <FavoritesToolbar filtering={filtering} dialogs={dialogs} />
           )}
 
           {/* グリッドビュー */}
