@@ -3,8 +3,8 @@
 import { AverageRatingBadge } from "@/components/ui/badges/average-rating-badge";
 import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
-import { NodeActionContextMenu } from "@/components/ui/context-menus/node-actions-context-menu";
-import { NodeActionDropdownMenu } from "@/components/ui/dropdown-menus/node-action-dropdown-menu";
+import { NodeContextMenu } from "@/components/ui/context-menus/node-context-menu";
+import { NodeDropdownMenu } from "@/components/ui/dropdown-menus/node-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
@@ -546,7 +546,7 @@ function Cell({
           isMediaNode && !isMobile && !dropdownMenuOpen && !contextMenuOpen
         }
       >
-        <NodeActionContextMenu
+        <NodeContextMenu
           node={node}
           menuItems={menuItems}
           onOpenChange={setContextMenuOpen}
@@ -624,7 +624,7 @@ function Cell({
                     isMobile && "opacity-100"
                   )}
                 >
-                  <NodeActionDropdownMenu
+                  <NodeDropdownMenu
                     node={node}
                     menuItems={menuItems}
                     open={dropdownMenuOpen}
@@ -666,7 +666,7 @@ function Cell({
               )}
             </div>
           </div>
-        </NodeActionContextMenu>
+        </NodeContextMenu>
       </HoverPreviewPortal>
     </div>
   );

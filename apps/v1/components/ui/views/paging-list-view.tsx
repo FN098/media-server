@@ -6,9 +6,9 @@ import { FolderStatusBadge } from "@/components/ui/badges/folder-status-badge";
 import { SizeBar } from "@/components/ui/bars/size-bar";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
-import { NodeActionContextMenu } from "@/components/ui/context-menus/node-actions-context-menu";
+import { NodeContextMenu } from "@/components/ui/context-menus/node-context-menu";
 import { LocalDate } from "@/components/ui/dates/local-date";
-import { NodeActionDropdownMenu } from "@/components/ui/dropdown-menus/node-action-dropdown-menu";
+import { NodeDropdownMenu } from "@/components/ui/dropdown-menus/node-dropdown-menu";
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
@@ -533,7 +533,7 @@ function DataRow({
         isMediaNode && !isMobile && !dropdownMenuOpen && !contextMenuOpen
       }
     >
-      <NodeActionContextMenu
+      <NodeContextMenu
         node={node}
         menuItems={menuItems}
         onOpenChange={setContextMenuOpen}
@@ -640,7 +640,7 @@ function DataRow({
 
           {/* Actions */}
           <div className="flex justify-center">
-            <NodeActionDropdownMenu
+            <NodeDropdownMenu
               node={node}
               menuItems={menuItems}
               open={dropdownMenuOpen}
@@ -648,7 +648,7 @@ function DataRow({
             />
           </div>
         </div>
-      </NodeActionContextMenu>
+      </NodeContextMenu>
     </HoverPreviewPortal>
   );
 }

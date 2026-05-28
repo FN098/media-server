@@ -21,7 +21,7 @@ const variantClass: Record<MenuItemVariant, string> = {
   destructive: "text-destructive focus:text-destructive",
 };
 
-interface NodeActionContextMenuProps {
+interface NodeContextMenuProps {
   node: MediaNode;
   menuItems: MenuItemDef<NodeContext>[];
   children: React.ReactNode;
@@ -29,13 +29,13 @@ interface NodeActionContextMenuProps {
   disabled?: boolean;
 }
 
-export function NodeActionContextMenu({
+export function NodeContextMenu({
   node,
   menuItems,
   children,
   onOpenChange,
   disabled = false,
-}: NodeActionContextMenuProps) {
+}: NodeContextMenuProps) {
   const mounted = useMounted();
 
   const visibleItems = useMemo(
@@ -50,19 +50,19 @@ export function NodeActionContextMenu({
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
         {visibleItems.map((item) => (
-          <ActionContextMenuItem key={item.key} item={item} node={node} />
+          <NodeContextMenuItem key={item.key} item={item} node={node} />
         ))}
       </ContextMenuContent>
     </ContextMenu>
   );
 }
 
-interface ActionContextMenuItemProps {
+interface NodeContextMenuItemProps {
   node: MediaNode;
   item: MenuItemDef<NodeContext>;
 }
 
-function ActionContextMenuItem({ node, item }: ActionContextMenuItemProps) {
+function NodeContextMenuItem({ node, item }: NodeContextMenuItemProps) {
   if (item.type === "custom") {
     return <ContextMenuItem asChild>{item.render({ node })}</ContextMenuItem>;
   }

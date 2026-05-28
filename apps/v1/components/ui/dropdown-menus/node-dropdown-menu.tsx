@@ -26,7 +26,7 @@ const variantClass: Record<MenuItemVariant, string> = {
   destructive: "text-destructive focus:text-destructive",
 };
 
-interface NodeActionsDropdownMenuProps {
+interface NodeDropdownMenuProps {
   node: MediaNode;
   menuItems: MenuItemDef<NodeContext>[];
   open?: boolean;
@@ -37,7 +37,7 @@ interface NodeActionsDropdownMenuProps {
   triggerType?: "default" | "large";
 }
 
-export function NodeActionDropdownMenu({
+export function NodeDropdownMenu({
   node,
   menuItems,
   open: controlledOpen,
@@ -46,7 +46,7 @@ export function NodeActionDropdownMenu({
   disabled,
   hidden,
   triggerType = "default",
-}: NodeActionsDropdownMenuProps) {
+}: NodeDropdownMenuProps) {
   const isMobile = useIsMobile();
   const mounted = useMounted();
 
@@ -64,7 +64,7 @@ export function NodeActionDropdownMenu({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <ActionDropdownMenuTrigger
+        <NodeDropdownMenuTrigger
           triggerType={triggerType}
           className={className}
           disabled={disabled}
@@ -74,7 +74,7 @@ export function NodeActionDropdownMenu({
 
       <DropdownMenuContent align="end" className="min-w-48">
         {visibleItems.map((item) => (
-          <ActionDropdownMenuItem
+          <NodeDropdownMenuItem
             key={item.key}
             node={node}
             item={item}
@@ -87,15 +87,15 @@ export function NodeActionDropdownMenu({
   );
 }
 
-interface ActionDropdownMenuTriggerProps extends React.ComponentProps<"button"> {
+interface NodeDropdownMenuTriggerProps extends React.ComponentProps<"button"> {
   triggerType?: "default" | "large";
 }
 
-function ActionDropdownMenuTrigger({
+function NodeDropdownMenuTrigger({
   triggerType = "default",
   className,
   ...rest
-}: ActionDropdownMenuTriggerProps) {
+}: NodeDropdownMenuTriggerProps) {
   if (triggerType === "large") {
     return (
       <button
@@ -122,19 +122,19 @@ function ActionDropdownMenuTrigger({
   );
 }
 
-interface ActionDropdownMenuItemProps {
+interface NodeDropdownMenuItemProps {
   node: MediaNode;
   item: MenuItemDef<NodeContext>;
   closeMenu: () => void;
   isMobile: boolean;
 }
 
-function ActionDropdownMenuItem({
+function NodeDropdownMenuItem({
   node,
   item,
   closeMenu,
   isMobile,
-}: ActionDropdownMenuItemProps) {
+}: NodeDropdownMenuItemProps) {
   if (item.type === "custom") {
     return (
       <DropdownMenuItem asChild>
