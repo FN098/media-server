@@ -20,19 +20,21 @@ export function useSelectedNodes<T extends SelectableNode>({
   activated = true,
   directoryBehavior = "include",
 }: UseSelectedNodes<T>) {
-  return useMemo(() => {
-    if (!activated) return [];
-
-    return nodes.filter((node) => {
-      if (node.isDirectory) {
-        switch (directoryBehavior) {
-          case "include":
-            return true;
-          case "exclude":
-            return false;
+  const selectedNodes = useMemo(
+    () =>
+      nodes.filter((node) => {
+        if (node.isDirectory) {
+          switch (directoryBehavior) {
+            case "include":
+              return true;
+            case "exclude":
+              return false;
+          }
         }
-      }
-      return selectedPaths.has(node.path);
-    });
-  }, [activated, directoryBehavior, nodes, selectedPaths]);
+        return selectedPaths.has(node.path);
+      }),
+    [directoryBehavior, nodes, selectedPaths]
+  );
+
+  return activated ? selectedNodes : [];
 }
