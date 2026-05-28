@@ -30,7 +30,10 @@ export function useFavoritesSelection({
     hasSelection,
   } = usePathSelectionContext();
 
-  const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
+  const { selectedNodes } = useSelectedNodes({
+    nodes: allNodes,
+    selectedPaths,
+  });
 
   const replace = useCallback(
     (node: MediaNode) => {

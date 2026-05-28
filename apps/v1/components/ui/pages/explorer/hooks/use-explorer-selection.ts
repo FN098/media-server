@@ -30,7 +30,12 @@ export function useExplorerSelection({
     hasSelection,
   } = usePathSelectionContext();
 
-  const { selectedNodes } = useSelectedNodes(allNodes, selectedPaths);
+  const { selectedNodes } = useSelectedNodes({
+    nodes: allNodes,
+    selectedPaths,
+  });
+
+  console.log({ selectedNodes });
 
   const replace = useCallback(
     (node: MediaNode) => {

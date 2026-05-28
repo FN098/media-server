@@ -7,16 +7,19 @@ export type SelectableNode = {
   isDirectory: boolean;
 };
 
-export function useSelectedNodes<T extends SelectableNode>(
-  nodes: T[],
-  selectedPaths: Iterable<string>,
-  options?: {
-    activated?: boolean; // デフォルト: true
-    directoryBehavior?: DirectoryBehavior; // デフォルト: "include"
-  }
-) {
-  const { activated = true, directoryBehavior = "include" } = options ?? {};
+interface UseSelectedNodes<T> {
+  nodes: T[];
+  selectedPaths: Iterable<string>;
+  activated?: boolean;
+  directoryBehavior?: DirectoryBehavior;
+}
 
+export function useSelectedNodes<T extends SelectableNode>({
+  nodes,
+  selectedPaths,
+  activated = true,
+  directoryBehavior = "include",
+}: UseSelectedNodes<T>) {
   // O(1) で path => node を検索するための Map
   const nodeMap = useMemo(() => {
     return new Map(nodes.map((node) => [node.path, node]));
