@@ -1,27 +1,26 @@
-import { RatingFilterValue } from "@/lib/filter/types";
+import { TagFilterValue } from "@/lib/filter/types";
 import { useCallback, useState } from "react";
 
-export type RatingFilterDialogContext =
+export type TagFilterDialogContext =
   | {
       isOpen: true;
-      currentValue: RatingFilterValue;
+      currentValue: TagFilterValue;
     }
   | { isOpen: false };
 
-interface UseRatingFilterDialogProps {
-  onChange?: (context: RatingFilterDialogContext) => void;
+interface UseTagFilterDialogProps {
+  onChange?: (context: TagFilterDialogContext) => void;
 }
 
-export function useRatingFilterDialog({
-  onChange,
-}: UseRatingFilterDialogProps = {}) {
+export function useTagFilterDialog({ onChange }: UseTagFilterDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentValue, setCurrentValue] = useState<RatingFilterValue>({
-    mode: "all",
+  const [currentValue, setCurrentValue] = useState<TagFilterValue>({
+    mode: "AND",
+    tags: [],
   });
 
   const open = useCallback(
-    (value: RatingFilterValue) => {
+    (value: TagFilterValue) => {
       onChange?.({ isOpen: true, currentValue: value });
       setCurrentValue(value);
       setIsOpen(true);
@@ -35,8 +34,8 @@ export function useRatingFilterDialog({
   }, [onChange]);
 
   return {
-    currentValue,
     isOpen,
+    currentValue,
     open,
     close,
   };

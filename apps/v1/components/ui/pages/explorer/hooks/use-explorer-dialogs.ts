@@ -7,6 +7,7 @@ import { useMoveDialog } from "@/hooks/use-move-dialog";
 import { usePreviewDialog } from "@/hooks/use-preview-dialog";
 import { useRatingFilterDialog } from "@/hooks/use-rating-filter-dialog";
 import { useRenameDialog } from "@/hooks/use-rename-dialog";
+import { useTagFilterDialog } from "@/hooks/use-tag-filter-dialog";
 import { MediaNode } from "@/lib/media/types";
 import { useMemo } from "react";
 
@@ -22,6 +23,7 @@ export function useExplorerDialogs() {
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog<MediaNode>();
   const ratingFilterDialog = useRatingFilterDialog();
+  const tagFilterDialog = useTagFilterDialog();
 
   const all = useMemo(
     () =>
@@ -35,6 +37,7 @@ export function useExplorerDialogs() {
         previewDialog,
         favoriteDialog,
         ratingFilterDialog,
+        tagFilterDialog,
       }) as const,
     [
       copyDialog,
@@ -46,6 +49,7 @@ export function useExplorerDialogs() {
       previewDialog,
       ratingFilterDialog,
       renameDialog,
+      tagFilterDialog,
     ]
   );
 

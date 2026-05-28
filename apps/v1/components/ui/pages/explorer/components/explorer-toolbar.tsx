@@ -20,6 +20,7 @@ import {
   MusicIcon,
   StarIcon,
   StarsIcon,
+  TagIcon,
   TrashIcon,
   VideoIcon,
 } from "lucide-react";
@@ -47,6 +48,9 @@ export function ExplorerToolbar({
 
   const ratingValue = filtering.controls.rating.value;
   const isRatingActive = ratingValue.mode !== "all";
+
+  const tagValue = filtering.controls.tag.value;
+  const isTagActive = tagValue.tags && tagValue.tags.length > 0;
 
   const filterMenuItems: FilterMenuItem[] = [
     {
@@ -137,6 +141,15 @@ export function ExplorerToolbar({
         dialogs.ratingFilterDialog.open(filtering.controls.rating.value);
       },
     },
+    {
+      type: "action",
+      label: "タグ...",
+      icon: TagIcon,
+      isActive: isTagActive,
+      onClick: () => {
+        dialogs.tagFilterDialog.open(filtering.controls.tag.value);
+      },
+    },
   ];
 
   return (
@@ -156,18 +169,20 @@ export function ExplorerToolbar({
           canReset={filtering.canReset}
         />
 
-        {/* 評価フィルターダイアログ */}
-        <RatingFilterDialog
-          open={dialogs.ratingFilterDialog.isOpen}
-          onOpenChange={(open) => !open && dialogs.ratingFilterDialog.close()}
-          value={dialogs.ratingFilterDialog.currentValue}
-          onChange={filtering.controls.rating.apply}
-        />
-
-        {/* TODO: FilterDropdownMenu にまとめる */}
+        {/* TODO: ExplorerToolbarDialogs にまとめる */}
         <>
+          {/* 評価フィルターダイアログ */}
+          <RatingFilterDialog
+            open={dialogs.ratingFilterDialog.isOpen}
+            onOpenChange={(open) => !open && dialogs.ratingFilterDialog.close()}
+            value={dialogs.ratingFilterDialog.currentValue}
+            onChange={filtering.controls.rating.apply}
+          />
+
           {/* タグフィルター */}
           <TagFilterDialog
+            open={dialogs.tagFilterDialog.isOpen}
+            onOpenChange={(open) => !open && dialogs.tagFilterDialog.close()}
             value={filtering.controls.tag.value}
             onChange={filtering.controls.tag.apply}
             relatedNodes={filtering.mediaOnly}

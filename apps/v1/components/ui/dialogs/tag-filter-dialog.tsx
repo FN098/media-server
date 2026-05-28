@@ -13,7 +13,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
@@ -33,18 +32,10 @@ import {
   RotateCcw,
   Search,
   Star,
-  Tag,
   X,
 } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
-
-interface TagFilterDialogProps {
-  value: TagFilterValue;
-  onChange: (value: TagFilterValue) => void;
-  autoFocusInput?: boolean;
-  relatedNodes?: MediaNode[];
-}
 
 const modeTexts = {
   AND: "すべて含む",
@@ -53,7 +44,18 @@ const modeTexts = {
   EMPTY: "タグなし",
 } as const satisfies Record<TagFilterMode, string>;
 
+interface TagFilterDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  value: TagFilterValue;
+  onChange: (value: TagFilterValue) => void;
+  autoFocusInput?: boolean;
+  relatedNodes?: MediaNode[];
+}
+
 export function TagFilterDialog({
+  open,
+  onOpenChange,
   value,
   onChange,
   autoFocusInput = false,
@@ -64,10 +66,6 @@ export function TagFilterDialog({
     [value.tags]
   );
   const selectedCount = selectedTagIds.size;
-
-  // タグ取得APIを有効化
-  const [activated, setActivated] = useState(false);
-  const activate = useCallback(() => setActivated(true), []);
 
   // タグ検索用クエリ
   const [query, setQuery] = useState("");
@@ -81,33 +79,33 @@ export function TagFilterDialog({
   const { tags: syncedTags, isLoading: isLoadingSynced } = useTags({
     strategy: "ids-only",
     ids: Array.from(selectedTagIds),
-    triggered: activated && selectedCount > 0,
+    triggered: open && selectedCount > 0,
   });
 
   // クエリ検索タグ
   const { tags: searchedTags, isLoading: isLoadingSearch } = useTags({
     query: debouncedQuery,
-    triggered: activated && debouncedQuery === trimmedQuery && !!debouncedQuery,
+    triggered: open && debouncedQuery === trimmedQuery && !!debouncedQuery,
   });
 
   // お気に入りタグ
   const { tags: favoriteTags, isLoading: isLoadingFavorite } = useTags({
     strategy: "favorite-only",
-    triggered: activated,
+    triggered: open,
   });
 
   // 最近使用タグ
   const { tags: recentTags, isLoading: isLoadingRecent } = useTags({
     strategy: "recently-used",
     limit: 10,
-    triggered: activated,
+    triggered: open,
   });
 
   // 関連タグ
   const { tags: relatedTags, isLoading: isLoadingRelated } = useTags({
     paths: relatedPaths,
     strategy: "related-only",
-    triggered: activated && relatedPaths.length > 0,
+    triggered: open && relatedPaths.length > 0,
   });
 
   // タグ取得中フラグ
@@ -144,14 +142,15 @@ export function TagFilterDialog({
       .filter((t): t is TagType => !!t);
   }, [selectedTagIds, tagMap]);
 
-  const [open, setOpen] = useState(false);
   const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(
     new Set()
   );
+
   // 選択済みタグのキャッシュ（ダイアログ内一時状態）
   const [tempSelectedCache, setTempSelectedCache] = useState<
     Map<string, TagType>
   >(new Map());
+
   const [currentMode, setCurrentMode] = useState<TagFilterMode>(value.mode);
 
   // サジェスト用
@@ -160,7 +159,6 @@ export function TagFilterDialog({
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const isEmptyMode = currentMode === "EMPTY";
-  const hasSelection = selectedTagIds.size > 0;
   const suggestionOpen = query.length > 0 && !isEmptyMode;
 
   // ダイアログ内の選択済みタグ一覧（キャッシュから取得）
@@ -173,7 +171,6 @@ export function TagFilterDialog({
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
-      activate();
       // 現在のコンテキスト状態を一時状態に同期
       setTempSelectedIds(new Set(selectedTagIds));
       setTempSelectedCache(new Map(selectedTags.map((t) => [t.id, t])));
@@ -183,7 +180,7 @@ export function TagFilterDialog({
       setQuery("");
       setActiveIndex(-1);
     }
-    setOpen(nextOpen);
+    onOpenChange(nextOpen);
   };
 
   const toggleTemp = (tag: TagType) => {
@@ -261,7 +258,7 @@ export function TagFilterDialog({
       mode: currentMode,
       tags: tempSelectedTags,
     });
-    setOpen(false);
+    onOpenChange(false);
   };
 
   const mounted = useMounted();
@@ -275,31 +272,6 @@ export function TagFilterDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "gap-2 h-9 w-full transition-colors",
-            hasSelection &&
-              "border-primary bg-primary/5 text-primary hover:bg-primary/10"
-          )}
-          onPointerEnter={activate}
-          onPointerDown={activate}
-        >
-          <Tag className="h-4 w-4" />
-          <span>タグフィルタ</span>
-          {hasSelection && (
-            <Badge
-              variant="default"
-              className="ml-1 px-1.5 h-5 min-w-[20px] justify-center"
-            >
-              {selectedTagIds.size}
-            </Badge>
-          )}
-        </Button>
-      </DialogTrigger>
-
       <DialogContent
         onOpenAutoFocus={(e) => {
           e.preventDefault();
