@@ -33,7 +33,7 @@ export function useTrashMenu({
   const items: MenuItemDef<NodeContext>[] = useMemo(
     () => [
       {
-        key: "openInNewTab",
+        key: "open-in-new-tab",
         type: "action",
         icon: ExternalLinkIcon,
         label: "新しいタブで開く",
@@ -41,12 +41,13 @@ export function useTrashMenu({
         hidden: () => selectedCount > 1,
       },
       {
-        key: "toggleFullscreen",
+        key: "toggle-fullscreen",
         type: "action",
         icon: FullscreenIcon,
         label: "全画面",
         onClick: () => void fullscreen.toggle(),
         hidden: () => !viewer.isOpen || !fullscreen.isSupported,
+        kbd: "F",
       },
       {
         key: "restore",
@@ -64,6 +65,7 @@ export function useTrashMenu({
         label: "削除",
         onClick: ({ node }) =>
           deleteDialog.open(hasSelection ? selectedNodes : [node]),
+        kbd: "Del",
       },
     ],
     [

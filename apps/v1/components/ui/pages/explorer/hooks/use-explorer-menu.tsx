@@ -100,6 +100,7 @@ export function useExplorerMenu({
         label: "全画面",
         onClick: () => void fullscreen.toggle(),
         hidden: () => !viewer.isOpen || !fullscreen.isSupported,
+        kbd: "F",
       },
       {
         key: "extract-archive",
@@ -117,6 +118,7 @@ export function useExplorerMenu({
         label: "名前の変更",
         onClick: ({ node }) => renameDialog.open(node),
         hidden: () => selectedCount > 1,
+        kbd: "F2",
       },
       {
         key: "move",
@@ -181,6 +183,7 @@ export function useExplorerMenu({
         label: "削除",
         onClick: ({ node }) =>
           deleteDialog.open(hasSelection ? selectedNodes : [node]),
+        kbd: "Del",
       },
     ],
     [
