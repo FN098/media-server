@@ -141,13 +141,9 @@ export function useFavorites(initialData?: Favorite[]) {
   const updateMultipleFavorites = useCallback(
     async (
       paths: string[],
-      options?: {
-        rating?: number | null;
-        skipIfAlreadyFavorite?: boolean;
-      }
+      rating: number | null = null,
+      skipIfAlreadyFavorite = false
     ) => {
-      const { rating = null, skipIfAlreadyFavorite = false } = options || {};
-
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);

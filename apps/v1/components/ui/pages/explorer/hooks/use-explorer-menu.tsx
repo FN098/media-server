@@ -71,22 +71,14 @@ export function useExplorerMenu({
           if (node.isDirectory) return null;
 
           const { rating } = favorites.get(node.path);
+          const targets = hasSelection ? selectedNodes : [node];
+
           return (
             <div className="w-full flex justify-center">
               <FavoriteRatingInput
                 value={rating}
                 onChange={(newRating) =>
-                  hasSelection
-                    ? // TODO
-                      favorites.updateSelected({
-                        newRating,
-                        onSuccess: closeMenu,
-                      })
-                    : favorites.update({
-                        node,
-                        newRating,
-                        onSuccess: closeMenu,
-                      })
+                  favorites.update({ targets, newRating, onSuccess: closeMenu })
                 }
               />
             </div>

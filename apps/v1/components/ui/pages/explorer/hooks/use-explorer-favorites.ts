@@ -6,55 +6,23 @@ import { toast } from "sonner";
 export type ExplorerFavorites = ReturnType<typeof useExplorerFavorites>;
 
 type UpdateProps = {
-  node: MediaNode;
+  targets: MediaNode[];
   newRating: number | null;
   onSuccess?: () => void;
 };
 
-type UpdateSelectedProps = {
-  newRating: number | null;
-  onSuccess?: () => void;
-};
+export function useExplorerFavorites() {
+  const { getFavorite, updateMultipleFavorites } = useFavoritesContext();
 
-interface UseExplorerFavoritesProps {
-  targetNodes: MediaNode[];
-}
-
-export function useExplorerFavorites({
-  targetNodes,
-}: UseExplorerFavoritesProps) {
-  const { updateFavorite, getFavorite, updateMultipleFavorites } =
-    useFavoritesContext();
-
-  const [updatingFavorite, startUpdatingFavorite] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   const update = useCallback(
-    ({ node, newRating, onSuccess }: UpdateProps) => {
-      if (updatingFavorite) return;
+    ({ targets, newRating, onSuccess }: UpdateProps) => {
+      if (isPending) return;
 
-      startUpdatingFavorite(async () => {
-        const result = await updateFavorite(node.path, newRating);
-
-        if (result.success) {
-          toast.success("レーティングが更新されました。", { duration: 500 });
-          onSuccess?.();
-        } else {
-          toast.error(result.error);
-        }
-      });
-    },
-    [updateFavorite, updatingFavorite]
-  );
-
-  const updateSelected = useCallback(
-    ({ newRating, onSuccess }: UpdateSelectedProps) => {
-      if (updatingFavorite) return;
-
-      startUpdatingFavorite(async () => {
-        const paths = targetNodes.map((node) => node.path);
-        const result = await updateMultipleFavorites(paths, {
-          rating: newRating,
-        });
+      startTransition(async () => {
+        const paths = targets.map((target) => target.path);
+        const result = await updateMultipleFavorites(paths, newRating);
 
         if (result.success) {
           toast.success("レーティングが更新されました。", { duration: 500 });
@@ -64,12 +32,11 @@ export function useExplorerFavorites({
         }
       });
     },
-    [targetNodes, updateMultipleFavorites, updatingFavorite]
+    [isPending, updateMultipleFavorites]
   );
 
   return {
     get: getFavorite,
     update,
-    updateSelected,
   };
 }

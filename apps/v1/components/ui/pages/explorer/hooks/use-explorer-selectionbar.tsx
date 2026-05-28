@@ -67,7 +67,8 @@ export function useExplorerSelectionbar({
                 <FavoriteRatingInput
                   value={averageRating}
                   onChange={(newRating) =>
-                    favorites.updateSelected({
+                    favorites.update({
+                      targets: nodes,
                       newRating,
                       onSuccess: closeMenu,
                     })
