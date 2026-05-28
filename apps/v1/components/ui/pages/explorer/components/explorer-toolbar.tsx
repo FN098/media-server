@@ -28,14 +28,22 @@ export function ExplorerToolbar({
 }: ExplorerToolbarProps) {
   const sort = useSort();
 
-  const filter = useExplorerFilter({ filtering, dialogs });
+  const { toolbarFilterItems } = useExplorerFilter();
   const { toolbarSortItems } = useExplorerSort();
   const { toolbarActionItems } = useExplorerActions();
+
+  const filterContext = useMemo(() => {
+    return {
+      filtering,
+      dialogs,
+    };
+  }, [dialogs, filtering]);
 
   const actionContext = useMemo(() => {
     const nonFavoriteTargets = filtering.filteredNodes.filter(
       (node) => !node.isDirectory && !favorites.get(node.path).isFavorite
     );
+
     return {
       listing,
       filtering,
@@ -63,9 +71,8 @@ export function ExplorerToolbar({
         {/* フィルター */}
         <div className="w-full sm:w-[160px]">
           <FilterDropdownMenu
-            items={filter.menuItems}
-            onReset={filter.control.reset}
-            canReset={filter.control.canReset}
+            items={toolbarFilterItems}
+            context={filterContext}
           />
         </div>
 

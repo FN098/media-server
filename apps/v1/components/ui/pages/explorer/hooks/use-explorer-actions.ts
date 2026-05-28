@@ -41,7 +41,5 @@ const toolbarActionItems: MenuItemDef<ToolbarActionContext>[] = [
 ];
 
 export function useExplorerActions() {
-  return {
-    toolbarActionItems,
-  };
+  return { toolbarActionItems };
 }

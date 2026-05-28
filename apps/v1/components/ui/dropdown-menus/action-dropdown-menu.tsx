@@ -41,74 +41,88 @@ export function ActionDropdownMenu<T>({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[240px]">
         {items.map((item) => (
-          <RenderMenuItem key={item.key} item={item} context={context} />
+          <ActionDropdownMenuItem
+            key={item.key}
+            item={item}
+            context={context}
+          />
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-// 再帰的にメニューを描画する内部コンポーネント
-function RenderMenuItem<T>({
-  item,
-  context,
-}: {
+interface ActionDropdownMenuItemProps<T> {
   item: MenuItemDef<T>;
   context: T;
-}) {
-  // hidden の動的判定
+}
+
+function ActionDropdownMenuItem<T>({
+  item,
+  context,
+}: ActionDropdownMenuItemProps<T>) {
   if (item.hidden?.(context)) return null;
 
-  // 1. 区切り線
+  // 区切り線
   if (item.type === "separator") {
     return <DropdownMenuSeparator />;
   }
 
-  // 2. カスタム
+  // カスタム
   if (item.type === "custom") {
     return <>{item.render(context)}</>;
   }
 
-  // 3. 階層グループ（追加！）
+  // 階層グループ
   if (item.type === "group") {
-    const SubIcon = item.icon;
-    const isGroupDisabled = item.disabled?.(context);
+    const Icon = item.icon;
+    const isDisabled = item.disabled?.(context);
 
     return (
       <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={isGroupDisabled}>
-          {SubIcon && <SubIcon className="mr-2 h-4 w-4" />}
+        <DropdownMenuSubTrigger disabled={isDisabled}>
+          {Icon && <Icon className="mr-2 h-4 w-4" />}
           <span>{item.label}</span>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="w-[200px]">
           {item.children.map((child) => (
-            <RenderMenuItem key={child.key} item={child} context={context} />
+            <ActionDropdownMenuItem
+              key={child.key}
+              item={child}
+              context={context}
+            />
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
     );
   }
 
-  // 4. 通常アクション
-  const Icon = item.icon;
-  const isDisabled = item.disabled?.(context);
+  // 通常アクション
+  if (item.type === "action") {
+    const Icon = item.icon;
+    const isDisabled = item.disabled?.(context);
 
-  return (
-    <DropdownMenuItem
-      disabled={isDisabled}
-      onClick={(e) => {
-        e.stopPropagation();
-        void item.onClick(context);
-      }}
-      className={
-        item.variant === "destructive"
-          ? "text-destructive focus:text-destructive"
-          : ""
-      }
-    >
-      <Icon className="mr-2 h-4 w-4" />
-      <span className="flex-grow">{item.label}</span>
-      {item.kbd && <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>}
-    </DropdownMenuItem>
-  );
+    return (
+      <DropdownMenuItem
+        disabled={isDisabled}
+        onClick={(e) => {
+          e.stopPropagation();
+          void item.onClick(context);
+        }}
+        className={
+          item.variant === "destructive"
+            ? "text-destructive focus:text-destructive"
+            : ""
+        }
+      >
+        <Icon className="mr-2 h-4 w-4" />
+        <span className="flex-grow">{item.label}</span>
+        {item.kbd && (
+          <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>
+        )}
+      </DropdownMenuItem>
+    );
+  }
+
+  return null;
 }

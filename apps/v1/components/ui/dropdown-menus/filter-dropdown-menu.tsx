@@ -1,5 +1,6 @@
 "use client";
 
+import { FilterMenuItem } from "@/components/ui/pages/explorer/hooks/use-explorer-filter";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -13,47 +14,25 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  CheckIcon,
-  ChevronRight,
-  Filter,
-  LucideIcon,
-  RotateCcw,
-} from "lucide-react";
+import { CheckIcon, ChevronRight, Filter, RotateCcw } from "lucide-react";
 
-// 外から渡すメニュー項目の型定義（再帰構造）
-export type FilterMenuItem =
-  | {
-      type: "action";
-      label: string;
-      icon?: LucideIcon;
-      iconClassName?: string;
-      onClick: () => void;
-      isActive?: boolean; // 選択中かどうかのハイライト用
-      closeOnSelect?: boolean;
-    }
-  | {
-      type: "group";
-      label: string;
-      icon?: LucideIcon;
-      iconClassName?: string;
-      children: FilterMenuItem[]; // 子階層のメニュー
-      isActive?: boolean; // 子階層のいずれかが選択されているかのハイライト用
-    };
-
-interface FilterDropdownMenuProps {
-  items: FilterMenuItem[];
-  placeholder?: string; // ボタンのテキスト（デフォルト: "フィルター"）
-  onReset?: () => void; // フィルター全体のリセット処理
-  canReset?: boolean; // リセットボタンを表示するかどうか
+interface FilterDropdownMenuProps<T> {
+  items: FilterMenuItem<T>[];
+  context: T;
+  onReset?: () => void;
+  canReset?: boolean;
+  triggerLabel?: string;
+  resetLabel?: string;
 }
 
-export function FilterDropdownMenu({
+export function FilterDropdownMenu<T>({
   items,
-  placeholder = "フィルター",
+  context,
   onReset,
   canReset = false,
-}: FilterDropdownMenuProps) {
+  triggerLabel = "フィルター",
+  resetLabel = "フィルターをクリア",
+}: FilterDropdownMenuProps<T>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -65,9 +44,7 @@ export function FilterDropdownMenu({
             <Filter
               className={cn(
                 "h-4 w-4 shrink-0 transition-colors",
-                canReset
-                  ? "fill-primary text-primary" // 適用中は塗りつぶし
-                  : "text-muted-foreground"
+                canReset ? "fill-primary text-primary" : "text-muted-foreground"
               )}
             />
             <span
@@ -77,7 +54,7 @@ export function FilterDropdownMenu({
                   : "text-muted-foreground"
               }
             >
-              {placeholder}
+              {triggerLabel}
             </span>
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 opacity-50 rotate-90" />
@@ -94,69 +71,57 @@ export function FilterDropdownMenu({
             >
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-4 w-4" />
-                <span>フィルターをクリア</span>
+                <span>{resetLabel}</span>
               </div>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
         )}
 
-        {/* 動的メニュー生成 */}
-        {items.map((item, index) => (
-          <FilterMenuItemRender key={`${item.label}-${index}`} item={item} />
+        {items.map((item) => (
+          <FilterDropdownMenuItem
+            key={item.key}
+            item={item}
+            context={context}
+          />
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-// --- サブコンポーネント: 再帰的にメニューを描画 ---
-function FilterMenuItemRender({ item }: { item: FilterMenuItem }) {
-  const Icon = item.icon;
+interface FilterDropdownMenuItemProps<T> {
+  item: FilterMenuItem<T>;
+  context: T;
+}
 
-  // 1. 最終アクション
-  if (item.type === "action") {
-    return (
-      <DropdownMenuItem
-        onClick={item.onClick}
-        onSelect={(e) => {
-          if (item.closeOnSelect === false) {
-            e.preventDefault();
-          }
-        }}
-        className={cn(
-          "flex items-center justify-between gap-4 w-full cursor-pointer",
-          item.isActive ? "bg-accent/60 font-medium text-foreground" : ""
-        )}
-      >
-        <div className="flex items-center gap-2 overflow-hidden truncate">
-          {Icon && (
-            <Icon
-              className={cn(
-                "h-4 w-4 shrink-0 transition-colors",
-                item.isActive ? "" : "text-muted-foreground",
-                item.iconClassName
-              )}
-            />
-          )}
-          <span className="truncate">{item.label}</span>
-        </div>
+function FilterDropdownMenuItem<T>({
+  item,
+  context,
+}: FilterDropdownMenuItemProps<T>) {
+  if (item.hidden?.(context)) return null;
 
-        <div className="flex h-4 w-4 shrink-0 items-center justify-center">
-          {item.isActive && (
-            <CheckIcon className="h-4 w-4 text-primary stroke-[2.5]" />
-          )}
-        </div>
-      </DropdownMenuItem>
-    );
+  // 区切り線
+  if (item.type === "separator") {
+    return <DropdownMenuSeparator />;
   }
 
-  // 2. グループ（サブメニュー）
+  // カスタム
+  if (item.type === "custom") {
+    return <>{item.render(context)}</>;
+  }
+
+  // 階層グループ
   if (item.type === "group") {
+    const Icon = item.icon;
+    const isDisabled = item.disabled?.(context);
+    const isActive = item.isActive?.(context);
+
     return (
       <DropdownMenuSub>
         <DropdownMenuSubTrigger
-          className={item.isActive ? "bg-accent font-medium" : ""}
+          disabled={isDisabled}
+          className={isActive ? "bg-accent font-medium" : ""}
         >
           <div className="flex items-center gap-2">
             {Icon && (
@@ -172,15 +137,60 @@ function FilterMenuItemRender({ item }: { item: FilterMenuItem }) {
         </DropdownMenuSubTrigger>
         <DropdownMenuPortal>
           <DropdownMenuSubContent>
-            {item.children.map((child, index) => (
-              <FilterMenuItemRender
-                key={`${child.label}-${index}`}
+            {item.children.map((child) => (
+              <FilterDropdownMenuItem
+                key={item.key}
                 item={child}
+                context={context}
               />
             ))}
           </DropdownMenuSubContent>
         </DropdownMenuPortal>
       </DropdownMenuSub>
+    );
+  }
+
+  // 通常アクション
+  if (item.type === "action") {
+    const Icon = item.icon;
+    const isDisabled = item.disabled?.(context);
+    const isActive = item.isActive?.(context);
+
+    return (
+      <DropdownMenuItem
+        disabled={isDisabled}
+        onClick={() => {
+          void item.onClick(context);
+        }}
+        onSelect={(e) => {
+          if (item.closeOnSelect === false) {
+            e.preventDefault();
+          }
+        }}
+        className={cn(
+          "flex items-center justify-between gap-4 w-full cursor-pointer",
+          isActive ? "bg-accent/60 font-medium text-foreground" : ""
+        )}
+      >
+        <div className="flex items-center gap-2 overflow-hidden truncate">
+          {Icon && (
+            <Icon
+              className={cn(
+                "h-4 w-4 shrink-0 transition-colors",
+                isActive ? "" : "text-muted-foreground",
+                item.iconClassName
+              )}
+            />
+          )}
+          <span className="truncate">{item.label}</span>
+        </div>
+
+        <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+          {isActive && (
+            <CheckIcon className="h-4 w-4 text-primary stroke-[2.5]" />
+          )}
+        </div>
+      </DropdownMenuItem>
     );
   }
 

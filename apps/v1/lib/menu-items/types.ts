@@ -18,11 +18,14 @@ export interface ActionMenuItem<T> extends BaseMenuItem<T> {
   kbd?: string;
 }
 
-export interface GroupMenuItem<T> extends BaseMenuItem<T> {
+export interface GroupMenuItem<
+  T,
+  TItem = MenuItemDef<T>,
+> extends BaseMenuItem<T> {
   type: "group";
   label: string;
   icon?: React.ComponentType<{ className?: string }>;
-  children: MenuItemDef<T>[]; // 再帰的に自身を呼び出す
+  children: TItem[]; // 再帰的に自身を呼び出す
 }
 
 export interface CustomMenuItem<T> extends BaseMenuItem<T> {
