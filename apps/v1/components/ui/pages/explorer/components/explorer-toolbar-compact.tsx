@@ -59,8 +59,11 @@ export function ExplorerToolbar({
           icon: StarIcon,
           iconClassName: "fill-yellow-400 text-yellow-400",
           isActive: favValue === "only_favorites",
-          onClick: () =>
-            filtering.controls.favorite.apply({ mode: "only_favorites" }),
+          onClick: () => {
+            const nextMode =
+              favValue === "only_favorites" ? "all" : "only_favorites";
+            filtering.controls.favorite.apply({ mode: nextMode });
+          },
         },
         {
           type: "action",
@@ -68,8 +71,11 @@ export function ExplorerToolbar({
           icon: StarIcon,
           iconClassName: "text-muted-foreground",
           isActive: favValue === "exclude_favorites",
-          onClick: () =>
-            filtering.controls.favorite.apply({ mode: "exclude_favorites" }),
+          onClick: () => {
+            const nextMode =
+              favValue === "exclude_favorites" ? "all" : "exclude_favorites";
+            filtering.controls.favorite.apply({ mode: nextMode });
+          },
         },
       ],
     },
@@ -84,24 +90,27 @@ export function ExplorerToolbar({
           label: "画像",
           icon: ImageIcon,
           isActive: mediaTypeValue.types.includes("image"),
-          onClick: () =>
-            filtering.controls.mediaType.apply({ types: ["image"] }),
+          onClick: () => {
+            filtering.controls.mediaType.apply({ types: ["image"] });
+          },
         },
         {
           type: "action",
           label: "動画",
           icon: VideoIcon,
           isActive: mediaTypeValue.types.includes("video"),
-          onClick: () =>
-            filtering.controls.mediaType.apply({ types: ["video"] }),
+          onClick: () => {
+            filtering.controls.mediaType.apply({ types: ["video"] });
+          },
         },
         {
           type: "action",
           label: "音声",
           icon: MusicIcon,
           isActive: mediaTypeValue.types.includes("audio"),
-          onClick: () =>
-            filtering.controls.mediaType.apply({ types: ["audio"] }),
+          onClick: () => {
+            filtering.controls.mediaType.apply({ types: ["audio"] });
+          },
         },
       ],
     },

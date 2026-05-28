@@ -24,6 +24,7 @@ export type FilterMenuItem =
       iconClassName?: string;
       onClick: () => void;
       isActive?: boolean; // 選択中かどうかのハイライト用
+      closeOnSelect?: boolean;
     }
   | {
       type: "group";
@@ -58,6 +59,11 @@ export function FilterDropdownMenu({
           <DropdownMenuItem
             key={`${item.label}-${index}`}
             onClick={item.onClick}
+            onSelect={(e) => {
+              if (item.closeOnSelect === false) {
+                e.preventDefault();
+              }
+            }}
             className={item.isActive ? "bg-accent font-medium" : ""}
           >
             <div className="flex items-center gap-2">

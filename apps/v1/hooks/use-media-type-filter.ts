@@ -73,11 +73,11 @@ export function useMediaTypeFilter(options?: MediaTypeFilterOptions) {
   );
 
   const toggle = useCallback(
-    (target: MediaFsNodeType) => {
-      const isExist = value.types.includes(target);
+    (type: MediaFsNodeType) => {
+      const isExist = value.types.includes(type);
       const nextTypes = isExist
-        ? value.types.filter((t) => t !== target)
-        : [...value.types, target];
+        ? value.types.filter((t) => t !== type)
+        : [...value.types, type];
       apply({ types: nextTypes });
     },
     [apply, value.types]
