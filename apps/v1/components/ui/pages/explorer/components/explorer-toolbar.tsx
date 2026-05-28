@@ -1,5 +1,5 @@
 import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
-import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropwodn-menu";
+import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { ExplorerToolbarDialogs } from "@/components/ui/pages/explorer/components/explorer-dialogs";
 import {

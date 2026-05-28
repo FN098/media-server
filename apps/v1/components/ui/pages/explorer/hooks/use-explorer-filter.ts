@@ -1,4 +1,4 @@
-import { FilterMenuItem } from "@/components/ui/dropdown-menus/filter-dropwodn-menu";
+import { FilterMenuItem } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import {

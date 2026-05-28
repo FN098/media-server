@@ -45,7 +45,7 @@ interface FilterDropdownMenuProps {
   items: FilterMenuItem[];
   placeholder?: string; // ボタンのテキスト（デフォルト: "フィルター"）
   onReset?: () => void; // フィルター全体のリセット処理
-  canReset?: boolean; // リセットボタンを表示するかどうか（フィルターが適用されているかどうかのフラグとしても使用）
+  canReset?: boolean; // リセットボタンを表示するかどうか
 }
 
 export function FilterDropdownMenu({
@@ -54,81 +54,6 @@ export function FilterDropdownMenu({
   onReset,
   canReset = false,
 }: FilterDropdownMenuProps) {
-  // メニュー項目を再帰的にレンダリングするヘルパー関数
-  const renderMenuItems = (menuItems: FilterMenuItem[]) => {
-    return menuItems.map((item, index) => {
-      const Icon = item.icon;
-
-      // 1. 最終アクション
-      if (item.type === "action") {
-        return (
-          <DropdownMenuItem
-            key={`${item.label}-${index}`}
-            onClick={item.onClick}
-            onSelect={(e) => {
-              if (item.closeOnSelect === false) {
-                e.preventDefault();
-              }
-            }}
-            className={cn(
-              "flex items-center justify-between gap-4 w-full cursor-pointer",
-              item.isActive ? "bg-accent/60 font-medium text-foreground" : ""
-            )}
-          >
-            <div className="flex items-center gap-2 overflow-hidden truncate">
-              {Icon && (
-                <Icon
-                  className={cn(
-                    "h-4 w-4 shrink-0 transition-colors",
-                    item.isActive ? "" : "text-muted-foreground",
-                    item.iconClassName
-                  )}
-                />
-              )}
-              <span className="truncate">{item.label}</span>
-            </div>
-
-            <div className="flex h-4 w-4 shrink-0 items-center justify-center">
-              {item.isActive && (
-                <CheckIcon className="h-4 w-4 text-primary stroke-[2.5]" />
-              )}
-            </div>
-          </DropdownMenuItem>
-        );
-      }
-
-      // 2. グループ（サブメニュー）
-      if (item.type === "group") {
-        return (
-          <DropdownMenuSub key={`${item.label}-${index}`}>
-            <DropdownMenuSubTrigger
-              className={item.isActive ? "bg-accent font-medium" : ""}
-            >
-              <div className="flex items-center gap-2">
-                {Icon && (
-                  <Icon
-                    className={cn(
-                      "h-4 w-4 shrink-0 text-muted-foreground",
-                      item.iconClassName
-                    )}
-                  />
-                )}
-                <span>{item.label}</span>
-              </div>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                {renderMenuItems(item.children)}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        );
-      }
-
-      return null;
-    });
-  };
-
   return (
     <div className="w-full">
       <DropdownMenu>
@@ -178,9 +103,88 @@ export function FilterDropdownMenu({
           )}
 
           {/* 動的メニュー生成 */}
-          {renderMenuItems(items)}
+          {items.map((item, index) => (
+            <FilterMenuItemRender key={`${item.label}-${index}`} item={item} />
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
+}
+
+// --- サブコンポーネント: 再帰的にメニューを描画 ---
+function FilterMenuItemRender({ item }: { item: FilterMenuItem }) {
+  const Icon = item.icon;
+
+  // 1. 最終アクション
+  if (item.type === "action") {
+    return (
+      <DropdownMenuItem
+        onClick={item.onClick}
+        onSelect={(e) => {
+          if (item.closeOnSelect === false) {
+            e.preventDefault();
+          }
+        }}
+        className={cn(
+          "flex items-center justify-between gap-4 w-full cursor-pointer",
+          item.isActive ? "bg-accent/60 font-medium text-foreground" : ""
+        )}
+      >
+        <div className="flex items-center gap-2 overflow-hidden truncate">
+          {Icon && (
+            <Icon
+              className={cn(
+                "h-4 w-4 shrink-0 transition-colors",
+                item.isActive ? "" : "text-muted-foreground",
+                item.iconClassName
+              )}
+            />
+          )}
+          <span className="truncate">{item.label}</span>
+        </div>
+
+        <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+          {item.isActive && (
+            <CheckIcon className="h-4 w-4 text-primary stroke-[2.5]" />
+          )}
+        </div>
+      </DropdownMenuItem>
+    );
+  }
+
+  // 2. グループ（サブメニュー）
+  if (item.type === "group") {
+    return (
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger
+          className={item.isActive ? "bg-accent font-medium" : ""}
+        >
+          <div className="flex items-center gap-2">
+            {Icon && (
+              <Icon
+                className={cn(
+                  "h-4 w-4 shrink-0 text-muted-foreground",
+                  item.iconClassName
+                )}
+              />
+            )}
+            <span>{item.label}</span>
+          </div>
+        </DropdownMenuSubTrigger>
+        <DropdownMenuPortal>
+          <DropdownMenuSubContent>
+            {item.children.map((child, index) => (
+              <FilterMenuItemRender
+                key={`${child.label}-${index}`}
+                item={child}
+              />
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuPortal>
+      </DropdownMenuSub>
+    );
+  }
+
+  return null;
 }
