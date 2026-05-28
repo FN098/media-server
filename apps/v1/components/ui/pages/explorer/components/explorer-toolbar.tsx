@@ -2,10 +2,7 @@ import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdo
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { ExplorerToolbarDialogs } from "@/components/ui/pages/explorer/components/explorer-dialogs";
-import {
-  ToolbarActionContext,
-  useExplorerActions,
-} from "@/components/ui/pages/explorer/hooks/use-explorer-actions";
+import { useExplorerActions } from "@/components/ui/pages/explorer/hooks/use-explorer-actions";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
 import { useExplorerFilter } from "@/components/ui/pages/explorer/hooks/use-explorer-filter";
@@ -14,6 +11,7 @@ import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explor
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useSort } from "@/hooks/use-sort";
 import { MediaListing } from "@/lib/media/types";
+import { useMemo } from "react";
 
 interface ExplorerToolbarProps {
   listing: MediaListing;
@@ -29,17 +27,32 @@ export function ExplorerToolbar({
   favorites,
 }: ExplorerToolbarProps) {
   const sort = useSort();
-  const filter = useExplorerFilter({ filtering, dialogs });
 
+  const filter = useExplorerFilter({ filtering, dialogs });
   const { toolbarSortItems } = useExplorerSort();
   const { toolbarActionItems } = useExplorerActions();
 
-  const actionContext: ToolbarActionContext = {
-    listing,
-    filtering,
-    dialogs,
-    favorites,
-  };
+  const computed = useMemo(() => {
+    const nonFavoriteTargets = filtering.filteredNodes.filter(
+      (node) => !node.isDirectory && !favorites.get(node.path).isFavorite
+    );
+
+    return {
+      nonFavoriteTargets,
+      hasNonFavoriteFiles: nonFavoriteTargets.length > 0,
+    };
+  }, [favorites, filtering.filteredNodes]);
+
+  const actionContext = useMemo(
+    () => ({
+      listing,
+      filtering,
+      dialogs,
+      favorites,
+      computed,
+    }),
+    [listing, filtering, dialogs, favorites, computed]
+  );
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">

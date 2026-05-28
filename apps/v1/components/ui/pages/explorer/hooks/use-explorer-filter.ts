@@ -19,7 +19,7 @@ interface UseExplorerFilterProps {
   dialogs: ExplorerDialogs;
 }
 
-// TODO: use-explorer-actions のようにする
+// TODO: use-explorer-actions
 export function useExplorerFilter({
   filtering,
   dialogs,

@@ -1,7 +1,7 @@
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
-import { MediaListing } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { FolderPlus, TrashIcon } from "lucide-react";
 
@@ -10,6 +10,10 @@ export interface ToolbarActionContext {
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
   favorites: ExplorerFavorites;
+  computed: {
+    hasNonFavoriteFiles: boolean;
+    nonFavoriteTargets: MediaNode[];
+  };
 }
 
 const toolbarActionItems: MenuItemDef<ToolbarActionContext>[] = [
@@ -26,14 +30,9 @@ const toolbarActionItems: MenuItemDef<ToolbarActionContext>[] = [
     label: "お気に入り以外一括削除",
     icon: TrashIcon,
     variant: "destructive",
-    disabled: (ctx) =>
-      !ctx.filtering.filteredNodes.some(
-        (node) => !node.isDirectory && !ctx.favorites.get(node.path).isFavorite
-      ),
+    disabled: (ctx) => !ctx.computed.hasNonFavoriteFiles,
     onClick: (ctx) => {
-      const targets = ctx.filtering.filteredNodes.filter(
-        (node) => !node.isDirectory && !ctx.favorites.get(node.path).isFavorite
-      );
+      const targets = ctx.computed.nonFavoriteTargets;
       if (targets.length > 0) {
         ctx.dialogs.deleteDialog.open(targets);
       }
