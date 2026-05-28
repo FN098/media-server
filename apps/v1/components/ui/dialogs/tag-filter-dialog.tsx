@@ -258,7 +258,7 @@ export function TagFilterDialog({
       mode: currentMode,
       tags: tempSelectedTags,
     });
-    onOpenChange(false);
+    handleOpenChange(false);
   };
 
   const mounted = useMounted();
