@@ -16,7 +16,7 @@ export function useTrashSelectionbar({
   dialogs,
   tagEditor,
 }: UseTrashSelectionbarProps) {
-  const { selectedNodes } = selection;
+  const { hasSelection, selectedNodes } = selection;
   const { deleteDialog, restoreDialog } = dialogs;
 
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
@@ -41,6 +41,7 @@ export function useTrashSelectionbar({
           icon: RotateCcwIcon,
           label: "復元",
           onClick: () => restoreDialog.open(selectedNodes),
+          disabled: () => !hasSelection,
         },
         {
           key: "delete",
@@ -49,9 +50,10 @@ export function useTrashSelectionbar({
           icon: Trash2Icon,
           label: "削除",
           onClick: () => deleteDialog.open(selectedNodes),
+          disabled: () => !hasSelection,
         },
       ] satisfies MenuItemDef<MultipleNodesContext>[],
-    [restoreDialog, selectedNodes, deleteDialog]
+    [restoreDialog, selectedNodes, deleteDialog, hasSelection]
   );
 
   return {

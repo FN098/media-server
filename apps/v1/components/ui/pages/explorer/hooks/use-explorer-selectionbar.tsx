@@ -4,6 +4,7 @@ import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-expl
 import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { ExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumbs";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
+import { hasMedia } from "@/lib/media/media-types";
 import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { averageBy } from "@/lib/utils/math";
@@ -35,9 +36,13 @@ export function useExplorerSelectionbar({
   favorites,
   thumbs,
 }: UseExplorerSelectionbarProps) {
-  const { selectedNodes } = selection;
-
+  const { hasSelection, selectedNodes } = selection;
   const { favoriteDialog, deleteDialog, copyDialog, moveDialog } = dialogs;
+
+  const isMediaSelected = useMemo(
+    () => hasMedia(selectedNodes),
+    [selectedNodes]
+  );
 
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
     () => [
@@ -73,6 +78,7 @@ export function useExplorerSelectionbar({
                       onSuccess: closeMenu,
                     })
                   }
+                  disabled={!isMediaSelected}
                 />
               </div>
             );
@@ -84,6 +90,7 @@ export function useExplorerSelectionbar({
           icon: StarIcon,
           label: "お気に入り登録",
           onClick: () => favoriteDialog.open(selectedNodes, "add"),
+          disabled: () => !isMediaSelected,
         },
         {
           key: "remove-favorites",
@@ -91,6 +98,7 @@ export function useExplorerSelectionbar({
           icon: StarOffIcon,
           label: "お気に入り解除",
           onClick: () => favoriteDialog.open(selectedNodes, "remove"),
+          disabled: () => !isMediaSelected,
         },
         {
           key: "move",
@@ -98,6 +106,7 @@ export function useExplorerSelectionbar({
           icon: FolderInputIcon,
           label: "移動",
           onClick: () => moveDialog.open(selectedNodes, listing.path),
+          disabled: () => !hasSelection,
         },
         {
           key: "copy",
@@ -105,6 +114,7 @@ export function useExplorerSelectionbar({
           icon: CopyIcon,
           label: "コピー",
           onClick: () => copyDialog.open(selectedNodes, listing.path),
+          disabled: () => !hasSelection,
         },
         {
           key: "update-thumb",
@@ -112,6 +122,7 @@ export function useExplorerSelectionbar({
           icon: RefreshCwIcon,
           label: "サムネイル更新",
           onClick: () => void thumbs.updateParallel(selectedNodes),
+          disabled: () => !hasSelection,
         },
         {
           key: "delete",
@@ -120,6 +131,7 @@ export function useExplorerSelectionbar({
           icon: Trash2Icon,
           label: "削除",
           onClick: () => deleteDialog.open(selectedNodes),
+          disabled: () => !hasSelection,
         },
       ] satisfies MenuItemDef<MultipleNodesContext>[],
     [
@@ -127,6 +139,8 @@ export function useExplorerSelectionbar({
       deleteDialog,
       favoriteDialog,
       favorites,
+      hasSelection,
+      isMediaSelected,
       listing.path,
       moveDialog,
       selectedNodes,

@@ -1,20 +1,31 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { FavoritesFavorites } from "@/components/ui/pages/favorites/hooks/use-favorites-favorites";
+import { FavoritesSelection } from "@/components/ui/pages/favorites/hooks/use-favorites-selection";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
+import { hasMedia } from "@/lib/media/media-types";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { averageBy } from "@/lib/utils/math";
 import { TagIcon } from "lucide-react";
 import { useMemo } from "react";
 
 interface UseFavoritesSelectionbarProps {
+  selection: FavoritesSelection;
   tagEditor: TagEditorControl;
   favorites: FavoritesFavorites;
 }
 
 export function useFavoritesSelectionbar({
+  selection,
   tagEditor,
   favorites,
 }: UseFavoritesSelectionbarProps) {
+  const { selectedNodes } = selection;
+
+  const isMediaSelected = useMemo(
+    () => hasMedia(selectedNodes),
+    [selectedNodes]
+  );
+
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
     () => [
       {
@@ -49,13 +60,14 @@ export function useFavoritesSelectionbar({
                       onSuccess: closeMenu,
                     })
                   }
+                  disabled={!isMediaSelected}
                 />
               </div>
             );
           },
         },
       ] satisfies MenuItemDef<MultipleNodesContext>[],
-    [favorites]
+    [favorites, isMediaSelected]
   );
 
   return {
