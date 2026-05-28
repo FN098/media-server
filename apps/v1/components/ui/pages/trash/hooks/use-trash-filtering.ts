@@ -66,8 +66,7 @@ export function useTrashFiltering({ listing }: UseTrashFilteringProps) {
   );
 
   // 検索パラメータリセット用
-  const { hasResettableSearchParams, clearSearchParams } =
-    useSearchParamsControl({ keep: ["viewMode"] });
+  const search = useSearchParamsControl({ keep: ["viewMode"] });
 
   return {
     filteredNodes: filtered,
@@ -76,8 +75,8 @@ export function useTrashFiltering({ listing }: UseTrashFilteringProps) {
     isFiltered,
     mediaOnly,
     addTagFilter,
-    canReset: hasResettableSearchParams,
-    reset: clearSearchParams,
+    canReset: search.canClear,
+    reset: search.clear,
     controls: {
       query: queryFilter,
       mediaType: mediaTypeFilter,

@@ -12,11 +12,11 @@ export function useSearchParamsControl({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const hasSearchParams = useMemo(() => {
+  const hasAny = useMemo(() => {
     return searchParams.size > 0;
   }, [searchParams]);
 
-  const hasResettableSearchParams = useMemo(() => {
+  const canClear = useMemo(() => {
     for (const key of searchParams.keys()) {
       if (!keep.includes(key)) {
         return true;
@@ -25,7 +25,7 @@ export function useSearchParamsControl({
     return false;
   }, [searchParams, keep]);
 
-  const clearSearchParams = useCallback(() => {
+  const clear = useCallback(() => {
     if (keep.length === 0) {
       router.replace(pathname);
       return;
@@ -46,8 +46,9 @@ export function useSearchParamsControl({
   }, [router, pathname, searchParams, keep]);
 
   return {
-    hasSearchParams,
-    hasResettableSearchParams,
-    clearSearchParams,
+    count: searchParams.size,
+    hasAny,
+    canClear,
+    clear,
   };
 }
