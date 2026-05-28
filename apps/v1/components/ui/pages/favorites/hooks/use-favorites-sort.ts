@@ -10,34 +10,22 @@ export type FavoritesSort = ReturnType<typeof useFavoritesSort>;
 
 export const options = [
   {
-    value: {
-      sort: "path",
-      direction: "asc",
-    },
+    sort: "path",
     label: "ファイルパス",
     icon: ArrowDownAzIcon,
   },
   {
-    value: {
-      sort: "mtime",
-      direction: "desc",
-    },
+    sort: "mtime",
     label: "更新日",
     icon: CalendarArrowDownIcon,
   },
   {
-    value: {
-      sort: "size",
-      direction: "desc",
-    },
+    sort: "size",
     label: "サイズ",
     icon: WeightIcon,
   },
   {
-    value: {
-      sort: "rating",
-      direction: "desc",
-    },
+    sort: "rating",
     label: "評価",
     icon: StarsIcon,
   },

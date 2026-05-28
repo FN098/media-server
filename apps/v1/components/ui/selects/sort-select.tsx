@@ -10,13 +10,16 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { ArrowUpDown, LucideIcon, RotateCcw } from "lucide-react";
 
+type SortDirection = "asc" | "desc";
+
 type SortValue = {
   sort: string; // 並び替えのフィールド名
-  direction: "asc" | "desc"; // 並び替えの向き
+  direction: SortDirection; // 並び替えの向き
 };
 
 type SelectOption = {
-  value: SortValue; // 選択項目の値
+  sort: string; // 並び替えのフィールド名
+  direction: SortDirection; // 並び替えの向き
   label: string; // 選択項目の表示名
   icon?: LucideIcon; // 選択項目のアイコン
 };
@@ -41,7 +44,7 @@ export function SortSelect({ value, onChange, options }: SortSelectProps) {
 
   // options の中に現在の値が存在するかチェック
   const isValidOption =
-    !!currentKey && options.some((opt) => combine(opt.value) === currentKey);
+    !!currentKey && options.some((opt) => combine(opt) === currentKey);
 
   // 有効なオプションがある場合のみ値をセット。なければ undefined (placeholder表示)
   const selectedKey = isValidOption ? currentKey : undefined;
@@ -101,7 +104,7 @@ export function SortSelect({ value, onChange, options }: SortSelectProps) {
           )}
 
           {options.map((opt) => {
-            const combined = combine(opt.value);
+            const combined = combine(opt);
             const Icon = opt.icon || ArrowUpDown;
 
             return (

@@ -1,4 +1,5 @@
 import { ResetButton } from "@/components/ui/buttons/reset-button";
+import { SortDropdownMenuButton } from "@/components/ui/buttons/sort-dropdown-menu";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
@@ -7,7 +8,6 @@ import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-expl
 import { ExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { FavoriteFilterSelect } from "@/components/ui/selects/favorite-filter-select";
 import { MediaTypeFilterMultiSelect } from "@/components/ui/selects/media-type-filter-multi-select";
-import { SortSelect } from "@/components/ui/selects/sort-select";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { MediaListing } from "@/lib/media/types";
 import { Button } from "@/shadcn/components/ui/button";
@@ -35,7 +35,7 @@ export function ExplorerToolbar({
     <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2">
       <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 flex-grow">
         {/* 並び替え */}
-        <SortSelect
+        <SortDropdownMenuButton
           value={sort.value}
           onChange={sort.apply}
           options={sort.options}

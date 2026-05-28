@@ -12,50 +12,32 @@ export type ExplorerSort = ReturnType<typeof useExplorerSort>;
 
 export const options = [
   {
-    value: {
-      sort: "name",
-      direction: "asc",
-    },
+    sort: "name",
     label: "名前",
     icon: ArrowDownAzIcon,
   },
   {
-    value: {
-      sort: "mtime",
-      direction: "desc",
-    },
+    sort: "mtime",
     label: "更新日",
     icon: CalendarArrowDownIcon,
   },
   {
-    value: {
-      sort: "size",
-      direction: "desc",
-    },
+    sort: "size",
     label: "サイズ",
     icon: WeightIcon,
   },
   {
-    value: {
-      sort: "fileCount",
-      direction: "desc",
-    },
+    sort: "fileCount",
     label: "ファイル数",
     icon: FileStackIcon,
   },
   {
-    value: {
-      sort: "lastViewed",
-      direction: "desc",
-    },
+    sort: "lastViewed",
     label: "訪問日",
     icon: ClockIcon,
   },
   {
-    value: {
-      sort: "rating",
-      direction: "desc",
-    },
+    sort: "rating",
     label: "評価",
     icon: StarsIcon,
   },
