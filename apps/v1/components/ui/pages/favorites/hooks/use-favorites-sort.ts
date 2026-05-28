@@ -1,7 +1,7 @@
 import { useSort } from "@/hooks/use-sort";
 import {
-  ArrowDownAzIcon,
-  CalendarArrowDownIcon,
+  ALargeSmallIcon,
+  CalendarIcon,
   StarsIcon,
   WeightIcon,
 } from "lucide-react";
@@ -12,12 +12,12 @@ export const options = [
   {
     sort: "path",
     label: "ファイルパス",
-    icon: ArrowDownAzIcon,
+    icon: ALargeSmallIcon,
   },
   {
     sort: "mtime",
     label: "更新日",
-    icon: CalendarArrowDownIcon,
+    icon: CalendarIcon,
   },
   {
     sort: "size",

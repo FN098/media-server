@@ -1,7 +1,7 @@
 import { useSort } from "@/hooks/use-sort";
 import {
-  ArrowDownAzIcon,
-  CalendarArrowDownIcon,
+  ALargeSmallIcon,
+  CalendarIcon,
   ClockIcon,
   FileStackIcon,
   StarsIcon,
@@ -14,12 +14,12 @@ export const options = [
   {
     sort: "name",
     label: "名前",
-    icon: ArrowDownAzIcon,
+    icon: ALargeSmallIcon,
   },
   {
     sort: "mtime",
     label: "更新日",
-    icon: CalendarArrowDownIcon,
+    icon: CalendarIcon,
   },
   {
     sort: "size",
