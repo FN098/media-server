@@ -119,12 +119,12 @@ export function useExplorerHotkeys({
     }
   );
 
-  useHotkeys("p", () => navigation.openPrevFolder("first"), {
+  useHotkeys("ctrl+left", () => navigation.openPrevFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
     enabled,
   });
 
-  useHotkeys("n", () => navigation.openNextFolder("first"), {
+  useHotkeys("ctrl+right", () => navigation.openNextFolder("first"), {
     scopes: ["explorer", "viewer", "tag-editor"],
     enabled,
   });

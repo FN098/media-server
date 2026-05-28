@@ -110,12 +110,12 @@ export function useTrashHotkeys({
     }
   );
 
-  useHotkeys("p", () => navigation.openPrevFolder("first"), {
+  useHotkeys("ctrl+left", () => navigation.openPrevFolder("first"), {
     scopes: ["trash", "viewer", "tag-editor"],
     enabled,
   });
 
-  useHotkeys("n", () => navigation.openNextFolder("first"), {
+  useHotkeys("ctrl+right", () => navigation.openNextFolder("first"), {
     scopes: ["trash", "viewer", "tag-editor"],
     enabled,
   });
