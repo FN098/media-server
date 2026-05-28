@@ -80,6 +80,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
   });
 
   const selectionbar = useFavoritesSelectionbar({
+    selection,
     tagEditor,
     favorites,
   });
