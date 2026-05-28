@@ -64,7 +64,8 @@ export function useExplorerMenu({
     renameDialog,
   } = dialogs;
 
-  const items: MenuItemDef<NodeContext>[] = useMemo(
+  // TODO: context
+  const items = useMemo<MenuItemDef<NodeContext>[]>(
     () => [
       {
         key: "rating",
@@ -88,21 +89,16 @@ export function useExplorerMenu({
         },
       },
       {
+        key: "separator-navigation",
+        type: "separator",
+      },
+      {
         key: "open-in-new-tab",
         type: "action",
         icon: ExternalLinkIcon,
         label: "新しいタブで開く",
         onClick: ({ node }) => navigation.openInNewTab(node),
         hidden: () => selectedCount > 1,
-      },
-      {
-        key: "toggle-fullscreen",
-        type: "action",
-        icon: FullscreenIcon,
-        label: "全画面",
-        onClick: () => void fullscreen.toggle(),
-        hidden: () => !viewer.isOpen || !fullscreen.isSupported,
-        kbd: "F",
       },
       {
         key: "goto-next-folder",
@@ -121,6 +117,19 @@ export function useExplorerMenu({
         onClick: () => navigation.openPrevFolder("first"),
         hidden: () => !viewer.isOpen,
         kbd: ["Ctrl", "Left"],
+      },
+      {
+        key: "toggle-fullscreen",
+        type: "action",
+        icon: FullscreenIcon,
+        label: "全画面",
+        onClick: () => void fullscreen.toggle(),
+        hidden: () => !viewer.isOpen || !fullscreen.isSupported,
+        kbd: "F",
+      },
+      {
+        key: "separator-file-action",
+        type: "separator",
       },
       {
         key: "extract-archive",
@@ -157,6 +166,10 @@ export function useExplorerMenu({
           copyDialog.open(hasSelection ? selectedNodes : [node], listing.path),
       },
       {
+        key: "separator-tag-action",
+        type: "separator",
+      },
+      {
         key: "edit-tags",
         type: "action",
         icon: TagIcon,
@@ -174,6 +187,10 @@ export function useExplorerMenu({
         disabled: ({ node }) =>
           !filtering.canAddTagFilter(hasSelection ? selectedNodes : node),
         hidden: ({ node }) => node.isDirectory,
+      },
+      {
+        key: "separator-etc",
+        type: "separator",
       },
       {
         key: "set-as-preview",
@@ -194,6 +211,10 @@ export function useExplorerMenu({
             ? void thumbs.updateParallel(selectedNodes)
             : void thumbs.update(node),
         hidden: () => viewer.isOpen,
+      },
+      {
+        key: "separator-delete",
+        type: "separator",
       },
       {
         key: "delete",
