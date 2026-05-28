@@ -26,7 +26,7 @@ export function useSelectedNodes<T extends SelectableNode>({
         if (node.isDirectory) {
           switch (directoryBehavior) {
             case "include":
-              return true;
+              return selectedPaths.has(node.path);
             case "exclude":
               return false;
           }
