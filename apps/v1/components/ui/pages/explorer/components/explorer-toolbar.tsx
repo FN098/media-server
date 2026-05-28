@@ -28,7 +28,6 @@ export function ExplorerToolbar({
   dialogs,
   favorites,
 }: ExplorerToolbarProps) {
-  const isMobile = useIsMobile();
   const filter = useExplorerFilterMenu({ filtering, dialogs });
 
   return (
@@ -47,27 +46,6 @@ export function ExplorerToolbar({
           onReset={filtering.reset}
           canReset={filtering.canReset}
         />
-
-        {/* TODO: ExplorerToolbarDialogs にまとめる */}
-        <>
-          {/* 評価フィルターダイアログ */}
-          <RatingFilterDialog
-            open={dialogs.ratingFilterDialog.isOpen}
-            onOpenChange={(open) => !open && dialogs.ratingFilterDialog.close()}
-            value={dialogs.ratingFilterDialog.currentValue}
-            onChange={filtering.controls.rating.apply}
-          />
-
-          {/* タグフィルター */}
-          <TagFilterDialog
-            open={dialogs.tagFilterDialog.isOpen}
-            onOpenChange={(open) => !open && dialogs.tagFilterDialog.close()}
-            value={filtering.controls.tag.value}
-            onChange={filtering.controls.tag.apply}
-            relatedNodes={filtering.mediaOnly}
-            autoFocusInput={!isMobile}
-          />
-        </>
 
         {/* TODO: アクションメニューにまとめる */}
         <>
@@ -107,6 +85,43 @@ export function ExplorerToolbar({
         isFiltered={filtering.isFiltered}
         className="ml-auto min-w-[120px] text-right"
       />
+
+      {/* ダイアログ */}
+      <ExplorerToolbarDialogs dialogs={dialogs} filtering={filtering} />
     </div>
+  );
+}
+
+interface ExplorerToolbarDialogsProps {
+  dialogs: ExplorerDialogs;
+  filtering: ExplorerFiltering;
+}
+
+export function ExplorerToolbarDialogs({
+  dialogs,
+  filtering,
+}: ExplorerToolbarDialogsProps) {
+  const isMobile = useIsMobile();
+
+  return (
+    <>
+      {/* 評価フィルターダイアログ */}
+      <RatingFilterDialog
+        open={dialogs.ratingFilterDialog.isOpen}
+        onOpenChange={(open) => !open && dialogs.ratingFilterDialog.close()}
+        value={dialogs.ratingFilterDialog.currentValue}
+        onChange={filtering.controls.rating.apply}
+      />
+
+      {/* タグフィルター */}
+      <TagFilterDialog
+        open={dialogs.tagFilterDialog.isOpen}
+        onOpenChange={(open) => !open && dialogs.tagFilterDialog.close()}
+        value={filtering.controls.tag.value}
+        onChange={filtering.controls.tag.apply}
+        relatedNodes={filtering.mediaOnly}
+        autoFocusInput={!isMobile}
+      />
+    </>
   );
 }
