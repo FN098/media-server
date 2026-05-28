@@ -3,10 +3,12 @@ import { useCallback, useMemo } from "react";
 
 interface UseSearchParamsControlOptions {
   keep?: string[];
+  omit?: string[];
 }
 
 export function useSearchParamsControl({
   keep = [],
+  omit = [],
 }: UseSearchParamsControlOptions = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,32 +20,46 @@ export function useSearchParamsControl({
 
   const canClear = useMemo(() => {
     for (const key of searchParams.keys()) {
-      if (!keep.includes(key)) {
+      if (
+        (keep.length > 0 && !keep.includes(key)) ||
+        (omit.length > 0 && omit.includes(key))
+      ) {
         return true;
       }
     }
+
     return false;
-  }, [searchParams, keep]);
+  }, [searchParams, keep, omit]);
 
   const clear = useCallback(() => {
-    if (keep.length === 0) {
+    // 全削除
+    if (keep.length === 0 && omit.length === 0) {
       router.replace(pathname);
       return;
     }
 
     const nextParams = new URLSearchParams();
 
-    for (const key of keep) {
-      const values = searchParams.getAll(key);
+    for (const [key, value] of searchParams.entries()) {
+      // keep モード
+      if (keep.length > 0) {
+        if (keep.includes(key)) {
+          nextParams.append(key, value);
+        }
 
-      for (const value of values) {
+        continue;
+      }
+
+      // omit モード
+      if (!omit.includes(key)) {
         nextParams.append(key, value);
       }
     }
 
     const query = nextParams.toString();
+
     router.replace(query ? `${pathname}?${query}` : pathname);
-  }, [router, pathname, searchParams, keep]);
+  }, [router, pathname, searchParams, keep, omit]);
 
   return {
     count: searchParams.size,
