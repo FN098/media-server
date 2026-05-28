@@ -10,6 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { ChevronRight, Wand2 } from "lucide-react";
 
 interface ActionDropdownMenuProps<T> {
@@ -22,6 +23,8 @@ export function ActionDropdownMenu<T>({
   items,
   context,
 }: ActionDropdownMenuProps<T>) {
+  const isMobile = useIsMobile();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -44,6 +47,7 @@ export function ActionDropdownMenu<T>({
             key={item.key}
             item={item}
             context={context}
+            isMobile={isMobile}
           />
         ))}
       </DropdownMenuContent>
@@ -54,11 +58,13 @@ export function ActionDropdownMenu<T>({
 interface ActionDropdownMenuItemProps<T> {
   item: MenuItemDef<T>;
   context: T;
+  isMobile: boolean;
 }
 
 function ActionDropdownMenuItem<T>({
   item,
   context,
+  isMobile,
 }: ActionDropdownMenuItemProps<T>) {
   if (item.hidden?.(context)) return null;
 
@@ -89,6 +95,7 @@ function ActionDropdownMenuItem<T>({
               key={child.key}
               item={child}
               context={context}
+              isMobile={isMobile}
             />
           ))}
         </DropdownMenuSubContent>
@@ -116,7 +123,7 @@ function ActionDropdownMenuItem<T>({
       >
         <Icon className="mr-2 h-4 w-4" />
         <span className="flex-grow">{item.label}</span>
-        {item.kbd && (
+        {!isMobile && item.kbd && (
           <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>
         )}
       </DropdownMenuItem>

@@ -17,6 +17,7 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/shadcn/components/ui/context-menu";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import React from "react";
 
 const variantClass: Record<MenuItemVariant, string> = {
@@ -39,6 +40,7 @@ export function NodeContextMenu({
   onOpenChange,
   disabled = false,
 }: NodeContextMenuProps) {
+  const isMobile = useIsMobile();
   const mounted = useMounted();
 
   const context = { node };
@@ -50,7 +52,12 @@ export function NodeContextMenu({
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
         {menuItems.map((item) => (
-          <NodeContextMenuItem key={item.key} item={item} context={context} />
+          <NodeContextMenuItem
+            key={item.key}
+            item={item}
+            context={context}
+            isMobile={isMobile}
+          />
         ))}
       </ContextMenuContent>
     </ContextMenu>
@@ -60,9 +67,14 @@ export function NodeContextMenu({
 interface NodeContextMenuItemProps {
   item: MenuItemDef<NodeContext>;
   context: NodeContext;
+  isMobile: boolean;
 }
 
-function NodeContextMenuItem({ item, context }: NodeContextMenuItemProps) {
+function NodeContextMenuItem({
+  item,
+  context,
+  isMobile,
+}: NodeContextMenuItemProps) {
   if (item.hidden?.(context)) return null;
 
   // 区切り線
@@ -77,11 +89,11 @@ function NodeContextMenuItem({ item, context }: NodeContextMenuItemProps) {
 
   // 階層グループ
   if (item.type === "group") {
-    const SubIcon = item.icon;
+    const Icon = item.icon;
     return (
       <ContextMenuSub>
         <ContextMenuSubTrigger disabled={item.disabled?.(context)}>
-          {SubIcon && <SubIcon className="mr-2 h-4 w-4" />}
+          {Icon && <Icon className="mr-2 h-4 w-4" />}
           <span>{item.label}</span>
         </ContextMenuSubTrigger>
         <ContextMenuSubContent className="w-[200px]">
@@ -90,6 +102,7 @@ function NodeContextMenuItem({ item, context }: NodeContextMenuItemProps) {
               key={child.key}
               item={child}
               context={context}
+              isMobile={isMobile}
             />
           ))}
         </ContextMenuSubContent>
@@ -98,21 +111,27 @@ function NodeContextMenuItem({ item, context }: NodeContextMenuItemProps) {
   }
 
   // 通常アクション
-  const Icon = item.icon;
-  const variant = item.variant ?? "default";
+  if (item.type === "action") {
+    const Icon = item.icon;
+    const variant = item.variant ?? "default";
 
-  return (
-    <ContextMenuItem
-      className={variantClass[variant]}
-      disabled={item.disabled?.(context)}
-      onClick={(e) => {
-        e.stopPropagation();
-        void item.onClick(context);
-      }}
-    >
-      <Icon className="mr-2 h-4 w-4" />
-      {item.label}
-      {item.kbd && <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>}
-    </ContextMenuItem>
-  );
+    return (
+      <ContextMenuItem
+        className={variantClass[variant]}
+        disabled={item.disabled?.(context)}
+        onClick={(e) => {
+          e.stopPropagation();
+          void item.onClick(context);
+        }}
+      >
+        <Icon className="mr-2 h-4 w-4" />
+        {item.label}
+        {!isMobile && item.kbd && (
+          <kbd className="ml-auto text-xs opacity-50">{item.kbd}</kbd>
+        )}
+      </ContextMenuItem>
+    );
+  }
+
+  return null;
 }

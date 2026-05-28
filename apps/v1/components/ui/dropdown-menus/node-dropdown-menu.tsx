@@ -146,11 +146,11 @@ function NodeDropdownMenuItem({
 
   // 階層グループ
   if (item.type === "group") {
-    const SubIcon = item.icon;
+    const Icon = item.icon;
     return (
       <DropdownMenuSub>
         <DropdownMenuSubTrigger disabled={item.disabled?.(context)}>
-          {SubIcon && <SubIcon className="mr-2 h-4 w-4" />}
+          {Icon && <Icon className="mr-2 h-4 w-4" />}
           <span>{item.label}</span>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="w-[200px]">
@@ -168,26 +168,30 @@ function NodeDropdownMenuItem({
   }
 
   // 通常アクション
-  const Icon = item.icon;
-  const variant = item.variant ?? "default";
-  const isDisabled = item.disabled?.(context);
+  if (item.type === "action") {
+    const Icon = item.icon;
+    const variant = item.variant ?? "default";
+    const isDisabled = item.disabled?.(context);
 
-  return (
-    <DropdownMenuItem
-      className={cn("relative", variantClass[variant])}
-      disabled={isDisabled}
-      onClick={(e) => {
-        e.stopPropagation();
-        void item.onClick(context);
-      }}
-    >
-      <Icon className="mr-2 h-4 w-4" />
-      {item.label}
-      {!isMobile && item.kbd && (
-        <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
-          <Kbd>{item.kbd}</Kbd>
-        </div>
-      )}
-    </DropdownMenuItem>
-  );
+    return (
+      <DropdownMenuItem
+        className={cn("relative", variantClass[variant])}
+        disabled={isDisabled}
+        onClick={(e) => {
+          e.stopPropagation();
+          void item.onClick(context);
+        }}
+      >
+        <Icon className="mr-2 h-4 w-4" />
+        {item.label}
+        {!isMobile && item.kbd && (
+          <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 text-xs text-muted-foreground">
+            <Kbd>{item.kbd}</Kbd>
+          </div>
+        )}
+      </DropdownMenuItem>
+    );
+  }
+
+  return null;
 }
