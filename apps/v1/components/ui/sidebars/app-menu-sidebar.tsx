@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeSelect } from "@/components/ui/selects/theme-select";
-import { pageMetas } from "@/lib/page-meta/meta";
+import { resolvePageMetas } from "@/lib/page-meta/resolvers";
 import {
   Sidebar,
   SidebarContent,
@@ -21,16 +21,15 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
-// Menu items.
-const items = [
-  pageMetas["dashboard"],
-  pageMetas["explorer"],
-  pageMetas["favorites"],
-  pageMetas["trash"],
-  pageMetas["settings"],
-  pageMetas["sandbox"],
-  pageMetas["maintenance"],
-];
+const menuItems = resolvePageMetas([
+  "dashboard",
+  "explorer",
+  "favorites",
+  "trash",
+  "settings",
+  "sandbox",
+  "maintenance",
+]);
 
 export function AppMenuSidebar() {
   const { setOpenMobile } = useSidebar();
@@ -50,7 +49,7 @@ export function AppMenuSidebar() {
           <SidebarGroupLabel>App Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <Link href={item.url} onClick={() => setOpenMobile(false)}>

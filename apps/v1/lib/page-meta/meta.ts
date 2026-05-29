@@ -1,57 +1,78 @@
 import { PATHS } from "@/lib/path/paths";
 import {
-  FolderSearch,
-  LayoutDashboard,
+  FolderSearchIcon,
+  LayoutDashboardIcon,
   LucideIcon,
-  PackageOpen,
-  Settings,
-  Star,
-  Trash2,
-  Wrench,
+  PackageOpenIcon,
+  SettingsIcon,
+  StarIcon,
+  Trash2Icon,
+  WrenchIcon,
 } from "lucide-react";
 
-export type PageMeta = {
+export type PageMetaRaw = {
+  key: string;
   title: string;
   url: string;
   icon: LucideIcon;
+  hidden?: boolean;
   developmentOnly?: boolean;
 };
 
-export const pageMetas = {
-  dashboard: {
+export type PageMeta = {
+  key: string;
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  hidden: boolean;
+  developmentOnly: boolean;
+};
+
+export const pageMetas = [
+  {
+    key: "dashboard",
     title: "Dashboard",
     url: PATHS.client.dashboard.root,
-    icon: LayoutDashboard,
+    icon: LayoutDashboardIcon,
   },
-  explorer: {
+  {
+    key: "explorer",
     title: "Explorer",
     url: PATHS.client.explorer.root,
-    icon: FolderSearch,
+    icon: FolderSearchIcon,
   },
-  favorites: {
+  {
+    key: "favorites",
     title: "Favorites",
     url: PATHS.client.favorites.root,
-    icon: Star,
+    icon: StarIcon,
   },
-  trash: {
+  {
+    key: "trash",
     title: "Trash",
     url: PATHS.client.trash.root,
-    icon: Trash2,
+    icon: Trash2Icon,
   },
-  settings: {
+  {
+    key: "settings",
     title: "Settings",
     url: PATHS.client.settings.root,
-    icon: Settings,
+    icon: SettingsIcon,
+    hidden: true,
   },
-  sandbox: {
+  {
+    key: "sandbox",
     title: "Sandbox",
     url: PATHS.client.sandbox.root,
-    icon: PackageOpen,
+    icon: PackageOpenIcon,
     developmentOnly: true,
   },
-  maintenance: {
+  {
+    key: "maintenance",
     title: "Maintenance",
     url: PATHS.client.maintenance.root,
-    icon: Wrench,
+    icon: WrenchIcon,
   },
-} as const satisfies Record<string, PageMeta>;
+] as const satisfies readonly PageMetaRaw[];
+
+export type PageMetaKey = (typeof pageMetas)[number]["key"];

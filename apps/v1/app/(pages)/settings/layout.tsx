@@ -1,9 +1,11 @@
 import { Header } from "@/components/ui/headers/header";
-import { pageMetas } from "@/lib/page-meta/meta";
+import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
-const meta = pageMetas["settings"];
+const meta = resolvePageMeta("settings");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  if (!meta) return;
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header

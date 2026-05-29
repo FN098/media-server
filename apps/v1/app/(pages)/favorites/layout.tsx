@@ -1,10 +1,12 @@
 import { Header } from "@/components/ui/headers/header";
-import { pageMetas } from "@/lib/page-meta/meta";
+import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 import { SearchFocusProvider } from "@/providers/search-focus.provider";
 
-const meta = pageMetas["favorites"];
+const meta = resolvePageMeta("favorites");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  if (!meta) return;
+
   return (
     <SearchFocusProvider>
       <div className="w-full h-svh flex flex-col overflow-hidden">

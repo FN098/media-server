@@ -1,9 +1,11 @@
 import { Header } from "@/components/ui/headers/header";
-import { pageMetas } from "@/lib/page-meta/meta";
+import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
-const meta = pageMetas["maintenance"];
+const meta = resolvePageMeta("maintenance");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  if (!meta) return;
+
   return (
     <div className="w-full h-svh flex flex-col">
       <Header
