@@ -5,13 +5,9 @@ import {
   createBackupAction,
   getBackupListAction,
   restoreBackupAction,
-} from "@/actions/db-actions";
-import {
-  DbBackupFile,
-  DbUploadResult,
-  MAX_KEEP_COUNT,
-  MIN_KEEP_COUNT,
-} from "@/lib/db/backup";
+} from "@/lib/db-backup/actions";
+import { MAX_KEEP_COUNT, MIN_KEEP_COUNT } from "@/lib/db-backup/config";
+import { DbBackupFile, DbBackupUploadResult } from "@/lib/db-backup/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -167,7 +163,7 @@ export function DatabaseBackupCard() {
           body: formData,
         });
 
-        const data = (await res.json()) as DbUploadResult;
+        const data = (await res.json()) as DbBackupUploadResult;
 
         if (data.success) {
           const uploaded = {

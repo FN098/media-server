@@ -1,4 +1,5 @@
-import { DbUploadResult, TEMP_DB_BACKUP_DIR } from "@/lib/db/backup";
+import { TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
+import { DbBackupUploadResult } from "@/lib/db-backup/types";
 import { formatBytes } from "@/lib/utils/format";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
         size: validFile.size,
         isTemp: true,
       },
-    } satisfies DbUploadResult);
+    } satisfies DbBackupUploadResult);
   } catch (e) {
     console.error("upload db file error:", e);
     return NextResponse.json(

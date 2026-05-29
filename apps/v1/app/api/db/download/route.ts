@@ -1,4 +1,4 @@
-import { DB_BACKUP_DIR } from "@/lib/db/backup";
+import { DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { getMimetype } from "@/lib/media/mimetype";
 import fs from "fs";
 import { NextRequest, NextResponse } from "next/server";

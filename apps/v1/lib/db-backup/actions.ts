@@ -1,10 +1,7 @@
 "use server";
 
-import {
-  DB_BACKUP_DIR,
-  DbBackupFile,
-  TEMP_DB_BACKUP_DIR,
-} from "@/lib/db/backup";
+import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
+import { DbBackupFile } from "@/lib/db-backup/types";
 import { getDatabaseUrlInfo } from "@/lib/db/url";
 import { spawn } from "child_process";
 import fs from "fs/promises";
