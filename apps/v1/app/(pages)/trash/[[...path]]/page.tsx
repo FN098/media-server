@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { Trash } from "@/components/ui/pages/trash";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import { getFolderVisitedInfo } from "@/lib/folder/repository";
-import { formatNodes } from "@/lib/media/format";
+import { formatNodes } from "@/lib/media/formatters";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getMediaDbNodes } from "@/lib/media/repository";

@@ -8,7 +8,7 @@ import {
   getFolderVisitedInfo,
   updateFolderCache,
 } from "@/lib/folder/repository";
-import { formatNodes } from "@/lib/media/format";
+import { formatNodes } from "@/lib/media/formatters";
 import { getMediaFsListing } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getMediaDbNodes } from "@/lib/media/repository";
