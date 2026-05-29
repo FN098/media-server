@@ -57,7 +57,7 @@ export function TrashToolbar({
         {/* フィルター */}
         <div className="w-full sm:w-[160px]">
           <FilterDropdownMenu
-            items={toolbarFilterItems}
+            menuItems={toolbarFilterItems}
             context={filterContext}
           />
         </div>
@@ -65,7 +65,7 @@ export function TrashToolbar({
         {/* アクション */}
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
-            items={toolbarActionItems}
+            menuItems={toolbarActionItems}
             context={actionContext}
           />
         </div>

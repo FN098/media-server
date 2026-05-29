@@ -1,6 +1,8 @@
 "use client";
 
-import { FilterMenuItem } from "@/lib/menu-items/types";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createTransformer } from "@/lib/menu-items/transformer";
+import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -17,18 +19,21 @@ import { cn } from "@/shadcn/lib/utils";
 import { CheckIcon, ChevronRight, Filter, RotateCcw } from "lucide-react";
 
 interface FilterDropdownMenuProps<T> {
-  items: FilterMenuItem<T>[];
+  menuItems: FilterMenuItem<T>[];
   context: T;
   onReset?: () => void;
   canReset?: boolean;
 }
 
 export function FilterDropdownMenu<T>({
-  items,
+  menuItems,
   context,
   onReset,
   canReset = false,
 }: FilterDropdownMenuProps<T>) {
+  const transformer = createTransformer<MenuItemDef<T>, T>(defaultFilters);
+  const items = transformer(menuItems, context);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -95,8 +100,6 @@ function FilterDropdownMenuItem<T>({
   item,
   context,
 }: FilterDropdownMenuItemProps<T>) {
-  if (item.hidden?.(context)) return null;
-
   // 区切り線
   if (item.type === "separator") {
     return <DropdownMenuSeparator />;

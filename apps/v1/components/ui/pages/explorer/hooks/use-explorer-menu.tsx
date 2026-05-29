@@ -128,7 +128,7 @@ export function useExplorerMenu({
         kbd: "F",
       },
       {
-        key: "separator-file-action",
+        key: "separator-fs-operation",
         type: "separator",
       },
       {

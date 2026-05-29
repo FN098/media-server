@@ -2,6 +2,8 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
@@ -20,6 +22,10 @@ import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
 import { Fragment, useState } from "react";
+
+const transformer = createTransformer<MenuItemDef<NodeContext>, NodeContext>(
+  defaultFilters
+);
 
 interface NodeDropdownMenuProps {
   node: MediaNode;
@@ -50,6 +56,7 @@ export function NodeDropdownMenu({
   const setOpen = onControlledOpenChange ?? setInternalOpen;
 
   const context = { node, closeMenu: () => setOpen(false) };
+  const items = transformer(menuItems, context);
 
   if (!mounted || hidden) return null;
 
@@ -65,7 +72,7 @@ export function NodeDropdownMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="min-w-48">
-        {menuItems.map((item) => (
+        {items.map((item) => (
           <NodeDropdownMenuItem
             key={item.key}
             item={item}
@@ -124,8 +131,6 @@ function NodeDropdownMenuItem({
   context,
   isMobile,
 }: NodeDropdownMenuItemProps) {
-  if (item.hidden?.(context)) return null;
-
   // 区切り線
   if (item.type === "separator") {
     return <DropdownMenuSeparator />;

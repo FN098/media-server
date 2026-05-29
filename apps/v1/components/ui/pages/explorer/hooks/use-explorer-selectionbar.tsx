@@ -85,6 +85,10 @@ export function useExplorerSelectionbar({
           },
         },
         {
+          key: "separator-favorite-action",
+          type: "separator",
+        },
+        {
           key: "add-favorites",
           type: "action",
           icon: StarIcon,
@@ -99,6 +103,10 @@ export function useExplorerSelectionbar({
           label: "お気に入り解除",
           onClick: () => favoriteDialog.open(selectedNodes, "remove"),
           disabled: () => !isMediaSelected,
+        },
+        {
+          key: "separator-fs-operation",
+          type: "separator",
         },
         {
           key: "move",
@@ -123,6 +131,10 @@ export function useExplorerSelectionbar({
           label: "サムネイル更新",
           onClick: () => void thumbs.updateParallel(selectedNodes),
           disabled: () => !hasSelection,
+        },
+        {
+          key: "separator-delete",
+          type: "separator",
         },
         {
           key: "delete",

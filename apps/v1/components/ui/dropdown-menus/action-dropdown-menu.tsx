@@ -1,3 +1,5 @@
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
@@ -18,16 +20,19 @@ import { ChevronRight, Wand2 } from "lucide-react";
 import { Fragment } from "react/jsx-runtime";
 
 interface ActionDropdownMenuProps<T> {
-  items: MenuItemDef<T>[];
+  menuItems: MenuItemDef<T>[];
   context: T;
   triggerLabel?: string;
 }
 
 export function ActionDropdownMenu<T>({
-  items,
+  menuItems,
   context,
 }: ActionDropdownMenuProps<T>) {
   const isMobile = useIsMobile();
+
+  const transformer = createTransformer<MenuItemDef<T>, T>(defaultFilters);
+  const items = transformer(menuItems, context);
 
   return (
     <DropdownMenu>
@@ -46,7 +51,7 @@ export function ActionDropdownMenu<T>({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[240px]">
-        {items.map((item) => (
+        {transformer(items, context).map((item) => (
           <ActionDropdownMenuItem
             key={item.key}
             item={item}
@@ -70,8 +75,6 @@ function ActionDropdownMenuItem<T>({
   context,
   isMobile,
 }: ActionDropdownMenuItemProps<T>) {
-  if (item.hidden?.(context)) return null;
-
   // 区切り線
   if (item.type === "separator") {
     return <DropdownMenuSeparator />;

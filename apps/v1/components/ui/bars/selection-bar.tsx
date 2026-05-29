@@ -1,4 +1,6 @@
 import { AnimatedCheckCircle } from "@/components/ui/icons/animated-check-circle";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -18,6 +20,11 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { MoreVertical, X } from "lucide-react";
 import { Fragment } from "react/jsx-runtime";
+
+const transformer = createTransformer<
+  MenuItemDef<MultipleNodesContext>,
+  MultipleNodesContext
+>(defaultFilters);
 
 interface SelectionBarProps {
   open: boolean;
@@ -44,6 +51,9 @@ export function SelectionBar({
 }: SelectionBarProps) {
   const isAllSelected = count > 0 && count === totalCount;
   const isMobile = useIsMobile();
+
+  const inlineItems = transformer(inlineMenuItems ?? [], context);
+  const items = transformer(menuItems ?? [], context);
 
   return (
     <AnimatePresence>
@@ -85,7 +95,7 @@ export function SelectionBar({
             <div className="flex gap-1 items-center">
               <div className="flex gap-1 items-center">
                 {/* インラインアクション */}
-                {inlineMenuItems?.map((item) => (
+                {inlineItems.map((item) => (
                   <SelectionBarInlineMenuItem
                     key={item.key}
                     item={item}
@@ -94,7 +104,7 @@ export function SelectionBar({
                 ))}
 
                 {/* ドロップダウンメニューアクション */}
-                {menuItems && menuItems.length > 0 && (
+                {items && items.length > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -107,7 +117,7 @@ export function SelectionBar({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {menuItems.map((item) => (
+                      {items.map((item) => (
                         <SelectionBarMenuItem
                           key={item.key}
                           item={item}
@@ -149,8 +159,6 @@ function SelectionBarInlineMenuItem({
   item,
   context,
 }: SelectionBarInlineMenuItemProps) {
-  if (item.hidden?.(context)) return null;
-
   // 区切り線
   if (item.type === "separator") {
     return <div className="w-px h-6 bg-border mx-1" />;
@@ -194,8 +202,6 @@ function SelectionBarMenuItem({
   context,
   isMobile,
 }: SelectionBarMenuItemProps) {
-  if (item.hidden?.(context)) return null;
-
   // 区切り線
   if (item.type === "separator") {
     return <DropdownMenuSeparator />;

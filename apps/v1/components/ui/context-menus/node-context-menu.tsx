@@ -2,11 +2,8 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import {
-  createTransformer,
-  filterHiddenItems,
-  filterSeparators,
-} from "@/lib/menu-items/transformer";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import {
@@ -24,10 +21,9 @@ import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import React, { Fragment } from "react";
 
-const transformer = createTransformer<MenuItemDef<NodeContext>, NodeContext>([
-  filterHiddenItems,
-  filterSeparators,
-]);
+const transformer = createTransformer<MenuItemDef<NodeContext>, NodeContext>(
+  defaultFilters
+);
 
 interface NodeContextMenuProps {
   node: MediaNode;
@@ -48,6 +44,7 @@ export function NodeContextMenu({
   const mounted = useMounted();
 
   const context = { node };
+  const items = transformer(menuItems, context);
 
   if (!mounted || disabled) return children;
 
@@ -55,7 +52,7 @@ export function NodeContextMenu({
     <ContextMenu onOpenChange={onOpenChange}>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
-        {transformer(menuItems, context).map((item) => (
+        {items.map((item) => (
           <NodeContextMenuItem
             key={item.key}
             item={item}
