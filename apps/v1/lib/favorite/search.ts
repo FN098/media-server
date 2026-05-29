@@ -35,10 +35,11 @@ type SearchFavoriteResult = {
 };
 
 type FavoriteWithMedia = Prisma.FavoriteGetPayload<{
-  select: ReturnType<typeof getSelect>;
+  select: ReturnType<typeof buildSelect>;
 }>;
 
-function getSelect() {
+function buildSelect() {
+  // prisma の型推論を利かせるため、as const としつつ関数の戻り値の型を明示しない
   return {
     rating: true,
     createdAt: true,
@@ -215,64 +216,74 @@ function toMediaNode(f: FavoriteWithMedia): MediaNode {
   };
 }
 
+async function findSortedFavorites(
+  params: SearchFavoriteParams,
+  where: Prisma.FavoriteWhereInput,
+  select: ReturnType<typeof buildSelect>
+): Promise<FavoriteWithMedia[]> {
+  const orderBy = buildOrderBy(params);
+
+  return prisma.favorite.findMany({
+    where,
+    select,
+    orderBy,
+    take: params.limit,
+  });
+}
+
+async function findShuffledFavorites(
+  params: SearchFavoriteParams,
+  where: Prisma.FavoriteWhereInput,
+  select: ReturnType<typeof buildSelect>
+): Promise<FavoriteWithMedia[]> {
+  const allRecords = await prisma.favorite.findMany({
+    where,
+    select: { mediaId: true },
+  });
+
+  let mediaIds = allRecords.map((r) => r.mediaId);
+
+  mediaIds = params.seed
+    ? shuffleArrayWithSeed(mediaIds, params.seed)
+    : shuffleArray(mediaIds);
+
+  const slicedMediaIds = params.limit
+    ? mediaIds.slice(0, params.limit)
+    : mediaIds;
+
+  const favorites = await prisma.favorite.findMany({
+    where: {
+      userId: params.userId,
+      mediaId: { in: slicedMediaIds },
+    },
+    select,
+  });
+
+  const map = new Map(favorites.map((f) => [f.media.id, f]));
+
+  return slicedMediaIds
+    .map((id) => map.get(id))
+    .filter((f): f is FavoriteWithMedia => !!f);
+}
+
 export async function searchFavoriteMediaNodes(
   params: SearchFavoriteParams
 ): Promise<SearchFavoriteResult> {
-  const { limit: take, seed, shuffle } = params;
-  const select = getSelect();
+  const select = buildSelect();
   const where = buildWhere(params);
 
-  // 全体件数を取得
   const total = await prisma.favorite.count({ where });
-  if (total === 0) return { nodes: [], total: 0 };
 
-  let favorites: FavoriteWithMedia[];
-
-  if (shuffle) {
-    // IDだけを全件取得
-    const allRecords = await prisma.favorite.findMany({
-      where,
-      select: { mediaId: true },
-    });
-
-    let targetMediaIds = allRecords.map((r) => r.mediaId);
-
-    // シャッフル
-    targetMediaIds = seed
-      ? shuffleArrayWithSeed(targetMediaIds, seed)
-      : shuffleArray(targetMediaIds);
-
-    // limit分切り出し
-    const slicedMediaIds = take
-      ? targetMediaIds.slice(0, take)
-      : targetMediaIds;
-
-    // 詳細データ取得
-    const detailedFavorites = await prisma.favorite.findMany({
-      where: {
-        userId: params.userId,
-        mediaId: { in: slicedMediaIds },
-      },
-      select,
-    });
-
-    // 元のシャッフル順に並び替え
-    const favoriteMap = new Map(detailedFavorites.map((f) => [f.media.id, f]));
-    favorites = slicedMediaIds
-      .map((mId) => favoriteMap.get(mId))
-      .filter((f): f is FavoriteWithMedia => !!f);
-  } else {
-    // 通常取得
-    favorites = await prisma.favorite.findMany({
-      where,
-      select,
-      orderBy: buildOrderBy(params),
-      take,
-    });
+  if (total === 0) {
+    return { nodes: [], total: 0 };
   }
 
-  // 結果を加工
-  const nodes = favorites.map((f) => toMediaNode(f));
+  const favorites = params.shuffle
+    ? await findShuffledFavorites(params, where, select)
+    : await findSortedFavorites(params, where, select);
 
-  return { nodes, total };
+  return {
+    nodes: favorites.map(toMediaNode),
+    total,
+  };
 }
