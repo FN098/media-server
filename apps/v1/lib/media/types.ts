@@ -76,8 +76,6 @@ export type SortOptions<T> = {
 
 export type SortKeyOf<T> = SortOptions<T>["key"];
 
-export type MediaNodeFilter = (node: MediaNode) => boolean;
-
 export interface MediaFsContext {
   /** 物理ルートパスの解決関数 */
   resolveRealPath: (virtualPath: string) => string;

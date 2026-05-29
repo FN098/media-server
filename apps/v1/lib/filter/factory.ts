@@ -7,8 +7,10 @@ import {
   TagFilterValue,
 } from "@/lib/filter/types";
 import { isMedia } from "@/lib/media/media-types";
-import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/japanese";
+
+export type MediaNodeFilter = (node: MediaNode) => boolean;
 
 export function withDirectoryControl(
   filter: MediaNodeFilter,

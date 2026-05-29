@@ -1,9 +1,11 @@
-import { MediaNode, MediaNodeFilter } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { useMemo } from "react";
+
+type Pipe = (node: MediaNode) => boolean;
 
 interface UseFilteredNodesProps {
   targets: MediaNode[];
-  pipeline: MediaNodeFilter[];
+  pipeline: Pipe[];
   activated?: boolean;
 }
 
