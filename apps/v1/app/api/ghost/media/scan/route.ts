@@ -1,4 +1,7 @@
-import { GhostMediaItem, GhostMediaScanEventData } from "@/lib/media/types";
+import {
+  GhostMediaItem,
+  GhostMediaScanEventData,
+} from "@/lib/ghost-media/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { access, constants } from "fs/promises";

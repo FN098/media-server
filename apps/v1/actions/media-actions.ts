@@ -1,12 +1,12 @@
 "use server";
 
-import { getMimetype } from "@/lib/media/mimetype";
-import { fsNameSchema } from "@/lib/media/schemas";
 import {
   GhostMediaDeleteResult,
   GhostMediaItem,
   GhostMediaScanOptions,
-} from "@/lib/media/types";
+} from "@/lib/ghost-media/types";
+import { getMimetype } from "@/lib/media/mimetype";
+import { fsNameSchema } from "@/lib/media/schemas";
 import { isBlockedServerPath } from "@/lib/path/blacklist";
 import {
   getServerMediaPath,
