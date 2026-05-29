@@ -1,52 +1,51 @@
-import { ParsedDatabaseURL } from "@/lib/utils/database-url";
+import { ParsedDatabaseURL } from "@/lib/utils/db-url-parser";
 import { spawn } from "child_process";
-import fs from "fs/promises";
+import { createReadStream } from "fs";
+import { pipeline } from "stream/promises";
 
 export async function restoreDatabaseFromFile(
   db: ParsedDatabaseURL,
   filePath: string
 ) {
-  let fileHandle: fs.FileHandle | null = null;
+  if (db.protocol !== "mysql" && db.protocol !== "mariadb") {
+    throw new Error("Target database must be MySQL or MariaDB");
+  }
+
+  // 読み込み用ファイルストリームを生成
+  const readStream = createReadStream(filePath);
 
   try {
-    fileHandle = await fs.open(filePath, "r");
+    // バックグラウンドプロセスで mysql コマンドを起動
+    const childProcess = spawn(
+      "mysql",
+      ["-h", db.host, "-P", db.port, "-u", db.user, db.database],
+      {
+        env: {
+          ...process.env,
+          MYSQL_PWD: db.password, // パスワードは環境変数で安全に渡す
+        },
+      }
+    );
 
-    await new Promise<void>((resolve, reject) => {
-      const process = spawn("mysql", [
-        "-h",
-        db.host,
-        "-P",
-        db.port,
-        "-u",
-        db.user,
-        `-p${db.password}`,
-        db.database,
-      ]);
-
-      const stream = fileHandle!.createReadStream();
-      stream.pipe(process.stdin);
-
-      stream.on("end", () => {
-        process.stdin.end();
-      });
-
-      process.stderr.on("data", (data: Buffer) => {
-        console.error("mysql error:", data.toString());
-      });
-
-      process.on("close", (code) => {
-        if (code === 0) resolve();
-        else reject(new Error(`mysql exited with code ${code}`));
-      });
-
-      process.on("error", reject);
+    // mysql の標準エラー出力バッファ
+    let stderr = "";
+    childProcess.stderr.on("data", (data: Buffer) => {
+      stderr += data.toString();
     });
-  } finally {
-    // ファイルハンドルは必ず解放
-    if (fileHandle) {
-      try {
-        await fileHandle.close();
-      } catch {}
+
+    // ファイルのストリームを mysql の標準入力へパイプラインで流し込む
+    await pipeline(readStream, childProcess.stdin);
+
+    // 終了コードが 0 以外ならエラーを投げる
+    if (childProcess.exitCode !== 0) {
+      throw new Error(
+        stderr.trim() ||
+          `mysql exited with code ${childProcess.exitCode} (signal: ${childProcess.signalCode})`
+      );
     }
+  } catch (error) {
+    // エラー時は確実にストリームを破棄
+    readStream.destroy();
+    throw error;
   }
 }
