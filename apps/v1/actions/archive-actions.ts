@@ -1,6 +1,6 @@
 "use server";
 
-import { extractWith7Zip } from "@/lib/7zip";
+import { extractWith7Zip } from "@/lib/child_process/7-zip";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsSync, promises as fsPromises } from "fs";
 import { revalidatePath } from "next/cache";
