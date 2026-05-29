@@ -2,12 +2,12 @@
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import {
-  getRecentFolders,
   togglePinVisitedFolder,
   updateVisitedFolder,
 } from "@/lib/folder/repository";
 import { fsNameSchema } from "@/lib/media/schemas";
 import { getServerMediaPath } from "@/lib/path/helpers";
+import { db } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
 import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -74,7 +74,15 @@ export async function createFolderAction(
 export async function getRecentFoldersAction() {
   try {
     const user = await resolveCurrentUserOrThrow();
-    const folders = await getRecentFolders(user.id, 10);
+    const folders = await db.visitedFolder.findMany({
+      select: {
+        dirPath: true,
+        isPinned: true,
+      },
+      where: { userId: user.id },
+      take: 10,
+      orderBy: { lastViewedAt: "desc" },
+    });
 
     return {
       success: true,
