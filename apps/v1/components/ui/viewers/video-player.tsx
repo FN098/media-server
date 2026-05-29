@@ -1,6 +1,6 @@
 import { LoadingSpinner } from "@/components/ui/spinners/loading-spinner";
+import { resolveMediaUrl } from "@/lib/media/resolvers";
 import { MediaFsNode } from "@/lib/media/types";
-import { resolveMediaUrl } from "@/lib/media/url";
 import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";
 import { cn } from "@/shadcn/lib/utils";
 import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
