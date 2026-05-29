@@ -2,7 +2,7 @@
 
 import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupFile } from "@/lib/db-backup/types";
-import { getDatabaseUrlInfo } from "@/lib/db/url";
+import { getDatabaseUrl, parseDatabaseURL } from "@/lib/utils/url";
 import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
@@ -46,7 +46,8 @@ export async function createBackupAction() {
   const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
   const fileName = `backup_${timestamp}.sql`;
   const filePath = path.join(DB_BACKUP_DIR, fileName);
-  const db = getDatabaseUrlInfo();
+  const databaseUrl = getDatabaseUrl();
+  const db = parseDatabaseURL(databaseUrl);
 
   let fileHandle: fs.FileHandle | null = null;
 
@@ -114,7 +115,8 @@ export async function restoreBackupAction(file: DbBackupFile) {
     ? path.join(TEMP_DB_BACKUP_DIR, file.name)
     : path.join(DB_BACKUP_DIR, file.name);
 
-  const db = getDatabaseUrlInfo();
+  const databaseUrl = getDatabaseUrl();
+  const db = parseDatabaseURL(databaseUrl);
 
   let fileHandle: fs.FileHandle | null = null;
 
