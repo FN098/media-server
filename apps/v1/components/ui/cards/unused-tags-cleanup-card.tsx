@@ -3,7 +3,7 @@
 import {
   deleteSelectedTagsAction,
   scanUnusedTagsAction,
-} from "@/actions/tag-actions";
+} from "@/lib/tag/actions";
 import { UnusedTagItem } from "@/lib/tag/types";
 import {
   AlertDialog,
