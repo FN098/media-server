@@ -1,5 +1,5 @@
 import { encodePath } from "@/lib/path/encoder";
-import { getAbsoluteApiMediaUrl, getApiThumbPath } from "@/lib/path/helpers";
+import { getAbsoluteApiThumbUrl, getApiThumbPath } from "@/lib/path/helpers";
 
 type Media = {
   path: string;
@@ -23,7 +23,7 @@ export function resolveMediaThumbUrl(media: Media, option?: UrlOption) {
   const encoded = encodePath(basePath);
 
   const url = option?.absolute
-    ? getAbsoluteApiMediaUrl(encoded)
+    ? getAbsoluteApiThumbUrl(encoded)
     : getApiThumbPath(encoded);
 
   return appendVersion(url, option?.version);

@@ -14,6 +14,12 @@ export function getApiMediaPath(virtualPath: string) {
   return joinUrlPath(PATHS.api.media.file.root, virtualPath);
 }
 
+export function getAbsoluteApiThumbUrl(virtualPath: string): string {
+  const baseUrl = getWebApiUrl();
+  const path = getApiThumbPath(virtualPath);
+  return getAbsoluteUrl(baseUrl, path);
+}
+
 export function getApiThumbPath(virtualPath: string) {
   return joinUrlPath(
     PATHS.api.media.file.thumb.root,
