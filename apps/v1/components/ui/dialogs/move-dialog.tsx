@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  getRecentFoldersAction,
-  togglePinVisitedFolderAction,
-} from "@/actions/folder-actions";
-import {
   getSubDirectoriesAction,
   moveNodesAction,
 } from "@/actions/media-actions";
 import { TextWithTooltip } from "@/components/ui/texts/text-with-tooltip";
+import {
+  getRecentFoldersAction,
+  togglePinVisitedFolderAction,
+} from "@/lib/folder/actions";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,

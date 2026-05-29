@@ -1,4 +1,3 @@
-import { visitFolderAction } from "@/actions/folder-actions";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { FolderNavigation } from "@/hooks/use-folder-navigation";
@@ -6,6 +5,7 @@ import { History, toHistoryItem } from "@/hooks/use-history";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { useParentPathname } from "@/hooks/use-parent-pathname";
 import { ViewerNavigation } from "@/hooks/use-viewer-control";
+import { visitFolderAction } from "@/lib/folder/actions";
 import { IndexLike } from "@/lib/index-like";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";

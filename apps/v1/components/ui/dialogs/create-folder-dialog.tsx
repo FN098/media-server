@@ -1,4 +1,4 @@
-import { createFolderAction } from "@/actions/folder-actions"; // 適宜アクション名を確認してください
+import { createFolderAction } from "@/lib/folder/actions"; // 適宜アクション名を確認してください
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
