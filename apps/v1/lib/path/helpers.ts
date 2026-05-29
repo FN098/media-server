@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { getWebApiUrl } from "@/lib/env";
 import { PATHS } from "@/lib/path/paths";
-import { getAbsoluteUrl } from "@/lib/utils/url";
+import { getAbsoluteUrl, joinUrlPath } from "@/lib/utils/url";
 import path from "path";
 
 export function getAbsoluteApiMediaUrl(virtualPath: string): string {
@@ -11,11 +11,11 @@ export function getAbsoluteApiMediaUrl(virtualPath: string): string {
 }
 
 export function getApiMediaUrl(virtualPath: string) {
-  return path.join(PATHS.api.media.file.root, virtualPath);
+  return joinUrlPath(PATHS.api.media.file.root, virtualPath);
 }
 
 export function getApiThumbUrl(virtualPath: string) {
-  return path.join(
+  return joinUrlPath(
     PATHS.api.media.file.thumb.root,
     virtualPath + APP_CONFIG.thumb.extension
   );
@@ -26,33 +26,33 @@ export function getApiThumbEventsUrl() {
 }
 
 export function getServerMediaPath(virtualPath: string): string {
-  return path.join(PATHS.server.media.root, virtualPath);
+  return joinUrlPath(PATHS.server.media.root, virtualPath);
 }
 
 export function getServerMediaThumbPath(
   virtualPath: string,
   isDirectory?: boolean
 ): string {
-  return path.join(
+  return joinUrlPath(
     PATHS.server.media.thumb.root,
     virtualPath + (isDirectory ? "" : APP_CONFIG.thumb.extension)
   );
 }
 
 export function getServerMediaTrashPath(virtualPath: string): string {
-  return path.join(PATHS.server.media.trash.root, virtualPath);
+  return joinUrlPath(PATHS.server.media.trash.root, virtualPath);
 }
 
 export function getServerMediaDbPath(virtualPath: string): string {
-  return path.join(PATHS.server.media.db.root, virtualPath);
+  return joinUrlPath(PATHS.server.media.db.root, virtualPath);
 }
 
 export function getClientExplorerPath(virtualPath: string): string {
-  return path.join(PATHS.client.explorer.root, virtualPath);
+  return joinUrlPath(PATHS.client.explorer.root, virtualPath);
 }
 
 export function getClientTrashPath(virtualPath: string): string {
-  return path.join(PATHS.client.trash.root, virtualPath);
+  return joinUrlPath(PATHS.client.trash.root, virtualPath);
 }
 
 export function getParentDirPath(virtualPath: string): string {

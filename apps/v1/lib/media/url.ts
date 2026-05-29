@@ -1,7 +1,7 @@
 import { encodePath } from "@/lib/path/encoder";
 import { getAbsoluteApiMediaUrl, getApiMediaUrl } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
-import path from "path";
+import { joinUrlPath } from "@/lib/utils/url";
 
 type Media = {
   path: string;
@@ -21,7 +21,7 @@ function appendVersion(url: string, version?: number) {
 
 export function resolveMediaUrl(media: Media, option?: UrlOption) {
   const basePath = media.isDeleted
-    ? path.join(PATHS.virtual.trash.root, media.path)
+    ? joinUrlPath(PATHS.virtual.trash.root, media.path)
     : media.path;
 
   const encoded = encodePath(basePath);

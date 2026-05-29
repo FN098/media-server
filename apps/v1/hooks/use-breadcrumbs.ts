@@ -1,6 +1,6 @@
 import { BreadcrumbLinkItem } from "@/components/ui/breadcrumbs/types";
+import { joinUrlPath } from "@/lib/utils/url";
 import { usePathname } from "next/navigation";
-import path from "path";
 import { useMemo } from "react";
 
 type BreadcrumbFormatContext = {
@@ -32,7 +32,7 @@ export function useBreadcrumbs(basePath: string, options?: Options) {
       { key: "home", label: "Home", href: basePath },
       ...parts.map((part, index) => {
         const relativePath = parts.slice(0, index + 1).join("/");
-        const href = path.join(basePath, relativePath);
+        const href = joinUrlPath(basePath, relativePath);
         const label =
           formatLabel?.({
             part,

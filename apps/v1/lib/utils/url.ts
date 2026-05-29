@@ -9,3 +9,7 @@ export function getAbsoluteUrl(baseUrl: string | null, path: string): string {
 
   throw new Error("Cannot resolve absolute URL: no baseUrl and no window");
 }
+
+export function joinUrlPath(...parts: string[]): string {
+  return joinUrlPath(...parts).replace(/\\/g, "/");
+}
