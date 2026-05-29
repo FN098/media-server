@@ -1,4 +1,4 @@
-import { extractMultipleArchivesNodeAction } from "@/actions/archive-actions";
+import { extractMultipleArchivesNodeAction } from "@/lib/archive/actions";
 import {
   AlertDialog,
   AlertDialogAction,
