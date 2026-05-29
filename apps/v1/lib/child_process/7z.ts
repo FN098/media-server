@@ -10,24 +10,28 @@ export async function extractArchive(
   outputDir: string
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    // 'x': ディレクトリ構造を維持
-    // '-o...': 出力先指定（スペースなし）
-    // '-y': すべて自動で「はい」応答
-    const args = ["x", archivePath, `-o${outputDir}`, "-y"];
-    const process = spawn("7z", args);
+    const childProcess = spawn("7z", [
+      // 'x': ディレクトリ構造を維持
+      // '-o...': 出力先指定（スペースなし）
+      // '-y': すべて自動で「はい」応答
+      "x",
+      archivePath,
+      `-o${outputDir}`,
+      "-y",
+    ]);
 
     let stdout = "";
     let stderr = "";
 
-    process.stdout.on("data", (data: Buffer) => {
+    childProcess.stdout.on("data", (data: Buffer) => {
       stdout += data.toString();
     });
 
-    process.stderr.on("data", (data: Buffer) => {
+    childProcess.stderr.on("data", (data: Buffer) => {
       stderr += data.toString();
     });
 
-    process.on("close", (code) => {
+    childProcess.on("close", (code) => {
       if (code === 0) {
         resolve(stdout);
       } else {
@@ -37,7 +41,7 @@ export async function extractArchive(
       }
     });
 
-    process.on("error", (err) =>
+    childProcess.on("error", (err) =>
       reject(new Error(`7-Zip 起動失敗: ${err.message}`))
     );
   });

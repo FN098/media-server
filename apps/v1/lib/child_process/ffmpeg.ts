@@ -5,7 +5,7 @@ export async function createVideoThumb(
   thumbPath: string
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const process = spawn("ffmpeg", [
+    const childProcess = spawn("ffmpeg", [
       "-y",
       "-v",
       "quiet",
@@ -19,11 +19,11 @@ export async function createVideoThumb(
     ]);
 
     // プロセスが起動できなかった場合などのエラー処理
-    process.on("error", (err) => {
+    childProcess.on("error", (err) => {
       reject(new Error(`Failed to start ffmpeg: ${err.message}`));
     });
 
-    process.on("close", (code) => {
+    childProcess.on("close", (code) => {
       if (code === 0) resolve();
       else
         reject(
