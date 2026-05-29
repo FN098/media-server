@@ -1,4 +1,4 @@
-import { getApiThumbEventsUrl } from "@/lib/path/helpers";
+import { getApiThumbEventsPath } from "@/lib/path/helpers";
 import { ThumbCompletedEvent } from "@/workers/thumb/types";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -8,7 +8,7 @@ export function useThumbEvent() {
   const listeners = useRef(new Set<Listener>());
 
   useEffect(() => {
-    const eventSource = new EventSource(getApiThumbEventsUrl());
+    const eventSource = new EventSource(getApiThumbEventsPath());
 
     eventSource.onmessage = (e: MessageEvent<string>) => {
       const event = JSON.parse(e.data) as ThumbCompletedEvent;

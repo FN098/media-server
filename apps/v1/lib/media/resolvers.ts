@@ -1,5 +1,5 @@
 import { encodePath } from "@/lib/path/encoder";
-import { getAbsoluteApiMediaUrl, getApiMediaUrl } from "@/lib/path/helpers";
+import { getAbsoluteApiMediaUrl, getApiMediaPath } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
 import { joinUrlPath } from "@/lib/utils/url";
 
@@ -28,7 +28,7 @@ export function resolveMediaUrl(media: Media, option?: UrlOption) {
 
   const url = option?.absolute
     ? getAbsoluteApiMediaUrl(encoded)
-    : getApiMediaUrl(encoded);
+    : getApiMediaPath(encoded);
 
   return appendVersion(url, option?.version);
 }

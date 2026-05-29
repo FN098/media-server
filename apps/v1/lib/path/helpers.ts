@@ -6,22 +6,22 @@ import path from "path";
 
 export function getAbsoluteApiMediaUrl(virtualPath: string): string {
   const baseUrl = getWebApiUrl();
-  const path = getApiMediaUrl(virtualPath);
+  const path = getApiMediaPath(virtualPath);
   return getAbsoluteUrl(baseUrl, path);
 }
 
-export function getApiMediaUrl(virtualPath: string) {
+export function getApiMediaPath(virtualPath: string) {
   return joinUrlPath(PATHS.api.media.file.root, virtualPath);
 }
 
-export function getApiThumbUrl(virtualPath: string) {
+export function getApiThumbPath(virtualPath: string) {
   return joinUrlPath(
     PATHS.api.media.file.thumb.root,
     virtualPath + APP_CONFIG.thumb.extension
   );
 }
 
-export function getApiThumbEventsUrl() {
+export function getApiThumbEventsPath() {
   return PATHS.api.thumb.events.root;
 }
 
