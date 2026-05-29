@@ -35,37 +35,34 @@ type SearchFavoriteResult = {
 };
 
 type FavoriteWithMedia = Prisma.FavoriteGetPayload<{
-  select: ReturnType<typeof buildSelect>;
+  select: typeof favoriteSelect;
 }>;
 
-function buildSelect() {
-  // prisma の型推論を利かせるため、as const としつつ関数の戻り値の型を明示しない
-  return {
-    rating: true,
-    createdAt: true,
-    media: {
-      select: {
-        id: true,
-        path: true,
-        title: true,
-        fileMtime: true,
-        fileSize: true,
-        previewPath: true,
-        type: true,
-        mediaTags: {
-          select: {
-            tag: {
-              select: {
-                id: true,
-                name: true,
-              },
+const favoriteSelect = {
+  rating: true,
+  createdAt: true,
+  media: {
+    select: {
+      id: true,
+      path: true,
+      title: true,
+      fileMtime: true,
+      fileSize: true,
+      previewPath: true,
+      type: true,
+      mediaTags: {
+        select: {
+          tag: {
+            select: {
+              id: true,
+              name: true,
             },
           },
         },
       },
     },
-  } as const satisfies Prisma.FavoriteSelect;
-}
+  },
+} as const satisfies Prisma.FavoriteSelect;
 
 function buildWhere({
   userId,
@@ -218,14 +215,13 @@ function toMediaNode(f: FavoriteWithMedia): MediaNode {
 
 async function findSortedFavorites(
   params: SearchFavoriteParams,
-  where: Prisma.FavoriteWhereInput,
-  select: ReturnType<typeof buildSelect>
+  where: Prisma.FavoriteWhereInput
 ): Promise<FavoriteWithMedia[]> {
   const orderBy = buildOrderBy(params);
 
   return prisma.favorite.findMany({
     where,
-    select,
+    select: favoriteSelect,
     orderBy,
     take: params.limit,
   });
@@ -233,8 +229,7 @@ async function findSortedFavorites(
 
 async function findShuffledFavorites(
   params: SearchFavoriteParams,
-  where: Prisma.FavoriteWhereInput,
-  select: ReturnType<typeof buildSelect>
+  where: Prisma.FavoriteWhereInput
 ): Promise<FavoriteWithMedia[]> {
   const allRecords = await prisma.favorite.findMany({
     where,
@@ -256,7 +251,7 @@ async function findShuffledFavorites(
       userId: params.userId,
       mediaId: { in: slicedMediaIds },
     },
-    select,
+    select: favoriteSelect,
   });
 
   const map = new Map(favorites.map((f) => [f.media.id, f]));
@@ -269,7 +264,6 @@ async function findShuffledFavorites(
 export async function searchFavoriteMediaNodes(
   params: SearchFavoriteParams
 ): Promise<SearchFavoriteResult> {
-  const select = buildSelect();
   const where = buildWhere(params);
 
   const total = await prisma.favorite.count({ where });
@@ -279,8 +273,8 @@ export async function searchFavoriteMediaNodes(
   }
 
   const favorites = params.shuffle
-    ? await findShuffledFavorites(params, where, select)
-    : await findSortedFavorites(params, where, select);
+    ? await findShuffledFavorites(params, where)
+    : await findSortedFavorites(params, where);
 
   return {
     nodes: favorites.map(toMediaNode),
