@@ -1,4 +1,4 @@
-import { isMedia } from "@/lib/media/media-types";
+import { isMedia } from "@/lib/media/detectors";
 import { sortNodes } from "@/lib/media/sort";
 import type { MediaFsNode, MediaType, PrismaMedia } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";

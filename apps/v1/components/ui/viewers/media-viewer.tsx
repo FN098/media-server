@@ -19,7 +19,7 @@ import {
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/use-document-title";
-import { isMedia } from "@/lib/media/media-types";
+import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { assertNever } from "@/lib/utils/assert";

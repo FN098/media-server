@@ -7,7 +7,7 @@ import { useMediaIndex } from "@/hooks/use-media-index";
 import { useParentPathname } from "@/hooks/use-parent-pathname";
 import { ViewerNavigation } from "@/hooks/use-viewer-control";
 import { IndexLike } from "@/lib/index-like";
-import { isMedia } from "@/lib/media/media-types";
+import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";

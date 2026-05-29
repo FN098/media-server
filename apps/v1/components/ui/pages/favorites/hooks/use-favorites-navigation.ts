@@ -4,7 +4,7 @@ import { FolderNavigation } from "@/hooks/use-folder-navigation";
 import { History, toHistoryItem } from "@/hooks/use-history";
 import { useMediaIndex } from "@/hooks/use-media-index";
 import { ViewerNavigation } from "@/hooks/use-viewer-control";
-import { isMedia } from "@/lib/media/media-types";
+import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { useCallback } from "react";

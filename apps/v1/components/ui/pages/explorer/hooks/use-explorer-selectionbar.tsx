@@ -4,7 +4,7 @@ import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-expl
 import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { ExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumbs";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
-import { hasMedia } from "@/lib/media/media-types";
+import { hasMedia } from "@/lib/media/detectors";
 import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { averageBy } from "@/lib/utils/math";

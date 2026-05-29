@@ -13,7 +13,7 @@ import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useLongPress } from "@/hooks/use-long-press";
-import { isMedia } from "@/lib/media/media-types";
+import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/format";

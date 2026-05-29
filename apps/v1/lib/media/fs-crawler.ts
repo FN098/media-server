@@ -1,5 +1,5 @@
+import { detectMediaType, isMedia } from "@/lib/media/detectors";
 import { MediaFsContext } from "@/lib/media/fs";
-import { detectMediaType, isMedia } from "@/lib/media/media-types";
 import { sortNames } from "@/lib/media/sort";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";

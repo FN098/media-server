@@ -1,4 +1,4 @@
-import { detectMediaType, mediaTypes } from "@/lib/media/media-types";
+import { detectMediaType, mediaTypes } from "@/lib/media/detectors";
 import { MediaType } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 
