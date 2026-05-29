@@ -2,6 +2,11 @@
 
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
+import {
+  createTransformer,
+  filterHiddenItems,
+  filterSeparators,
+} from "@/lib/menu-items/transformer";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import {
@@ -18,6 +23,11 @@ import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import React, { Fragment } from "react";
+
+const transformer = createTransformer<MenuItemDef<NodeContext>, NodeContext>([
+  filterHiddenItems,
+  filterSeparators,
+]);
 
 interface NodeContextMenuProps {
   node: MediaNode;
@@ -45,7 +55,7 @@ export function NodeContextMenu({
     <ContextMenu onOpenChange={onOpenChange}>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-48">
-        {menuItems.map((item) => (
+        {transformer(menuItems, context).map((item) => (
           <NodeContextMenuItem
             key={item.key}
             item={item}
@@ -69,8 +79,6 @@ function NodeContextMenuItem({
   context,
   isMobile,
 }: NodeContextMenuItemProps) {
-  if (item.hidden?.(context)) return null;
-
   // 区切り線
   if (item.type === "separator") {
     return <ContextMenuSeparator />;
