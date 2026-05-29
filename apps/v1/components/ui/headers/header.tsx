@@ -1,6 +1,6 @@
 import { HeaderNavigation } from "@/components/ui/headers/header-navigation";
 import { HeaderSearch } from "@/components/ui/headers/header-search";
-import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-sidebar";
+import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-menu-sidebar";
 import { LucideIcon } from "lucide-react";
 import { HeaderViewModeSwitch } from "./header-view-mode-switch";
 

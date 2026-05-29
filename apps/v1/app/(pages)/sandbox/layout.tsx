@@ -1,5 +1,5 @@
 import { Header } from "@/components/ui/headers/header";
-import { pageMetas } from "@/lib/page-meta";
+import { pageMetas } from "@/lib/page-meta/meta";
 
 const meta = pageMetas["sandbox"];
 

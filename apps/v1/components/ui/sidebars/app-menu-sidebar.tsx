@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeSelect } from "@/components/ui/selects/theme-select";
-import { pageMetas } from "@/lib/page-meta";
+import { pageMetas } from "@/lib/page-meta/meta";
 import {
   Sidebar,
   SidebarContent,
@@ -32,7 +32,7 @@ const items = [
   pageMetas["maintenance"],
 ];
 
-export function AppSidebar() {
+export function AppMenuSidebar() {
   const { setOpenMobile } = useSidebar();
 
   return (

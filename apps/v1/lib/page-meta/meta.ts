@@ -14,6 +14,7 @@ export type PageMeta = {
   title: string;
   url: string;
   icon: LucideIcon;
+  developmentOnly?: boolean;
 };
 
 export const pageMetas = {
@@ -46,6 +47,7 @@ export const pageMetas = {
     title: "Sandbox",
     url: PATHS.client.sandbox.root,
     icon: PackageOpen,
+    developmentOnly: true,
   },
   maintenance: {
     title: "Maintenance",
