@@ -27,15 +27,15 @@ export function getDatabaseUrl(): string {
 export type ParsedDatabaseURL = {
   protocol: string;
   host: string;
-  port: number;
+  port: string;
   user: string;
   password: string;
   database: string;
 };
 
-const defaultPortMap: Record<string, number> = {
-  mysql: 3306,
-  postgresql: 5432,
+const defaultPortMap: Record<string, string> = {
+  mysql: "3306",
+  postgresql: "5432",
 };
 
 export function parseDatabaseURL(databaseUrl: string): ParsedDatabaseURL {
@@ -45,8 +45,7 @@ export function parseDatabaseURL(databaseUrl: string): ParsedDatabaseURL {
   const user = url.username;
   const password = url.password;
   const host = url.hostname;
-  const port =
-    url.port !== "" ? Number(url.port) : (defaultPortMap[protocol] ?? 0);
+  const port = url.port !== "" ? url.port : (defaultPortMap[protocol] ?? "");
   const database = url.pathname.split("/").filter(Boolean)[0] ?? "";
 
   return {
