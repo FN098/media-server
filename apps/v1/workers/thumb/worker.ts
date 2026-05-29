@@ -1,4 +1,4 @@
-import { getMediaFsNode, getMediaFsNodes } from "@/lib/media/fs";
+import { getFsNode, listFsNodes } from "@/lib/media/fs";
 import { sortNodes } from "@/lib/media/sort";
 import { createThumbs } from "@/lib/thumb/create";
 import { chunk } from "@/lib/utils/array";
@@ -31,7 +31,7 @@ export const startThumbWorker = () => {
 
           try {
             console.log(`[Job ${job.id}] Batch Processing: ${dirPath}`);
-            const nodes = await getMediaFsNodes(dirPath);
+            const nodes = await listFsNodes(dirPath);
 
             // 名前順（表示順）に処理するためにソート
             const sorted = sortNodes(nodes);
@@ -81,7 +81,7 @@ export const startThumbWorker = () => {
 
           try {
             console.log(`[Job ${job.id}] Single Processing: ${filePath}`);
-            const node = await getMediaFsNode(filePath);
+            const node = await getFsNode(filePath);
             await createThumbs([node], { force: forceCreate });
 
             // 完了通知イベントを発行

@@ -9,7 +9,7 @@ import {
   updateFolderCache,
 } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/formatters";
-import { getMediaFsListing } from "@/lib/media/fs";
+import { listFsDirectory } from "@/lib/media/fs";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getMediaDbNodes } from "@/lib/media/repository";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
@@ -61,7 +61,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   const currentVirtualPath = pathParts.map(decodeURIComponent).join("/");
 
   // FileSystem からリスト取得
-  const fsListing = await getMediaFsListing(currentVirtualPath);
+  const fsListing = await listFsDirectory(currentVirtualPath);
   if (!fsListing) notFound();
 
   const fsNodes = fsListing.nodes;

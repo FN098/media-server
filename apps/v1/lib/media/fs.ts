@@ -17,7 +17,7 @@ const defaultContext: MediaFsContext = {
   filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
 };
 
-export async function getMediaFsNodes(
+export async function listFsNodes(
   virtualDirPath: string,
   context: MediaFsContext = defaultContext
 ): Promise<MediaFsNode[]> {
@@ -58,7 +58,7 @@ export async function getMediaFsNodes(
   return nodes;
 }
 
-export async function getMediaFsNode(
+export async function getFsNode(
   virtualFilePath: string,
   context: MediaFsContext = defaultContext
 ): Promise<MediaFsNode> {
@@ -78,7 +78,7 @@ export async function getMediaFsNode(
   };
 }
 
-export async function getMediaFsListing(
+export async function listFsDirectory(
   virtualDirPath: string,
   context: MediaFsContext = defaultContext
 ): Promise<MediaFsListing | null> {
@@ -86,7 +86,7 @@ export async function getMediaFsListing(
   if (!(await existsPath(realDirPath))) return null;
 
   // --- 現在のディレクトリのノード取得 ---
-  const nodes = await getMediaFsNodes(virtualDirPath, context);
+  const nodes = await listFsNodes(virtualDirPath, context);
 
   // --- 前後のディレクトリパスを取得 ---
   let prev: string | null = null;
