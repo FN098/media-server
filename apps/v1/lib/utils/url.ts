@@ -1,3 +1,5 @@
+import path from "node:path";
+
 export function getAbsoluteUrl(baseUrl: string | null, path: string): string {
   const relativePath = path.startsWith("/") ? path : `/${path}`;
 
@@ -11,5 +13,5 @@ export function getAbsoluteUrl(baseUrl: string | null, path: string): string {
 }
 
 export function joinUrlPath(...parts: string[]): string {
-  return joinUrlPath(...parts).replace(/\\/g, "/");
+  return path.join(...parts).replace(/\\/g, "/");
 }
