@@ -5,7 +5,7 @@ import { spawn } from "child_process";
  * @param archivePath 解凍対象のファイルパス (.zip, .rar など)
  * @param outputDir 解凍先のディレクトリパス
  */
-export async function extractWith7Zip(
+export async function extractArchive(
   archivePath: string,
   outputDir: string
 ): Promise<string> {

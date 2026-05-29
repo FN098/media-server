@@ -1,6 +1,6 @@
 "use server";
 
-import { extractWith7Zip } from "@/lib/child_process/7-zip";
+import { extractArchive } from "@/lib/child_process/archive-extractor";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsSync, promises as fsPromises } from "fs";
 import { revalidatePath } from "next/cache";
@@ -94,7 +94,7 @@ export async function extractMultipleArchivesNodeAction(
       isDirCreated = true;
 
       // 7-Zipを実行して解凍
-      await extractWith7Zip(srcRealPath, destRealPath);
+      await extractArchive(srcRealPath, destRealPath);
 
       // 個別の成功結果を格納
       results.push({
