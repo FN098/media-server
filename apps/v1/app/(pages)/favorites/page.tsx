@@ -9,7 +9,7 @@ import {
   TagFilterMode,
 } from "@/lib/filter/types";
 import { formatNodes } from "@/lib/media/format";
-import { SortDirection } from "@/lib/media/types";
+import { SortDirection } from "@/lib/media/sort";
 import { hashObject } from "@/lib/utils/fnv1a-hash";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { HistoryProvider } from "@/providers/history-provider";

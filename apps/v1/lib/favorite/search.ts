@@ -6,7 +6,8 @@ import {
   TagFilterMode,
 } from "@/lib/filter/types";
 import { detectMediaType } from "@/lib/media/media-types";
-import { MediaNode, MediaType, SortDirection } from "@/lib/media/types";
+import { SortDirection } from "@/lib/media/sort";
+import { MediaNode, MediaType } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";
 import { normalizeForLike } from "@/lib/utils/japanese";
 import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/shuffle";

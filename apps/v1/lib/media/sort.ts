@@ -1,4 +1,12 @@
-import { SortOptions } from "@/lib/media/types";
+export type SortDirection = "asc" | "desc";
+
+export type SortOptions<T> = {
+  key?: keyof T;
+  direction?: SortDirection;
+  valueMapper?: (node: T, key: keyof T) => unknown;
+};
+
+export type SortKeyOf<T> = SortOptions<T>["key"];
 
 const collator = new Intl.Collator("ja-JP", {
   numeric: true, // 10 を 2 の後ろにする

@@ -66,16 +66,6 @@ export type MediaDbNode = {
   favoritedAt?: Date;
 };
 
-export type SortDirection = "asc" | "desc";
-
-export type SortOptions<T> = {
-  key?: keyof T;
-  direction?: SortDirection;
-  valueMapper?: (node: T, key: keyof T) => unknown;
-};
-
-export type SortKeyOf<T> = SortOptions<T>["key"];
-
 export interface MediaFsContext {
   /** 物理ルートパスの解決関数 */
   resolveRealPath: (virtualPath: string) => string;
