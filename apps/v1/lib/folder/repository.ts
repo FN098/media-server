@@ -1,5 +1,9 @@
-import type { FolderMeta, VisitedFolder } from "@/generated/prisma/client";
-import { FolderFavoriteInfo, FolderVisitedInfo } from "@/lib/folder/types";
+import { VisitedFolder } from "@/generated/prisma/client";
+import {
+  FolderFavoriteInfo,
+  FolderMeta,
+  FolderVisitedInfo,
+} from "@/lib/folder/types";
 import { prisma } from "@/lib/prisma";
 
 // 最近訪れたフォルダの一覧取得

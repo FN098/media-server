@@ -1,5 +1,8 @@
-import { FolderMeta } from "@/generated/prisma/client";
-import { FolderFavoriteInfo, FolderVisitedInfo } from "@/lib/folder/types";
+import {
+  FolderFavoriteInfo,
+  FolderMeta,
+  FolderVisitedInfo,
+} from "@/lib/folder/types";
 import { MediaDbNode, MediaFsNode, MediaNode } from "@/lib/media/types";
 
 export function mergeFsWithDb({
