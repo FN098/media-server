@@ -1,5 +1,5 @@
 import { archiveExtensions } from "@/lib/archive/extensions";
-import { extname } from "path/posix";
+import { extname } from "node:path";
 
 function createGuard<const T extends readonly string[]>(values: T) {
   const set = new Set(values);
