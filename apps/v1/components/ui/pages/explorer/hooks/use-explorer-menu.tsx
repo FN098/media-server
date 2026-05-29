@@ -8,7 +8,7 @@ import { ExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explore
 import { Fullscreen } from "@/hooks/use-fullscreen";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
 import { ViewerNavigation } from "@/hooks/use-viewer-control";
-import { isArchiveFile } from "@/lib/archive/extensions";
+import { isArchiveFile } from "@/lib/archive/validators";
 import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
