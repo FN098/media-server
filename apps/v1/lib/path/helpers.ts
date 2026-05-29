@@ -1,6 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
+import { getPublicSiteUrl } from "@/lib/env";
 import { PATHS } from "@/lib/path/paths";
-import { getAbsoluteUrl, getPublicSiteUrl } from "@/lib/utils/url";
+import { getAbsoluteUrl } from "@/lib/utils/url";
 import path from "path";
 
 export function getAbsoluteApiMediaUrl(virtualPath: string): string {

@@ -1,11 +1,5 @@
 import { URL } from "url";
 
-export function getPublicSiteUrl(): string {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl) throw new Error("env:NEXT_PUBLIC_SITE_URL is invalid");
-  return siteUrl;
-}
-
 export function getAbsoluteUrl(baseUrl: string | null, path: string): string {
   const relativePath = path.startsWith("/") ? path : `/${path}`;
 
@@ -16,12 +10,6 @@ export function getAbsoluteUrl(baseUrl: string | null, path: string): string {
   }
 
   throw new Error("Cannot resolve absolute URL: no baseUrl and no window");
-}
-
-export function getDatabaseUrl(): string {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) throw new Error("env:DATABASE_URL is invalid");
-  return databaseUrl;
 }
 
 export type ParsedDatabaseURL = {
