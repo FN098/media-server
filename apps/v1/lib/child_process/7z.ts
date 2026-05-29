@@ -14,20 +14,20 @@ export async function extractArchive(
     // '-o...': 出力先指定（スペースなし）
     // '-y': すべて自動で「はい」応答
     const args = ["x", archivePath, `-o${outputDir}`, "-y"];
-    const process7z = spawn("7z", args);
+    const process = spawn("7z", args);
 
     let stdout = "";
     let stderr = "";
 
-    process7z.stdout.on("data", (data: Buffer) => {
+    process.stdout.on("data", (data: Buffer) => {
       stdout += data.toString();
     });
 
-    process7z.stderr.on("data", (data: Buffer) => {
+    process.stderr.on("data", (data: Buffer) => {
       stderr += data.toString();
     });
 
-    process7z.on("close", (code) => {
+    process.on("close", (code) => {
       if (code === 0) {
         resolve(stdout);
       } else {
@@ -37,7 +37,7 @@ export async function extractArchive(
       }
     });
 
-    process7z.on("error", (err) =>
+    process.on("error", (err) =>
       reject(new Error(`7-Zip 起動失敗: ${err.message}`))
     );
   });

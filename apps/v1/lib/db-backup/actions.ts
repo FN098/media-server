@@ -1,9 +1,10 @@
 "use server";
 
+import { restoreDatabaseFromFile } from "@/lib/child_process/mysql";
+import { dumpDatabaseToFile } from "@/lib/child_process/mysqldump";
 import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { getDatabaseUrl, parseDatabaseURL } from "@/lib/utils/url";
-import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 
@@ -49,57 +50,16 @@ export async function createBackupAction() {
   const databaseUrl = getDatabaseUrl();
   const db = parseDatabaseURL(databaseUrl);
 
-  let fileHandle: fs.FileHandle | null = null;
-
   try {
     await fs.mkdir(DB_BACKUP_DIR, { recursive: true });
 
-    fileHandle = await fs.open(filePath, "w");
-
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn("mysqldump", [
-        "-h",
-        db.host,
-        "-P",
-        db.port,
-        "-u",
-        db.user,
-        `-p${db.password}`,
-        db.database,
-      ]);
-
-      const stream = fileHandle!.createWriteStream();
-      child.stdout.pipe(stream);
-
-      child.stderr.on("data", (data: Buffer) => {
-        console.error("mysqldump error:", data.toString());
-      });
-
-      child.on("close", (code) => {
-        if (code === 0) resolve();
-        else reject(new Error(`mysqldump exited with code ${code}`));
-      });
-
-      child.on("error", reject);
-    });
+    await dumpDatabaseToFile(db, filePath);
 
     return { success: true, fileName };
   } catch (error) {
     console.error("create db backup error", error);
 
-    // ゴミファイル削除
-    try {
-      await fs.unlink(filePath);
-    } catch {}
-
     return { success: false, error: "バックアップに失敗しました" };
-  } finally {
-    // ファイルハンドルは必ず解放
-    if (fileHandle) {
-      try {
-        await fileHandle.close();
-      } catch {}
-    }
   }
 }
 
@@ -118,41 +78,8 @@ export async function restoreBackupAction(file: DbBackupFile) {
   const databaseUrl = getDatabaseUrl();
   const db = parseDatabaseURL(databaseUrl);
 
-  let fileHandle: fs.FileHandle | null = null;
-
   try {
-    fileHandle = await fs.open(filePath, "r");
-
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn("mysql", [
-        "-h",
-        db.host,
-        "-P",
-        db.port,
-        "-u",
-        db.user,
-        `-p${db.password}`,
-        db.database,
-      ]);
-
-      const stream = fileHandle!.createReadStream();
-      stream.pipe(child.stdin);
-
-      stream.on("end", () => {
-        child.stdin.end();
-      });
-
-      child.stderr.on("data", (data: Buffer) => {
-        console.error("mysql error:", data.toString());
-      });
-
-      child.on("close", (code) => {
-        if (code === 0) resolve();
-        else reject(new Error(`mysql exited with code ${code}`));
-      });
-
-      child.on("error", reject);
-    });
+    await restoreDatabaseFromFile(db, filePath);
 
     return { success: true };
   } catch (error) {
@@ -165,13 +92,6 @@ export async function restoreBackupAction(file: DbBackupFile) {
         : "リストアに失敗しました";
 
     return { success: false, error: message };
-  } finally {
-    // ファイルハンドルは必ず解放
-    if (fileHandle) {
-      try {
-        await fileHandle.close();
-      } catch {}
-    }
   }
 }
 

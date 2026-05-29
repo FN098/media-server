@@ -1,6 +1,6 @@
 "use server";
 
-import { extractArchive } from "@/lib/child_process/archive-extractor";
+import { extractArchive } from "@/lib/child_process/7z";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsSync, promises as fsPromises } from "fs";
 import { revalidatePath } from "next/cache";

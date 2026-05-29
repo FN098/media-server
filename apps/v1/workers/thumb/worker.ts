@@ -1,6 +1,6 @@
-import { createThumbs } from "@/lib/child_process/thumbs-creator";
 import { getFsNode, listFsNodes } from "@/lib/media/fs";
 import { sortNodes } from "@/lib/media/sort";
+import { createThumbs } from "@/lib/thumb/creator";
 import { chunk } from "@/lib/utils/array";
 import { ThumbJobData } from "@/workers/thumb/types";
 import { Worker } from "bullmq";
