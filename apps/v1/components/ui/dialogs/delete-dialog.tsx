@@ -1,7 +1,7 @@
 import {
   deleteNodesAction,
   deleteNodesPermanentlyAction,
-} from "@/actions/media-actions";
+} from "@/lib/media/actions";
 import {
   AlertDialog,
   AlertDialogAction,

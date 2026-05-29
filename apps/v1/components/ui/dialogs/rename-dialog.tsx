@@ -1,4 +1,4 @@
-import { renameNodeAction } from "@/actions/media-actions";
+import { renameNodeAction } from "@/lib/media/actions";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,

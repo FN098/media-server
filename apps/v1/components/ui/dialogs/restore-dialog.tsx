@@ -1,4 +1,4 @@
-import { restoreNodesAction } from "@/actions/media-actions";
+import { restoreNodesAction } from "@/lib/media/actions";
 import {
   AlertDialog,
   AlertDialogAction,

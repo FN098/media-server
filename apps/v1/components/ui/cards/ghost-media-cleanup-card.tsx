@@ -1,10 +1,10 @@
 "use client";
 
-import { cleanupGhostMediaAction } from "@/actions/media-actions";
 import {
   GhostMediaItem,
   GhostMediaScanEventData,
 } from "@/lib/ghost-media/types";
+import { cleanupGhostMediaAction } from "@/lib/media/actions";
 import {
   AlertDialog,
   AlertDialogAction,

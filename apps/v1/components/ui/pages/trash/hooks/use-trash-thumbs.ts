@@ -1,11 +1,11 @@
 import {
-  touchMediaTimestampAction,
-  updatePreviewAction,
-} from "@/actions/media-actions";
-import {
   enqueueCreateSingleThumbJobAction,
   enqueueCreateThumbsJobAction,
 } from "@/actions/thumb-actions";
+import {
+  touchMediaTimestampAction,
+  updatePreviewAction,
+} from "@/lib/media/actions";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";

@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  copyNodesAction,
-  getSubDirectoriesAction,
-} from "@/actions/media-actions";
 import { TextWithTooltip } from "@/components/ui/texts/text-with-tooltip";
+import { copyNodesAction, getSubDirectoriesAction } from "@/lib/media/actions";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
