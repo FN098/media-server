@@ -192,7 +192,7 @@ function buildOrderBy({
   }
 }
 
-function mapToMediaNode(f: FavoriteWithMedia): MediaNode {
+function toMediaNode(f: FavoriteWithMedia): MediaNode {
   return {
     id: f.media.id,
     name: path.basename(f.media.path),
@@ -272,7 +272,7 @@ export async function searchFavoriteMediaNodes(
   }
 
   // 結果を加工
-  const nodes = favorites.map((f) => mapToMediaNode(f));
+  const nodes = favorites.map((f) => toMediaNode(f));
 
   return { nodes, total };
 }
