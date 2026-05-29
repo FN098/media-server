@@ -1,10 +1,12 @@
 import { APP_CONFIG } from "@/app.config";
 import { PATHS } from "@/lib/path/paths";
-import { getAbsoluteUrl } from "@/lib/utils/url";
+import { getAbsoluteUrl, getPublicSiteUrl } from "@/lib/utils/url";
 import path from "path";
 
-export function getAbsoluteApiMediaUrl(virtualPath: string) {
-  return getAbsoluteUrl(getApiMediaUrl(virtualPath));
+export function getAbsoluteApiMediaUrl(virtualPath: string): string {
+  const baseUrl = getPublicSiteUrl();
+  const path = getApiMediaUrl(virtualPath);
+  return getAbsoluteUrl(baseUrl, path);
 }
 
 export function getApiMediaUrl(virtualPath: string) {
