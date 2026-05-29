@@ -65,11 +65,3 @@ export type MediaDbNode = {
   previewPath?: string | null;
   favoritedAt?: Date;
 };
-
-export interface MediaFsContext {
-  /** 物理ルートパスの解決関数 */
-  resolveRealPath: (virtualPath: string) => string;
-
-  /** 仮想パスのフィルタリング関数（ブラックリストなど） */
-  filterVirtualPath?: (virtualPath: string) => boolean;
-}
