@@ -1,7 +1,7 @@
 import { LoadingSpinner } from "@/components/ui/spinners/loading-spinner";
 import { MediaNode } from "@/lib/media/types";
 import { resolveMediaUrl } from "@/lib/media/url";
-import { resolveMediaThumbUrl } from "@/lib/thumb/url";
+import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";
 import { cn } from "@/shadcn/lib/utils";
 import Image from "next/image";
 import { useState } from "react";

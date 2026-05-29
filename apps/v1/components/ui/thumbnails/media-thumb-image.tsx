@@ -4,7 +4,7 @@ import { useThumbEventObserver } from "@/hooks/use-thumb-event-observer";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
 import { enqueueCreateThumbsJobAction } from "@/lib/thumb/actions";
-import { resolveMediaThumbUrl } from "@/lib/thumb/url";
+import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useRef, useState } from "react";
 
