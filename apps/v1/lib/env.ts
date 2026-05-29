@@ -1,5 +1,9 @@
-export function getPublicSiteUrl(): string | null {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? null;
+export function getWebUiUrl(): string | null {
+  return process.env.NEXT_PUBLIC_WEB_UI_URL ?? null;
+}
+
+export function getWebApiUrl(): string | null {
+  return process.env.NEXT_PUBLIC_WEB_API_URL ?? null;
 }
 
 export function getDatabaseUrlOrThrow(): string {
