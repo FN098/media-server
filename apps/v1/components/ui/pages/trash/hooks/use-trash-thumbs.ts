@@ -1,12 +1,12 @@
 import {
-  enqueueCreateSingleThumbJobAction,
-  enqueueCreateThumbsJobAction,
-} from "@/actions/thumb-actions";
-import {
   touchMediaTimestampAction,
   updatePreviewAction,
 } from "@/lib/media/actions";
 import { MediaListing, MediaNode } from "@/lib/media/types";
+import {
+  enqueueCreateSingleThumbJobAction,
+  enqueueCreateThumbsJobAction,
+} from "@/lib/thumb/actions";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";

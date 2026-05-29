@@ -1,6 +1,6 @@
 "use client";
 
-import { cleanupGhostThumbnailsAction } from "@/actions/thumb-actions";
+import { cleanupGhostThumbnailsAction } from "@/lib/thumb/actions";
 import { GhostThumbItem, GhostThumbScanEventData } from "@/lib/thumb/types";
 import {
   AlertDialog,
