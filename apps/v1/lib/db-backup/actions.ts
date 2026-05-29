@@ -5,7 +5,7 @@ import { dumpDatabaseToFile } from "@/lib/child_process/mysqldump";
 import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { getDatabaseUrl } from "@/lib/env";
-import { parseDatabaseURL } from "@/lib/utils/url";
+import { parseDatabaseURL } from "@/lib/utils/database-url";
 import fs from "fs/promises";
 import path from "path";
 

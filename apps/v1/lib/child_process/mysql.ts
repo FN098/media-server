@@ -1,4 +1,4 @@
-import { ParsedDatabaseURL } from "@/lib/utils/url";
+import { ParsedDatabaseURL } from "@/lib/utils/database-url";
 import { spawn } from "child_process";
 import fs from "fs/promises";
 
