@@ -10,10 +10,8 @@ import { getServerMediaPath } from "@/lib/path/helpers";
 import { constants } from "fs";
 import { access } from "fs/promises";
 
-/**
- * 不要なメディアをスキャン
- * @deprecated 進捗確認できないので非推奨。代わりに /api/ghost/media/scan を推奨
- */
+// 不要なメディアをスキャン
+/** @deprecated 進捗確認できないので非推奨。代わりに /api/ghost/media/scan を推奨 */
 export async function scanGhostMediaAction(options?: GhostMediaScanOptions) {
   try {
     const isFullScan = options?.fullScan ?? false;
