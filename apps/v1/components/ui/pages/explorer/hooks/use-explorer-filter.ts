@@ -1,5 +1,6 @@
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
+import { MediaListing } from "@/lib/media/types";
 import { FilterMenuItem } from "@/lib/menu-items/types";
 import {
   FileTypeIcon,
@@ -14,6 +15,7 @@ import {
 interface ExplorerToolbarFilterContext {
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
+  listing: MediaListing;
 }
 
 const toolbarFilterItems: FilterMenuItem<ExplorerToolbarFilterContext>[] = [
@@ -129,7 +131,10 @@ const toolbarFilterItems: FilterMenuItem<ExplorerToolbarFilterContext>[] = [
     icon: TagIcon,
     isActive: (ctx) => ctx.filtering.controls.tag.value.tags.length > 0,
     onClick: (ctx) => {
-      ctx.dialogs.tagFilterDialog.open(ctx.filtering.controls.tag.value);
+      ctx.dialogs.tagFilterDialog.open(
+        ctx.filtering.controls.tag.value,
+        ctx.listing.nodes
+      );
     },
   },
 ];

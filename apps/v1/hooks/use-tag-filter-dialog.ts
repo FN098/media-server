@@ -1,9 +1,13 @@
 import { useTags } from "@/hooks/use-tags";
 import { TagFilterMode, TagFilterValue } from "@/lib/filter/types";
-import { MediaNode } from "@/lib/media/types";
-import { Tag as TagType } from "@/lib/tag/types";
+import { Tag } from "@/lib/tag/types";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
+
+type RelatedNode = {
+  path: string;
+  tags?: Tag[] | null;
+};
 
 interface UseTagFilterDialogProps {
   onApply?: (value: TagFilterValue) => void;
@@ -15,7 +19,7 @@ export function useTagFilterDialog({
   autoFocusInput = false,
 }: UseTagFilterDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [relatedNodes, setRelatedNodes] = useState<MediaNode[]>([]);
+  const [relatedTags, setRelatedTags] = useState<Tag[]>([]);
 
   // ダイアログ内の「一時編集状態」
   const [currentMode, setCurrentMode] = useState<TagFilterMode>("AND");
@@ -23,9 +27,9 @@ export function useTagFilterDialog({
   const [tempSelectedIds, setTempSelectedIds] = useState<Set<string>>(
     new Set()
   );
-  const [tempSelectedCache, setTempSelectedCache] = useState<
-    Map<string, TagType>
-  >(new Map());
+  const [tempSelectedCache, setTempSelectedCache] = useState<Map<string, Tag>>(
+    new Map()
+  );
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,10 +37,6 @@ export function useTagFilterDialog({
 
   const trimmedQuery = useMemo(() => query.trim().toLowerCase(), [query]);
   const [debouncedQuery] = useDebounce(trimmedQuery, 300);
-  const relatedPaths = useMemo(
-    () => relatedNodes.map((n) => n.path),
-    [relatedNodes]
-  );
 
   // ─── データフェッチ層（トリガー制御を含む） ───
   const isEmptyMode = currentMode === "EMPTY";
@@ -58,14 +58,7 @@ export function useTagFilterDialog({
     triggered: isOpen,
   });
 
-  const { tags: relatedTags, isLoading: isLoadingRelated } = useTags({
-    paths: relatedPaths,
-    strategy: "related-only",
-    triggered: isOpen && relatedPaths.length > 0,
-  });
-
-  const isLoading =
-    isLoadingSearch || isLoadingFavorite || isLoadingRecent || isLoadingRelated;
+  const isLoading = isLoadingSearch || isLoadingFavorite || isLoadingRecent;
 
   // ダイアログ内の選択済みタグ一覧
   const tempSelectedTags = useMemo(
@@ -82,9 +75,18 @@ export function useTagFilterDialog({
 
   // ─── 操作ロジック ───
   const open = useCallback(
-    (initialValue: TagFilterValue, nodes: MediaNode[] = []) => {
+    (initialValue: TagFilterValue, relatedNodes: RelatedNode[] = []) => {
       const initialIds = new Set(initialValue.tags.map((t) => t.id));
-      setRelatedNodes(nodes);
+
+      const tagMap = new Map<string, Tag>();
+      for (const node of relatedNodes) {
+        if (node.tags == null || node.tags.length === 0) continue;
+        for (const tag of node.tags) {
+          tagMap.set(tag.id, tag);
+        }
+      }
+      setRelatedTags([...tagMap.values()]);
+
       setCurrentMode(initialValue.mode);
       setTempSelectedIds(initialIds);
       setTempSelectedCache(new Map(initialValue.tags.map((t) => [t.id, t])));
@@ -101,7 +103,7 @@ export function useTagFilterDialog({
     setActiveIndex(-1);
   }, []);
 
-  const toggleTemp = useCallback((tag: TagType) => {
+  const toggleTemp = useCallback((tag: Tag) => {
     setTempSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(tag.id)) next.delete(tag.id);
@@ -117,7 +119,7 @@ export function useTagFilterDialog({
   }, []);
 
   const handleSelectSuggestion = useCallback(
-    (tag: TagType) => {
+    (tag: Tag) => {
       toggleTemp(tag);
       setQuery("");
       setActiveIndex(-1);

@@ -42,8 +42,9 @@ export function ExplorerToolbar({
     return {
       filtering,
       dialogs,
+      listing,
     };
-  }, [dialogs, filtering]);
+  }, [dialogs, filtering, listing]);
 
   const actionContext = useMemo(() => {
     const nonFavoriteTargets = filtering.filteredNodes.filter(
