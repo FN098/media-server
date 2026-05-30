@@ -1,7 +1,7 @@
 "use client";
 
 import { getSubDirectoriesAction } from "@/lib/folder/actions";
-import { getFolderMediaFilesAction } from "@/lib/media/actions";
+import { listMediaAction } from "@/lib/media/actions";
 import { updatePreviewAction } from "@/lib/preview/actions";
 import { getFilenameWithoutExt } from "@/lib/utils/filename";
 import { Button } from "@/shadcn/components/ui/button";
@@ -54,7 +54,7 @@ export function ApplyPreviewDialog({
     startNavigating(async () => {
       const [dirRes, fileRes] = await Promise.all([
         getSubDirectoriesAction(dirPath),
-        getFolderMediaFilesAction(dirPath),
+        listMediaAction(dirPath),
       ]);
 
       if (dirRes.success && fileRes.success) {
@@ -162,7 +162,7 @@ export function ApplyPreviewDialog({
                 </div>
               ))}
 
-              {/* ファイル一覧 (ファイルに対してもプレビューを設定する場合) */}
+              {/* ファイル一覧 */}
               {files.map((file) => (
                 <Button
                   key={file.path}

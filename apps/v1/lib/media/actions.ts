@@ -1,6 +1,6 @@
 "use server";
 
-import { getMimetype } from "@/lib/media/mimetype";
+import { detectMediaType } from "@/lib/media/detectors";
 import { FsNameSchema } from "@/lib/media/schemas";
 import {
   getServerMediaPath,
@@ -584,8 +584,8 @@ export async function copyNodesAction(
   return results;
 }
 
-// フォルダプレビュー用ファイル一覧
-export async function getFolderMediaFilesAction(dirPath: string) {
+// メディアファイル一覧
+export async function listMediaAction(dirPath: string) {
   if (!dirPath) {
     return { success: false, error: "パスが指定されていません" };
   }
@@ -608,20 +608,17 @@ export async function getFolderMediaFilesAction(dirPath: string) {
 
   const mediaFiles = entries
     .filter((e) => e.isFile()) // ファイルのみ対象
-    .filter((e) => {
-      const mimeType = getMimetype(e.name);
-      return (
-        mimeType.startsWith("image/") ||
-        mimeType.startsWith("video/") ||
-        mimeType.startsWith("audio/")
-      );
+    .map((e) => {
+      const type = detectMediaType(e.name);
+      if (type === null) return null;
+      return {
+        name: e.name,
+        // 仮想パスを生成
+        path: join(dirPath, e.name).replace(/\\/g, "/"),
+        type,
+      };
     })
-    .map((e) => ({
-      name: e.name,
-      // 仮想パスを生成
-      path: join(dirPath, e.name).replace(/\\/g, "/"),
-      type: getMimetype(e.name).startsWith("video/") ? "video" : "image",
-    }));
+    .filter((e) => e !== null);
 
   return {
     success: true,
