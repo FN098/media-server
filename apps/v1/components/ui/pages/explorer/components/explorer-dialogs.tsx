@@ -8,6 +8,7 @@ import { PreviewDialog } from "@/components/ui/dialogs/preview-dialog";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
+import { TextFilePreviewDialog } from "@/components/ui/dialogs/text-file-preview-dialog";
 import { ExplorerDialogs as ExplorerDialogsType } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 
 type ExplorerDialogsProps = {
@@ -24,6 +25,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
     moveDialog,
     previewDialog,
     renameDialog,
+    textFilePreviewDialog,
   } = dialogs;
 
   return (
@@ -51,6 +53,9 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
 
       {/* お気に入りダイアログ */}
       <FavoriteDialog dialog={favoriteDialog} />
+
+      {/* テキストファイルプレビューダイアログ */}
+      <TextFilePreviewDialog dialog={textFilePreviewDialog} />
     </>
   );
 }

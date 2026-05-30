@@ -1,3 +1,4 @@
+import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
@@ -24,6 +25,7 @@ interface UseExplorerNavigationProps {
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;
+  dialogs: ExplorerDialogs;
 }
 
 export function useExplorerNavigation({
@@ -33,6 +35,7 @@ export function useExplorerNavigation({
   viewer,
   history,
   folder,
+  dialogs,
 }: UseExplorerNavigationProps) {
   const { path: currentDir, next: nextDir, prev: prevDir } = listing;
   const { mediaOnly } = filtering;
@@ -90,23 +93,32 @@ export function useExplorerNavigation({
         return;
       }
 
+      // テキストファイルならプレビュー表示
       toast.promise(
         async () => {
-          return await getFilePreviewAction(node.path);
+          const file = await getFilePreviewAction(node.path);
+
+          if (!file.isText)
+            throw new Error("このファイル形式は対応していません");
+
+          if (!file.content) throw new Error("空のファイルです");
+
+          dialogs.textFilePreviewDialog.open({
+            title: node.name,
+            content: file.content,
+            encoding: file.encoding,
+            isTruncated: file.isTruncated,
+          });
         },
         {
           loading: "読み込み中...",
-          success: (file) => {
-            if (file.isText) {
-              return file.content;
-            }
-            return "このファイル形式は対応していません";
-          },
-          error: "ファイルの読み込みに失敗しました",
+          success: "読み込み完了",
+          error: (e) =>
+            (e as Error).message || "ファイルの読み込みに失敗しました",
         }
       );
     },
-    [folder, getMediaIndex, viewer]
+    [dialogs.textFilePreviewDialog, folder, getMediaIndex, viewer]
   );
 
   // 新しいタブで開く

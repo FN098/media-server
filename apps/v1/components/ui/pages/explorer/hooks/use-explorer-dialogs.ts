@@ -9,6 +9,7 @@ import { usePreviewDialog } from "@/hooks/dialogs/use-preview-dialog";
 import { useRatingFilterDialog } from "@/hooks/dialogs/use-rating-filter-dialog";
 import { useRenameDialog } from "@/hooks/dialogs/use-rename-dialog";
 import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
+import { useTextFilePreviewDialog } from "@/hooks/dialogs/use-text-file-preview-dialog";
 import { useMemo } from "react";
 
 export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;
@@ -26,6 +27,7 @@ export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
   const extractDialog = useExtractDialog();
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog();
+  const textFilePreviewDialog = useTextFilePreviewDialog();
 
   const ratingFilterDialog = useRatingFilterDialog({
     onApply: filtering.controls.rating.apply,
@@ -49,6 +51,7 @@ export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
         favoriteDialog,
         ratingFilterDialog,
         tagFilterDialog,
+        textFilePreviewDialog,
       }) as const,
     [
       copyDialog,
@@ -61,6 +64,7 @@ export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
       ratingFilterDialog,
       renameDialog,
       tagFilterDialog,
+      textFilePreviewDialog,
     ]
   );
 

@@ -39,10 +39,12 @@ export function Explorer({ listing }: ExplorerProps) {
   const viewMode = useViewMode();
   const filtering = useExplorerFiltering({ listing });
   const selection = useExplorerSelection({ listing, filtering });
-
+  const dialogs = useExplorerDialogs({ filtering });
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation({});
   const history = useHistoryContext();
+  const favorites = useExplorerFavorites();
+
   const navigation = useExplorerNavigation({
     listing,
     filtering,
@@ -50,15 +52,13 @@ export function Explorer({ listing }: ExplorerProps) {
     viewer,
     history,
     folder,
+    dialogs,
   });
-
-  const favorites = useExplorerFavorites();
 
   const tagEditor = useTagEditorControl({
     targetCount: selection.selectedCount,
   });
 
-  const dialogs = useExplorerDialogs({ filtering });
   const thumbs = useExplorerThumbs({ listing });
   const fullscreen = useFullscreen();
 
