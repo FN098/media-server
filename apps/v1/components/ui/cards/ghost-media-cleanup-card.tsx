@@ -5,6 +5,7 @@ import {
   GhostMediaItem,
   GhostMediaScanEventData,
 } from "@/lib/ghost-media/types";
+import { chunk } from "@/lib/utils/array";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -132,14 +133,34 @@ export function GhostMediaCleanupCard() {
   // 削除実行
   const handleDelete = useCallback(() => {
     if (!items || items.length === 0) return;
-    const ids = items.map((n) => n.id);
+
     startTransition(async () => {
-      const result = await cleanupGhostMediaAction(ids);
-      if (result.success) {
-        toast.success(`${result.deletedCount}件の不要なメディアを削除しました`);
+      try {
+        const chunks = chunk(
+          items.map((n) => n.id),
+          1000
+        );
+
+        let deletedCount = 0;
+
+        for (const ids of chunks) {
+          const result = await cleanupGhostMediaAction(ids);
+
+          if (!result.success) {
+            throw new Error(result.error);
+          }
+
+          deletedCount += result.deletedCount ?? 0;
+        }
+
+        toast.success(`${deletedCount}件の不要なメディアを削除しました`);
         setItems(null);
-      } else {
-        toast.error(result.error || "削除中にエラーが発生しました");
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "削除中にエラーが発生しました"
+        );
       }
     });
   }, [items]);
