@@ -1,10 +1,10 @@
 import { VisitedFolder } from "@/generated/prisma/client";
+import { prisma } from "@/lib/db/prisma";
 import {
   FolderFavoriteInfo,
   FolderMeta,
   FolderVisitedInfo,
 } from "@/lib/folder/types";
-import { prisma } from "@/lib/prisma";
 
 // 最近訪れたフォルダの一覧取得
 export async function getRecentFolders(

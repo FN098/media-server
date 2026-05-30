@@ -1,5 +1,6 @@
 "use server";
 
+import { prisma } from "@/lib/db/prisma";
 import { detectMediaType } from "@/lib/media/detectors";
 import { FsNameSchema } from "@/lib/media/schemas";
 import {
@@ -7,7 +8,6 @@ import {
   getServerMediaThumbPath,
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
-import { prisma } from "@/lib/prisma";
 import { existsPath, recursiveMergeMove } from "@/lib/utils/fs";
 import { Dirent } from "fs";
 import { cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";

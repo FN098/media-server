@@ -1,5 +1,5 @@
+import { prisma } from "@/lib/db/prisma";
 import { MediaDbNode } from "@/lib/media/types";
-import { prisma } from "@/lib/prisma";
 
 export async function getMediaDbNodes(
   dirPath: string,

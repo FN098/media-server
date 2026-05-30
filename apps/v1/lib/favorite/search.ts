@@ -1,4 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/db/prisma";
 import { FavoriteSortKey } from "@/lib/favorite/types";
 import {
   RatingFilterMode,
@@ -8,7 +9,6 @@ import {
 import { detectMediaType } from "@/lib/media/detectors";
 import { SortDirection } from "@/lib/media/sort";
 import { MediaNode, MediaType } from "@/lib/media/types";
-import { prisma } from "@/lib/prisma";
 import { normalizeForLike } from "@/lib/utils/japanese";
 import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/shuffle";
 import path, { basename } from "path";

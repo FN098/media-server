@@ -1,6 +1,7 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
+import { db } from "@/lib/db/prisma";
 import {
   togglePinVisitedFolder,
   updateVisitedFolder,
@@ -8,7 +9,6 @@ import {
 import { FsNameSchema } from "@/lib/media/schemas";
 import { isBlockedServerPath } from "@/lib/path/blacklist";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import { db } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
 import { Dirent } from "fs";
 import { mkdir, readdir } from "fs/promises";

@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
+import { prisma } from "@/lib/db/prisma";
 import { getMediaPathFromThumbPath } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
-import { prisma } from "@/lib/prisma";
 import { GhostThumbItem, GhostThumbScanEventData } from "@/lib/thumb/types";
 import { glob } from "glob";
 import { NextRequest } from "next/server";

@@ -1,5 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { SearchTagsOptions, Tag } from "@/lib/tag/types";
 
 export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {

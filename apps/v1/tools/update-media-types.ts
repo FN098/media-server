@@ -1,6 +1,6 @@
+import { prisma } from "@/lib/db/prisma";
 import { detectMediaType, mediaTypes } from "@/lib/media/detectors";
 import { MediaType } from "@/lib/media/types";
-import { prisma } from "@/lib/prisma";
 
 export async function bulkUpdateMediaTypes() {
   try {

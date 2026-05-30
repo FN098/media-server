@@ -1,12 +1,12 @@
 "use server";
 
+import { prisma } from "@/lib/db/prisma";
 import {
   GhostMediaDeleteResult,
   GhostMediaItem,
   GhostMediaScanOptions,
 } from "@/lib/ghost-media/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import { prisma } from "@/lib/prisma";
 import { constants } from "fs";
 import { access } from "fs/promises";
 
