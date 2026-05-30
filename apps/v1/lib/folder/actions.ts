@@ -74,7 +74,7 @@ export async function createFolderAction(
 }
 
 // 最近訪問したフォルダを取得（移動用）
-export async function getRecentFoldersAction() {
+export async function listRecentFoldersAction() {
   try {
     const user = await resolveCurrentUserOrThrow();
     const folders = await db.visitedFolder.findMany({

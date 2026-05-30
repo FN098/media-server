@@ -1,5 +1,5 @@
 import {
-  getRecentFoldersAction,
+  listRecentFoldersAction,
   listSubDirectoriesAction,
   togglePinVisitedFolderAction,
 } from "@/lib/folder/actions";
@@ -53,7 +53,7 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
   // 2. 最近のフォルダ取得
   const fetchRecentDirs = useCallback(() => {
     startNavigating(async () => {
-      const result = await getRecentFoldersAction();
+      const result = await listRecentFoldersAction();
       if (result.success) {
         const filtered = (result.data ?? []).filter(
           (d: RecentDirectoryInfo) =>
