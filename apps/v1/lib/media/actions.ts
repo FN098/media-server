@@ -12,7 +12,7 @@ import { existsPath, recursiveMergeMove } from "@/lib/utils/fs";
 import { Dirent } from "fs";
 import { cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import { basename, dirname, join } from "path";
+import { basename, dirname, extname, join } from "path";
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
@@ -254,6 +254,23 @@ export async function moveNodesAction(
     path.replace(/^\//, "")
   );
 
+  // 移動先の既存ファイル/フォルダ一覧を最初に1回だけ取得 (メモリ上で高速判定するため)
+  const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
+  const existingNames = new Set<string>();
+  try {
+    const files = await readdir(destLocalRootPath);
+    files.forEach((name) => existingNames.add(name));
+  } catch (e) {
+    // 移動先フォルダ自体が存在しないなどのエラーハンドリング
+    if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+      return {
+        success: 0,
+        failed: sourcePaths.length,
+        errors: ["移動先フォルダの読み込みに失敗しました"],
+      };
+    }
+  }
+
   for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
     if (
@@ -267,25 +284,8 @@ export async function moveNodesAction(
       continue;
     }
 
-    const srcName = srcVirtualPath.split("/").pop() || "";
-    const destVirtualPath =
-      normalizedDestDirPath === ""
-        ? srcName
-        : `${normalizedDestDirPath}/${srcName}`;
-
-    const srcRealPath = getServerMediaPath(srcVirtualPath);
-    const destRealPath = getServerMediaPath(destVirtualPath);
-
-    // 存在確認
-    if (await existsPath(destRealPath)) {
-      results.failed++;
-      results.errors.push(
-        `移動先に同名の項目が存在します: ${basename(destRealPath)}`
-      );
-      continue;
-    }
-
     // ディレクトリ判定
+    const srcRealPath = getServerMediaPath(srcVirtualPath);
     let stats: Awaited<ReturnType<typeof lstat>>;
     try {
       stats = await lstat(srcRealPath);
@@ -297,6 +297,34 @@ export async function moveNodesAction(
       continue;
     }
     const isDirectory = stats.isDirectory();
+    const srcName = srcVirtualPath.split("/").pop() || "";
+
+    // 新しい名前を確定
+    let currentSrcName = srcName;
+    let counter = 1;
+
+    while (existingNames.has(currentSrcName)) {
+      if (isDirectory) {
+        // フォルダの場合: 「フォルダ名 (1)」
+        currentSrcName = `${srcName} (${counter})`;
+      } else {
+        // ファイルの場合: 「ファイル名 (1).ext」
+        const ext = extname(srcName);
+        const base = basename(srcName, ext);
+        currentSrcName = `${base} (${counter})${ext}`;
+      }
+      counter++;
+    }
+
+    // 次のループのファイルがこれと衝突するのを防ぐため、確定した名前を Set に予約登録
+    existingNames.add(currentSrcName);
+
+    // 最終的なパスを決定
+    const destVirtualPath =
+      normalizedDestDirPath === ""
+        ? currentSrcName
+        : `${normalizedDestDirPath}/${currentSrcName}`;
+    const destRealPath = getServerMediaPath(destVirtualPath);
 
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
     const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
