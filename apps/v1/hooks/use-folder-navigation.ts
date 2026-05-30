@@ -1,4 +1,4 @@
-import { IndexLike } from "@/lib/index-like";
+import { IndexLike } from "@/hooks/use-viewer-control";
 import { resolveClientPath } from "@/lib/path/resolvers";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
@@ -14,8 +14,8 @@ type NavigateConfig = {
 };
 
 interface UseFolderNavigationProps {
-  atKey?: string; // デフォルト: "at"
-  pageKey?: string; // デフォルト: "page"
+  atKey?: string;
+  pageKey?: string;
 }
 
 export function useFolderNavigation({
