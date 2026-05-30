@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  getFolderMediaFilesAction,
-  getSubDirectoriesAction,
-} from "@/lib/media/actions";
+import { getSubDirectoriesAction } from "@/lib/folder/actions";
+import { getFolderMediaFilesAction } from "@/lib/media/actions";
 import { updatePreviewAction } from "@/lib/preview/actions";
 import { getFilenameWithoutExt } from "@/lib/utils/filename";
 import { Button } from "@/shadcn/components/ui/button";

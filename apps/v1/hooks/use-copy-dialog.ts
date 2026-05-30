@@ -1,8 +1,9 @@
 import {
   getRecentFoldersAction,
+  getSubDirectoriesAction,
   togglePinVisitedFolderAction,
 } from "@/lib/folder/actions";
-import { copyNodesAction, getSubDirectoriesAction } from "@/lib/media/actions";
+import { copyNodesAction } from "@/lib/media/actions";
 import { MediaNode } from "@/lib/media/types";
 import { dirname } from "path";
 import { useCallback, useState, useTransition } from "react";

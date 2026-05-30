@@ -2,7 +2,6 @@
 
 import { getMimetype } from "@/lib/media/mimetype";
 import { FsNameSchema } from "@/lib/media/schemas";
-import { isBlockedServerPath } from "@/lib/path/blacklist";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
@@ -583,40 +582,6 @@ export async function copyNodesAction(
   revalidatePath("/explorer");
 
   return results;
-}
-
-// サブフォルダ一覧
-export async function getSubDirectoriesAction(dirPath: string) {
-  if (!dirPath) {
-    return { success: false, error: "パスが指定されていません" };
-  }
-
-  const realPath = getServerMediaPath(dirPath);
-
-  let entries: Dirent[];
-  try {
-    entries = await readdir(realPath, { withFileTypes: true });
-  } catch (e) {
-    if ((e as NodeJS.ErrnoException).code === "ENOENT") {
-      return { success: false, error: "フォルダが見つかりません" };
-    }
-    if ((e as NodeJS.ErrnoException).code === "EACCES") {
-      return { success: false, error: "フォルダへのアクセス権がありません" };
-    }
-    console.error(`Sub Directories Error [${dirPath}]:`, e);
-    return { success: false, error: "フォルダ一覧の取得に失敗しました" };
-  }
-
-  return {
-    success: true,
-    directories: entries
-      .filter((e) => e.isDirectory())
-      .filter((e) => !isBlockedServerPath(join(realPath, e.name)))
-      .map((e) => ({
-        name: e.name,
-        path: join(dirPath, e.name).replace(/\\/g, "/"),
-      })),
-  };
 }
 
 // フォルダプレビュー用ファイル一覧
