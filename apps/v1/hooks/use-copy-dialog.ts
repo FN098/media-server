@@ -1,6 +1,6 @@
 import {
   getRecentFoldersAction,
-  getSubDirectoriesAction,
+  listSubDirectoriesAction,
   togglePinVisitedFolderAction,
 } from "@/lib/folder/actions";
 import { copyNodesAction } from "@/lib/media/actions";
@@ -32,7 +32,7 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
   const fetchDirs = useCallback(
     (path: string) => {
       startNavigating(async () => {
-        const result = await getSubDirectoriesAction(path);
+        const result = await listSubDirectoriesAction(path);
         if (result.success) {
           // ループ防止のフィルタリング
           const filtered = result.directories!.filter(

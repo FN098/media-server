@@ -1,6 +1,6 @@
 "use client";
 
-import { getSubDirectoriesAction } from "@/lib/folder/actions";
+import { listSubDirectoriesAction } from "@/lib/folder/actions";
 import { listMediaAction } from "@/lib/media/actions";
 import { updatePreviewAction } from "@/lib/preview/actions";
 import { getFilenameWithoutExt } from "@/lib/utils/filename";
@@ -53,7 +53,7 @@ export function ApplyPreviewDialog({
   const fetchContents = (dirPath: string) => {
     startNavigating(async () => {
       const [dirRes, fileRes] = await Promise.all([
-        getSubDirectoriesAction(dirPath),
+        listSubDirectoriesAction(dirPath),
         listMediaAction(dirPath),
       ]);
 
