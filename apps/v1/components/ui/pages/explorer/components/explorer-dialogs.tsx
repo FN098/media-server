@@ -1,10 +1,10 @@
-import { ApplyPreviewDialog } from "@/components/ui/dialogs/apply-preview-dialog";
 import { CopyDialog } from "@/components/ui/dialogs/copy-dialog";
 import { CreateFolderDialog } from "@/components/ui/dialogs/create-folder-dialog";
 import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
 import { ExtractDialog } from "@/components/ui/dialogs/extract-dialog";
 import { FavoriteDialog } from "@/components/ui/dialogs/favorite-dialog";
 import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
+import { PreviewDialog } from "@/components/ui/dialogs/preview-dialog";
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
@@ -49,15 +49,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       <DeleteDialog dialog={deleteDialog} />
 
       {/* プレビュー設定ダイアログ */}
-      <ApplyPreviewDialog
-        open={previewDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            previewDialog.close();
-          }
-        }}
-        previewPath={previewDialog.previewPath}
-      />
+      <PreviewDialog dialog={previewDialog} />
 
       {/* お気に入りダイアログ */}
       <FavoriteDialog
