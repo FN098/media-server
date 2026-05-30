@@ -3,7 +3,7 @@ import { Trash } from "@/components/ui/pages/trash";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import { getFolderVisitedInfo } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/formatters";
-import { listFsDirectory } from "@/lib/media/fs";
+import { listFsDirectory } from "@/lib/media/fs-listing";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getMediaDbNodes } from "@/lib/media/repository";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";

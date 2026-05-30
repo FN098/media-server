@@ -9,7 +9,7 @@ import {
   updateFolderCache,
 } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/formatters";
-import { listFsDirectory } from "@/lib/media/fs";
+import { listFsDirectory } from "@/lib/media/fs-listing";
 import { mergeFsWithDb } from "@/lib/media/merge";
 import { getMediaDbNodes } from "@/lib/media/repository";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";

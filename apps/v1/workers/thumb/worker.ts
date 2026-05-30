@@ -1,4 +1,4 @@
-import { getFsNode, listFsNodes } from "@/lib/media/fs";
+import { getFsNode, listFsNodes } from "@/lib/media/fs-listing";
 import { sortNodes } from "@/lib/media/sort";
 import { createThumbs } from "@/lib/thumb/creator";
 import { chunk } from "@/lib/utils/array";
