@@ -1,6 +1,6 @@
 "use client";
 
-import { usePaging } from "@/hooks/use-paging";
+import { usePaging } from "@/hooks/navigations/use-paging";
 import { createContext, ReactNode, useContext } from "react";
 
 type PagingContextType = ReturnType<typeof usePaging>;

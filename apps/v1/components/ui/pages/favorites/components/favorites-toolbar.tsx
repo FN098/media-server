@@ -7,7 +7,7 @@ import { useFavoritesFilter } from "@/components/ui/pages/favorites/hooks/use-fa
 import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
 import { useFavoritesSort } from "@/components/ui/pages/favorites/hooks/use-favorites-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useSort } from "@/hooks/use-sort";
+import { useSort } from "@/hooks/sort/use-sort";
 import { useMemo } from "react";
 
 interface FavoritesToolbarProps {

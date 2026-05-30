@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathSelection } from "@/hooks/use-path-selection";
+import { usePathSelection } from "@/hooks/selections/use-path-selection";
 import React, { createContext, useContext } from "react";
 
 type PathSelectionContextType = ReturnType<typeof usePathSelection>;

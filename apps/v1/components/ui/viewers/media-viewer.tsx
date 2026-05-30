@@ -17,8 +17,8 @@ import {
   MediaViewerSlide,
 } from "@/components/ui/viewers/lib/slides";
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
-import { useAutoHidingUI } from "@/hooks/use-auto-hide";
-import { useDocumentTitle } from "@/hooks/use-document-title";
+import { useAutoHidingUI } from "@/hooks/general/use-auto-hide";
+import { useDocumentTitle } from "@/hooks/general/use-document-title";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
@@ -79,7 +79,7 @@ export function MediaViewer({
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { value: isHeaderPinned, toggle: toggleIsHeaderPinned } =
+  const { isPinned: isHeaderPinned, toggle: toggleIsHeaderPinned } =
     useViewerHeaderPinnedContext();
 
   const {

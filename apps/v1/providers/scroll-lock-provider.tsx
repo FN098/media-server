@@ -1,6 +1,6 @@
 "use client";
 
-import { useScrollLock } from "@/hooks/use-scroll-lock";
+import { useScrollLock } from "@/hooks/general/use-scroll-lock";
 import { createContext, useContext, useEffect } from "react";
 
 type ScrollLockContextType = ReturnType<typeof useScrollLock>;

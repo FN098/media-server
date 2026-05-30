@@ -1,4 +1,4 @@
-import { useTags } from "@/hooks/use-tags";
+import { useTags } from "@/hooks/tags/use-tags";
 import {
   TagFilterMode,
   TagFilterOptions,

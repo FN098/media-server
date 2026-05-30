@@ -1,8 +1,8 @@
 "use client";
 
 import { SearchInput } from "@/components/ui/inputs/search-input";
+import { useQueryFilter } from "@/hooks/filters/use-query-filter";
 import { useMounted } from "@/hooks/general/use-mounted";
-import { useQueryFilter } from "@/hooks/use-query-filter";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Kbd } from "@/shadcn/components/ui/kbd";

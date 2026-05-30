@@ -10,7 +10,7 @@ import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-expl
 import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useSort } from "@/hooks/use-sort";
+import { useSort } from "@/hooks/sort/use-sort";
 import { MediaListing } from "@/lib/media/types";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { useMemo } from "react";

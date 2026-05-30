@@ -1,5 +1,5 @@
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
-import { useSelectedNodes } from "@/hooks/use-selected-nodes";
+import { useSelectedNodes } from "@/hooks/selections/use-selected-nodes";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useCallback, useEffect } from "react";

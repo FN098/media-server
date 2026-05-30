@@ -1,4 +1,4 @@
-import { useSelection } from "@/hooks/use-selection";
+import { useSelection } from "@/hooks/selections/use-selection";
 
 export function usePathSelection(initialSelectedPaths?: Iterable<string>) {
   const {

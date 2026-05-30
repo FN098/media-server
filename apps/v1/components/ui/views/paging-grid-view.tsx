@@ -9,7 +9,7 @@ import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
-import { useLongPress } from "@/hooks/use-long-press";
+import { useLongPress } from "@/hooks/mobile/use-long-press";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/format";

@@ -1,4 +1,4 @@
-import { useTags } from "@/hooks/use-tags";
+import { useTags } from "@/hooks/tags/use-tags";
 import { TagFilterMode, TagFilterValue } from "@/lib/filter/types";
 import { Tag } from "@/lib/tag/types";
 import { uniqueBy } from "@/lib/utils/array";

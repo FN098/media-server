@@ -1,6 +1,6 @@
 "use client";
 
-import { useThumbEvent } from "@/hooks/use-thumb-event";
+import { useThumbEvent } from "@/hooks/thumbs/use-thumb-event";
 import { createContext, useContext } from "react";
 
 type ThumbEventContextType = ReturnType<typeof useThumbEvent>;

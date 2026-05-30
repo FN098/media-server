@@ -1,6 +1,6 @@
 import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialogs";
 import { TrashSelection } from "@/components/ui/pages/trash/hooks/use-trash-selection";
-import { TagEditorControl } from "@/hooks/use-tag-editor-control";
+import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { RotateCcwIcon, TagIcon, Trash2Icon } from "lucide-react";
 import { useMemo } from "react";

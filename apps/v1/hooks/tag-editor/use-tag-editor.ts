@@ -1,5 +1,5 @@
-import { useTagStates } from "@/hooks/use-tag-states";
-import { useTags } from "@/hooks/use-tags";
+import { useTagStates } from "@/hooks/tag-editor/use-tag-states";
+import { useTags } from "@/hooks/tags/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import {
   PendingChanges,

@@ -2,10 +2,10 @@ import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explor
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { ExplorerNavigation } from "@/components/ui/pages/explorer/hooks/use-explorer-navigation";
 import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
-import { Fullscreen } from "@/hooks/use-fullscreen";
-import { SearchFocus } from "@/hooks/use-search-focus";
-import { TagEditorControl } from "@/hooks/use-tag-editor-control";
-import { ViewerNavigation } from "@/hooks/use-viewer-navigation";
+import { Fullscreen } from "@/hooks/general/use-fullscreen";
+import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { SearchFocus } from "@/hooks/search/use-search-focus";
+import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 

@@ -5,9 +5,9 @@ import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-expl
 import { ExplorerNavigation } from "@/components/ui/pages/explorer/hooks/use-explorer-navigation";
 import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { ExplorerThumbs } from "@/components/ui/pages/explorer/hooks/use-explorer-thumbs";
-import { Fullscreen } from "@/hooks/use-fullscreen";
-import { TagEditorControl } from "@/hooks/use-tag-editor-control";
-import { ViewerNavigation } from "@/hooks/use-viewer-navigation";
+import { Fullscreen } from "@/hooks/general/use-fullscreen";
+import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { isArchiveFile } from "@/lib/archive/validators";
 import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";

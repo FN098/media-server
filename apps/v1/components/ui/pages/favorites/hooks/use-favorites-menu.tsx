@@ -3,9 +3,9 @@ import { FavoritesFavorites } from "@/components/ui/pages/favorites/hooks/use-fa
 import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
 import { FavoritesNavigation } from "@/components/ui/pages/favorites/hooks/use-favorites-navigation";
 import { FavoritesSelection } from "@/components/ui/pages/favorites/hooks/use-favorites-selection";
-import { Fullscreen } from "@/hooks/use-fullscreen";
-import { TagEditorControl } from "@/hooks/use-tag-editor-control";
-import { ViewerNavigation } from "@/hooks/use-viewer-navigation";
+import { Fullscreen } from "@/hooks/general/use-fullscreen";
+import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   ExternalLinkIcon,

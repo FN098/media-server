@@ -1,10 +1,13 @@
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
 import { TrashSelection } from "@/components/ui/pages/trash/hooks/use-trash-selection";
-import { FolderNavigation } from "@/hooks/use-folder-navigation";
-import { History, toHistoryItem } from "@/hooks/use-history";
-import { useMediaIndex } from "@/hooks/use-media-index";
-import { useParentPathname } from "@/hooks/use-parent-pathname";
-import { IndexLike, ViewerNavigation } from "@/hooks/use-viewer-navigation";
+import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
+import { History, toHistoryItem } from "@/hooks/navigations/use-history";
+import { useMediaIndex } from "@/hooks/navigations/use-media-index";
+import { useParentPathname } from "@/hooks/navigations/use-parent-pathname";
+import {
+  IndexLike,
+  ViewerNavigation,
+} from "@/hooks/navigations/use-viewer-navigation";
 import { visitFolderAction } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";

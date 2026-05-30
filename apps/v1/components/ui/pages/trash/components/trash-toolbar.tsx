@@ -7,7 +7,7 @@ import { useTrashFilter } from "@/components/ui/pages/trash/hooks/use-trash-filt
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
 import { useTrashSort } from "@/components/ui/pages/trash/hooks/use-trash-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useSort } from "@/hooks/use-sort";
+import { useSort } from "@/hooks/sort/use-sort";
 import { MediaListing } from "@/lib/media/types";
 import { useMemo } from "react";
 

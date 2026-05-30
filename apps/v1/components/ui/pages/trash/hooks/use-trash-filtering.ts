@@ -1,8 +1,8 @@
-import { useFilteredNodes } from "@/hooks/use-filtered-nodes";
-import { useMediaTypeFilter } from "@/hooks/use-media-type-filter";
-import { useQueryFilter } from "@/hooks/use-query-filter";
-import { useSearchParamsControl } from "@/hooks/use-search-params-control";
-import { useTagFilter } from "@/hooks/use-tag-filter";
+import { useFilteredNodes } from "@/hooks/filters/use-filtered-nodes";
+import { useMediaTypeFilter } from "@/hooks/filters/use-media-type-filter";
+import { useQueryFilter } from "@/hooks/filters/use-query-filter";
+import { useTagFilter } from "@/hooks/filters/use-tag-filter";
+import { useSearchParamsControl } from "@/hooks/general/use-search-params-control";
 import {
   createMediaOnlyFilter,
   createMediaTypeFilter,

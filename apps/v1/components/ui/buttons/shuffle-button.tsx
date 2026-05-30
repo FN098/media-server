@@ -1,6 +1,6 @@
 "use client";
 
-import { useShuffle } from "@/hooks/use-shuffle";
+import { useShuffle } from "@/hooks/sort/use-shuffle";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { Shuffle } from "lucide-react";

@@ -2,10 +2,10 @@ import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialog
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
 import { TrashNavigation } from "@/components/ui/pages/trash/hooks/use-trash-navigation";
 import { TrashSelection } from "@/components/ui/pages/trash/hooks/use-trash-selection";
-import { Fullscreen } from "@/hooks/use-fullscreen";
-import { SearchFocus } from "@/hooks/use-search-focus";
-import { TagEditorControl } from "@/hooks/use-tag-editor-control";
-import { ViewerNavigation } from "@/hooks/use-viewer-navigation";
+import { Fullscreen } from "@/hooks/general/use-fullscreen";
+import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { SearchFocus } from "@/hooks/search/use-search-focus";
+import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 

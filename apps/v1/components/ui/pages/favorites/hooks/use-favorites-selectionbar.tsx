@@ -1,7 +1,7 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { FavoritesFavorites } from "@/components/ui/pages/favorites/hooks/use-favorites-favorites";
 import { FavoritesSelection } from "@/components/ui/pages/favorites/hooks/use-favorites-selection";
-import { TagEditorControl } from "@/hooks/use-tag-editor-control";
+import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { hasMedia } from "@/lib/media/detectors";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { averageBy } from "@/lib/utils/math";

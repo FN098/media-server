@@ -1,6 +1,6 @@
 "use client";
 
-import { useFavorites } from "@/hooks/use-favorites";
+import { useFavorites } from "@/hooks/favorites/use-favorites";
 import { Favorite } from "@/lib/favorite/types";
 import { createContext, useContext } from "react";
 

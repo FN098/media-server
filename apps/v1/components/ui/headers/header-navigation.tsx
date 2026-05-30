@@ -2,7 +2,7 @@
 
 import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs/dynamic-breadcrumbs";
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
-import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
+import { useBreadcrumbs } from "@/hooks/navigations/use-breadcrumbs";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";

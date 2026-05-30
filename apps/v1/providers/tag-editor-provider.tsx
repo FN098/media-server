@@ -1,6 +1,6 @@
 "use client";
 
-import { useTagEditor } from "@/hooks/use-tag-editor";
+import { useTagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { MediaNode } from "@/lib/media/types";
 import { createContext, ReactNode, useContext } from "react";
 

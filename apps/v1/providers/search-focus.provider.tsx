@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchFocus } from "@/hooks/use-search-focus";
+import { useSearchFocus } from "@/hooks/search/use-search-focus";
 import { createContext, useContext } from "react";
 
 type SearchFocusContextType = ReturnType<typeof useSearchFocus>;
