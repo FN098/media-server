@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+/** @deprecated Use FileNameSchema */
 export const FsNameSchema = z
   .string()
   .min(1, "名前を入力してください。")
