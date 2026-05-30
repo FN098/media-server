@@ -1,7 +1,12 @@
 import { renameNodeAction } from "@/lib/media/actions";
-import { MediaNode } from "@/lib/media/types";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
+
+type RenameTarget = {
+  isDirectory: boolean;
+  path: string;
+  name: string;
+};
 
 interface UseRenameDialogProps {
   onSuccess?: () => void;
@@ -9,19 +14,19 @@ interface UseRenameDialogProps {
 
 export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [target, setTarget] = useState<MediaNode | null>(null);
+  const [target, setTarget] = useState<RenameTarget | null>(null);
   const [newName, setNewName] = useState<string>("");
   const [extension, setExtension] = useState<string>("");
 
   const [isPending, startTransition] = useTransition();
 
   // 1. ダイアログを開く
-  const open = useCallback((node: MediaNode) => {
-    setTarget(node);
+  const open = useCallback((target: RenameTarget) => {
+    setTarget(target);
     setIsOpen(true);
 
-    const isDirectory = node.type === "directory";
-    const currentName = node.name;
+    const isDirectory = target.isDirectory;
+    const currentName = target.name;
 
     // 名前と拡張子の分離
     if (isDirectory) {

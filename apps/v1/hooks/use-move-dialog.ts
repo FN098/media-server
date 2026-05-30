@@ -4,13 +4,22 @@ import {
   togglePinVisitedFolderAction,
 } from "@/lib/folder/actions";
 import { moveNodesAction } from "@/lib/media/actions";
-import { MediaNode } from "@/lib/media/types";
 import { dirname } from "path";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-export type DirectoryInfo = { name: string; path: string };
-export type RecentDirectoryInfo = DirectoryInfo & { pinned: boolean };
+type DirectoryInfo = {
+  name: string;
+  path: string;
+};
+
+type RecentDirectoryInfo = DirectoryInfo & {
+  pinned: boolean;
+};
+
+type MoveTarget = {
+  path: string;
+};
 
 interface UseMoveDialogProps {
   onSuccess?: () => void;
@@ -22,7 +31,7 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
   const [currentDir, setCurrentDir] = useState<string>("");
   const [dirs, setDirs] = useState<DirectoryInfo[]>([]);
   const [recentDirs, setRecentDirs] = useState<RecentDirectoryInfo[]>([]);
-  const [sourceNodes, setSourceNodes] = useState<MediaNode[]>([]);
+  const [targets, setTargets] = useState<MoveTarget[]>([]);
 
   const [isNavigating, startNavigating] = useTransition();
   const [isMoving, startMoving] = useTransition();
@@ -37,7 +46,7 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
           // ループ防止のフィルタリング
           const filtered = result.directories!.filter(
             (d) =>
-              !sourceNodes.some(
+              !targets.some(
                 (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
               )
           );
@@ -47,7 +56,7 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
         }
       });
     },
-    [sourceNodes]
+    [targets]
   );
 
   // 2. 最近のフォルダ取得
@@ -57,21 +66,21 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
       if (result.success) {
         const filtered = (result.data ?? []).filter(
           (d: RecentDirectoryInfo) =>
-            !sourceNodes.some(
+            !targets.some(
               (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
             )
         );
         setRecentDirs(filtered);
       }
     });
-  }, [sourceNodes]);
+  }, [targets]);
 
   // 3. ダイアログを開く
   const open = useCallback(
-    (sourceNodes: MediaNode[], path: string) => {
+    (targets: MoveTarget[], path: string) => {
       setInitialDir(path);
       setCurrentDir(path);
-      setSourceNodes(sourceNodes);
+      setTargets(targets);
       setIsOpen(true);
       fetchDirs(path);
       fetchRecentDirs();
@@ -121,7 +130,7 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
   const performMove = useCallback(() => {
     if (!currentDir) return;
     startMoving(async () => {
-      const paths = sourceNodes.map((n) => n.path);
+      const paths = targets.map((n) => n.path);
       const result = await moveNodesAction(paths, currentDir);
 
       if (result.failed === 0) {
@@ -134,7 +143,7 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
         );
       }
     });
-  }, [currentDir, sourceNodes, close, onSuccess]);
+  }, [currentDir, targets, onSuccess, close]);
 
   return {
     isOpen,

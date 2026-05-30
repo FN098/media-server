@@ -1,7 +1,11 @@
 import { extractMultipleArchivesNodeAction } from "@/lib/archive/actions";
-import { MediaNode } from "@/lib/media/types";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
+
+type ExtractTarget = {
+  path: string;
+  name: string;
+};
 
 interface UseExtractDialogProps {
   onSuccess?: () => void;
@@ -9,12 +13,12 @@ interface UseExtractDialogProps {
 
 export function useExtractDialog({ onSuccess }: UseExtractDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [targets, setTargets] = useState<MediaNode[]>([]);
+  const [targets, setTargets] = useState<ExtractTarget[]>([]);
   const [isPending, startTransition] = useTransition();
 
   // 1. ダイアログを開く
-  const open = useCallback((nodes: MediaNode[]) => {
-    setTargets(nodes);
+  const open = useCallback((targets: ExtractTarget[]) => {
+    setTargets(targets);
     setIsOpen(true);
   }, []);
 
