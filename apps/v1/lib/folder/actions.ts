@@ -1,8 +1,8 @@
 "use server";
 
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
-import { db } from "@/lib/db/prisma";
 import {
+  getRecentFolders,
   togglePinVisitedFolder,
   updateVisitedFolder,
 } from "@/lib/folder/repository";
@@ -73,19 +73,11 @@ export async function createFolderAction(
   }
 }
 
-// 最近訪問したフォルダを取得（移動用）
+// 最近訪問したフォルダを取得
 export async function listRecentFoldersAction() {
   try {
     const user = await resolveCurrentUserOrThrow();
-    const folders = await db.visitedFolder.findMany({
-      select: {
-        dirPath: true,
-        isPinned: true,
-      },
-      where: { userId: user.id },
-      take: 10,
-      orderBy: { lastViewedAt: "desc" },
-    });
+    const folders = await getRecentFolders(user.id, 10);
 
     return {
       success: true,
