@@ -52,7 +52,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     targetCount: selection.selectedCount,
   });
 
-  const dialogs = useFavoritesDialogs();
+  const dialogs = useFavoritesDialogs({ filtering });
   const thumbs = useFavoritesThumbs();
   const fullscreen = useFullscreen();
 

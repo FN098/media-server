@@ -64,7 +64,7 @@ export function FavoritesToolbar({
       />
 
       {/* ダイアログ */}
-      <FavoritesToolbarDialogs dialogs={dialogs} filtering={filtering} />
+      <FavoritesToolbarDialogs dialogs={dialogs} />
     </div>
   );
 }

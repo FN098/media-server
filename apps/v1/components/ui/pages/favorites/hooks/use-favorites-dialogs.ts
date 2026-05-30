@@ -1,14 +1,25 @@
+import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
 import { useRatingFilterDialog } from "@/hooks/use-rating-filter-dialog";
 import { useTagFilterDialog } from "@/hooks/use-tag-filter-dialog";
 import { useMemo } from "react";
 
 export type FavoritesDialogs = ReturnType<typeof useFavoritesDialogs>;
 
-export function useFavoritesDialogs() {
-  const ratingFilterDialog = useRatingFilterDialog();
-  const tagFilterDialog = useTagFilterDialog();
+interface UseFavoritesDialogsProps {
+  filtering: FavoritesFiltering;
+}
 
-  const all = useMemo(
+export function useFavoritesDialogs({ filtering }: UseFavoritesDialogsProps) {
+  const ratingFilterDialog = useRatingFilterDialog({
+    onApply: filtering.controls.rating.apply,
+  });
+
+  const tagFilterDialog = useTagFilterDialog({
+    onApply: filtering.controls.tag.apply,
+    autoFocusInput: true,
+  });
+
+  const allDialogs = useMemo(
     () =>
       ({
         ratingFilterDialog,
@@ -18,12 +29,12 @@ export function useFavoritesDialogs() {
   );
 
   const isOpen = useMemo(
-    () => Object.values(all).some(({ isOpen }) => isOpen),
-    [all]
+    () => Object.values(allDialogs).some(({ isOpen }) => isOpen),
+    [allDialogs]
   );
 
   return {
-    ...all,
+    ...allDialogs,
     isOpen,
   };
 }

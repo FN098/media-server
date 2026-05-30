@@ -26,9 +26,11 @@ export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
   const extractDialog = useExtractDialog();
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog();
+
   const ratingFilterDialog = useRatingFilterDialog({
     onApply: filtering.controls.rating.apply,
   });
+
   const tagFilterDialog = useTagFilterDialog({
     onApply: filtering.controls.tag.apply,
     autoFocusInput: true,

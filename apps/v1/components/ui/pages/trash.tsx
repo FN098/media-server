@@ -51,7 +51,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     targetCount: selection.selectedCount,
   });
 
-  const dialogs = useTrashDialogs();
+  const dialogs = useTrashDialogs({ filtering });
 
   const thumbs = useTrashThumbs({
     listing,
