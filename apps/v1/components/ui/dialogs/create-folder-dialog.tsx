@@ -1,4 +1,6 @@
-import { createFolderAction } from "@/lib/folder/actions"; // 適宜アクション名を確認してください
+"use client";
+
+import { useCreateFolderDialog } from "@/hooks/use-create-folder-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
@@ -8,51 +10,23 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
-import { useRef, useState, useTransition } from "react";
-import { toast } from "sonner";
 
 interface CreateFolderDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  parentPath: string; // フォルダを作成する親ディレクトリのパス
+  dialog: ReturnType<typeof useCreateFolderDialog>;
 }
 
-export function CreateFolderDialog({
-  open,
-  onOpenChange,
-  parentPath,
-}: CreateFolderDialogProps) {
-  const [folderName, setFolderName] = useState("");
-  const [isPending, startTransition] = useTransition();
-  const inputRef = useRef<HTMLInputElement>(null);
+export function CreateFolderDialog({ dialog }: CreateFolderDialogProps) {
+  const { isOpen, folderName, isPending, setFolderName, close, performCreate } =
+    dialog;
 
-  // 作成実行
-  const performCreate = () => {
-    const trimmedName = folderName.trim();
-
-    if (!trimmedName) {
-      toast.error("フォルダ名を入力してください");
-      return;
-    }
-
-    startTransition(async () => {
-      // サーバーアクションの呼び出し
-      const result = await createFolderAction(parentPath, trimmedName);
-
-      if (result.success) {
-        toast.success("フォルダを作成しました");
-        onOpenChange(false);
-      } else {
-        toast.error(result.error || "作成に失敗しました");
-      }
-    });
-  };
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent
+        className="sm:max-w-[425px]"
         onPointerDownOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.stopPropagation()} // 親へのイベント伝播を止める
       >
         <DialogHeader>
           <DialogTitle>新規フォルダ作成</DialogTitle>
@@ -60,7 +34,6 @@ export function CreateFolderDialog({
 
         <div className="py-4">
           <Input
-            ref={inputRef}
             value={folderName}
             onChange={(e) => setFolderName(e.target.value)}
             placeholder="新しいフォルダ名を入力"
@@ -72,15 +45,12 @@ export function CreateFolderDialog({
             }}
             disabled={isPending}
             className="w-full"
+            autoFocus // ダイアログを開いたときに自動でフォーカス
           />
         </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={close} disabled={isPending}>
             キャンセル
           </Button>
           <Button

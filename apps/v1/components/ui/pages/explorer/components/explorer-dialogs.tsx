@@ -55,16 +55,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       />
 
       {/* フォルダ作成ダイアログ */}
-      <CreateFolderDialog
-        key={`create-folder-${createFolderDialog.isOpen}`}
-        open={createFolderDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            createFolderDialog.close();
-          }
-        }}
-        parentPath={createFolderDialog.parentPath}
-      />
+      <CreateFolderDialog dialog={createFolderDialog} />
 
       {/* 移動ダイアログ */}
       <MoveDialog dialog={moveDialog} />
