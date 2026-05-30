@@ -1,13 +1,11 @@
+import {
+  ChildProcessExitStatus,
+  RestoreDatabaseResult,
+} from "@/lib/child_process/types";
 import { ParsedDatabaseURL } from "@/lib/utils/db-url-parser";
 import { spawn } from "child_process";
 import { createReadStream } from "fs";
 import { pipeline } from "stream/promises";
-
-export type RestoreDatabaseResult = {
-  ok: boolean;
-  code: number;
-  signal: string | null;
-};
 
 export async function restoreDatabaseFromFile(
   db: ParsedDatabaseURL,
@@ -32,15 +30,11 @@ export async function restoreDatabaseFromFile(
     }
   );
 
-  // mysql の標準エラー出力バッファ
+  // mysql の出力バッファ
   let stderr = "";
 
   childProcess.stderr.on("data", (data: Buffer) => {
     stderr += data.toString();
-  });
-
-  childProcess.stdin.on("error", (err) => {
-    console.error("mysql stdin error:", err);
   });
 
   // 終了コードが 0 以外なら throw
@@ -48,24 +42,22 @@ export async function restoreDatabaseFromFile(
     childProcess.on("error", reject);
 
     childProcess.on("close", (code, signal) => {
-      if (code !== 0) {
-        reject(
-          new Error(
-            stderr.trim() ||
-              `mysql exited with code ${code} (signal: ${signal})`
-          )
-        );
-        return;
-      }
-      resolve({ ok: code === 0, code, signal } satisfies RestoreDatabaseResult);
+      resolve({ code, signal } satisfies ChildProcessExitStatus);
     });
   });
 
   try {
     // ファイルのストリームを mysql の標準入力へパイプラインで流し込む
     await pipeline(readStream, childProcess.stdin);
-    const status = await exitPromise;
-    return status as RestoreDatabaseResult;
+
+    // プロセスの終了を待機して終了ステータスを取得
+    const exitStatus = (await exitPromise) as ChildProcessExitStatus;
+
+    return {
+      ok: exitStatus.code === 0,
+      exitStatus,
+      error: stderr || undefined,
+    };
   } catch (error) {
     readStream.destroy();
     childProcess.kill("SIGTERM");
