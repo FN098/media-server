@@ -112,7 +112,7 @@ export function MediaViewer({
     currentNode,
     allSlides,
     swiperRef,
-    onSlideChange,
+    updateActiveSlide,
     setCurrentSlideIndex,
   } = useMediaViewerNavigation({
     allNodes,
@@ -205,7 +205,7 @@ export function MediaViewer({
         initialIndex={initialIndex}
         hasPrev={hasPrev}
         swiperRef={swiperRef}
-        onSlideChange={onSlideChange}
+        onSlideChange={(swiper) => updateActiveSlide(swiper.activeIndex)}
         setCurrentSlideIndex={setCurrentSlideIndex}
         isRepeating={isRepeating}
         setIsRepeating={setIsRepeating}

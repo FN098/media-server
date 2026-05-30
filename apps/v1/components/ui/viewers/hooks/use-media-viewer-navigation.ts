@@ -48,22 +48,22 @@ export function useMediaViewerNavigation({
     [allNodes, hasPrev, hasNext]
   );
 
-  const onSlideChange = useCallback(
-    (swiper: SwiperClass) => {
-      const slide = allSlides[swiper.activeIndex];
+  const updateActiveSlide = useCallback(
+    (activeSlideIndex: number) => {
+      const slide = allSlides[activeSlideIndex];
       if (!slide) return;
-
       if (slide.type === "empty") return;
 
+      // ナビゲーション（前後のアルバムを開くなど）のトリガー
       if (slide.type === "navigation") {
         if (slide.direction === "prev") onOpenPrev?.();
         if (slide.direction === "next") onOpenNext?.();
         return;
       }
 
-      setCurrentSlideIndex(swiper.activeIndex);
+      setCurrentSlideIndex(activeSlideIndex);
 
-      const index = getMediaIndex(swiper.activeIndex, hasPrev);
+      const index = getMediaIndex(activeSlideIndex, hasPrev);
       const node = allNodes[index];
       if (!node) return;
 
@@ -112,7 +112,7 @@ export function useMediaViewerNavigation({
     currentNode,
     allSlides,
     swiperRef,
-    onSlideChange,
+    updateActiveSlide,
     setCurrentSlideIndex,
   };
 }
