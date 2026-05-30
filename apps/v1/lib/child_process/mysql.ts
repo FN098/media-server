@@ -3,7 +3,8 @@ import { spawn } from "child_process";
 import { createReadStream } from "fs";
 import { pipeline } from "stream/promises";
 
-type MySqlExitStatus = {
+export type RestoreDatabaseResult = {
+  ok: boolean;
   code: number;
   signal: string | null;
 };
@@ -11,7 +12,7 @@ type MySqlExitStatus = {
 export async function restoreDatabaseFromFile(
   db: ParsedDatabaseURL,
   filePath: string
-): Promise<MySqlExitStatus> {
+): Promise<RestoreDatabaseResult> {
   if (db.protocol !== "mysql" && db.protocol !== "mariadb") {
     throw new Error("Target database must be MySQL or MariaDB");
   }
@@ -56,7 +57,7 @@ export async function restoreDatabaseFromFile(
         );
         return;
       }
-      resolve({ code, signal } satisfies MySqlExitStatus);
+      resolve({ ok: code === 0, code, signal } satisfies RestoreDatabaseResult);
     });
   });
 
@@ -64,7 +65,7 @@ export async function restoreDatabaseFromFile(
     // ファイルのストリームを mysql の標準入力へパイプラインで流し込む
     await pipeline(readStream, childProcess.stdin);
     const status = await exitPromise;
-    return status as MySqlExitStatus;
+    return status as RestoreDatabaseResult;
   } catch (error) {
     readStream.destroy();
     childProcess.kill("SIGTERM");

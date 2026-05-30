@@ -82,12 +82,14 @@ export async function restoreBackupAction(file: DbBackupFile) {
 
   try {
     console.log("restore started.");
-
     const result = await restoreDatabaseFromFile(db, filePath);
-
     console.log("restore ended:", result);
 
-    return { success: true };
+    if (result.ok) {
+      return { success: true };
+    } else {
+      return { success: false, error: "リストアが正常に終了しませんでした" };
+    }
   } catch (error) {
     console.error("restore db backup error", error);
 
