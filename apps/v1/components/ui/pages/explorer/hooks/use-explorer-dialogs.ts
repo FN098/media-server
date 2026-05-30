@@ -2,13 +2,12 @@ import { useCopyDialog } from "@/hooks/use-copy-dialog";
 import { useCreateFolderDialog } from "@/hooks/use-create-folder-dialog";
 import { useDeleteDialog } from "@/hooks/use-delete-dialog";
 import { useExtractDialog } from "@/hooks/use-extract-dialog";
-import { useFavoriteDialog } from "@/hooks/use-favorites-dialog";
+import { useFavoriteDialog } from "@/hooks/use-favorite-dialog";
 import { useMoveDialog } from "@/hooks/use-move-dialog";
 import { usePreviewDialog } from "@/hooks/use-preview-dialog";
 import { useRatingFilterDialog } from "@/hooks/use-rating-filter-dialog";
 import { useRenameDialog } from "@/hooks/use-rename-dialog";
 import { useTagFilterDialog } from "@/hooks/use-tag-filter-dialog";
-import { MediaNode } from "@/lib/media/types";
 import { useMemo } from "react";
 
 export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;
@@ -21,7 +20,7 @@ export function useExplorerDialogs() {
   const deleteDialog = useDeleteDialog();
   const extractDialog = useExtractDialog();
   const previewDialog = usePreviewDialog();
-  const favoriteDialog = useFavoriteDialog<MediaNode>();
+  const favoriteDialog = useFavoriteDialog();
   const ratingFilterDialog = useRatingFilterDialog();
   const tagFilterDialog = useTagFilterDialog();
 

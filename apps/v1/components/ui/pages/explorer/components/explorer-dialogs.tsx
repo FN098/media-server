@@ -52,16 +52,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       <PreviewDialog dialog={previewDialog} />
 
       {/* お気に入りダイアログ */}
-      <FavoriteDialog
-        open={favoriteDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            favoriteDialog.close();
-          }
-        }}
-        targets={favoriteDialog.targets}
-        mode={favoriteDialog.mode}
-      />
+      <FavoriteDialog dialog={favoriteDialog} />
     </>
   );
 }
