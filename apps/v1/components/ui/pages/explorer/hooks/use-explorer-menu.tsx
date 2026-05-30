@@ -71,8 +71,6 @@ export function useExplorerMenu({
         key: "rating",
         type: "custom",
         render: ({ node, closeMenu }) => {
-          if (node.isDirectory) return null;
-
           const { rating } = favorites.get(node.path);
           const targets = hasSelection ? selectedNodes : [node];
 
@@ -87,6 +85,7 @@ export function useExplorerMenu({
             </div>
           );
         },
+        hidden: ({ node }) => node.isDirectory,
       },
       {
         key: "separator-navigation",
