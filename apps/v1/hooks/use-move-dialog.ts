@@ -4,6 +4,7 @@ type MoveDialogContext<T> =
   | {
       isOpen: true;
       initialDir: string;
+      currentDIr: string;
       targets: T[];
     }
   | { isOpen: false };
@@ -15,6 +16,7 @@ interface UseMoveDialogProps<T> {
 export function useMoveDialog<T>({ onChange }: UseMoveDialogProps<T> = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [initialDir, setInitialDir] = useState<string>("");
+  const [currentDir, setCurrentDir] = useState<string>("");
   const [targets, setTargets] = useState<T[]>([]);
 
   const open = useCallback(
@@ -22,10 +24,12 @@ export function useMoveDialog<T>({ onChange }: UseMoveDialogProps<T> = {}) {
       onChange?.({
         isOpen: true,
         initialDir,
+        currentDIr: initialDir,
         targets,
       });
       setTargets(targets);
       setInitialDir(initialDir);
+      setCurrentDir(initialDir);
       setIsOpen(true);
     },
     [onChange]
@@ -39,6 +43,8 @@ export function useMoveDialog<T>({ onChange }: UseMoveDialogProps<T> = {}) {
 
   return {
     initialDir,
+    currentDir,
+    setCurrentDir,
     targets,
     isOpen,
     open,

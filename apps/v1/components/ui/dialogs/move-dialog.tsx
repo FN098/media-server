@@ -42,19 +42,23 @@ interface MoveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sourceNodes: { path: string }[];
-  initialDirPath?: string;
+  initialDir: string;
+  currentDir: string;
+  onCurrentDirChange: (path: string) => void;
 }
 
 export function MoveDialog({
   open,
   onOpenChange,
   sourceNodes,
-  initialDirPath = "/",
+  initialDir,
+  currentDir,
+  onCurrentDirChange,
 }: MoveDialogProps) {
-  const [currentPath, setCurrentPath] = useState(initialDirPath);
+  console.log({ currentDir, initialDir });
+
   const [dirs, setDirs] = useState<DirectoryInfo[]>([]);
   const [recentDirs, setRecentDirs] = useState<RecentDirectoryInfo[]>([]);
-
   const [activeTab, setActiveTab] = useState<string>("browse");
 
   const [isNavigating, startNavigating] = useTransition();
@@ -102,11 +106,11 @@ export function MoveDialog({
 
   // 移動実行
   const performMove = useCallback(() => {
-    if (!currentPath) return;
+    if (!currentDir) return;
 
     startMoving(async () => {
       const paths = sourceNodes.map((n) => n.path);
-      const result = await moveNodesAction(paths, currentPath);
+      const result = await moveNodesAction(paths, currentDir);
 
       if (result.failed === 0) {
         toast.success(`${result.success}件のアイテムを移動しました`);
@@ -117,15 +121,15 @@ export function MoveDialog({
         );
       }
     });
-  }, [currentPath, onOpenChange, sourceNodes]);
+  }, [currentDir, onOpenChange, sourceNodes]);
 
   // 対象のフォルダを開く
   const openFolder = useCallback(
     (path: string) => {
-      setCurrentPath(path);
+      onCurrentDirChange(path);
       fetchDirs(path);
     },
-    [fetchDirs]
+    [fetchDirs, onCurrentDirChange]
   );
 
   // 最近のフォルダをクリックしたときの処理
@@ -136,10 +140,10 @@ export function MoveDialog({
 
   // 親フォルダに戻る
   const goBackParentFolder = useCallback(() => {
-    const parent = dirname(currentPath).replace(/\\/g, "/");
+    const parent = dirname(currentDir).replace(/\\/g, "/");
     const path = parent === "." ? "/" : parent;
     openFolder(path);
-  }, [currentPath, openFolder]);
+  }, [currentDir, openFolder]);
 
   // ピン留めトグル処理
   const handleTogglePin = (path: string, currentPinned: boolean) => {
@@ -156,10 +160,10 @@ export function MoveDialog({
   // ダイアログ初期化
   useEffect(() => {
     if (open) {
-      fetchDirs(initialDirPath);
+      fetchDirs(currentDir);
       fetchRecentDirs();
     }
-  }, [fetchDirs, fetchRecentDirs, initialDirPath, open]);
+  }, [currentDir, fetchDirs, fetchRecentDirs, open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -171,7 +175,7 @@ export function MoveDialog({
           <DialogTitle>移動先を選択</DialogTitle>
           <div className="flex items-center gap-2 text-sm text-muted-foreground break-all bg-muted p-2 rounded">
             <Folder className="h-4 w-4 shrink-0" />
-            {currentPath}
+            {currentDir}
           </div>
         </DialogHeader>
 
@@ -192,7 +196,7 @@ export function MoveDialog({
             value="browse"
             className="flex-1 min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col gap-2"
           >
-            {currentPath !== "/" && (
+            {currentDir !== "/" && (
               <Button
                 variant="ghost"
                 className="w-full justify-start text-primary shrink-0"
@@ -270,7 +274,7 @@ export function MoveDialog({
                           variant="ghost"
                           className={cn(
                             "w-full justify-start hover:bg-primary/10 group text-left pl-3 pr-12 py-6 h-auto", // ピンボタンのスペース確保と高さを少し調整
-                            currentPath === dir.path &&
+                            currentDir === dir.path &&
                               "bg-primary/5 font-medium",
                             dir.pinned && "bg-secondary/30" // ピン留め時の背景変更
                           )}
@@ -334,7 +338,7 @@ export function MoveDialog({
           </Button>
           <Button
             onClick={performMove}
-            disabled={isLoading || currentPath === initialDirPath}
+            disabled={isLoading || currentDir === initialDir}
           >
             {isMoving ? (
               "移動中..."

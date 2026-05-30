@@ -75,7 +75,9 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
           }
         }}
         sourceNodes={moveDialog.targets}
-        initialDirPath={moveDialog.initialDir}
+        initialDir={moveDialog.initialDir}
+        currentDir={moveDialog.currentDir}
+        onCurrentDirChange={moveDialog.setCurrentDir}
       />
 
       {/* コピーダイアログ */}
