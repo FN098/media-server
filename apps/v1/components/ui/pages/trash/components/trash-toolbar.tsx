@@ -32,8 +32,9 @@ export function TrashToolbar({
     return {
       filtering,
       dialogs,
+      listing,
     };
-  }, [dialogs, filtering]);
+  }, [dialogs, filtering, listing]);
 
   const actionContext = useMemo(() => {
     return {

@@ -1,5 +1,6 @@
 import { FavoritesDialogs } from "@/components/ui/pages/favorites/hooks/use-favorites-dialogs";
 import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
+import { MediaListing } from "@/lib/media/types";
 import { FilterMenuItem } from "@/lib/menu-items/types";
 import {
   FileTypeIcon,
@@ -13,6 +14,7 @@ import {
 interface FavoritesToolbarFilterContext {
   filtering: FavoritesFiltering;
   dialogs: FavoritesDialogs;
+  listing: MediaListing;
 }
 
 const toolbarFilterItems: FilterMenuItem<FavoritesToolbarFilterContext>[] = [
@@ -87,7 +89,10 @@ const toolbarFilterItems: FilterMenuItem<FavoritesToolbarFilterContext>[] = [
     icon: TagIcon,
     isActive: (ctx) => ctx.filtering.controls.tag.value.tags.length > 0,
     onClick: (ctx) => {
-      ctx.dialogs.tagFilterDialog.open(ctx.filtering.controls.tag.value);
+      ctx.dialogs.tagFilterDialog.open(
+        ctx.filtering.controls.tag.value,
+        ctx.listing.nodes
+      );
     },
   },
 ];

@@ -8,16 +8,19 @@ import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-fa
 import { useFavoritesSort } from "@/components/ui/pages/favorites/hooks/use-favorites-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useSort } from "@/hooks/sort/use-sort";
+import { MediaListing } from "@/lib/media/types";
 import { useMemo } from "react";
 
 interface FavoritesToolbarProps {
   filtering: FavoritesFiltering;
   dialogs: FavoritesDialogs;
+  listing: MediaListing;
 }
 
 export function FavoritesToolbar({
   filtering,
   dialogs,
+  listing,
 }: FavoritesToolbarProps) {
   const sort = useSort();
 
@@ -28,8 +31,9 @@ export function FavoritesToolbar({
     return {
       filtering,
       dialogs,
+      listing,
     };
-  }, [dialogs, filtering]);
+  }, [dialogs, filtering, listing]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">

@@ -1,5 +1,6 @@
 import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialogs";
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
+import { MediaListing } from "@/lib/media/types";
 import { FilterMenuItem } from "@/lib/menu-items/types";
 import {
   FileTypeIcon,
@@ -12,6 +13,7 @@ import {
 interface TrashToolbarFilterContext {
   filtering: TrashFiltering;
   dialogs: TrashDialogs;
+  listing: MediaListing;
 }
 
 const toolbarFilterItems: FilterMenuItem<TrashToolbarFilterContext>[] = [
@@ -76,7 +78,10 @@ const toolbarFilterItems: FilterMenuItem<TrashToolbarFilterContext>[] = [
     icon: TagIcon,
     isActive: (ctx) => ctx.filtering.controls.tag.value.tags.length > 0,
     onClick: (ctx) => {
-      ctx.dialogs.tagFilterDialog.open(ctx.filtering.controls.tag.value);
+      ctx.dialogs.tagFilterDialog.open(
+        ctx.filtering.controls.tag.value,
+        ctx.listing.nodes
+      );
     },
   },
 ];
