@@ -5,7 +5,7 @@ import { FavoritesNavigation } from "@/components/ui/pages/favorites/hooks/use-f
 import { FavoritesSelection } from "@/components/ui/pages/favorites/hooks/use-favorites-selection";
 import { Fullscreen } from "@/hooks/use-fullscreen";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
-import { ViewerNavigation } from "@/hooks/use-viewer-control";
+import { ViewerNavigation } from "@/hooks/use-viewer-navigation";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   ExternalLinkIcon,

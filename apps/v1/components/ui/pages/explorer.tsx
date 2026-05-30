@@ -21,7 +21,7 @@ import { useFolderNavigation } from "@/hooks/use-folder-navigation";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTagEditorControl } from "@/hooks/use-tag-editor-control";
 import { useViewMode } from "@/hooks/use-view-mode";
-import { useViewerNavigation } from "@/hooks/use-viewer-control";
+import { useViewerNavigation } from "@/hooks/use-viewer-navigation";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";

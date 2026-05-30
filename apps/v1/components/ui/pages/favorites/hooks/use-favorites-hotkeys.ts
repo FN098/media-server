@@ -4,7 +4,7 @@ import { FavoritesSelection } from "@/components/ui/pages/favorites/hooks/use-fa
 import { Fullscreen } from "@/hooks/use-fullscreen";
 import { SearchFocus } from "@/hooks/use-search-focus";
 import { TagEditorControl } from "@/hooks/use-tag-editor-control";
-import { ViewerNavigation } from "@/hooks/use-viewer-control";
+import { ViewerNavigation } from "@/hooks/use-viewer-navigation";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 

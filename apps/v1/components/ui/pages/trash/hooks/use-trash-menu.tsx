@@ -2,7 +2,7 @@ import { TrashDialogs } from "@/components/ui/pages/trash/hooks/use-trash-dialog
 import { TrashNavigation } from "@/components/ui/pages/trash/hooks/use-trash-navigation";
 import { TrashSelection } from "@/components/ui/pages/trash/hooks/use-trash-selection";
 import { Fullscreen } from "@/hooks/use-fullscreen";
-import { ViewerNavigation } from "@/hooks/use-viewer-control";
+import { ViewerNavigation } from "@/hooks/use-viewer-navigation";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   ExternalLinkIcon,
