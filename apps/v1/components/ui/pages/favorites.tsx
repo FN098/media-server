@@ -158,7 +158,6 @@ export function Favorites({ listing }: { listing: MediaListing }) {
             targetNodes={selection.selectedNodes}
             onClose={tagEditor.close}
             mode={tagEditor.mode}
-            opacity={tagEditor.mode === "default" ? 100 : 0}
           />
 
           {/* ダイアログ */}
