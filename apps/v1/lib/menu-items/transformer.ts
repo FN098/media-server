@@ -1,52 +1,36 @@
-type Transform<TItem, TContext> = (
+export type Transform<TItem, TContext> = (
   items: TItem[],
   context: TContext
 ) => TItem[];
 
-type RecursiveMenuItem<TItem> = {
-  type: string;
-  children?: TItem[];
-};
+export function createTransformer<TItem, TContext>(
+  transforms: readonly Transform<TItem, TContext>[]
+): Transform<TItem, TContext> {
+  function apply(items: TItem[], context: TContext): TItem[] {
+    return transforms.reduce(
+      (current, transform) => transform(current, context),
+      items
+    );
+  }
 
-type TransformerOptions = {
-  recurse?: boolean;
-};
+  return apply;
+}
 
-export function createTransformer<
-  TItem extends RecursiveMenuItem<TItem>,
+export function createRecursiveTransformer<
+  TItem extends { key: string; children?: TItem[] },
   TContext,
 >(
-  transforms: readonly Transform<TItem, TContext>[],
-  defaultOptions?: TransformerOptions
-) {
-  function run(
-    items: TItem[],
-    context: TContext,
-    options?: TransformerOptions
-  ): TItem[] {
-    const resolvedOptions = {
-      ...defaultOptions,
-      ...options,
-    };
-
+  transforms: readonly Transform<TItem, TContext>[]
+): Transform<TItem, TContext> {
+  function apply(items: TItem[], context: TContext): TItem[] {
     const transformed = transforms.reduce(
       (current, transform) => transform(current, context),
       items
     );
-
-    if (!resolvedOptions.recurse) {
-      return transformed;
-    }
-
     return transformed.map((item) => {
       if (!item.children) return item;
-
-      return {
-        ...item,
-        children: run(item.children, context, resolvedOptions),
-      };
+      return { ...item, children: apply(item.children, context) };
     });
   }
-
-  return run;
+  return apply;
 }

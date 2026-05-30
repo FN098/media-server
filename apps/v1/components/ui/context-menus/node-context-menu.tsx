@@ -3,7 +3,7 @@
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { defaultFilters } from "@/lib/menu-items/filters";
-import { createTransformer } from "@/lib/menu-items/transformer";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import {
@@ -21,9 +21,10 @@ import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import React, { Fragment } from "react";
 
-const transformer = createTransformer<MenuItemDef<NodeContext>, NodeContext>(
-  defaultFilters
-);
+const transformer = createRecursiveTransformer<
+  MenuItemDef<NodeContext>,
+  NodeContext
+>(defaultFilters);
 
 interface NodeContextMenuProps {
   node: MediaNode;

@@ -1,5 +1,5 @@
 import { defaultFilters } from "@/lib/menu-items/filters";
-import { createTransformer } from "@/lib/menu-items/transformer";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
@@ -31,7 +31,9 @@ export function ActionDropdownMenu<T>({
 }: ActionDropdownMenuProps<T>) {
   const isMobile = useIsMobile();
 
-  const transformer = createTransformer<MenuItemDef<T>, T>(defaultFilters);
+  const transformer = createRecursiveTransformer<MenuItemDef<T>, T>(
+    defaultFilters
+  );
   const items = transformer(menuItems, context);
 
   return (

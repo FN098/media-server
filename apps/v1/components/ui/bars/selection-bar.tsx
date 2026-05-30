@@ -1,6 +1,6 @@
 import { AnimatedCheckCircle } from "@/components/ui/icons/animated-check-circle";
 import { defaultFilters } from "@/lib/menu-items/filters";
-import { createTransformer } from "@/lib/menu-items/transformer";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -21,7 +21,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { MoreVertical, X } from "lucide-react";
 import { Fragment } from "react/jsx-runtime";
 
-const transformer = createTransformer<
+const transformer = createRecursiveTransformer<
   MenuItemDef<MultipleNodesContext>,
   MultipleNodesContext
 >(defaultFilters);

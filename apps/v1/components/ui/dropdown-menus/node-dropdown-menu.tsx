@@ -3,7 +3,7 @@
 import { useMounted } from "@/hooks/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { defaultFilters } from "@/lib/menu-items/filters";
-import { createTransformer } from "@/lib/menu-items/transformer";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
@@ -23,9 +23,10 @@ import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
 import { Fragment, useState } from "react";
 
-const transformer = createTransformer<MenuItemDef<NodeContext>, NodeContext>(
-  defaultFilters
-);
+const transformer = createRecursiveTransformer<
+  MenuItemDef<NodeContext>,
+  NodeContext
+>(defaultFilters);
 
 interface NodeDropdownMenuProps {
   node: MediaNode;

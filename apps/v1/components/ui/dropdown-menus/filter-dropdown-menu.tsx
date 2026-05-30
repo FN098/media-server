@@ -1,7 +1,7 @@
 "use client";
 
 import { defaultFilters } from "@/lib/menu-items/filters";
-import { createTransformer } from "@/lib/menu-items/transformer";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -31,7 +31,9 @@ export function FilterDropdownMenu<T>({
   onReset,
   canReset = false,
 }: FilterDropdownMenuProps<T>) {
-  const transformer = createTransformer<MenuItemDef<T>, T>(defaultFilters);
+  const transformer = createRecursiveTransformer<MenuItemDef<T>, T>(
+    defaultFilters
+  );
   const items = transformer(menuItems, context);
 
   return (
