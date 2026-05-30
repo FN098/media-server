@@ -316,7 +316,7 @@ export async function moveNodesAction(
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
     const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
 
-    // サムネイル移動
+    // サムネイル移動前処理（移動対象がフォルダなら先に移動先の同名フォルダを削除しておく）
     let thumbMoved = false;
     try {
       if (isDirectory) {
@@ -331,6 +331,7 @@ export async function moveNodesAction(
       continue;
     }
 
+    // サムネイル移動
     try {
       await rename(srcThumbPath, destThumbPath);
       thumbMoved = true;
@@ -464,8 +465,6 @@ export async function moveNodesAction(
           `;
         }
       });
-
-      results.success++;
     } catch (error) {
       console.error(`DB Move Error [${srcVirtualPath}]:`, error);
 
