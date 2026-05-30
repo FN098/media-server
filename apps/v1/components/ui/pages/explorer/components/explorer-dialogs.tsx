@@ -46,15 +46,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       <CopyDialog dialog={copyDialog} />
 
       {/* 削除ダイアログ */}
-      <DeleteDialog
-        open={deleteDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            deleteDialog.close();
-          }
-        }}
-        targets={deleteDialog.targets}
-      />
+      <DeleteDialog dialog={deleteDialog} />
 
       {/* プレビュー設定ダイアログ */}
       <ApplyPreviewDialog

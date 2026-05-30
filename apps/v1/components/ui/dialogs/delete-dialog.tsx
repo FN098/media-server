@@ -1,7 +1,6 @@
-import {
-  deleteNodesAction,
-  deleteNodesPermanentlyAction,
-} from "@/lib/media/actions";
+"use client";
+
+import { useDeleteDialog } from "@/hooks/use-delete-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,62 +12,21 @@ import {
   AlertDialogTitle,
 } from "@/shadcn/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
-import { useTransition } from "react";
-import { toast } from "sonner";
-
-type DeletableNode = { path: string; name: string };
 
 interface DeleteDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  targets: DeletableNode[];
-  permanent?: boolean;
+  dialog: ReturnType<typeof useDeleteDialog>;
 }
 
-export function DeleteDialog({
-  open,
-  onOpenChange,
-  targets,
-  permanent = false,
-}: DeleteDialogProps) {
-  const [isPending, startTransition] = useTransition();
+export function DeleteDialog({ dialog }: DeleteDialogProps) {
+  const { isOpen, targets, permanent, isPending, close, performDelete } =
+    dialog;
+
+  if (!isOpen || !targets || targets.length === 0) return null;
+
   const count = targets.length;
 
-  const handleApply = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
-    e.preventDefault();
-
-    if (permanent) {
-      // 完全に削除
-      startTransition(async () => {
-        const paths = targets.map((n) => n.path);
-        const result = await deleteNodesPermanentlyAction(paths);
-
-        if (result.failed === 0) {
-          toast.success(`${result.success}件のアイテムを完全に削除しました`);
-          onOpenChange(false);
-        } else {
-          toast.error(`${result.failed}件の削除に失敗しました`);
-        }
-      });
-    } else {
-      // ゴミ箱に移動
-      startTransition(async () => {
-        const paths = targets.map((n) => n.path);
-        const result = await deleteNodesAction(paths);
-
-        if (result.failed === 0) {
-          toast.success(`${result.success}件をゴミ箱に移動しました`);
-          onOpenChange(false);
-        } else {
-          toast.error(`${result.failed}件の削除に失敗しました`);
-        }
-      });
-    }
-  };
-
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <AlertDialogContent
         onEscapeKeyDown={(e) => e.stopPropagation()}
         className="focus:outline-none"
@@ -95,13 +53,20 @@ export function DeleteDialog({
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
+
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>キャンセル</AlertDialogCancel>
+          <AlertDialogCancel onClick={close} disabled={isPending}>
+            キャンセル
+          </AlertDialogCancel>
           <AlertDialogAction
             autoFocus
-            onClick={handleApply}
+            onClick={(e) => {
+              // Shadcnのデフォルトで閉じる挙動をガード
+              e.preventDefault();
+              performDelete();
+            }}
             disabled={isPending}
-            className="bg-destructive hover:bg-destructive/90"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
             {isPending ? (
               <>

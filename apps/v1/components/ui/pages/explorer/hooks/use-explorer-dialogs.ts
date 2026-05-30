@@ -18,7 +18,7 @@ export function useExplorerDialogs() {
   const moveDialog = useMoveDialog();
   const copyDialog = useCopyDialog();
   const createFolderDialog = useCreateFolderDialog();
-  const deleteDialog = useDeleteDialog<MediaNode>();
+  const deleteDialog = useDeleteDialog();
   const extractDialog = useExtractDialog();
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog<MediaNode>();

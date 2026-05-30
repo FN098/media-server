@@ -1,42 +1,71 @@
-import { useCallback, useState } from "react";
+import {
+  deleteNodesAction,
+  deleteNodesPermanentlyAction,
+} from "@/lib/media/actions";
+import { useCallback, useState, useTransition } from "react";
+import { toast } from "sonner";
 
-export type DeleteDialogContext<T> =
-  | {
-      isOpen: true;
-      targets: T[];
-    }
-  | { isOpen: false };
+type DeleteTarget = {
+  path: string;
+};
 
-interface UseDeleteDialogProps<T> {
-  onChange?: (context: DeleteDialogContext<T>) => void;
+interface UseDeleteDialogProps {
+  onSuccess?: () => void;
 }
 
-export function useDeleteDialog<T>({ onChange }: UseDeleteDialogProps<T> = {}) {
+export function useDeleteDialog({ onSuccess }: UseDeleteDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [targets, setTargets] = useState<T[]>([]);
+  const [targets, setTargets] = useState<DeleteTarget[]>([]);
+  const [permanent, setPermanent] = useState(false);
 
-  const open = useCallback(
-    (targets: T[]) => {
-      onChange?.({
-        isOpen: true,
-        targets,
-      });
-      setTargets(targets);
-      setIsOpen(true);
-    },
-    [onChange]
-  );
+  const [isPending, startTransition] = useTransition();
 
+  // 1. ダイアログを開く（完全削除かどうかのフラグをここで受け取る）
+  const open = useCallback((nodes: DeleteTarget[], isPermanent = false) => {
+    setTargets(nodes);
+    setPermanent(isPermanent);
+    setIsOpen(true);
+  }, []);
+
+  // 2. ダイアログを閉じる
   const close = useCallback(() => {
-    onChange?.({ isOpen: false });
-    setTargets([]);
     setIsOpen(false);
-  }, [onChange]);
+    setTargets([]);
+    setPermanent(false);
+  }, []);
+
+  // 3. 削除処理の実行
+  const performDelete = useCallback(() => {
+    if (targets.length === 0) return;
+
+    const paths = targets.map((n) => n.path);
+
+    startTransition(async () => {
+      const result = permanent
+        ? await deleteNodesPermanentlyAction(paths)
+        : await deleteNodesAction(paths);
+
+      if (result.failed === 0) {
+        toast.success(
+          permanent
+            ? `${result.success}件のアイテムを完全に削除しました`
+            : `${result.success}件をゴミ箱に移動しました`
+        );
+        onSuccess?.();
+        close();
+      } else {
+        toast.error(`${result.failed}件の削除に失敗しました`);
+      }
+    });
+  }, [targets, permanent, close, onSuccess]);
 
   return {
-    targets,
     isOpen,
+    targets,
+    permanent,
+    isPending,
     open,
     close,
+    performDelete,
   };
 }
