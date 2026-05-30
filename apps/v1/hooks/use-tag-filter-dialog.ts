@@ -1,6 +1,7 @@
 import { useTags } from "@/hooks/use-tags";
 import { TagFilterMode, TagFilterValue } from "@/lib/filter/types";
 import { Tag } from "@/lib/tag/types";
+import { uniqueBy } from "@/lib/utils/array";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 
@@ -77,16 +78,11 @@ export function useTagFilterDialog({
   const open = useCallback(
     (initialValue: TagFilterValue, relatedNodes: RelatedNode[] = []) => {
       const initialIds = new Set(initialValue.tags.map((t) => t.id));
-
-      const tagMap = new Map<string, Tag>();
-      for (const node of relatedNodes) {
-        if (node.tags == null || node.tags.length === 0) continue;
-        for (const tag of node.tags) {
-          tagMap.set(tag.id, tag);
-        }
-      }
-      setRelatedTags([...tagMap.values()]);
-
+      const relatedTags = uniqueBy(
+        relatedNodes.flatMap((n) => n.tags ?? []),
+        "id"
+      );
+      setRelatedTags(relatedTags);
       setCurrentMode(initialValue.mode);
       setTempSelectedIds(initialIds);
       setTempSelectedCache(new Map(initialValue.tags.map((t) => [t.id, t])));
