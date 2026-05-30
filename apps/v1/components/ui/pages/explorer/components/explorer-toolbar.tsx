@@ -102,7 +102,7 @@ export function ExplorerToolbar({
       />
 
       {/* ダイアログ */}
-      <ExplorerToolbarDialogs dialogs={dialogs} filtering={filtering} />
+      <ExplorerToolbarDialogs dialogs={dialogs} />
     </div>
   );
 }

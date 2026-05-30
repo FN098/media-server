@@ -29,7 +29,10 @@ export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
   const ratingFilterDialog = useRatingFilterDialog({
     onApply: filtering.controls.rating.apply,
   });
-  const tagFilterDialog = useTagFilterDialog();
+  const tagFilterDialog = useTagFilterDialog({
+    onApply: filtering.controls.tag.apply,
+    autoFocusInput: true,
+  });
 
   const all = useMemo(
     () =>
