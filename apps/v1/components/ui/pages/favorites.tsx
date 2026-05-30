@@ -11,7 +11,6 @@ import { useFavoritesMenu } from "@/components/ui/pages/favorites/hooks/use-favo
 import { useFavoritesNavigation } from "@/components/ui/pages/favorites/hooks/use-favorites-navigation";
 import { useFavoritesSelection } from "@/components/ui/pages/favorites/hooks/use-favorites-selection";
 import { useFavoritesSelectionbar } from "@/components/ui/pages/favorites/hooks/use-favorites-selectionbar";
-import { useFavoritesSort } from "@/components/ui/pages/favorites/hooks/use-favorites-sort";
 import { useFavoritesThumbs } from "@/components/ui/pages/favorites/hooks/use-favorites-thumbs";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -33,7 +32,6 @@ import { cn } from "@/shadcn/lib/utils";
 export function Favorites({ listing }: { listing: MediaListing }) {
   const searchFocus = useSearchFocusContext();
   const viewMode = useViewMode();
-  const sort = useFavoritesSort();
   const filtering = useFavoritesFiltering({ listing });
   const selection = useFavoritesSelection({ listing, filtering });
 
