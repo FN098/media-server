@@ -11,6 +11,7 @@ import {
 import { visitFolderAction } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
+import { getFilePreviewAction } from "@/lib/text/actions";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -89,7 +90,21 @@ export function useExplorerNavigation({
         return;
       }
 
-      toast.warning("このファイル形式は対応していません");
+      toast.promise(
+        async () => {
+          return await getFilePreviewAction(node.path);
+        },
+        {
+          loading: "読み込み中...",
+          success: (file) => {
+            if (file.isText) {
+              return file.content;
+            }
+            return "このファイル形式は対応していません";
+          },
+          error: "ファイルの読み込みに失敗しました",
+        }
+      );
     },
     [folder, getMediaIndex, viewer]
   );
