@@ -509,7 +509,7 @@ export function DatabaseBackupCard() {
                 <AlertDialogCancel>キャンセル</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleRestore}
-                  className="bg-destructive text-white hover:bg-destructive/90"
+                  variant="destructive"
                 >
                   リストアを確定する
                 </AlertDialogAction>
