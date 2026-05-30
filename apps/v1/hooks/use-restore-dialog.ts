@@ -1,44 +1,57 @@
-import { useCallback, useState } from "react";
+import { restoreNodesAction } from "@/lib/media/actions";
+import { useCallback, useState, useTransition } from "react";
+import { toast } from "sonner";
 
-export type RestoreDialogContext<T> =
-  | {
-      isOpen: true;
-      targets: T[];
-    }
-  | { isOpen: false };
+type RestoreTarget = {
+  path: string;
+};
 
-interface UseRestoreDialogProps<T> {
-  onChange?: (context: RestoreDialogContext<T>) => void;
+interface UseRestoreDialogProps {
+  onSuccess?: () => void;
 }
 
-export function useRestoreDialog<T>({
-  onChange,
-}: UseRestoreDialogProps<T> = {}) {
+export function useRestoreDialog({ onSuccess }: UseRestoreDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [targets, setTargets] = useState<T[]>([]);
+  const [targets, setTargets] = useState<RestoreTarget[]>([]);
+  const [isPending, startTransition] = useTransition();
 
-  const open = useCallback(
-    (targets: T[]) => {
-      onChange?.({
-        isOpen: true,
-        targets,
-      });
-      setTargets(targets);
-      setIsOpen(true);
-    },
-    [onChange]
-  );
+  // 1. ダイアログを開く
+  const open = useCallback((targets: RestoreTarget[]) => {
+    setTargets(targets);
+    setIsOpen(true);
+  }, []);
 
+  // 2. ダイアログを閉じる
   const close = useCallback(() => {
-    onChange?.({ isOpen: false });
-    setTargets([]);
     setIsOpen(false);
-  }, [onChange]);
+    setTargets([]);
+  }, []);
+
+  // 3. 復元処理の実行
+  const performRestore = useCallback(() => {
+    if (targets.length === 0) return;
+
+    const paths = targets.map((n) => n.path);
+
+    startTransition(async () => {
+      const result = await restoreNodesAction(paths);
+
+      if (result.failed === 0) {
+        toast.success(`${result.success}件のアイテムを復元しました`);
+        onSuccess?.();
+        close();
+      } else {
+        toast.error(`${result.failed}件の復元に失敗しました`);
+      }
+    });
+  }, [targets, close, onSuccess]);
 
   return {
-    targets,
     isOpen,
+    targets,
+    isPending,
     open,
     close,
+    performRestore,
   };
 }

@@ -12,27 +12,10 @@ export function TrashDialogs({ dialogs }: TrashDialogsProps) {
   return (
     <>
       {/* 削除ダイアログ */}
-      <DeleteDialog
-        open={deleteDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            deleteDialog.close();
-          }
-        }}
-        targets={deleteDialog.targets}
-        permanent
-      />
+      <DeleteDialog dialog={deleteDialog} />
 
       {/* 復元ダイアログ */}
-      <RestoreDialog
-        open={restoreDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            restoreDialog.close();
-          }
-        }}
-        targets={restoreDialog.targets}
-      />
+      <RestoreDialog dialog={restoreDialog} />
     </>
   );
 }

@@ -1,4 +1,6 @@
-import { restoreNodesAction } from "@/lib/media/actions";
+"use client";
+
+import { useRestoreDialog } from "@/hooks/use-restore-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,43 +12,24 @@ import {
   AlertDialogTitle,
 } from "@/shadcn/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
-import { useTransition } from "react";
-import { toast } from "sonner";
 
 interface RestoreDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  targets: { path: string; name: string }[];
+  dialog: ReturnType<typeof useRestoreDialog>;
 }
 
-export function RestoreDialog({
-  open,
-  onOpenChange,
-  targets,
-}: RestoreDialogProps) {
-  const [isPending, startTransition] = useTransition();
+export function RestoreDialog({ dialog }: RestoreDialogProps) {
+  const { isOpen, targets, isPending, close, performRestore } = dialog;
+
+  if (!isOpen || !targets || targets.length === 0) return null;
+
   const count = targets.length;
 
-  const handleApply = (e: React.MouseEvent) => {
-    // 重要: デフォルトの「クリックしたら閉じる」動作をキャンセル
-    e.preventDefault();
-
-    startTransition(async () => {
-      const paths = targets.map((n) => n.path);
-      const result = await restoreNodesAction(paths);
-
-      if (result.failed === 0) {
-        toast.success(`${result.success}件のアイテムを復元しました`);
-        onOpenChange(false);
-      } else {
-        toast.error(`${result.failed}件の復元に失敗しました`);
-      }
-    });
-  };
-
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent onEscapeKeyDown={(e) => e.stopPropagation()}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>
+      <AlertDialogContent
+        onEscapeKeyDown={(e) => e.stopPropagation()}
+        className="focus:outline-none"
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>アイテムの復元</AlertDialogTitle>
           <AlertDialogDescription>
@@ -55,10 +38,18 @@ export function RestoreDialog({
             同名のファイルが元の場所にある場合は上書きされます。
           </AlertDialogDescription>
         </AlertDialogHeader>
+
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>キャンセル</AlertDialogCancel>
+          <AlertDialogCancel onClick={close} disabled={isPending}>
+            キャンセル
+          </AlertDialogCancel>
           <AlertDialogAction
-            onClick={handleApply}
+            autoFocus
+            onClick={(e) => {
+              // Shadcnのデフォルトで閉じる挙動をガード
+              e.preventDefault();
+              performRestore();
+            }}
             disabled={isPending}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
