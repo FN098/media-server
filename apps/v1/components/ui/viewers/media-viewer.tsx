@@ -7,13 +7,13 @@ import { NodeDropdownMenu } from "@/components/ui/dropdown-menus/node-dropdown-m
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
-import { useMediaViewerFavorite } from "@/components/ui/viewers/hooks/use-media-viewer-favorite";
-import { useMediaViewerHotkeys } from "@/components/ui/viewers/hooks/use-media-viewer-hotkeys";
-import { useMediaViewerNavigation } from "@/components/ui/viewers/hooks/use-media-viewer-navigation";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/general/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/general/use-document-title";
+import { useMediaViewerFavorite } from "@/hooks/viewer/use-media-viewer-favorite";
+import { useMediaViewerHotkeys } from "@/hooks/viewer/use-media-viewer-hotkeys";
+import { useMediaViewerNavigation } from "@/hooks/viewer/use-media-viewer-navigation";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
