@@ -78,7 +78,7 @@ export async function getFsNode(
   };
 }
 
-export async function listFsDirectory(
+export async function getFsListing(
   virtualDirPath: string,
   context: MediaFsContext = defaultContext
 ): Promise<MediaFsListing | null> {

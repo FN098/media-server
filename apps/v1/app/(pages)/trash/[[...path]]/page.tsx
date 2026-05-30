@@ -3,7 +3,7 @@ import { Trash } from "@/components/ui/pages/trash";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import { getFolderVisitedInfo } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/formatters";
-import { listFsDirectory } from "@/lib/media/fs-listing";
+import { getFsListing } from "@/lib/media/fs-listing";
 import { mergeFsWithDb } from "@/lib/media/merger";
 import { getMediaDbNodes } from "@/lib/media/repository";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
@@ -56,7 +56,7 @@ export default async function TrashPage(props: TrashPageProps) {
   const currentVirtualDirPath = pathParts.map(decodeURIComponent).join("/");
 
   // FileSystem からリスト取得
-  const fsListing = await listFsDirectory(currentVirtualDirPath, {
+  const fsListing = await getFsListing(currentVirtualDirPath, {
     resolveRealPath: (virtualPath) => getServerMediaTrashPath(virtualPath),
     filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
   });
