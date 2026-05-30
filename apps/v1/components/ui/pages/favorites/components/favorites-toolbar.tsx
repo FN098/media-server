@@ -48,6 +48,8 @@ export function FavoritesToolbar({
           <FilterDropdownMenu
             menuItems={toolbarFilterItems}
             context={filterContext}
+            onReset={filtering.reset}
+            canReset={filtering.canReset}
           />
         </div>
 
