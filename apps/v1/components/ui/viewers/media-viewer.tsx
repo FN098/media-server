@@ -11,11 +11,6 @@ import { useMediaViewerFavorite } from "@/components/ui/viewers/hooks/use-media-
 import { useMediaViewerHotkeys } from "@/components/ui/viewers/hooks/use-media-viewer-hotkeys";
 import { useMediaViewerNavigation } from "@/components/ui/viewers/hooks/use-media-viewer-navigation";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
-import {
-  ContentSlide,
-  getSlideIndex,
-  MediaViewerSlide,
-} from "@/components/ui/viewers/lib/slides";
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
 import { useAutoHidingUI } from "@/hooks/general/use-auto-hide";
 import { useDocumentTitle } from "@/hooks/general/use-document-title";
@@ -24,6 +19,11 @@ import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { assertNever } from "@/lib/utils/assert";
 import { clamp } from "@/lib/utils/clamp";
+import {
+  ContentSlide,
+  getSlideIndex,
+  MediaViewerSlide,
+} from "@/lib/viewer/slides";
 import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import {
