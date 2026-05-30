@@ -81,7 +81,11 @@ export async function restoreBackupAction(file: DbBackupFile) {
   const db = parseDatabaseURL(databaseUrl);
 
   try {
-    await restoreDatabaseFromFile(db, filePath);
+    console.log("restore started.");
+
+    const result = await restoreDatabaseFromFile(db, filePath);
+
+    console.log("restore ended:", result);
 
     return { success: true };
   } catch (error) {
