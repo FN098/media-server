@@ -3,8 +3,8 @@
 import {
   getFolderMediaFilesAction,
   getSubDirectoriesAction,
-  updatePreviewAction,
 } from "@/lib/media/actions";
+import { updatePreviewAction } from "@/lib/preview/actions";
 import { getFilenameWithoutExt } from "@/lib/utils/filename";
 import { Button } from "@/shadcn/components/ui/button";
 import {
