@@ -19,6 +19,7 @@ import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { basename, extname } from "path";
 
 // 動的ページとしてレンダリング
 export const dynamic = "force-dynamic";
@@ -102,8 +103,23 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   const sorted = sortNodes(merged, {
     key: sortKey,
     direction: sortDirection,
-    valueMapper: (node, key) =>
-      node.isDirectory && key === "rating" ? node["averageRating"] : node[key],
+    valueMapper: (node, key) => {
+      if (node.isDirectory && key === "rating") {
+        return node["averageRating"];
+      }
+
+      if (key === "name") {
+        // 拡張子を除くファイル名で比較
+        return basename(node.name, extname(node.name));
+      }
+
+      if (key === "path") {
+        // 拡張子を除くファイル名で比較
+        return basename(node.path, extname(node.path));
+      }
+
+      return node[key];
+    },
   });
 
   // フォーマット
