@@ -5,7 +5,10 @@ import { dirname } from "path";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-export type PreviewItemInfo = { name: string; path: string };
+type PreviewItemInfo = {
+  name: string;
+  path: string;
+};
 
 interface UsePreviewDialogProps {
   onSuccess?: () => void;

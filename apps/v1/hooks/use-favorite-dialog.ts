@@ -1,9 +1,12 @@
-import { MediaNode } from "@/lib/media/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-export type FavoriteDialogMode = "add" | "remove";
+type FavoriteTarget = {
+  path: string;
+};
+
+type FavoriteDialogMode = "add" | "remove";
 
 interface UseFavoriteDialogProps {
   onSuccess?: () => void;
@@ -11,7 +14,7 @@ interface UseFavoriteDialogProps {
 
 export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [targets, setTargets] = useState<MediaNode[]>([]);
+  const [targets, setTargets] = useState<FavoriteTarget[]>([]);
   const [mode, setMode] = useState<FavoriteDialogMode>("add");
 
   const [isPending, startTransition] = useTransition();
@@ -20,8 +23,8 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
 
   // 1. ダイアログを開く
   const open = useCallback(
-    (nodes: MediaNode[], currentMode: FavoriteDialogMode) => {
-      setTargets(nodes);
+    (targets: FavoriteTarget[], currentMode: FavoriteDialogMode) => {
+      setTargets(targets);
       setMode(currentMode);
       setIsOpen(true);
     },
