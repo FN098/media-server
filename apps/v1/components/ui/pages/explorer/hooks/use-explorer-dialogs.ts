@@ -19,7 +19,7 @@ export function useExplorerDialogs() {
   const copyDialog = useCopyDialog();
   const createFolderDialog = useCreateFolderDialog();
   const deleteDialog = useDeleteDialog<MediaNode>();
-  const extractDialog = useExtractDialog<MediaNode>();
+  const extractDialog = useExtractDialog();
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog<MediaNode>();
   const ratingFilterDialog = useRatingFilterDialog();

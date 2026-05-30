@@ -31,15 +31,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
   return (
     <>
       {/* 解凍ダイアログ */}
-      <ExtractDialog
-        open={extractDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            extractDialog.close();
-          }
-        }}
-        targets={extractDialog.targets}
-      />
+      <ExtractDialog dialog={extractDialog} />
 
       {/* リネームダイアログ */}
       <RenameDialog dialog={renameDialog} />

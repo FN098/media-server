@@ -1,4 +1,6 @@
-import { extractMultipleArchivesNodeAction } from "@/lib/archive/actions";
+"use client";
+
+import { useExtractDialog } from "@/hooks/use-extract-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,46 +12,19 @@ import {
   AlertDialogTitle,
 } from "@/shadcn/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
-import { useTransition } from "react";
-import { toast } from "sonner";
 
 interface ExtractDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  targets: { path: string; name: string }[] | null;
+  dialog: ReturnType<typeof useExtractDialog>;
 }
 
-export function ExtractDialog({
-  open,
-  onOpenChange,
-  targets,
-}: ExtractDialogProps) {
-  const [isPending, startTransition] = useTransition();
+export function ExtractDialog({ dialog }: ExtractDialogProps) {
+  const { isOpen, targets, isPending, close, performExtract } = dialog;
 
-  if (!targets || targets.length === 0) return null;
-
-  const handleApply = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // 重要: デフォルトの「クリックしたらダイアログを自動で閉じる」動作をキャンセル
-    e.preventDefault();
-
-    startTransition(async () => {
-      const result = await extractMultipleArchivesNodeAction(targets);
-
-      if (result.success) {
-        toast.success(
-          targets.length === 1
-            ? `${targets[0].name} の解凍が完了しました`
-            : `${targets.length} 件の解凍が完了しました`
-        );
-        onOpenChange(false); // 成功時のみモーダルを閉じる
-      } else {
-        toast.error(result.error || "解凍に失敗しました");
-      }
-    });
-  };
+  // ターゲットがない、または空の時は何も描画しない
+  if (!isOpen || !targets || targets.length === 0) return null;
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <AlertDialogContent
         onEscapeKeyDown={(e) => e.stopPropagation()}
         className="focus:outline-none"
@@ -65,11 +40,18 @@ export function ExtractDialog({
             など）が付与されます。
           </AlertDialogDescription>
         </AlertDialogHeader>
+
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>キャンセル</AlertDialogCancel>
+          <AlertDialogCancel onClick={close} disabled={isPending}>
+            キャンセル
+          </AlertDialogCancel>
           <AlertDialogAction
             autoFocus
-            onClick={handleApply}
+            onClick={(e) => {
+              // ShadcnのAlertDialogActionが勝手にダイアログを閉じるデフォルト挙動をガード
+              e.preventDefault();
+              performExtract();
+            }}
             disabled={isPending}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
