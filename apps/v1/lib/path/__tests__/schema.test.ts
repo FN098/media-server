@@ -1,6 +1,31 @@
 import { PathSchema, PathSegmentSchema } from "@/lib/path/schemas";
 import { describe, expect, it } from "vitest";
 
+const RESERVED_NAMES = [
+  "CON",
+  "PRN",
+  "AUX",
+  "NUL",
+  "COM1",
+  "COM2",
+  "COM3",
+  "COM4",
+  "COM5",
+  "COM6",
+  "COM7",
+  "COM8",
+  "COM9",
+  "LPT1",
+  "LPT2",
+  "LPT3",
+  "LPT4",
+  "LPT5",
+  "LPT6",
+  "LPT7",
+  "LPT8",
+  "LPT9",
+] as const;
+
 describe("PathSegmentSchema", () => {
   describe("valid segments", () => {
     it.each(["foo", "foo.txt", "my-file", "my_file", "画像", "大阪.jpg"])(
@@ -33,20 +58,9 @@ describe("PathSegmentSchema", () => {
   });
 
   describe("reserved names", () => {
-    it.each([
-      "CON",
-      "PRN",
-      "AUX",
-      "NUL",
-      "COM1",
-      "COM9",
-      "LPT1",
-      "LPT9",
-      "CON.txt",
-      "nul.jpg",
-      "com1.png",
-    ])("rejects %s", (segment) => {
-      expect(() => PathSegmentSchema.parse(segment)).toThrow();
+    it.each(RESERVED_NAMES)("rejects reserved name %s", (name) => {
+      expect(() => PathSegmentSchema.parse(name)).toThrow();
+      expect(() => PathSegmentSchema.parse(`${name}.txt`)).toThrow();
     });
 
     it.each(["con", "Con", "cOn", "nul", "Com1", "lPt9"])(
@@ -57,7 +71,7 @@ describe("PathSegmentSchema", () => {
     );
   });
 
-  describe("trim behavior", () => {
+  describe("whitespace handling", () => {
     it.each([" foo", "foo ", " foo "])(
       "rejects segment with leading/trailing whitespace: %s",
       (segment) => {
@@ -79,6 +93,10 @@ describe("PathSchema", () => {
 
     it("removes multiple leading slashes", () => {
       expect(PathSchema.parse("///foo/bar")).toBe("foo/bar");
+    });
+
+    it("normalizes mixed separators", () => {
+      expect(PathSchema.parse("\\foo/bar\\baz")).toBe("foo/bar/baz");
     });
   });
 
@@ -127,34 +145,17 @@ describe("PathSchema", () => {
   });
 
   describe("reserved names", () => {
-    const RESERVED_NAMES = [
-      "CON",
-      "PRN",
-      "AUX",
-      "NUL",
-      "COM1",
-      "COM2",
-      "COM3",
-      "COM4",
-      "COM5",
-      "COM6",
-      "COM7",
-      "COM8",
-      "COM9",
-      "LPT1",
-      "LPT2",
-      "LPT3",
-      "LPT4",
-      "LPT5",
-      "LPT6",
-      "LPT7",
-      "LPT8",
-      "LPT9",
-    ];
-
     it.each(RESERVED_NAMES)("rejects reserved name %s", (name) => {
       expect(() => PathSchema.parse(name)).toThrow();
       expect(() => PathSchema.parse(`${name}.txt`)).toThrow();
     });
+
+    it.each(["con", "Con", "cOn", "nul", "Com1", "lPt9"])(
+      "rejects reserved name regardless of case: %s",
+      (name) => {
+        expect(() => PathSchema.parse(name)).toThrow();
+        expect(() => PathSchema.parse(`foo/${name}/bar`)).toThrow();
+      }
+    );
   });
 });
