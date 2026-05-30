@@ -58,7 +58,7 @@ export function Explorer({ listing }: ExplorerProps) {
     targetCount: selection.selectedCount,
   });
 
-  const dialogs = useExplorerDialogs();
+  const dialogs = useExplorerDialogs({ filtering });
   const thumbs = useExplorerThumbs({ listing });
   const fullscreen = useFullscreen();
 

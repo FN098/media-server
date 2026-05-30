@@ -1,3 +1,4 @@
+import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
 import { useCopyDialog } from "@/hooks/use-copy-dialog";
 import { useCreateFolderDialog } from "@/hooks/use-create-folder-dialog";
 import { useDeleteDialog } from "@/hooks/use-delete-dialog";
@@ -12,7 +13,11 @@ import { useMemo } from "react";
 
 export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;
 
-export function useExplorerDialogs() {
+interface UseExplorerDialogsProps {
+  filtering: ExplorerFiltering;
+}
+
+export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
   const renameDialog = useRenameDialog();
   const moveDialog = useMoveDialog();
   const copyDialog = useCopyDialog();
@@ -21,7 +26,9 @@ export function useExplorerDialogs() {
   const extractDialog = useExtractDialog();
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog();
-  const ratingFilterDialog = useRatingFilterDialog();
+  const ratingFilterDialog = useRatingFilterDialog({
+    onApply: filtering.controls.rating.apply,
+  });
   const tagFilterDialog = useTagFilterDialog();
 
   const all = useMemo(

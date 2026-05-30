@@ -68,15 +68,12 @@ export function ExplorerToolbarDialogs({
 }: ExplorerToolbarDialogsProps) {
   const isMobile = useIsMobile();
 
+  const { ratingFilterDialog } = dialogs;
+
   return (
     <>
       {/* 評価フィルターダイアログ */}
-      <RatingFilterDialog
-        open={dialogs.ratingFilterDialog.isOpen}
-        onOpenChange={(open) => !open && dialogs.ratingFilterDialog.close()}
-        value={dialogs.ratingFilterDialog.currentValue}
-        onChange={filtering.controls.rating.apply}
-      />
+      <RatingFilterDialog dialog={ratingFilterDialog} />
 
       {/* タグフィルター */}
       <TagFilterDialog
