@@ -526,6 +526,23 @@ export async function copyNodesAction(
     path.replace(/^\//, "")
   );
 
+  // コピー先の既存ファイル/フォルダ一覧を最初に1回だけ取得 (メモリ上で高速判定するため)
+  const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
+  const existingNames = new Set<string>();
+  try {
+    const files = await readdir(destLocalRootPath);
+    files.forEach((name) => existingNames.add(name));
+  } catch (e) {
+    // コピー先フォルダ自体が存在しないなどのエラーハンドリング
+    if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+      return {
+        success: 0,
+        failed: sourcePaths.length,
+        errors: ["コピー先フォルダの読み込みに失敗しました"],
+      };
+    }
+  }
+
   for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
     if (
@@ -539,56 +556,47 @@ export async function copyNodesAction(
       continue;
     }
 
-    const srcName = srcVirtualPath.split("/").pop() || "";
-    const destVirtualPath =
-      normalizedDestDirPath === ""
-        ? srcName
-        : `${normalizedDestDirPath}/${srcName}`;
-
-    const srcRealPath = getServerMediaPath(srcVirtualPath);
-    const destRealPath = getServerMediaPath(destVirtualPath);
-
-    // 存在確認
-    if (await existsPath(destRealPath)) {
-      results.failed++;
-      results.errors.push(
-        `コピー先に同名の項目が存在します: ${basename(destRealPath)}`
-      );
-      continue;
-    }
-
     // ディレクトリ判定
+    const srcRealPath = getServerMediaPath(srcVirtualPath);
     let stats: Awaited<ReturnType<typeof lstat>>;
     try {
       stats = await lstat(srcRealPath);
     } catch {
       results.failed++;
       results.errors.push(
-        `コピー元が見つかりません: ${basename(srcVirtualPath)}`
+        `移動元が見つかりません: ${basename(srcVirtualPath)}`
       );
       continue;
     }
     const isDirectory = stats.isDirectory();
+    const srcName = srcVirtualPath.split("/").pop() || "";
 
-    // FSコピー
-    try {
-      await cp(srcRealPath, destRealPath, { recursive: isDirectory });
-    } catch (e) {
-      console.error(`File Copy Error [${srcVirtualPath}]:`, e);
+    // 新しい名前を確定
+    let currentSrcName = srcName;
+    let counter = 1;
 
-      // ロールバック（中途半端なコピー結果を削除）
-      try {
-        await rm(destRealPath, { recursive: true, force: true });
-      } catch (re) {
-        console.error(`File Rollback Error [${srcVirtualPath}]:`, re);
+    while (existingNames.has(currentSrcName)) {
+      if (isDirectory) {
+        // フォルダの場合: 「フォルダ名 (1)」
+        currentSrcName = `${srcName} (${counter})`;
+      } else {
+        // ファイルの場合: 「ファイル名 (1).ext」
+        const ext = extname(srcName);
+        const base = basename(srcName, ext);
+        currentSrcName = `${base} (${counter})${ext}`;
       }
-
-      results.failed++;
-      results.errors.push(
-        `ファイルコピー中にエラーが発生しました: ${basename(srcVirtualPath)}`
-      );
-      continue;
+      counter++;
     }
+
+    // 次のループのファイルがこれと衝突するのを防ぐため、確定した名前を Set に予約登録
+    existingNames.add(currentSrcName);
+
+    // 最終的なパスを決定
+    const destVirtualPath =
+      normalizedDestDirPath === ""
+        ? currentSrcName
+        : `${normalizedDestDirPath}/${currentSrcName}`;
+    const destRealPath = getServerMediaPath(destVirtualPath);
 
     // サムネイルコピー（失敗しても本体コピーは続行）
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
@@ -600,6 +608,26 @@ export async function copyNodesAction(
         // ENOENT 以外は警告ログだけ残す（本体コピーは成功しているので続行）
         console.error(`Thumbnail Copy Error [${srcVirtualPath}]:`, e);
       }
+    }
+
+    // FSコピー
+    try {
+      await cp(srcRealPath, destRealPath, { recursive: isDirectory });
+    } catch (e) {
+      console.error(`File Copy Error [${srcVirtualPath}]:`, e);
+
+      // FSロールバック（中途半端なコピー結果を削除）
+      try {
+        await rm(destRealPath, { recursive: true, force: true });
+      } catch (re) {
+        console.error(`File Rollback Error [${srcVirtualPath}]:`, re);
+      }
+
+      results.failed++;
+      results.errors.push(
+        `ファイルコピー中にエラーが発生しました: ${basename(srcVirtualPath)}`
+      );
+      continue;
     }
 
     // NOTE: DB 登録はしない（新規として扱う）
