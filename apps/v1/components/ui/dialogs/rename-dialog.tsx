@@ -1,4 +1,6 @@
-import { renameNodeAction } from "@/lib/media/actions";
+"use client";
+
+import { useRenameDialog } from "@/hooks/use-rename-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
@@ -8,79 +10,47 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
-import { useEffect, useRef, useState, useTransition } from "react";
-import { toast } from "sonner";
+import { useEffect, useRef } from "react";
 
 interface RenameDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  sourcePath: string;
-  currentName: string; // 例: "photo.jpg"
-  isDirectory?: boolean;
+  dialog: ReturnType<typeof useRenameDialog>;
 }
 
-export function RenameDialog({
-  open,
-  onOpenChange,
-  sourcePath,
-  currentName,
-  isDirectory,
-}: RenameDialogProps) {
-  const parseName = () => {
-    if (isDirectory) {
-      return { baseName: currentName, extension: "" };
-    }
+export function RenameDialog({ dialog }: RenameDialogProps) {
+  const {
+    isOpen,
+    newName,
+    extension,
+    isPending,
+    setNewName,
+    close,
+    performRename,
+  } = dialog;
 
-    const dotIndex = currentName.lastIndexOf(".");
-    const baseName =
-      dotIndex > 0 ? currentName.substring(0, dotIndex) : currentName;
-    const extension = dotIndex > 0 ? currentName.substring(dotIndex) : "";
-    return { baseName, extension };
-  };
-
-  const { baseName, extension } = parseName();
-
-  const [newName, setNewName] = useState(baseName);
-  const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const performRename = () => {
-    startTransition(async () => {
-      // 拡張子を再度結合
-      const fullNewName = `${newName}${extension}`;
-
-      if (!newName || fullNewName === currentName) {
-        onOpenChange(false);
-        return;
-      }
-
-      const result = await renameNodeAction(sourcePath, fullNewName);
-
-      if (result.success) {
-        toast.success("リネームしました");
-        onOpenChange(false);
-      } else {
-        toast.error(result.error || "リネームに失敗しました");
-      }
-    });
-  };
-
-  // ダイアログ初期化
+  // ダイアログが開いた際、テキストを入力状態にして最初から全選択（反転）させるUX
   useEffect(() => {
-    if (open) {
-      setNewName(baseName);
-
-      if (inputRef.current) {
-        inputRef.current.focus();
-        inputRef.current.select();
-      }
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      }, 50);
+      return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <DialogTitle>名前の変更</DialogTitle>
         </DialogHeader>
@@ -91,25 +61,32 @@ export function RenameDialog({
               ref={inputRef}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="ファイル名を入力"
-              onKeyDown={(e) => e.key === "Enter" && void performRename()}
+              placeholder="名前を入力"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !isPending) {
+                  e.preventDefault();
+                  performRename();
+                }
+              }}
               disabled={isPending}
               className="flex-1"
             />
-            <span className="text-sm text-muted-foreground font-mono">
-              {extension}
-            </span>
+            {extension && (
+              <span className="text-sm text-muted-foreground font-mono bg-muted px-2 py-1 rounded shrink-0">
+                {extension}
+              </span>
+            )}
           </div>
         </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={close} disabled={isPending}>
             キャンセル
           </Button>
-          <Button onClick={performRename} disabled={isPending}>
+          <Button
+            onClick={performRename}
+            disabled={isPending || !newName.trim()}
+          >
             {isPending ? "実行中..." : "保存"}
           </Button>
         </DialogFooter>

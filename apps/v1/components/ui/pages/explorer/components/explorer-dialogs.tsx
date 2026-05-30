@@ -42,17 +42,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       />
 
       {/* リネームダイアログ */}
-      <RenameDialog
-        open={renameDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            renameDialog.close();
-          }
-        }}
-        sourcePath={renameDialog.target?.path ?? ""}
-        currentName={renameDialog.target?.name ?? ""}
-        isDirectory={renameDialog.target?.isDirectory}
-      />
+      <RenameDialog dialog={renameDialog} />
 
       {/* フォルダ作成ダイアログ */}
       <CreateFolderDialog dialog={createFolderDialog} />
