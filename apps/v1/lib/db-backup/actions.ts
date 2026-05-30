@@ -5,6 +5,7 @@ import { dumpDatabaseToFile } from "@/lib/child_process/mysqldump";
 import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { getDatabaseUrlOrThrow } from "@/lib/env/helpers";
+import { FileNameSchema } from "@/lib/path/schemas";
 import { parseDatabaseURL } from "@/lib/utils/db-url-parser";
 import fs from "fs/promises";
 import path from "path";
@@ -67,15 +68,14 @@ export async function createBackupAction() {
 
 // リストアの実行
 export async function restoreBackupAction(file: DbBackupFile) {
-  // セキュリティ対策: ファイル名にパス区切り文字が含まれていないかチェック
-  // (ディレクトリトラバーサル対策)
-  if (file.name.includes("/") || file.name.includes("\\")) {
+  const parsedFileName = FileNameSchema.safeParse(file.name);
+  if (!parsedFileName.success) {
     return { success: false, error: "不正なファイル名です" };
   }
 
   const filePath = file.isTemp
-    ? path.join(TEMP_DB_BACKUP_DIR, file.name)
-    : path.join(DB_BACKUP_DIR, file.name);
+    ? path.join(TEMP_DB_BACKUP_DIR, parsedFileName.data)
+    : path.join(DB_BACKUP_DIR, parsedFileName.data);
 
   const databaseUrl = getDatabaseUrlOrThrow();
   const db = parseDatabaseURL(databaseUrl);
