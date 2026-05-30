@@ -1,14 +1,14 @@
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
-import { useCopyDialog } from "@/hooks/use-copy-dialog";
-import { useCreateFolderDialog } from "@/hooks/use-create-folder-dialog";
-import { useDeleteDialog } from "@/hooks/use-delete-dialog";
-import { useExtractDialog } from "@/hooks/use-extract-dialog";
-import { useFavoriteDialog } from "@/hooks/use-favorite-dialog";
-import { useMoveDialog } from "@/hooks/use-move-dialog";
-import { usePreviewDialog } from "@/hooks/use-preview-dialog";
-import { useRatingFilterDialog } from "@/hooks/use-rating-filter-dialog";
-import { useRenameDialog } from "@/hooks/use-rename-dialog";
-import { useTagFilterDialog } from "@/hooks/use-tag-filter-dialog";
+import { useCopyDialog } from "@/hooks/dialogs/use-copy-dialog";
+import { useCreateFolderDialog } from "@/hooks/dialogs/use-create-folder-dialog";
+import { useDeleteDialog } from "@/hooks/dialogs/use-delete-dialog";
+import { useExtractDialog } from "@/hooks/dialogs/use-extract-dialog";
+import { useFavoriteDialog } from "@/hooks/dialogs/use-favorite-dialog";
+import { useMoveDialog } from "@/hooks/dialogs/use-move-dialog";
+import { usePreviewDialog } from "@/hooks/dialogs/use-preview-dialog";
+import { useRatingFilterDialog } from "@/hooks/dialogs/use-rating-filter-dialog";
+import { useRenameDialog } from "@/hooks/dialogs/use-rename-dialog";
+import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { useMemo } from "react";
 
 export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;

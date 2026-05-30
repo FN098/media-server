@@ -1,6 +1,6 @@
 "use client";
 
-import { useFavoriteDialog } from "@/hooks/use-favorite-dialog";
+import { useFavoriteDialog } from "@/hooks/dialogs/use-favorite-dialog";
 import {
   AlertDialog,
   AlertDialogAction,

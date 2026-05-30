@@ -1,6 +1,6 @@
 "use client";
 
-import { useCreateFolderDialog } from "@/hooks/use-create-folder-dialog";
+import { useCreateFolderDialog } from "@/hooks/dialogs/use-create-folder-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,

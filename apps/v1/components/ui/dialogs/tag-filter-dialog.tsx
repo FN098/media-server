@@ -1,7 +1,7 @@
 "use client";
 
+import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { useMounted } from "@/hooks/use-mounted";
-import { useTagFilterDialog } from "@/hooks/use-tag-filter-dialog";
 import { TagFilterMode } from "@/lib/filter/types";
 import { Tag as TagType } from "@/lib/tag/types";
 import { Badge } from "@/shadcn/components/ui/badge";

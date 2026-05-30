@@ -1,6 +1,6 @@
 "use client";
 
-import { useExtractDialog } from "@/hooks/use-extract-dialog";
+import { useExtractDialog } from "@/hooks/dialogs/use-extract-dialog";
 import {
   AlertDialog,
   AlertDialogAction,

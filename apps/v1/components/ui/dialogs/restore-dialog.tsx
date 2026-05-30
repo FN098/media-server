@@ -1,6 +1,6 @@
 "use client";
 
-import { useRestoreDialog } from "@/hooks/use-restore-dialog";
+import { useRestoreDialog } from "@/hooks/dialogs/use-restore-dialog";
 import {
   AlertDialog,
   AlertDialogAction,

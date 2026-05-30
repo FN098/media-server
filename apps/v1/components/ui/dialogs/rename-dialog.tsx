@@ -1,6 +1,6 @@
 "use client";
 
-import { useRenameDialog } from "@/hooks/use-rename-dialog";
+import { useRenameDialog } from "@/hooks/dialogs/use-rename-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,

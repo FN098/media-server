@@ -1,6 +1,6 @@
 import { FavoritesFiltering } from "@/components/ui/pages/favorites/hooks/use-favorites-filtering";
-import { useRatingFilterDialog } from "@/hooks/use-rating-filter-dialog";
-import { useTagFilterDialog } from "@/hooks/use-tag-filter-dialog";
+import { useRatingFilterDialog } from "@/hooks/dialogs/use-rating-filter-dialog";
+import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { useMemo } from "react";
 
 export type FavoritesDialogs = ReturnType<typeof useFavoritesDialogs>;

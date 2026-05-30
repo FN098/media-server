@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeleteDialog } from "@/hooks/use-delete-dialog";
+import { useDeleteDialog } from "@/hooks/dialogs/use-delete-dialog";
 import {
   AlertDialog,
   AlertDialogAction,

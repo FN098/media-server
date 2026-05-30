@@ -1,7 +1,7 @@
 "use client";
 
 import { TextWithTooltip } from "@/components/ui/texts/text-with-tooltip";
-import { useCopyDialog } from "@/hooks/use-copy-dialog";
+import { useCopyDialog } from "@/hooks/dialogs/use-copy-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,

@@ -1,7 +1,7 @@
 import { TrashFiltering } from "@/components/ui/pages/trash/hooks/use-trash-filtering";
-import { useDeleteDialog } from "@/hooks/use-delete-dialog";
-import { useRestoreDialog } from "@/hooks/use-restore-dialog";
-import { useTagFilterDialog } from "@/hooks/use-tag-filter-dialog";
+import { useDeleteDialog } from "@/hooks/dialogs/use-delete-dialog";
+import { useRestoreDialog } from "@/hooks/dialogs/use-restore-dialog";
+import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { useMemo } from "react";
 
 export type TrashDialogs = ReturnType<typeof useTrashDialogs>;
