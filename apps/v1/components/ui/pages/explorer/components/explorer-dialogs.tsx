@@ -70,15 +70,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       <MoveDialog dialog={moveDialog} />
 
       {/* コピーダイアログ */}
-      <CopyDialog
-        open={copyDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            copyDialog.close();
-          }
-        }}
-        sourceNodes={copyDialog.targets}
-      />
+      <CopyDialog dialog={copyDialog} />
 
       {/* 削除ダイアログ */}
       <DeleteDialog

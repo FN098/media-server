@@ -1,7 +1,7 @@
 "use client";
 
 import { TextWithTooltip } from "@/components/ui/texts/text-with-tooltip";
-import { copyNodesAction, getSubDirectoriesAction } from "@/lib/media/actions";
+import { useCopyDialog } from "@/hooks/use-copy-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
@@ -11,163 +11,216 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
-import { ChevronLeft, ChevronRight, Copy, Folder } from "lucide-react";
-import { dirname } from "path";
-import { useEffect, useState, useTransition } from "react";
-import { toast } from "sonner";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shadcn/components/ui/tabs";
+import { cn } from "@/shadcn/lib/utils";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Copy,
+  Folder,
+  Pin,
+} from "lucide-react";
+import { useState } from "react";
 
 interface CopyDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  sourceNodes: { path: string; name: string }[];
-  initialDirPath?: string; // ナビゲーションの開始ディレクトリパス
+  dialog: ReturnType<typeof useCopyDialog>;
 }
 
-export function CopyDialog({
-  open,
-  onOpenChange,
-  sourceNodes,
-  initialDirPath = "/",
-}: CopyDialogProps) {
-  const [targetDirPath, setTargetDirPath] = useState(initialDirPath);
-  const [dirs, setDirs] = useState<{ name: string; path: string }[]>([]);
+export function CopyDialog({ dialog }: CopyDialogProps) {
+  const {
+    isOpen,
+    initialDir,
+    currentDir,
+    dirs,
+    recentDirs,
+    isLoading,
+    isCopying,
+    close,
+    changeDir,
+    goBackParent,
+    togglePin,
+    performCopy,
+  } = dialog;
 
-  const [isNavigating, startNavigating] = useTransition();
-  const [isCopying, startCopying] = useTransition();
-  const isLoading = isNavigating || isCopying;
+  const [activeTab, setActiveTab] = useState<string>("browse");
 
-  // フォルダ一覧を取得
-  const fetchDirs = (path: string) => {
-    startNavigating(async () => {
-      const result = await getSubDirectoriesAction(path);
-      if (result.success) {
-        // コピー元自身・およびその子孫フォルダは選択肢から除外（再帰ループ防止）
-        const filtered = result.directories!.filter(
-          (d) =>
-            !sourceNodes.some(
-              (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
-            )
-        );
-        setDirs(filtered);
-        setTargetDirPath(path);
-      } else {
-        toast.error(result.error);
-      }
-    });
-  };
-
-  // コピー実行
-  const handleCopy = () => {
-    startCopying(async () => {
-      const paths = sourceNodes.map((n) => n.path);
-      const result = await copyNodesAction(paths, targetDirPath);
-
-      if (result.failed === 0) {
-        toast.success(`${result.success}件のアイテムをコピーしました`);
-        onOpenChange(false);
-      } else {
-        toast.error(
-          `${result.failed}件のコピーに失敗しました\n${result.errors.join("\n")}`
-        );
-      }
-    });
-  };
-
-  // 対象のフォルダを開く
-  const handleOpen = (path: string) => {
-    fetchDirs(path);
-  };
-
-  // 親フォルダに戻る
-  const handleBack = () => {
-    const parent = dirname(targetDirPath).replace(/\\/g, "/");
-    fetchDirs(parent === "." ? "/" : parent);
-  };
-
-  // ダイアログ初期化
-  useEffect(() => {
-    if (open) {
-      fetchDirs(initialDirPath);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent
-        className="sm:max-w-[425px] h-[500px] flex flex-col"
+        className="sm:max-w-[425px] h-[540px] flex flex-col"
         onEscapeKeyDown={(e) => e.stopPropagation()}
       >
         <DialogHeader>
           <DialogTitle>コピー先を選択</DialogTitle>
           <div className="flex items-center gap-2 text-sm text-muted-foreground break-all bg-muted p-2 rounded">
             <Folder className="h-4 w-4 shrink-0" />
-            {targetDirPath}
+            {currentDir}
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto flex flex-col gap-2">
-          {targetDirPath !== "/" && (
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-primary"
-              onClick={() => handleBack()}
-              disabled={isLoading}
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              上の階層へ
-            </Button>
-          )}
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex-1 flex flex-col min-h-0"
+        >
+          <TabsList className="grid w-full grid-cols-2 shrink-0 mb-2">
+            <TabsTrigger value="browse">通常ブラウズ</TabsTrigger>
+            <TabsTrigger value="recent" className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              最近のフォルダ
+            </TabsTrigger>
+          </TabsList>
 
-          <ScrollArea className="flex-1 overflow-auto border rounded-md p-2 relative">
-            {/* スピナー */}
-            {isLoading && (
-              <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
-                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
-              </div>
+          <TabsContent
+            value="browse"
+            className="flex-1 min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col gap-2"
+          >
+            {currentDir !== "/" && (
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-primary shrink-0"
+                onClick={goBackParent}
+                disabled={isLoading}
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                上の階層へ
+              </Button>
             )}
 
-            {/* フォルダー一覧 */}
-            <div className="flex flex-col gap-1">
-              {dirs.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  このフォルダにサブフォルダはありません
-                </div>
-              ) : (
-                dirs.map((dir) => (
-                  <Button
-                    key={dir.path}
-                    variant="ghost"
-                    className="w-full justify-between hover:bg-primary/10 group"
-                    onClick={() => handleOpen(dir.path)}
-                    disabled={isLoading}
-                  >
-                    <div className="flex items-center">
-                      <Folder className="mr-2 h-4 w-4 text-blue-500" />
-                      <TextWithTooltip
-                        text={dir.name}
-                        className="max-w-[250px]"
-                      />
+            <div className="flex-1 min-h-0 relative border rounded-md">
+              <ScrollArea className="h-full w-full p-2">
+                {isLoading && (
+                  <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
+                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+                  </div>
+                )}
+                <div className="flex flex-col gap-1">
+                  {dirs.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      このフォルダにサブフォルダはありません
                     </div>
-                    <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                  </Button>
-                ))
-              )}
+                  ) : (
+                    dirs.map((dir) => (
+                      <Button
+                        key={dir.path}
+                        variant="ghost"
+                        className="w-full justify-between hover:bg-primary/10 group"
+                        onClick={() => changeDir(dir.path)}
+                        disabled={isLoading}
+                      >
+                        <div className="flex items-center">
+                          <Folder className="mr-2 h-4 w-4 text-blue-500" />
+                          <TextWithTooltip
+                            text={dir.name}
+                            className="max-w-[250px]"
+                          />
+                        </div>
+                        <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100" />
+                      </Button>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
             </div>
-          </ScrollArea>
-        </div>
+          </TabsContent>
 
-        <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isCopying}
+          <TabsContent
+            value="recent"
+            className="flex-1 min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col"
           >
+            <div className="flex-1 min-h-0 relative border rounded-md">
+              <ScrollArea className="h-full w-full p-2">
+                {isLoading && (
+                  <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
+                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+                  </div>
+                )}
+                <div className="flex flex-col gap-1">
+                  {recentDirs.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      最近訪問したフォルダはありません
+                    </div>
+                  ) : (
+                    recentDirs.map((dir) => (
+                      <div
+                        key={dir.path}
+                        className="relative group/wrapper w-full"
+                      >
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-start hover:bg-primary/10 group text-left pl-3 pr-12 py-6 h-auto",
+                            currentDir === dir.path &&
+                              "bg-primary/5 font-medium",
+                            dir.pinned && "bg-secondary/30"
+                          )}
+                          onClick={() => {
+                            changeDir(dir.path);
+                            setActiveTab("browse");
+                          }}
+                          disabled={isLoading}
+                        >
+                          <Folder className="mr-2 h-4 w-4 text-amber-500 shrink-0" />
+                          <div className="flex flex-col items-start min-w-0 pr-2">
+                            <span className="truncate w-full text-sm">
+                              {dir.name || dir.path.split("/").pop()}
+                            </span>
+                            <span className="text-xs text-muted-foreground truncate w-full">
+                              {dir.path}
+                            </span>
+                          </div>
+                        </Button>
+
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            disabled={isLoading}
+                            className={cn(
+                              "h-8 w-8 text-muted-foreground/50 hover:text-primary transition-opacity",
+                              !dir.pinned &&
+                                "opacity-0 group-hover/wrapper:opacity-100 focus:opacity-100"
+                            )}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              togglePin(dir.path, dir.pinned);
+                            }}
+                          >
+                            <Pin
+                              className={cn(
+                                "w-3.5 h-3.5 transition-transform duration-200",
+                                dir.pinned
+                                  ? "fill-primary text-primary"
+                                  : "rotate-45"
+                              )}
+                            />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <DialogFooter className="gap-2 pt-2 border-t">
+          <Button variant="outline" onClick={close} disabled={isLoading}>
             キャンセル
           </Button>
           <Button
-            onClick={handleCopy}
-            disabled={isLoading || initialDirPath === targetDirPath}
+            onClick={performCopy}
+            disabled={isLoading || currentDir === initialDir}
           >
             {isCopying ? (
               "コピー中..."
