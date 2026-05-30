@@ -7,10 +7,12 @@ import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explor
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
 import { useExplorerFilter } from "@/components/ui/pages/explorer/hooks/use-explorer-filter";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
+import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { useExplorerSort } from "@/components/ui/pages/explorer/hooks/use-explorer-sort";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useSort } from "@/hooks/use-sort";
 import { MediaListing } from "@/lib/media/types";
+import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { useMemo } from "react";
 
 interface ExplorerToolbarProps {
@@ -18,6 +20,7 @@ interface ExplorerToolbarProps {
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
   favorites: ExplorerFavorites;
+  selection: ExplorerSelection;
 }
 
 export function ExplorerToolbar({
@@ -25,12 +28,15 @@ export function ExplorerToolbar({
   filtering,
   dialogs,
   favorites,
+  selection,
 }: ExplorerToolbarProps) {
   const sort = useSort();
 
   const { toolbarFilterItems } = useExplorerFilter();
   const { toolbarSortItems } = useExplorerSort();
   const { toolbarActionItems } = useExplorerActions();
+
+  const isMobile = useIsMobile();
 
   const filterContext = useMemo(() => {
     return {
@@ -49,12 +55,14 @@ export function ExplorerToolbar({
       filtering,
       dialogs,
       favorites,
+      selection,
       computed: {
         nonFavoriteTargets,
         hasNonFavoriteFiles: nonFavoriteTargets.length > 0,
+        isMobile,
       },
     };
-  }, [listing, filtering, dialogs, favorites]);
+  }, [filtering, listing, dialogs, favorites, selection, isMobile]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">

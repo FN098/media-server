@@ -112,6 +112,7 @@ export function Explorer({ listing }: ExplorerProps) {
               filtering={filtering}
               dialogs={dialogs}
               favorites={favorites}
+              selection={selection}
             />
           )}
 

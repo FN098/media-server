@@ -1,27 +1,38 @@
 import { ExplorerDialogs } from "@/components/ui/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/components/ui/pages/explorer/hooks/use-explorer-favorites";
 import { ExplorerFiltering } from "@/components/ui/pages/explorer/hooks/use-explorer-filtering";
+import { ExplorerSelection } from "@/components/ui/pages/explorer/hooks/use-explorer-selection";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
-import { FolderPlus, Trash2Icon } from "lucide-react";
+import { CheckCheckIcon, FolderPlusIcon, Trash2Icon } from "lucide-react";
 
 interface ExplorerToolbarActionContext {
   listing: MediaListing;
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
   favorites: ExplorerFavorites;
+  selection: ExplorerSelection;
   computed: {
     hasNonFavoriteFiles: boolean;
     nonFavoriteTargets: MediaNode[];
+    isMobile: boolean;
   };
 }
 
 const toolbarActionItems: MenuItemDef<ExplorerToolbarActionContext>[] = [
   {
+    key: "check-all",
+    type: "action",
+    label: "すべて選択",
+    icon: CheckCheckIcon,
+    onClick: (ctx) => ctx.selection.selectAll(),
+    // hidden: (ctx) => !ctx.computed.isMobile,
+  },
+  {
     key: "create-folder",
     type: "action",
     label: "新規フォルダ",
-    icon: FolderPlus,
+    icon: FolderPlusIcon,
     onClick: (ctx) => ctx.dialogs.createFolderDialog.open(ctx.listing.path),
   },
   {
