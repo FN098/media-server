@@ -10,7 +10,7 @@ import {
 } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/formatters";
 import { listFsDirectory } from "@/lib/media/fs-listing";
-import { mergeFsWithDb } from "@/lib/media/merge";
+import { mergeFsWithDb } from "@/lib/media/merger";
 import { getMediaDbNodes } from "@/lib/media/repository";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
