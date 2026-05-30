@@ -68,7 +68,7 @@ export function useExplorerSelectionbar({
             const averageRating = averageBy(filtered, (n) => n.rating!);
 
             return (
-              <div className="w-full flex justify-center p-1">
+              <div className="w-full flex justify-center p-2">
                 <FavoriteRatingInput
                   value={averageRating}
                   onChange={(newRating) =>
