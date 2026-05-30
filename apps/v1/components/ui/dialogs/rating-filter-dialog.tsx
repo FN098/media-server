@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@/hooks/general/use-mounted";
 import { useRatingFilterDialog } from "@/hooks/use-rating-filter-dialog";
 import {
   RatingFilterMode,

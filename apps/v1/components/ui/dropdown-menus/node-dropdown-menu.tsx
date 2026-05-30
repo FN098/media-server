@@ -1,6 +1,6 @@
 "use client";
 
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@/hooks/general/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";

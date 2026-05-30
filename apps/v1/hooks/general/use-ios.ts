@@ -1,4 +1,4 @@
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@/hooks/general/use-mounted";
 
 function detectIsIOS(): boolean {
   if (typeof window === "undefined") return false;

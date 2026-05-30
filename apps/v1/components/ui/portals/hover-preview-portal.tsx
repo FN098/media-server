@@ -1,7 +1,7 @@
 "use client";
 
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@/hooks/general/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useMemo, useState } from "react";

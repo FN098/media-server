@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@/hooks/general/use-mounted";
 import { Button } from "@/shadcn/components/ui/button";
 import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";

@@ -1,4 +1,4 @@
-import { useMounted } from "@/hooks/use-mounted";
+import { useMounted } from "@/hooks/general/use-mounted";
 import {
   Select,
   SelectContent,
