@@ -1,6 +1,6 @@
 "use client";
 
-import { usePreviewDialog } from "@/hooks/use-preview-dialog";
+import { usePreviewDialog } from "@/hooks/dialogs/use-preview-dialog";
 import { getFilenameWithoutExt } from "@/lib/utils/filename";
 import { Button } from "@/shadcn/components/ui/button";
 import {

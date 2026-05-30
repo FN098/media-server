@@ -1,7 +1,7 @@
 "use client";
 
+import { useRatingFilterDialog } from "@/hooks/dialogs/use-rating-filter-dialog";
 import { useMounted } from "@/hooks/general/use-mounted";
-import { useRatingFilterDialog } from "@/hooks/use-rating-filter-dialog";
 import {
   RatingFilterMode,
   RatingOperator,
