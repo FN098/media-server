@@ -34,7 +34,7 @@ export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
     autoFocusInput: true,
   });
 
-  const all = useMemo(
+  const allDialogs = useMemo(
     () =>
       ({
         renameDialog,
@@ -63,12 +63,12 @@ export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
   );
 
   const isOpen = useMemo(
-    () => Object.values(all).some(({ isOpen }) => isOpen),
-    [all]
+    () => Object.values(allDialogs).some(({ isOpen }) => isOpen),
+    [allDialogs]
   );
 
   return {
-    ...all,
+    ...allDialogs,
     isOpen,
   };
 }
