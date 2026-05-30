@@ -5,7 +5,7 @@ import {
   togglePinVisitedFolder,
   updateVisitedFolder,
 } from "@/lib/folder/repository";
-import { fsNameSchema } from "@/lib/media/schemas";
+import { FsNameSchema } from "@/lib/media/schemas";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { db } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
@@ -27,7 +27,7 @@ export async function createFolderAction(
   parentPath: string,
   folderName: string
 ) {
-  const validation = fsNameSchema.safeParse(folderName);
+  const validation = FsNameSchema.safeParse(folderName);
 
   if (!validation.success) {
     return {

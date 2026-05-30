@@ -1,7 +1,7 @@
 "use server";
 
 import { getMimetype } from "@/lib/media/mimetype";
-import { fsNameSchema } from "@/lib/media/schemas";
+import { FsNameSchema } from "@/lib/media/schemas";
 import { isBlockedServerPath } from "@/lib/path/blacklist";
 import {
   getServerMediaPath,
@@ -27,7 +27,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   }
 
   // バリデーション
-  const validation = fsNameSchema.safeParse(newName);
+  const validation = FsNameSchema.safeParse(newName);
   if (!validation.success) {
     return {
       success: false,

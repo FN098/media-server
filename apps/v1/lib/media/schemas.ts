@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const fsNameSchema = z
+export const FsNameSchema = z
   .string()
   .min(1, "名前を入力してください。")
   .max(255, "名前が長すぎます。")
