@@ -1,10 +1,5 @@
 "use server";
 
-import {
-  GhostMediaDeleteResult,
-  GhostMediaItem,
-  GhostMediaScanOptions,
-} from "@/lib/ghost-media/types";
 import { getMimetype } from "@/lib/media/mimetype";
 import { fsNameSchema } from "@/lib/media/schemas";
 import { isBlockedServerPath } from "@/lib/path/blacklist";
@@ -15,8 +10,8 @@ import {
 } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { existsPath } from "@/lib/utils/fs";
-import { constants, Dirent } from "fs";
-import { access, cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
+import { Dirent } from "fs";
+import { cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { basename, dirname, join } from "path";
 
@@ -816,97 +811,6 @@ export async function restoreNodesAction(sourcePaths: string[]) {
   revalidatePath("/trash");
 
   return results;
-}
-
-/**
- * 不要なメディアをスキャン
- * @deprecated 進捗確認できないので非推奨。代わりに /api/ghost/media/scan を推奨
- */
-export async function scanGhostMediaAction(options?: GhostMediaScanOptions) {
-  try {
-    const isFullScan = options?.fullScan ?? false;
-    const ghostItems: GhostMediaItem[] = [];
-
-    if (isFullScan) {
-      // フルスキャン：ファイル単位で実体を確認
-      const allMedia = await prisma.media.findMany({
-        select: { id: true, title: true, path: true, dirPath: true },
-      });
-
-      for (const item of allMedia) {
-        const realPath = getServerMediaPath(item.path);
-        try {
-          await access(realPath, constants.F_OK);
-        } catch {
-          ghostItems.push({
-            id: item.id,
-            title: item.title,
-            path: item.path,
-          });
-        }
-      }
-    } else {
-      // クイックスキャン：フォルダ単位で実体を確認
-      const folders = await prisma.media.groupBy({
-        by: ["dirPath"],
-      });
-
-      const missingDirPaths: string[] = [];
-      for (const folder of folders) {
-        const realPath = getServerMediaPath(folder.dirPath);
-        try {
-          await access(realPath, constants.F_OK);
-        } catch {
-          missingDirPaths.push(folder.dirPath);
-        }
-      }
-
-      if (missingDirPaths.length > 0) {
-        const items = await prisma.media.findMany({
-          where: { dirPath: { in: missingDirPaths } },
-          select: { id: true, title: true, path: true },
-        });
-        ghostItems.push(...items);
-      }
-    }
-
-    return {
-      success: true,
-      items: ghostItems,
-    };
-  } catch (error) {
-    console.error("Scan Ghost Media Error:", error);
-    return { success: false, error: "スキャン中にエラーが発生しました。" };
-  }
-}
-
-// 不要なメディアを削除
-export async function cleanupGhostMediaAction(
-  ids: string[]
-): Promise<GhostMediaDeleteResult> {
-  if (!ids || ids.length === 0) {
-    return { success: true, deletedCount: 0 };
-  }
-
-  let deleteResult: { count: number };
-  try {
-    deleteResult = await prisma.media.deleteMany({
-      where: {
-        id: { in: ids },
-      },
-    });
-  } catch (error) {
-    console.error("Cleanup Ghost Media Error:", error);
-    return {
-      success: false,
-      error: "削除中に予期せぬエラーが発生しました。",
-    };
-  }
-
-  return {
-    success: true,
-    deletedCount: deleteResult.count,
-  };
 }
 
 // タイムスタンプ更新
