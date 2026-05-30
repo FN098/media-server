@@ -67,18 +67,7 @@ export function ExplorerDialogs({ dialogs }: ExplorerDialogsProps) {
       />
 
       {/* 移動ダイアログ */}
-      <MoveDialog
-        open={moveDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            moveDialog.close();
-          }
-        }}
-        sourceNodes={moveDialog.targets}
-        initialDir={moveDialog.initialDir}
-        currentDir={moveDialog.currentDir}
-        onCurrentDirChange={moveDialog.setCurrentDir}
-      />
+      <MoveDialog dialog={moveDialog} />
 
       {/* コピーダイアログ */}
       <CopyDialog

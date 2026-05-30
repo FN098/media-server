@@ -1,11 +1,7 @@
 "use client";
 
 import { TextWithTooltip } from "@/components/ui/texts/text-with-tooltip";
-import {
-  getRecentFoldersAction,
-  togglePinVisitedFolderAction,
-} from "@/lib/folder/actions";
-import { getSubDirectoriesAction, moveNodesAction } from "@/lib/media/actions";
+import { useMoveDialog } from "@/hooks/use-move-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
@@ -30,145 +26,36 @@ import {
   FolderInput,
   Pin,
 } from "lucide-react";
-import { dirname } from "path";
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { toast } from "sonner";
-
-type DirectoryInfo = { name: string; path: string };
-
-type RecentDirectoryInfo = DirectoryInfo & { pinned: boolean };
+import { useState } from "react";
 
 interface MoveDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  sourceNodes: { path: string }[];
-  initialDir: string;
-  currentDir: string;
-  onCurrentDirChange: (path: string) => void;
+  dialog: ReturnType<typeof useMoveDialog>;
 }
 
-export function MoveDialog({
-  open,
-  onOpenChange,
-  sourceNodes,
-  initialDir,
-  currentDir,
-  onCurrentDirChange,
-}: MoveDialogProps) {
-  console.log({ currentDir, initialDir });
+export function MoveDialog({ dialog }: MoveDialogProps) {
+  const {
+    isOpen,
+    initialDir,
+    currentDir,
+    dirs,
+    recentDirs,
+    isLoading,
+    isMoving,
+    close,
+    changeDir,
+    goBackParent,
+    togglePin,
+    performMove,
+  } = dialog;
 
-  const [dirs, setDirs] = useState<DirectoryInfo[]>([]);
-  const [recentDirs, setRecentDirs] = useState<RecentDirectoryInfo[]>([]);
   const [activeTab, setActiveTab] = useState<string>("browse");
 
-  const [isNavigating, startNavigating] = useTransition();
-  const [isMoving, startMoving] = useTransition();
-  const isLoading = isNavigating || isMoving;
-
-  // フォルダ一覧を取得
-  const fetchDirs = useCallback(
-    (path: string) => {
-      startNavigating(async () => {
-        const result = await getSubDirectoriesAction(path);
-        if (result.success) {
-          // 移動対象自身や、その子孫フォルダは選択肢から除外する（ループ防止）
-          const filtered = result.directories!.filter(
-            (d) =>
-              !sourceNodes.some(
-                (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
-              )
-          );
-          setDirs(filtered);
-        } else {
-          toast.error(result.error);
-        }
-      });
-    },
-    [sourceNodes]
-  );
-
-  // 最近のフォルダを取得
-  const fetchRecentDirs = useCallback(() => {
-    startNavigating(async () => {
-      const result = await getRecentFoldersAction();
-      if (result.success) {
-        // 移動対象自身や子孫フォルダは履歴からも除外しておく
-        const filtered = (result.data ?? []).filter(
-          (d: RecentDirectoryInfo) =>
-            !sourceNodes.some(
-              (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
-            )
-        );
-        setRecentDirs(filtered);
-      }
-    });
-  }, [sourceNodes]);
-
-  // 移動実行
-  const performMove = useCallback(() => {
-    if (!currentDir) return;
-
-    startMoving(async () => {
-      const paths = sourceNodes.map((n) => n.path);
-      const result = await moveNodesAction(paths, currentDir);
-
-      if (result.failed === 0) {
-        toast.success(`${result.success}件のアイテムを移動しました`);
-        onOpenChange(false);
-      } else {
-        toast.error(
-          `${result.failed}件の移動に失敗しました\n${result.errors.join("\n")}`
-        );
-      }
-    });
-  }, [currentDir, onOpenChange, sourceNodes]);
-
-  // 対象のフォルダを開く
-  const openFolder = useCallback(
-    (path: string) => {
-      onCurrentDirChange(path);
-      fetchDirs(path);
-    },
-    [fetchDirs, onCurrentDirChange]
-  );
-
-  // 最近のフォルダをクリックしたときの処理
-  const handleSelectRecentFolder = (path: string) => {
-    openFolder(path);
-    setActiveTab("browse");
-  };
-
-  // 親フォルダに戻る
-  const goBackParentFolder = useCallback(() => {
-    const parent = dirname(currentDir).replace(/\\/g, "/");
-    const path = parent === "." ? "/" : parent;
-    openFolder(path);
-  }, [currentDir, openFolder]);
-
-  // ピン留めトグル処理
-  const handleTogglePin = (path: string, currentPinned: boolean) => {
-    startNavigating(async () => {
-      const result = await togglePinVisitedFolderAction(path, currentPinned);
-      if (result.success) {
-        fetchRecentDirs();
-      } else {
-        toast.error(result.error || "ピン留めの更新に失敗しました");
-      }
-    });
-  };
-
-  // ダイアログ初期化
-  useEffect(() => {
-    if (open) {
-      fetchDirs(currentDir);
-      fetchRecentDirs();
-    }
-  }, [currentDir, fetchDirs, fetchRecentDirs, open]);
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent
-        className="sm:max-w-[425px] h-[540px] flex flex-col" // タブの分、高さを少し広げています
+        className="sm:max-w-[425px] h-[540px] flex flex-col"
         onEscapeKeyDown={(e) => e.stopPropagation()}
       >
         <DialogHeader>
@@ -200,7 +87,7 @@ export function MoveDialog({
               <Button
                 variant="ghost"
                 className="w-full justify-start text-primary shrink-0"
-                onClick={() => goBackParentFolder()}
+                onClick={goBackParent}
                 disabled={isLoading}
               >
                 <ChevronLeft className="mr-2 h-4 w-4" />
@@ -215,7 +102,6 @@ export function MoveDialog({
                     <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
                   </div>
                 )}
-
                 <div className="flex flex-col gap-1">
                   {dirs.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground text-sm">
@@ -227,7 +113,7 @@ export function MoveDialog({
                         key={dir.path}
                         variant="ghost"
                         className="w-full justify-between hover:bg-primary/10 group"
-                        onClick={() => openFolder(dir.path)}
+                        onClick={() => changeDir(dir.path)}
                         disabled={isLoading}
                       >
                         <div className="flex items-center">
@@ -257,7 +143,6 @@ export function MoveDialog({
                     <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
                   </div>
                 )}
-
                 <div className="flex flex-col gap-1">
                   {recentDirs.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground text-sm">
@@ -269,16 +154,18 @@ export function MoveDialog({
                         key={dir.path}
                         className="relative group/wrapper w-full"
                       >
-                        {/* フォルダ選択ボタン */}
                         <Button
                           variant="ghost"
                           className={cn(
-                            "w-full justify-start hover:bg-primary/10 group text-left pl-3 pr-12 py-6 h-auto", // ピンボタンのスペース確保と高さを少し調整
+                            "w-full justify-start hover:bg-primary/10 group text-left pl-3 pr-12 py-6 h-auto",
                             currentDir === dir.path &&
                               "bg-primary/5 font-medium",
-                            dir.pinned && "bg-secondary/30" // ピン留め時の背景変更
+                            dir.pinned && "bg-secondary/30"
                           )}
-                          onClick={() => handleSelectRecentFolder(dir.path)}
+                          onClick={() => {
+                            changeDir(dir.path);
+                            setActiveTab("browse");
+                          }}
                           disabled={isLoading}
                         >
                           <Folder className="mr-2 h-4 w-4 text-amber-500 shrink-0" />
@@ -292,7 +179,6 @@ export function MoveDialog({
                           </div>
                         </Button>
 
-                        {/* ピン留めボタン（絶対配置：ホバー時、またはピン留め中のみ表示） */}
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
                           <Button
                             size="icon"
@@ -305,15 +191,15 @@ export function MoveDialog({
                             )}
                             onClick={(e) => {
                               e.preventDefault();
-                              e.stopPropagation(); // フォルダ選択イベントへの伝播を防止
-                              handleTogglePin(dir.path, dir.pinned);
+                              e.stopPropagation();
+                              togglePin(dir.path, dir.pinned);
                             }}
                           >
                             <Pin
                               className={cn(
                                 "w-3.5 h-3.5 transition-transform duration-200",
                                 dir.pinned
-                                  ? "fill-primary text-primary rotate-0"
+                                  ? "fill-primary text-primary"
                                   : "rotate-45"
                               )}
                             />
@@ -329,11 +215,7 @@ export function MoveDialog({
         </Tabs>
 
         <DialogFooter className="gap-2 pt-2 border-t">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={close} disabled={isLoading}>
             キャンセル
           </Button>
           <Button

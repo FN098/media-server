@@ -15,7 +15,7 @@ export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;
 
 export function useExplorerDialogs() {
   const renameDialog = useRenameDialog<MediaNode>();
-  const moveDialog = useMoveDialog<MediaNode>();
+  const moveDialog = useMoveDialog();
   const copyDialog = useCopyDialog<MediaNode>();
   const createFolderDialog = useCreateFolderDialog();
   const deleteDialog = useDeleteDialog<MediaNode>();
