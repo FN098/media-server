@@ -9,7 +9,7 @@ import {
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
-import { existsPath } from "@/lib/utils/fs";
+import { existsPath, recursiveMergeMove } from "@/lib/utils/fs";
 import { Dirent } from "fs";
 import { cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -662,37 +662,6 @@ export async function getFolderMediaFilesAction(dirPath: string) {
     success: true,
     files: mediaFiles,
   };
-}
-
-// 再帰的な移動
-async function recursiveMergeMove(src: string, dest: string) {
-  const stats = await lstat(src);
-  if (!stats.isDirectory()) {
-    // ファイルの場合
-    // 移動先に同名ファイルがあれば上書き
-    if (await existsPath(dest)) {
-      await rm(dest, { force: true });
-    }
-    await rename(src, dest);
-  } else {
-    // ディレクトリの場合
-    // 移動先に同名フォルダがなければリネーム
-    if (!(await existsPath(dest))) {
-      await rename(src, dest);
-      return;
-    }
-
-    // 同名フォルダがあれば中のファイルやフォルダを再帰的に移動
-    const entries = await readdir(src);
-    for (const entry of entries) {
-      const srcPath = join(src, entry);
-      const destPath = join(dest, entry);
-      await recursiveMergeMove(srcPath, destPath);
-    }
-
-    // 空になったソースディレクトリを削除
-    await rm(src, { recursive: true, force: true });
-  }
 }
 
 // 削除（ゴミ箱フォルダへの移動）
