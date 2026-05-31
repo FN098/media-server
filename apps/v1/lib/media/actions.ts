@@ -68,8 +68,9 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       error: `同名のファイルまたはディレクトリが既に存在します。: ${destVirtualPath}`,
     };
   }
+
+  // リネーム先が not found の場合は処理継続、それ以外は失敗
   if (destPathInfo.error !== "not-found") {
-    // 見つからなかった以外のエラーの場合は処理中断
     return {
       success: false,
       error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${destVirtualPath}`,
@@ -96,7 +97,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     await rename(srcThumbPath, destThumbPath);
     thumbRenamed = true;
   } catch (e) {
-    // サムネイル元が not found の場合は処理継続（それ以外のエラーの場合は中断）
+    // サムネイル元が not found （未作成）の場合は処理継続、それ以外は失敗
     if (!isFsNotFoundError(e)) {
       console.error("failed to rename thumbnails directory:", e);
       return {
@@ -106,7 +107,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     }
   }
 
-  // FS更新
+  // FSリネーム
   try {
     await rename(srcRealPath, destRealPath);
   } catch (e) {
@@ -223,22 +224,22 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         `;
       }
     });
-  } catch (error) {
-    console.error("failed to update database:", error);
+  } catch (e) {
+    console.error("failed to update database:", e);
 
     // FSロールバック
     try {
       await rename(destRealPath, srcRealPath);
-    } catch (e) {
-      console.error("failed to rollback renamed file or directory:", e);
+    } catch (err) {
+      console.error("failed to rollback renamed file or directory:", err);
     }
 
     // サムネイルロールバック
     if (thumbRenamed) {
       try {
         await rename(destThumbPath, srcThumbPath);
-      } catch (e) {
-        console.error("failed to rollback renamed thumbnails directory:", e);
+      } catch (err) {
+        console.error("failed to rollback renamed thumbnails directory:", err);
       }
     }
 
@@ -267,24 +268,21 @@ export async function moveNodesAction(
 
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  // ディレクトリ内のエントリ名一覧を取得（この後の自動連番で使う）
-  const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
+  // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
+  const readDestDirPath = getServerMediaPath(normalizedDestDirPath);
   const existingNames = new Set<string>();
   try {
-    const files = await readdir(destLocalRootPath);
-    files.forEach((name) => existingNames.add(name));
+    const existingFiles = await readdir(readDestDirPath);
+    existingFiles.forEach((name) => existingNames.add(name));
   } catch (e) {
-    // 移動先フォルダ自体が存在しないなどのエラーハンドリング
-    if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
-      return {
-        success: 0,
-        failed: sourcePaths.length,
-        errors: ["移動先フォルダの読み込みに失敗しました"],
-      };
-    }
+    console.error("failed to read directory:", e);
+    return {
+      success: 0,
+      failed: sourcePaths.length,
+      errors: ["移動先フォルダの読み込みに失敗しました"],
+    };
   }
 
-  // ひとつずつ順番に処理する
   for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
     if (
@@ -300,35 +298,26 @@ export async function moveNodesAction(
 
     // ディレクトリ判定
     const srcRealPath = getServerMediaPath(srcVirtualPath);
-    let stats: Awaited<ReturnType<typeof lstat>>;
-    try {
-      stats = await lstat(srcRealPath);
-    } catch (e) {
-      results.failed++;
-
-      if (isFsNotFoundError(e)) {
-        results.errors.push(
-          `移動元が見つかりません: ${basename(srcVirtualPath)}`
-        );
-      } else if (isFsPermissionError(e)) {
-        results.errors.push(
-          `移動元へのアクセス権限がありません: ${basename(srcVirtualPath)}`
-        );
-      } else {
-        results.errors.push(
-          `移動元にアクセスできませんでした: ${basename(srcVirtualPath)}`
-        );
-      }
-
-      continue;
+    const srcPathInfo = await getPathInfo(srcRealPath);
+    if (!srcPathInfo.exists) {
+      if (srcPathInfo.error === "not-found")
+        return {
+          success: false,
+          error: `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`,
+        };
+      else
+        return {
+          success: false,
+          error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`,
+        };
     }
-    const isDirectory = stats.isDirectory();
+    const isDirectory = srcPathInfo.isDirectory;
+
     const srcName = srcVirtualPath.split("/").pop() || "";
 
-    // 新しい名前を確定
+    // 新しい名前を確定（名前衝突があれば (1), (2), ... などの連番を付与）
     let currentSrcName = srcName;
     let counter = 1;
-
     while (existingNames.has(currentSrcName)) {
       if (isDirectory) {
         // フォルダの場合: 「フォルダ名 (1)」
@@ -350,20 +339,17 @@ export async function moveNodesAction(
       normalizedDestDirPath === ""
         ? currentSrcName
         : `${normalizedDestDirPath}/${currentSrcName}`;
-
     const destRealPath = getServerMediaPath(destVirtualPath);
 
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
     const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
 
-    // サムネイル移動前処理（移動対象がフォルダなら先に移動先の同名フォルダを削除しておく）
+    // サムネイルリネーム前処理（リネーム先の古い残骸をファイル・フォルダ問わずお掃除）
     let thumbMoved = false;
     try {
-      if (isDirectory) {
-        await rm(destThumbPath, { recursive: true, force: true });
-      }
+      await rm(destThumbPath, { recursive: true, force: true });
     } catch (e) {
-      console.error(`Thumbnail Dir Remove Error [${srcVirtualPath}]:`, e);
+      console.error("failed to remove thumbnails directory:", e);
       results.failed++;
       results.errors.push(
         `サムネイル処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
@@ -376,15 +362,15 @@ export async function moveNodesAction(
       await rename(srcThumbPath, destThumbPath);
       thumbMoved = true;
     } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
-        console.error(`Thumbnail Rename Error [${srcVirtualPath}]:`, e);
+      // サムネイル元が not found （未作成）の場合は処理継続、それ以外は失敗
+      if (!isFsNotFoundError(e)) {
+        console.error("failed to rename thumbnails directory:", e);
         results.failed++;
         results.errors.push(
           `サムネイル処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
         );
         continue;
       }
-      // ENOENT はスキップ（サムネイル未生成）
     }
 
     // FS移動
@@ -397,8 +383,8 @@ export async function moveNodesAction(
       if (thumbMoved) {
         try {
           await rename(destThumbPath, srcThumbPath);
-        } catch (re) {
-          console.error(`Thumbnail Rollback Error [${srcVirtualPath}]:`, re);
+        } catch (e) {
+          console.error("failed to rollback renamed thumbnails directory:", e);
         }
       }
 
@@ -505,29 +491,30 @@ export async function moveNodesAction(
           `;
         }
       });
-    } catch (error) {
-      console.error(`DB Move Error [${srcVirtualPath}]:`, error);
+    } catch (e) {
+      console.error("failed to update database:", e);
 
       // FSロールバック
       try {
         await rename(destRealPath, srcRealPath);
-      } catch (re) {
-        console.error(`File Rollback Error [${srcVirtualPath}]:`, re);
+      } catch (err) {
+        console.error("failed to rollback renamed file or directory:", err);
       }
 
       // サムネイルロールバック
       if (thumbMoved) {
         try {
           await rename(destThumbPath, srcThumbPath);
-        } catch (re) {
-          console.error(`Thumbnail Rollback Error [${srcVirtualPath}]:`, re);
+        } catch (err) {
+          console.error(
+            "failed to rollback renamed thumbnails directory:",
+            err
+          );
         }
       }
 
       results.failed++;
-      results.errors.push(
-        `DB更新中にエラーが発生しました: ${basename(srcVirtualPath)}`
-      );
+      results.errors.push("DB更新中にエラーが発生しました。");
       continue;
     }
 
@@ -551,7 +538,7 @@ export async function copyNodesAction(
 
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  // ディレクトリ内のエントリ名一覧を取得（この後の自動連番で使う）
+  // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
   const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
   const existingNames = new Set<string>();
   try {
