@@ -37,7 +37,7 @@ export async function updateFavoriteAction(
   // NOTE: Favorite テーブルのID制約の都合上、path のままでは upsert できないので、パスからIDを逆引きする
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(path);
+  const mediaId = await getMediaIdByPath(parsed.data.path);
   if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
   const input = {
@@ -59,6 +59,8 @@ export async function updateFavoriteAction(
 export async function deleteFavoriteAction(path: string) {
   // 認証
   const user = await resolveCurrentUserOrThrow();
+
+  // 入力バリデーション
 
   try {
     const mediaId = await getMediaIdByPath(path);
