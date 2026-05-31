@@ -282,8 +282,6 @@ export async function moveNodesAction(
   sourcePaths: string[],
   destDirPath: string
 ) {
-  const results = { success: 0, failed: 0, errors: [] as string[] };
-
   // 認証
   await resolveCurrentUserOrThrow();
 
@@ -325,6 +323,8 @@ export async function moveNodesAction(
       errors: ["移動先フォルダの読み込みに失敗しました"],
     };
   }
+
+  const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
@@ -573,8 +573,6 @@ export async function copyNodesAction(
   sourcePaths: string[],
   destDirPath: string
 ) {
-  const results = { success: 0, failed: 0, errors: [] as string[] };
-
   // 認証
   const user = await resolveCurrentUserOrThrow();
   const userId = user.id;
@@ -619,6 +617,8 @@ export async function copyNodesAction(
       };
     }
   }
+
+  const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
@@ -896,8 +896,6 @@ export async function listMediaAction(dirPath: string) {
 
 // 削除（ゴミ箱フォルダへの移動）
 export async function deleteNodesAction(sourcePaths: string[]) {
-  const results = { success: 0, failed: 0, errors: [] as string[] };
-
   // 認証
   await resolveCurrentUserOrThrow();
 
@@ -922,7 +920,10 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     };
   }
 
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+
   for (const srcVirtualPath of normalizedSourcePaths) {
+    // ゴミ箱に移動しても仮想パスは変わらない（物理パスのみ変更）
     const destVirtualPath = srcVirtualPath;
 
     // 仮想パス→物理パス
@@ -945,11 +946,12 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     } catch (e) {
       console.error("failed to move file or directory:", e);
       results.failed++;
-      results.errors.push("削除中にエラーが発生しました。");
+      results.errors.push("ファイル移動中にエラーが発生しました。");
       continue;
     }
 
-    // NOTE: DB削除はしない（フォルダ同期時に自動削除）
+    // TODO: DB 更新の追加 (Media.deletedAt で論理削除)
+
     results.success++;
   }
 
@@ -962,8 +964,6 @@ export async function deleteNodesAction(sourcePaths: string[]) {
 
 // 復元（ゴミ箱フォルダから元のフォルダへの移動）
 export async function restoreNodesAction(sourcePaths: string[]) {
-  const results = { success: 0, failed: 0, errors: [] as string[] };
-
   // 認証
   await resolveCurrentUserOrThrow();
 
@@ -987,6 +987,8 @@ export async function restoreNodesAction(sourcePaths: string[]) {
       errors: ["システムフォルダは操作できません。"],
     };
   }
+
+  const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of normalizedSourcePaths) {
     const destVirtualPath = srcVirtualPath;
@@ -1029,8 +1031,6 @@ export async function restoreNodesAction(sourcePaths: string[]) {
 
 // 完全に削除
 export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
-  const results = { success: 0, failed: 0, errors: [] as string[] };
-
   // 認証
   await resolveCurrentUserOrThrow();
 
@@ -1055,6 +1055,8 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     };
   }
 
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+
   for (const srcVirtualPath of normalizedSourcePaths) {
     // 仮想パス→物理パス
     const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
@@ -1069,7 +1071,8 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
       continue;
     }
 
-    // NOTE: DB削除はしない（フォルダ同期時に自動削除）
+    // TODO: DB からも削除
+
     results.success++;
   }
 
@@ -1097,16 +1100,18 @@ export async function touchMediaTimestampAction(sourcePath: string) {
     return { success: false, error: "システムフォルダは操作できません。" };
   }
 
-  // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
+  // DB 更新
   try {
     await updateMediaFileMtime({ path: normalizedSourcePath });
   } catch (e) {
-    console.error("Touch Media Timestamp Error:", e);
+    console.error("failed to update database:", e);
     return {
       success: false,
       error: "タイムスタンプの更新に失敗しました。",
     };
   }
+
+  // NOTE: FS のタイムスタンプは utime や open->close では更新されないので無視
 
   return { success: true };
 }
