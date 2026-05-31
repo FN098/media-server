@@ -1,7 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
-interface UpsertFavoriteProps {
+interface UpsertFavoriteInput {
   userId: string;
   mediaId: string;
   rating: number | null;
@@ -11,7 +11,7 @@ export async function upsertFavorite({
   userId,
   mediaId,
   rating,
-}: UpsertFavoriteProps): Promise<void> {
+}: UpsertFavoriteInput): Promise<void> {
   await prisma.favorite.upsert({
     where: {
       userId_mediaId: { userId, mediaId },
@@ -35,10 +35,15 @@ export async function getFavorite(
   });
 }
 
-export async function deleteFavorite(
-  userId: string,
-  mediaId: string
-): Promise<{ count: number }> {
+interface DeleteFavoriteInput {
+  userId: string;
+  mediaId: string;
+}
+
+export async function deleteFavorite({
+  userId,
+  mediaId,
+}: DeleteFavoriteInput): Promise<{ count: number }> {
   // delete はレコードがないとエラーを吐くので deleteMany か
   // 存在チェック後の delete を推奨
   return await prisma.favorite.deleteMany({

@@ -11,6 +11,7 @@ import {
 } from "@/lib/favorite/repository";
 import { UpsertFavoriteInputSchema } from "@/lib/favorite/schemar";
 import { getMediaIdByPath, getMediaIdsByPaths } from "@/lib/media/repository";
+import { VirtualPathSchema } from "@/lib/path/schemas";
 import { clamp } from "@/lib/utils/clamp";
 
 // お気に入りレーティング更新
@@ -23,31 +24,31 @@ export async function updateFavoriteAction(
 
   // 入力バリデーション
   const parsed = UpsertFavoriteInputSchema.safeParse({
-    userId: user.id,
     path,
     rating,
   });
 
-  if (!parsed.success)
+  if (!parsed.success) {
     return {
       success: false,
       error: `不正な入力です: ${parsed.error.issues[0].message}`,
     };
+  }
+
+  const validated = parsed.data;
 
   // NOTE: Favorite テーブルのID制約の都合上、path のままでは upsert できないので、パスからIDを逆引きする
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(parsed.data.path);
+  const mediaId = await getMediaIdByPath(validated.path);
   if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
-  const input = {
-    userId: parsed.data.userId,
-    rating: parsed.data.rating,
-    mediaId,
-  };
-
   try {
-    await upsertFavorite(input);
+    await upsertFavorite({
+      userId: user.id,
+      rating: validated.rating,
+      mediaId,
+    });
     return { success: true };
   } catch (error) {
     console.error("Failed to update favorite:", error);
@@ -61,13 +62,25 @@ export async function deleteFavoriteAction(path: string) {
   const user = await resolveCurrentUserOrThrow();
 
   // 入力バリデーション
+  const parsed = VirtualPathSchema.safeParse(path);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+    };
+  }
+
+  const validated = { path: parsed.data };
+
+  // NOTE: Favorite テーブルのID制約の都合上、path のままでは upsert できないので、パスからIDを逆引きする
+
+  // メディアID逆引き
+  const mediaId = await getMediaIdByPath(validated.path);
+  if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
   try {
-    const mediaId = await getMediaIdByPath(path);
-    if (!mediaId) return { success: false, error: "メディアが見つかりません" };
-
-    await deleteFavorite(user.id, mediaId);
-
+    await deleteFavorite({ userId: user.id, mediaId });
     return { success: true };
   } catch (error) {
     console.error("Failed to delete favorite:", error);

@@ -12,7 +12,6 @@ export const FavoriteSchema = z.object({
 });
 
 export const UpsertFavoriteInputSchema = z.object({
-  userId: UserSchema.shape.id,
   rating: z.number().int().min(1).max(5).nullable(),
   path: VirtualPathSchema,
 });
