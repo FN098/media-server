@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // schema.prisma の Media 定義相当
 export const MediaSchema = z.object({
-  id: z.uuidv7(),
+  id: z.uuid(),
   path: z.string(),
   dirPath: z.string(),
   previewPath: z.string().nullable(),
