@@ -308,8 +308,8 @@ export async function moveNodesAction(
   // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
   const existingNames = new Set<string>();
   try {
-    const files = await readdir(realDestDirPath);
-    files.forEach((name) => existingNames.add(name));
+    const entries = await readdir(realDestDirPath);
+    entries.forEach((name) => existingNames.add(name));
   } catch (e) {
     console.error("failed to read directory:", e);
     return {
@@ -596,8 +596,8 @@ export async function copyNodesAction(
   // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
   const existingNames = new Set<string>();
   try {
-    const files = await readdir(realDestDirPath);
-    files.forEach((name) => existingNames.add(name));
+    const entries = await readdir(realDestDirPath);
+    entries.forEach((name) => existingNames.add(name));
   } catch (e) {
     // コピー先フォルダ自体が存在しないなどのエラーハンドリング
     if (!isFsNotFoundError(e)) {
