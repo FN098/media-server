@@ -1,6 +1,6 @@
 import {
-  PathSegmentSchema,
   VirtualPathSchema,
+  VirtualPathSegmentSchema,
 } from "@/lib/virtual-path/schemas";
 import { describe, expect, it } from "vitest";
 
@@ -29,12 +29,12 @@ const RESERVED_NAMES = [
   "LPT9",
 ] as const;
 
-describe("PathSegmentSchema", () => {
+describe("VirtualPathSegmentSchema", () => {
   describe("valid segments", () => {
     it.each(["foo", "foo.txt", "my-file", "my_file", "画像", "大阪.jpg"])(
       "accepts %s",
       (segment) => {
-        expect(PathSegmentSchema.parse(segment)).toBe(segment);
+        expect(VirtualPathSegmentSchema.parse(segment)).toBe(segment);
       }
     );
   });
@@ -56,20 +56,20 @@ describe("PathSegmentSchema", () => {
       "foo.",
       "foo ",
     ])("rejects %s", (segment) => {
-      expect(() => PathSegmentSchema.parse(segment)).toThrow();
+      expect(() => VirtualPathSegmentSchema.parse(segment)).toThrow();
     });
   });
 
   describe("reserved names", () => {
     it.each(RESERVED_NAMES)("rejects reserved name %s", (name) => {
-      expect(() => PathSegmentSchema.parse(name)).toThrow();
-      expect(() => PathSegmentSchema.parse(`${name}.txt`)).toThrow();
+      expect(() => VirtualPathSegmentSchema.parse(name)).toThrow();
+      expect(() => VirtualPathSegmentSchema.parse(`${name}.txt`)).toThrow();
     });
 
     it.each(["con", "Con", "cOn", "nul", "Com1", "lPt9"])(
       "rejects reserved name regardless of case: %s",
       (segment) => {
-        expect(() => PathSegmentSchema.parse(segment)).toThrow();
+        expect(() => VirtualPathSegmentSchema.parse(segment)).toThrow();
       }
     );
   });
@@ -78,7 +78,7 @@ describe("PathSegmentSchema", () => {
     it.each([" foo", "foo ", " foo "])(
       "rejects segment with leading/trailing whitespace: %s",
       (segment) => {
-        expect(() => PathSegmentSchema.parse(segment)).toThrow();
+        expect(() => VirtualPathSegmentSchema.parse(segment)).toThrow();
       }
     );
   });

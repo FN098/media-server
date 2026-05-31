@@ -27,59 +27,61 @@ const WINDOWS_RESERVED_NAMES = new Set([
   "LPT9",
 ]);
 
-export const PathSegmentSchema = z.string().superRefine((segment, ctx) => {
-  if (!segment) {
-    ctx.addIssue({
-      code: "custom",
-      message: "セグメントが空です",
-    });
-    return;
-  }
+export const VirtualPathSegmentSchema = z
+  .string()
+  .superRefine((segment, ctx) => {
+    if (!segment) {
+      ctx.addIssue({
+        code: "custom",
+        message: "セグメントが空です",
+      });
+      return;
+    }
 
-  if (segment !== segment.trim()) {
-    ctx.addIssue({
-      code: "custom",
-      message: "先頭または末尾に空白を含めることはできません",
-    });
-  }
+    if (segment !== segment.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        message: "先頭または末尾に空白を含めることはできません",
+      });
+    }
 
-  if (segment.includes("/") || segment.includes("\\")) {
-    ctx.addIssue({
-      code: "custom",
-      message: "セグメントにパス区切り文字は使用できません",
-    });
-  }
+    if (segment.includes("/") || segment.includes("\\")) {
+      ctx.addIssue({
+        code: "custom",
+        message: "セグメントにパス区切り文字は使用できません",
+      });
+    }
 
-  if (segment === "." || segment === "..") {
-    ctx.addIssue({
-      code: "custom",
-      message: `使用できないパス要素です: ${segment}`,
-    });
-  }
+    if (segment === "." || segment === "..") {
+      ctx.addIssue({
+        code: "custom",
+        message: `使用できないパス要素です: ${segment}`,
+      });
+    }
 
-  if (WINDOWS_INVALID_CHARS.test(segment)) {
-    ctx.addIssue({
-      code: "custom",
-      message: `使用できない文字が含まれています: ${segment}`,
-    });
-  }
+    if (WINDOWS_INVALID_CHARS.test(segment)) {
+      ctx.addIssue({
+        code: "custom",
+        message: `使用できない文字が含まれています: ${segment}`,
+      });
+    }
 
-  if (/[. ]$/.test(segment)) {
-    ctx.addIssue({
-      code: "custom",
-      message: `末尾のピリオドまたはスペースは禁止です: ${segment}`,
-    });
-  }
+    if (/[. ]$/.test(segment)) {
+      ctx.addIssue({
+        code: "custom",
+        message: `末尾のピリオドまたはスペースは禁止です: ${segment}`,
+      });
+    }
 
-  const basename = segment.split(".")[0].toUpperCase();
+    const basename = segment.split(".")[0].toUpperCase();
 
-  if (WINDOWS_RESERVED_NAMES.has(basename)) {
-    ctx.addIssue({
-      code: "custom",
-      message: `予約名は使用できません: ${segment}`,
-    });
-  }
-});
+    if (WINDOWS_RESERVED_NAMES.has(basename)) {
+      ctx.addIssue({
+        code: "custom",
+        message: `予約名は使用できません: ${segment}`,
+      });
+    }
+  });
 
 // 仮想パス。先頭スラッシュ禁止
 export const VirtualPathSchema = z.string().superRefine((value, ctx) => {
@@ -109,7 +111,7 @@ export const VirtualPathSchema = z.string().superRefine((value, ctx) => {
   const segments = value.split("/");
 
   for (const [index, segment] of segments.entries()) {
-    const result = PathSegmentSchema.safeParse(segment);
+    const result = VirtualPathSegmentSchema.safeParse(segment);
 
     if (!result.success) {
       for (const issue of result.error.issues) {
@@ -125,5 +127,5 @@ export const VirtualPathSchema = z.string().superRefine((value, ctx) => {
 export const VirtualPathOneSchema = VirtualPathSchema;
 export const VirtualPathManySchema = z.array(VirtualPathSchema);
 
-export const FileNameSchema = PathSegmentSchema;
-export const FolderNameSchema = PathSegmentSchema;
+export const FileNameSchema = VirtualPathSegmentSchema;
+export const FolderNameSchema = VirtualPathSegmentSchema;

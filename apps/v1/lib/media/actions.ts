@@ -18,8 +18,9 @@ import {
   recursiveMergeMove,
 } from "@/lib/utils/fs";
 import {
-  PathSegmentSchema,
-  VirtualPathSchema,
+  VirtualPathManySchema,
+  VirtualPathOneSchema,
+  VirtualPathSegmentSchema,
 } from "@/lib/virtual-path/schemas";
 import console from "console";
 import { randomUUID } from "crypto";
@@ -29,15 +30,15 @@ import { revalidatePath } from "next/cache";
 import { basename, dirname, extname, join } from "path";
 
 function normalizeVirtualPath(path: string) {
-  return VirtualPathSchema.parse(path);
+  return VirtualPathOneSchema.parse(path);
 }
 
 function normalizeVirtualPaths(paths: string[]) {
-  return paths.map((path) => VirtualPathSchema.parse(path));
+  return VirtualPathManySchema.parse(paths);
 }
 
-function normalizePathSegment(segment: string) {
-  return PathSegmentSchema.parse(segment);
+function normalizeFileOrDirectoryName(name: string) {
+  return VirtualPathSegmentSchema.parse(name);
 }
 
 // リネーム
@@ -47,7 +48,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
   // 入力バリデーション+正規化
   const normalizedSourcePath = normalizeVirtualPath(sourcePath);
-  const normalizedNewName = normalizePathSegment(newName);
+  const normalizedNewName = normalizeFileOrDirectoryName(newName);
 
   // ルートフォルダ保護
   if (normalizedSourcePath === "") {
@@ -106,7 +107,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   try {
     await rm(destThumbPath, { recursive: true, force: true });
   } catch (e) {
-    console.error("failed to remove thumbnails directory:", e);
+    console.error("failed to remove thumbnail file or directory:", e);
     return {
       success: false,
       error: "サムネイル処理中にエラーが発生しました。",
@@ -121,7 +122,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   } catch (e) {
     // サムネイル元が not found （未作成）の場合は処理継続、それ以外は失敗
     if (!isFsNotFoundError(e)) {
-      console.error("failed to rename thumbnails directory:", e);
+      console.error("failed to rename thumbnail file or directory:", e);
       return {
         success: false,
         error: "サムネイル処理中にエラーが発生しました。",
