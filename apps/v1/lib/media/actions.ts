@@ -1,6 +1,7 @@
 "use server";
 
 import { Media } from "@/generated/prisma/client";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import { prisma } from "@/lib/db/prisma";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
@@ -38,6 +39,9 @@ function normalizePathSegment(segment: string) {
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
+  // 認証
+  await resolveCurrentUserOrThrow();
+
   // 入力バリデーション+正規化
   const normalizedSourcePath = normalizeVirtualPath(sourcePath);
   const normalizedNewName = normalizePathSegment(newName);
@@ -279,6 +283,9 @@ export async function moveNodesAction(
   destDirPath: string
 ) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
+
+  // 認証
+  await resolveCurrentUserOrThrow();
 
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
@@ -568,6 +575,9 @@ export async function copyNodesAction(
 ) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
+  // 認証
+  await resolveCurrentUserOrThrow();
+
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
   const normalizedDestDirPath = normalizeVirtualPath(destDirPath);
@@ -812,6 +822,9 @@ export async function copyNodesAction(
 
 // メディアファイル一覧
 export async function listMediaAction(dirPath: string) {
+  // 認証
+  await resolveCurrentUserOrThrow();
+
   // 入力バリデーション+正規化
   const normalizedDirPath = normalizeVirtualPath(dirPath);
 
@@ -861,6 +874,9 @@ export async function listMediaAction(dirPath: string) {
 // 削除（ゴミ箱フォルダへの移動）
 export async function deleteNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
+
+  // 認証
+  await resolveCurrentUserOrThrow();
 
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
@@ -924,6 +940,9 @@ export async function deleteNodesAction(sourcePaths: string[]) {
 // 復元（ゴミ箱フォルダから元のフォルダへの移動）
 export async function restoreNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
+
+  // 認証
+  await resolveCurrentUserOrThrow();
 
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
@@ -989,6 +1008,9 @@ export async function restoreNodesAction(sourcePaths: string[]) {
 export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
+  // 認証
+  await resolveCurrentUserOrThrow();
+
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
 
@@ -1036,6 +1058,9 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
 
 // タイムスタンプ更新
 export async function touchMediaTimestampAction(sourcePath: string) {
+  // 認証
+  await resolveCurrentUserOrThrow();
+
   // 入力バリデーション+正規化
   const normalizedSourcePath = normalizeVirtualPath(sourcePath);
 
