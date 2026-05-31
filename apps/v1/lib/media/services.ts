@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { dirname } from "@/lib/virtual-path/path";
 
 // ==========================================
 // renameNode
@@ -15,13 +16,15 @@ export async function renameNodeInDb({
   destVirtualPath,
   isDirectory,
 }: RenameNodeInDbParams): Promise<void> {
+  const destDirPath = dirname(destVirtualPath);
+
   await prisma.$transaction(async (tx) => {
     // -------------------------------------------------------
     // Media: 自分自身の path 更新（ファイル・フォルダ共通）
     // -------------------------------------------------------
     await tx.media.updateMany({
       where: { path: srcVirtualPath },
-      data: { path: destVirtualPath },
+      data: { path: destVirtualPath, dirPath: destDirPath },
     });
 
     // -------------------------------------------------------
@@ -59,7 +62,7 @@ export async function renameNodeInDb({
     }
 
     // -------------------------------------------------------
-    // VisitedFolder: リネーム先と被る既存レコードを削除
+    // VisitedFolder: 移動先と被る既存レコードを削除
     // -------------------------------------------------------
     await tx.visitedFolder.deleteMany({
       where: {
@@ -82,7 +85,7 @@ export async function renameNodeInDb({
       },
     });
 
-    // VisitedFolder: path 一括置換
+    // VisitedFolder: dirPath 一括置換
     await tx.$executeRaw`
       UPDATE VisitedFolder
       SET dirPath = CASE
@@ -97,7 +100,7 @@ export async function renameNodeInDb({
     // FolderMeta: 配下の previewPath 一括置換（フォルダのみ）
     // -------------------------------------------------------
     if (isDirectory) {
-      // リネーム先と被る既存レコードを削除（上書き許容）
+      // 移動先と被る既存レコードを削除（上書き許容）
       await tx.folderMeta.deleteMany({
         where: {
           OR: [
