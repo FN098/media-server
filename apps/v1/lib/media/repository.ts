@@ -161,3 +161,17 @@ export async function cloneMediaRecordsUnderDir(
     })
   );
 }
+
+// ファイル更新日を更新
+export async function updateMediaFileMtime({
+  path,
+  mtime = new Date(),
+}: {
+  path: string;
+  mtime?: Date;
+}): Promise<void> {
+  await prisma.media.update({
+    where: { path },
+    data: { fileMtime: mtime },
+  });
+}

@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { detectMediaType } from "@/lib/media/detectors";
+import { updateMediaFileMtime } from "@/lib/media/repository";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
@@ -838,14 +839,10 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
 export async function touchMediaTimestampAction(targetPath: string) {
   // 入力バリデーション+正規化
   const normalizedPath = normalizeVirtualPath(targetPath);
-  const virtualPath = normalizedPath;
 
   // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
   try {
-    await prisma.media.update({
-      where: { path: virtualPath },
-      data: { fileMtime: new Date() },
-    });
+    await updateMediaFileMtime({ path: normalizedPath });
   } catch (error) {
     console.error("Touch Media Timestamp Error:", error);
     return {
