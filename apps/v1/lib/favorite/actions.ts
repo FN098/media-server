@@ -9,7 +9,7 @@ import {
   upsertFavorite,
   upsertMultipleFavorites,
 } from "@/lib/favorite/repository";
-import { FavoriteCreateOneSchema } from "@/lib/favorite/schemar";
+import { UpsertFavoriteInputSchema } from "@/lib/favorite/schemar";
 import { getMediaIdByPath, getMediaIdsByPaths } from "@/lib/media/repository";
 import { clamp } from "@/lib/utils/clamp";
 
@@ -22,7 +22,7 @@ export async function updateFavoriteAction(
   const user = await resolveCurrentUserOrThrow();
 
   // 入力バリデーション
-  const parsed = FavoriteCreateOneSchema.safeParse({
+  const parsed = UpsertFavoriteInputSchema.safeParse({
     userId: user.id,
     path,
     rating,
@@ -57,9 +57,10 @@ export async function updateFavoriteAction(
 
 // お気に入り削除 (レコード自体の消去)
 export async function deleteFavoriteAction(path: string) {
-  try {
-    const user = await resolveCurrentUserOrThrow();
+  // 認証
+  const user = await resolveCurrentUserOrThrow();
 
+  try {
     const mediaId = await getMediaIdByPath(path);
     if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
