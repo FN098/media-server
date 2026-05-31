@@ -1,5 +1,6 @@
 "use server";
 
+import { Media } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
@@ -9,12 +10,15 @@ import {
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { PathSegmentSchema, VirtualPathSchema } from "@/lib/path/schemas";
+import { isHiddenVirtualPath } from "@/lib/path/system-hidden-paths";
 import {
   getPathInfo,
   isFsNotFoundError,
   isFsPermissionError,
   recursiveMergeMove,
 } from "@/lib/utils/fs";
+import console from "console";
+import { randomUUID } from "crypto";
 import { Dirent } from "fs";
 import { cp, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -37,6 +41,16 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   // 入力バリデーション+正規化
   const normalizedSourcePath = normalizeVirtualPath(sourcePath);
   const normalizedNewName = normalizePathSegment(newName);
+
+  // ルートフォルダ保護
+  if (normalizedSourcePath === "") {
+    return { success: false, error: "ルートフォルダは操作できません" };
+  }
+
+  // システムフォルダ保護
+  if (isHiddenVirtualPath(normalizedSourcePath)) {
+    return { success: false, error: "システムフォルダは操作できません" };
+  }
 
   const srcVirtualPath = normalizedSourcePath;
   const destVirtualPath = join(dirname(srcVirtualPath), normalizedNewName);
@@ -131,6 +145,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
   // DB更新
   try {
+    // TODO: prisma の型安全なクエリに書き換え
     await prisma.$transaction(async (tx) => {
       // 自分自身の更新
       await tx.$executeRaw`
@@ -269,6 +284,24 @@ export async function moveNodesAction(
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
   const normalizedDestDirPath = normalizeVirtualPath(destDirPath);
 
+  // ルートフォルダ保護
+  if (normalizedSourcePaths.some((path) => path === "")) {
+    return {
+      success: 0,
+      failed: sourcePaths.length,
+      errors: ["ルートフォルダは操作できません"],
+    };
+  }
+
+  // システムフォルダ保護
+  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["システムフォルダは操作できません"],
+    };
+  }
+
   // 仮想パス→物理パス
   const realDestDirPath = getServerMediaPath(normalizedDestDirPath);
 
@@ -338,10 +371,7 @@ export async function moveNodesAction(
     existingNames.add(currentSrcName);
 
     // 最終的なパスを決定
-    const destVirtualPath =
-      normalizedDestDirPath === ""
-        ? currentSrcName
-        : `${normalizedDestDirPath}/${currentSrcName}`;
+    const destVirtualPath = `${normalizedDestDirPath}/${currentSrcName}`;
     const destRealPath = getServerMediaPath(destVirtualPath);
 
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
@@ -400,6 +430,7 @@ export async function moveNodesAction(
 
     // DB更新
     try {
+      // TODO: prisma の型安全なクエリに書き換え
       await prisma.$transaction(async (tx) => {
         // 自分自身の更新
         await tx.$executeRaw`
@@ -541,6 +572,24 @@ export async function copyNodesAction(
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
   const normalizedDestDirPath = normalizeVirtualPath(destDirPath);
 
+  // ルートフォルダ保護
+  if (normalizedSourcePaths.some((path) => path === "")) {
+    return {
+      success: 0,
+      failed: sourcePaths.length,
+      errors: ["ルートフォルダは操作できません"],
+    };
+  }
+
+  // システムフォルダ保護
+  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["システムフォルダは操作できません"],
+    };
+  }
+
   // 仮想パス→物理パス
   const realDestDirPath = getServerMediaPath(normalizedDestDirPath);
 
@@ -551,7 +600,7 @@ export async function copyNodesAction(
     files.forEach((name) => existingNames.add(name));
   } catch (e) {
     // コピー先フォルダ自体が存在しないなどのエラーハンドリング
-    if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+    if (!isFsNotFoundError(e)) {
       return {
         success: 0,
         failed: sourcePaths.length,
@@ -616,6 +665,7 @@ export async function copyNodesAction(
       normalizedDestDirPath === ""
         ? currentSrcName
         : `${normalizedDestDirPath}/${currentSrcName}`;
+
     const destRealPath = getServerMediaPath(destVirtualPath);
 
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
@@ -626,10 +676,10 @@ export async function copyNodesAction(
     try {
       await cp(srcThumbPath, destThumbPath, { recursive: true });
       thumbCopied = true;
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
+    } catch (cpError) {
+      if (isFsNotFoundError(cpError)) {
         // ENOENT 以外は警告ログだけ残す（本体コピーは成功しているので続行）
-        console.error(`Thumbnail Copy Error [${srcVirtualPath}]:`, e);
+        console.error("failed to copy thumbnails:", cpError);
       }
     }
 
@@ -642,8 +692,8 @@ export async function copyNodesAction(
       // FSロールバック（中途半端なコピー結果を削除）
       try {
         await rm(destRealPath, { recursive: true, force: true });
-      } catch (re) {
-        console.error("failed to remove file or directory:", re);
+      } catch (e) {
+        console.error("failed to remove file or directory:", e);
       }
 
       // サムネイルロールバック
@@ -660,7 +710,80 @@ export async function copyNodesAction(
       continue;
     }
 
-    // NOTE: DB 登録はしない（新規として扱う）
+    // DB 更新
+    try {
+      await prisma.$transaction(async (tx) => {
+        // ディレクトリ配下を1回のクエリで全取得
+        const srcMediaList = await tx.media.findMany({
+          where: isDirectory
+            ? {
+                OR: [
+                  { dirPath: srcVirtualPath },
+                  { dirPath: { startsWith: srcVirtualPath + "/" } },
+                ],
+              }
+            : { path: srcVirtualPath },
+          include: { mediaTags: { select: { tagId: true } } },
+        });
+
+        // コピー用のデータを準備
+        const idMap = new Map<string, string>();
+        const dataToCreate = srcMediaList.map((m) => {
+          const newId = randomUUID();
+          idMap.set(m.id, newId);
+          return {
+            id: newId,
+            path: destVirtualPath,
+            dirPath: m.dirPath.replace(srcVirtualPath, destVirtualPath),
+            fileMtime: m.fileMtime,
+            fileSize: m.fileSize,
+            type: m.type,
+            title: m.title,
+            previewPath: m.previewPath,
+          };
+        }) satisfies Partial<Media>[];
+
+        // createMany でまとめて挿入
+        await tx.media.createMany({
+          data: dataToCreate,
+          skipDuplicates: true,
+        });
+
+        // MediaTag も createMany で一括
+        await tx.mediaTag.createMany({
+          data: srcMediaList.flatMap((m) =>
+            m.mediaTags.map(({ tagId }) => ({
+              mediaId: idMap.get(m.id)!, // src→destのIDマッピング
+              tagId,
+            }))
+          ),
+          skipDuplicates: true,
+        });
+      });
+    } catch (e) {
+      console.error("failed to update database:", e);
+
+      // FSロールバック（中途半端なコピー結果を削除）
+      try {
+        await rm(destRealPath, { recursive: true, force: true });
+      } catch (e) {
+        console.error("failed to rollback copied file or directory:", e);
+      }
+
+      // サムネイルロールバック
+      if (thumbCopied) {
+        try {
+          await rm(destThumbPath, { recursive: true, force: true });
+        } catch (e) {
+          console.error("failed to rollback copied thumbnails directory:", e);
+        }
+      }
+
+      results.failed++;
+      results.errors.push("ファイルコピー中にエラーが発生しました。");
+      continue;
+    }
+
     results.success++;
   }
 
@@ -674,6 +797,11 @@ export async function copyNodesAction(
 export async function listMediaAction(dirPath: string) {
   // 入力バリデーション+正規化
   const normalizedDirPath = normalizeVirtualPath(dirPath);
+
+  // システムフォルダ保護
+  if (isHiddenVirtualPath(normalizedDirPath)) {
+    return { success: false, error: "システムフォルダは操作できません" };
+  }
 
   // 仮想パス→物理パス
   const virtualDirPath = normalizedDirPath;
@@ -720,6 +848,24 @@ export async function deleteNodesAction(sourcePaths: string[]) {
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
 
+  // ルートフォルダ保護
+  if (normalizedSourcePaths.some((path) => path === "")) {
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["ルートフォルダは操作できません"],
+    };
+  }
+
+  // システムフォルダ保護
+  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["システムフォルダは操作できません"],
+    };
+  }
+
   for (const srcVirtualPath of normalizedSourcePaths) {
     const destVirtualPath = srcVirtualPath;
 
@@ -765,6 +911,24 @@ export async function restoreNodesAction(sourcePaths: string[]) {
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
 
+  // ルートフォルダ保護
+  if (normalizedSourcePaths.some((path) => path === "")) {
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["ルートフォルダは操作できません"],
+    };
+  }
+
+  // システムフォルダ保護
+  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["システムフォルダは操作できません"],
+    };
+  }
+
   for (const srcVirtualPath of normalizedSourcePaths) {
     const destVirtualPath = srcVirtualPath;
 
@@ -809,15 +973,33 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
   // 入力バリデーション+正規化
-  const normalizedPaths = normalizeVirtualPaths(sourcePaths);
+  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
 
-  for (const virtualPath of normalizedPaths) {
+  // ルートフォルダ保護
+  if (normalizedSourcePaths.some((path) => path === "")) {
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["ルートフォルダは操作できません"],
+    };
+  }
+
+  // システムフォルダ保護
+  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["システムフォルダは操作できません"],
+    };
+  }
+
+  for (const srcVirtualPath of normalizedSourcePaths) {
     // 仮想パス→物理パス
-    const realPath = getServerMediaTrashPath(virtualPath);
+    const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
 
     // FS削除
     try {
-      await rm(realPath, { recursive: true, force: true });
+      await rm(srcRealPath, { recursive: true, force: true });
     } catch (error) {
       console.error("failed to remove file or directory", error);
       results.failed++;
@@ -836,13 +1018,23 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
 }
 
 // タイムスタンプ更新
-export async function touchMediaTimestampAction(targetPath: string) {
+export async function touchMediaTimestampAction(sourcePath: string) {
   // 入力バリデーション+正規化
-  const normalizedPath = normalizeVirtualPath(targetPath);
+  const normalizedSourcePath = normalizeVirtualPath(sourcePath);
+
+  // ルートフォルダ保護
+  if (normalizedSourcePath === "") {
+    return { success: false, error: "ルートフォルダは操作できません" };
+  }
+
+  // システムフォルダ保護
+  if (isHiddenVirtualPath(normalizedSourcePath)) {
+    return { success: false, error: "システムフォルダは操作できません" };
+  }
 
   // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
   try {
-    await updateMediaFileMtime({ path: normalizedPath });
+    await updateMediaFileMtime({ path: normalizedSourcePath });
   } catch (error) {
     console.error("Touch Media Timestamp Error:", error);
     return {
