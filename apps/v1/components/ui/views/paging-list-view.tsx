@@ -674,18 +674,14 @@ function RatingCell({
   updateFavorite,
 }: RatingCellProps) {
   if (node.isDirectory) {
-    if (!node.averageRating) {
-      return <span className="italic text-muted-foreground">-</span>;
-    }
-
     return (
       <>
         <FavoriteRatingDisplay
-          value={node.averageRating}
+          value={node.averageRating ?? 0}
           className="hidden md:flex"
         />
         <AverageRatingBadge
-          rating={node.averageRating}
+          rating={node.averageRating ?? 0}
           className="flex md:hidden"
         />
       </>
