@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { getWebApiUrl } from "@/lib/env/helpers";
+import { getWebApiUrl } from "@/lib/env/env-client";
 import { PATHS } from "@/lib/path/paths";
 import { getAbsoluteUrl, joinUrlPath } from "@/lib/utils/url";
 import path from "path";
