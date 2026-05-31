@@ -125,11 +125,11 @@ export async function listSubDirectoriesAction(dirPath: string) {
     return { success: false, error: "パスが指定されていません" };
   }
 
-  const realPath = getServerMediaPath(dirPath);
+  const realDirPath = getServerMediaPath(dirPath);
 
   let entries: Dirent[];
   try {
-    entries = await readdir(realPath, { withFileTypes: true });
+    entries = await readdir(realDirPath, { withFileTypes: true });
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code === "ENOENT") {
       return { success: false, error: "フォルダが見つかりません" };
@@ -145,7 +145,7 @@ export async function listSubDirectoriesAction(dirPath: string) {
     success: true,
     directories: entries
       .filter((e) => e.isDirectory())
-      .filter((e) => !isBlockedServerPath(join(realPath, e.name)))
+      .filter((e) => !isBlockedServerPath(join(realDirPath, e.name)))
       .map((e) => ({
         name: e.name,
         path: join(dirPath, e.name).replace(/\\/g, "/"),
