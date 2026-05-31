@@ -18,6 +18,7 @@ import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
 import { formatBytes } from "@/lib/utils/format";
 import { useFavoritesContext } from "@/providers/favorites-provider";
+import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
@@ -296,21 +297,23 @@ export function PagingListView({
     >
       <HeaderRow />
 
-      <div className="flex-1 overflow-y-auto">
-        {currentNodes.map((node, index) => (
-          <DataRow
-            key={node.path}
-            node={node}
-            globalIndex={(currentPage - 1) * pageSize + index}
-            allNodes={allNodes}
-            isMobile={isMobile}
-            totalSize={totalSize}
-            onOpen={onOpen}
-            onSelectionChange={onSelectionChange}
-            onThumbError={onThumbError}
-          />
-        ))}
-      </div>
+      <LocaleProvider>
+        <div className="flex-1 overflow-y-auto">
+          {currentNodes.map((node, index) => (
+            <DataRow
+              key={node.path}
+              node={node}
+              globalIndex={(currentPage - 1) * pageSize + index}
+              allNodes={allNodes}
+              isMobile={isMobile}
+              totalSize={totalSize}
+              onOpen={onOpen}
+              onSelectionChange={onSelectionChange}
+              onThumbError={onThumbError}
+            />
+          ))}
+        </div>
+      </LocaleProvider>
 
       <PagingControl
         currentPage={currentPage}
@@ -525,6 +528,8 @@ function DataRow({
 
   const title = node.title ?? node.name;
 
+  const { locale } = useLocaleContext();
+
   return (
     <HoverPreviewPortal
       key={node.id}
@@ -599,7 +604,7 @@ function DataRow({
 
           {/* Updated */}
           <div className="hidden lg:block text-muted-foreground text-xs tabular-nums">
-            <LocalDate value={node.mtime} />
+            <LocalDate value={node.mtime} locale={locale} />
           </div>
 
           {/* Size */}

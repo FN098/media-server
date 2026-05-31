@@ -1,14 +1,31 @@
 "use client";
 
-import { formatLocalDate } from "@/lib/utils/format";
-import { useEffect, useState } from "react";
+import { useMounted } from "@/hooks/general/use-mounted";
+import { useMemo } from "react";
 
-export function LocalDate({ value }: { value: string | Date | null }) {
-  const [text, setText] = useState("-");
+interface LocalDateProps {
+  value: string | Date | null;
+  locale: string;
+  fallback?: string;
+}
 
-  useEffect(() => {
-    setText(formatLocalDate(value));
-  }, [value]);
+export function LocalDate({ value, locale, fallback = "-" }: LocalDateProps) {
+  const mounted = useMounted();
+  const formatted = useMemo(
+    () => (value && mounted && formatDate(new Date(value), locale)) || fallback,
+    [fallback, locale, mounted, value]
+  );
 
-  return <>{text}</>;
+  return <>{formatted}</>;
+}
+
+function formatDate(date: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
 }
