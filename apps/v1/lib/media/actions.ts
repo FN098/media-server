@@ -44,12 +44,12 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
   // ルートフォルダ保護
   if (normalizedSourcePath === "") {
-    return { success: false, error: "ルートフォルダは操作できません" };
+    return { success: false, error: "ルートフォルダは操作できません。" };
   }
 
   // システムフォルダ保護
   if (isSystemHiddenVirtualPath(normalizedSourcePath)) {
-    return { success: false, error: "システムフォルダは操作できません" };
+    return { success: false, error: "システムフォルダは操作できません。" };
   }
 
   const srcVirtualPath = normalizedSourcePath;
@@ -289,7 +289,7 @@ export async function moveNodesAction(
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["ルートフォルダは操作できません"],
+      errors: ["ルートフォルダは操作できません。"],
     };
   }
 
@@ -298,7 +298,7 @@ export async function moveNodesAction(
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["システムフォルダは操作できません"],
+      errors: ["システムフォルダは操作できません。"],
     };
   }
 
@@ -577,7 +577,7 @@ export async function copyNodesAction(
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["ルートフォルダは操作できません"],
+      errors: ["ルートフォルダは操作できません。"],
     };
   }
 
@@ -586,7 +586,7 @@ export async function copyNodesAction(
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["システムフォルダは操作できません"],
+      errors: ["システムフォルダは操作できません。"],
     };
   }
 
@@ -672,10 +672,10 @@ export async function copyNodesAction(
     try {
       await cp(srcThumbPath, destThumbPath, { recursive: true });
       thumbCopied = true;
-    } catch (cpError) {
-      if (isFsNotFoundError(cpError)) {
+    } catch (e) {
+      if (!isFsNotFoundError(e)) {
         // ENOENT 以外は警告ログだけ残す（本体コピーは成功しているので続行）
-        console.error("failed to copy thumbnails:", cpError);
+        console.error("failed to copy thumbnails:", e);
       }
     }
 
@@ -817,7 +817,7 @@ export async function listMediaAction(dirPath: string) {
 
   // システムフォルダ保護
   if (isSystemHiddenVirtualPath(normalizedDirPath)) {
-    return { success: false, error: "システムフォルダは操作できません" };
+    return { success: false, error: "システムフォルダは操作できません。" };
   }
 
   // 仮想パス→物理パス
@@ -870,7 +870,7 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["ルートフォルダは操作できません"],
+      errors: ["ルートフォルダは操作できません。"],
     };
   }
 
@@ -879,7 +879,7 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["システムフォルダは操作できません"],
+      errors: ["システムフォルダは操作できません。"],
     };
   }
 
@@ -933,7 +933,7 @@ export async function restoreNodesAction(sourcePaths: string[]) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["ルートフォルダは操作できません"],
+      errors: ["ルートフォルダは操作できません。"],
     };
   }
 
@@ -942,7 +942,7 @@ export async function restoreNodesAction(sourcePaths: string[]) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["システムフォルダは操作できません"],
+      errors: ["システムフォルダは操作できません。"],
     };
   }
 
@@ -997,7 +997,7 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["ルートフォルダは操作できません"],
+      errors: ["ルートフォルダは操作できません。"],
     };
   }
 
@@ -1006,7 +1006,7 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["システムフォルダは操作できません"],
+      errors: ["システムフォルダは操作できません。"],
     };
   }
 
@@ -1017,8 +1017,8 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     // FS削除
     try {
       await rm(srcRealPath, { recursive: true, force: true });
-    } catch (error) {
-      console.error("failed to remove file or directory", error);
+    } catch (e) {
+      console.error("failed to remove file or directory:", e);
       results.failed++;
       results.errors.push("削除中にエラーが発生しました。");
       continue;
@@ -1041,19 +1041,19 @@ export async function touchMediaTimestampAction(sourcePath: string) {
 
   // ルートフォルダ保護
   if (normalizedSourcePath === "") {
-    return { success: false, error: "ルートフォルダは操作できません" };
+    return { success: false, error: "ルートフォルダは操作できません。" };
   }
 
   // システムフォルダ保護
   if (isSystemHiddenVirtualPath(normalizedSourcePath)) {
-    return { success: false, error: "システムフォルダは操作できません" };
+    return { success: false, error: "システムフォルダは操作できません。" };
   }
 
   // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
   try {
     await updateMediaFileMtime({ path: normalizedSourcePath });
-  } catch (error) {
-    console.error("Touch Media Timestamp Error:", error);
+  } catch (e) {
+    console.error("Touch Media Timestamp Error:", e);
     return {
       success: false,
       error: "タイムスタンプの更新に失敗しました。",
