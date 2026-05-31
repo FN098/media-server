@@ -1,15 +1,38 @@
-import { access, lstat, readdir, rename, rm, rmdir, stat } from "fs/promises";
+import {
+  access,
+  constants,
+  lstat,
+  readdir,
+  rename,
+  rm,
+  rmdir,
+  stat,
+} from "fs/promises";
 import path from "path";
 import { join } from "path/posix";
 
-/** @deprecated */
 export async function existsPath(path: string): Promise<boolean> {
   try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
+    await access(path, constants.F_OK);
+    return true; // アクセスできた ＝ 存在する
+  } catch (e) {
+    if (isFsNotFoundError(e)) {
+      return false; // 見つからない ＝ 存在しない
+    }
+    throw e; // それ以外のエラーはそのまま投げる
   }
+}
+
+export function isFsNotFoundError(
+  error: unknown
+): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
+}
+
+export function isFsPermissionError(
+  error: unknown
+): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error && error.code === "EACCES";
 }
 
 /**
