@@ -1,4 +1,4 @@
-const MEDIA_ROOT = process.env.MEDIA_ROOT ?? "media";
+const MEDIA_ROOT = process.env.MEDIA_ROOT ?? "/media";
 
 export const PATHS = {
   server: {
