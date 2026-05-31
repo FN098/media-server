@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/db/prisma";
 import {
   GhostMediaItem,
   GhostMediaScanEventData,
 } from "@/lib/ghost-media/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
+import { prisma } from "@/lib/prisma";
 import { access, constants } from "fs/promises";
 import { NextRequest } from "next/server";
 

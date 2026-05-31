@@ -1,7 +1,7 @@
 "use server";
 
-import { prisma } from "@/lib/db/prisma";
 import { getServerMediaPath } from "@/lib/path/helpers";
+import { prisma } from "@/lib/prisma";
 import { stat } from "fs/promises";
 import { revalidatePath } from "next/cache";
 

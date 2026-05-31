@@ -2,8 +2,8 @@
 
 import { Prisma } from "@/generated/prisma/client";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
-import { prisma } from "@/lib/db/prisma";
 import { getClientExplorerPath } from "@/lib/path/helpers";
+import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
 import { generateKana } from "@/lib/utils/kana";

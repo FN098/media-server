@@ -2,7 +2,6 @@
 
 import { Media } from "@/generated/prisma/client";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
-import { prisma } from "@/lib/db/prisma";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
 import {
@@ -11,6 +10,7 @@ import {
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
+import { prisma } from "@/lib/prisma";
 import {
   getPathInfo,
   isFsNotFoundError,

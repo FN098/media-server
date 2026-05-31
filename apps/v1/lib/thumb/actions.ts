@@ -1,9 +1,9 @@
 "use server";
 
 import { APP_CONFIG } from "@/app.config";
-import { prisma } from "@/lib/db/prisma";
 import { getMediaPathFromThumbPath } from "@/lib/path/helpers";
 import { PATHS } from "@/lib/path/paths";
+import { prisma } from "@/lib/prisma";
 import { GhostThumbItem, GhostThumbScanOptions } from "@/lib/thumb/types";
 import { sha1Hash } from "@/lib/utils/sha1-hash";
 import { connection, thumbQueue } from "@/workers/thumb/queue";

@@ -1,5 +1,5 @@
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from "@/lib/prisma";
 import { Tag } from "@/lib/tag/types";
 
 export async function getTagsByIds(

@@ -1,5 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function upsertFavorite({
   userId,

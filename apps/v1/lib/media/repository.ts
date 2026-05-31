@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db/prisma";
 import { MediaDbNode } from "@/lib/media/types";
+import { prisma } from "@/lib/prisma";
 
 // Explorer | Trash ページで対象のディレクトリに存在するファイルの詳細データ取得
 export async function getMediaDbNodes(

@@ -2,7 +2,7 @@
 // Edge 環境で呼び出すとエラーになるので注意
 
 import { PASS, USER } from "@/lib/auth/basic-auth";
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from "@/lib/prisma";
 
 export function registerNodeOnly() {
   console.log("BASIC 認証情報", { USER, PASS });
