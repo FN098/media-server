@@ -7,7 +7,7 @@ import {
   getServerMediaThumbPath,
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
-import { PathSchema, PathSegmentSchema } from "@/lib/path/schemas";
+import { PathSegmentSchema, VirtualPathSchema } from "@/lib/path/schemas";
 import {
   getPathInfo,
   isFsNotFoundError,
@@ -20,14 +20,14 @@ import { revalidatePath } from "next/cache";
 import { basename, dirname, extname, join } from "path";
 
 function normalizeVirtualPath(path: string) {
-  return PathSchema.parse(path);
+  return VirtualPathSchema.parse(path);
 }
 
 function normalizeVirtualPaths(paths: string[]) {
-  return paths.map((path) => PathSchema.parse(path));
+  return paths.map((path) => VirtualPathSchema.parse(path));
 }
 
-function normalizeVirtualPathSegment(segment: string) {
+function normalizePathSegment(segment: string) {
   return PathSegmentSchema.parse(segment);
 }
 
@@ -35,7 +35,7 @@ function normalizeVirtualPathSegment(segment: string) {
 export async function renameNodeAction(sourcePath: string, newName: string) {
   // 入力バリデーション+正規化
   const normalizedSourcePath = normalizeVirtualPath(sourcePath);
-  const normalizedNewName = normalizeVirtualPathSegment(newName);
+  const normalizedNewName = normalizePathSegment(newName);
 
   const srcVirtualPath = normalizedSourcePath;
   const destVirtualPath = join(dirname(srcVirtualPath), normalizedNewName);

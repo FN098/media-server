@@ -1,4 +1,4 @@
-import { PathSchema, PathSegmentSchema } from "@/lib/path/schemas";
+import { PathSegmentSchema, VirtualPathSchema } from "@/lib/path/schemas";
 import { describe, expect, it } from "vitest";
 
 const RESERVED_NAMES = [
@@ -81,80 +81,82 @@ describe("PathSegmentSchema", () => {
   });
 });
 
-describe("PathSchema", () => {
+describe("VirtualPathSchema", () => {
   describe("normalization", () => {
     it("converts backslashes to slashes", () => {
-      expect(PathSchema.parse("foo\\bar")).toBe("foo/bar");
+      expect(VirtualPathSchema.parse("foo\\bar")).toBe("foo/bar");
     });
 
     it("removes leading slash", () => {
-      expect(PathSchema.parse("/foo/bar")).toBe("foo/bar");
+      expect(VirtualPathSchema.parse("/foo/bar")).toBe("foo/bar");
     });
 
     it("removes multiple leading slashes", () => {
-      expect(PathSchema.parse("///foo/bar")).toBe("foo/bar");
+      expect(VirtualPathSchema.parse("///foo/bar")).toBe("foo/bar");
     });
 
     it("normalizes mixed separators", () => {
-      expect(PathSchema.parse("\\foo/bar\\baz")).toBe("foo/bar/baz");
+      expect(VirtualPathSchema.parse("\\foo/bar\\baz")).toBe("foo/bar/baz");
     });
   });
 
   describe("valid paths", () => {
     it("accepts simple path", () => {
-      expect(PathSchema.parse("foo/bar")).toBe("foo/bar");
+      expect(VirtualPathSchema.parse("foo/bar")).toBe("foo/bar");
     });
 
     it("accepts japanese path", () => {
-      expect(PathSchema.parse("画像/旅行/大阪.jpg")).toBe("画像/旅行/大阪.jpg");
+      expect(VirtualPathSchema.parse("画像/旅行/大阪.jpg")).toBe(
+        "画像/旅行/大阪.jpg"
+      );
     });
 
     it("accepts file with extension", () => {
-      expect(PathSchema.parse("foo/bar.txt")).toBe("foo/bar.txt");
+      expect(VirtualPathSchema.parse("foo/bar.txt")).toBe("foo/bar.txt");
     });
   });
 
   describe("invalid paths", () => {
     it("rejects empty path", () => {
-      expect(() => PathSchema.parse("")).toThrow();
+      expect(() => VirtualPathSchema.parse("")).toThrow();
     });
 
     it("rejects double slash", () => {
-      expect(() => PathSchema.parse("foo//bar")).toThrow();
+      expect(() => VirtualPathSchema.parse("foo//bar")).toThrow();
     });
 
     it("rejects trailing slash", () => {
-      expect(() => PathSchema.parse("foo/bar/")).toThrow();
+      expect(() => VirtualPathSchema.parse("foo/bar/")).toThrow();
     });
 
     it("rejects dot segment", () => {
-      expect(() => PathSchema.parse("foo/./bar")).toThrow();
+      expect(() => VirtualPathSchema.parse("foo/./bar")).toThrow();
     });
 
     it("rejects parent segment", () => {
-      expect(() => PathSchema.parse("foo/../bar")).toThrow();
+      expect(() => VirtualPathSchema.parse("foo/../bar")).toThrow();
     });
 
     it("rejects reserved names", () => {
-      expect(() => PathSchema.parse("foo/CON/bar")).toThrow();
+      expect(() => VirtualPathSchema.parse("foo/CON/bar")).toThrow();
     });
 
     it("rejects invalid characters", () => {
-      expect(() => PathSchema.parse("foo/te<st/bar")).toThrow();
+      expect(() => VirtualPathSchema.parse("foo/te<st/bar")).toThrow();
     });
   });
 
   describe("reserved names", () => {
     it.each(RESERVED_NAMES)("rejects reserved name %s", (name) => {
-      expect(() => PathSchema.parse(name)).toThrow();
-      expect(() => PathSchema.parse(`${name}.txt`)).toThrow();
+      expect(() => VirtualPathSchema.parse(name)).toThrow();
+      expect(() => VirtualPathSchema.parse(`${name}.txt`)).toThrow();
     });
 
     it.each(["con", "Con", "cOn", "nul", "Com1", "lPt9"])(
       "rejects reserved name regardless of case: %s",
       (name) => {
-        expect(() => PathSchema.parse(name)).toThrow();
-        expect(() => PathSchema.parse(`foo/${name}/bar`)).toThrow();
+        expect(() => VirtualPathSchema.parse(name)).toThrow();
+        expect(() => VirtualPathSchema.parse(`foo/${name}/bar`)).toThrow();
       }
     );
   });
