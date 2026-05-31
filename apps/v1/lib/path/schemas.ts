@@ -81,6 +81,7 @@ export const PathSegmentSchema = z.string().superRefine((segment, ctx) => {
   }
 });
 
+// 仮想パス。先頭スラッシュ禁止
 export const PathSchema = z
   .string()
   .transform((value) => value.replace(/\\/g, "/").replace(/^\/+/, ""))

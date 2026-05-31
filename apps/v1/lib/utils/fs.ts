@@ -2,6 +2,7 @@ import { access, lstat, readdir, rename, rm, rmdir, stat } from "fs/promises";
 import path from "path";
 import { join } from "path/posix";
 
+/** @deprecated */
 export async function existsPath(path: string): Promise<boolean> {
   try {
     await access(path);

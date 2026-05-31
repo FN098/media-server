@@ -13,42 +13,27 @@ import { Dirent } from "fs";
 import { cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { basename, dirname, extname, join } from "path";
-import { ZodError } from "zod";
 
-// ヘルパー
-function getZodErrorMessage<T>(error: ZodError<T>) {
-  return error.issues[0].message;
+function normalizeVirtualPath(path: string) {
+  return PathSchema.parse(path);
+}
+
+function normalizeVirtualPaths(paths: string[]) {
+  return paths.map((path) => PathSchema.parse(path));
+}
+
+function normalizeVirtualPathSegment(segment: string) {
+  return PathSegmentSchema.parse(segment);
 }
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
-  // ルート保護
-  if (sourcePath === "") {
-    return {
-      success: false,
-      error: "ルートディレクトリはリネームできません。",
-    };
-  }
-
   // 入力バリデーション+正規化
-  const parsedSourcePath = PathSchema.safeParse(sourcePath);
-  if (!parsedSourcePath.success) {
-    return {
-      success: false,
-      error: getZodErrorMessage(parsedSourcePath.error),
-    };
-  }
+  const normalizedSourcePath = normalizeVirtualPath(sourcePath);
+  const normalizedNewName = normalizeVirtualPathSegment(newName);
 
-  const parsedNewName = PathSegmentSchema.safeParse(newName);
-  if (!parsedNewName.success) {
-    return {
-      success: false,
-      error: getZodErrorMessage(parsedNewName.error),
-    };
-  }
-
-  const srcVirtualPath = parsedSourcePath.data;
-  const destVirtualPath = join(dirname(srcVirtualPath), parsedNewName.data);
+  const srcVirtualPath = normalizedSourcePath;
+  const destVirtualPath = join(dirname(srcVirtualPath), normalizedNewName);
 
   // 仮想パス→物理パス
   const srcRealPath = getServerMediaPath(srcVirtualPath);
@@ -62,6 +47,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     };
   }
 
+  // ディレクトリ判定
   let stats: Awaited<ReturnType<typeof lstat>>;
   try {
     stats = await lstat(srcRealPath);
@@ -257,13 +243,11 @@ export async function moveNodesAction(
   sourcePaths: string[],
   destDirPath: string
 ) {
-  const results = { success: 0, failed: 0, errors: [] as string[] };
+  // 入力バリデーション+正規化
+  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
+  const normalizedDestDirPath = normalizeVirtualPath(destDirPath);
 
-  // 正規化
-  const normalizedDestDirPath = destDirPath.replace(/^\//, "");
-  const normalizedSourcePaths = sourcePaths.map((path) =>
-    path.replace(/^\//, "")
-  );
+  const results = { success: 0, failed: 0, errors: [] as string[] };
 
   // 移動先の既存ファイル/フォルダ一覧を最初に1回だけ取得 (メモリ上で高速判定するため)
   const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
@@ -335,6 +319,7 @@ export async function moveNodesAction(
       normalizedDestDirPath === ""
         ? currentSrcName
         : `${normalizedDestDirPath}/${currentSrcName}`;
+
     const destRealPath = getServerMediaPath(destVirtualPath);
 
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
@@ -529,13 +514,11 @@ export async function copyNodesAction(
   sourcePaths: string[],
   destDirPath: string
 ) {
-  const results = { success: 0, failed: 0, errors: [] as string[] };
+  // 入力バリデーション+正規化
+  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
+  const normalizedDestDirPath = normalizeVirtualPath(destDirPath);
 
-  // 正規化
-  const normalizedDestDirPath = destDirPath.replace(/^\//, "");
-  const normalizedSourcePaths = sourcePaths.map((path) =>
-    path.replace(/^\//, "")
-  );
+  const results = { success: 0, failed: 0, errors: [] as string[] };
 
   // コピー先の既存ファイル/フォルダ一覧を最初に1回だけ取得 (メモリ上で高速判定するため)
   const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
@@ -653,15 +636,15 @@ export async function copyNodesAction(
 
 // メディアファイル一覧
 export async function listMediaAction(dirPath: string) {
-  if (!dirPath) {
-    return { success: false, error: "パスが指定されていません" };
-  }
+  // 入力バリデーション+正規化
+  const virtualDirPath = normalizeVirtualPath(dirPath);
 
-  const realPath = getServerMediaPath(dirPath);
+  // 仮想パス→物理パス
+  const realDirPath = getServerMediaPath(virtualDirPath);
 
   let entries: Dirent[];
   try {
-    entries = await readdir(realPath, { withFileTypes: true });
+    entries = await readdir(realDirPath, { withFileTypes: true });
   } catch (e) {
     if ((e as NodeJS.ErrnoException).code === "ENOENT") {
       return { success: false, error: "フォルダが見つかりません" };
@@ -669,7 +652,7 @@ export async function listMediaAction(dirPath: string) {
     if ((e as NodeJS.ErrnoException).code === "EACCES") {
       return { success: false, error: "フォルダへのアクセス権がありません" };
     }
-    console.error(`Sub Directories Error [${dirPath}]:`, e);
+    console.error(`Sub Directories Error [${virtualDirPath}]:`, e);
     return { success: false, error: "ファイル一覧の取得に失敗しました" };
   }
 
@@ -681,7 +664,7 @@ export async function listMediaAction(dirPath: string) {
       return {
         name: e.name,
         // 仮想パスを生成
-        path: join(dirPath, e.name).replace(/\\/g, "/"),
+        path: join(virtualDirPath, e.name).replace(/\\/g, "/"),
         type,
       };
     })
@@ -695,11 +678,15 @@ export async function listMediaAction(dirPath: string) {
 
 // 削除（ゴミ箱フォルダへの移動）
 export async function deleteNodesAction(sourcePaths: string[]) {
+  // 入力バリデーション+正規化
+  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
+
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  for (const srcVirtualPath of sourcePaths) {
+  for (const srcVirtualPath of normalizedSourcePaths) {
     const destVirtualPath = srcVirtualPath;
 
+    // 仮想パス→物理パス
     const srcRealPath = getServerMediaPath(srcVirtualPath);
     const destRealPath = getServerMediaTrashPath(destVirtualPath);
 
@@ -740,11 +727,15 @@ export async function deleteNodesAction(sourcePaths: string[]) {
 
 // 復元（ゴミ箱フォルダから元のフォルダへの移動）
 export async function restoreNodesAction(sourcePaths: string[]) {
+  // 入力バリデーション+正規化
+  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
+
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  for (const srcVirtualPath of sourcePaths) {
+  for (const srcVirtualPath of normalizedSourcePaths) {
     const destVirtualPath = srcVirtualPath;
 
+    // 仮想パス→物理パス
     const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
     const destRealPath = getServerMediaPath(destVirtualPath);
 
@@ -784,9 +775,13 @@ export async function restoreNodesAction(sourcePaths: string[]) {
 
 // 完全に削除
 export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
+  // 入力バリデーション+正規化
+  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
+
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  for (const virtualPath of sourcePaths) {
+  for (const virtualPath of normalizedSourcePaths) {
+    // 仮想パス→物理パス
     const realPath = getServerMediaTrashPath(virtualPath);
 
     // FS削除
@@ -813,10 +808,13 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
 
 // タイムスタンプ更新
 export async function touchMediaTimestampAction(targetPath: string) {
+  // 入力バリデーション+正規化
+  const virtualPath = normalizeVirtualPath(targetPath);
+
   // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
   try {
     await prisma.media.update({
-      where: { path: targetPath },
+      where: { path: virtualPath },
       data: { fileMtime: new Date() },
     });
   } catch (error) {
