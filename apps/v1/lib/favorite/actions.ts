@@ -21,6 +21,7 @@ export async function updateFavoriteAction(
 ) {
   // 認証
   const user = await resolveCurrentUserOrThrow();
+  const userId = user.id;
 
   // 入力バリデーション
   const parsed = UpsertFavoriteInputSchema.safeParse({
@@ -37,17 +38,15 @@ export async function updateFavoriteAction(
 
   const validated = parsed.data;
 
-  // NOTE: Favorite テーブルのID制約の都合上、path のままでは upsert できないので、パスからIDを逆引きする
-
   // メディアID逆引き
   const mediaId = await getMediaIdByPath(validated.path);
   if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
   try {
     await upsertFavorite({
-      userId: user.id,
-      rating: validated.rating,
+      userId,
       mediaId,
+      rating: validated.rating,
     });
     return { success: true };
   } catch (error) {
@@ -60,6 +59,7 @@ export async function updateFavoriteAction(
 export async function deleteFavoriteAction(path: string) {
   // 認証
   const user = await resolveCurrentUserOrThrow();
+  const userId = user.id;
 
   // 入力バリデーション
   const parsed = VirtualPathSchema.safeParse(path);
@@ -73,14 +73,12 @@ export async function deleteFavoriteAction(path: string) {
 
   const validated = { path: parsed.data };
 
-  // NOTE: Favorite テーブルのID制約の都合上、path のままでは upsert できないので、パスからIDを逆引きする
-
   // メディアID逆引き
   const mediaId = await getMediaIdByPath(validated.path);
   if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
   try {
-    await deleteFavorite({ userId: user.id, mediaId });
+    await deleteFavorite({ userId, mediaId });
     return { success: true };
   } catch (error) {
     console.error("Failed to delete favorite:", error);
@@ -90,18 +88,39 @@ export async function deleteFavoriteAction(path: string) {
 
 // お気に入り再検証
 export async function revalidateFavoriteAction(path: string) {
+  // 認証
+  const user = await resolveCurrentUserOrThrow();
+  const userId = user.id;
+
+  // 入力バリデーション
+  const parsed = VirtualPathSchema.safeParse(path);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+    };
+  }
+
+  const validated = { path: parsed.data };
+
+  // メディアID逆引き
+  const mediaId = await getMediaIdByPath(validated.path);
+  if (!mediaId) return { success: false, error: "メディアが見つかりません" };
+
   try {
-    const user = await resolveCurrentUserOrThrow();
+    const favorite = await getFavorite({ userId, mediaId });
 
-    const mediaId = await getMediaIdByPath(path);
-    if (!mediaId) return { success: false, error: "メディアが見つかりません" };
-
-    const favorite = await getFavorite(user.id, mediaId);
+    // お気に入り未登録の場合は成功扱いとする
+    if (!favorite) return { success: true, favorite: null };
 
     // クライアント側が期待する { path, rating } の形式で返す
     return {
       success: true,
-      favorite: favorite ? { path, rating: favorite.rating } : null,
+      favorite: {
+        path: validated.path,
+        rating: favorite.rating,
+      },
     };
   } catch (error) {
     console.error("Failed to revalidate favorite:", error);
