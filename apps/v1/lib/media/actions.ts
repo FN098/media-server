@@ -4,6 +4,7 @@ import { Media } from "@/generated/prisma/client";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
+import { renameNodeInDb } from "@/lib/media/services";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
@@ -92,7 +93,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     };
   }
 
-  // リネーム先が not found の場合は処理継続、それ以外は失敗
+  // not found の場合は処理継続、それ以外は失敗
   if (destPathInfo.error !== "not-found") {
     return {
       success: false,
@@ -153,101 +154,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
   // DB更新
   try {
-    // TODO: prisma の型安全なクエリに書き換え
-    await prisma.$transaction(async (tx) => {
-      // 自分自身の更新
-      await tx.$executeRaw`
-        UPDATE Media 
-        SET path = ${destVirtualPath}
-        WHERE path = ${srcVirtualPath}
-      `;
-
-      // 配下の更新
-      if (isDirectory) {
-        await tx.$executeRaw`
-          UPDATE Media 
-          SET 
-            path = REPLACE(path, CONCAT(${srcVirtualPath}, '/'), CONCAT(${destVirtualPath}, '/')),
-            dirPath = CASE 
-              WHEN dirPath = ${srcVirtualPath} THEN ${destVirtualPath}
-              ELSE REPLACE(dirPath, CONCAT(${srcVirtualPath}, '/'), CONCAT(${destVirtualPath}, '/'))
-            END
-          WHERE path LIKE CONCAT(${srcVirtualPath}, '/%')
-        `;
-      }
-
-      // 訪問履歴の更新
-      await tx.$executeRaw`
-        DELETE FROM VisitedFolder
-        WHERE (
-          dirPath = ${destVirtualPath}
-          OR dirPath LIKE CONCAT(${destVirtualPath}, '/%')
-        )
-        AND (
-          dirPath != ${srcVirtualPath}
-          AND dirPath NOT LIKE CONCAT(${srcVirtualPath}, '/%')
-        )
-      `;
-
-      await tx.$executeRaw`
-        UPDATE VisitedFolder 
-        SET dirPath = CASE 
-          WHEN dirPath = ${srcVirtualPath} THEN ${destVirtualPath}
-          ELSE REPLACE(dirPath, CONCAT(${srcVirtualPath}, '/'), CONCAT(${destVirtualPath}, '/'))
-        END
-        WHERE dirPath = ${srcVirtualPath} OR dirPath LIKE CONCAT(${srcVirtualPath}, '/%')
-      `;
-
-      // プレビューの更新（フォルダ）
-      if (isDirectory) {
-        // リネーム先の重複を削除（上書き許容）
-        await tx.$executeRaw`
-          DELETE FROM FolderMeta 
-          WHERE path = ${destVirtualPath} OR path LIKE CONCAT(${destVirtualPath}, '/%')
-        `;
-
-        // path と previewPath を一括置換
-        await tx.$executeRaw`
-          UPDATE FolderMeta
-          SET 
-            path = CASE 
-              WHEN path = ${srcVirtualPath} THEN ${destVirtualPath}
-              ELSE REPLACE(path, CONCAT(${srcVirtualPath}, '/'), CONCAT(${destVirtualPath}, '/'))
-            END,
-            previewPath = CASE
-              WHEN previewPath IS NULL THEN NULL
-              WHEN previewPath = ${srcVirtualPath} THEN ${destVirtualPath}
-              WHEN previewPath LIKE CONCAT(${srcVirtualPath}, '/%') 
-                THEN REPLACE(previewPath, CONCAT(${srcVirtualPath}, '/'), CONCAT(${destVirtualPath}, '/'))
-              ELSE previewPath
-            END
-          WHERE path = ${srcVirtualPath} OR path LIKE CONCAT(${srcVirtualPath}, '/%')
-        `;
-      } else {
-        // ファイル単体のリネームの場合
-        await tx.$executeRaw`
-          UPDATE FolderMeta SET previewPath = ${destVirtualPath} WHERE previewPath = ${srcVirtualPath}
-        `;
-      }
-
-      // プレビューの更新（メディア）
-      if (isDirectory) {
-        await tx.$executeRaw`
-          UPDATE Media
-          SET previewPath = CASE
-            WHEN previewPath = ${srcVirtualPath} THEN ${destVirtualPath}
-            WHEN previewPath LIKE CONCAT(${srcVirtualPath}, '/%')
-              THEN REPLACE(previewPath, CONCAT(${srcVirtualPath}, '/'), CONCAT(${destVirtualPath}, '/'))
-            ELSE previewPath
-          END
-          WHERE previewPath = ${srcVirtualPath} OR previewPath LIKE CONCAT(${srcVirtualPath}, '/%')
-        `;
-      } else {
-        await tx.$executeRaw`
-          UPDATE Media SET previewPath = ${destVirtualPath} WHERE previewPath = ${srcVirtualPath}
-        `;
-      }
-    });
+    await renameNodeInDb({ srcVirtualPath, destVirtualPath, isDirectory });
   } catch (e) {
     console.error("failed to update database:", e);
 
