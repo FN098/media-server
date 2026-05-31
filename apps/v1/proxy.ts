@@ -1,5 +1,5 @@
 import { authenticate, parseCredentials } from "@/lib/auth/basic-auth";
-import { isBlockedClientPath } from "@/lib/path/blacklist";
+import { isBlockedClientPath } from "@/lib/path/blocked-paths";
 import { NextRequest, NextResponse } from "next/server";
 
 function unauthorized(message = "Unauthorized") {

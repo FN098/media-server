@@ -2,44 +2,55 @@
 
 import { prisma } from "@/lib/db/prisma";
 import { detectMediaType } from "@/lib/media/detectors";
-import { FsNameSchema } from "@/lib/media/schemas";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
+import { PathSchema, PathSegmentSchema } from "@/lib/path/schemas";
 import { existsPath, recursiveMergeMove } from "@/lib/utils/fs";
 import { Dirent } from "fs";
 import { cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { basename, dirname, extname, join } from "path";
+import { ZodError } from "zod";
+
+// ヘルパー
+function getZodErrorMessage<T>(error: ZodError<T>) {
+  return error.issues[0].message;
+}
 
 // リネーム
 export async function renameNodeAction(sourcePath: string, newName: string) {
-  // 正規化
-  const normalizedSourcePath = sourcePath.replace(/^\/+/, "");
-  if (normalizedSourcePath === "") {
+  // ルート保護
+  if (sourcePath === "") {
     return {
       success: false,
       error: "ルートディレクトリはリネームできません。",
     };
   }
 
-  // バリデーション
-  const validation = FsNameSchema.safeParse(newName);
-  if (!validation.success) {
+  // 入力バリデーション+正規化
+  const parsedSourcePath = PathSchema.safeParse(sourcePath);
+  if (!parsedSourcePath.success) {
     return {
       success: false,
-      error: validation.error.issues[0].message,
+      error: getZodErrorMessage(parsedSourcePath.error),
     };
   }
 
-  const srcVirtualPath = normalizedSourcePath;
-  const destVirtualPath = join(dirname(srcVirtualPath), newName.trim()).replace(
-    /\\/g,
-    "/"
-  );
+  const parsedNewName = PathSegmentSchema.safeParse(newName);
+  if (!parsedNewName.success) {
+    return {
+      success: false,
+      error: getZodErrorMessage(parsedNewName.error),
+    };
+  }
 
+  const srcVirtualPath = parsedSourcePath.data;
+  const destVirtualPath = join(dirname(srcVirtualPath), parsedNewName.data);
+
+  // 仮想パス→物理パス
   const srcRealPath = getServerMediaPath(srcVirtualPath);
   const destRealPath = getServerMediaPath(destVirtualPath);
 
@@ -727,35 +738,6 @@ export async function deleteNodesAction(sourcePaths: string[]) {
   return results;
 }
 
-// 完全に削除
-export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
-  const results = { success: 0, failed: 0, errors: [] as string[] };
-
-  for (const virtualPath of sourcePaths) {
-    const realPath = getServerMediaTrashPath(virtualPath);
-
-    // FS削除
-    try {
-      await rm(realPath, { recursive: true, force: true });
-    } catch (error) {
-      console.error(`Permanent Delete Error [${virtualPath}]:`, error);
-      results.failed++;
-      results.errors.push(
-        `削除中にエラーが発生しました: ${basename(virtualPath)}`
-      );
-      continue;
-    }
-
-    // NOTE: DB削除はしない（フォルダ同期時に自動削除）
-    results.success++;
-  }
-
-  // キャッシュの更新
-  revalidatePath("/trash");
-
-  return results;
-}
-
 // 復元（ゴミ箱フォルダから元のフォルダへの移動）
 export async function restoreNodesAction(sourcePaths: string[]) {
   const results = { success: 0, failed: 0, errors: [] as string[] };
@@ -795,6 +777,35 @@ export async function restoreNodesAction(sourcePaths: string[]) {
 
   // キャッシュの更新
   revalidatePath("/explorer");
+  revalidatePath("/trash");
+
+  return results;
+}
+
+// 完全に削除
+export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+
+  for (const virtualPath of sourcePaths) {
+    const realPath = getServerMediaTrashPath(virtualPath);
+
+    // FS削除
+    try {
+      await rm(realPath, { recursive: true, force: true });
+    } catch (error) {
+      console.error(`Permanent Delete Error [${virtualPath}]:`, error);
+      results.failed++;
+      results.errors.push(
+        `削除中にエラーが発生しました: ${basename(virtualPath)}`
+      );
+      continue;
+    }
+
+    // NOTE: DB削除はしない（フォルダ同期時に自動削除）
+    results.success++;
+  }
+
+  // キャッシュの更新
   revalidatePath("/trash");
 
   return results;

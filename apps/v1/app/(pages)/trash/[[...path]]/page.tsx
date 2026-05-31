@@ -8,7 +8,7 @@ import { mergeFsWithDb } from "@/lib/media/merger";
 import { getMediaDbNodes } from "@/lib/media/repository";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
-import { isBlockedVirtualPath } from "@/lib/path/blacklist";
+import { isBlockedVirtualPath } from "@/lib/path/blocked-paths";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";

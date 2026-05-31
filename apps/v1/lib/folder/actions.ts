@@ -7,7 +7,7 @@ import {
   updateVisitedFolder,
 } from "@/lib/folder/repository";
 import { FsNameSchema } from "@/lib/media/schemas";
-import { isBlockedServerPath } from "@/lib/path/blacklist";
+import { isBlockedServerPath } from "@/lib/path/blocked-paths";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
 import { Dirent } from "fs";
