@@ -82,47 +82,43 @@ export const PathSegmentSchema = z.string().superRefine((segment, ctx) => {
 });
 
 // 仮想パス。先頭スラッシュ禁止
-export const VirtualPathSchema = z
-  .string()
-  .transform((value) => value.replace(/\\/g, "/").replace(/^\/+/, ""))
-  .superRefine((value, ctx) => {
-    if (!value) {
-      ctx.addIssue({
-        code: "custom",
-        message: "パスが空です",
-      });
-      return;
-    }
+export const VirtualPathSchema = z.string().superRefine((value, ctx) => {
+  if (value.startsWith("/")) {
+    ctx.addIssue({
+      code: "custom",
+      message: "先頭のスラッシュは使用できません",
+    });
+  }
 
-    if (value.includes("//")) {
-      ctx.addIssue({
-        code: "custom",
-        message: "連続したスラッシュは使用できません",
-      });
-    }
+  if (value.includes("//")) {
+    ctx.addIssue({
+      code: "custom",
+      message: "連続したスラッシュは使用できません",
+    });
+  }
 
-    if (value.endsWith("/")) {
-      ctx.addIssue({
-        code: "custom",
-        message: "末尾のスラッシュは使用できません",
-      });
-    }
+  if (value.endsWith("/")) {
+    ctx.addIssue({
+      code: "custom",
+      message: "末尾のスラッシュは使用できません",
+    });
+  }
 
-    const segments = value.split("/");
+  const segments = value.split("/");
 
-    for (const [index, segment] of segments.entries()) {
-      const result = PathSegmentSchema.safeParse(segment);
+  for (const [index, segment] of segments.entries()) {
+    const result = PathSegmentSchema.safeParse(segment);
 
-      if (!result.success) {
-        for (const issue of result.error.issues) {
-          ctx.addIssue({
-            ...issue,
-            path: [index],
-          });
-        }
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        ctx.addIssue({
+          ...issue,
+          path: [index],
+        });
       }
     }
-  });
+  }
+});
 
 export const VirtualPathOneSchema = VirtualPathSchema;
 export const VirtualPathManySchema = z.array(VirtualPathSchema);

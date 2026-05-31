@@ -82,24 +82,6 @@ describe("PathSegmentSchema", () => {
 });
 
 describe("VirtualPathSchema", () => {
-  describe("normalization", () => {
-    it("converts backslashes to slashes", () => {
-      expect(VirtualPathSchema.parse("foo\\bar")).toBe("foo/bar");
-    });
-
-    it("removes leading slash", () => {
-      expect(VirtualPathSchema.parse("/foo/bar")).toBe("foo/bar");
-    });
-
-    it("removes multiple leading slashes", () => {
-      expect(VirtualPathSchema.parse("///foo/bar")).toBe("foo/bar");
-    });
-
-    it("normalizes mixed separators", () => {
-      expect(VirtualPathSchema.parse("\\foo/bar\\baz")).toBe("foo/bar/baz");
-    });
-  });
-
   describe("valid paths", () => {
     it("accepts simple path", () => {
       expect(VirtualPathSchema.parse("foo/bar")).toBe("foo/bar");
