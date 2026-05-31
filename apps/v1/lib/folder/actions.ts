@@ -8,7 +8,7 @@ import {
 } from "@/lib/folder/repository";
 import { FsNameSchema } from "@/lib/media/schemas";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import { isHiddenServerPath } from "@/lib/path/system-hidden-paths";
+import { isSystemHiddenRealPath } from "@/lib/path/protections";
 import { existsPath } from "@/lib/utils/fs";
 import { Dirent } from "fs";
 import { mkdir, readdir } from "fs/promises";
@@ -145,7 +145,7 @@ export async function listSubDirectoriesAction(dirPath: string) {
     success: true,
     directories: entries
       .filter((e) => e.isDirectory())
-      .filter((e) => !isHiddenServerPath(join(realDirPath, e.name)))
+      .filter((e) => !isSystemHiddenRealPath(join(realDirPath, e.name)))
       .map((e) => ({
         name: e.name,
         path: join(dirPath, e.name).replace(/\\/g, "/"),

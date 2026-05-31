@@ -1,5 +1,5 @@
 import { authenticate, parseCredentials } from "@/lib/auth/basic-auth";
-import { isHiddenClientPath } from "@/lib/path/system-hidden-paths";
+import { isBlockedClientPath } from "@/lib/path/protections";
 import { NextRequest, NextResponse } from "next/server";
 
 function unauthorized(message = "Unauthorized") {
@@ -30,8 +30,8 @@ export function proxy(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname;
 
-  // ブラックリスト判定
-  const isBlocked = isHiddenClientPath(pathname);
+  // アクセス禁止パス保護
+  const isBlocked = isBlockedClientPath(pathname);
   if (isBlocked) {
     // 404 に見せる
     return NextResponse.rewrite(new URL("/404", req.url));

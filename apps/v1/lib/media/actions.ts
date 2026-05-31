@@ -9,8 +9,8 @@ import {
   getServerMediaThumbPath,
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
+import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { PathSegmentSchema, VirtualPathSchema } from "@/lib/path/schemas";
-import { isHiddenVirtualPath } from "@/lib/path/system-hidden-paths";
 import {
   getPathInfo,
   isFsNotFoundError,
@@ -48,7 +48,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   }
 
   // システムフォルダ保護
-  if (isHiddenVirtualPath(normalizedSourcePath)) {
+  if (isSystemHiddenVirtualPath(normalizedSourcePath)) {
     return { success: false, error: "システムフォルダは操作できません" };
   }
 
@@ -294,7 +294,7 @@ export async function moveNodesAction(
   }
 
   // システムフォルダ保護
-  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+  if (normalizedSourcePaths.some((path) => isSystemHiddenVirtualPath(path))) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
@@ -582,7 +582,7 @@ export async function copyNodesAction(
   }
 
   // システムフォルダ保護
-  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+  if (normalizedSourcePaths.some((path) => isSystemHiddenVirtualPath(path))) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
@@ -816,7 +816,7 @@ export async function listMediaAction(dirPath: string) {
   const normalizedDirPath = normalizeVirtualPath(dirPath);
 
   // システムフォルダ保護
-  if (isHiddenVirtualPath(normalizedDirPath)) {
+  if (isSystemHiddenVirtualPath(normalizedDirPath)) {
     return { success: false, error: "システムフォルダは操作できません" };
   }
 
@@ -875,7 +875,7 @@ export async function deleteNodesAction(sourcePaths: string[]) {
   }
 
   // システムフォルダ保護
-  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+  if (normalizedSourcePaths.some((path) => isSystemHiddenVirtualPath(path))) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
@@ -938,7 +938,7 @@ export async function restoreNodesAction(sourcePaths: string[]) {
   }
 
   // システムフォルダ保護
-  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+  if (normalizedSourcePaths.some((path) => isSystemHiddenVirtualPath(path))) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
@@ -1002,7 +1002,7 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
   }
 
   // システムフォルダ保護
-  if (normalizedSourcePaths.some((path) => isHiddenVirtualPath(path))) {
+  if (normalizedSourcePaths.some((path) => isSystemHiddenVirtualPath(path))) {
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
@@ -1045,7 +1045,7 @@ export async function touchMediaTimestampAction(sourcePath: string) {
   }
 
   // システムフォルダ保護
-  if (isHiddenVirtualPath(normalizedSourcePath)) {
+  if (isSystemHiddenVirtualPath(normalizedSourcePath)) {
     return { success: false, error: "システムフォルダは操作できません" };
   }
 

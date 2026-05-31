@@ -9,7 +9,7 @@ import { getMediaDbNodes } from "@/lib/media/repository";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
-import { isHiddenVirtualPath } from "@/lib/path/system-hidden-paths";
+import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { FavoritesProvider } from "@/providers/favorites-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { Metadata } from "next";
@@ -58,7 +58,7 @@ export default async function TrashPage(props: TrashPageProps) {
   // FileSystem からリスト取得
   const fsListing = await getFsListing(currentVirtualDirPath, {
     resolveRealPath: (virtualPath) => getServerMediaTrashPath(virtualPath),
-    filterVirtualPath: (virtualPath) => !isHiddenVirtualPath(virtualPath),
+    filterVirtualPath: (virtualPath) => !isSystemHiddenVirtualPath(virtualPath),
   });
   if (!fsListing) notFound();
 
