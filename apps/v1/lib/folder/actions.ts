@@ -7,8 +7,8 @@ import {
   updateVisitedFolder,
 } from "@/lib/folder/repository";
 import { FsNameSchema } from "@/lib/media/schemas";
-import { isBlockedServerPath } from "@/lib/path/blocked-paths";
 import { getServerMediaPath } from "@/lib/path/helpers";
+import { isHiddenServerPath } from "@/lib/path/system-hidden-paths";
 import { existsPath } from "@/lib/utils/fs";
 import { Dirent } from "fs";
 import { mkdir, readdir } from "fs/promises";
@@ -145,7 +145,7 @@ export async function listSubDirectoriesAction(dirPath: string) {
     success: true,
     directories: entries
       .filter((e) => e.isDirectory())
-      .filter((e) => !isBlockedServerPath(join(realDirPath, e.name)))
+      .filter((e) => !isHiddenServerPath(join(realDirPath, e.name)))
       .map((e) => ({
         name: e.name,
         path: join(dirPath, e.name).replace(/\\/g, "/"),

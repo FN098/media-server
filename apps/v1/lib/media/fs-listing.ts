@@ -1,8 +1,8 @@
 import { detectMediaType } from "@/lib/media/detectors";
 import { findGlobalAdjacentFolder } from "@/lib/media/fs-crawler";
 import { MediaFsListing, MediaFsNode } from "@/lib/media/types";
-import { isBlockedVirtualPath } from "@/lib/path/blocked-paths";
 import { getServerMediaPath } from "@/lib/path/helpers";
+import { isHiddenVirtualPath } from "@/lib/path/system-hidden-paths";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
@@ -14,7 +14,7 @@ export interface MediaFsContext {
 
 const defaultContext: MediaFsContext = {
   resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),
-  filterVirtualPath: (virtualPath) => !isBlockedVirtualPath(virtualPath),
+  filterVirtualPath: (virtualPath) => !isHiddenVirtualPath(virtualPath),
 };
 
 export async function listFsNodes(
