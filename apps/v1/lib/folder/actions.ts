@@ -17,7 +17,9 @@ import {
   isFsNotFoundError,
   isFsPermissionError,
 } from "@/lib/utils/fs";
+import { Dirent } from "fs";
 import { mkdir, readdir } from "fs/promises";
+import { revalidatePath } from "next/cache";
 import { basename } from "path";
 import { join } from "path/posix";
 
@@ -31,6 +33,9 @@ export async function visitFolderAction(dirPath: string): Promise<void> {
   const user = await resolveCurrentUserOrThrow();
 
   await updateVisitedFolder(dirPath, user.id);
+
+  // キャッシュ更新
+  revalidatePath("/dashboard");
 }
 
 // フォルダ作成
@@ -77,9 +82,6 @@ export async function createFolderAction(
 
   try {
     await mkdir(newRealPath, { recursive: true });
-    return {
-      success: true,
-    };
   } catch (error) {
     console.error("failed to create new directory:", error);
     return {
@@ -87,6 +89,13 @@ export async function createFolderAction(
       error: "フォルダ作成中にエラーが発生しました。",
     };
   }
+
+  // キャッシュ更新
+  revalidatePath("/explorer");
+
+  return {
+    success: true,
+  };
 }
 
 // 最近訪問したフォルダを取得
@@ -94,17 +103,9 @@ export async function listRecentFoldersAction() {
   // 認証
   const user = await resolveCurrentUserOrThrow();
 
+  let folders: Awaited<ReturnType<typeof getRecentFolders>>;
   try {
-    const folders = await getRecentFolders(user.id, 10);
-
-    return {
-      success: true,
-      data: folders.map((f) => ({
-        path: f.dirPath,
-        name: basename(f.dirPath),
-        pinned: f.isPinned,
-      })),
-    };
+    folders = await getRecentFolders(user.id, 10);
   } catch (error) {
     console.error("Get Recent Folders Error:", error);
     return {
@@ -112,6 +113,15 @@ export async function listRecentFoldersAction() {
       error: "フォルダ取得中にエラーが発生しました。",
     };
   }
+
+  return {
+    success: true,
+    data: folders.map((f) => ({
+      path: f.dirPath,
+      name: basename(f.dirPath),
+      pinned: f.isPinned,
+    })),
+  };
 }
 
 // フォルダ訪問履歴ピン留めトグル
@@ -131,6 +141,9 @@ export async function togglePinVisitedFolderAction(
       error: "フォルダ更新中にエラーが発生しました。",
     };
   }
+
+  // キャッシュ更新
+  revalidatePath("/dashboard");
 
   return {
     success: true,
@@ -153,19 +166,9 @@ export async function listSubDirectoriesAction(dirPath: string) {
   // 仮想パス→物理パス
   const realDirPath = getServerMediaPath(normalizedDirPath);
 
+  let entries: Dirent[];
   try {
-    const entries = await readdir(realDirPath, { withFileTypes: true });
-
-    return {
-      success: true,
-      directories: entries
-        .filter((e) => e.isDirectory())
-        .filter((e) => !isSystemHiddenRealPath(join(realDirPath, e.name)))
-        .map((e) => ({
-          name: e.name,
-          path: join(dirPath, e.name).replace(/\\/g, "/"),
-        })),
-    };
+    entries = await readdir(realDirPath, { withFileTypes: true });
   } catch (e) {
     if (isFsNotFoundError(e)) {
       return { success: false, error: "フォルダが見つかりません。" };
@@ -176,4 +179,15 @@ export async function listSubDirectoriesAction(dirPath: string) {
     console.error("failed to read directory", e);
     return { success: false, error: "ファイル一覧の取得に失敗しました。" };
   }
+
+  return {
+    success: true,
+    directories: entries
+      .filter((e) => e.isDirectory())
+      .filter((e) => !isSystemHiddenRealPath(join(realDirPath, e.name)))
+      .map((e) => ({
+        name: e.name,
+        path: join(dirPath, e.name).replace(/\\/g, "/"),
+      })),
+  };
 }
