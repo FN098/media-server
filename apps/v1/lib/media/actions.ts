@@ -576,7 +576,8 @@ export async function copyNodesAction(
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
   // 認証
-  await resolveCurrentUserOrThrow();
+  const user = await resolveCurrentUserOrThrow();
+  const userId = user.id;
 
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
@@ -729,7 +730,15 @@ export async function copyNodesAction(
                 ],
               }
             : { path: srcVirtualPath },
-          include: { mediaTags: { select: { tagId: true } } },
+          include: {
+            mediaTags: {
+              select: { tagId: true },
+            },
+            favorites: {
+              select: { rating: true },
+              where: { userId },
+            },
+          },
         });
 
         const replacePath = (p: string) =>
@@ -737,7 +746,7 @@ export async function copyNodesAction(
 
         // コピー用のデータを準備
         const idMap = new Map<string, string>();
-        const dataToCreate = srcMediaList.map((m) => {
+        const mediaData = srcMediaList.map((m) => {
           const newId = randomUUID();
           idMap.set(m.id, newId);
 
@@ -770,20 +779,34 @@ export async function copyNodesAction(
           }
         }) satisfies Partial<Media>[];
 
+        const mediaTagData = srcMediaList.flatMap((m) =>
+          m.mediaTags.map(({ tagId }) => ({
+            mediaId: idMap.get(m.id)!, // src→destのIDマッピング
+            tagId,
+          }))
+        );
+
+        const favoriteData = srcMediaList.flatMap((m) =>
+          m.favorites.map(({ rating }) => ({
+            mediaId: idMap.get(m.id)!, // src→destのIDマッピング
+            userId,
+            rating,
+          }))
+        );
+
         // createMany でまとめて挿入
         await tx.media.createMany({
-          data: dataToCreate,
+          data: mediaData,
           skipDuplicates: true,
         });
 
-        // MediaTag も createMany で一括
         await tx.mediaTag.createMany({
-          data: srcMediaList.flatMap((m) =>
-            m.mediaTags.map(({ tagId }) => ({
-              mediaId: idMap.get(m.id)!, // src→destのIDマッピング
-              tagId,
-            }))
-          ),
+          data: mediaTagData,
+          skipDuplicates: true,
+        });
+
+        await tx.favorite.createMany({
+          data: favoriteData,
           skipDuplicates: true,
         });
       });
