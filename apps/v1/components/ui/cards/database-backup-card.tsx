@@ -2,9 +2,9 @@
 
 import {
   cleanupOldBackupsAction,
-  createBackupAction,
-  getBackupListAction,
-  restoreBackupAction,
+  dumpDatabaseAction,
+  listBackupFilesAction,
+  restoreDatabaseAction,
 } from "@/lib/db-backup/actions";
 import { MAX_KEEP_COUNT, MIN_KEEP_COUNT } from "@/lib/db-backup/config";
 import { DbBackupFile, DbBackupUploadResult } from "@/lib/db-backup/types";
@@ -103,7 +103,7 @@ export function DatabaseBackupCard() {
 
   const refreshList = () => {
     startListing(async () => {
-      const list = await getBackupListAction();
+      const list = await listBackupFilesAction();
       setBackupFiles(
         list.map((v) => ({
           key: `saved:${v.name}`,
@@ -115,7 +115,7 @@ export function DatabaseBackupCard() {
 
   const handleBackup = () => {
     startCreating(async () => {
-      const res = await createBackupAction();
+      const res = await dumpDatabaseAction();
       if (res.success) {
         toast.success("バックアップを作成しました");
 
@@ -189,7 +189,7 @@ export function DatabaseBackupCard() {
     if (!selectedFile) return;
 
     startRestoring(async () => {
-      const res = await restoreBackupAction(selectedFile.value);
+      const res = await restoreDatabaseAction(selectedFile.value);
       if (res.success) {
         toast.success("リストアが完了しました");
         // 一時ファイルだった場合は、リストから消去して選択を解除
@@ -212,7 +212,7 @@ export function DatabaseBackupCard() {
     // 最新のリストを取得して件数を確認
     // (表示中の backupFiles を使わず、常に最新状態を取ることで判定ミスを防ぐ)
     startListing(async () => {
-      const list = await getBackupListAction();
+      const list = await listBackupFilesAction();
       const mappedList = list.map((v) => ({
         key: `saved:${v.name}`,
         value: v,
