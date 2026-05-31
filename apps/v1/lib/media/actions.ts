@@ -52,15 +52,10 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
         success: false,
         error: `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`,
       };
-    else if (srcPathInfo.error === "access-denied")
-      return {
-        success: false,
-        error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`,
-      };
     else
       return {
         success: false,
-        error: `不明なエラーです。: ${srcPathInfo.errorCode}`,
+        error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`,
       };
   }
   const isDirectory = srcPathInfo.isDirectory;
@@ -70,25 +65,23 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   if (destPathInfo.exists) {
     return {
       success: false,
-      error: `同名の項目が既に存在します。: ${basename(destRealPath)}`,
+      error: `同名のファイルまたはディレクトリが既に存在します。: ${destVirtualPath}`,
     };
   }
   if (destPathInfo.error !== "not-found") {
     // 見つからなかった以外のエラーの場合は処理中断
     return {
       success: false,
-      error: `書き込み権限がありません。: ${basename(destRealPath)}`,
+      error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${destVirtualPath}`,
     };
   }
 
   const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
   const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
 
-  // サムネイルリネーム前処理（リネーム後と同名のディレクトリを先に削除しておく）
+  // サムネイルリネーム前処理（リネーム先の古い残骸をファイル・フォルダ問わずお掃除）
   try {
-    if (isDirectory) {
-      await rm(destThumbPath, { recursive: true, force: true });
-    }
+    await rm(destThumbPath, { recursive: true, force: true });
   } catch (e) {
     console.error("failed to remove thumbnails directory:", e);
     return {
@@ -241,10 +234,12 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     }
 
     // サムネイルロールバック
-    try {
-      await rename(destThumbPath, srcThumbPath);
-    } catch (e) {
-      console.error("failed to rollback renamed thumbnails directory:", e);
+    if (thumbRenamed) {
+      try {
+        await rename(destThumbPath, srcThumbPath);
+      } catch (e) {
+        console.error("failed to rollback renamed thumbnails directory:", e);
+      }
     }
 
     return {
