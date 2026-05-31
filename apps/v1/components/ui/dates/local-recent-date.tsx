@@ -1,14 +1,21 @@
 "use client";
 
-import { formatRecentDate } from "@/lib/utils/format";
-import { useEffect, useState } from "react";
+import { useMounted } from "@/hooks/general/use-mounted";
+import { formatRecentDate } from "@/lib/utils/date";
+import { useMemo } from "react";
 
-export function LocalRecentDate({ value }: { value: string | Date | null }) {
-  const [text, setText] = useState("-");
+interface LocalRecentDateProps {
+  value: string | Date | null;
+  // locale: string; // サポート対象外
+  fallback?: string;
+}
 
-  useEffect(() => {
-    setText(formatRecentDate(value));
-  }, [value]);
+export function LocalRecentDate({ value, fallback }: LocalRecentDateProps) {
+  const mounted = useMounted();
+  const formatted = useMemo(
+    () => (value && mounted && formatRecentDate(value, fallback)) || fallback,
+    [fallback, mounted, value]
+  );
 
-  return <>{text}</>;
+  return <>{formatted}</>;
 }

@@ -1,19 +1,6 @@
 import { format, formatDistanceToNow, isYesterday } from "date-fns";
 import { ja } from "date-fns/locale";
 
-export function formatBytes(
-  bytes: number | null | undefined,
-  fallback = "-"
-): string {
-  if (bytes == null || bytes < 0) return fallback;
-
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
-
-  return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
-}
-
 /**
  * Dateオブジェクトを「いい感じ」の文字列にフォーマットする
  * - 1時間未満: 「〜分前」

@@ -12,7 +12,7 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useLongPress } from "@/hooks/mobile/use-long-press";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
-import { formatBytes } from "@/lib/utils/formatters";
+import { formatBytes } from "@/lib/utils/bytes";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { usePagingContext } from "@/providers/paging-provider";
