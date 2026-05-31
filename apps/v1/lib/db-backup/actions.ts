@@ -5,7 +5,7 @@ import { dumpDatabaseToFile } from "@/lib/child_process/mysqldump";
 import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { getDatabaseUrlOrThrow } from "@/lib/env/env-server";
-import { FileNameSchema, PathSchema } from "@/lib/path/schemas";
+import { FileNameSchema } from "@/lib/path/schemas";
 import { parseDatabaseURL } from "@/lib/utils/db-url-parser";
 import fs from "fs/promises";
 import path from "path";
@@ -54,9 +54,6 @@ export async function dumpDatabaseAction() {
   const fileName = `backup_${timestamp}.sql`;
   const filePath = path.join(DB_BACKUP_DIR, fileName);
 
-  // 念のため
-  const parsedFilePath = PathSchema.parse(filePath);
-
   const databaseUrl = getDatabaseUrlOrThrow();
   const db = parseDatabaseURL(databaseUrl);
 
@@ -64,7 +61,7 @@ export async function dumpDatabaseAction() {
 
   try {
     console.log("dump database started.");
-    const result = await dumpDatabaseToFile(db, parsedFilePath);
+    const result = await dumpDatabaseToFile(db, filePath);
     console.log("dump database ended:", result);
 
     if (result.ok) {
