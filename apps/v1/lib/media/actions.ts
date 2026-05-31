@@ -730,7 +730,7 @@ export async function copyNodesAction(
           return {
             id: newId,
             path: destVirtualPath,
-            dirPath: m.dirPath.replace(srcVirtualPath, destVirtualPath),
+            dirPath: normalizedDestDirPath,
             fileMtime: m.fileMtime,
             fileSize: m.fileSize,
             type: m.type,
