@@ -15,7 +15,7 @@ import {
   recursiveMergeMove,
 } from "@/lib/utils/fs";
 import { Dirent } from "fs";
-import { cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
+import { cp, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import { basename, dirname, extname, join } from "path";
 
@@ -262,18 +262,20 @@ export async function moveNodesAction(
   sourcePaths: string[],
   destDirPath: string
 ) {
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
   const normalizedDestDirPath = normalizeVirtualPath(destDirPath);
 
-  const results = { success: 0, failed: 0, errors: [] as string[] };
+  // 仮想パス→物理パス
+  const realDestDirPath = getServerMediaPath(normalizedDestDirPath);
 
   // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
-  const readDestDirPath = getServerMediaPath(normalizedDestDirPath);
   const existingNames = new Set<string>();
   try {
-    const existingFiles = await readdir(readDestDirPath);
-    existingFiles.forEach((name) => existingNames.add(name));
+    const files = await readdir(realDestDirPath);
+    files.forEach((name) => existingNames.add(name));
   } catch (e) {
     console.error("failed to read directory:", e);
     return {
@@ -296,8 +298,10 @@ export async function moveNodesAction(
       continue;
     }
 
-    // ディレクトリ判定
+    // 仮想パス→物理パス
     const srcRealPath = getServerMediaPath(srcVirtualPath);
+
+    // ディレクトリ判定
     const srcPathInfo = await getPathInfo(srcRealPath);
     if (!srcPathInfo.exists) {
       if (srcPathInfo.error === "not-found")
@@ -345,7 +349,6 @@ export async function moveNodesAction(
     const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
 
     // サムネイルリネーム前処理（リネーム先の古い残骸をファイル・フォルダ問わずお掃除）
-    let thumbMoved = false;
     try {
       await rm(destThumbPath, { recursive: true, force: true });
     } catch (e) {
@@ -358,6 +361,7 @@ export async function moveNodesAction(
     }
 
     // サムネイル移動
+    let thumbMoved = false;
     try {
       await rename(srcThumbPath, destThumbPath);
       thumbMoved = true;
@@ -390,7 +394,7 @@ export async function moveNodesAction(
 
       results.failed++;
       results.errors.push(
-        `ファイル移動中にエラーが発生しました: ${basename(srcVirtualPath)}`
+        `ファイル移動中にエラーが発生しました: ${srcVirtualPath}`
       );
       continue;
     }
@@ -532,17 +536,19 @@ export async function copyNodesAction(
   sourcePaths: string[],
   destDirPath: string
 ) {
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
   const normalizedDestDirPath = normalizeVirtualPath(destDirPath);
 
-  const results = { success: 0, failed: 0, errors: [] as string[] };
+  // 仮想パス→物理パス
+  const realDestDirPath = getServerMediaPath(normalizedDestDirPath);
 
   // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
-  const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
   const existingNames = new Set<string>();
   try {
-    const files = await readdir(destLocalRootPath);
+    const files = await readdir(realDestDirPath);
     files.forEach((name) => existingNames.add(name));
   } catch (e) {
     // コピー先フォルダ自体が存在しないなどのエラーハンドリング
@@ -568,25 +574,30 @@ export async function copyNodesAction(
       continue;
     }
 
-    // ディレクトリ判定
+    // 仮想パス→物理パス
     const srcRealPath = getServerMediaPath(srcVirtualPath);
-    let stats: Awaited<ReturnType<typeof lstat>>;
-    try {
-      stats = await lstat(srcRealPath);
-    } catch {
-      results.failed++;
-      results.errors.push(
-        `移動元が見つかりません: ${basename(srcVirtualPath)}`
-      );
-      continue;
+
+    // ディレクトリ判定
+    const srcPathInfo = await getPathInfo(srcRealPath);
+    if (!srcPathInfo.exists) {
+      if (srcPathInfo.error === "not-found")
+        return {
+          success: false,
+          error: `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`,
+        };
+      else
+        return {
+          success: false,
+          error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`,
+        };
     }
-    const isDirectory = stats.isDirectory();
+    const isDirectory = srcPathInfo.isDirectory;
+
     const srcName = srcVirtualPath.split("/").pop() || "";
 
-    // 新しい名前を確定
+    // 新しい名前を確定（名前衝突があれば (1), (2), ... などの連番を付与）
     let currentSrcName = srcName;
     let counter = 1;
-
     while (existingNames.has(currentSrcName)) {
       if (isDirectory) {
         // フォルダの場合: 「フォルダ名 (1)」
@@ -610,11 +621,14 @@ export async function copyNodesAction(
         : `${normalizedDestDirPath}/${currentSrcName}`;
     const destRealPath = getServerMediaPath(destVirtualPath);
 
-    // サムネイルコピー（失敗しても本体コピーは続行）
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
     const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
+
+    // サムネイルコピー（失敗しても本体コピーは続行）
+    let thumbCopied = false;
     try {
-      await cp(srcThumbPath, destThumbPath, { recursive: isDirectory });
+      await cp(srcThumbPath, destThumbPath, { recursive: true });
+      thumbCopied = true;
     } catch (e) {
       if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
         // ENOENT 以外は警告ログだけ残す（本体コピーは成功しているので続行）
@@ -626,19 +640,26 @@ export async function copyNodesAction(
     try {
       await cp(srcRealPath, destRealPath, { recursive: isDirectory });
     } catch (e) {
-      console.error(`File Copy Error [${srcVirtualPath}]:`, e);
+      console.error("failed to copy file or directory:", e);
 
       // FSロールバック（中途半端なコピー結果を削除）
       try {
         await rm(destRealPath, { recursive: true, force: true });
       } catch (re) {
-        console.error(`File Rollback Error [${srcVirtualPath}]:`, re);
+        console.error("failed to remove file or directory:", re);
+      }
+
+      // サムネイルロールバック
+      if (thumbCopied) {
+        try {
+          await rm(destThumbPath, { recursive: true, force: true });
+        } catch (e) {
+          console.error("failed to rollback copied thumbnails directory:", e);
+        }
       }
 
       results.failed++;
-      results.errors.push(
-        `ファイルコピー中にエラーが発生しました: ${basename(srcVirtualPath)}`
-      );
+      results.errors.push("ファイルコピー中にエラーが発生しました。");
       continue;
     }
 
@@ -655,9 +676,10 @@ export async function copyNodesAction(
 // メディアファイル一覧
 export async function listMediaAction(dirPath: string) {
   // 入力バリデーション+正規化
-  const virtualDirPath = normalizeVirtualPath(dirPath);
+  const normalizedDirPath = normalizeVirtualPath(dirPath);
 
   // 仮想パス→物理パス
+  const virtualDirPath = normalizedDirPath;
   const realDirPath = getServerMediaPath(virtualDirPath);
 
   let entries: Dirent[];
@@ -665,20 +687,20 @@ export async function listMediaAction(dirPath: string) {
     entries = await readdir(realDirPath, { withFileTypes: true });
   } catch (e) {
     if (isFsNotFoundError(e)) {
-      return { success: false, error: "フォルダが見つかりません" };
+      return { success: false, error: "フォルダが見つかりません。" };
     }
     if (isFsPermissionError(e)) {
-      return { success: false, error: "フォルダへのアクセス権がありません" };
+      return { success: false, error: "フォルダへのアクセス権がありません。" };
     }
-    console.error(`Sub Directories Error [${virtualDirPath}]:`, e);
-    return { success: false, error: "ファイル一覧の取得に失敗しました" };
+    console.error("failed to read directory", e);
+    return { success: false, error: "ファイル一覧の取得に失敗しました。" };
   }
 
   const mediaFiles = entries
     .filter((e) => e.isFile()) // ファイルのみ対象
     .map((e) => {
       const type = detectMediaType(e.name);
-      if (type === null) return null;
+      if (type === null) return null; // メディア以外を除く
       return {
         name: e.name,
         // 仮想パスを生成
@@ -696,10 +718,10 @@ export async function listMediaAction(dirPath: string) {
 
 // 削除（ゴミ箱フォルダへの移動）
 export async function deleteNodesAction(sourcePaths: string[]) {
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
-
-  const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of normalizedSourcePaths) {
     const destVirtualPath = srcVirtualPath;
@@ -712,11 +734,9 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     try {
       await mkdir(dirname(destRealPath), { recursive: true });
     } catch (e) {
-      console.error(`Directory Create Error [${destRealPath}]:`, e);
+      console.error("failed to create directory:", e);
       results.failed++;
-      results.errors.push(
-        `フォルダ処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
-      );
+      results.errors.push("フォルダ処理中にエラーが発生しました。");
       continue;
     }
 
@@ -724,11 +744,9 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     try {
       await recursiveMergeMove(srcRealPath, destRealPath);
     } catch (e) {
-      console.error(`File Move Error [${srcVirtualPath}]:`, e);
+      console.error("failed to move file or directory:", e);
       results.failed++;
-      results.errors.push(
-        `削除中にエラーが発生しました: ${basename(srcVirtualPath)}`
-      );
+      results.errors.push("削除中にエラーが発生しました。");
       continue;
     }
 
@@ -745,10 +763,10 @@ export async function deleteNodesAction(sourcePaths: string[]) {
 
 // 復元（ゴミ箱フォルダから元のフォルダへの移動）
 export async function restoreNodesAction(sourcePaths: string[]) {
+  const results = { success: 0, failed: 0, errors: [] as string[] };
+
   // 入力バリデーション+正規化
   const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
-
-  const results = { success: 0, failed: 0, errors: [] as string[] };
 
   for (const srcVirtualPath of normalizedSourcePaths) {
     const destVirtualPath = srcVirtualPath;
@@ -757,15 +775,15 @@ export async function restoreNodesAction(sourcePaths: string[]) {
     const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
     const destRealPath = getServerMediaPath(destVirtualPath);
 
+    const destRealParentPath = dirname(destRealPath);
+
     // 移動先フォルダ作成
     try {
-      await mkdir(dirname(destRealPath), { recursive: true });
+      await mkdir(destRealParentPath, { recursive: true });
     } catch (e) {
-      console.error(`Directory Create Error [${destRealPath}]:`, e);
+      console.error("failed to create directory:", e);
       results.failed++;
-      results.errors.push(
-        `フォルダ処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
-      );
+      results.errors.push("フォルダ処理中にエラーが発生しました。");
       continue;
     }
 
@@ -773,11 +791,9 @@ export async function restoreNodesAction(sourcePaths: string[]) {
     try {
       await recursiveMergeMove(srcRealPath, destRealPath);
     } catch (e) {
-      console.error(`File Move Error [${srcVirtualPath}]:`, e);
+      console.error("failed to move file or directory", e);
       results.failed++;
-      results.errors.push(
-        `復元中にエラーが発生しました: ${basename(srcVirtualPath)}`
-      );
+      results.errors.push("復元中にエラーが発生しました。");
       continue;
     }
 
@@ -793,12 +809,12 @@ export async function restoreNodesAction(sourcePaths: string[]) {
 
 // 完全に削除
 export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
-  // 入力バリデーション+正規化
-  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
-
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  for (const virtualPath of normalizedSourcePaths) {
+  // 入力バリデーション+正規化
+  const normalizedPaths = normalizeVirtualPaths(sourcePaths);
+
+  for (const virtualPath of normalizedPaths) {
     // 仮想パス→物理パス
     const realPath = getServerMediaTrashPath(virtualPath);
 
@@ -806,11 +822,9 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     try {
       await rm(realPath, { recursive: true, force: true });
     } catch (error) {
-      console.error(`Permanent Delete Error [${virtualPath}]:`, error);
+      console.error("failed to remove file or directory", error);
       results.failed++;
-      results.errors.push(
-        `削除中にエラーが発生しました: ${basename(virtualPath)}`
-      );
+      results.errors.push("削除中にエラーが発生しました。");
       continue;
     }
 
@@ -827,7 +841,8 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
 // タイムスタンプ更新
 export async function touchMediaTimestampAction(targetPath: string) {
   // 入力バリデーション+正規化
-  const virtualPath = normalizeVirtualPath(targetPath);
+  const normalizedPath = normalizeVirtualPath(targetPath);
+  const virtualPath = normalizedPath;
 
   // 実ファイルのタイムスタンプは utime や open->close では更新されないので無視
   try {
@@ -837,7 +852,10 @@ export async function touchMediaTimestampAction(targetPath: string) {
     });
   } catch (error) {
     console.error("Touch Media Timestamp Error:", error);
-    return { success: false, error: "タイムスタンプの更新に失敗しました。" };
+    return {
+      success: false,
+      error: "タイムスタンプの更新に失敗しました。",
+    };
   }
 
   return { success: true };
