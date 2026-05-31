@@ -293,7 +293,7 @@ export async function moveNodesAction(
     ) {
       results.failed++;
       results.errors.push(
-        `自分自身またはサブフォルダへの操作はできません: ${basename(srcVirtualPath)}`
+        `自分自身またはサブフォルダへの操作はできません: ${srcVirtualPath}`
       );
       continue;
     }
@@ -305,15 +305,13 @@ export async function moveNodesAction(
     const srcPathInfo = await getPathInfo(srcRealPath);
     if (!srcPathInfo.exists) {
       if (srcPathInfo.error === "not-found")
-        return {
-          success: false,
-          error: `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`,
-        };
+        results.errors.push(
+          `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`
+        );
       else
-        return {
-          success: false,
-          error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`,
-        };
+        results.errors.push(
+          `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`
+        );
     }
     const isDirectory = srcPathInfo.isDirectory;
 
@@ -355,7 +353,7 @@ export async function moveNodesAction(
       console.error("failed to remove thumbnails directory:", e);
       results.failed++;
       results.errors.push(
-        `サムネイル処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
+        `サムネイル処理中にエラーが発生しました: ${srcVirtualPath}`
       );
       continue;
     }
@@ -371,7 +369,7 @@ export async function moveNodesAction(
         console.error("failed to rename thumbnails directory:", e);
         results.failed++;
         results.errors.push(
-          `サムネイル処理中にエラーが発生しました: ${basename(srcVirtualPath)}`
+          `サムネイル処理中にエラーが発生しました: ${srcVirtualPath}`
         );
         continue;
       }
@@ -569,7 +567,7 @@ export async function copyNodesAction(
     ) {
       results.failed++;
       results.errors.push(
-        `自分自身またはサブフォルダへの操作はできません: ${basename(srcVirtualPath)}`
+        `自分自身またはサブフォルダへの操作はできません: ${srcVirtualPath}`
       );
       continue;
     }
@@ -581,15 +579,13 @@ export async function copyNodesAction(
     const srcPathInfo = await getPathInfo(srcRealPath);
     if (!srcPathInfo.exists) {
       if (srcPathInfo.error === "not-found")
-        return {
-          success: false,
-          error: `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`,
-        };
+        results.errors.push(
+          `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`
+        );
       else
-        return {
-          success: false,
-          error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`,
-        };
+        results.errors.push(
+          `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`
+        );
     }
     const isDirectory = srcPathInfo.isDirectory;
 
