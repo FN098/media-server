@@ -11,13 +11,16 @@ import {
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
-import { PathSegmentSchema, VirtualPathSchema } from "@/lib/path/schemas";
 import {
   getPathInfo,
   isFsNotFoundError,
   isFsPermissionError,
   recursiveMergeMove,
 } from "@/lib/utils/fs";
+import {
+  PathSegmentSchema,
+  VirtualPathSchema,
+} from "@/lib/virtual-path/schemas";
 import console from "console";
 import { randomUUID } from "crypto";
 import { Dirent } from "fs";

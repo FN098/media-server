@@ -11,12 +11,15 @@ import {
   isSystemHiddenRealPath,
   isSystemHiddenVirtualPath,
 } from "@/lib/path/protections";
-import { FolderNameSchema, VirtualPathSchema } from "@/lib/path/schemas";
 import {
   existsPath,
   isFsNotFoundError,
   isFsPermissionError,
 } from "@/lib/utils/fs";
+import {
+  FolderNameSchema,
+  VirtualPathSchema,
+} from "@/lib/virtual-path/schemas";
 import { Dirent } from "fs";
 import { mkdir, readdir } from "fs/promises";
 import { revalidatePath } from "next/cache";

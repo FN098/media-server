@@ -14,7 +14,7 @@ import { getMediaIdByPath, getMediaIdsByPaths } from "@/lib/media/repository";
 import {
   VirtualPathManySchema,
   VirtualPathOneSchema,
-} from "@/lib/path/schemas";
+} from "@/lib/virtual-path/schemas";
 
 // お気に入りレーティング更新
 export async function updateFavoriteAction(

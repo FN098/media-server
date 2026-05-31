@@ -6,7 +6,7 @@ import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { parseDatabaseURL } from "@/lib/db/parsers";
 import { getDatabaseUrlOrThrow } from "@/lib/env/env-server";
-import { FileNameSchema } from "@/lib/path/schemas";
+import { FileNameSchema } from "@/lib/virtual-path/schemas";
 import fs from "fs/promises";
 import path from "path";
 

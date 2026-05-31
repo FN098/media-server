@@ -1,4 +1,7 @@
-import { PathSegmentSchema, VirtualPathSchema } from "@/lib/path/schemas";
+import {
+  PathSegmentSchema,
+  VirtualPathSchema,
+} from "@/lib/virtual-path/schemas";
 import { describe, expect, it } from "vitest";
 
 const RESERVED_NAMES = [
