@@ -661,11 +661,7 @@ export async function copyNodesAction(
     existingNames.add(currentSrcName);
 
     // 最終的なパスを決定
-    const destVirtualPath =
-      normalizedDestDirPath === ""
-        ? currentSrcName
-        : `${normalizedDestDirPath}/${currentSrcName}`;
-
+    const destVirtualPath = `${normalizedDestDirPath}/${currentSrcName}`;
     const destRealPath = getServerMediaPath(destVirtualPath);
 
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
