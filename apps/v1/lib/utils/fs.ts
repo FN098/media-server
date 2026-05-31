@@ -68,11 +68,12 @@ export async function getPathInfo(path: string): Promise<PathInfo> {
     return {
       exists: false,
       isDirectory: false,
-      error: isFsNotFoundError(e)
-        ? "not-found"
-        : isFsPermissionError(e)
-          ? "access-denied"
-          : "unknown",
+      error:
+        code === "ENOENT"
+          ? "not-found"
+          : code === "EACCESS"
+            ? "access-denied"
+            : "unknown",
       errorCode: code,
     };
   }

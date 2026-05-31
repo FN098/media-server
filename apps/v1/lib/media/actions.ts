@@ -8,7 +8,12 @@ import {
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { PathSchema, PathSegmentSchema } from "@/lib/path/schemas";
-import { existsPath, recursiveMergeMove } from "@/lib/utils/fs";
+import {
+  getPathInfo,
+  isFsNotFoundError,
+  isFsPermissionError,
+  recursiveMergeMove,
+} from "@/lib/utils/fs";
 import { Dirent } from "fs";
 import { cp, lstat, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -39,69 +44,87 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   const srcRealPath = getServerMediaPath(srcVirtualPath);
   const destRealPath = getServerMediaPath(destVirtualPath);
 
+  // ディレクトリ判定
+  const srcPathInfo = await getPathInfo(srcRealPath);
+  if (!srcPathInfo.exists) {
+    if (srcPathInfo.error === "not-found")
+      return {
+        success: false,
+        error: `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`,
+      };
+    else if (srcPathInfo.error === "access-denied")
+      return {
+        success: false,
+        error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`,
+      };
+    else
+      return {
+        success: false,
+        error: `不明なエラーです。: ${srcPathInfo.errorCode}`,
+      };
+  }
+  const isDirectory = srcPathInfo.isDirectory;
+
   // 存在確認
-  if (await existsPath(destRealPath)) {
+  const destPathInfo = await getPathInfo(destRealPath);
+  if (destPathInfo.exists) {
     return {
       success: false,
       error: `同名の項目が既に存在します。: ${basename(destRealPath)}`,
     };
   }
-
-  // ディレクトリ判定
-  let stats: Awaited<ReturnType<typeof lstat>>;
-  try {
-    stats = await lstat(srcRealPath);
-  } catch {
+  if (destPathInfo.error !== "not-found") {
+    // 見つからなかった以外のエラーの場合は処理中断
     return {
       success: false,
-      error: `移動元が見つかりません: ${basename(srcVirtualPath)}`,
+      error: `書き込み権限がありません。: ${basename(destRealPath)}`,
     };
   }
-  const isDirectory = stats.isDirectory();
 
   const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
   const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
 
-  // サムネイルリネーム
-  let thumbRenamed = false;
+  // サムネイルリネーム前処理（リネーム後と同名のディレクトリを先に削除しておく）
   try {
     if (isDirectory) {
       await rm(destThumbPath, { recursive: true, force: true });
     }
   } catch (e) {
-    console.error("Thumbnail Dir Remove Error:", e);
+    console.error("failed to remove thumbnails directory:", e);
     return {
       success: false,
       error: "サムネイル処理中にエラーが発生しました。",
     };
   }
 
+  // サムネイルリネーム
+  let thumbRenamed = false;
   try {
     await rename(srcThumbPath, destThumbPath);
     thumbRenamed = true;
   } catch (e) {
-    if ((e as NodeJS.ErrnoException).code !== "ENOENT") {
-      console.error("Thumbnail Rename Error:", e);
+    // サムネイル元が not found の場合は処理継続（それ以外のエラーの場合は中断）
+    if (!isFsNotFoundError(e)) {
+      console.error("failed to rename thumbnails directory:", e);
       return {
         success: false,
         error: "サムネイル処理中にエラーが発生しました。",
       };
     }
-    // ENOENT はスキップ
   }
 
   // FS更新
   try {
     await rename(srcRealPath, destRealPath);
   } catch (e) {
-    console.error("File Rename Error:", e);
+    console.error("failed to rename file or directory:", e);
 
     // サムネイルロールバック
     if (thumbRenamed) {
       try {
         await rename(destThumbPath, srcThumbPath);
       } catch (e) {
-        console.error("Thumbnail Rollback Error:", e);
+        console.error("failed to rollback renamed thumbnails directory:", e);
       }
     }
 
@@ -208,20 +231,20 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       }
     });
   } catch (error) {
-    console.error("DB Rename Error:", error);
+    console.error("failed to update database:", error);
 
     // FSロールバック
     try {
       await rename(destRealPath, srcRealPath);
     } catch (e) {
-      console.error("File Rollback Error:", e);
+      console.error("failed to rollback renamed file or directory:", e);
     }
 
     // サムネイルロールバック
     try {
       await rename(destThumbPath, srcThumbPath);
     } catch (e) {
-      console.error("Thumbnail Rollback Error:", e);
+      console.error("failed to rollback renamed thumbnails directory:", e);
     }
 
     return {
@@ -249,7 +272,7 @@ export async function moveNodesAction(
 
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  // 移動先の既存ファイル/フォルダ一覧を最初に1回だけ取得 (メモリ上で高速判定するため)
+  // ディレクトリ内のエントリ名一覧を取得（この後の自動連番で使う）
   const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
   const existingNames = new Set<string>();
   try {
@@ -266,6 +289,7 @@ export async function moveNodesAction(
     }
   }
 
+  // ひとつずつ順番に処理する
   for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
     if (
@@ -284,11 +308,23 @@ export async function moveNodesAction(
     let stats: Awaited<ReturnType<typeof lstat>>;
     try {
       stats = await lstat(srcRealPath);
-    } catch {
+    } catch (e) {
       results.failed++;
-      results.errors.push(
-        `移動元が見つかりません: ${basename(srcVirtualPath)}`
-      );
+
+      if (isFsNotFoundError(e)) {
+        results.errors.push(
+          `移動元が見つかりません: ${basename(srcVirtualPath)}`
+        );
+      } else if (isFsPermissionError(e)) {
+        results.errors.push(
+          `移動元へのアクセス権限がありません: ${basename(srcVirtualPath)}`
+        );
+      } else {
+        results.errors.push(
+          `移動元にアクセスできませんでした: ${basename(srcVirtualPath)}`
+        );
+      }
+
       continue;
     }
     const isDirectory = stats.isDirectory();
@@ -520,7 +556,7 @@ export async function copyNodesAction(
 
   const results = { success: 0, failed: 0, errors: [] as string[] };
 
-  // コピー先の既存ファイル/フォルダ一覧を最初に1回だけ取得 (メモリ上で高速判定するため)
+  // ディレクトリ内のエントリ名一覧を取得（この後の自動連番で使う）
   const destLocalRootPath = getServerMediaPath(normalizedDestDirPath);
   const existingNames = new Set<string>();
   try {
@@ -646,10 +682,10 @@ export async function listMediaAction(dirPath: string) {
   try {
     entries = await readdir(realDirPath, { withFileTypes: true });
   } catch (e) {
-    if ((e as NodeJS.ErrnoException).code === "ENOENT") {
+    if (isFsNotFoundError(e)) {
       return { success: false, error: "フォルダが見つかりません" };
     }
-    if ((e as NodeJS.ErrnoException).code === "EACCES") {
+    if (isFsPermissionError(e)) {
       return { success: false, error: "フォルダへのアクセス権がありません" };
     }
     console.error(`Sub Directories Error [${virtualDirPath}]:`, e);
