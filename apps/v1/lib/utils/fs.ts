@@ -23,6 +23,61 @@ export async function existsPath(path: string): Promise<boolean> {
   }
 }
 
+export type PathInfo =
+  | {
+      // ディレクトリ
+      exists: true;
+      isDirectory: true;
+      mtime: Date;
+    }
+  | {
+      // ファイル
+      exists: true;
+      isDirectory: false;
+      mtime: Date;
+      size: number;
+    }
+  | {
+      // エラー
+      exists: false;
+      isDirectory: false;
+      error: "not-found" | "access-denied" | "unknown";
+      errorCode: string | null;
+    };
+
+export async function getPathInfo(path: string): Promise<PathInfo> {
+  try {
+    const stats = await lstat(path);
+
+    return stats.isDirectory()
+      ? {
+          exists: true,
+          isDirectory: true,
+          mtime: stats.mtime,
+        }
+      : {
+          exists: true,
+          isDirectory: false,
+          mtime: stats.mtime,
+          size: stats.size,
+        };
+  } catch (e) {
+    const isErrorObj = e instanceof Error && "code" in e;
+    const code = isErrorObj ? (e.code as string) : null;
+
+    return {
+      exists: false,
+      isDirectory: false,
+      error: isFsNotFoundError(e)
+        ? "not-found"
+        : isFsPermissionError(e)
+          ? "access-denied"
+          : "unknown",
+      errorCode: code,
+    };
+  }
+}
+
 export function isFsNotFoundError(
   error: unknown
 ): error is NodeJS.ErrnoException {
