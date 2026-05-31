@@ -288,7 +288,7 @@ export async function moveNodesAction(
   if (normalizedSourcePaths.some((path) => path === "")) {
     return {
       success: 0,
-      failed: sourcePaths.length,
+      failed: normalizedSourcePaths.length,
       errors: ["ルートフォルダは操作できません"],
     };
   }
@@ -314,7 +314,7 @@ export async function moveNodesAction(
     console.error("failed to read directory:", e);
     return {
       success: 0,
-      failed: sourcePaths.length,
+      failed: normalizedSourcePaths.length,
       errors: ["移動先フォルダの読み込みに失敗しました"],
     };
   }
@@ -576,7 +576,7 @@ export async function copyNodesAction(
   if (normalizedSourcePaths.some((path) => path === "")) {
     return {
       success: 0,
-      failed: sourcePaths.length,
+      failed: normalizedSourcePaths.length,
       errors: ["ルートフォルダは操作できません"],
     };
   }
@@ -603,7 +603,7 @@ export async function copyNodesAction(
     if (!isFsNotFoundError(e)) {
       return {
         success: 0,
-        failed: sourcePaths.length,
+        failed: normalizedSourcePaths.length,
         errors: ["コピー先フォルダの読み込みに失敗しました"],
       };
     }
@@ -722,21 +722,42 @@ export async function copyNodesAction(
           include: { mediaTags: { select: { tagId: true } } },
         });
 
+        const replacePath = (p: string) =>
+          destVirtualPath + p.slice(srcVirtualPath.length);
+
         // コピー用のデータを準備
         const idMap = new Map<string, string>();
         const dataToCreate = srcMediaList.map((m) => {
           const newId = randomUUID();
           idMap.set(m.id, newId);
-          return {
-            id: newId,
-            path: destVirtualPath,
-            dirPath: normalizedDestDirPath,
-            fileMtime: m.fileMtime,
-            fileSize: m.fileSize,
-            type: m.type,
-            title: m.title,
-            previewPath: m.previewPath,
-          };
+
+          if (!isDirectory) {
+            // ファイル単体：パスは確定値
+            return {
+              id: newId,
+              path: destVirtualPath,
+              dirPath: normalizedDestDirPath,
+              fileMtime: m.fileMtime,
+              fileSize: m.fileSize,
+              type: m.type,
+              title: m.title,
+              previewPath: m.previewPath,
+            };
+          } else {
+            // ディレクトリ：配下の各パスをプレフィックス置換
+            return {
+              id: newId,
+              path: replacePath(m.path),
+              dirPath: replacePath(m.dirPath),
+              fileMtime: m.fileMtime,
+              fileSize: m.fileSize,
+              type: m.type,
+              title: m.title,
+              previewPath: m.previewPath?.startsWith(srcVirtualPath)
+                ? replacePath(m.previewPath)
+                : (m.previewPath ?? null),
+            };
+          }
         }) satisfies Partial<Media>[];
 
         // createMany でまとめて挿入
