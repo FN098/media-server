@@ -1,17 +1,6 @@
+import { defaultPorts } from "@/lib/db/ports";
+import { ParsedDatabaseURL } from "@/lib/db/types";
 import { URL } from "url";
-
-export type ParsedDatabaseURL = {
-  protocol: string;
-  host: string;
-  port: string;
-  user: string;
-  password: string;
-  database: string;
-};
-const defaultPorts: Record<string, string> = {
-  mysql: "3306",
-  postgresql: "5432",
-};
 
 export function parseDatabaseURL(databaseUrl: string): ParsedDatabaseURL {
   const url = new URL(databaseUrl);

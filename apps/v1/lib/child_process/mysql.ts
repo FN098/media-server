@@ -2,7 +2,7 @@ import {
   ChildProcessExitStatus,
   RestoreDatabaseResult,
 } from "@/lib/child_process/types";
-import { ParsedDatabaseURL } from "@/lib/utils/db-url-parser";
+import { ParsedDatabaseURL } from "@/lib/db/types";
 import { spawn } from "child_process";
 import { createReadStream } from "fs";
 import { pipeline } from "stream/promises";
