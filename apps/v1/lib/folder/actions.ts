@@ -42,7 +42,7 @@ export async function createFolderAction(
   await resolveCurrentUserOrThrow();
 
   // 入力バリデーション+正規化
-  const parsedParentPath = VirtualPathSchema.safeParse(parentPath || "/");
+  const parsedParentPath = VirtualPathSchema.safeParse(parentPath);
   if (!parsedParentPath.success) {
     return {
       success: false,

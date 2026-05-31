@@ -83,6 +83,8 @@ export const PathSegmentSchema = z.string().superRefine((segment, ctx) => {
 
 // 仮想パス。先頭スラッシュ禁止
 export const VirtualPathSchema = z.string().superRefine((value, ctx) => {
+  if (value === "") return;
+
   if (value.startsWith("/")) {
     ctx.addIssue({
       code: "custom",

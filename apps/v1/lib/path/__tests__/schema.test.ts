@@ -99,10 +99,6 @@ describe("VirtualPathSchema", () => {
   });
 
   describe("invalid paths", () => {
-    it("rejects empty path", () => {
-      expect(() => VirtualPathSchema.parse("")).toThrow();
-    });
-
     it("rejects double slash", () => {
       expect(() => VirtualPathSchema.parse("foo//bar")).toThrow();
     });
