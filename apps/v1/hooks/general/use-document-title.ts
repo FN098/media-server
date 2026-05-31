@@ -1,10 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 
 export function useDocumentTitle() {
-  // 初回マウント時のタイトルを保持する
   const originalTitle = useRef<string | null>(null);
 
-  // 現在のタイトル
   const [title, setTitleState] = useState<string>(() => {
     if (typeof document !== "undefined") {
       return document.title;
@@ -12,7 +10,6 @@ export function useDocumentTitle() {
     return "";
   });
 
-  // タイトルを設定する関数
   const setTitle = useCallback((newTitle: string) => {
     if (typeof document === "undefined") return;
 
@@ -25,7 +22,6 @@ export function useDocumentTitle() {
     setTitleState(newTitle);
   }, []);
 
-  // 元のタイトルに戻す関数
   const resetTitle = useCallback(() => {
     if (typeof document === "undefined" || originalTitle.current === null) {
       return;
@@ -33,8 +29,6 @@ export function useDocumentTitle() {
 
     document.title = originalTitle.current;
     setTitleState(originalTitle.current);
-
-    console.debug(document.title);
   }, []);
 
   return {
