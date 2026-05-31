@@ -16,7 +16,7 @@ import { useLongPress } from "@/hooks/mobile/use-long-press";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { getExtension } from "@/lib/utils/filename";
-import { formatBytes } from "@/lib/utils/format";
+import { formatBytes } from "@/lib/utils/formatters";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";

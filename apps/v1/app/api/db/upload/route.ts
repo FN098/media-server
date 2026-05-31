@@ -1,6 +1,6 @@
 import { TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupUploadResult } from "@/lib/db-backup/types";
-import { formatBytes } from "@/lib/utils/format";
+import { formatBytes } from "@/lib/utils/formatters";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";

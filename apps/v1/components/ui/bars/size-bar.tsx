@@ -1,4 +1,4 @@
-import { formatBytes } from "@/lib/utils/format";
+import { formatBytes } from "@/lib/utils/formatters";
 
 interface SizeBarProps {
   pattern?: "A" | "B" | "C";
