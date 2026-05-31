@@ -83,7 +83,7 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
             value="browse"
             className="flex-1 min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col gap-2"
           >
-            {currentDir !== "/" && (
+            {currentDir !== "" && (
               <Button
                 variant="ghost"
                 className="w-full justify-start text-primary shrink-0"

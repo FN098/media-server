@@ -73,7 +73,7 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
   // 4. 親階層へ戻る
   const goBackParent = useCallback(() => {
     const parent = dirname(currentDir).replace(/\\/g, "/");
-    const path = parent === "." ? "/" : parent;
+    const path = parent === "." ? "" : parent;
     fetchContents(path);
   }, [currentDir, fetchContents]);
 

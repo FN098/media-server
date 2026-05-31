@@ -65,7 +65,7 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
         <div className="flex-1 overflow-hidden flex flex-col gap-2 min-h-0">
           {/* 現在の階層表示 & 戻る */}
           <div className="flex items-center gap-2 shrink-0">
-            {currentDir !== "/" && (
+            {currentDir !== "" && (
               <Button
                 size="icon"
                 variant="ghost"

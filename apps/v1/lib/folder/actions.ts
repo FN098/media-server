@@ -121,10 +121,6 @@ export async function togglePinVisitedFolderAction(
 
 // サブフォルダ一覧
 export async function listSubDirectoriesAction(dirPath: string) {
-  if (!dirPath) {
-    return { success: false, error: "パスが指定されていません" };
-  }
-
   const realDirPath = getServerMediaPath(dirPath);
 
   let entries: Dirent[];
