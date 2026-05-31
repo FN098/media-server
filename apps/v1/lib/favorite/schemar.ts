@@ -1,5 +1,4 @@
 import { MediaSchema } from "@/lib/media/schemas";
-import { VirtualPathSchema } from "@/lib/path/schemas";
 import { UserSchema } from "@/lib/user/schemas";
 import z from "zod";
 
@@ -11,7 +10,4 @@ export const FavoriteSchema = z.object({
   createdAt: z.date(),
 });
 
-export const UpsertFavoriteInputSchema = z.object({
-  rating: z.number().int().min(1).max(5).nullable(),
-  path: VirtualPathSchema,
-});
+export const RatingInputSchema = z.number().int().min(1).max(5).nullable();

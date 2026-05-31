@@ -9,10 +9,12 @@ import {
   upsertFavorite,
   upsertMultipleFavorites,
 } from "@/lib/favorite/repository";
-import { UpsertFavoriteInputSchema } from "@/lib/favorite/schemar";
+import { RatingInputSchema } from "@/lib/favorite/schemar";
 import { getMediaIdByPath, getMediaIdsByPaths } from "@/lib/media/repository";
-import { VirtualPathSchema } from "@/lib/path/schemas";
-import { clamp } from "@/lib/utils/clamp";
+import {
+  VirtualPathManySchema,
+  VirtualPathOneSchema,
+} from "@/lib/path/schemas";
 
 // お気に入りレーティング更新
 export async function updateFavoriteAction(
@@ -24,29 +26,34 @@ export async function updateFavoriteAction(
   const userId = user.id;
 
   // 入力バリデーション
-  const parsed = UpsertFavoriteInputSchema.safeParse({
-    path,
-    rating,
-  });
-
-  if (!parsed.success) {
+  const parsedPath = VirtualPathOneSchema.safeParse(path);
+  if (!parsedPath.success) {
     return {
       success: false,
-      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+      error: `不正な入力です: ${parsedPath.error.issues[0].message}`,
     };
   }
 
-  const validated = parsed.data;
+  const parsedRating = RatingInputSchema.safeParse(rating);
+  if (!parsedRating.success) {
+    return {
+      success: false,
+      error: `不正な入力です: ${parsedRating.error.issues[0].message}`,
+    };
+  }
+
+  const validPath = parsedPath.data;
+  const validRating = parsedRating.data;
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(validated.path);
+  const mediaId = await getMediaIdByPath(validPath);
   if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
   try {
     await upsertFavorite({
       userId,
       mediaId,
-      rating: validated.rating,
+      rating: validRating,
     });
     return { success: true };
   } catch (error) {
@@ -62,19 +69,17 @@ export async function deleteFavoriteAction(path: string) {
   const userId = user.id;
 
   // 入力バリデーション
-  const parsed = VirtualPathSchema.safeParse(path);
-
+  const parsed = VirtualPathOneSchema.safeParse(path);
   if (!parsed.success) {
     return {
       success: false,
       error: `不正な入力です: ${parsed.error.issues[0].message}`,
     };
   }
-
-  const validated = { path: parsed.data };
+  const validPath = parsed.data;
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(validated.path);
+  const mediaId = await getMediaIdByPath(validPath);
   if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
   try {
@@ -93,8 +98,7 @@ export async function revalidateFavoriteAction(path: string) {
   const userId = user.id;
 
   // 入力バリデーション
-  const parsed = VirtualPathSchema.safeParse(path);
-
+  const parsed = VirtualPathOneSchema.safeParse(path);
   if (!parsed.success) {
     return {
       success: false,
@@ -102,10 +106,10 @@ export async function revalidateFavoriteAction(path: string) {
     };
   }
 
-  const validated = { path: parsed.data };
+  const validPath = parsed.data;
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(validated.path);
+  const mediaId = await getMediaIdByPath(validPath);
   if (!mediaId) return { success: false, error: "メディアが見つかりません" };
 
   try {
@@ -118,7 +122,7 @@ export async function revalidateFavoriteAction(path: string) {
     return {
       success: true,
       favorite: {
-        path: validated.path,
+        path: validPath,
         rating: favorite.rating,
       },
     };
@@ -133,35 +137,57 @@ export async function updateMultipleFavoritesAction(
   paths: string[],
   rating: number | null
 ) {
+  // 認証
+  const user = await resolveCurrentUserOrThrow();
+  const userId = user.id;
+
+  // 入力バリデーション
+  const parsedPaths = VirtualPathManySchema.safeParse(paths);
+  if (!parsedPaths.success) {
+    return {
+      success: false,
+      error: `不正な入力です: ${parsedPaths.error.issues[0].message}`,
+    };
+  }
+
+  const parsedRating = RatingInputSchema.safeParse(rating);
+  if (!parsedRating.success) {
+    return {
+      success: false,
+      error: `不正な入力です: ${parsedRating.error.issues[0].message}`,
+    };
+  }
+
+  const validPaths = parsedPaths.data;
+  const validRating = parsedRating.data;
+
+  // メディアID逆引き
+  const mediaMap = await getMediaIdsByPaths(validPaths);
+  if (Object.keys(mediaMap).length === 0) {
+    return { success: true, count: 0 };
+  }
+
+  // 有効なデータのみを抽出して整形
+  const dataToUpsert = validPaths
+    .map((path) => {
+      const mediaId = mediaMap[path];
+      if (!mediaId) return null;
+      return {
+        userId,
+        mediaId,
+      };
+    })
+    .filter((d): d is NonNullable<typeof d> => d !== null);
+
+  if (dataToUpsert.length === 0) {
+    return { success: true, count: 0 };
+  }
+
   try {
-    const user = await resolveCurrentUserOrThrow();
-    const mediaMap = await getMediaIdsByPaths(paths);
-
-    if (Object.keys(mediaMap).length === 0) {
-      return { success: true, count: 0 };
-    }
-
-    const validRating = rating !== null ? clamp(rating, 1, 5) : null;
-
-    // 有効なデータのみを抽出して整形
-    const dataToUpsert = paths
-      .map((path) => {
-        const mediaId = mediaMap[path];
-        if (!mediaId) return null;
-        return {
-          userId: user.id,
-          mediaId,
-        };
-      })
-      .filter((d): d is NonNullable<typeof d> => d !== null);
-
-    if (dataToUpsert.length === 0) {
-      return { success: true, count: 0 };
-    }
-
-    // 一括保存
-    await upsertMultipleFavorites(dataToUpsert, validRating);
-
+    await upsertMultipleFavorites({
+      data: dataToUpsert,
+      rating: validRating,
+    });
     return { success: true, count: dataToUpsert.length };
   } catch (error) {
     console.error("Failed to update multiple favorites:", error);
@@ -171,19 +197,30 @@ export async function updateMultipleFavoritesAction(
 
 // 一括お気に入り削除
 export async function deleteMultipleFavoritesAction(paths: string[]) {
+  // 認証
+  const user = await resolveCurrentUserOrThrow();
+  const userId = user.id;
+
+  // 入力バリデーション
+  const parsed = VirtualPathManySchema.safeParse(paths);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+    };
+  }
+
+  const validPaths = parsed.data;
+
+  // メディアID逆引き
+  const mediaMap = await getMediaIdsByPaths(validPaths);
+  const mediaIds = Object.values(mediaMap);
+  if (mediaIds.length === 0) {
+    return { success: true, count: 0 };
+  }
+
   try {
-    const user = await resolveCurrentUserOrThrow();
-
-    const mediaMap = await getMediaIdsByPaths(paths);
-    const mediaIds = Object.values(mediaMap);
-
-    if (mediaIds.length === 0) {
-      return { success: true, count: 0 };
-    }
-
-    // 一括削除
-    const { count } = await deleteMultipleFavorites(user.id, mediaIds);
-
+    const { count } = await deleteMultipleFavorites({ userId, mediaIds });
     return { success: true, count };
   } catch (error) {
     console.error("Failed to delete multiple favorites:", error);
@@ -193,18 +230,30 @@ export async function deleteMultipleFavoritesAction(paths: string[]) {
 
 // 一括お気に入り再検証
 export async function revalidateMultipleFavoritesAction(paths: string[]) {
+  // 認証
+  const user = await resolveCurrentUserOrThrow();
+  const userId = user.id;
+
+  // 入力バリデーション
+  const parsed = VirtualPathManySchema.safeParse(paths);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+    };
+  }
+
+  const validPaths = parsed.data;
+
+  // メディアID逆引き
+  const mediaMap = await getMediaIdsByPaths(validPaths);
+  const mediaIds = Object.values(mediaMap);
+  if (mediaIds.length === 0) {
+    return { success: true, count: 0 };
+  }
+
   try {
-    const user = await resolveCurrentUserOrThrow();
-
-    const mediaMap = await getMediaIdsByPaths(paths);
-    const mediaIds = Object.values(mediaMap);
-
-    if (mediaIds.length === 0) {
-      return { success: true, count: 0 };
-    }
-
-    // 一括取得
-    const favorites = await getMultipleFavorites(user.id, mediaIds);
+    const favorites = await getMultipleFavorites({ userId, mediaIds });
 
     // クライアントが Map に復元しやすい形式で返す
     // 例: [{ path: "/a", rating: 5 }, { path: "/b", rating: null }]

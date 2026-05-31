@@ -124,6 +124,8 @@ export const VirtualPathSchema = z
     }
   });
 
-export const FileNameSchema = PathSegmentSchema;
+export const VirtualPathOneSchema = VirtualPathSchema;
+export const VirtualPathManySchema = z.array(VirtualPathSchema);
 
+export const FileNameSchema = PathSegmentSchema;
 export const FolderNameSchema = PathSegmentSchema;
