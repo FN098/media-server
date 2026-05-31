@@ -1,11 +1,17 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db/prisma";
 
-export async function upsertFavorite(
-  userId: string,
-  mediaId: string,
-  rating: number | null
-): Promise<void> {
+interface UpsertFavoriteProps {
+  userId: string;
+  mediaId: string;
+  rating: number | null;
+}
+
+export async function upsertFavorite({
+  userId,
+  mediaId,
+  rating,
+}: UpsertFavoriteProps): Promise<void> {
   await prisma.favorite.upsert({
     where: {
       userId_mediaId: { userId, mediaId },

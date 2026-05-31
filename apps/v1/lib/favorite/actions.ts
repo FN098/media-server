@@ -9,6 +9,7 @@ import {
   upsertFavorite,
   upsertMultipleFavorites,
 } from "@/lib/favorite/repository";
+import { FavoriteCreateOneSchema } from "@/lib/favorite/schemar";
 import { getMediaIdByPath, getMediaIdsByPaths } from "@/lib/media/repository";
 import { clamp } from "@/lib/utils/clamp";
 
@@ -17,17 +18,36 @@ export async function updateFavoriteAction(
   path: string,
   rating: number | null
 ) {
+  // 認証
+  const user = await resolveCurrentUserOrThrow();
+
+  // 入力バリデーション
+  const parsed = FavoriteCreateOneSchema.safeParse({
+    userId: user.id,
+    path,
+    rating,
+  });
+
+  if (!parsed.success)
+    return {
+      success: false,
+      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+    };
+
+  // NOTE: Favorite テーブルのID制約の都合上、path のままでは upsert できないので、パスからIDを逆引きする
+
+  // メディアID逆引き
+  const mediaId = await getMediaIdByPath(path);
+  if (!mediaId) return { success: false, error: "メディアが見つかりません" };
+
+  const input = {
+    userId: parsed.data.userId,
+    rating: parsed.data.rating,
+    mediaId,
+  };
+
   try {
-    const user = await resolveCurrentUserOrThrow();
-
-    const mediaId = await getMediaIdByPath(path);
-    if (!mediaId) return { success: false, error: "メディアが見つかりません" };
-
-    // バリデーション: 数値がある場合は 1~5 にクランプ
-    const validRating = rating !== null ? clamp(rating, 1, 5) : null;
-
-    await upsertFavorite(user.id, mediaId, validRating);
-
+    await upsertFavorite(input);
     return { success: true };
   } catch (error) {
     console.error("Failed to update favorite:", error);
