@@ -1,17 +1,15 @@
 "use server";
 
-import { Media } from "@/generated/prisma/client";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
-import { renameNodeInDb } from "@/lib/media/services";
+import { copyNodeInDb, renameNodeInDb } from "@/lib/media/services";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
   getServerMediaTrashPath,
 } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
-import { prisma } from "@/lib/prisma";
 import {
   getPathInfo,
   isFsNotFoundError,
@@ -24,7 +22,6 @@ import {
   VirtualPathSegmentSchema,
 } from "@/lib/virtual-path/schemas";
 import console from "console";
-import { randomUUID } from "crypto";
 import { Dirent } from "fs";
 import { cp, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -527,97 +524,11 @@ export async function copyNodesAction(
 
     // DB 更新
     try {
-      // TODO: services.ts に切り出し
-      await prisma.$transaction(async (tx) => {
-        // ディレクトリ配下を1回のクエリで全取得
-        const srcMediaList = await tx.media.findMany({
-          where: isDirectory
-            ? {
-                OR: [
-                  { dirPath: srcVirtualPath },
-                  { dirPath: { startsWith: srcVirtualPath + "/" } },
-                ],
-              }
-            : { path: srcVirtualPath },
-          include: {
-            mediaTags: {
-              select: { tagId: true },
-            },
-            favorites: {
-              select: { rating: true },
-              where: { userId },
-            },
-          },
-        });
-
-        const replacePath = (p: string) =>
-          destVirtualPath + p.slice(srcVirtualPath.length);
-
-        // コピー用のデータを準備
-        const idMap = new Map<string, string>();
-        const mediaData = srcMediaList.map((m) => {
-          const newId = randomUUID();
-          idMap.set(m.id, newId);
-
-          if (!isDirectory) {
-            // ファイル単体：パスは確定値
-            return {
-              id: newId,
-              path: destVirtualPath,
-              dirPath: normalizedDestDirPath,
-              fileMtime: m.fileMtime,
-              fileSize: m.fileSize,
-              type: m.type,
-              title: m.title,
-              previewPath: m.previewPath,
-            };
-          } else {
-            // ディレクトリ：配下の各パスをプレフィックス置換
-            return {
-              id: newId,
-              path: replacePath(m.path),
-              dirPath: replacePath(m.dirPath),
-              fileMtime: m.fileMtime,
-              fileSize: m.fileSize,
-              type: m.type,
-              title: m.title,
-              previewPath: m.previewPath?.startsWith(srcVirtualPath)
-                ? replacePath(m.previewPath)
-                : (m.previewPath ?? null),
-            };
-          }
-        }) satisfies Partial<Media>[];
-
-        const mediaTagData = srcMediaList.flatMap((m) =>
-          m.mediaTags.map(({ tagId }) => ({
-            mediaId: idMap.get(m.id)!, // src→destのIDマッピング
-            tagId,
-          }))
-        );
-
-        const favoriteData = srcMediaList.flatMap((m) =>
-          m.favorites.map(({ rating }) => ({
-            mediaId: idMap.get(m.id)!, // src→destのIDマッピング
-            userId,
-            rating,
-          }))
-        );
-
-        // createMany でまとめて挿入
-        await tx.media.createMany({
-          data: mediaData,
-          skipDuplicates: true,
-        });
-
-        await tx.mediaTag.createMany({
-          data: mediaTagData,
-          skipDuplicates: true,
-        });
-
-        await tx.favorite.createMany({
-          data: favoriteData,
-          skipDuplicates: true,
-        });
+      await copyNodeInDb({
+        srcVirtualPath,
+        destVirtualPath,
+        isDirectory,
+        userId,
       });
     } catch (e) {
       console.error("failed to update database:", e);
