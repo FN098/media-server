@@ -390,7 +390,6 @@ function MediaViewerSlides({
     [swiperRef]
   );
 
-  // TODO: useMediaViewerNavigation に移動
   const goNext = useCallback(() => {
     if (allSlides.length === 0) return;
 

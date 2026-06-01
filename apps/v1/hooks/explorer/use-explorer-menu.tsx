@@ -65,6 +65,7 @@ export function useExplorerMenu({
   } = dialogs;
 
   // TODO: context
+  // 参考: hooks/explorer/use-explorer-actions.ts
   const items = useMemo<MenuItemDef<NodeContext>[]>(
     () => [
       {
