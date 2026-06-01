@@ -64,6 +64,7 @@ export function Explorer({ listing }: ExplorerProps) {
 
   useExplorerHotkeys({
     enabled: true,
+    listing,
     filtering,
     selection,
     dialogs,

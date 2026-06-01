@@ -2,7 +2,7 @@ import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { useSelectedNodes } from "@/hooks/selections/use-selected-nodes";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 export type ExplorerSelection = ReturnType<typeof useExplorerSelection>;
 
@@ -27,14 +27,28 @@ export function useExplorerSelection({
     selectPaths,
     clearSelection,
     hasSelection,
+    lastSelectedPath,
   } = usePathSelectionContext();
 
+  // path -> node を O(1) で検索するためのマップ
+  const nodeMap = useMemo(
+    () => new Map(listing.nodes.map((n) => [n.path, n])),
+    [listing.nodes]
+  );
+
+  const lastSelectedNode = useMemo(
+    () => (lastSelectedPath ? nodeMap.get(lastSelectedPath) : null),
+    [lastSelectedPath, nodeMap]
+  );
+
+  // TODO: hook を使わないように
   const selectedNodes = useSelectedNodes({
     // IMPORTANT: フィルター済みノードを渡すと、無限レンダリングに陥るので、全ノードを渡す
     nodes: listing.nodes,
     selectedPaths,
   });
 
+  // TODO: パフォーマンス上の問題がある（全選択時などにかくつく）
   // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
   useEffect(() => {
     const nextPaths = selectedNodes.map((n) => n.path);
@@ -76,6 +90,7 @@ export function useExplorerSelection({
 
   return {
     isSelectionMode,
+    lastSelectedNode,
     hasSelection,
     selectedNodes,
     selectedCount,

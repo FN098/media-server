@@ -155,6 +155,7 @@ export function useExplorerMenu({
         label: "移動",
         onClick: ({ node }) =>
           moveDialog.open(hasSelection ? selectedNodes : [node], listing.path),
+        kbd: "F7",
       },
       {
         key: "copy",
@@ -163,6 +164,7 @@ export function useExplorerMenu({
         label: "コピー",
         onClick: ({ node }) =>
           copyDialog.open(hasSelection ? selectedNodes : [node], listing.path),
+        kbd: "F8",
       },
       {
         key: "separator-tag-action",
@@ -175,6 +177,7 @@ export function useExplorerMenu({
         label: "タグ編集",
         onClick: () => tagEditor.open(),
         hidden: ({ node }) => node.isDirectory,
+        kbd: "T",
       },
       {
         key: "add-tag-filter",

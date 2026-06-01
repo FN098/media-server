@@ -6,6 +6,7 @@ import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { SearchFocus } from "@/hooks/search/use-search-focus";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { MediaListing } from "@/lib/media/types";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 
@@ -13,6 +14,7 @@ const ALL_SCOPES = ["explorer", "tag-editor", "viewer", "dialog"] as const;
 
 interface UseExplorerHotkeysProps {
   enabled: boolean;
+  listing: MediaListing;
   filtering: ExplorerFiltering;
   selection: ExplorerSelection;
   dialogs: ExplorerDialogs;
@@ -25,6 +27,7 @@ interface UseExplorerHotkeysProps {
 
 export function useExplorerHotkeys({
   enabled,
+  listing,
   filtering,
   selection,
   dialogs,
@@ -112,7 +115,40 @@ export function useExplorerHotkeys({
 
   useHotkeys(
     "f2",
-    () => dialogs.renameDialog.open(selection.selectedNodes[0]),
+    (e) => {
+      e.preventDefault();
+      if (selection.lastSelectedNode) {
+        dialogs.renameDialog.open(selection.lastSelectedNode);
+      }
+    },
+    {
+      scopes: ["explorer", "viewer"],
+      enabled: enabled && selection.hasSelection,
+    }
+  );
+
+  useHotkeys(
+    "f7",
+    (e) => {
+      e.preventDefault();
+      if (selection.lastSelectedNode) {
+        dialogs.moveDialog.open(selection.selectedNodes, listing.path);
+      }
+    },
+    {
+      scopes: ["explorer", "viewer"],
+      enabled: enabled && selection.hasSelection,
+    }
+  );
+
+  useHotkeys(
+    "f8",
+    (e) => {
+      e.preventDefault();
+      if (selection.lastSelectedNode) {
+        dialogs.copyDialog.open(selection.selectedNodes, listing.path);
+      }
+    },
     {
       scopes: ["explorer", "viewer"],
       enabled: enabled && selection.hasSelection,
