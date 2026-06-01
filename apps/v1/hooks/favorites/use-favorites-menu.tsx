@@ -2,9 +2,9 @@ import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-inp
 import { FavoritesFavorites } from "@/hooks/favorites/use-favorites-favorites";
 import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
 import { FavoritesNavigation } from "@/hooks/favorites/use-favorites-navigation";
-import { FavoritesSelection } from "@/hooks/favorites/use-favorites-selection";
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
@@ -18,7 +18,7 @@ import { useMemo } from "react";
 
 interface UseFavoritesMenuProps {
   filtering: FavoritesFiltering;
-  selection: FavoritesSelection;
+  selection: MediaNodeSelection;
   tagEditor: TagEditorControl;
   navigation: FavoritesNavigation;
   viewer: ViewerNavigation;

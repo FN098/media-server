@@ -6,8 +6,8 @@ import {
   IndexLike,
   ViewerNavigation,
 } from "@/hooks/navigations/use-viewer-navigation";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
-import { TrashSelection } from "@/hooks/trash/use-trash-selection";
 import { visitFolderAction } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
@@ -19,7 +19,7 @@ export type TrashNavigation = ReturnType<typeof useTrashNavigation>;
 interface UseTrashNavigationProps {
   listing: MediaListing;
   filtering: TrashFiltering;
-  selection: TrashSelection;
+  selection: MediaNodeSelection;
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;

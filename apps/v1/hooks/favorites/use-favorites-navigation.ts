@@ -1,9 +1,9 @@
 import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
-import { FavoritesSelection } from "@/hooks/favorites/use-favorites-selection";
 import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { History, toHistoryItem } from "@/hooks/navigations/use-history";
 import { useMediaIndex } from "@/hooks/navigations/use-media-index";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
@@ -14,7 +14,7 @@ export type FavoritesNavigation = ReturnType<typeof useFavoritesNavigation>;
 
 interface UseFavoritesNavigationProps {
   filtering: FavoritesFiltering;
-  selection: FavoritesSelection;
+  selection: MediaNodeSelection;
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;

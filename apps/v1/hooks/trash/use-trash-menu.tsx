@@ -1,8 +1,8 @@
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { TrashNavigation } from "@/hooks/trash/use-trash-navigation";
-import { TrashSelection } from "@/hooks/trash/use-trash-selection";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import {
   ExternalLinkIcon,
@@ -15,7 +15,7 @@ import {
 import { useMemo } from "react";
 
 interface UseTrashMenuProps {
-  selection: TrashSelection;
+  selection: MediaNodeSelection;
   dialogs: TrashDialogs;
   navigation: TrashNavigation;
   viewer: ViewerNavigation;

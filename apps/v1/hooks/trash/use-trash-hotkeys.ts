@@ -1,11 +1,11 @@
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { SearchFocus } from "@/hooks/search/use-search-focus";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { TrashNavigation } from "@/hooks/trash/use-trash-navigation";
-import { TrashSelection } from "@/hooks/trash/use-trash-selection";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 
@@ -14,7 +14,7 @@ const ALL_SCOPES = ["trash", "tag-editor", "viewer", "dialog"] as const;
 interface UseTrashHotkeysProps {
   enabled: boolean;
   filtering: TrashFiltering;
-  selection: TrashSelection;
+  selection: MediaNodeSelection;
   dialogs: TrashDialogs;
   tagEditor: TagEditorControl;
   navigation: TrashNavigation;

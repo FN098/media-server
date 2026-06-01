@@ -1,9 +1,9 @@
 import { FavoritesDialogs } from "@/hooks/favorites/use-favorites-dialogs";
 import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
-import { FavoritesSelection } from "@/hooks/favorites/use-favorites-selection";
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { SearchFocus } from "@/hooks/search/use-search-focus";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
@@ -13,7 +13,7 @@ const ALL_SCOPES = ["favorites", "tag-editor", "viewer", "dialog"] as const;
 interface UseFavoritesHotkeysProps {
   enabled: boolean;
   filtering: FavoritesFiltering;
-  selection: FavoritesSelection;
+  selection: MediaNodeSelection;
   dialogs: FavoritesDialogs;
   tagEditor: TagEditorControl;
   viewer: ViewerNavigation;
