@@ -162,14 +162,14 @@ export function useExplorerNavigation({
   );
 
   // 一つ上のフォルダを開く
-  const { navigateToParent } = useParentPathname();
+  const { navigateToParent: openParentFolder } = useParentPathname();
 
   return {
     open,
     openInNewTab,
     openPrevFolder,
     openNextFolder,
-    openParentFolder: navigateToParent,
+    openParentFolder,
     onScrollRestored,
     onIndexChange,
   };
