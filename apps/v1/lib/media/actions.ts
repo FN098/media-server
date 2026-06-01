@@ -786,6 +786,8 @@ export async function touchMediaTimestampAction(sourcePath: string) {
     return { success: false, error: "システムフォルダは操作できません。" };
   }
 
+  // NOTE: FS のタイムスタンプは utime や open->close では更新されないので無視
+
   // DB 更新
   try {
     await updateMediaFileMtime({ path: normalizedSourcePath });
@@ -796,8 +798,6 @@ export async function touchMediaTimestampAction(sourcePath: string) {
       error: "タイムスタンプの更新に失敗しました。",
     };
   }
-
-  // NOTE: FS のタイムスタンプは utime や open->close では更新されないので無視
 
   return { success: true };
 }
