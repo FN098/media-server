@@ -12,7 +12,7 @@ const directionSchema = z.enum(["asc", "desc"]).nullable();
 interface UseSortProps {
   sortKey?: string;
   directionKey?: string;
-  resetKeys?: string[];
+  resetKeys?: string[]; // ソート適用時に削除するパラメータ名
 }
 
 export function useSort({

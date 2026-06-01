@@ -1,18 +1,18 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-type Options = {
+interface UseShuffleProps {
   shuffleKey?: string;
   seedKey?: string;
-};
+}
 
-export function useShuffle(options?: Options) {
+export function useShuffle({
+  shuffleKey = "shuffle",
+  seedKey = "seed",
+}: UseShuffleProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  // キー名のマッピング（デフォルト値を設定）
-  const { shuffleKey = "shuffle", seedKey = "seed" } = options || {};
 
   const shuffle = searchParams.get(shuffleKey);
   const seed = searchParams.get(seedKey);
@@ -21,7 +21,7 @@ export function useShuffle(options?: Options) {
 
   // 新しいシードを生成してURLを更新する
   const update = useCallback(() => {
-    const newSeed = Math.random().toString(36).substring(2, 9);
+    const newSeed = generateSeed();
     const params = new URLSearchParams(searchParams.toString());
 
     params.set(shuffleKey, "true");
@@ -42,4 +42,8 @@ export function useShuffle(options?: Options) {
   }, [pathname, router, searchParams, seedKey, shuffleKey]);
 
   return { enabled, seed, update, reset };
+}
+
+function generateSeed() {
+  return Math.random().toString(36).substring(2, 9);
 }
