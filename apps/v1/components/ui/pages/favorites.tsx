@@ -13,7 +13,7 @@ import { useFavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering
 import { useFavoritesHotkeys } from "@/hooks/favorites/use-favorites-hotkeys";
 import { useFavoritesMenu } from "@/hooks/favorites/use-favorites-menu";
 import { useFavoritesNavigation } from "@/hooks/favorites/use-favorites-navigation";
-import { useFavoritesSelectionbar } from "@/hooks/favorites/use-favorites-selectionbar";
+import { useFavoritesSelectionBar } from "@/hooks/favorites/use-favorites-selection-bar";
 import { useFavoritesThumbs } from "@/hooks/favorites/use-favorites-thumbs";
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
@@ -80,7 +80,7 @@ export function Favorites({ listing }: { listing: MediaListing }) {
     favorites,
   });
 
-  const selectionbar = useFavoritesSelectionbar({
+  const selectionbar = useFavoritesSelectionBar({
     selection,
     tagEditor,
     favorites,

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
-interface UseExplorerSelectionbarProps {
+interface UseExplorerSelectionBarProps {
   listing: MediaListing;
   selection: MediaNodeSelection;
   dialogs: ExplorerDialogs;
@@ -28,14 +28,14 @@ interface UseExplorerSelectionbarProps {
   thumbs: ExplorerThumbs;
 }
 
-export function useExplorerSelectionbar({
+export function useExplorerSelectionBar({
   listing,
   selection,
   dialogs,
   tagEditor,
   favorites,
   thumbs,
-}: UseExplorerSelectionbarProps) {
+}: UseExplorerSelectionBarProps) {
   const { hasSelection, selectedNodes } = selection;
   const { favoriteDialog, deleteDialog, copyDialog, moveDialog } = dialogs;
 

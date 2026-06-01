@@ -18,7 +18,7 @@ import { useTrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { useTrashHotkeys } from "@/hooks/trash/use-trash-hotkeys";
 import { useTrashMenu } from "@/hooks/trash/use-trash-menu";
 import { useTrashNavigation } from "@/hooks/trash/use-trash-navigation";
-import { useTrashSelectionbar } from "@/hooks/trash/use-trash-selectionbar";
+import { useTrashSelectionBar } from "@/hooks/trash/use-trash-selection-bar";
 import { useTrashThumbs } from "@/hooks/trash/use-trash-thumbs";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
@@ -82,7 +82,7 @@ export function Trash({ listing }: { listing: MediaListing }) {
     fullscreen,
   });
 
-  const selectionbar = useTrashSelectionbar({
+  const selectionbar = useTrashSelectionBar({
     selection,
     dialogs,
     tagEditor,

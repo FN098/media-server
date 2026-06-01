@@ -1,21 +1,21 @@
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
-import { TrashSelection } from "@/hooks/trash/use-trash-selection";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { RotateCcwIcon, TagIcon, Trash2Icon } from "lucide-react";
 import { useMemo } from "react";
 
-interface UseTrashSelectionbarProps {
-  selection: TrashSelection;
+interface UseTrashSelectionBarProps {
+  selection: MediaNodeSelection;
   dialogs: TrashDialogs;
   tagEditor: TagEditorControl;
 }
 
-export function useTrashSelectionbar({
+export function useTrashSelectionBar({
   selection,
   dialogs,
   tagEditor,
-}: UseTrashSelectionbarProps) {
+}: UseTrashSelectionBarProps) {
   const { hasSelection, selectedNodes } = selection;
   const { deleteDialog, restoreDialog } = dialogs;
 

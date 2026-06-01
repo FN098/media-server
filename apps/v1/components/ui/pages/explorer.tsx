@@ -14,7 +14,7 @@ import { useExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { useExplorerHotkeys } from "@/hooks/explorer/use-explorer-hotkeys";
 import { useExplorerMenu } from "@/hooks/explorer/use-explorer-menu";
 import { useExplorerNavigation } from "@/hooks/explorer/use-explorer-navigation";
-import { useExplorerSelectionbar } from "@/hooks/explorer/use-explorer-selectionbar";
+import { useExplorerSelectionBar } from "@/hooks/explorer/use-explorer-selection-bar";
 import { useExplorerThumbs } from "@/hooks/explorer/use-explorer-thumbs";
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
@@ -91,7 +91,7 @@ export function Explorer({ listing }: ExplorerProps) {
     thumbs,
   });
 
-  const selectionbar = useExplorerSelectionbar({
+  const selectionbar = useExplorerSelectionBar({
     listing,
     selection,
     dialogs,
