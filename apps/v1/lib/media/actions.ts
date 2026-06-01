@@ -74,12 +74,12 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     if (srcPathInfo.error === "not-found")
       return {
         success: false,
-        error: `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`,
+        error: `ファイルまたはフォルダが存在しません。: ${srcVirtualPath}`,
       };
     else
       return {
         success: false,
-        error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`,
+        error: `ファイルまたはフォルダへのアクセスが拒否されました。: ${srcVirtualPath}`,
       };
   }
   const isDirectory = srcPathInfo.isDirectory;
@@ -89,7 +89,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   if (destPathInfo.exists) {
     return {
       success: false,
-      error: `同名のファイルまたはディレクトリが既に存在します。: ${destVirtualPath}`,
+      error: `同名のファイルまたはフォルダが既に存在します。: ${destVirtualPath}`,
     };
   }
 
@@ -97,7 +97,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
   if (destPathInfo.error !== "not-found") {
     return {
       success: false,
-      error: `ファイルまたはディレクトリへのアクセスが拒否されました。: ${destVirtualPath}`,
+      error: `ファイルまたはフォルダへのアクセスが拒否されました。: ${destVirtualPath}`,
     };
   }
 
@@ -111,7 +111,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     console.error("failed to remove thumbnail file or directory:", e);
     return {
       success: false,
-      error: "サムネイル処理中にエラーが発生しました。",
+      error: "ファイルまたはフォルダのリネームに失敗しました。",
     };
   }
 
@@ -126,7 +126,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       console.error("failed to rename thumbnail file or directory:", e);
       return {
         success: false,
-        error: "サムネイル処理中にエラーが発生しました。",
+        error: "ファイルまたはフォルダのリネームに失敗しました。",
       };
     }
   }
@@ -148,7 +148,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
     return {
       success: false,
-      error: "ファイルリネーム中にエラーが発生しました。",
+      error: "ファイルまたはフォルダのリネームに失敗しました。",
     };
   }
 
@@ -176,7 +176,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
 
     return {
       success: false,
-      error: "DB更新中にエラーが発生しました。",
+      error: "ファイルまたはフォルダのリネームに失敗しました。",
     };
   }
 
@@ -231,7 +231,7 @@ export async function moveNodesAction(
     return {
       success: 0,
       failed: normalizedSourcePaths.length,
-      errors: ["移動先フォルダの読み込みに失敗しました"],
+      errors: ["ファイルまたはフォルダの移動に失敗しました。"],
     };
   }
 
@@ -245,7 +245,7 @@ export async function moveNodesAction(
     ) {
       results.failed++;
       results.errors.push(
-        `自分自身またはサブフォルダへの操作はできません: ${srcVirtualPath}`
+        `自分自身またはサブフォルダへの操作はできません。: ${srcVirtualPath}`
       );
       continue;
     }
@@ -258,11 +258,11 @@ export async function moveNodesAction(
     if (!srcPathInfo.exists) {
       if (srcPathInfo.error === "not-found")
         results.errors.push(
-          `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`
+          `ファイルまたはフォルダが存在しません。: ${srcVirtualPath}`
         );
       else
         results.errors.push(
-          `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`
+          `ファイルまたはフォルダへのアクセスが拒否されました。: ${srcVirtualPath}`
         );
     }
     const isDirectory = srcPathInfo.isDirectory;
@@ -301,9 +301,7 @@ export async function moveNodesAction(
     } catch (e) {
       console.error("failed to remove thumbnails directory:", e);
       results.failed++;
-      results.errors.push(
-        `サムネイル処理中にエラーが発生しました: ${srcVirtualPath}`
-      );
+      results.errors.push("ファイルまたはフォルダの移動に失敗しました。");
       continue;
     }
 
@@ -313,13 +311,11 @@ export async function moveNodesAction(
       await rename(srcThumbPath, destThumbPath);
       thumbMoved = true;
     } catch (e) {
-      // サムネイル元が not found （未作成）の場合は処理継続、それ以外は失敗
+      // not found （未作成）の場合は処理継続、それ以外は失敗
       if (!isFsNotFoundError(e)) {
         console.error("failed to rename thumbnails directory:", e);
         results.failed++;
-        results.errors.push(
-          `サムネイル処理中にエラーが発生しました: ${srcVirtualPath}`
-        );
+        results.errors.push("ファイルまたはフォルダの移動に失敗しました。");
         continue;
       }
     }
@@ -328,7 +324,7 @@ export async function moveNodesAction(
     try {
       await rename(srcRealPath, destRealPath);
     } catch (e) {
-      console.error(`File Move Error [${srcVirtualPath}]:`, e);
+      console.error(`failed to rename file or directory:`, e);
 
       // サムネイルロールバック
       if (thumbMoved) {
@@ -340,9 +336,7 @@ export async function moveNodesAction(
       }
 
       results.failed++;
-      results.errors.push(
-        `ファイル移動中にエラーが発生しました: ${srcVirtualPath}`
-      );
+      results.errors.push("ファイルまたはフォルダの移動に失敗しました。");
       continue;
     }
 
@@ -372,7 +366,7 @@ export async function moveNodesAction(
       }
 
       results.failed++;
-      results.errors.push("DB更新中にエラーが発生しました。");
+      results.errors.push("ファイルまたはフォルダの移動に失敗しました。");
       continue;
     }
 
@@ -425,14 +419,12 @@ export async function copyNodesAction(
     const entries = await readdir(realDestDirPath);
     entries.forEach((name) => existingNames.add(name));
   } catch (e) {
-    // コピー先フォルダ自体が存在しないなどのエラーハンドリング
-    if (!isFsNotFoundError(e)) {
-      return {
-        success: 0,
-        failed: normalizedSourcePaths.length,
-        errors: ["コピー先フォルダの読み込みに失敗しました"],
-      };
-    }
+    console.error("failed to read directory:", e);
+    return {
+      success: 0,
+      failed: normalizedSourcePaths.length,
+      errors: ["ファイルまたはフォルダのコピーに失敗しました。"],
+    };
   }
 
   const results = { success: 0, failed: 0, errors: [] as string[] };
@@ -445,7 +437,7 @@ export async function copyNodesAction(
     ) {
       results.failed++;
       results.errors.push(
-        `自分自身またはサブフォルダへの操作はできません: ${srcVirtualPath}`
+        `自分自身またはサブフォルダへの操作はできません。。: ${srcVirtualPath}`
       );
       continue;
     }
@@ -458,11 +450,11 @@ export async function copyNodesAction(
     if (!srcPathInfo.exists) {
       if (srcPathInfo.error === "not-found")
         results.errors.push(
-          `ファイルまたはディレクトリが存在しません。: ${srcVirtualPath}`
+          `ファイルまたはフォルダが存在しません。: ${srcVirtualPath}`
         );
       else
         results.errors.push(
-          `ファイルまたはディレクトリへのアクセスが拒否されました。: ${srcVirtualPath}`
+          `ファイルまたはフォルダへのアクセスが拒否されました。: ${srcVirtualPath}`
         );
     }
     const isDirectory = srcPathInfo.isDirectory;
@@ -502,7 +494,6 @@ export async function copyNodesAction(
       thumbCopied = true;
     } catch (e) {
       if (!isFsNotFoundError(e)) {
-        // ENOENT 以外は警告ログだけ残す（本体コピーは成功しているので続行）
         console.error("failed to copy thumbnails:", e);
       }
     }
@@ -530,12 +521,13 @@ export async function copyNodesAction(
       }
 
       results.failed++;
-      results.errors.push("ファイルコピー中にエラーが発生しました。");
+      results.errors.push("ファイルまたはフォルダのコピーに失敗しました。");
       continue;
     }
 
     // DB 更新
     try {
+      // TODO: services.ts に切り出し
       await prisma.$transaction(async (tx) => {
         // ディレクトリ配下を1回のクエリで全取得
         const srcMediaList = await tx.media.findMany({
@@ -647,7 +639,7 @@ export async function copyNodesAction(
       }
 
       results.failed++;
-      results.errors.push("ファイルコピー中にエラーが発生しました。");
+      results.errors.push("ファイルまたはフォルダのコピーに失敗しました。");
       continue;
     }
 
@@ -702,7 +694,7 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     } catch (e) {
       console.error("failed to create directory:", e);
       results.failed++;
-      results.errors.push("フォルダ処理中にエラーが発生しました。");
+      results.errors.push("ファイルまたはフォルダの削除に失敗しました。");
       continue;
     }
 
@@ -712,11 +704,11 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     } catch (e) {
       console.error("failed to move file or directory:", e);
       results.failed++;
-      results.errors.push("ファイル移動中にエラーが発生しました。");
+      results.errors.push("ファイルまたはフォルダの削除に失敗しました。");
       continue;
     }
 
-    // TODO: DB 更新の追加 (Media.deletedAt で論理削除)
+    // TODO: DBの更新（論理削除フラグON）
 
     results.success++;
   }
@@ -771,7 +763,7 @@ export async function restoreNodesAction(sourcePaths: string[]) {
     } catch (e) {
       console.error("failed to create directory:", e);
       results.failed++;
-      results.errors.push("フォルダ処理中にエラーが発生しました。");
+      results.errors.push("ファイルまたはフォルダの復元に失敗しました。");
       continue;
     }
 
@@ -781,9 +773,11 @@ export async function restoreNodesAction(sourcePaths: string[]) {
     } catch (e) {
       console.error("failed to move file or directory", e);
       results.failed++;
-      results.errors.push("復元中にエラーが発生しました。");
+      results.errors.push("ファイルまたはフォルダの復元に失敗しました。");
       continue;
     }
+
+    // TODO: DBの更新（論理削除フラグOFF）
 
     results.success++;
   }
@@ -833,11 +827,11 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
     } catch (e) {
       console.error("failed to remove file or directory:", e);
       results.failed++;
-      results.errors.push("削除中にエラーが発生しました。");
+      results.errors.push("ファイルまたはフォルダの削除に失敗しました。");
       continue;
     }
 
-    // TODO: DB からも削除
+    // TODO: DB からも物理削除
 
     results.success++;
   }
