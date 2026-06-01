@@ -139,7 +139,10 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       try {
         await rename(destThumbPath, srcThumbPath);
       } catch (e) {
-        console.error("failed to rollback renamed thumbnails directory:", e);
+        console.error(
+          "failed to rollback renamed thumbnail file or directory:",
+          e
+        );
       }
     }
 
@@ -167,7 +170,10 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
       try {
         await rename(destThumbPath, srcThumbPath);
       } catch (err) {
-        console.error("failed to rollback renamed thumbnails directory:", err);
+        console.error(
+          "failed to rollback renamed thumbnail file or directory:",
+          err
+        );
       }
     }
 
@@ -296,7 +302,7 @@ export async function moveNodesAction(
     try {
       await rm(destThumbPath, { recursive: true, force: true });
     } catch (e) {
-      console.error("failed to remove thumbnails directory:", e);
+      console.error("failed to remove thumbnail file or directory:", e);
       results.failed++;
       results.errors.push("ファイルまたはフォルダの移動に失敗しました。");
       continue;
@@ -310,7 +316,7 @@ export async function moveNodesAction(
     } catch (e) {
       // not found （未作成）の場合は処理継続、それ以外は失敗
       if (!isFsNotFoundError(e)) {
-        console.error("failed to rename thumbnails directory:", e);
+        console.error("failed to rename thumbnail file or directory:", e);
         results.failed++;
         results.errors.push("ファイルまたはフォルダの移動に失敗しました。");
         continue;
@@ -328,7 +334,10 @@ export async function moveNodesAction(
         try {
           await rename(destThumbPath, srcThumbPath);
         } catch (e) {
-          console.error("failed to rollback renamed thumbnails directory:", e);
+          console.error(
+            "failed to rollback renamed thumbnail file or directory:",
+            e
+          );
         }
       }
 
@@ -356,7 +365,7 @@ export async function moveNodesAction(
           await rename(destThumbPath, srcThumbPath);
         } catch (err) {
           console.error(
-            "failed to rollback renamed thumbnails directory:",
+            "failed to rollback renamed thumbnail file or directory:",
             err
           );
         }
@@ -513,7 +522,10 @@ export async function copyNodesAction(
         try {
           await rm(destThumbPath, { recursive: true, force: true });
         } catch (e) {
-          console.error("failed to rollback copied thumbnails directory:", e);
+          console.error(
+            "failed to rollback copied thumbnail file or directory:",
+            e
+          );
         }
       }
 
@@ -545,7 +557,10 @@ export async function copyNodesAction(
         try {
           await rm(destThumbPath, { recursive: true, force: true });
         } catch (e) {
-          console.error("failed to rollback copied thumbnails directory:", e);
+          console.error(
+            "failed to rollback copied thumbnail file or directory:",
+            e
+          );
         }
       }
 
