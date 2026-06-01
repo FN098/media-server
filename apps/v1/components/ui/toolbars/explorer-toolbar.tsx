@@ -8,8 +8,8 @@ import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
 import { useExplorerFilter } from "@/hooks/explorer/use-explorer-filter";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { ExplorerSelection } from "@/hooks/explorer/use-explorer-selection";
 import { useExplorerSort } from "@/hooks/explorer/use-explorer-sort";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useSort } from "@/hooks/sort/use-sort";
 import { MediaListing } from "@/lib/media/types";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -20,7 +20,7 @@ interface ExplorerToolbarProps {
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
   favorites: ExplorerFavorites;
-  selection: ExplorerSelection;
+  selection: MediaNodeSelection;
 }
 
 export function ExplorerToolbar({

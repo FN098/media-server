@@ -14,12 +14,12 @@ import { useExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { useExplorerHotkeys } from "@/hooks/explorer/use-explorer-hotkeys";
 import { useExplorerMenu } from "@/hooks/explorer/use-explorer-menu";
 import { useExplorerNavigation } from "@/hooks/explorer/use-explorer-navigation";
-import { useExplorerSelection } from "@/hooks/explorer/use-explorer-selection";
 import { useExplorerSelectionbar } from "@/hooks/explorer/use-explorer-selectionbar";
 import { useExplorerThumbs } from "@/hooks/explorer/use-explorer-thumbs";
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useTagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
@@ -38,7 +38,10 @@ export function Explorer({ listing }: ExplorerProps) {
   const searchFocus = useSearchFocusContext();
   const viewMode = useViewMode();
   const filtering = useExplorerFiltering({ listing });
-  const selection = useExplorerSelection({ listing, filtering });
+  const selection = useMediaNodeSelection({
+    allNodes: listing.nodes,
+    activeNodes: filtering.filteredNodes,
+  });
   const dialogs = useExplorerDialogs({ filtering });
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation({});

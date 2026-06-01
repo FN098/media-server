@@ -1,23 +1,20 @@
-import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useCallback, useEffect, useMemo } from "react";
 
-export type ExplorerSelection = ReturnType<typeof useExplorerSelection>;
+export type MediaNodeSelection = ReturnType<typeof useMediaNodeSelection>;
 
-interface UseExplorerSelectionProps {
-  listing: MediaListing;
-  filtering: ExplorerFiltering;
+interface UseMediaNodeSelectionProps {
+  allNodes: MediaNode[];
+  activeNodes: MediaNode[];
   enableFolderSelection?: boolean;
 }
 
-export function useExplorerSelection({
-  listing,
-  filtering,
+export function useMediaNodeSelection({
+  allNodes,
+  activeNodes,
   enableFolderSelection = true,
-}: UseExplorerSelectionProps) {
-  const { filteredNodes: currentNodes } = filtering;
-
+}: UseMediaNodeSelectionProps) {
   const {
     isSelectionMode,
     enterSelectionMode,
@@ -33,8 +30,8 @@ export function useExplorerSelection({
 
   // path -> node を O(1) で検索するためのマップ
   const nodeMap = useMemo(
-    () => new Map(listing.nodes.map((n) => [n.path, n])),
-    [listing.nodes]
+    () => new Map(allNodes.map((n) => [n.path, n])),
+    [allNodes]
   );
 
   const lastSelectedNode = useMemo(
@@ -81,8 +78,8 @@ export function useExplorerSelection({
   );
 
   const selectAll = useCallback(() => {
-    select(currentNodes);
-  }, [currentNodes, select]);
+    select(activeNodes);
+  }, [activeNodes, select]);
 
   const reset = useCallback(() => {
     clearSelection();

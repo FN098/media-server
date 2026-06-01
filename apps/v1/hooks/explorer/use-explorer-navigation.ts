@@ -1,6 +1,5 @@
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { ExplorerSelection } from "@/hooks/explorer/use-explorer-selection";
 import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { History, toHistoryItem } from "@/hooks/navigations/use-history";
 import { useMediaIndex } from "@/hooks/navigations/use-media-index";
@@ -9,6 +8,7 @@ import {
   IndexLike,
   ViewerNavigation,
 } from "@/hooks/navigations/use-viewer-navigation";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { visitFolderAction } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
@@ -21,7 +21,7 @@ export type ExplorerNavigation = ReturnType<typeof useExplorerNavigation>;
 interface UseExplorerNavigationProps {
   listing: MediaListing;
   filtering: ExplorerFiltering;
-  selection: ExplorerSelection;
+  selection: MediaNodeSelection;
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;

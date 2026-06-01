@@ -1,10 +1,10 @@
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { ExplorerNavigation } from "@/hooks/explorer/use-explorer-navigation";
-import { ExplorerSelection } from "@/hooks/explorer/use-explorer-selection";
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { SearchFocus } from "@/hooks/search/use-search-focus";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { MediaListing } from "@/lib/media/types";
 import { useEffect, useMemo } from "react";
@@ -16,7 +16,7 @@ interface UseExplorerHotkeysProps {
   enabled: boolean;
   listing: MediaListing;
   filtering: ExplorerFiltering;
-  selection: ExplorerSelection;
+  selection: MediaNodeSelection;
   dialogs: ExplorerDialogs;
   tagEditor: TagEditorControl;
   navigation: ExplorerNavigation;

@@ -1,8 +1,8 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
-import { ExplorerSelection } from "@/hooks/explorer/use-explorer-selection";
 import { ExplorerThumbs } from "@/hooks/explorer/use-explorer-thumbs";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { hasMedia } from "@/lib/media/detectors";
 import { MediaListing } from "@/lib/media/types";
@@ -21,7 +21,7 @@ import { useMemo } from "react";
 
 interface UseExplorerSelectionbarProps {
   listing: MediaListing;
-  selection: ExplorerSelection;
+  selection: MediaNodeSelection;
   dialogs: ExplorerDialogs;
   tagEditor: TagEditorControl;
   favorites: ExplorerFavorites;

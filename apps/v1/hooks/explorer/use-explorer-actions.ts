@@ -1,7 +1,7 @@
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { ExplorerSelection } from "@/hooks/explorer/use-explorer-selection";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { CheckCheckIcon, FolderPlusIcon, Trash2Icon } from "lucide-react";
@@ -11,7 +11,7 @@ interface ExplorerToolbarActionContext {
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
   favorites: ExplorerFavorites;
-  selection: ExplorerSelection;
+  selection: MediaNodeSelection;
   computed: {
     hasNonFavoriteFiles: boolean;
     nonFavoriteTargets: MediaNode[];
