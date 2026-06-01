@@ -660,57 +660,6 @@ export async function copyNodesAction(
   return results;
 }
 
-// メディアファイル一覧
-export async function listMediaAction(dirPath: string) {
-  // 認証
-  await resolveCurrentUserOrThrow();
-
-  // 入力バリデーション+正規化
-  const normalizedDirPath = normalizeVirtualPath(dirPath);
-
-  // システムフォルダ保護
-  if (isSystemHiddenVirtualPath(normalizedDirPath)) {
-    return { success: false, error: "システムフォルダは操作できません。" };
-  }
-
-  // 仮想パス→物理パス
-  const virtualDirPath = normalizedDirPath;
-  const realDirPath = getServerMediaPath(virtualDirPath);
-
-  let entries: Dirent[];
-  try {
-    entries = await readdir(realDirPath, { withFileTypes: true });
-  } catch (e) {
-    if (isFsNotFoundError(e)) {
-      return { success: false, error: "フォルダが見つかりません。" };
-    }
-    if (isFsPermissionError(e)) {
-      return { success: false, error: "フォルダへのアクセス権がありません。" };
-    }
-    console.error("failed to read directory", e);
-    return { success: false, error: "ファイル一覧の取得に失敗しました。" };
-  }
-
-  const mediaFiles = entries
-    .filter((e) => e.isFile()) // ファイルのみ対象
-    .map((e) => {
-      const type = detectMediaType(e.name);
-      if (type === null) return null; // メディア以外を除く
-      return {
-        name: e.name,
-        // 仮想パスを生成
-        path: join(virtualDirPath, e.name).replace(/\\/g, "/"),
-        type,
-      };
-    })
-    .filter((e) => e !== null);
-
-  return {
-    success: true,
-    files: mediaFiles,
-  };
-}
-
 // 削除（ゴミ箱フォルダへの移動）
 export async function deleteNodesAction(sourcePaths: string[]) {
   // 認証
@@ -931,4 +880,55 @@ export async function touchMediaTimestampAction(sourcePath: string) {
   // NOTE: FS のタイムスタンプは utime や open->close では更新されないので無視
 
   return { success: true };
+}
+
+// メディアファイル一覧
+export async function listMediaAction(dirPath: string) {
+  // 認証
+  await resolveCurrentUserOrThrow();
+
+  // 入力バリデーション+正規化
+  const normalizedDirPath = normalizeVirtualPath(dirPath);
+
+  // システムフォルダ保護
+  if (isSystemHiddenVirtualPath(normalizedDirPath)) {
+    return { success: false, error: "システムフォルダは操作できません。" };
+  }
+
+  // 仮想パス→物理パス
+  const virtualDirPath = normalizedDirPath;
+  const realDirPath = getServerMediaPath(virtualDirPath);
+
+  let entries: Dirent[];
+  try {
+    entries = await readdir(realDirPath, { withFileTypes: true });
+  } catch (e) {
+    if (isFsNotFoundError(e)) {
+      return { success: false, error: "フォルダが見つかりません。" };
+    }
+    if (isFsPermissionError(e)) {
+      return { success: false, error: "フォルダへのアクセス権がありません。" };
+    }
+    console.error("failed to read directory", e);
+    return { success: false, error: "ファイル一覧の取得に失敗しました。" };
+  }
+
+  const mediaFiles = entries
+    .filter((e) => e.isFile()) // ファイルのみ対象
+    .map((e) => {
+      const type = detectMediaType(e.name);
+      if (type === null) return null; // メディア以外を除く
+      return {
+        name: e.name,
+        // 仮想パスを生成
+        path: join(virtualDirPath, e.name).replace(/\\/g, "/"),
+        type,
+      };
+    })
+    .filter((e) => e !== null);
+
+  return {
+    success: true,
+    files: mediaFiles,
+  };
 }
