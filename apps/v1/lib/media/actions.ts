@@ -497,7 +497,7 @@ export async function copyNodesAction(
 
     // FSコピー
     try {
-      await cp(srcRealPath, destRealPath, { recursive: isDirectory });
+      await cp(srcRealPath, destRealPath, { recursive: true });
     } catch (e) {
       console.error("failed to copy file or directory:", e);
 
