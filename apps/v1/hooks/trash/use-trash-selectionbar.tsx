@@ -49,7 +49,8 @@ export function useTrashSelectionbar({
           variant: "destructive",
           icon: Trash2Icon,
           label: "削除",
-          onClick: () => deleteDialog.open(selectedNodes),
+          onClick: () =>
+            deleteDialog.open(selectedNodes, { isPermanent: true }),
           disabled: () => !hasSelection,
         },
       ] satisfies MenuItemDef<MultipleNodesContext>[],

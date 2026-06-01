@@ -14,7 +14,8 @@ const toolbarActionItems: MenuItemDef<TrashToolbarActionContext>[] = [
     type: "action",
     label: "このフォルダ内を完全に削除",
     icon: Trash2Icon,
-    onClick: (ctx) => ctx.dialogs.deleteDialog.open(ctx.listing.nodes),
+    onClick: (ctx) =>
+      ctx.dialogs.deleteDialog.open(ctx.listing.nodes, { isPermanent: true }),
     disabled: (ctx) => {
       return ctx.listing.nodes.length === 0;
     },

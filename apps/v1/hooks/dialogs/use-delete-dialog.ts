@@ -21,11 +21,14 @@ export function useDeleteDialog({ onSuccess }: UseDeleteDialogProps = {}) {
   const [isPending, startTransition] = useTransition();
 
   // 1. ダイアログを開く（完全削除かどうかのフラグをここで受け取る）
-  const open = useCallback((nodes: DeleteTarget[], isPermanent = false) => {
-    setTargets(nodes);
-    setPermanent(isPermanent);
-    setIsOpen(true);
-  }, []);
+  const open = useCallback(
+    (nodes: DeleteTarget[], options?: { isPermanent: boolean }) => {
+      setTargets(nodes);
+      setPermanent(options?.isPermanent ?? false);
+      setIsOpen(true);
+    },
+    []
+  );
 
   // 2. ダイアログを閉じる
   const close = useCallback(() => {

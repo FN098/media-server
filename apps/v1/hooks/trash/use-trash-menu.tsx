@@ -84,7 +84,9 @@ export function useTrashMenu({
         variant: "destructive",
         label: "削除",
         onClick: ({ node }) =>
-          deleteDialog.open(hasSelection ? selectedNodes : [node]),
+          deleteDialog.open(hasSelection ? selectedNodes : [node], {
+            isPermanent: true,
+          }),
         kbd: "Del",
       },
     ],

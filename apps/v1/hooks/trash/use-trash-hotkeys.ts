@@ -69,7 +69,8 @@ export function useTrashHotkeys({
 
   useHotkeys(
     "delete",
-    () => dialogs.deleteDialog.open(selection.selectedNodes),
+    () =>
+      dialogs.deleteDialog.open(selection.selectedNodes, { isPermanent: true }),
     {
       scopes: "trash",
       enabled: enabled && selection.hasSelection,
