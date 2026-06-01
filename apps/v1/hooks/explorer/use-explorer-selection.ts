@@ -1,5 +1,4 @@
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { useSelectedNodes } from "@/hooks/selections/use-selected-nodes";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useCallback, useEffect, useMemo } from "react";
@@ -9,11 +8,13 @@ export type ExplorerSelection = ReturnType<typeof useExplorerSelection>;
 interface UseExplorerSelectionProps {
   listing: MediaListing;
   filtering: ExplorerFiltering;
+  enableFolderSelection?: boolean;
 }
 
 export function useExplorerSelection({
   listing,
   filtering,
+  enableFolderSelection = true,
 }: UseExplorerSelectionProps) {
   const { filteredNodes: currentNodes } = filtering;
 
@@ -41,12 +42,12 @@ export function useExplorerSelection({
     [lastSelectedPath, nodeMap]
   );
 
-  // TODO: hook を使わないように
-  const selectedNodes = useSelectedNodes({
-    // IMPORTANT: フィルター済みノードを渡すと、無限レンダリングに陥るので、全ノードを渡す
-    nodes: listing.nodes,
-    selectedPaths,
-  });
+  const selectedNodes = useMemo(() => {
+    return Array.from(selectedPaths)
+      .map((path) => nodeMap.get(path))
+      .filter((node) => node != null)
+      .filter((node) => enableFolderSelection || !node.isDirectory);
+  }, [enableFolderSelection, nodeMap, selectedPaths]);
 
   // TODO: パフォーマンス上の問題がある（全選択時などにかくつく）
   // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
