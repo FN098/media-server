@@ -11,13 +11,13 @@ import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useTagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useTrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { useTrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { useTrashHotkeys } from "@/hooks/trash/use-trash-hotkeys";
 import { useTrashMenu } from "@/hooks/trash/use-trash-menu";
 import { useTrashNavigation } from "@/hooks/trash/use-trash-navigation";
-import { useTrashSelection } from "@/hooks/trash/use-trash-selection";
 import { useTrashSelectionbar } from "@/hooks/trash/use-trash-selectionbar";
 import { useTrashThumbs } from "@/hooks/trash/use-trash-thumbs";
 import { useViewMode } from "@/hooks/view/use-view-mode";
@@ -33,7 +33,10 @@ export function Trash({ listing }: { listing: MediaListing }) {
   const searchFocus = useSearchFocusContext();
   const viewMode = useViewMode();
   const filtering = useTrashFiltering({ listing });
-  const selection = useTrashSelection({ listing, filtering });
+  const selection = useMediaNodeSelection({
+    allNodes: listing.nodes,
+    activeNodes: filtering.filteredNodes,
+  });
 
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation({});
