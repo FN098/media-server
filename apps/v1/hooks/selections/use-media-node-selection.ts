@@ -1,6 +1,6 @@
 import { MediaNode } from "@/lib/media/types";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 export type MediaNodeSelection = ReturnType<typeof useMediaNodeSelection>;
 
@@ -43,22 +43,8 @@ export function useMediaNodeSelection({
     return Array.from(selectedPaths)
       .map((path) => nodeMap.get(path))
       .filter((node) => node != null)
-      .filter((node) => enableFolderSelection || !node.isDirectory);
+      .filter((node) => enableFolderSelection || !node.isDirectory); // フォルダ選択無効ならフォルダ除外
   }, [enableFolderSelection, nodeMap, selectedPaths]);
-
-  // TODO: パフォーマンス上の問題がある（全選択時などにかくつく）
-  // フィルター適用などで選択済みノードが変更された場合は、コンテキストを更新
-  useEffect(() => {
-    const nextPaths = selectedNodes.map((n) => n.path);
-
-    const changed =
-      nextPaths.length !== selectedPaths.size ||
-      nextPaths.some((path) => !selectedPaths.has(path));
-
-    if (changed) {
-      selectPaths(nextPaths);
-    }
-  }, [selectedNodes, selectedPaths, selectPaths]);
 
   const replace = useCallback(
     (node: MediaNode) => {
