@@ -634,7 +634,7 @@ export async function deleteNodesAction(sourcePaths: string[]) {
       continue;
     }
 
-    // TODO: DBの更新（論理削除フラグON）
+    // DB更新不要：.trash フォルダへの移動のみ
 
     results.success++;
   }
@@ -703,7 +703,7 @@ export async function restoreNodesAction(sourcePaths: string[]) {
       continue;
     }
 
-    // TODO: DBの更新（論理削除フラグOFF）
+    // DB更新不要
 
     results.success++;
   }
@@ -757,7 +757,7 @@ export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
       continue;
     }
 
-    // TODO: DB からも物理削除
+    // DB更新不要
 
     results.success++;
   }
@@ -786,7 +786,7 @@ export async function touchMediaTimestampAction(sourcePath: string) {
     return { success: false, error: "システムフォルダは操作できません。" };
   }
 
-  // NOTE: FS のタイムスタンプは utime や open->close では更新されないので無視
+  // FS 更新不要：タイムスタンプは utime や open->close では更新されないため
 
   // DB 更新
   try {
