@@ -12,8 +12,7 @@ export function useMediaViewerFavorite({
   currentNode,
   onChange,
 }: UseMediaViewerFavoriteProps) {
-  const { toggleFavorite, updateFavorite, getFavorite } =
-    useFavoritesControlContext();
+  const control = useFavoritesControlContext();
 
   const [isPending, startTransition] = useTransition();
 
@@ -24,24 +23,18 @@ export function useMediaViewerFavorite({
         rating: null,
       };
     }
+    return control.getFavorite(currentNode.path);
+  }, [control, currentNode]);
 
-    const { isFavorite = false, rating = null } = getFavorite(currentNode.path);
-
-    return {
-      isFavorite,
-      rating,
-    };
-  }, [currentNode, getFavorite]);
-
-  const handleToggleFavorite = useCallback(() => {
+  const toggleFavorite = useCallback(() => {
     if (!currentNode) return;
 
     startTransition(async () => {
       try {
-        const { isFavorite } = getFavorite(currentNode.path);
+        const { isFavorite } = control.getFavorite(currentNode.path);
         const nextIsFavorite = !isFavorite;
 
-        await toggleFavorite(currentNode.path);
+        await control.toggleFavorite(currentNode.path);
 
         toast.info(
           nextIsFavorite
@@ -56,15 +49,15 @@ export function useMediaViewerFavorite({
         toast.error("お気に入りの更新に失敗しました");
       }
     });
-  }, [currentNode, getFavorite, toggleFavorite, onChange]);
+  }, [currentNode, control, onChange]);
 
-  const handleChangeRating = useCallback(
+  const changeRating = useCallback(
     (rating: number | null) => {
       if (!currentNode) return;
 
       startTransition(async () => {
         try {
-          await updateFavorite(currentNode.path, rating);
+          await control.updateFavorite(currentNode.path, rating);
 
           toast.info(
             rating != null
@@ -80,14 +73,13 @@ export function useMediaViewerFavorite({
         }
       });
     },
-    [currentNode, updateFavorite, onChange]
+    [currentNode, control, onChange]
   );
 
   return {
-    isFavorite: favoriteState.isFavorite,
-    rating: favoriteState.rating,
+    ...favoriteState,
     isPending,
-    toggleFavorite: handleToggleFavorite,
-    changeRating: handleChangeRating,
+    toggleFavorite,
+    changeRating,
   };
 }
