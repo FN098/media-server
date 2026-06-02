@@ -21,7 +21,7 @@ interface UseFolderNavigationProps {
 export function useFolderNavigation({
   atKey = "at",
   pageKey = "page",
-}: UseFolderNavigationProps) {
+}: UseFolderNavigationProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

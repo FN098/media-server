@@ -8,97 +8,28 @@ import { ExplorerToolbar } from "@/components/ui/toolbars/explorer-toolbar";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import { useExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
-import { useExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
-import { useExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { useExplorerHotkeys } from "@/hooks/explorer/use-explorer-hotkeys";
-import { useExplorerMenu } from "@/hooks/explorer/use-explorer-menu";
-import { useExplorerNavigation } from "@/hooks/explorer/use-explorer-navigation";
-import { useExplorerSelectionBar } from "@/hooks/explorer/use-explorer-selection-bar";
-import { useExplorerThumbs } from "@/hooks/explorer/use-explorer-thumbs";
-import { useFullscreen } from "@/hooks/general/use-fullscreen";
-import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
-import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
-import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { useTagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
-import { useViewMode } from "@/hooks/view/use-view-mode";
-import { MediaListing } from "@/lib/media/types";
-import { useHistoryContext } from "@/providers/history-provider";
+import { useExplorerContext } from "@/providers/explorer-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
-import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { cn } from "@/shadcn/lib/utils";
 
-interface ExplorerProps {
-  listing: MediaListing;
-}
-
-export function Explorer({ listing }: ExplorerProps) {
-  const searchFocus = useSearchFocusContext();
-  const viewMode = useViewMode();
-  const filtering = useExplorerFiltering({ listing });
-  const selection = useMediaNodeSelection({
-    allNodes: listing.nodes,
-    activeNodes: filtering.filteredNodes,
-  });
-  const dialogs = useExplorerDialogs({ filtering });
-  const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
-  const folder = useFolderNavigation({});
-  const history = useHistoryContext();
-  const favorites = useExplorerFavorites();
-
-  const navigation = useExplorerNavigation({
+export function Explorer() {
+  const {
     listing,
+    viewMode,
     filtering,
     selection,
+    dialogs,
     viewer,
     history,
-    folder,
-    dialogs,
-  });
-
-  const tagEditor = useTagEditorControl({
-    targetCount: selection.selectedCount,
-  });
-
-  const thumbs = useExplorerThumbs({ listing });
-  const fullscreen = useFullscreen();
-
-  useExplorerHotkeys({
-    enabled: true,
-    listing,
-    filtering,
-    selection,
-    dialogs,
-    tagEditor,
-    navigation,
-    viewer,
-    fullscreen,
-    searchFocus,
-  });
-
-  const menu = useExplorerMenu({
-    listing,
-    filtering,
-    selection,
-    dialogs,
-    tagEditor,
-    navigation,
-    viewer,
-    fullscreen,
     favorites,
-    thumbs,
-  });
-
-  const selectionbar = useExplorerSelectionBar({
-    listing,
-    selection,
-    dialogs,
+    navigation,
     tagEditor,
-    favorites,
     thumbs,
-  });
+    menu,
+    selectionbar,
+  } = useExplorerContext();
 
   return (
     <PagingProvider totalItems={filtering.filteredCount}>
