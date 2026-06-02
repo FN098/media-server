@@ -10,12 +10,10 @@ const headerPinnedContext = createContext<HeaderPinned | undefined>(undefined);
 
 export function ViewerHeaderPinnedProvider({
   children,
-  defaultPinned,
 }: {
   children: React.ReactNode;
-  defaultPinned?: boolean;
 }) {
-  const value = useHeaderPinned(defaultPinned);
+  const value = useHeaderPinned();
 
   return (
     <headerPinnedContext.Provider value={value}>

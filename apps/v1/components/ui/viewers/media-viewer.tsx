@@ -1,6 +1,5 @@
 "use client";
 
-import { APP_CONFIG } from "@/app.config";
 import { FavoriteButton } from "@/components/ui/buttons/favorite-button";
 import { ViewerHeaderPinButton } from "@/components/ui/buttons/viewer-header-pin-button";
 import { NodeDropdownMenu } from "@/components/ui/dropdown-menus/node-dropdown-menu";
@@ -9,11 +8,10 @@ import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
-import { useAutoHidingUI } from "@/hooks/general/use-auto-hide";
-import { useDocumentTitle } from "@/hooks/general/use-document-title";
-import { useMediaViewerFavorite } from "@/hooks/viewer/use-media-viewer-favorite";
-import { useMediaViewerHotkeys } from "@/hooks/viewer/use-media-viewer-hotkeys";
-import { useMediaViewerNavigation } from "@/hooks/viewer/use-media-viewer-navigation";
+import {
+  MediaViewerContext,
+  useMediaViewer,
+} from "@/hooks/viewer/use-media-viewer";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
@@ -24,30 +22,14 @@ import {
   getSlideIndex,
   MediaViewerSlide,
 } from "@/lib/viewer/slides";
-import { useViewerHeaderPinnedContext } from "@/providers/viewer-header-pinned-provider";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  PauseIcon,
-  PlayIcon,
-} from "lucide-react";
-import {
-  Dispatch,
-  RefObject,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useCallback, useEffect } from "react";
 import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
-import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 interface MediaViewerProps {
   allNodes: MediaNode[];
@@ -62,221 +44,48 @@ interface MediaViewerProps {
   onDelete?: (node: MediaNode) => void;
 }
 
-export function MediaViewer({
-  allNodes,
-  initialIndex = 0,
-  hotkeysEnabled = true,
-  menuItems,
-  onIndexChange,
-  onClose,
-  onOpenPrev,
-  onOpenNext,
-  onOpenParent,
-  onDelete,
-}: MediaViewerProps) {
-  // ===== ヘッダー =====
-
-  const [isHovered, setIsHovered] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const { isPinned: isHeaderPinned, toggle: toggleIsHeaderPinned } =
-    useViewerHeaderPinnedContext();
-
-  const {
-    isVisible: isHeaderVisible,
-    toggle: toggleHeaderVisibility,
-    interact: interactHeader,
-  } = useAutoHidingUI({
-    duration: 2000,
-    disabled: isHovered || isMenuOpen || isHeaderPinned,
-  });
-
-  // ===== タイトル =====
-
-  const { setTitle } = useDocumentTitle();
-
-  // タイトルにファイルタイトルまたはファイル名を設定
-  const updateTitle = useCallback(
-    (node: MediaNode) => {
-      setTitle(`${node.title ?? node.name} | ${APP_CONFIG.meta.title}`);
-    },
-    [setTitle]
-  );
-
-  // ===== ナビゲーション =====
-
-  const {
-    hasPrev,
-    currentIndex,
-    currentSlideIndex,
-    currentNode,
-    allSlides,
-    swiperRef,
-    updateActiveSlide,
-    setCurrentSlideIndex,
-  } = useMediaViewerNavigation({
-    allNodes,
-    initialIndex,
-    onIndexChange,
-    onOpenPrev,
-    onOpenNext,
-    onNodeChange: updateTitle,
-  });
-
-  // ===== お気に入り =====
-
-  const { isFavorite, rating, toggleFavorite, changeRating } =
-    useMediaViewerFavorite({
-      currentNode,
-      interactHeader,
-    });
-
-  // ===== ショートカット =====
-
-  useMediaViewerHotkeys({
-    enabled: hotkeysEnabled,
-    swiperRef,
-    currentNode,
-    isHeaderPinned,
-    toggleHeaderVisibility,
-    toggleIsHeaderPinned,
-    interactHeader,
-    onClose,
-    onDelete,
-    onOpenParent,
-    onToggleFavorite: toggleFavorite,
-    onChangeRating: changeRating,
-  });
-
-  // ===== 音声 =====
-
-  const [isRepeating, setIsRepeating] = useState(false);
-
-  // ===== スライドショー =====
-
-  const [isSlideshowEnabled, setIsSlideshowEnabled] = useState(false);
-
-  const handleToggleSlideshow = useCallback(() => {
-    setIsSlideshowEnabled((prev) => {
-      const next = !prev;
-
-      if (next) {
-        setIsRepeating(false);
-      }
-
-      return next;
-    });
-  }, []);
+export function MediaViewer(props: MediaViewerProps) {
+  const viewer = useMediaViewer(props);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
       {/* ヘッダーエリア（インタラクション検知用） */}
       <div
         className="absolute top-0 left-0 right-0 h-24 z-40"
-        onMouseMove={interactHeader}
-        onPointerDown={interactHeader}
+        onMouseMove={viewer.header.interact}
+        onPointerDown={viewer.header.interact}
       />
 
-      {/* ヘッダー */}
-      <MediaViewerHeader
-        visible={isHeaderVisible}
-        currentNode={currentNode}
-        currentIndex={currentIndex}
-        totalCount={allNodes.length}
-        isHeaderPinned={isHeaderPinned}
-        toggleIsHeaderPinned={toggleIsHeaderPinned}
-        isHovered={isHovered}
-        setIsHovered={setIsHovered}
-        isMenuOpen={isMenuOpen}
-        setIsMenuOpen={setIsMenuOpen}
-        menuItems={menuItems}
-        isFavorite={isFavorite}
-        rating={rating}
-        onToggleFavorite={toggleFavorite}
-        onClose={onClose}
-        isSlideshowEnabled={isSlideshowEnabled}
-        onToggleSlideshow={handleToggleSlideshow}
-      />
-
-      {/* メディアコンテンツ */}
-      <MediaViewerSlides
-        allSlides={allSlides}
-        currentSlideIndex={currentSlideIndex}
-        initialIndex={initialIndex}
-        hasPrev={hasPrev}
-        swiperRef={swiperRef}
-        onSlideChange={(swiper) => updateActiveSlide(swiper.activeIndex)}
-        setCurrentSlideIndex={setCurrentSlideIndex}
-        isRepeating={isRepeating}
-        setIsRepeating={setIsRepeating}
-        isSlideshowEnabled={isSlideshowEnabled}
-      />
+      <MediaViewerHeader viewer={viewer} />
+      <MediaViewerSlides viewer={viewer} />
     </div>
   );
 }
 
+// ===== ヘッダー =====
+
 interface MediaViewerHeaderProps {
-  visible: boolean;
-  currentNode: MediaNode | null;
-  currentIndex: number;
-  totalCount: number;
-  isHeaderPinned: boolean;
-  toggleIsHeaderPinned: () => void;
-  isHovered: boolean;
-  setIsHovered: Dispatch<SetStateAction<boolean>>;
-  isMenuOpen: boolean;
-  setIsMenuOpen: Dispatch<SetStateAction<boolean>>;
-  menuItems?: MenuItemDef<NodeContext>[];
-  isFavorite: boolean;
-  rating: number | null;
-  onToggleFavorite: () => void;
-  onClose?: () => void;
-  isSlideshowEnabled: boolean;
-  onToggleSlideshow: () => void;
+  viewer: MediaViewerContext;
 }
 
 function MediaViewerHeader({
-  visible,
-  currentNode,
-  currentIndex,
-  totalCount,
-  isHeaderPinned,
-  toggleIsHeaderPinned,
-  setIsHovered,
-  isMenuOpen,
-  setIsMenuOpen,
-  menuItems = [],
-  isFavorite,
-  rating,
-  onToggleFavorite,
-  onClose,
-  isSlideshowEnabled,
-  onToggleSlideshow,
+  viewer: {
+    navigation: { allNodes, currentIndex, currentNode },
+    header: {
+      setIsHovered,
+      pinned,
+      visibility: { isVisible },
+      isMenuOpen,
+      setIsMenuOpen,
+    },
+    headerMenuItems,
+    onClose,
+    favorite: { rating, isFavorite, toggleFavorite },
+  },
 }: MediaViewerHeaderProps) {
-  const newMenuItems = useMemo(() => {
-    const items = [...menuItems];
-
-    if (items.length > 0) {
-      items.push({
-        key: `separator-${items.length}`,
-        type: "separator",
-      });
-    }
-
-    items.push({
-      key: "toggle-slideshow",
-      type: "action",
-      label: isSlideshowEnabled ? "スライドショー停止" : "スライドショー開始",
-      icon: isSlideshowEnabled ? PauseIcon : PlayIcon,
-      onClick: onToggleSlideshow,
-    });
-
-    return items;
-  }, [isSlideshowEnabled, menuItems, onToggleSlideshow]);
-
   return (
     <AnimatePresence>
-      {visible && (
+      {isVisible && (
         <motion.div
           key="viewer-header"
           initial={{ opacity: 0, y: -20 }}
@@ -290,7 +99,6 @@ function MediaViewerHeader({
           }}
           className="absolute top-0 left-0 right-0 z-60 px-2 py-4 md:p-6 flex items-center justify-between bg-linear-to-b from-black/60 to-transparent"
         >
-          {/* 閉じる */}
           <button
             onClick={onClose}
             className="p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full mr-4"
@@ -298,7 +106,6 @@ function MediaViewerHeader({
             <ArrowLeft size={28} />
           </button>
 
-          {/* ファイル情報 */}
           <div className="flex flex-col gap-1 ml-4 mr-4 flex-1 min-w-0 select-text">
             <span className="text-white md:text-lg font-medium drop-shadow-md">
               <MarqueeText key={currentIndex} speed={40} delay={1}>
@@ -307,17 +114,15 @@ function MediaViewerHeader({
                 </ClickToCopy>
               </MarqueeText>
             </span>
-
             <span className="text-white/60 text-sm">
-              {currentIndex + 1} / {totalCount}
-              {/* {isSlideshowEnabled && " • スライドショー"} */}
+              {currentIndex + 1} / {allNodes.length}
             </span>
           </div>
 
           <div className="flex items-center gap-4">
             <ViewerHeaderPinButton
-              isPinned={isHeaderPinned}
-              onClick={toggleIsHeaderPinned}
+              isPinned={pinned.enabled}
+              onClick={pinned.toggle}
             />
 
             {!!currentNode && isMedia(currentNode.type) && (
@@ -325,14 +130,14 @@ function MediaViewerHeader({
                 variant="large"
                 rating={rating}
                 isFavorite={isFavorite}
-                onClick={onToggleFavorite}
+                onClick={toggleFavorite}
               />
             )}
 
             {currentNode && (
               <NodeDropdownMenu
                 node={currentNode}
-                menuItems={newMenuItems}
+                menuItems={headerMenuItems}
                 open={isMenuOpen}
                 onOpenChange={setIsMenuOpen}
                 triggerType="large"
@@ -345,31 +150,25 @@ function MediaViewerHeader({
   );
 }
 
+// ===== スライド =====
+
 interface MediaViewerSlidesProps {
-  allSlides: MediaViewerSlide[];
-  currentSlideIndex: number;
-  initialIndex: number;
-  hasPrev: boolean;
-  swiperRef: RefObject<SwiperClass | null>;
-  onSlideChange: (swiper: SwiperClass) => void;
-  setCurrentSlideIndex: (index: number) => void;
-  isRepeating: boolean;
-  setIsRepeating: (value: boolean) => void;
-  isSlideshowEnabled: boolean;
+  viewer: MediaViewerContext;
 }
 
-function MediaViewerSlides({
-  allSlides,
-  currentSlideIndex,
-  initialIndex,
-  hasPrev,
-  swiperRef,
-  onSlideChange,
-  setCurrentSlideIndex,
-  isRepeating,
-  setIsRepeating,
-  isSlideshowEnabled,
-}: MediaViewerSlidesProps) {
+function MediaViewerSlides({ viewer }: MediaViewerSlidesProps) {
+  const {
+    navigation: {
+      allSlides,
+      currentSlideIndex,
+      initialIndex,
+      hasPrev,
+      swiperRef,
+      updateActiveSlide,
+      setCurrentSlideIndex,
+    },
+  } = viewer;
+
   const handleWheel = useCallback(
     (e: React.WheelEvent, slide: ContentSlide) => {
       if (slide.node.type !== "image") return;
@@ -417,7 +216,7 @@ function MediaViewerSlides({
       }}
       modules={[Virtual, Navigation, Zoom]}
       initialSlide={getSlideIndex(initialIndex, hasPrev)}
-      onSlideChange={onSlideChange}
+      onSlideChange={(swiper) => updateActiveSlide(swiper.activeIndex)}
       virtual
       zoom
       className="h-full w-full"
@@ -440,9 +239,7 @@ function MediaViewerSlides({
               <MediaViewerSlideRenderer
                 slide={slide}
                 active={active}
-                isRepeating={isRepeating}
-                onRepeatingChange={setIsRepeating}
-                isSlideshowEnabled={isSlideshowEnabled}
+                viewer={viewer}
                 onNext={goNext}
               />
             </div>
@@ -453,23 +250,26 @@ function MediaViewerSlides({
   );
 }
 
+// ===== スライドレンダラー =====
+
 interface MediaViewerSlideRendererProps {
   slide: MediaViewerSlide;
   active: boolean;
-  isRepeating: boolean;
-  onRepeatingChange: (value: boolean) => void;
-  isSlideshowEnabled: boolean;
+  viewer: MediaViewerContext;
   onNext: () => void;
 }
 
 function MediaViewerSlideRenderer({
   slide,
   active,
-  isRepeating,
-  onRepeatingChange,
-  isSlideshowEnabled,
+  viewer,
   onNext,
 }: MediaViewerSlideRendererProps) {
+  const {
+    slideshow: { enabled: isSlideshowEnabled },
+    audioRepeating: { enabled: isRepeating, setEnabled: setIsRepeating },
+  } = viewer;
+
   switch (slide.type) {
     case "empty":
       return slide.position === "first" ? (
@@ -523,7 +323,7 @@ function MediaViewerSlideRenderer({
               media={slide.node}
               active={active}
               isRepeating={isRepeating && !isSlideshowEnabled}
-              onRepeatingChange={onRepeatingChange}
+              onRepeatingChange={setIsRepeating}
               disableRepeat={isSlideshowEnabled}
               onEnded={isSlideshowEnabled ? onNext : undefined}
             />
@@ -537,6 +337,8 @@ function MediaViewerSlideRenderer({
       return assertNever(slide);
   }
 }
+
+// ===== 画像スライド =====
 
 interface ImageSlideProps {
   media: MediaNode;

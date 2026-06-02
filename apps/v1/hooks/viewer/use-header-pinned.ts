@@ -2,20 +2,20 @@ import { useCallback, useState } from "react";
 
 export type HeaderPinned = ReturnType<typeof useHeaderPinned>;
 
-export function useHeaderPinned(initialValue: boolean = false) {
-  const [isPinned, setIsPinned] = useState(initialValue);
+export function useHeaderPinned() {
+  const [enabled, setEnabled] = useState(false);
 
   const apply = useCallback(
-    (nextIsPinned: boolean) => setIsPinned(nextIsPinned),
+    (nextIsPinned: boolean) => setEnabled(nextIsPinned),
     []
   );
 
-  const reset = useCallback(() => setIsPinned(false), []);
+  const reset = useCallback(() => setEnabled(false), []);
 
-  const toggle = useCallback(() => setIsPinned((prev) => !prev), []);
+  const toggle = useCallback(() => setEnabled((prev) => !prev), []);
 
   return {
-    isPinned,
+    enabled,
     apply,
     reset,
     toggle,

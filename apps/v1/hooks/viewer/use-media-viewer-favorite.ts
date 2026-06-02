@@ -5,12 +5,12 @@ import { toast } from "sonner";
 
 interface UseMediaViewerFavoriteProps {
   currentNode: MediaNode | null;
-  interactHeader?: () => void;
+  onChange?: (value: { isFavorite: boolean; rating: number | null }) => void;
 }
 
 export function useMediaViewerFavorite({
   currentNode,
-  interactHeader,
+  onChange,
 }: UseMediaViewerFavoriteProps) {
   const { toggleFavorite, updateFavorite, getFavorite } = useFavoritesContext();
 
@@ -49,13 +49,13 @@ export function useMediaViewerFavorite({
           { duration: 1000 }
         );
 
-        interactHeader?.();
+        onChange?.({ isFavorite: nextIsFavorite, rating: null });
       } catch (e) {
         console.error(e);
         toast.error("お気に入りの更新に失敗しました");
       }
     });
-  }, [currentNode, getFavorite, toggleFavorite, interactHeader]);
+  }, [currentNode, getFavorite, toggleFavorite, onChange]);
 
   const handleChangeRating = useCallback(
     (rating: number | null) => {
@@ -72,18 +72,19 @@ export function useMediaViewerFavorite({
             { duration: 1000 }
           );
 
-          interactHeader?.();
+          onChange?.({ isFavorite: true, rating });
         } catch (e) {
           console.error(e);
           toast.error("お気に入りの更新に失敗しました");
         }
       });
     },
-    [currentNode, updateFavorite, interactHeader]
+    [currentNode, updateFavorite, onChange]
   );
 
   return {
-    ...favoriteState,
+    isFavorite: favoriteState.isFavorite,
+    rating: favoriteState.rating,
     isPending,
     toggleFavorite: handleToggleFavorite,
     changeRating: handleChangeRating,

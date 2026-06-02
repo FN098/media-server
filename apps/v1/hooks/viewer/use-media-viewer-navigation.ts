@@ -107,9 +107,11 @@ export function useMediaViewerNavigation({
   return {
     hasPrev,
     hasNext,
+    initialIndex,
     currentIndex,
     currentSlideIndex,
     currentNode,
+    allNodes,
     allSlides,
     swiperRef,
     updateActiveSlide,

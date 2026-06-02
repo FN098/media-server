@@ -37,3 +37,5 @@ export function useDocumentTitle() {
     resetTitle,
   };
 }
+
+export type DocumentTitleContext = ReturnType<typeof useDocumentTitle>;
