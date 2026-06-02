@@ -6,6 +6,8 @@ import {
   FileTypeIcon,
   ImageIcon,
   MusicIcon,
+  StarIcon,
+  StarsIcon,
   TagIcon,
   VideoIcon,
 } from "lucide-react";
@@ -17,6 +19,47 @@ interface TrashToolbarFilterContext {
 }
 
 const toolbarFilterItems: FilterMenuItem<TrashToolbarFilterContext>[] = [
+  {
+    key: "favorite-filter-group",
+    type: "group",
+    label: "お気に入り",
+    icon: StarIcon,
+    isActive: (ctx) => ctx.filtering.controls.favorite.value.mode === "all",
+    children: [
+      {
+        key: "favorite-only",
+        type: "action",
+        label: "お気に入りのみ",
+        icon: StarIcon,
+        iconClassName: "fill-yellow-400 text-yellow-400",
+        isActive: (ctx) =>
+          ctx.filtering.controls.favorite.value.mode === "only_favorites",
+        onClick: (ctx) => {
+          const nextMode =
+            ctx.filtering.controls.favorite.value.mode === "only_favorites"
+              ? "all"
+              : "only_favorites";
+          ctx.filtering.controls.favorite.apply({ mode: nextMode });
+        },
+      },
+      {
+        key: "nonfavorite-only",
+        type: "action",
+        label: "お気に入り以外",
+        icon: StarIcon,
+        iconClassName: "text-muted-foreground",
+        isActive: (ctx) =>
+          ctx.filtering.controls.favorite.value.mode === "exclude_favorites",
+        onClick: (ctx) => {
+          const nextMode =
+            ctx.filtering.controls.favorite.value.mode === "exclude_favorites"
+              ? "all"
+              : "exclude_favorites";
+          ctx.filtering.controls.favorite.apply({ mode: nextMode });
+        },
+      },
+    ],
+  },
   {
     key: "file-type-filter-group",
     type: "group",
@@ -70,6 +113,16 @@ const toolbarFilterItems: FilterMenuItem<TrashToolbarFilterContext>[] = [
         },
       },
     ],
+  },
+  {
+    key: "rating-filter",
+    type: "action",
+    label: "評価",
+    icon: StarsIcon,
+    isActive: (ctx) => ctx.filtering.controls.rating.value.mode !== "all",
+    onClick: (ctx) => {
+      ctx.dialogs.ratingFilterDialog.open(ctx.filtering.controls.rating.value);
+    },
   },
   {
     key: "tag-filter",

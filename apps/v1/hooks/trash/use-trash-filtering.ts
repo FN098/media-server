@@ -1,11 +1,15 @@
+import { useFavoriteFilter } from "@/hooks/filters/use-favorite-filter";
 import { useFilteredNodes } from "@/hooks/filters/use-filtered-nodes";
 import { useMediaTypeFilter } from "@/hooks/filters/use-media-type-filter";
 import { useQueryFilter } from "@/hooks/filters/use-query-filter";
+import { useRatingFilter } from "@/hooks/filters/use-rating-filter";
 import { useTagFilter } from "@/hooks/filters/use-tag-filter";
 import { useSearchParamsControl } from "@/hooks/general/use-search-params-control";
 import {
+  createFavoriteFilter,
   createMediaOnlyFilter,
   createMediaTypeFilter,
+  createRatingFilter,
   createSearchFilter,
   createTagFilter,
   withDirectoryControl,
@@ -22,7 +26,9 @@ interface UseTrashFilteringProps {
 export function useTrashFiltering({ listing }: UseTrashFilteringProps) {
   const queryFilter = useQueryFilter();
   const mediaTypeFilter = useMediaTypeFilter();
+  const ratingFilter = useRatingFilter();
   const tagFilter = useTagFilter();
+  const favoriteFilter = useFavoriteFilter();
 
   // フィルターパイプライン
   const pipeline = useMemo(
@@ -35,9 +41,23 @@ export function useTrashFiltering({ listing }: UseTrashFilteringProps) {
         createMediaTypeFilter(mediaTypeFilter.value),
         "apply-filter"
       ),
+      withDirectoryControl(
+        createRatingFilter(ratingFilter.value),
+        "apply-filter"
+      ),
       withDirectoryControl(createTagFilter(tagFilter.value), "always"),
+      withDirectoryControl(
+        createFavoriteFilter(favoriteFilter.value),
+        "always"
+      ),
     ],
-    [queryFilter.value, mediaTypeFilter.value, tagFilter.value]
+    [
+      queryFilter.value,
+      mediaTypeFilter.value,
+      ratingFilter.value,
+      tagFilter.value,
+      favoriteFilter.value,
+    ]
   );
 
   // フィルター結果
@@ -94,7 +114,9 @@ export function useTrashFiltering({ listing }: UseTrashFilteringProps) {
     controls: {
       query: queryFilter,
       mediaType: mediaTypeFilter,
+      rating: ratingFilter,
       tag: tagFilter,
+      favorite: favoriteFilter,
     },
   };
 }

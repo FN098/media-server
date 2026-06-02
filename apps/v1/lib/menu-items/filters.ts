@@ -17,6 +17,7 @@ export function filterSeparators<TItem extends { type: string }, TContext>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _context: TContext
 ): TItem[] {
+  // 最初と最後、および2つ以上連続したセパレータを除外
   return items.filter((item, index, array) => {
     if (item.type !== "separator") return true;
 

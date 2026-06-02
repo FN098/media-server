@@ -1,21 +1,14 @@
 import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
 import { RestoreDialog } from "@/components/ui/dialogs/restore-dialog";
-import { TrashDialogs as TrashDialogsType } from "@/hooks/trash/use-trash-dialogs";
+import { useTrashContext } from "@/providers/trash-provider";
 
-type TrashDialogsProps = {
-  dialogs: TrashDialogsType;
-};
-
-export function TrashDialogs({ dialogs }: TrashDialogsProps) {
-  const { deleteDialog, restoreDialog } = dialogs;
+export function TrashDialogs() {
+  const { dialogs } = useTrashContext();
 
   return (
     <>
-      {/* 削除ダイアログ */}
-      <DeleteDialog dialog={deleteDialog} />
-
-      {/* 復元ダイアログ */}
-      <RestoreDialog dialog={restoreDialog} />
+      <DeleteDialog dialog={dialogs.deleteDialog} />
+      <RestoreDialog dialog={dialogs.restoreDialog} />
     </>
   );
 }

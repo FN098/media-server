@@ -12,6 +12,7 @@ import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { FavoritesControlProvider } from "@/providers/favorites-control-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
+import { TrashProvider } from "@/providers/trash-provider";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -99,7 +100,9 @@ export default async function TrashPage(props: TrashPageProps) {
   return (
     <PathSelectionProvider>
       <FavoritesControlProvider favorites={listing.nodes}>
-        <Trash listing={listing} />
+        <TrashProvider listing={listing}>
+          <Trash />
+        </TrashProvider>
       </FavoritesControlProvider>
     </PathSelectionProvider>
   );

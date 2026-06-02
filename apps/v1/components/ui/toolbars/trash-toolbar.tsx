@@ -4,24 +4,14 @@ import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-m
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useSort } from "@/hooks/sort/use-sort";
 import { useTrashActions } from "@/hooks/trash/use-trash-actions";
-import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { useTrashFilter } from "@/hooks/trash/use-trash-filter";
-import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { useTrashSort } from "@/hooks/trash/use-trash-sort";
-import { MediaListing } from "@/lib/media/types";
+import { useTrashContext } from "@/providers/trash-provider";
 import { useMemo } from "react";
 
-interface TrashToolbarProps {
-  listing: MediaListing;
-  filtering: TrashFiltering;
-  dialogs: TrashDialogs;
-}
+export function TrashToolbar() {
+  const { listing, filtering, dialogs } = useTrashContext();
 
-export function TrashToolbar({
-  listing,
-  filtering,
-  dialogs,
-}: TrashToolbarProps) {
   const sort = useSort();
 
   const { toolbarFilterItems } = useTrashFilter();
