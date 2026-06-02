@@ -6,7 +6,7 @@ import { MediaListing, MediaNode } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { CheckCheckIcon, FolderPlusIcon, Trash2Icon } from "lucide-react";
 
-interface ExplorerToolbarActionContext {
+interface ExplorerActionMenuContext {
   listing: MediaListing;
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
@@ -19,7 +19,7 @@ interface ExplorerToolbarActionContext {
   };
 }
 
-const toolbarActionItems: MenuItemDef<ExplorerToolbarActionContext>[] = [
+const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
   {
     key: "check-all",
     type: "action",
@@ -51,6 +51,6 @@ const toolbarActionItems: MenuItemDef<ExplorerToolbarActionContext>[] = [
   },
 ];
 
-export function useExplorerActions() {
-  return { toolbarActionItems };
+export function useExplorerActionMenu() {
+  return { items: actionMenuItems };
 }

@@ -17,24 +17,30 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu";
 import { cn } from "@/shadcn/lib/utils";
 import { CheckIcon, ChevronRight, Filter, RotateCcw } from "lucide-react";
+import { useMemo } from "react";
 
 interface FilterDropdownMenuProps<T> {
-  menuItems: FilterMenuItem<T>[];
+  items: FilterMenuItem<T>[];
   context: T;
   onReset?: () => void;
   canReset?: boolean;
 }
 
 export function FilterDropdownMenu<T>({
-  menuItems,
+  items,
   context,
   onReset,
   canReset = false,
 }: FilterDropdownMenuProps<T>) {
-  const transformer = createRecursiveTransformer<MenuItemDef<T>, T>(
-    defaultFilters
+  const transformer = useMemo(
+    () => createRecursiveTransformer<MenuItemDef<T>, T>(defaultFilters),
+    []
   );
-  const items = transformer(menuItems, context);
+
+  const transformed = useMemo(
+    () => transformer(items, context),
+    [context, items, transformer]
+  );
 
   return (
     <DropdownMenu>
@@ -81,7 +87,7 @@ export function FilterDropdownMenu<T>({
           </>
         )}
 
-        {items.map((item) => (
+        {transformed.map((item) => (
           <FilterDropdownMenuItem
             key={item.key}
             item={item}

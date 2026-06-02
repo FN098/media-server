@@ -3,12 +3,12 @@ import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { Trash2Icon } from "lucide-react";
 
-interface TrashToolbarActionContext {
+interface TrashActionMenuContext {
   listing: MediaListing;
   dialogs: TrashDialogs;
 }
 
-const toolbarActionItems: MenuItemDef<TrashToolbarActionContext>[] = [
+const menuItems: MenuItemDef<TrashActionMenuContext>[] = [
   {
     key: "empty-current-dir",
     type: "action",
@@ -23,6 +23,6 @@ const toolbarActionItems: MenuItemDef<TrashToolbarActionContext>[] = [
   },
 ];
 
-export function useTrashActions() {
-  return { toolbarActionItems };
+export function useTrashActionMenu() {
+  return { items: menuItems };
 }

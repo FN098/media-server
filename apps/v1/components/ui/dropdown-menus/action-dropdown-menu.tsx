@@ -17,24 +17,30 @@ import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { ChevronRight, Wand2 } from "lucide-react";
+import { useMemo } from "react";
 import { Fragment } from "react/jsx-runtime";
 
 interface ActionDropdownMenuProps<T> {
-  menuItems: MenuItemDef<T>[];
+  items: MenuItemDef<T>[];
   context: T;
   triggerLabel?: string;
 }
 
 export function ActionDropdownMenu<T>({
-  menuItems,
+  items,
   context,
 }: ActionDropdownMenuProps<T>) {
   const isMobile = useIsMobile();
 
-  const transformer = createRecursiveTransformer<MenuItemDef<T>, T>(
-    defaultFilters
+  const transformer = useMemo(
+    () => createRecursiveTransformer<MenuItemDef<T>, T>(defaultFilters),
+    []
   );
-  const items = transformer(menuItems, context);
+
+  const transformed = useMemo(
+    () => transformer(items, context),
+    [context, items, transformer]
+  );
 
   return (
     <DropdownMenu>
@@ -53,7 +59,7 @@ export function ActionDropdownMenu<T>({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[240px]">
-        {transformer(items, context).map((item) => (
+        {transformed.map((item) => (
           <ActionDropdownMenuItem
             key={item.key}
             item={item}

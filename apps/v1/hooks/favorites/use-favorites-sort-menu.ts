@@ -5,9 +5,7 @@ import {
   WeightIcon,
 } from "lucide-react";
 
-export type FavoritesSort = ReturnType<typeof useFavoritesSort>;
-
-export const toolbarSortItems = [
+export const sortMenuItems = [
   {
     sort: "path",
     label: "ファイルパス",
@@ -30,6 +28,6 @@ export const toolbarSortItems = [
   },
 ] as const;
 
-export function useFavoritesSort() {
-  return { toolbarSortItems };
+export function useFavoritesSortMenu() {
+  return { items: sortMenuItems };
 }

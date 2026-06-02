@@ -12,13 +12,13 @@ import {
   VideoIcon,
 } from "lucide-react";
 
-interface ExplorerToolbarFilterContext {
+interface ExplorerFilterMenuContext {
   filtering: ExplorerFiltering;
   dialogs: ExplorerDialogs;
   listing: MediaListing;
 }
 
-const toolbarFilterItems: FilterMenuItem<ExplorerToolbarFilterContext>[] = [
+const filterMenuItems: FilterMenuItem<ExplorerFilterMenuContext>[] = [
   {
     key: "favorite-filter-group",
     type: "group",
@@ -139,6 +139,6 @@ const toolbarFilterItems: FilterMenuItem<ExplorerToolbarFilterContext>[] = [
   },
 ];
 
-export function useExplorerFilter() {
-  return { toolbarFilterItems };
+export function useExplorerFilterMenu() {
+  return { items: filterMenuItems };
 }

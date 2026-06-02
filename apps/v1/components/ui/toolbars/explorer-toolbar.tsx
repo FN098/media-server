@@ -2,9 +2,9 @@ import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdo
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useExplorerActions } from "@/hooks/explorer/use-explorer-actions";
-import { useExplorerFilter } from "@/hooks/explorer/use-explorer-filter";
-import { useExplorerSort } from "@/hooks/explorer/use-explorer-sort";
+import { useExplorerActionMenu } from "@/hooks/explorer/use-explorer-action-menu";
+import { useExplorerFilterMenu } from "@/hooks/explorer/use-explorer-filter-menu";
+import { useExplorerSortMenu } from "@/hooks/explorer/use-explorer-sort-menu";
 import { useSort } from "@/hooks/sort/use-sort";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
@@ -16,13 +16,13 @@ export function ExplorerToolbar() {
 
   const sort = useSort();
 
-  const { toolbarFilterItems } = useExplorerFilter();
-  const { toolbarSortItems } = useExplorerSort();
-  const { toolbarActionItems } = useExplorerActions();
+  const filterMenu = useExplorerFilterMenu();
+  const sortMenu = useExplorerSortMenu();
+  const actionMenu = useExplorerActionMenu();
 
   const isMobile = useIsMobile();
 
-  const filterContext = useMemo(() => {
+  const filterMenuContext = useMemo(() => {
     return {
       filtering,
       dialogs,
@@ -30,7 +30,7 @@ export function ExplorerToolbar() {
     };
   }, [dialogs, filtering, listing]);
 
-  const actionContext = useMemo(() => {
+  const actionMenuContext = useMemo(() => {
     const nonFavoriteTargets = filtering.filteredNodes.filter(
       (node) => !node.isDirectory && !favorites.get(node.path).isFavorite
     );
@@ -57,15 +57,15 @@ export function ExplorerToolbar() {
           <SortDropdownMenu
             value={sort.value}
             onChange={sort.apply}
-            items={toolbarSortItems}
+            items={sortMenu.items}
           />
         </div>
 
         {/* フィルター */}
         <div className="w-full sm:w-[160px]">
           <FilterDropdownMenu
-            menuItems={toolbarFilterItems}
-            context={filterContext}
+            items={filterMenu.items}
+            context={filterMenuContext}
             onReset={filtering.reset}
             canReset={filtering.canReset}
           />
@@ -74,8 +74,8 @@ export function ExplorerToolbar() {
         {/* アクション */}
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
-            menuItems={toolbarActionItems}
-            context={actionContext}
+            items={actionMenu.items}
+            context={actionMenuContext}
           />
         </div>
       </div>

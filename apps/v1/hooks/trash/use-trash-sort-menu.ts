@@ -7,9 +7,7 @@ import {
   WeightIcon,
 } from "lucide-react";
 
-export type TrashSort = ReturnType<typeof useTrashSort>;
-
-const toolbarSortItems = [
+const sortMenuItems = [
   {
     sort: "name",
     label: "名前",
@@ -42,6 +40,6 @@ const toolbarSortItems = [
   },
 ] as const;
 
-export function useTrashSort() {
-  return { toolbarSortItems };
+export function useTrashSortMenu() {
+  return { items: sortMenuItems };
 }

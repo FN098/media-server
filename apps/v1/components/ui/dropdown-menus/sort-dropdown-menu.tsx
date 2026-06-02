@@ -29,15 +29,15 @@ type SortMenuItem = {
 };
 
 interface SortDropdownMenuProps {
+  items: readonly SortMenuItem[];
   value: SortValue | null;
   onChange: (value: SortValue | null) => void;
-  items: readonly SortMenuItem[];
 }
 
 export function SortDropdownMenu({
+  items,
   value,
   onChange,
-  items,
 }: SortDropdownMenuProps) {
   const currentItem = items.find((item) => item.sort === value?.sort);
 

@@ -3,9 +3,9 @@ import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdo
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useSort } from "@/hooks/sort/use-sort";
-import { useTrashActions } from "@/hooks/trash/use-trash-actions";
-import { useTrashFilter } from "@/hooks/trash/use-trash-filter";
-import { useTrashSort } from "@/hooks/trash/use-trash-sort";
+import { useTrashActionMenu } from "@/hooks/trash/use-trash-action-menu";
+import { useTrashFilterMenu } from "@/hooks/trash/use-trash-filter-menu";
+import { useTrashSortMenu } from "@/hooks/trash/use-trash-sort-menu";
 import { useTrashContext } from "@/providers/trash-provider";
 import { useMemo } from "react";
 
@@ -14,11 +14,11 @@ export function TrashToolbar() {
 
   const sort = useSort();
 
-  const { toolbarFilterItems } = useTrashFilter();
-  const { toolbarSortItems } = useTrashSort();
-  const { toolbarActionItems } = useTrashActions();
+  const filterMenu = useTrashFilterMenu();
+  const sortMenu = useTrashSortMenu();
+  const actionMenu = useTrashActionMenu();
 
-  const filterContext = useMemo(() => {
+  const filterMenuContext = useMemo(() => {
     return {
       filtering,
       dialogs,
@@ -26,7 +26,7 @@ export function TrashToolbar() {
     };
   }, [dialogs, filtering, listing]);
 
-  const actionContext = useMemo(() => {
+  const actionMenuContext = useMemo(() => {
     return {
       listing,
       dialogs,
@@ -41,15 +41,15 @@ export function TrashToolbar() {
           <SortDropdownMenu
             value={sort.value}
             onChange={sort.apply}
-            items={toolbarSortItems}
+            items={sortMenu.items}
           />
         </div>
 
         {/* フィルター */}
         <div className="w-full sm:w-[160px]">
           <FilterDropdownMenu
-            menuItems={toolbarFilterItems}
-            context={filterContext}
+            items={filterMenu.items}
+            context={filterMenuContext}
             onReset={filtering.reset}
             canReset={filtering.canReset}
           />
@@ -58,8 +58,8 @@ export function TrashToolbar() {
         {/* アクション */}
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
-            menuItems={toolbarActionItems}
-            context={actionContext}
+            items={actionMenu.items}
+            context={actionMenuContext}
           />
         </div>
       </div>

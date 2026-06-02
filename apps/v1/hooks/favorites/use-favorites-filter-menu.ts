@@ -1,65 +1,23 @@
-import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
-import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
+import { FavoritesDialogs } from "@/hooks/favorites/use-favorites-dialogs";
+import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
 import { MediaListing } from "@/lib/media/types";
 import { FilterMenuItem } from "@/lib/menu-items/types";
 import {
   FileTypeIcon,
   ImageIcon,
   MusicIcon,
-  StarIcon,
   StarsIcon,
   TagIcon,
   VideoIcon,
 } from "lucide-react";
 
-interface TrashToolbarFilterContext {
-  filtering: TrashFiltering;
-  dialogs: TrashDialogs;
+interface FavoritesFilterMenuContext {
+  filtering: FavoritesFiltering;
+  dialogs: FavoritesDialogs;
   listing: MediaListing;
 }
 
-const toolbarFilterItems: FilterMenuItem<TrashToolbarFilterContext>[] = [
-  {
-    key: "favorite-filter-group",
-    type: "group",
-    label: "お気に入り",
-    icon: StarIcon,
-    isActive: (ctx) => ctx.filtering.controls.favorite.value.mode === "all",
-    children: [
-      {
-        key: "favorite-only",
-        type: "action",
-        label: "お気に入りのみ",
-        icon: StarIcon,
-        iconClassName: "fill-yellow-400 text-yellow-400",
-        isActive: (ctx) =>
-          ctx.filtering.controls.favorite.value.mode === "only_favorites",
-        onClick: (ctx) => {
-          const nextMode =
-            ctx.filtering.controls.favorite.value.mode === "only_favorites"
-              ? "all"
-              : "only_favorites";
-          ctx.filtering.controls.favorite.apply({ mode: nextMode });
-        },
-      },
-      {
-        key: "nonfavorite-only",
-        type: "action",
-        label: "お気に入り以外",
-        icon: StarIcon,
-        iconClassName: "text-muted-foreground",
-        isActive: (ctx) =>
-          ctx.filtering.controls.favorite.value.mode === "exclude_favorites",
-        onClick: (ctx) => {
-          const nextMode =
-            ctx.filtering.controls.favorite.value.mode === "exclude_favorites"
-              ? "all"
-              : "exclude_favorites";
-          ctx.filtering.controls.favorite.apply({ mode: nextMode });
-        },
-      },
-    ],
-  },
+const filterMenuItems: FilterMenuItem<FavoritesFilterMenuContext>[] = [
   {
     key: "file-type-filter-group",
     type: "group",
@@ -139,6 +97,6 @@ const toolbarFilterItems: FilterMenuItem<TrashToolbarFilterContext>[] = [
   },
 ];
 
-export function useTrashFilter() {
-  return { toolbarFilterItems };
+export function useFavoritesFilterMenu() {
+  return { items: filterMenuItems };
 }

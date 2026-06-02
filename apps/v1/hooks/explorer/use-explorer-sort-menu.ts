@@ -7,9 +7,7 @@ import {
   WeightIcon,
 } from "lucide-react";
 
-export type ExplorerSort = ReturnType<typeof useExplorerSort>;
-
-const toolbarSortItems = [
+const sortMenuItems = [
   {
     sort: "name",
     label: "名前",
@@ -42,6 +40,6 @@ const toolbarSortItems = [
   },
 ] as const;
 
-export function useExplorerSort() {
-  return { toolbarSortItems };
+export function useExplorerSortMenu() {
+  return { items: sortMenuItems };
 }
