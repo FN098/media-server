@@ -68,8 +68,8 @@ interface MediaViewerHeaderProps {
   viewer: MediaViewerContext;
 }
 
-function MediaViewerHeader({
-  viewer: {
+function MediaViewerHeader({ viewer }: MediaViewerHeaderProps) {
+  const {
     navigation: { allNodes, currentIndex, currentNode },
     header: {
       setIsHovered,
@@ -81,8 +81,8 @@ function MediaViewerHeader({
     headerMenuItems,
     onClose,
     favorite: { rating, isFavorite, toggleFavorite },
-  },
-}: MediaViewerHeaderProps) {
+  } = viewer;
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -266,7 +266,7 @@ function MediaViewerSlideRenderer({
   onNext,
 }: MediaViewerSlideRendererProps) {
   const {
-    slideshow: { enabled: isSlideshowEnabled },
+    slideshow: { enabled: isSlideshowEnabled, delay },
     audioRepeating: { enabled: isRepeating, setEnabled: setIsRepeating },
   } = viewer;
 
@@ -304,6 +304,7 @@ function MediaViewerSlideRenderer({
               media={slide.node}
               active={active}
               isSlideshowEnabled={isSlideshowEnabled}
+              delay={delay}
               onNext={onNext}
             />
           );
