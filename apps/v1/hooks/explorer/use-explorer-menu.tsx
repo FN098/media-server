@@ -64,8 +64,10 @@ export function useExplorerMenu({
     renameDialog,
   } = dialogs;
 
-  // TODO: context
-  // 参考: hooks/explorer/use-explorer-actions.ts
+  /**
+   * @todo グローバルホイスト
+   * @see hooks/explorer/use-explorer-actions.ts
+   */
   const items = useMemo<MenuItemDef<NodeContext>[]>(
     () => [
       {

@@ -8,7 +8,10 @@ interface UseTagEditorHandlersProps {
   targetCount: number;
 }
 
-/** @deprecated TODO: use-tag-editor にまとめる */
+/**
+ * @deprecated
+ * @todo use-tag-editor にまとめる
+ */
 export function useTagEditorControl({
   targetCount,
 }: UseTagEditorHandlersProps) {

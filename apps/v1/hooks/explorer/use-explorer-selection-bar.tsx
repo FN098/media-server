@@ -28,7 +28,6 @@ interface UseExplorerSelectionBarProps {
   thumbs: ExplorerThumbs;
 }
 
-// TODO: メニュー定義をグローバルにしつつコンテキスト利用
 export function useExplorerSelectionBar({
   listing,
   selection,
@@ -45,6 +44,10 @@ export function useExplorerSelectionBar({
     [selectedNodes]
   );
 
+  /**
+   * @todo グローバルホイスト
+   * @see hooks/explorer/use-explorer-actions.ts
+   */
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
     () => [
       {

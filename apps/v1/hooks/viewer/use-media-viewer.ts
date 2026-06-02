@@ -106,7 +106,7 @@ export function useMediaViewer({
 
   // ===== メニュー =====
 
-  // TODO: menuItems の定義に移動
+  /** @todo 別ファイルに定義 */
   const headerMenuItems = useMemo(() => {
     const items = [...menuItems];
 

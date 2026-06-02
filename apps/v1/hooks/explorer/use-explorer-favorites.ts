@@ -9,7 +9,10 @@ type UpdateProps = {
   onSuccess?: () => void;
 };
 
-// TODO: 削除対象
+/**
+ * @deprecated
+ * @todo 削除対象
+ */
 export function useExplorerFavorites() {
   const { getFavorite, updateMultipleFavorites } = useFavoritesControlContext();
 
