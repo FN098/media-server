@@ -2,18 +2,31 @@ import { ThumbJobData } from "@/workers/thumb/types";
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
 
-export const connection = new IORedis(process.env.REDIS_URL!, {
-  maxRetriesPerRequest: null,
-});
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  throw new Error("Missing REDIS_URL");
+}
 
 // 開発サーバー用シングルトン
-const globalForQueue = global as unknown as {
-  thumbQueue: Queue<ThumbJobData> | undefined;
+const g = globalThis as typeof globalThis & {
+  redis?: IORedis;
+  thumbQueue?: Queue<ThumbJobData>;
 };
 
-export const thumbQueue =
-  globalForQueue.thumbQueue ??
-  new Queue<ThumbJobData>("thumbs", { connection });
+export const connection =
+  g.redis ??
+  new IORedis(redisUrl, {
+    maxRetriesPerRequest: null,
+  });
 
-if (process.env.NODE_ENV !== "production")
-  globalForQueue.thumbQueue = thumbQueue;
+export const thumbQueue =
+  g.thumbQueue ??
+  new Queue<ThumbJobData>("thumbs", {
+    connection,
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  g.redis = connection;
+  g.thumbQueue = thumbQueue;
+}
