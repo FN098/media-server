@@ -28,9 +28,9 @@ export function ExplorerProvider({
 }
 
 export function useExplorerContext() {
-  const ctx = useContext(ExplorerContext);
-  if (ctx === undefined) {
+  const context = useContext(ExplorerContext);
+  if (context === undefined) {
     throw new Error("useExplorerContext must be used within ExplorerProvider");
   }
-  return ctx;
+  return context;
 }

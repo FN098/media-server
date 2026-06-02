@@ -3,9 +3,9 @@
 import { usePaging } from "@/hooks/navigations/use-paging";
 import { createContext, ReactNode, useContext } from "react";
 
-type PagingContextType = ReturnType<typeof usePaging>;
+type PagingContextValue = ReturnType<typeof usePaging>;
 
-const PagingContext = createContext<PagingContextType | undefined>(undefined);
+const PagingContext = createContext<PagingContextValue | undefined>(undefined);
 
 export function PagingProvider({
   children,
@@ -18,8 +18,7 @@ export function PagingProvider({
   defaultPageSize?: number;
   history?: "push" | "replace";
 }) {
-  // フックを呼び出し
-  const value = usePaging(totalItems, { defaultPageSize, history });
+  const value = usePaging({ totalItems, defaultPageSize, history });
 
   return (
     <PagingContext.Provider value={value}>{children}</PagingContext.Provider>

@@ -28,6 +28,7 @@ interface UseExplorerSelectionBarProps {
   thumbs: ExplorerThumbs;
 }
 
+// TODO: メニュー定義をグローバルにしつつコンテキスト利用
 export function useExplorerSelectionBar({
   listing,
   selection,

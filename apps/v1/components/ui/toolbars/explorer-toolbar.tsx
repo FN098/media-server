@@ -1,35 +1,19 @@
-import { ExplorerToolbarDialogs } from "@/components/ui/dialogs/explorer-dialogs";
 import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdown-menu";
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useExplorerActions } from "@/hooks/explorer/use-explorer-actions";
-import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
-import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
 import { useExplorerFilter } from "@/hooks/explorer/use-explorer-filter";
-import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { useExplorerSort } from "@/hooks/explorer/use-explorer-sort";
-import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useSort } from "@/hooks/sort/use-sort";
-import { MediaListing } from "@/lib/media/types";
+import { useExplorerContext } from "@/providers/explorer-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { useMemo } from "react";
 
-interface ExplorerToolbarProps {
-  listing: MediaListing;
-  filtering: ExplorerFiltering;
-  dialogs: ExplorerDialogs;
-  favorites: ExplorerFavorites;
-  selection: MediaNodeSelection;
-}
+export function ExplorerToolbar() {
+  const { listing, filtering, selection, dialogs, favorites } =
+    useExplorerContext();
 
-export function ExplorerToolbar({
-  listing,
-  filtering,
-  dialogs,
-  favorites,
-  selection,
-}: ExplorerToolbarProps) {
   const sort = useSort();
 
   const { toolbarFilterItems } = useExplorerFilter();
@@ -103,9 +87,6 @@ export function ExplorerToolbar({
         isFiltered={filtering.isFiltered}
         className="ml-auto sm:ml-auto min-w-[120px] text-right pt-2 sm:pt-0"
       />
-
-      {/* ダイアログ */}
-      <ExplorerToolbarDialogs dialogs={dialogs} />
     </div>
   );
 }

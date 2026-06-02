@@ -3,11 +3,11 @@
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { createContext, ReactNode, useContext } from "react";
 
-interface MenuItemsContextType {
+type MenuItemsContextValue = {
   items: MenuItemDef<NodeContext>[];
-}
+};
 
-const MenuItemsContext = createContext<MenuItemsContextType | undefined>(
+const MenuItemsContext = createContext<MenuItemsContextValue | undefined>(
   undefined
 );
 

@@ -2,26 +2,26 @@ import { clamp } from "@/lib/utils/clamp";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-type Options = {
-  defaultPageSize?: number; // デフォルト: 48
-  pageKey?: string; // デフォルト: "page"
-  pageSizeKey?: string; // デフォルト: "pageSize"
-  history?: "push" | "replace"; // デフォルト: "replace"
-};
-
 const MIN_PAGE = 1;
 const MAX_PAGE = 100;
 const MIN_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 100;
 
-export function usePaging(totalItems: number, options?: Options) {
-  const {
-    defaultPageSize = 48,
-    pageKey = "page",
-    pageSizeKey = "pageSize",
-    history = "replace",
-  } = options ?? {};
+interface UsePagingProps {
+  totalItems: number;
+  defaultPageSize?: number;
+  pageKey?: string;
+  pageSizeKey?: string;
+  history?: "push" | "replace";
+}
 
+export function usePaging({
+  totalItems,
+  defaultPageSize = 48,
+  pageKey = "page",
+  pageSizeKey = "pageSize",
+  history = "replace",
+}: UsePagingProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
