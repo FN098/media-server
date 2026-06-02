@@ -1,4 +1,4 @@
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -19,7 +19,7 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
 
   const [isPending, startTransition] = useTransition();
   const { updateMultipleFavorites, deleteMultipleFavorites } =
-    useFavoritesContext();
+    useFavoritesControlContext();
 
   // 1. ダイアログを開く
   const open = useCallback(

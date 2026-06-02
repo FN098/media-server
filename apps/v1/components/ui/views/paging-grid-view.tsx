@@ -13,7 +13,7 @@ import { useLongPress } from "@/hooks/mobile/use-long-press";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { usePagingContext } from "@/providers/paging-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
@@ -380,7 +380,7 @@ function Cell({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り機能
-  const { getFavorite, toggleFavorite } = useFavoritesContext();
+  const { getFavorite, toggleFavorite } = useFavoritesControlContext();
   const { isFavorite, rating } = getFavorite(node.path);
 
   // 選択機能

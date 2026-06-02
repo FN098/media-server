@@ -17,7 +17,7 @@ import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
 import { getExtension } from "@/lib/utils/filename";
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { usePagingContext } from "@/providers/paging-provider";
@@ -370,7 +370,8 @@ function DataRow({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
   // お気に入り機能
-  const { getFavorite, toggleFavorite, updateFavorite } = useFavoritesContext();
+  const { getFavorite, toggleFavorite, updateFavorite } =
+    useFavoritesControlContext();
   const { isFavorite, rating } = getFavorite(node.path);
 
   // 選択機能

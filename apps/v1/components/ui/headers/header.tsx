@@ -10,17 +10,14 @@ type HeaderFeatures = {
   viewMode?: boolean;
 };
 
-export function Header({
-  title,
-  icon: Icon,
-  basePath,
-  features,
-}: {
+interface HeaderProps {
   title: string;
   icon?: LucideIcon;
   basePath?: string;
   features?: HeaderFeatures;
-}) {
+}
+
+export function Header({ title, icon: Icon, basePath, features }: HeaderProps) {
   const { navigation = true, search = true, viewMode = true } = features || {};
 
   return (

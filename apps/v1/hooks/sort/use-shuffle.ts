@@ -9,7 +9,7 @@ interface UseShuffleProps {
 export function useShuffle({
   shuffleKey = "shuffle",
   seedKey = "seed",
-}: UseShuffleProps) {
+}: UseShuffleProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

@@ -17,8 +17,6 @@ import {
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useMemo } from "react";
 
-export type ExplorerFiltering = ReturnType<typeof useExplorerFiltering>;
-
 interface UseExplorerFilteringProps {
   listing: MediaListing;
 }
@@ -122,3 +120,5 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
     },
   };
 }
+
+export type ExplorerFiltering = ReturnType<typeof useExplorerFiltering>;

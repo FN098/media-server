@@ -13,11 +13,9 @@ import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { v4 } from "uuid";
 
-export function useTagEditor(initialTargetNodes?: MediaNode[]) {
+export function useTagEditor() {
   const [isTagEditMode, setIsTagEditMode] = useState(false);
-  const [targetNodes, setTargetNodes] = useState<MediaNode[]>(
-    initialTargetNodes ?? []
-  );
+  const [targetNodes, setTargetNodes] = useState<MediaNode[]>([]);
   const [newTagName, setNewTagName] = useState("");
   const [pendingNewTags, setPendingNewTags] = useState<Tag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});

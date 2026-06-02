@@ -16,7 +16,7 @@ import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { MediaNode } from "@/lib/media/types";
 import { ExplorerProvider } from "@/providers/explorer-provider";
-import { FavoritesProvider } from "@/providers/favorites-provider";
+import { FavoritesControlProvider } from "@/providers/favorites-control-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -144,11 +144,11 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   return (
     <PathSelectionProvider>
-      <FavoritesProvider favorites={favorites}>
+      <FavoritesControlProvider favorites={favorites}>
         <ExplorerProvider listing={listing}>
           <Explorer />
         </ExplorerProvider>
-      </FavoritesProvider>
+      </FavoritesControlProvider>
     </PathSelectionProvider>
   );
 }

@@ -1,9 +1,7 @@
 import { MediaNode } from "@/lib/media/types";
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { useCallback, useTransition } from "react";
 import { toast } from "sonner";
-
-export type ExplorerFavorites = ReturnType<typeof useExplorerFavorites>;
 
 type UpdateProps = {
   targets: MediaNode[];
@@ -11,8 +9,9 @@ type UpdateProps = {
   onSuccess?: () => void;
 };
 
+// TODO: 削除対象
 export function useExplorerFavorites() {
-  const { getFavorite, updateMultipleFavorites } = useFavoritesContext();
+  const { getFavorite, updateMultipleFavorites } = useFavoritesControlContext();
 
   const [isPending, startTransition] = useTransition();
 
@@ -43,3 +42,5 @@ export function useExplorerFavorites() {
     update,
   };
 }
+
+export type ExplorerFavorites = ReturnType<typeof useExplorerFavorites>;

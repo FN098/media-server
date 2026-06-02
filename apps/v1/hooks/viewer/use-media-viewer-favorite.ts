@@ -1,5 +1,5 @@
 import { MediaNode } from "@/lib/media/types";
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { useCallback, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -12,7 +12,8 @@ export function useMediaViewerFavorite({
   currentNode,
   onChange,
 }: UseMediaViewerFavoriteProps) {
-  const { toggleFavorite, updateFavorite, getFavorite } = useFavoritesContext();
+  const { toggleFavorite, updateFavorite, getFavorite } =
+    useFavoritesControlContext();
 
   const [isPending, startTransition] = useTransition();
 

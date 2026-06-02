@@ -1,27 +1,16 @@
 import { ShuffleButton } from "@/components/ui/buttons/shuffle-button";
-import { FavoritesToolbarDialogs } from "@/components/ui/dialogs/favorites-dialogs";
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { FavoritesDialogs } from "@/hooks/favorites/use-favorites-dialogs";
 import { useFavoritesFilter } from "@/hooks/favorites/use-favorites-filter";
-import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
 import { useFavoritesSort } from "@/hooks/favorites/use-favorites-sort";
 import { useSort } from "@/hooks/sort/use-sort";
-import { MediaListing } from "@/lib/media/types";
+import { useFavoritesContext } from "@/providers/favorites-provider";
 import { useMemo } from "react";
 
-interface FavoritesToolbarProps {
-  filtering: FavoritesFiltering;
-  dialogs: FavoritesDialogs;
-  listing: MediaListing;
-}
+export function FavoritesToolbar() {
+  const { listing, filtering, dialogs } = useFavoritesContext();
 
-export function FavoritesToolbar({
-  filtering,
-  dialogs,
-  listing,
-}: FavoritesToolbarProps) {
   const sort = useSort();
 
   const { toolbarFilterItems } = useFavoritesFilter();
@@ -68,9 +57,6 @@ export function FavoritesToolbar({
         isFiltered={filtering.isFiltered}
         className="ml-auto min-w-[120px] text-right"
       />
-
-      {/* ダイアログ */}
-      <FavoritesToolbarDialogs dialogs={dialogs} />
     </div>
   );
 }

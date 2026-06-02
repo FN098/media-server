@@ -11,10 +11,9 @@ import {
 import { formatNodes } from "@/lib/media/formatters";
 import { SortDirection } from "@/lib/media/sort";
 import { hashObject } from "@/lib/utils/fnv1a-hash";
+import { FavoritesControlProvider } from "@/providers/favorites-control-provider";
 import { FavoritesProvider } from "@/providers/favorites-provider";
-import { HistoryProvider } from "@/providers/history-provider";
 import { PathSelectionProvider } from "@/providers/path-selection-provider";
-import { TagEditorProvider } from "@/providers/tag-editor-provider";
 import { Metadata } from "next";
 
 // 動的ページとしてレンダリング
@@ -100,14 +99,12 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const key = hashObject(searchParams);
 
   return (
-    <TagEditorProvider>
-      <HistoryProvider>
-        <PathSelectionProvider>
-          <FavoritesProvider key={key} favorites={favorites}>
-            <Favorites listing={listing} />
-          </FavoritesProvider>
-        </PathSelectionProvider>
-      </HistoryProvider>
-    </TagEditorProvider>
+    <PathSelectionProvider>
+      <FavoritesControlProvider key={key} favorites={favorites}>
+        <FavoritesProvider listing={listing}>
+          <Favorites />
+        </FavoritesProvider>
+      </FavoritesControlProvider>
+    </PathSelectionProvider>
   );
 }
