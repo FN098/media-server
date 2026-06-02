@@ -96,5 +96,3 @@ export function useFavorites({ listing }: UseFavoritesProps) {
     selectionbar,
   };
 }
-
-export type FavoritesContextValue = ReturnType<typeof useFavorites>;

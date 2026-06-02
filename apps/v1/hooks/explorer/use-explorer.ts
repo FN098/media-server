@@ -107,5 +107,3 @@ export function useExplorer({ listing }: UseExplorerProps) {
     selectionbar,
   };
 }
-
-export type ExplorerContextValue = ReturnType<typeof useExplorer>;

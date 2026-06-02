@@ -3,11 +3,9 @@
 import { useThumbEvent } from "@/hooks/thumbs/use-thumb-event";
 import { createContext, useContext } from "react";
 
-type ThumbEventContextType = ReturnType<typeof useThumbEvent>;
+type ThumbEvent = ReturnType<typeof useThumbEvent>;
 
-const ThumbEventContext = createContext<ThumbEventContextType | undefined>(
-  undefined
-);
+const ThumbEventContext = createContext<ThumbEvent | undefined>(undefined);
 
 export function ThumbEventProvider({
   children,

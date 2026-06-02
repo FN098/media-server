@@ -1,7 +1,9 @@
 "use client";
 
-import { Paging, usePaging } from "@/hooks/navigations/use-paging";
+import { usePaging } from "@/hooks/navigations/use-paging";
 import { createContext, ReactNode, useContext } from "react";
+
+type Paging = ReturnType<typeof usePaging>;
 
 const PagingContext = createContext<Paging | undefined>(undefined);
 

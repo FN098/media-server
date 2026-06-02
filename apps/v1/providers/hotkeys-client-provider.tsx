@@ -8,9 +8,5 @@ export function HotkeysClientProvider({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <HotkeysProvider initiallyActiveScopes={["explorer-main"]}>
-      {children}
-    </HotkeysProvider>
-  );
+  return <HotkeysProvider>{children}</HotkeysProvider>;
 }

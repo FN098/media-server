@@ -1,7 +1,5 @@
 import { useCallback, useState } from "react";
 
-export type HeaderPinned = ReturnType<typeof useHeaderPinned>;
-
 export function useHeaderPinned() {
   const [enabled, setEnabled] = useState(false);
 

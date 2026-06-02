@@ -1,4 +1,3 @@
-import { useExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
@@ -34,7 +33,6 @@ export function useTrash({ listing }: UseTrashProps) {
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation();
   const history = useHistoryContext();
-  const favorites = useExplorerFavorites();
 
   const navigation = useTrashNavigation({
     listing,
@@ -96,5 +94,3 @@ export function useTrash({ listing }: UseTrashProps) {
     selectionbar,
   };
 }
-
-export type TrashContextValue = ReturnType<typeof useTrash>;

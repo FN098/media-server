@@ -3,11 +3,9 @@
 import { useTagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { createContext, ReactNode, useContext } from "react";
 
-type TagEditorContextType = ReturnType<typeof useTagEditor>;
+type TagEditor = ReturnType<typeof useTagEditor>;
 
-const TagEditorContext = createContext<TagEditorContextType | undefined>(
-  undefined
-);
+const TagEditorContext = createContext<TagEditor | undefined>(undefined);
 
 export function TagEditorProvider({ children }: { children: ReactNode }) {
   const value = useTagEditor();

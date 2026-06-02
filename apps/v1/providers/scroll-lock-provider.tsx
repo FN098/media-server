@@ -3,11 +3,9 @@
 import { useScrollLock } from "@/hooks/general/use-scroll-lock";
 import { createContext, useContext, useEffect } from "react";
 
-type ScrollLockContextType = ReturnType<typeof useScrollLock>;
+type ScrollLock = ReturnType<typeof useScrollLock>;
 
-const ScrollLockContext = createContext<ScrollLockContextType | undefined>(
-  undefined
-);
+const ScrollLockContext = createContext<ScrollLock | undefined>(undefined);
 
 export function ScrollLockProvider({
   children,

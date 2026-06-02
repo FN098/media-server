@@ -358,5 +358,3 @@ function useInFlight() {
 
   return { startFlight, finishFlight, isInFlight };
 }
-
-export type FavoritesControl = ReturnType<typeof useFavoritesControl>;

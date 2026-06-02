@@ -1,10 +1,12 @@
 "use client";
 
-import { TrashContextValue, useTrash } from "@/hooks/trash/use-trash";
+import { useTrash } from "@/hooks/trash/use-trash";
 import { MediaListing } from "@/lib/media/types";
 import { createContext, useContext } from "react";
 
-const TrashContext = createContext<TrashContextValue | undefined>(undefined);
+type Trash = ReturnType<typeof useTrash>;
+
+const TrashContext = createContext<Trash | undefined>(undefined);
 
 export function TrashProvider({
   children,

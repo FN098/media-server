@@ -1,15 +1,12 @@
 "use client";
 
-import {
-  FavoritesContextValue,
-  useFavorites,
-} from "@/hooks/favorites/use-favorites";
+import { useFavorites } from "@/hooks/favorites/use-favorites";
 import { MediaListing } from "@/lib/media/types";
 import { createContext, useContext } from "react";
 
-const FavoritesContext = createContext<FavoritesContextValue | undefined>(
-  undefined
-);
+type Favorites = ReturnType<typeof useFavorites>;
+
+const FavoritesContext = createContext<Favorites | undefined>(undefined);
 
 export function FavoritesProvider({
   children,

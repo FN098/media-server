@@ -1,15 +1,12 @@
 "use client";
 
-import {
-  ExplorerContextValue,
-  useExplorer,
-} from "@/hooks/explorer/use-explorer";
+import { useExplorer } from "@/hooks/explorer/use-explorer";
 import { MediaListing } from "@/lib/media/types";
 import { createContext, useContext } from "react";
 
-const ExplorerContext = createContext<ExplorerContextValue | undefined>(
-  undefined
-);
+type Explorer = ReturnType<typeof useExplorer>;
+
+const ExplorerContext = createContext<Explorer | undefined>(undefined);
 
 export function ExplorerProvider({
   children,

@@ -1,11 +1,10 @@
 "use client";
 
-import {
-  FavoritesControl,
-  useFavoritesControl,
-} from "@/hooks/favorites/use-favorites-control";
+import { useFavoritesControl } from "@/hooks/favorites/use-favorites-control";
 import { Favorite } from "@/lib/favorite/types";
 import { createContext, useContext } from "react";
+
+type FavoritesControl = ReturnType<typeof useFavoritesControl>;
 
 const FavoritesControlContext = createContext<FavoritesControl | undefined>(
   undefined

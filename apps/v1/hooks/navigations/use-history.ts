@@ -15,10 +15,10 @@ type Options = {
 export function useHistory(options: Options) {
   const { maxLength = 10 } = options ?? {};
 
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [items, setItems] = useState<HistoryItem[]>([]);
 
   const push = (item: HistoryItem) => {
-    setHistory((prev) => {
+    setItems((prev) => {
       const last = prev.at(-1);
       if (last?.path === item.path && last.type === item.type) {
         return prev; // 同じなら無視
@@ -28,7 +28,7 @@ export function useHistory(options: Options) {
   };
 
   const replaceLast = (item: HistoryItem) => {
-    setHistory((prev) => {
+    setItems((prev) => {
       if (prev.length === 0) return [item];
       const next = [...prev];
       next[next.length - 1] = item;
@@ -37,14 +37,14 @@ export function useHistory(options: Options) {
   };
 
   const pop = () => {
-    setHistory((prev) => prev.slice(0, -1));
+    setItems((prev) => prev.slice(0, -1));
   };
 
-  const last = history.at(-1);
+  const last = items.at(-1);
 
   return {
-    history,
-    set: setHistory,
+    items,
+    set: setItems,
     push,
     replaceLast,
     pop,

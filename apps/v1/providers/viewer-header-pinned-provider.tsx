@@ -1,10 +1,9 @@
 "use client";
 
-import {
-  HeaderPinned,
-  useHeaderPinned,
-} from "@/hooks/viewer/use-header-pinned";
+import { useHeaderPinned } from "@/hooks/viewer/use-header-pinned";
 import { createContext, useContext } from "react";
+
+type HeaderPinned = ReturnType<typeof useHeaderPinned>;
 
 const headerPinnedContext = createContext<HeaderPinned | undefined>(undefined);
 
