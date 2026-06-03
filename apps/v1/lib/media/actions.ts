@@ -39,8 +39,15 @@ function normalizeFileOrDirectoryName(name: string) {
   return VirtualPathSegmentSchema.parse(name);
 }
 
+export type RenameNodeResult =
+  | { success: true }
+  | { success: false; error: string; code?: "duplicated" };
+
 // リネーム
-export async function renameNodeAction(sourcePath: string, newName: string) {
+export async function renameNodeAction(
+  sourcePath: string,
+  newName: string
+): Promise<RenameNodeResult> {
   // 認証
   await resolveCurrentUserOrThrow();
 
@@ -87,6 +94,7 @@ export async function renameNodeAction(sourcePath: string, newName: string) {
     return {
       success: false,
       error: `同名のファイルまたはフォルダが既に存在します。: ${destVirtualPath}`,
+      code: "duplicated",
     };
   }
 

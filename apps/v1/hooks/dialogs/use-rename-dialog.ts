@@ -75,6 +75,10 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
         toast.success("リネームしました");
         onSuccess?.();
         close();
+      } else if (result.code === "duplicated") {
+        toast.error("同名のファイルが存在します。名前を確認してください");
+        const suggested = getSuggestedName(trimmedName, extension); // (1)を付ける
+        setNewName(suggested);
       } else {
         toast.error(result.error || "リネームに失敗しました");
       }
@@ -92,4 +96,13 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
     close,
     performRename,
   };
+}
+
+function getSuggestedName(baseName: string, extension: string): string {
+  // すでに (N) が付いていたらNをインクリメント
+  const match = baseName.match(/^(.*)\s\((\d+)\)$/);
+  if (match) {
+    return `${match[1]} (${Number(match[2]) + 1})`;
+  }
+  return `${baseName} (2)${extension}`;
 }
