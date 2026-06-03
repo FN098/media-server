@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "thumb": "tsx workers/thumb/processor.ts",
+    "thumb": "tsx workers/thumb/bootstrap.ts",
     "test": "vitest",
     "test:run": "vitest run"
   },
