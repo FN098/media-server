@@ -32,7 +32,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/v1 ./
 
 # ビルド用環境変数
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 ENV NEXT_TELEMETRY_DISABLED 1
 # ダミー用の接続文字列（これがないと prisma generate に失敗する）
 ENV DATABASE_URL dummy
