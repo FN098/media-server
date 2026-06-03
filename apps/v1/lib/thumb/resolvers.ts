@@ -11,12 +11,6 @@ type UrlOption = {
   version?: number;
 };
 
-function appendVersion(url: string, version?: number) {
-  if (!version) return url;
-  const separator = url.includes("?") ? "&" : "?";
-  return `${url}${separator}v=${version}`;
-}
-
 export function resolveMediaThumbUrl(media: Media, option?: UrlOption) {
   // ファイルを削除してもサムネイルはそのまま残るので同じパスを参照
   const basePath = media.path;
@@ -27,4 +21,10 @@ export function resolveMediaThumbUrl(media: Media, option?: UrlOption) {
     : getApiThumbPath(encoded);
 
   return appendVersion(url, option?.version);
+}
+
+function appendVersion(url: string, version?: number) {
+  if (!version) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}v=${version}`;
 }

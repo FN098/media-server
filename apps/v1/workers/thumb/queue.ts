@@ -2,10 +2,14 @@ import { ThumbJobData } from "@/workers/thumb/types";
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
 
-const redisUrl = process.env.REDIS_URL;
+function getRedisUrl() {
+  const redisUrl = process.env.REDIS_URL;
 
-if (!redisUrl) {
-  throw new Error("Missing REDIS_URL");
+  if (!redisUrl) {
+    throw new Error("Missing REDIS_URL");
+  }
+
+  return redisUrl;
 }
 
 // 開発サーバー用シングルトン
@@ -16,7 +20,7 @@ const g = globalThis as typeof globalThis & {
 
 export const connection =
   g.redis ??
-  new IORedis(redisUrl, {
+  new IORedis(getRedisUrl(), {
     maxRetriesPerRequest: null,
   });
 
