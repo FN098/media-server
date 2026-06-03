@@ -1,5 +1,5 @@
 import { renameNodeAction } from "@/lib/media/actions";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type RenameTarget = {
@@ -19,6 +19,8 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
   const [extension, setExtension] = useState<string>("");
 
   const [isPending, startTransition] = useTransition();
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // 1. ダイアログを開く
   const open = useCallback((target: RenameTarget) => {
@@ -76,9 +78,9 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
         onSuccess?.();
         close();
       } else if (result.code === "duplicated") {
-        toast.error("同名のファイルが存在します。名前を確認してください");
-        const suggested = getSuggestedName(trimmedName, extension); // (1)を付ける
+        const suggested = getSuggestedName(trimmedName); // (1)を付ける
         setNewName(suggested);
+        toast.error("同名のファイルが存在します。名前を確認してください");
       } else {
         toast.error(result.error || "リネームに失敗しました");
       }
@@ -91,6 +93,7 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
     newName,
     extension,
     isPending,
+    inputRef,
     setNewName,
     open,
     close,
@@ -98,11 +101,11 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
   };
 }
 
-function getSuggestedName(baseName: string, extension: string): string {
+function getSuggestedName(baseName: string): string {
   // すでに (N) が付いていたらNをインクリメント
   const match = baseName.match(/^(.*)\s\((\d+)\)$/);
   if (match) {
     return `${match[1]} (${Number(match[2]) + 1})`;
   }
-  return `${baseName} (2)${extension}`;
+  return `${baseName} (2)`;
 }

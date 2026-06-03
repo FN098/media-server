@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 interface RenameDialogProps {
   dialog: ReturnType<typeof useRenameDialog>;
@@ -22,25 +22,22 @@ export function RenameDialog({ dialog }: RenameDialogProps) {
     newName,
     extension,
     isPending,
+    inputRef,
     setNewName,
     close,
     performRename,
   } = dialog;
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // ダイアログが開いた際、テキストを入力状態にして最初から全選択（反転）させるUX
+  // ダイアログが開いた際、テキストを入力状態にして最初から全選択（反転）
   useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-          inputRef.current.select();
-        }
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
+    const timer = setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+        inputRef.current.select();
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [inputRef]);
 
   if (!isOpen) return null;
 
