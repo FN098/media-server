@@ -1,4 +1,4 @@
-import { connection } from "@/workers/thumb/queue";
+import { redis } from "@/lib/redis";
 import { NextRequest } from "next/server";
 
 export function GET(req: NextRequest) {
@@ -8,7 +8,7 @@ export function GET(req: NextRequest) {
     async start(controller) {
       // Redis の subscribe モードに入るとその接続は他のコマンドに使えなくなるため、
       // 既存の接続を複製して Subscribe 用に使う
-      const subscriber = connection.duplicate();
+      const subscriber = redis.duplicate();
 
       // Redis のメッセージを受け取って SSE 形式で送信
       await subscriber.subscribe("thumb-completed", (err) => {

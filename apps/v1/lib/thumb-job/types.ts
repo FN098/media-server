@@ -6,7 +6,7 @@ export interface ThumbJobData {
   forceCreate?: boolean;
 }
 
-export interface ThumbCompletedEvent {
+export interface ThumbJobCompletedEvent {
   dirPath?: string;
   filePath?: string;
 }

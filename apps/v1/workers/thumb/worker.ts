@@ -1,10 +1,10 @@
 import { getFsNode, listFsNodes } from "@/lib/media/fs-listing";
 import { sortNodes } from "@/lib/media/sort";
+import { redis } from "@/lib/redis";
+import { ThumbJobData } from "@/lib/thumb-job/types";
 import { createThumbs } from "@/lib/thumb/creator";
 import { chunk } from "@/lib/utils/array";
-import { ThumbJobData } from "@/workers/thumb/types";
 import { Worker } from "bullmq";
-import { connection } from "./queue";
 
 const EXPIRE_MS = 1000 * 60 * 10; // 10分
 
@@ -46,7 +46,7 @@ export const startThumbWorker = () => {
               // 2. ファイル単位での完了通知を発行
               await Promise.all(
                 chunk.map((node) =>
-                  connection.publish(
+                  redis.publish(
                     "thumb-completed",
                     JSON.stringify({ filePath: node.path })
                   )
@@ -60,16 +60,13 @@ export const startThumbWorker = () => {
             }
 
             // 3. 最後にディレクトリ単位での完了通知を発行（念のためのバックアップ）
-            await connection.publish(
-              "thumb-completed",
-              JSON.stringify({ dirPath })
-            );
+            await redis.publish("thumb-completed", JSON.stringify({ dirPath }));
 
             console.log(`[Job ${job.id}] Notified completion for: ${dirPath}`);
             break;
           } finally {
             if (job.data.lockKey) {
-              await connection.del(job.data.lockKey);
+              await redis.del(job.data.lockKey);
             }
           }
         }
@@ -85,7 +82,7 @@ export const startThumbWorker = () => {
             await createThumbs([node], { force: forceCreate });
 
             // 完了通知イベントを発行
-            await connection.publish(
+            await redis.publish(
               "thumb-completed",
               JSON.stringify({ filePath })
             );
@@ -94,7 +91,7 @@ export const startThumbWorker = () => {
             break;
           } finally {
             if (job.data.lockKey) {
-              await connection.del(job.data.lockKey);
+              await redis.del(job.data.lockKey);
             }
           }
         }
@@ -103,7 +100,7 @@ export const startThumbWorker = () => {
           console.warn(`Unknown job name: ${job.name}`);
       }
     },
-    { connection }
+    { connection: redis }
   );
 
   worker.on("failed", (job, err) => {

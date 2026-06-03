@@ -4,7 +4,7 @@ import { updatePreviewAction } from "@/lib/preview/actions";
 import {
   enqueueCreateSingleThumbJobAction,
   enqueueCreateThumbsJobAction,
-} from "@/lib/thumb/actions";
+} from "@/lib/thumb-job/actions";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";

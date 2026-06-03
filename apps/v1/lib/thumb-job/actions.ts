@@ -1,7 +1,8 @@
 "use server";
 
+import { redis } from "@/lib/redis";
+import { thumbQueue } from "@/lib/thumb-job/queue";
 import { sha1Hash } from "@/lib/utils/sha1-hash";
-import { connection, thumbQueue } from "@/workers/thumb/queue";
 
 // ジョブの有効期限
 const LOCK_TTL = 1000 * 60 * 10; // 10分
@@ -19,7 +20,7 @@ async function acquireLock(key: string, ttlMs: number): Promise<boolean> {
   // PX: milli-second EXpire (ttl)
   // LOCK_TTL: milli-seconds
   // NX: Not eXists (set only if not exists)
-  const res = await connection.set(key, "1", "PX", ttlMs, "NX");
+  const res = await redis.set(key, "1", "PX", ttlMs, "NX");
   return res === "OK";
 }
 

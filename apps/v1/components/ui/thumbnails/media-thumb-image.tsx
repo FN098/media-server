@@ -3,7 +3,7 @@ import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useThumbEventObserver } from "@/hooks/thumbs/use-thumb-event-observer";
 import { MediaNode } from "@/lib/media/types";
 import { getParentDirPath } from "@/lib/path/helpers";
-import { enqueueCreateThumbsJobAction } from "@/lib/thumb/actions";
+import { enqueueCreateThumbsJobAction } from "@/lib/thumb-job/actions";
 import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useRef, useState } from "react";
