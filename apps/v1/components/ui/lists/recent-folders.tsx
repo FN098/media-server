@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalRecentDate } from "@/components/ui/dates/local-recent-date";
 import type { VisitedFolder } from "@/generated/prisma/client";
 import { togglePinVisitedFolderAction } from "@/lib/folder/actions";
 import { getClientExplorerPath } from "@/lib/path/helpers";
@@ -9,7 +10,6 @@ import { cn } from "@/shadcn/lib/utils";
 import { Clock, Folder, History, Pin } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useTransition } from "react";
-import { LocalRecentDate } from "../dates/local-recent-date";
 
 interface RecentFoldersProps {
   folders: VisitedFolder[];

@@ -1,8 +1,8 @@
 import { HeaderNavigation } from "@/components/ui/headers/header-navigation";
 import { HeaderSearch } from "@/components/ui/headers/header-search";
+import { HeaderViewModeSwitch } from "@/components/ui/headers/header-view-mode-switch";
 import { AppSidebarOpenButton } from "@/components/ui/sidebars/app-menu-sidebar";
 import { LucideIcon } from "lucide-react";
-import { HeaderViewModeSwitch } from "./header-view-mode-switch";
 
 type HeaderFeatures = {
   navigation?: boolean;

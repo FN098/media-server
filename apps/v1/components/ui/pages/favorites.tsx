@@ -1,6 +1,7 @@
 "use client";
 
 import { SelectionBar } from "@/components/ui/bars/selection-bar";
+import { FavoritesToolbarDialogs } from "@/components/ui/dialogs/favorites-toolbar-dialogs";
 import { TagEditSheet } from "@/components/ui/sheets/tag-edit-sheet";
 import { FavoritesToolbar } from "@/components/ui/toolbars/favorites-toolbar";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
@@ -11,7 +12,6 @@ import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { cn } from "@/shadcn/lib/utils";
-import { FavoritesToolbarDialogs } from "../dialogs/favorites-toolbar-dialogs";
 
 export function Favorites() {
   const { viewer } = useFavoritesContext();
