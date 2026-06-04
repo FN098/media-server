@@ -235,11 +235,7 @@ function createExplorerMenuItems({
   ];
 }
 
-interface useExplorerMenuProps {
-  context: ExplorerMenuContext;
-}
-
-export function useExplorerMenu({ context }: useExplorerMenuProps) {
+export function useExplorerMenu(context: ExplorerMenuContext) {
   const items = useMemo(() => {
     return createExplorerMenuItems(context);
   }, [context]);

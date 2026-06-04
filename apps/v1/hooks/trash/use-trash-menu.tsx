@@ -97,11 +97,7 @@ function createTrashMenuItems({
   ];
 }
 
-interface useTrashMenuProps {
-  context: TrashMenuContext;
-}
-
-export function useTrashMenu({ context }: useTrashMenuProps) {
+export function useTrashMenu(context: TrashMenuContext) {
   const items = useMemo(() => {
     return createTrashMenuItems(context);
   }, [context]);

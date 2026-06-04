@@ -119,11 +119,7 @@ function createFavoritesMenuItems({
   ];
 }
 
-interface useFavoritesMenuProps {
-  context: FavoritesMenuContext;
-}
-
-export function useFavoritesMenu({ context }: useFavoritesMenuProps) {
+export function useFavoritesMenu(context: FavoritesMenuContext) {
   const items = useMemo(() => {
     return createFavoritesMenuItems(context);
   }, [context]);
