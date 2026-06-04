@@ -1,9 +1,8 @@
 "use client";
 
+import { useNodeContextMenu } from "@/hooks/context-menu/use-node-context-menu";
 import { useMounted } from "@/hooks/general/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import { defaultFilters } from "@/lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import {
@@ -19,12 +18,7 @@ import {
 import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import React, { Fragment, useMemo } from "react";
-
-const transformer = createRecursiveTransformer<
-  MenuItemDef<NodeContext>,
-  NodeContext
->(defaultFilters);
+import React, { Fragment } from "react";
 
 interface NodeContextMenuProps {
   node: MediaNode;
@@ -39,16 +33,11 @@ export function NodeContextMenu({
   menuItems,
   children,
   onOpenChange,
-  disabled = false,
+  disabled,
 }: NodeContextMenuProps) {
   const isMobile = useIsMobile();
   const mounted = useMounted();
-
-  const context = useMemo(() => ({ node }), [node]);
-  const items = useMemo(
-    () => transformer(menuItems, context),
-    [context, menuItems]
-  );
+  const { context, items } = useNodeContextMenu({ node, menuItems });
 
   if (!mounted || disabled) return children;
 

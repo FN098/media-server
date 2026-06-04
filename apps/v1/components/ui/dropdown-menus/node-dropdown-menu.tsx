@@ -1,9 +1,8 @@
 "use client";
 
+import { useNodeDropdownMenu } from "@/hooks/dropdown-menu/use-node-context-menu";
 import { useMounted } from "@/hooks/general/use-mounted";
 import { MediaNode } from "@/lib/media/types";
-import { defaultFilters } from "@/lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
@@ -21,12 +20,7 @@ import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
-import { Fragment, useMemo, useState } from "react";
-
-const transformer = createRecursiveTransformer<
-  MenuItemDef<NodeContext>,
-  NodeContext
->(defaultFilters);
+import { Fragment, useState } from "react";
 
 interface NodeDropdownMenuProps {
   node: MediaNode;
@@ -56,14 +50,7 @@ export function NodeDropdownMenu({
   const open = controlledOpen ?? internalOpen;
   const setOpen = onControlledOpenChange ?? setInternalOpen;
 
-  const context = useMemo(
-    () => ({ node, closeMenu: () => setOpen(false) }),
-    [node, setOpen]
-  );
-  const items = useMemo(
-    () => transformer(menuItems, context),
-    [context, menuItems]
-  );
+  const { context, items } = useNodeDropdownMenu({ node, menuItems });
 
   if (!mounted || hidden) return null;
 
