@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
-interface UseTrashMenuProps {
+interface TrashMenuContext {
   selection: MediaNodeSelection;
   dialogs: TrashDialogs;
   navigation: TrashNavigation;
@@ -22,85 +22,89 @@ interface UseTrashMenuProps {
   fullscreen: Fullscreen;
 }
 
-export function useTrashMenu({
+function createTrashMenuItems({
   selection,
   dialogs,
   navigation,
   viewer,
   fullscreen,
-}: UseTrashMenuProps) {
-  const { hasSelection, selectedCount, selectedNodes } = selection;
-  const { deleteDialog, restoreDialog } = dialogs;
-
-  const items: MenuItemDef<NodeContext>[] = useMemo(
-    () => [
-      {
-        key: "open-in-new-tab",
-        type: "action",
-        icon: ExternalLinkIcon,
-        label: "新しいタブで開く",
-        onClick: ({ node }) => navigation.openInNewTab(node),
-        hidden: () => selectedCount > 1,
-      },
-      {
-        key: "toggle-fullscreen",
-        type: "action",
-        icon: FullscreenIcon,
-        label: "全画面",
-        onClick: () => void fullscreen.toggle(),
-        hidden: () => !viewer.isOpen || !fullscreen.isSupported,
-        kbd: "F",
-      },
-      {
-        key: "goto-next-folder",
-        type: "action",
-        icon: MoveRightIcon,
-        label: "次のフォルダを開く",
-        onClick: () => navigation.openNextFolder("first"),
-        hidden: () => !viewer.isOpen,
-        kbd: ["Ctrl", "Right"],
-      },
-      {
-        key: "goto-prev-folder",
-        type: "action",
-        icon: MoveLeftIcon,
-        label: "前のフォルダを開く",
-        onClick: () => navigation.openPrevFolder("first"),
-        hidden: () => !viewer.isOpen,
-        kbd: ["Ctrl", "Left"],
-      },
-      {
-        key: "restore",
-        type: "action",
-        icon: RotateCcwIcon,
-        label: "復元",
-        onClick: ({ node }) =>
-          restoreDialog.open(hasSelection ? selectedNodes : [node]),
-      },
-      {
-        key: "delete",
-        type: "action",
-        icon: Trash2Icon,
-        variant: "destructive",
-        label: "削除",
-        onClick: ({ node }) =>
-          deleteDialog.open(hasSelection ? selectedNodes : [node], {
+}: TrashMenuContext): MenuItemDef<NodeContext>[] {
+  return [
+    {
+      key: "open-in-new-tab",
+      type: "action",
+      icon: ExternalLinkIcon,
+      label: "新しいタブで開く",
+      onClick: ({ node }) => navigation.openInNewTab(node),
+      hidden: () => selection.selectedCount > 1,
+    },
+    {
+      key: "goto-next-folder",
+      type: "action",
+      icon: MoveRightIcon,
+      label: "次のフォルダを開く",
+      onClick: () => navigation.openNextFolder("first"),
+      hidden: () => !viewer.isOpen,
+      kbd: ["Ctrl", "Right"],
+    },
+    {
+      key: "goto-prev-folder",
+      type: "action",
+      icon: MoveLeftIcon,
+      label: "前のフォルダを開く",
+      onClick: () => navigation.openPrevFolder("first"),
+      hidden: () => !viewer.isOpen,
+      kbd: ["Ctrl", "Left"],
+    },
+    {
+      key: "toggle-fullscreen",
+      type: "action",
+      icon: FullscreenIcon,
+      label: "全画面",
+      onClick: () => void fullscreen.toggle(),
+      hidden: () => !viewer.isOpen || !fullscreen.isSupported,
+      kbd: "F",
+    },
+    {
+      key: "separator-fs-operation",
+      type: "separator",
+    },
+    {
+      key: "restore",
+      type: "action",
+      icon: RotateCcwIcon,
+      label: "復元",
+      onClick: ({ node }) =>
+        dialogs.restoreDialog.open(
+          selection.hasSelection ? selection.selectedNodes : [node]
+        ),
+    },
+    {
+      key: "delete",
+      type: "action",
+      icon: Trash2Icon,
+      variant: "destructive",
+      label: "削除",
+      onClick: ({ node }) =>
+        dialogs.deleteDialog.open(
+          selection.hasSelection ? selection.selectedNodes : [node],
+          {
             isPermanent: true,
-          }),
-        kbd: "Del",
-      },
-    ],
-    [
-      navigation,
-      selectedCount,
-      fullscreen,
-      viewer.isOpen,
-      restoreDialog,
-      hasSelection,
-      selectedNodes,
-      deleteDialog,
-    ]
-  );
+          }
+        ),
+      kbd: "Del",
+    },
+  ];
+}
+
+interface useTrashMenuProps {
+  context: TrashMenuContext;
+}
+
+export function useTrashMenu({ context }: useTrashMenuProps) {
+  const items = useMemo(() => {
+    return createTrashMenuItems(context);
+  }, [context]);
 
   return {
     items,

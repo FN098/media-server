@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 
-interface UseFavoritesMenuProps {
+interface FavoritesMenuContext {
   filtering: FavoritesFiltering;
   selection: MediaNodeSelection;
   tagEditor: TagEditorControl;
@@ -26,7 +26,7 @@ interface UseFavoritesMenuProps {
   favorites: FavoritesFavorites;
 }
 
-export function useFavoritesMenu({
+function createFavoritesMenuItems({
   filtering,
   selection,
   tagEditor,
@@ -34,89 +34,99 @@ export function useFavoritesMenu({
   viewer,
   fullscreen,
   favorites,
-}: UseFavoritesMenuProps) {
-  const { hasSelection, selectedCount, selectedNodes } = selection;
+}: FavoritesMenuContext): MenuItemDef<NodeContext>[] {
+  return [
+    {
+      key: "rating",
+      type: "custom",
+      render: ({ node, closeMenu }) => {
+        const { rating } = favorites.get(node.path);
+        const targets = selection.hasSelection
+          ? selection.selectedNodes
+          : [node];
 
-  const items: MenuItemDef<NodeContext>[] = useMemo(
-    () => [
-      {
-        key: "rating",
-        type: "custom",
-        render: ({ node, closeMenu }) => {
-          const { rating } = favorites.get(node.path);
-          const targets = hasSelection ? selectedNodes : [node];
+        return (
+          <div className="w-full flex justify-center">
+            <FavoriteRatingInput
+              value={rating}
+              onChange={(newRating) =>
+                favorites.update({ targets, newRating, onSuccess: closeMenu })
+              }
+            />
+          </div>
+        );
+      },
+      hidden: ({ node }) => node.isDirectory,
+    },
+    {
+      key: "separator-navigation",
+      type: "separator",
+    },
+    {
+      key: "open-folder",
+      type: "action",
+      icon: FolderIcon,
+      label: "フォルダを開く",
+      onClick: ({ node }) => navigation.openParentFolder(node),
+      hidden: () => selection.selectedCount > 1,
+      kbd: "O",
+    },
+    {
+      key: "open-in-new-tab",
+      type: "action",
+      icon: ExternalLinkIcon,
+      label: "新しいタブで開く",
+      onClick: ({ node }) => navigation.openInNewTab(node),
+      hidden: () => selection.selectedCount > 1,
+    },
+    {
+      key: "toggle-fullscreen",
+      type: "action",
+      icon: FullscreenIcon,
+      label: "全画面",
+      onClick: () => void fullscreen.toggle(),
+      hidden: () => !viewer.isOpen || !fullscreen.isSupported,
+      kbd: "F",
+    },
+    {
+      key: "separator-tag-action",
+      type: "separator",
+    },
+    {
+      key: "edit-tags",
+      type: "action",
+      icon: TagIcon,
+      label: "タグ編集",
+      onClick: () => tagEditor.open(),
+      hidden: ({ node }) => node.isDirectory,
+      kbd: "T",
+    },
+    {
+      key: "add-tag-filter",
+      type: "action",
+      icon: ListFilterPlusIcon,
+      label: "タグをフィルターに追加",
+      onClick: ({ node }) =>
+        filtering.addTagFilter(
+          selection.hasSelection ? selection.selectedNodes : node
+        ),
+      disabled: ({ node }) =>
+        !filtering.canAddTagFilter(
+          selection.hasSelection ? selection.selectedNodes : node
+        ),
+      hidden: ({ node }) => node.isDirectory,
+    },
+  ];
+}
 
-          return (
-            <div className="w-full flex justify-center">
-              <FavoriteRatingInput
-                value={rating}
-                onChange={(newRating) =>
-                  favorites.update({ targets, newRating, onSuccess: closeMenu })
-                }
-              />
-            </div>
-          );
-        },
-        hidden: ({ node }) => node.isDirectory,
-      },
-      {
-        key: "open-folder",
-        type: "action",
-        icon: FolderIcon,
-        label: "フォルダを開く",
-        onClick: ({ node }) => navigation.openParentFolder(node),
-        hidden: () => selectedCount > 1,
-        kbd: "O",
-      },
-      {
-        key: "open-in-new-tab",
-        type: "action",
-        icon: ExternalLinkIcon,
-        label: "新しいタブで開く",
-        onClick: ({ node }) => navigation.openInNewTab(node),
-        hidden: () => selectedCount > 1,
-        kbd: "F",
-      },
-      {
-        key: "toggle-fullscreen",
-        type: "action",
-        icon: FullscreenIcon,
-        label: "全画面",
-        onClick: () => void fullscreen.toggle(),
-        hidden: () => !viewer.isOpen || !fullscreen.isSupported,
-      },
-      {
-        key: "edit-tags",
-        type: "action",
-        icon: TagIcon,
-        label: "タグ編集",
-        onClick: () => tagEditor.open(),
-        kbd: "T",
-      },
-      {
-        key: "addTagFilter",
-        type: "action",
-        icon: ListFilterPlusIcon,
-        label: "タグをフィルターに追加",
-        onClick: ({ node }) =>
-          filtering.addTagFilter(hasSelection ? selectedNodes : node),
-        disabled: ({ node }) =>
-          !filtering.canAddTagFilter(hasSelection ? selectedNodes : node),
-        hidden: ({ node }) => node.isDirectory,
-      },
-    ],
-    [
-      favorites,
-      filtering,
-      fullscreen,
-      hasSelection,
-      navigation,
-      selectedCount,
-      selectedNodes,
-      tagEditor,
-      viewer.isOpen,
-    ]
-  );
+interface useFavoritesMenuProps {
+  context: FavoritesMenuContext;
+}
+
+export function useFavoritesMenu({ context }: useFavoritesMenuProps) {
+  const items = useMemo(() => {
+    return createFavoritesMenuItems(context);
+  }, [context]);
 
   return {
     items,
