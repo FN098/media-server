@@ -9,6 +9,7 @@ import { useExplorerContext } from "@/providers/explorer-provider";
 
 export function ExplorerToolbar() {
   const { filtering, sort } = useExplorerContext();
+
   const filterMenu = useExplorerFilterMenu();
   const sortMenu = useExplorerSortMenu();
   const actionMenu = useExplorerActionMenu();
@@ -16,7 +17,6 @@ export function ExplorerToolbar() {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-grow">
-        {/* ソート */}
         <div className="w-full sm:w-[160px]">
           <SortDropdownMenu
             value={sort.value}
@@ -25,7 +25,6 @@ export function ExplorerToolbar() {
           />
         </div>
 
-        {/* フィルター */}
         <div className="w-full sm:w-[160px]">
           <FilterDropdownMenu
             items={filterMenu.items}
@@ -35,7 +34,6 @@ export function ExplorerToolbar() {
           />
         </div>
 
-        {/* アクション */}
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
             items={actionMenu.items}
@@ -44,12 +42,11 @@ export function ExplorerToolbar() {
         </div>
       </div>
 
-      {/* 件数 */}
       <FilterResultText
         totalCount={filtering.totalCount}
         filteredCount={filtering.filteredCount}
         isFiltered={filtering.isFiltered}
-        className="ml-auto sm:ml-auto min-w-[120px] text-right pt-2 sm:pt-0"
+        className="ml-auto min-w-[120px] text-right"
       />
     </div>
   );

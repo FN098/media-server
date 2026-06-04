@@ -18,7 +18,6 @@ export function FavoritesToolbar() {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-grow">
-        {/* ソート */}
         {sortMenu.items.length > 0 && (
           <div className="w-full sm:w-[160px]">
             <SortDropdownMenu
@@ -29,7 +28,6 @@ export function FavoritesToolbar() {
           </div>
         )}
 
-        {/* フィルター */}
         {filterMenu.items.length > 0 && (
           <div className="w-full sm:w-[160px]">
             <FilterDropdownMenu
@@ -41,7 +39,6 @@ export function FavoritesToolbar() {
           </div>
         )}
 
-        {/* アクション */}
         {actionMenu.items.length > 0 && (
           <div className="w-full sm:w-[160px]">
             <ActionDropdownMenu
@@ -51,11 +48,9 @@ export function FavoritesToolbar() {
           </div>
         )}
 
-        {/* シャッフルボタン */}
         <ShuffleButton />
       </div>
 
-      {/* 件数 */}
       <FilterResultText
         totalCount={filtering.totalCount}
         filteredCount={filtering.filteredCount}

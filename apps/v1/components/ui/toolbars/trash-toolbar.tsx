@@ -17,7 +17,6 @@ export function TrashToolbar() {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-grow">
-        {/* ソート */}
         <div className="w-full sm:w-[160px]">
           <SortDropdownMenu
             value={sort.value}
@@ -26,7 +25,6 @@ export function TrashToolbar() {
           />
         </div>
 
-        {/* フィルター */}
         <div className="w-full sm:w-[160px]">
           <FilterDropdownMenu
             items={filterMenu.items}
@@ -36,7 +34,6 @@ export function TrashToolbar() {
           />
         </div>
 
-        {/* アクション */}
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
             items={actionMenu.items}
@@ -45,7 +42,6 @@ export function TrashToolbar() {
         </div>
       </div>
 
-      {/* 件数 */}
       <FilterResultText
         totalCount={filtering.totalCount}
         filteredCount={filtering.filteredCount}
