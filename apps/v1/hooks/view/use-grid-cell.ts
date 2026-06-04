@@ -3,7 +3,7 @@ import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface UseGridCellProps {
   node: MediaNode;
@@ -153,6 +153,21 @@ export function useGridCell({
     onOpen?.(node);
   };
 
+  const toggleSelection = useCallback(() => {
+    enterSelectionMode();
+    togglePath(node.path);
+    setAnchorPath(node.path);
+    setLastSelectedPath(node.path);
+    onSelectionChange?.();
+  }, [
+    node.path,
+    enterSelectionMode,
+    togglePath,
+    setAnchorPath,
+    setLastSelectedPath,
+    onSelectionChange,
+  ]);
+
   return {
     isMediaNode,
     isFavorite,
@@ -175,5 +190,6 @@ export function useGridCell({
     handleDoubleClick: !isMobile ? handleDoubleClick : undefined,
     handleContextMenu: !isMobile ? handleContextMenu : undefined,
     toggleFavorite: () => void toggleFavorite(node.path),
+    toggleSelection,
   };
 }

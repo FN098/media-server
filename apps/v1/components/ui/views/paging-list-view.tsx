@@ -12,26 +12,18 @@ import { NodeDropdownMenu } from "@/components/ui/dropdown-menus/node-dropdown-m
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
-import { useLongPress } from "@/hooks/mobile/use-long-press";
-import { isMedia } from "@/lib/media/detectors";
+import { useGridCell } from "@/hooks/view/use-grid-cell";
+import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
 import { getExtension } from "@/lib/utils/filename";
 import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
-import { usePagingContext } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useMemo } from "react";
 
 // スマホ: Checkbox, Name, Rating, Actions
 // タブレット: Checkbox, Name, Type, Size, Rating, Actions
@@ -53,240 +45,22 @@ interface PagingListViewProps {
   onThumbError?: (node: MediaNode) => void;
 }
 
-export function PagingListView({
-  allNodes,
-  initialScrollPath,
-  focusOnPageChange = false,
-  onPageChange,
-  onScrollRestored,
-  onSelectionChange,
-  onOpen,
-  onThumbError,
-}: PagingListViewProps) {
-  const {
-    page: currentPage,
-    pageSize,
-    totalPages,
-    setPage,
-    paginate,
-  } = usePagingContext();
-
-  const {
-    lastSelectedPath,
-    setLastSelectedPath,
-    replaceSelection,
-    anchorPath,
-    setAnchorPath,
-    enterSelectionMode,
-    selectPaths,
-  } = usePathSelectionContext();
-
+export function PagingListView(props: PagingListViewProps) {
   const isMobile = useIsMobile();
 
-  // 現在のページのノードを取得
-  const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
+  const {
+    containerRef,
+    gridRef, // ListViewでは全行を包む親要素（仮想的なグリッド）にアタッチ
+    currentNodes,
+    totalSize,
+    currentPage,
+    totalPages,
+    pageSize,
+    handlePageChange,
+    handleKeyDown,
+  } = usePagingGridView(props);
 
-  //合計サイズを計算（比率計算の基準値）
-  const { totalSize } = useMemo(() => {
-    const sizes = allNodes.map((n) => n.size ?? 0);
-    return {
-      totalSize: sizes.reduce((acc, size) => acc + size, 0),
-    };
-  }, [allNodes]);
-
-  // ビューコンテナ
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // スクロール復元が実行済みかどうかを保持するフラグ
-  const hasRestored = useRef(false);
-
-  // パスから初期スクロール対象インデックスを特定する
-  const initialScrollTargetIndex = useMemo(() => {
-    if (!initialScrollPath) return null;
-    const index = allNodes.findIndex((n) => n.path === initialScrollPath);
-    return index !== -1 ? index : null;
-  }, [allNodes, initialScrollPath]);
-
-  // 初期スクロール対象をアンカーに設定
-  useEffect(() => {
-    if (!initialScrollTargetIndex) return;
-    setAnchorPath(allNodes[initialScrollTargetIndex].path);
-  }, [initialScrollTargetIndex, allNodes, setAnchorPath]);
-
-  // 初期スクロール対象を選択状態に設定
-  useEffect(() => {
-    if (!initialScrollTargetIndex) return;
-    replaceSelection(allNodes[initialScrollTargetIndex].path);
-  }, [initialScrollTargetIndex, allNodes, replaceSelection]);
-
-  // 初期スクロール対象を最終選択パスに設定
-  useEffect(() => {
-    if (!initialScrollTargetIndex) return;
-    setLastSelectedPath(allNodes[initialScrollTargetIndex].path);
-  }, [initialScrollTargetIndex, allNodes, setLastSelectedPath]);
-
-  // 初期スクロール対象ページを特定する
-  const initialScrollTargetPage = useMemo(() => {
-    if (!initialScrollTargetIndex) return null;
-    return Math.floor(initialScrollTargetIndex / pageSize) + 1;
-  }, [pageSize, initialScrollTargetIndex]);
-
-  // 初期スクロール対象ページに遷移
-  useEffect(() => {
-    if (
-      !initialScrollTargetPage ||
-      initialScrollTargetPage === currentPage ||
-      hasRestored.current
-    ) {
-      return;
-    }
-    setPage(initialScrollTargetPage);
-  }, [currentPage, setPage, initialScrollTargetPage]);
-
-  // 初期スクロール実行と完了通知
-  useEffect(() => {
-    // すでに復元済み、またはターゲットがない場合は何もしない
-    if (hasRestored.current || initialScrollTargetIndex === null) return;
-
-    const pageStart = (currentPage - 1) * pageSize;
-    const pageEnd = pageStart + pageSize;
-
-    // 現在のページにターゲットが含まれているか確認
-    if (
-      initialScrollTargetIndex >= pageStart &&
-      initialScrollTargetIndex < pageEnd
-    ) {
-      const element = document.getElementById(
-        `media-item-${initialScrollTargetIndex}`
-      );
-      if (element) {
-        element.scrollIntoView({ behavior: "instant", block: "nearest" });
-
-        // フラグを立てて、二度と実行されないようにする
-        hasRestored.current = true;
-        onScrollRestored?.();
-      }
-    }
-  }, [currentPage, pageSize, initialScrollTargetIndex, onScrollRestored]);
-
-  // ページ更新ハンドラ
-  const handlePageChange = (page: number) => {
-    setPage(page);
-    onPageChange?.(page);
-  };
-
-  // キーボード操作ハンドラ
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      const moveKeys = ["ArrowUp", "ArrowDown", "Enter"];
-      if (!moveKeys.includes(e.key)) return;
-
-      e.preventDefault();
-
-      // 最後に選択されたパスから現在のインデックスを探す
-      const currentPath = lastSelectedPath;
-      const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
-
-      // Enterで開く
-      if (e.key === "Enter" && currentPath) {
-        const node = allNodes[currentIndex];
-        if (node) onOpen?.(node);
-        return;
-      }
-
-      // 何も選択されていない場合は最初の要素を選択
-      if (currentIndex === -1) {
-        const first = allNodes[0];
-        if (first) {
-          replaceSelection(first.path);
-          setLastSelectedPath(first.path);
-          setAnchorPath(first.path);
-        }
-        return;
-      }
-
-      // 次のインデックス計算
-      let nextIndex = currentIndex;
-      if (e.key === "ArrowUp") nextIndex -= 1;
-      if (e.key === "ArrowDown") nextIndex += 1;
-
-      // 範囲チェック
-      if (nextIndex < 0 || nextIndex >= allNodes.length) return;
-
-      const nextNode = allNodes[nextIndex];
-
-      if (e.shiftKey) {
-        // --- 範囲選択移動 (Shift) ---
-        // 起点 (anchorPath) がなければ現在の位置を起点にする
-        const path = anchorPath ?? currentPath;
-        const anchorIndex = allNodes.findIndex((n) => n.path === path);
-
-        const start = Math.min(anchorIndex, nextIndex);
-        const end = Math.max(anchorIndex, nextIndex);
-        const paths = allNodes.slice(start, end + 1).map((n) => n.path);
-
-        enterSelectionMode();
-        selectPaths(paths); // 範囲で上書き
-        // ※ setAnchorPath は更新しない (起点を維持)
-      } else {
-        // 通常移動
-        replaceSelection(nextNode.path);
-        setAnchorPath(nextNode.path); // 次のShift操作のために起点を更新
-      }
-
-      // フォーカス位置更新
-      setLastSelectedPath(nextNode.path);
-
-      // ページ更新（必要なら）
-      const nextPage = Math.floor(nextIndex / pageSize) + 1;
-      if (nextPage !== currentPage) {
-        setPage(nextPage);
-      }
-
-      // DOMが更新されるタイミングでスクロール
-      requestAnimationFrame(() => {
-        const el = document.getElementById(`media-item-${nextIndex}`);
-        el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      });
-    },
-    [
-      allNodes,
-      anchorPath,
-      currentPage,
-      enterSelectionMode,
-      lastSelectedPath,
-      onOpen,
-      pageSize,
-      replaceSelection,
-      selectPaths,
-      setAnchorPath,
-      setLastSelectedPath,
-      setPage,
-    ]
-  );
-
-  // ページ遷移時の自動スクロール（副作用）
-  useEffect(() => {
-    if (focusOnPageChange) {
-      containerRef.current?.focus({ preventScroll: true });
-    }
-
-    // ページ変更に伴うスクロールが必要な場合、または外部からの指示（初期表示など）
-    // lastSelectedPath があれば、その要素へスクロールを試みる
-    const currentPath = lastSelectedPath;
-    if (!currentPath) return;
-
-    const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
-    if (currentIndex === -1) return;
-
-    // ページ変更によるスクロール、またはページボタンクリックなどによる遷移の場合に実行
-    requestAnimationFrame(() => {
-      const el = document.getElementById(`media-item-${currentIndex}`);
-      el?.scrollIntoView({ behavior: "instant", block: "nearest" });
-    });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]); // 依存は currentPage だけでOK
+  const { allNodes, onOpen, onSelectionChange, onThumbError } = props;
 
   return (
     <div
@@ -298,7 +72,7 @@ export function PagingListView({
       <HeaderRow />
 
       <LocaleProvider>
-        <div className="flex-1 overflow-y-auto">
+        <div ref={gridRef} className="flex-1 overflow-y-auto">
           {currentNodes.map((node, index) => (
             <DataRow
               key={node.path}
@@ -357,179 +131,38 @@ interface DataRowProps {
   onThumbError?: (node: MediaNode) => void;
 }
 
-function DataRow({
-  node,
-  globalIndex,
-  allNodes,
-  isMobile,
-  totalSize,
-  onSelectionChange,
-  onOpen,
-}: DataRowProps) {
-  // メディア判定
-  const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
-
-  // お気に入り機能
-  const { getFavorite, toggleFavorite, updateFavorite } =
-    useFavoritesControlContext();
-  const { isFavorite, rating } = getFavorite(node.path);
-
-  // 選択機能
-  const {
-    isSelectedPath,
-    replaceSelection,
-    setLastSelectedPath,
-    anchorPath,
-    setAnchorPath,
-    enterSelectionMode,
-    exitSelectionMode,
-    togglePath,
-    selectPath,
-    unselectPath,
-    selectedPaths,
-    deletePaths,
-    selectPaths,
-    isSelectionMode,
-  } = usePathSelectionContext();
-
-  const isSelected = isSelectedPath(node.path);
-
-  // メニュー
+function DataRow(props: DataRowProps) {
+  const { locale } = useLocaleContext();
   const { items: menuItems } = useMenuItemsContext();
-  const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
-  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const { updateFavorite } = useFavoritesControlContext();
 
-  // ドロップダウンメニュー表示で選択切り替え
-  const handleDropdownMenuOpenChange = (open: boolean) => {
-    if (open) {
-      replaceSelection(node.path);
-      setLastSelectedPath(node.path);
-      onSelectionChange?.();
-    }
-    setDropdownMenuOpen(open);
-  };
+  // Cell用ロジックフックの再利用
+  const {
+    isMediaNode,
+    isFavorite,
+    rating,
+    isSelected,
+    dropdownMenuOpen,
+    contextMenuOpen,
+    setContextMenuOpen,
+    handleDropdownMenuOpenChange,
+    longPressProps,
+    handleClick,
+    handleDoubleClick,
+    handleContextMenu,
+    toggleFavorite,
+    toggleSelection,
+  } = useGridCell(props);
 
-  // 長押しで選択モード
-  const handleLongPress = () => {
-    enterSelectionMode();
-    replaceSelection(node.path);
-    setLastSelectedPath(node.path);
-    onSelectionChange?.();
-  };
+  const { node, globalIndex, isMobile, totalSize } = props;
 
-  // 長押し判定
-  const { start, stop, isLongPressed } = useLongPress({
-    callback: handleLongPress,
-    ms: 600,
-  });
-
-  // クリックで選択（PC）
-  const handleClick = (e: React.MouseEvent) => {
-    if (isLongPressed || isMobile) return;
-    e.preventDefault();
-
-    if (e.shiftKey && anchorPath !== null) {
-      // Shift選択
-      enterSelectionMode();
-      const anchorIdx = allNodes.findIndex((n) => n.path === anchorPath);
-      if (anchorIdx === -1) return;
-      const startIdx = Math.min(anchorIdx, globalIndex);
-      const endIdx = Math.max(anchorIdx, globalIndex);
-      const paths = allNodes.slice(startIdx, endIdx + 1).map((n) => n.path);
-
-      if (e.ctrlKey || e.metaKey) {
-        // Ctrl あり
-        deletePaths(paths);
-      } else {
-        // Shift のみ
-        enterSelectionMode();
-        selectPaths(paths);
-      }
-    } else if (e.ctrlKey || e.metaKey) {
-      // Ctrl選択
-      enterSelectionMode();
-      togglePath(node.path);
-      setAnchorPath(node.path); // 次のShift操作の起点更新
-    } else {
-      // 通常選択
-      exitSelectionMode();
-      replaceSelection(node.path);
-      setAnchorPath(node.path); // 次のShift操作の起点更新
-    }
-
-    setLastSelectedPath(node.path);
-    onSelectionChange?.();
-  };
-
-  // 右クリックで選択（PC）
-  const handleContextMenu = (e: React.MouseEvent) => {
-    if (isMobile) return;
-
-    if (e.shiftKey && anchorPath !== null) {
-      // Shift: アンカーから範囲選択
-      enterSelectionMode();
-      const anchorIdx = allNodes.findIndex((n) => n.path === anchorPath);
-      if (anchorIdx !== -1) {
-        const startIdx = Math.min(anchorIdx, globalIndex);
-        const endIdx = Math.max(anchorIdx, globalIndex);
-        const paths = allNodes.slice(startIdx, endIdx + 1).map((n) => n.path);
-        selectPaths(paths);
-      }
-    } else if (e.ctrlKey || e.metaKey) {
-      // Ctrl: トグル追加
-      enterSelectionMode();
-      togglePath(node.path);
-      setAnchorPath(node.path);
-    } else {
-      // 通常: 未選択なら単独選択、選択済みなら維持（複数選択を崩さない）
-      if (!isSelected) {
-        exitSelectionMode();
-        replaceSelection(node.path);
-        setAnchorPath(node.path);
-      }
-    }
-
-    setLastSelectedPath(node.path);
-    onSelectionChange?.();
-  };
-
-  // ダブルクリックで開く（PC）
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    if (isMobile || e.ctrlKey || e.metaKey || e.shiftKey) return;
-    e.preventDefault();
-    onOpen?.(node);
-  };
-
-  // タップで開く（モバイル）
-  const handleTap = (e: React.MouseEvent) => {
-    if (isLongPressed || !isMobile) return;
-    e.preventDefault();
-
-    if (isSelectionMode) {
-      if (!isSelected) {
-        selectPath(node.path);
-      } else {
-        unselectPath(node.path);
-        if (selectedPaths.size === 1 && selectedPaths.has(node.path)) {
-          exitSelectionMode();
-        }
-      }
-      onSelectionChange?.();
-      return;
-    }
-
-    onOpen?.(node);
-  };
-
-  // 合計サイズに対するこのノードの占有率（%）
+  // 占有率計算
   const occupancyPercent = useMemo(() => {
     if (!node.size || totalSize === 0) return 0;
     return (node.size / totalSize) * 100;
   }, [node.size, totalSize]);
 
   const title = node.title ?? node.name;
-
-  const { locale } = useLocaleContext();
 
   return (
     <HoverPreviewPortal
@@ -548,15 +181,10 @@ function DataRow({
         <div
           id={`media-item-${globalIndex}`}
           role="row"
-          onMouseDown={start}
-          onMouseUp={stop}
-          onMouseLeave={stop}
-          onTouchStart={start}
-          onTouchEnd={stop}
-          onTouchMove={stop}
-          onClick={isMobile ? handleTap : handleClick}
-          onDoubleClick={!isMobile ? handleDoubleClick : undefined}
-          onContextMenu={!isMobile ? handleContextMenu : undefined}
+          {...longPressProps}
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
+          onContextMenu={handleContextMenu}
           className={cn(
             "grid items-center h-12 border-b select-none cursor-pointer transition-colors text-sm",
             GRID_TEMPLATE,
@@ -565,6 +193,7 @@ function DataRow({
               : "hover:bg-muted/50"
           )}
         >
+          {/* Checkbox */}
           <div
             className="flex justify-center"
             onClick={(e) => e.stopPropagation()}
@@ -572,8 +201,7 @@ function DataRow({
             <Checkbox
               checked={isSelected}
               onCheckedChange={() => {
-                togglePath(node.path);
-                onSelectionChange?.();
+                toggleSelection();
               }}
             />
           </div>
@@ -640,7 +268,9 @@ function DataRow({
               rating={rating}
               isFavorite={isFavorite}
               toggleFavorite={toggleFavorite}
-              updateFavorite={updateFavorite}
+              updateFavorite={(path, rating) =>
+                void updateFavorite(path, rating)
+              }
             />
           </div>
 
@@ -663,8 +293,8 @@ interface RatingCellProps {
   node: MediaNode;
   rating: number | null;
   isFavorite: boolean;
-  toggleFavorite: (path: string) => Promise<unknown>;
-  updateFavorite: (path: string, value: number | null) => Promise<unknown>;
+  toggleFavorite: () => void;
+  updateFavorite: (path: string, rating: number | null) => void;
 }
 
 function RatingCell({
@@ -693,14 +323,14 @@ function RatingCell({
     <>
       <FavoriteRatingInput
         value={rating}
-        onChange={(value) => void updateFavorite(node.path, value)}
+        onChange={(rating) => updateFavorite(node.path, rating)}
         className="hidden md:flex"
       />
       <FavoriteButton
         variant="default"
         rating={rating}
         isFavorite={isFavorite}
-        onClick={() => void toggleFavorite(node.path)}
+        onClick={toggleFavorite}
         className="flex md:hidden"
       />
     </>
