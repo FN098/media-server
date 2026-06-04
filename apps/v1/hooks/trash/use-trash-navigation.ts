@@ -14,8 +14,6 @@ import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
-export type TrashNavigation = ReturnType<typeof useTrashNavigation>;
-
 interface UseTrashNavigationProps {
   listing: MediaListing;
   filtering: TrashFiltering;
@@ -147,3 +145,5 @@ export function useTrashNavigation({
     onIndexChange,
   };
 }
+
+export type TrashNavigation = ReturnType<typeof useTrashNavigation>;

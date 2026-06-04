@@ -5,8 +5,6 @@ import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { useMemo } from "react";
 
-export type TrashDialogs = ReturnType<typeof useTrashDialogs>;
-
 interface UseTrashDialogsProps {
   filtering: TrashFiltering;
 }
@@ -45,3 +43,5 @@ export function useTrashDialogs({ filtering }: UseTrashDialogsProps) {
     isOpen,
   };
 }
+
+export type TrashDialogs = ReturnType<typeof useTrashDialogs>;

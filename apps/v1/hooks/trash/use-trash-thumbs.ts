@@ -9,8 +9,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export type TrashThumbs = ReturnType<typeof useTrashThumbs>;
-
 interface UseTrashThumbsProps {
   listing: MediaListing;
   autoCreateThumbs?: boolean;
@@ -108,3 +106,5 @@ const updateThumb = async (node: MediaNode) => {
     toast.error(updated.error);
   }
 };
+
+export type TrashThumbs = ReturnType<typeof useTrashThumbs>;

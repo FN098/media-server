@@ -3,8 +3,6 @@ import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
 import { useMemo } from "react";
 
-export type FavoritesDialogs = ReturnType<typeof useFavoritesDialogs>;
-
 interface UseFavoritesDialogsProps {
   filtering: FavoritesFiltering;
 }
@@ -38,3 +36,5 @@ export function useFavoritesDialogs({ filtering }: UseFavoritesDialogsProps) {
     isOpen,
   };
 }
+
+export type FavoritesDialogs = ReturnType<typeof useFavoritesDialogs>;

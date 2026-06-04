@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export type FavoritesThumbs = ReturnType<typeof useFavoritesThumbs>;
-
 export function useFavoritesThumbs() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -88,3 +86,5 @@ const updateThumb = async (node: MediaNode) => {
     toast.error(updated.error);
   }
 };
+
+export type FavoritesThumbs = ReturnType<typeof useFavoritesThumbs>;

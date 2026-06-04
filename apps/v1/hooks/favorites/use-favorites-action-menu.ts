@@ -15,7 +15,9 @@ interface FavoritesActionMenuContext {
   isMobile: boolean;
 }
 
-const actionMenuItems: MenuItemDef<FavoritesActionMenuContext>[] = [];
+const actionMenuItems: MenuItemDef<FavoritesActionMenuContext>[] = [
+  // メニューをここに追加
+];
 
 const transformer = createRecursiveTransformer<
   MenuItemDef<FavoritesActionMenuContext>,

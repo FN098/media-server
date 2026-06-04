@@ -10,8 +10,6 @@ import { getParentDirPath } from "@/lib/path/helpers";
 import { useCallback } from "react";
 import { toast } from "sonner";
 
-export type FavoritesNavigation = ReturnType<typeof useFavoritesNavigation>;
-
 interface UseFavoritesNavigationProps {
   filtering: FavoritesFiltering;
   selection: MediaNodeSelection;
@@ -108,3 +106,5 @@ export function useFavoritesNavigation({
     openParentFolder,
   };
 }
+
+export type FavoritesNavigation = ReturnType<typeof useFavoritesNavigation>;

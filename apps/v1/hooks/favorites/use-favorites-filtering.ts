@@ -15,8 +15,6 @@ import {
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useMemo } from "react";
 
-export type FavoritesFiltering = ReturnType<typeof useFavoritesFiltering>;
-
 interface UseFavoritesFilteringProps {
   listing: MediaListing;
 }
@@ -111,3 +109,5 @@ export function useFavoritesFiltering({ listing }: UseFavoritesFilteringProps) {
     },
   };
 }
+
+export type FavoritesFiltering = ReturnType<typeof useFavoritesFiltering>;

@@ -17,8 +17,6 @@ import {
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useMemo } from "react";
 
-export type TrashFiltering = ReturnType<typeof useTrashFiltering>;
-
 interface UseTrashFilteringProps {
   listing: MediaListing;
 }
@@ -120,3 +118,5 @@ export function useTrashFiltering({ listing }: UseTrashFilteringProps) {
     },
   };
 }
+
+export type TrashFiltering = ReturnType<typeof useTrashFiltering>;

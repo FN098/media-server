@@ -12,8 +12,6 @@ import { useTextFilePreviewDialog } from "@/hooks/dialogs/use-text-file-preview-
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { useMemo } from "react";
 
-export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;
-
 interface UseExplorerDialogsProps {
   filtering: ExplorerFiltering;
 }
@@ -78,3 +76,5 @@ export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
     isOpen,
   };
 }
+
+export type ExplorerDialogs = ReturnType<typeof useExplorerDialogs>;

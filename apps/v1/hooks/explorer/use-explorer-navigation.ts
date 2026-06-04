@@ -16,8 +16,6 @@ import { getFilePreviewAction } from "@/lib/text/actions";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
-export type ExplorerNavigation = ReturnType<typeof useExplorerNavigation>;
-
 interface UseExplorerNavigationProps {
   listing: MediaListing;
   filtering: ExplorerFiltering;
@@ -174,3 +172,5 @@ export function useExplorerNavigation({
     onIndexChange,
   };
 }
+
+export type ExplorerNavigation = ReturnType<typeof useExplorerNavigation>;
