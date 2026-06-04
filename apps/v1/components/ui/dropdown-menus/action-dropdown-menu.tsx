@@ -1,5 +1,3 @@
-import { defaultFilters } from "@/lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
@@ -17,7 +15,6 @@ import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { ChevronRight, Wand2 } from "lucide-react";
-import { useMemo } from "react";
 import { Fragment } from "react/jsx-runtime";
 
 interface ActionDropdownMenuProps<T> {
@@ -31,16 +28,6 @@ export function ActionDropdownMenu<T>({
   context,
 }: ActionDropdownMenuProps<T>) {
   const isMobile = useIsMobile();
-
-  const transformer = useMemo(
-    () => createRecursiveTransformer<MenuItemDef<T>, T>(defaultFilters),
-    []
-  );
-
-  const transformed = useMemo(
-    () => transformer(items, context),
-    [context, items, transformer]
-  );
 
   return (
     <DropdownMenu>
@@ -59,7 +46,7 @@ export function ActionDropdownMenu<T>({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[240px]">
-        {transformed.map((item) => (
+        {items.map((item) => (
           <ActionDropdownMenuItem
             key={item.key}
             item={item}

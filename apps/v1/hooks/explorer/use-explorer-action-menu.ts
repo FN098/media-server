@@ -3,6 +3,8 @@ import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { MediaListing, MediaNode } from "@/lib/media/types";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
@@ -16,9 +18,7 @@ interface ExplorerActionMenuContext {
   favorites: ExplorerFavorites;
   selection: MediaNodeSelection;
   isMobile: boolean;
-  computed: {
-    nonFavoriteFiles: MediaNode[];
-  };
+  nonFavoriteFiles: MediaNode[];
 }
 
 const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
@@ -28,7 +28,6 @@ const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
     label: "すべて選択",
     icon: CheckCheckIcon,
     onClick: (ctx) => ctx.selection.selectAll(),
-    // hidden: (ctx) => !ctx.computed.isMobile,
   },
   {
     key: "create-folder",
@@ -43,9 +42,9 @@ const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
     label: "お気に入り以外一括削除",
     icon: Trash2Icon,
     variant: "destructive",
-    disabled: (ctx) => ctx.computed.nonFavoriteFiles.length === 0,
+    disabled: (ctx) => ctx.nonFavoriteFiles.length === 0,
     onClick: (ctx) => {
-      const targets = ctx.computed.nonFavoriteFiles;
+      const targets = ctx.nonFavoriteFiles;
       if (targets.length > 0) {
         ctx.dialogs.deleteDialog.open(targets);
       }
@@ -53,32 +52,52 @@ const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
   },
 ];
 
+const transformer = createRecursiveTransformer<
+  MenuItemDef<ExplorerActionMenuContext>,
+  ExplorerActionMenuContext
+>(defaultFilters);
+
 export function useExplorerActionMenu() {
   const { listing, filtering, selection, dialogs, favorites } =
     useExplorerContext();
 
   const isMobile = useIsMobile();
 
-  const context = useMemo(() => {
-    const nonFavoriteFiles = filtering.filteredNodes.filter(
+  const nonFavoriteFiles = useMemo(() => {
+    return filtering.filteredNodes.filter(
       (node) => !node.isDirectory && !favorites.get(node.path).isFavorite
     );
+  }, [filtering, favorites]);
 
-    return {
-      listing,
-      filtering,
+  const context = useMemo(
+    () =>
+      ({
+        listing,
+        filtering,
+        dialogs,
+        favorites,
+        selection,
+        isMobile,
+        nonFavoriteFiles,
+      }) satisfies ExplorerActionMenuContext,
+    [
       dialogs,
       favorites,
-      selection,
+      filtering,
       isMobile,
-      computed: {
-        nonFavoriteFiles,
-      },
-    };
-  }, [filtering, listing, dialogs, favorites, selection, isMobile]);
+      listing,
+      nonFavoriteFiles,
+      selection,
+    ]
+  );
+
+  const transformed = useMemo(
+    () => transformer(actionMenuItems, context),
+    [context]
+  );
 
   return {
-    items: actionMenuItems,
-    context, // コンテキストも一緒に返す
+    items: transformed,
+    context,
   };
 }
