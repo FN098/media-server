@@ -1,5 +1,3 @@
-import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
-import { MediaListing } from "@/lib/media/types";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
@@ -8,8 +6,8 @@ import { Trash2Icon } from "lucide-react";
 import { useMemo } from "react";
 
 interface TrashActionMenuContext {
-  listing: MediaListing;
-  dialogs: TrashDialogs;
+  emptyCurrentDir(): void;
+  canEmptyCurrentDir: boolean;
 }
 
 const actionMenuItems: MenuItemDef<TrashActionMenuContext>[] = [
@@ -19,11 +17,8 @@ const actionMenuItems: MenuItemDef<TrashActionMenuContext>[] = [
     variant: "destructive",
     label: "このフォルダ内を完全に削除",
     icon: Trash2Icon,
-    onClick: (ctx) =>
-      ctx.dialogs.deleteDialog.open(ctx.listing.nodes, { isPermanent: true }),
-    disabled: (ctx) => {
-      return ctx.listing.nodes.length === 0;
-    },
+    onClick: (ctx) => ctx.emptyCurrentDir(),
+    disabled: (ctx) => ctx.canEmptyCurrentDir,
   },
 ];
 
@@ -33,14 +28,18 @@ const transformer = createRecursiveTransformer<
 >(defaultFilters);
 
 export function useTrashActionMenu() {
-  const { listing, dialogs } = useTrashContext();
+  const {
+    listing: { nodes: currentNodes },
+    dialogs: { deleteDialog },
+  } = useTrashContext();
 
   const context = useMemo(() => {
     return {
-      listing,
-      dialogs,
+      emptyCurrentDir: () =>
+        deleteDialog.open(currentNodes, { isPermanent: true }),
+      canEmptyCurrentDir: currentNodes.length > 0,
     } satisfies TrashActionMenuContext;
-  }, [dialogs, listing]);
+  }, [currentNodes, deleteDialog]);
 
   const transformed = useMemo(
     () => transformer(actionMenuItems, context),

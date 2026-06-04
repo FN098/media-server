@@ -1,40 +1,32 @@
-import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
-import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
-import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/media/types";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { useExplorerContext } from "@/providers/explorer-provider";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { CheckCheckIcon, FolderPlusIcon, Trash2Icon } from "lucide-react";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 interface ExplorerActionMenuContext {
-  listing: MediaListing;
-  filtering: ExplorerFiltering;
-  dialogs: ExplorerDialogs;
-  favorites: ExplorerFavorites;
-  selection: MediaNodeSelection;
-  isMobile: boolean;
-  nonFavoriteFiles: MediaNode[];
+  selectAll(): void;
+  promptCreateFolder(): void;
+  confirmDeleteNonFavorites(): void;
+  canDeleteNonFavorites: boolean;
 }
 
 const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
   {
-    key: "check-all",
+    key: "select-all",
     type: "action",
     label: "すべて選択",
     icon: CheckCheckIcon,
-    onClick: (ctx) => ctx.selection.selectAll(),
+    onClick: (ctx) => ctx.selectAll(),
   },
   {
     key: "create-folder",
     type: "action",
     label: "新規フォルダ",
     icon: FolderPlusIcon,
-    onClick: (ctx) => ctx.dialogs.createFolderDialog.open(ctx.listing.path),
+    onClick: (ctx) => ctx.promptCreateFolder(),
   },
   {
     key: "delete-non-favorites",
@@ -42,13 +34,8 @@ const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
     label: "お気に入り以外一括削除",
     icon: Trash2Icon,
     variant: "destructive",
-    disabled: (ctx) => ctx.nonFavoriteFiles.length === 0,
-    onClick: (ctx) => {
-      const targets = ctx.nonFavoriteFiles;
-      if (targets.length > 0) {
-        ctx.dialogs.deleteDialog.open(targets);
-      }
-    },
+    disabled: (ctx) => !ctx.canDeleteNonFavorites,
+    onClick: (ctx) => ctx.confirmDeleteNonFavorites(),
   },
 ];
 
@@ -58,35 +45,44 @@ const transformer = createRecursiveTransformer<
 >(defaultFilters);
 
 export function useExplorerActionMenu() {
-  const { listing, filtering, selection, dialogs, favorites } =
-    useExplorerContext();
+  const {
+    listing: { path: currentDirPath },
+    filtering: { filteredNodes },
+    selection: { selectAll },
+    dialogs: { createFolderDialog, deleteDialog },
+    favorites: { get: getFavorite },
+  } = useExplorerContext();
 
-  const isMobile = useIsMobile();
+  const isNonFavoriteFile = useCallback(
+    (node: MediaNode) =>
+      !node.isDirectory && !getFavorite(node.path).isFavorite,
+    [getFavorite]
+  );
 
-  const nonFavoriteFiles = useMemo(() => {
-    return filtering.filteredNodes.filter(
-      (node) => !node.isDirectory && !favorites.get(node.path).isFavorite
-    );
-  }, [filtering, favorites]);
+  const hasNonFavoriteFiles = useMemo(() => {
+    return filteredNodes.some(isNonFavoriteFile);
+  }, [filteredNodes, isNonFavoriteFile]);
 
   const context = useMemo(() => {
     return {
-      listing,
-      filtering,
-      dialogs,
-      favorites,
-      selection,
-      isMobile,
-      nonFavoriteFiles,
+      selectAll,
+      promptCreateFolder: () => createFolderDialog.open(currentDirPath),
+      canDeleteNonFavorites: hasNonFavoriteFiles,
+      confirmDeleteNonFavorites: () => {
+        const targets = filteredNodes.filter(isNonFavoriteFile);
+        if (targets.length > 0) {
+          deleteDialog.open(targets);
+        }
+      },
     } satisfies ExplorerActionMenuContext;
   }, [
-    dialogs,
-    favorites,
-    filtering,
-    isMobile,
-    listing,
-    nonFavoriteFiles,
-    selection,
+    createFolderDialog,
+    currentDirPath,
+    deleteDialog,
+    filteredNodes,
+    hasNonFavoriteFiles,
+    isNonFavoriteFile,
+    selectAll,
   ]);
 
   const transformed = useMemo(
