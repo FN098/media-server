@@ -26,7 +26,6 @@ import {
   TagIcon,
   Trash2Icon,
 } from "lucide-react";
-import { useMemo } from "react";
 
 interface ExplorerMenuContext {
   listing: MediaListing;
@@ -41,7 +40,7 @@ interface ExplorerMenuContext {
   thumbs: ExplorerThumbs;
 }
 
-function createExplorerMenuItems({
+export function createExplorerMenuItems({
   listing,
   filtering,
   selection,
@@ -233,14 +232,4 @@ function createExplorerMenuItems({
       kbd: "Del",
     },
   ];
-}
-
-export function useExplorerMenu(context: ExplorerMenuContext) {
-  const items = useMemo(() => {
-    return createExplorerMenuItems(context);
-  }, [context]);
-
-  return {
-    items,
-  };
 }
