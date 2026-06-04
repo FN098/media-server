@@ -99,16 +99,7 @@ interface CellProps {
   onThumbError?: (node: MediaNode) => void;
 }
 
-function Cell({
-  node,
-  globalIndex,
-  allNodes,
-  isMobile,
-  totalSize,
-  onSelectionChange,
-  onOpen,
-  onThumbError,
-}: CellProps) {
+function Cell(props: CellProps) {
   const { items: menuItems } = useMenuItemsContext();
 
   const {
@@ -126,14 +117,9 @@ function Cell({
     handleDoubleClick,
     handleContextMenu,
     toggleFavorite,
-  } = useGridCell({
-    node,
-    globalIndex,
-    allNodes,
-    isMobile,
-    onSelectionChange,
-    onOpen,
-  });
+  } = useGridCell(props);
+
+  const { node, globalIndex, isMobile, totalSize, onThumbError } = props;
 
   // 合計サイズに対するこのノードの占有率（%）
   const occupancyPercent = useMemo(() => {
