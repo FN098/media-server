@@ -8,13 +8,8 @@ import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { AudioPlayer } from "@/components/ui/viewers/audio-player";
 import { ImageViewer } from "@/components/ui/viewers/image-viewer";
 import { VideoPlayer } from "@/components/ui/viewers/video-player";
-import {
-  MediaViewerContext,
-  useMediaViewer,
-} from "@/hooks/viewer/use-media-viewer";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
-import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { assertNever } from "@/lib/utils/assert";
 import { clamp } from "@/lib/utils/clamp";
 import {
@@ -22,6 +17,7 @@ import {
   getSlideIndex,
   MediaViewerSlide,
 } from "@/lib/viewer/slides";
+import { useMediaViewerContext } from "@/providers/media-viewer-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect } from "react";
@@ -31,44 +27,27 @@ import "swiper/css/zoom";
 import { Navigation, Virtual, Zoom } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-interface MediaViewerProps {
-  allNodes: MediaNode[];
-  initialIndex?: number;
-  hotkeysEnabled?: boolean;
-  menuItems?: MenuItemDef<NodeContext>[];
-  onIndexChange: (index: number) => void;
-  onClose: () => void;
-  onOpenPrev?: () => void;
-  onOpenNext?: () => void;
-  onOpenParent?: (node: MediaNode) => void;
-  onDelete?: (node: MediaNode) => void;
-}
-
-export function MediaViewer(props: MediaViewerProps) {
-  const viewer = useMediaViewer(props);
+export function MediaViewer() {
+  const { header } = useMediaViewerContext();
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-hidden touch-none bg-black select-none">
       {/* ヘッダーエリア（インタラクション検知用） */}
       <div
         className="absolute top-0 left-0 right-0 h-24 z-40"
-        onMouseMove={viewer.header.interact}
-        onPointerDown={viewer.header.interact}
+        onMouseMove={header.interact}
+        onPointerDown={header.interact}
       />
 
-      <MediaViewerHeader viewer={viewer} />
-      <MediaViewerSlides viewer={viewer} />
+      <MediaViewerHeader />
+      <MediaViewerSlides />
     </div>
   );
 }
 
 // ===== ヘッダー =====
 
-interface MediaViewerHeaderProps {
-  viewer: MediaViewerContext;
-}
-
-function MediaViewerHeader({ viewer }: MediaViewerHeaderProps) {
+function MediaViewerHeader() {
   const {
     navigation: { allNodes, currentIndex, currentNode },
     header: {
@@ -81,7 +60,7 @@ function MediaViewerHeader({ viewer }: MediaViewerHeaderProps) {
     headerMenuItems,
     onClose,
     favorite: { rating, isFavorite, toggleFavorite },
-  } = viewer;
+  } = useMediaViewerContext();
 
   return (
     <AnimatePresence>
@@ -154,11 +133,7 @@ function MediaViewerHeader({ viewer }: MediaViewerHeaderProps) {
 
 // ===== スライド =====
 
-interface MediaViewerSlidesProps {
-  viewer: MediaViewerContext;
-}
-
-function MediaViewerSlides({ viewer }: MediaViewerSlidesProps) {
+function MediaViewerSlides() {
   const {
     navigation: {
       allSlides,
@@ -169,7 +144,7 @@ function MediaViewerSlides({ viewer }: MediaViewerSlidesProps) {
       updateActiveSlide,
       setCurrentSlideIndex,
     },
-  } = viewer;
+  } = useMediaViewerContext();
 
   const handleWheel = useCallback(
     (e: React.WheelEvent, slide: ContentSlide, active: boolean) => {
@@ -247,7 +222,6 @@ function MediaViewerSlides({ viewer }: MediaViewerSlidesProps) {
               <MediaViewerSlideRenderer
                 slide={slide}
                 active={active}
-                viewer={viewer}
                 onNext={goNext}
               />
             </div>
@@ -263,20 +237,18 @@ function MediaViewerSlides({ viewer }: MediaViewerSlidesProps) {
 interface MediaViewerSlideRendererProps {
   slide: MediaViewerSlide;
   active: boolean;
-  viewer: MediaViewerContext;
   onNext: () => void;
 }
 
 function MediaViewerSlideRenderer({
   slide,
   active,
-  viewer,
   onNext,
 }: MediaViewerSlideRendererProps) {
   const {
     slideshow: { enabled: isSlideshowEnabled, delay },
     audioRepeating: { enabled: isRepeating, setEnabled: setIsRepeating },
-  } = viewer;
+  } = useMediaViewerContext();
 
   switch (slide.type) {
     case "empty":

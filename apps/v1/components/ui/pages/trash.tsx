@@ -9,6 +9,7 @@ import { TrashToolbar } from "@/components/ui/toolbars/trash-toolbar";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
+import { MediaViewerProvider } from "@/providers/media-viewer-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
@@ -39,7 +40,7 @@ function TrashContent() {
   if (viewer.isOpen) {
     return (
       <ScrollLockProvider>
-        <MediaViewer
+        <MediaViewerProvider
           allNodes={filtering.mediaOnly}
           initialIndex={viewer.index}
           menuItems={menu.items}
@@ -48,7 +49,9 @@ function TrashContent() {
           onOpenPrev={navigation.openPrevFolder}
           onOpenNext={navigation.openNextFolder}
           onDelete={(node) => dialogs.deleteDialog.open([node])}
-        />
+        >
+          <MediaViewer />
+        </MediaViewerProvider>
       </ScrollLockProvider>
     );
   }

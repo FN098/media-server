@@ -10,6 +10,7 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerContext } from "@/providers/explorer-provider";
+import { MediaViewerProvider } from "@/providers/media-viewer-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
@@ -36,7 +37,7 @@ function ExplorerContent() {
   if (viewer.isOpen) {
     return (
       <ScrollLockProvider>
-        <MediaViewer
+        <MediaViewerProvider
           allNodes={filtering.mediaOnly}
           initialIndex={viewer.index}
           menuItems={menu.items}
@@ -45,7 +46,9 @@ function ExplorerContent() {
           onOpenPrev={navigation.openPrevFolder}
           onOpenNext={navigation.openNextFolder}
           onDelete={(node) => dialogs.deleteDialog.open([node])}
-        />
+        >
+          <MediaViewer />
+        </MediaViewerProvider>
       </ScrollLockProvider>
     );
   }
