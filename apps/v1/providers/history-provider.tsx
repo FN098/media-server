@@ -3,9 +3,9 @@
 import { useHistory } from "@/hooks/navigations/use-history";
 import { createContext, useContext } from "react";
 
-type History = ReturnType<typeof useHistory>;
-
-const HistoryContext = createContext<History | undefined>(undefined);
+const HistoryContext = createContext<ReturnType<typeof useHistory> | undefined>(
+  undefined
+);
 
 export function HistoryProvider({
   children,

@@ -4,9 +4,9 @@ import { useExplorer } from "@/hooks/explorer/use-explorer";
 import { MediaListing } from "@/lib/media/types";
 import { createContext, useContext } from "react";
 
-type Explorer = ReturnType<typeof useExplorer>;
-
-const ExplorerContext = createContext<Explorer | undefined>(undefined);
+const ExplorerContext = createContext<
+  ReturnType<typeof useExplorer> | undefined
+>(undefined);
 
 export function ExplorerProvider({
   children,

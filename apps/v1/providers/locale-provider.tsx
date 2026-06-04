@@ -3,9 +3,9 @@
 import { useLocale } from "@/hooks/general/use-locale";
 import { createContext, useContext } from "react";
 
-type Locale = ReturnType<typeof useLocale>;
-
-const LocaleContext = createContext<Locale | undefined>(undefined);
+const LocaleContext = createContext<ReturnType<typeof useLocale> | undefined>(
+  undefined
+);
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const value = useLocale();

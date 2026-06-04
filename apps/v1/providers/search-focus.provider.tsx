@@ -3,9 +3,9 @@
 import { useSearchFocus } from "@/hooks/search/use-search-focus";
 import { createContext, useContext } from "react";
 
-type SearchFocus = ReturnType<typeof useSearchFocus>;
-
-const SearchFocusContext = createContext<SearchFocus | undefined>(undefined);
+const SearchFocusContext = createContext<
+  ReturnType<typeof useSearchFocus> | undefined
+>(undefined);
 
 export function SearchFocusProvider({
   children,

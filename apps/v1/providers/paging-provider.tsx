@@ -3,9 +3,9 @@
 import { usePaging } from "@/hooks/navigations/use-paging";
 import { createContext, ReactNode, useContext } from "react";
 
-type Paging = ReturnType<typeof usePaging>;
-
-const PagingContext = createContext<Paging | undefined>(undefined);
+const PagingContext = createContext<ReturnType<typeof usePaging> | undefined>(
+  undefined
+);
 
 export function PagingProvider({
   children,

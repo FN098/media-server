@@ -3,9 +3,9 @@
 import { useHeaderPinned } from "@/hooks/viewer/use-header-pinned";
 import { createContext, useContext } from "react";
 
-type HeaderPinned = ReturnType<typeof useHeaderPinned>;
-
-const headerPinnedContext = createContext<HeaderPinned | undefined>(undefined);
+const headerPinnedContext = createContext<
+  ReturnType<typeof useHeaderPinned> | undefined
+>(undefined);
 
 export function ViewerHeaderPinnedProvider({
   children,

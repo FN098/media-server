@@ -3,11 +3,9 @@
 import { usePathSelection } from "@/hooks/selections/use-path-selection";
 import React, { createContext, useContext } from "react";
 
-type PathSelection = ReturnType<typeof usePathSelection>;
-
-const PathSelectionContext = createContext<PathSelection | undefined>(
-  undefined
-);
+const PathSelectionContext = createContext<
+  ReturnType<typeof usePathSelection> | undefined
+>(undefined);
 
 export function PathSelectionProvider({
   children,

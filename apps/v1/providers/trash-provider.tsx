@@ -4,9 +4,9 @@ import { useTrash } from "@/hooks/trash/use-trash";
 import { MediaListing } from "@/lib/media/types";
 import { createContext, useContext } from "react";
 
-type Trash = ReturnType<typeof useTrash>;
-
-const TrashContext = createContext<Trash | undefined>(undefined);
+const TrashContext = createContext<ReturnType<typeof useTrash> | undefined>(
+  undefined
+);
 
 export function TrashProvider({
   children,
