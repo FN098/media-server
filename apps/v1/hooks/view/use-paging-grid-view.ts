@@ -81,8 +81,9 @@ export function usePagingGridView({
       !initialScrollTargetPage ||
       initialScrollTargetPage === currentPage ||
       hasRestored.current
-    )
+    ) {
       return;
+    }
     setPage(initialScrollTargetPage);
   }, [currentPage, setPage, initialScrollTargetPage]);
 
@@ -101,7 +102,7 @@ export function usePagingGridView({
         `media-item-${initialScrollTargetIndex}`
       );
       if (element) {
-        element.scrollIntoView({ behavior: "instant", block: "nearest" });
+        element.scrollIntoView({ behavior: "instant", block: "center" });
         hasRestored.current = true;
         onScrollRestored?.();
       }
@@ -117,9 +118,11 @@ export function usePagingGridView({
   useEffect(() => {
     const updateColumns = () => {
       if (gridRef.current) {
+        // gridRef の直下の .grid 要素（なければ gridRef 自身）のスタイルを取得
         const gridStyle = window.getComputedStyle(
           gridRef.current.querySelector(":scope > .grid") ?? gridRef.current
         );
+        // grid 列のピクセル数情報（例. 120px 120px 120px 120px）から、現在の列数を計算
         const cols = gridStyle.gridTemplateColumns.split(" ").length;
         setColumnCount(cols || 1);
       }
@@ -216,7 +219,7 @@ export function usePagingGridView({
     ]
   );
 
-  // ページ変更時のコンテナフォーカスと位置復元
+  // キーボード操作によるページ変更時のコンテナフォーカスと位置復元
   useEffect(() => {
     if (focusOnPageChange) {
       containerRef.current?.focus({ preventScroll: true });
