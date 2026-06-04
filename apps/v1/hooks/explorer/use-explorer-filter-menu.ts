@@ -1,7 +1,9 @@
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { MediaListing } from "@/lib/media/types";
-import { FilterMenuItem } from "@/lib/menu-items/types";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
+import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import {
   FileTypeIcon,
@@ -141,6 +143,11 @@ const filterMenuItems: FilterMenuItem<ExplorerFilterMenuContext>[] = [
   },
 ];
 
+const transformer = createRecursiveTransformer<
+  MenuItemDef<ExplorerFilterMenuContext>,
+  ExplorerFilterMenuContext
+>(defaultFilters);
+
 export function useExplorerFilterMenu() {
   const { listing, filtering, dialogs } = useExplorerContext();
 
@@ -152,8 +159,13 @@ export function useExplorerFilterMenu() {
     };
   }, [dialogs, filtering, listing]);
 
+  const transformed = useMemo(
+    () => transformer(filterMenuItems, context),
+    [context]
+  );
+
   return {
-    items: filterMenuItems,
+    items: transformed,
     context,
   };
 }

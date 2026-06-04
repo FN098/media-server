@@ -1,7 +1,9 @@
 import { FavoritesDialogs } from "@/hooks/favorites/use-favorites-dialogs";
 import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
 import { MediaListing } from "@/lib/media/types";
-import { FilterMenuItem } from "@/lib/menu-items/types";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
+import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 import {
   FileTypeIcon,
@@ -99,6 +101,11 @@ const filterMenuItems: FilterMenuItem<FavoritesFilterMenuContext>[] = [
   },
 ];
 
+const transformer = createRecursiveTransformer<
+  MenuItemDef<FavoritesFilterMenuContext>,
+  FavoritesFilterMenuContext
+>(defaultFilters);
+
 export function useFavoritesFilterMenu() {
   const { listing, filtering, dialogs } = useFavoritesContext();
 
@@ -110,8 +117,13 @@ export function useFavoritesFilterMenu() {
     };
   }, [dialogs, filtering, listing]);
 
+  const transformed = useMemo(
+    () => transformer(filterMenuItems, context),
+    [context]
+  );
+
   return {
-    items: filterMenuItems,
+    items: transformed,
     context,
   };
 }
