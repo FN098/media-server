@@ -5,6 +5,57 @@ import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { RotateCcwIcon, TagIcon, Trash2Icon } from "lucide-react";
 import { useMemo } from "react";
 
+interface TrashSelectionBarMenuContext {
+  selectedNodes: MediaNodeSelection["selectedNodes"];
+  hasSelection: boolean;
+  tagEditor: TagEditorControl;
+  restoreDialog: TrashDialogs["restoreDialog"];
+  deleteDialog: TrashDialogs["deleteDialog"];
+}
+
+function createTrashSelectionBarMenu({
+  selectedNodes,
+  hasSelection,
+  tagEditor,
+  restoreDialog,
+  deleteDialog,
+}: TrashSelectionBarMenuContext) {
+  const inlineItems: MenuItemDef<MultipleNodesContext>[] = [
+    {
+      key: "editTags",
+      type: "action",
+      icon: TagIcon,
+      label: "タグ編集",
+      onClick: tagEditor.open,
+    },
+  ];
+
+  const items = [
+    {
+      key: "restore",
+      type: "action",
+      icon: RotateCcwIcon,
+      label: "復元",
+      onClick: () => restoreDialog.open(selectedNodes),
+      disabled: () => !hasSelection,
+    },
+    {
+      key: "delete",
+      type: "action",
+      variant: "destructive",
+      icon: Trash2Icon,
+      label: "削除",
+      onClick: () => deleteDialog.open(selectedNodes, { isPermanent: true }),
+      disabled: () => !hasSelection,
+    },
+  ] satisfies MenuItemDef<MultipleNodesContext>[];
+
+  return {
+    items,
+    inlineItems,
+  };
+}
+
 interface UseTrashSelectionBarProps {
   selection: MediaNodeSelection;
   dialogs: TrashDialogs;
@@ -17,54 +68,21 @@ export function useTrashSelectionBar({
   tagEditor,
 }: UseTrashSelectionBarProps) {
   const { hasSelection, selectedNodes } = selection;
-  const { deleteDialog, restoreDialog } = dialogs;
+  const { restoreDialog, deleteDialog } = dialogs;
 
-  /**
-   * @todo ホイスト
-   * @see hooks/explorer/use-explorer-actions.ts
-   */
-  const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
-    () => [
-      {
-        key: "editTags",
-        type: "action",
-        icon: TagIcon,
-        label: "タグ編集",
-        onClick: tagEditor.open,
-      },
-    ],
-    [tagEditor.open]
-  );
-
-  const menuItems = useMemo(
+  const menu = useMemo(
     () =>
-      [
-        {
-          key: "restore",
-          type: "action",
-          icon: RotateCcwIcon,
-          label: "復元",
-          onClick: () => restoreDialog.open(selectedNodes),
-          disabled: () => !hasSelection,
-        },
-        {
-          key: "delete",
-          type: "action",
-          variant: "destructive",
-          icon: Trash2Icon,
-          label: "削除",
-          onClick: () =>
-            deleteDialog.open(selectedNodes, { isPermanent: true }),
-          disabled: () => !hasSelection,
-        },
-      ] satisfies MenuItemDef<MultipleNodesContext>[],
-    [restoreDialog, selectedNodes, deleteDialog, hasSelection]
+      createTrashSelectionBarMenu({
+        selectedNodes,
+        hasSelection,
+        tagEditor,
+        restoreDialog,
+        deleteDialog,
+      }),
+    [deleteDialog, hasSelection, restoreDialog, selectedNodes, tagEditor]
   );
 
   return {
-    menu: {
-      items: menuItems,
-      inlineItems: inlineMenuItems,
-    },
+    menu,
   };
 }

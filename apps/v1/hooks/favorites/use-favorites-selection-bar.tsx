@@ -8,6 +8,60 @@ import { averageBy } from "@/lib/utils/math";
 import { TagIcon } from "lucide-react";
 import { useMemo } from "react";
 
+interface FavoritesSelectionBarMenuContext {
+  isMediaSelected: boolean;
+  tagEditor: TagEditorControl;
+  favorites: FavoritesFavorites;
+}
+
+function createFavoritesSelectionBarMenu({
+  isMediaSelected,
+  tagEditor,
+  favorites,
+}: FavoritesSelectionBarMenuContext) {
+  const inlineItems: MenuItemDef<MultipleNodesContext>[] = [
+    {
+      key: "editTags",
+      type: "action",
+      icon: TagIcon,
+      label: "タグ編集",
+      onClick: tagEditor.open,
+    },
+  ];
+
+  const items = [
+    {
+      key: "rating",
+      type: "custom",
+      render: ({ nodes, closeMenu }) => {
+        const filtered = nodes.filter((n) => n.rating != null);
+        const averageRating = averageBy(filtered, (n) => n.rating!);
+
+        return (
+          <div className="w-full flex justify-center p-2">
+            <FavoriteRatingInput
+              value={averageRating}
+              onChange={(newRating) =>
+                favorites.update({
+                  targets: nodes,
+                  newRating,
+                  onSuccess: closeMenu,
+                })
+              }
+              disabled={!isMediaSelected}
+            />
+          </div>
+        );
+      },
+    },
+  ] satisfies MenuItemDef<MultipleNodesContext>[];
+
+  return {
+    items,
+    inlineItems,
+  };
+}
+
 interface UseFavoritesSelectionBarProps {
   selection: MediaNodeSelection;
   tagEditor: TagEditorControl;
@@ -26,58 +80,17 @@ export function useFavoritesSelectionBar({
     [selectedNodes]
   );
 
-  /**
-   * @todo ホイスト
-   * @see hooks/explorer/use-explorer-actions.ts
-   */
-  const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
-    () => [
-      {
-        key: "editTags",
-        type: "action",
-        icon: TagIcon,
-        label: "タグ編集",
-        onClick: tagEditor.open,
-      },
-    ],
-    [tagEditor.open]
-  );
-
-  const menuItems = useMemo(
+  const menu = useMemo(
     () =>
-      [
-        {
-          key: "rating",
-          type: "custom",
-          render: ({ nodes, closeMenu }) => {
-            const filtered = nodes.filter((n) => n.rating != null);
-            const averageRating = averageBy(filtered, (n) => n.rating!);
-
-            return (
-              <div className="w-full flex justify-center p-1">
-                <FavoriteRatingInput
-                  value={averageRating}
-                  onChange={(newRating) =>
-                    favorites.update({
-                      targets: nodes,
-                      newRating,
-                      onSuccess: closeMenu,
-                    })
-                  }
-                  disabled={!isMediaSelected}
-                />
-              </div>
-            );
-          },
-        },
-      ] satisfies MenuItemDef<MultipleNodesContext>[],
-    [favorites, isMediaSelected]
+      createFavoritesSelectionBarMenu({
+        isMediaSelected,
+        tagEditor,
+        favorites,
+      }),
+    [favorites, isMediaSelected, tagEditor]
   );
 
   return {
-    menu: {
-      items: menuItems,
-      inlineItems: inlineMenuItems,
-    },
+    menu,
   };
 }
