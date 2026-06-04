@@ -10,7 +10,10 @@ import {
   TagFilterMenuContext,
   tagFilterMenuItems,
 } from "@/lib/filter/tag-filter";
-import { FilterMenuItem } from "@/lib/menu-items/types";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
+import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
+import { useMemo } from "react";
 
 export interface FavoritesFilterMenuContext
   extends
@@ -24,6 +27,17 @@ const items: FilterMenuItem<FavoritesFilterMenuContext>[] = [
   ...tagFilterMenuItems,
 ];
 
-export function useFavoritesFilterMenuItems() {
-  return items;
+const transformer = createRecursiveTransformer<
+  MenuItemDef<FavoritesFilterMenuContext>,
+  FavoritesFilterMenuContext
+>(defaultFilters);
+
+interface UseFavoritesFilterMenuItemsProps {
+  context: FavoritesFilterMenuContext;
+}
+
+export function useFavoritesFilterMenuItems({
+  context,
+}: UseFavoritesFilterMenuItemsProps) {
+  return useMemo(() => transformer(items, context), [context]);
 }

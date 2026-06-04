@@ -14,7 +14,10 @@ import {
   TagFilterMenuContext,
   tagFilterMenuItems,
 } from "@/lib/filter/tag-filter";
-import { FilterMenuItem } from "@/lib/menu-items/types";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
+import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
+import { useMemo } from "react";
 
 export interface TrashFilterMenuContext
   extends
@@ -30,6 +33,15 @@ const items: FilterMenuItem<TrashFilterMenuContext>[] = [
   ...tagFilterMenuItems,
 ];
 
-export function useTrashFilterMenuItems() {
-  return items;
+const transformer = createRecursiveTransformer<
+  MenuItemDef<TrashFilterMenuContext>,
+  TrashFilterMenuContext
+>(defaultFilters);
+
+interface UseTrashFilterMenuProps {
+  context: TrashFilterMenuContext;
+}
+
+export function useTrashFilterMenuItems({ context }: UseTrashFilterMenuProps) {
+  return useMemo(() => transformer(items, context), [context]);
 }

@@ -4,16 +4,8 @@ import {
 } from "@/hooks/explorer/use-explorer-filter-menu-items";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaType } from "@/lib/media/types";
-import { defaultFilters } from "@/lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
-import { MenuItemDef } from "@/lib/menu-items/types";
 import { useExplorerContext } from "@/providers/explorer-provider";
 import { useCallback, useMemo } from "react";
-
-const transformer = createRecursiveTransformer<
-  MenuItemDef<ExplorerFilterMenuContext>,
-  ExplorerFilterMenuContext
->(defaultFilters);
 
 export function useExplorerFilterMenu() {
   const {
@@ -78,8 +70,6 @@ export function useExplorerFilterMenu() {
     [listing.nodes, tag.value, tagFilterDialog]
   );
 
-  const items = useExplorerFilterMenuItems();
-
   const context = useMemo(() => {
     return {
       favoriteFilterMode,
@@ -104,13 +94,10 @@ export function useExplorerFilterMenu() {
     toggleNonFavoriteOnly,
   ]);
 
-  const transformed = useMemo(
-    () => transformer(items, context),
-    [context, items]
-  );
+  const items = useExplorerFilterMenuItems({ context });
 
   return {
-    items: transformed,
+    items,
     context,
   };
 }

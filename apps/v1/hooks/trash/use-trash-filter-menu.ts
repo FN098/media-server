@@ -4,16 +4,8 @@ import {
   useTrashFilterMenuItems,
 } from "@/hooks/trash/use-trash-filter-menu-items";
 import { isMedia } from "@/lib/media/detectors";
-import { defaultFilters } from "@/lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
-import { MenuItemDef } from "@/lib/menu-items/types";
 import { useTrashContext } from "@/providers/trash-provider";
 import { useCallback, useMemo } from "react";
-
-const transformer = createRecursiveTransformer<
-  MenuItemDef<TrashFilterMenuContext>,
-  TrashFilterMenuContext
->(defaultFilters);
 
 export function useTrashFilterMenu() {
   const {
@@ -78,8 +70,6 @@ export function useTrashFilterMenu() {
     [listing.nodes, tag.value, tagFilterDialog]
   );
 
-  const items = useTrashFilterMenuItems();
-
   const context = useMemo(() => {
     return {
       favoriteFilterMode,
@@ -104,13 +94,10 @@ export function useTrashFilterMenu() {
     toggleNonFavoriteOnly,
   ]);
 
-  const transformed = useMemo(
-    () => transformer(items, context),
-    [context, items]
-  );
+  const items = useTrashFilterMenuItems({ context });
 
   return {
-    items: transformed,
+    items,
     context,
   };
 }
