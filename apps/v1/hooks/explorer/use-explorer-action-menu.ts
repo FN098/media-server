@@ -4,7 +4,10 @@ import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
+import { useExplorerContext } from "@/providers/explorer-provider";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { CheckCheckIcon, FolderPlusIcon, Trash2Icon } from "lucide-react";
+import { useMemo } from "react";
 
 interface ExplorerActionMenuContext {
   listing: MediaListing;
@@ -12,10 +15,9 @@ interface ExplorerActionMenuContext {
   dialogs: ExplorerDialogs;
   favorites: ExplorerFavorites;
   selection: MediaNodeSelection;
+  isMobile: boolean;
   computed: {
-    hasNonFavoriteFiles: boolean;
-    nonFavoriteTargets: MediaNode[];
-    isMobile: boolean;
+    nonFavoriteFiles: MediaNode[];
   };
 }
 
@@ -41,9 +43,9 @@ const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
     label: "お気に入り以外一括削除",
     icon: Trash2Icon,
     variant: "destructive",
-    disabled: (ctx) => !ctx.computed.hasNonFavoriteFiles,
+    disabled: (ctx) => ctx.computed.nonFavoriteFiles.length === 0,
     onClick: (ctx) => {
-      const targets = ctx.computed.nonFavoriteTargets;
+      const targets = ctx.computed.nonFavoriteFiles;
       if (targets.length > 0) {
         ctx.dialogs.deleteDialog.open(targets);
       }
@@ -52,5 +54,31 @@ const actionMenuItems: MenuItemDef<ExplorerActionMenuContext>[] = [
 ];
 
 export function useExplorerActionMenu() {
-  return { items: actionMenuItems };
+  const { listing, filtering, selection, dialogs, favorites } =
+    useExplorerContext();
+
+  const isMobile = useIsMobile();
+
+  const context = useMemo(() => {
+    const nonFavoriteFiles = filtering.filteredNodes.filter(
+      (node) => !node.isDirectory && !favorites.get(node.path).isFavorite
+    );
+
+    return {
+      listing,
+      filtering,
+      dialogs,
+      favorites,
+      selection,
+      isMobile,
+      computed: {
+        nonFavoriteFiles,
+      },
+    };
+  }, [filtering, listing, dialogs, favorites, selection, isMobile]);
+
+  return {
+    items: actionMenuItems,
+    context, // コンテキストも一緒に返す
+  };
 }

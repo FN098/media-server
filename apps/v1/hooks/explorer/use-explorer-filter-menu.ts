@@ -2,6 +2,7 @@ import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { MediaListing } from "@/lib/media/types";
 import { FilterMenuItem } from "@/lib/menu-items/types";
+import { useExplorerContext } from "@/providers/explorer-provider";
 import {
   FileTypeIcon,
   ImageIcon,
@@ -11,6 +12,7 @@ import {
   TagIcon,
   VideoIcon,
 } from "lucide-react";
+import { useMemo } from "react";
 
 interface ExplorerFilterMenuContext {
   filtering: ExplorerFiltering;
@@ -140,5 +142,18 @@ const filterMenuItems: FilterMenuItem<ExplorerFilterMenuContext>[] = [
 ];
 
 export function useExplorerFilterMenu() {
-  return { items: filterMenuItems };
+  const { listing, filtering, dialogs } = useExplorerContext();
+
+  const context = useMemo(() => {
+    return {
+      filtering,
+      dialogs,
+      listing,
+    };
+  }, [dialogs, filtering, listing]);
+
+  return {
+    items: filterMenuItems,
+    context,
+  };
 }

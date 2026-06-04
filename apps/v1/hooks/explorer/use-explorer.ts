@@ -10,6 +10,7 @@ import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
+import { useSort } from "@/hooks/sort/use-sort";
 import { useTagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
@@ -29,6 +30,7 @@ export function useExplorer({ listing }: UseExplorerProps) {
     allNodes: listing.nodes,
     activeNodes: filtering.filteredNodes,
   });
+  const sort = useSort();
 
   const dialogs = useExplorerDialogs({ filtering });
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
@@ -94,6 +96,7 @@ export function useExplorer({ listing }: UseExplorerProps) {
     viewMode,
     filtering,
     selection,
+    sort,
     dialogs,
     viewer,
     folder,
