@@ -1,105 +1,14 @@
-import { FavoritesDialogs } from "@/hooks/favorites/use-favorites-dialogs";
-import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
-import { MediaListing } from "@/lib/media/types";
+import { isMedia } from "@/lib/media/detectors";
+import { MediaType } from "@/lib/media/types";
+import {
+  FavoritesFilterMenuContext,
+  favoritesFilterMenuItems,
+} from "@/lib/menu-items/favorites-filter-menu-items";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
-import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
+import { MenuItemDef } from "@/lib/menu-items/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";
-import {
-  FileTypeIcon,
-  ImageIcon,
-  MusicIcon,
-  StarsIcon,
-  TagIcon,
-  VideoIcon,
-} from "lucide-react";
-import { useMemo } from "react";
-
-interface FavoritesFilterMenuContext {
-  filtering: FavoritesFiltering;
-  dialogs: FavoritesDialogs;
-  listing: MediaListing;
-}
-
-const filterMenuItems: FilterMenuItem<FavoritesFilterMenuContext>[] = [
-  {
-    key: "file-type-filter-group",
-    type: "group",
-    label: "種別",
-    icon: FileTypeIcon,
-    isActive: (ctx) => ctx.filtering.controls.mediaType.value.types.length > 0,
-    children: [
-      {
-        key: "file-type-filter-image",
-        type: "action",
-        label: "画像",
-        icon: ImageIcon,
-        isActive: (ctx) =>
-          ctx.filtering.controls.mediaType.value.types.includes("image"),
-        onClick: (ctx) => {
-          if (ctx.filtering.controls.mediaType.value.types.includes("image")) {
-            ctx.filtering.controls.mediaType.reset();
-          } else {
-            ctx.filtering.controls.mediaType.apply({ types: ["image"] });
-          }
-        },
-      },
-      {
-        key: "file-type-filter-video",
-        type: "action",
-        label: "動画",
-        icon: VideoIcon,
-        isActive: (ctx) =>
-          ctx.filtering.controls.mediaType.value.types.includes("video"),
-        onClick: (ctx) => {
-          if (ctx.filtering.controls.mediaType.value.types.includes("video")) {
-            ctx.filtering.controls.mediaType.reset();
-          } else {
-            ctx.filtering.controls.mediaType.apply({ types: ["video"] });
-          }
-        },
-      },
-      {
-        key: "file-type-filter-audio",
-        type: "action",
-        label: "音声",
-        icon: MusicIcon,
-        isActive: (ctx) =>
-          ctx.filtering.controls.mediaType.value.types.includes("audio"),
-        onClick: (ctx) => {
-          if (ctx.filtering.controls.mediaType.value.types.includes("audio")) {
-            ctx.filtering.controls.mediaType.reset();
-          } else {
-            ctx.filtering.controls.mediaType.apply({ types: ["audio"] });
-          }
-        },
-      },
-    ],
-  },
-  {
-    key: "rating-filter",
-    type: "action",
-    label: "評価",
-    icon: StarsIcon,
-    isActive: (ctx) => ctx.filtering.controls.rating.value.mode !== "all",
-    onClick: (ctx) => {
-      ctx.dialogs.ratingFilterDialog.open(ctx.filtering.controls.rating.value);
-    },
-  },
-  {
-    key: "tag-filter",
-    type: "action",
-    label: "タグ",
-    icon: TagIcon,
-    isActive: (ctx) => ctx.filtering.controls.tag.value.tags.length > 0,
-    onClick: (ctx) => {
-      ctx.dialogs.tagFilterDialog.open(
-        ctx.filtering.controls.tag.value,
-        ctx.listing.nodes
-      );
-    },
-  },
-];
+import { useCallback, useMemo } from "react";
 
 const transformer = createRecursiveTransformer<
   MenuItemDef<FavoritesFilterMenuContext>,
@@ -107,18 +16,71 @@ const transformer = createRecursiveTransformer<
 >(defaultFilters);
 
 export function useFavoritesFilterMenu() {
-  const { listing, filtering, dialogs } = useFavoritesContext();
+  const {
+    listing,
+    filtering: {
+      controls: { mediaType, rating, tag },
+    },
+    dialogs: { ratingFilterDialog, tagFilterDialog },
+  } = useFavoritesContext();
+
+  const mediaTypes = useMemo(
+    () =>
+      mediaType.value.types.filter((type): type is MediaType => isMedia(type)),
+    [mediaType]
+  );
+
+  const hasRatingFilter = useMemo(
+    () => rating.value.mode !== "all",
+    [rating.value.mode]
+  );
+
+  const hasTagFilter = useMemo(
+    () => tag.value.tags.length > 0,
+    [tag.value.tags]
+  );
+
+  const toggleMediaType = useCallback(
+    (type: MediaType) => {
+      if (mediaTypes.includes(type)) {
+        mediaType.reset();
+      } else {
+        mediaType.apply({ types: [type] });
+      }
+    },
+    [mediaType, mediaTypes]
+  );
+
+  const openRatingFilter = useCallback(
+    () => ratingFilterDialog.open(rating.value),
+    [rating.value, ratingFilterDialog]
+  );
+
+  const openTagFilter = useCallback(
+    () => tagFilterDialog.open(tag.value, listing.nodes),
+    [listing.nodes, tag.value, tagFilterDialog]
+  );
 
   const context = useMemo(() => {
     return {
-      filtering,
-      dialogs,
-      listing,
-    };
-  }, [dialogs, filtering, listing]);
+      mediaTypes,
+      hasRatingFilter,
+      hasTagFilter,
+      toggleMediaType,
+      openRatingFilter,
+      openTagFilter,
+    } satisfies FavoritesFilterMenuContext;
+  }, [
+    mediaTypes,
+    openRatingFilter,
+    openTagFilter,
+    hasRatingFilter,
+    hasTagFilter,
+    toggleMediaType,
+  ]);
 
   const transformed = useMemo(
-    () => transformer(filterMenuItems, context),
+    () => transformer(favoritesFilterMenuItems, context),
     [context]
   );
 
