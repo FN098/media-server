@@ -39,6 +39,7 @@ export function useVisibility({
     isVisible,
     show,
     hide,
+    debouncedHide,
     toggle,
   };
 }
