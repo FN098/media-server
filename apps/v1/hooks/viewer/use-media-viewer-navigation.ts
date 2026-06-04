@@ -52,6 +52,9 @@ export function useMediaViewerNavigation({
     (activeSlideIndex: number) => {
       const slide = allSlides[activeSlideIndex];
       if (!slide) return;
+
+      setCurrentSlideIndex(activeSlideIndex);
+
       if (slide.type === "empty") return;
 
       // ナビゲーション（前後のアルバムを開くなど）のトリガー
@@ -60,8 +63,6 @@ export function useMediaViewerNavigation({
         if (slide.direction === "next") onOpenNext?.();
         return;
       }
-
-      setCurrentSlideIndex(activeSlideIndex);
 
       const index = getMediaIndex(activeSlideIndex, hasPrev);
       const node = allNodes[index];
