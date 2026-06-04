@@ -36,8 +36,8 @@ interface MediaViewerProps {
   initialIndex?: number;
   hotkeysEnabled?: boolean;
   menuItems?: MenuItemDef<NodeContext>[];
-  onIndexChange?: (index: number) => void;
-  onClose?: () => void;
+  onIndexChange: (index: number) => void;
+  onClose: () => void;
   onOpenPrev?: () => void;
   onOpenNext?: () => void;
   onOpenParent?: (node: MediaNode) => void;
@@ -115,7 +115,9 @@ function MediaViewerHeader({ viewer }: MediaViewerHeaderProps) {
               </MarqueeText>
             </span>
             <span className="text-white/60 text-sm">
-              {currentIndex + 1} / {allNodes.length}
+              {allNodes.length > 0
+                ? `${currentIndex + 1} / ${allNodes.length}`
+                : "-"}
             </span>
           </div>
 
