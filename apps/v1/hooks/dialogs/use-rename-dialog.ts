@@ -1,5 +1,5 @@
 import { renameNodeAction } from "@/lib/media/actions";
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type RenameTarget = {
@@ -21,6 +21,13 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
   const [isPending, startTransition] = useTransition();
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // isPending が解除されたときに、ダイアログが開いていれば再フォーカスする
+  useEffect(() => {
+    if (!isPending && isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isPending, isOpen]);
 
   // 1. ダイアログを開く
   const open = useCallback((target: RenameTarget) => {
