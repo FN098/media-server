@@ -1,15 +1,15 @@
 import { MediaNode } from "@/lib/media/types";
 
-type MenuItemVariant = "default" | "destructive";
+export type MenuItemVariant = "default" | "destructive";
 
-interface BaseMenuItem<TContext> {
+export interface BaseMenuItem<TContext> {
   key: string;
   hidden?: (context: TContext) => boolean;
   disabled?: (context: TContext) => boolean;
   className?: string;
 }
 
-interface ActionMenuItem<TContext> extends BaseMenuItem<TContext> {
+export interface ActionMenuItem<TContext> extends BaseMenuItem<TContext> {
   type: "action";
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -18,7 +18,7 @@ interface ActionMenuItem<TContext> extends BaseMenuItem<TContext> {
   kbd?: string | string[];
 }
 
-interface GroupMenuItem<
+export interface GroupMenuItem<
   TContext,
   TItem = MenuItemDef<TContext>,
 > extends BaseMenuItem<TContext> {
@@ -28,12 +28,12 @@ interface GroupMenuItem<
   children: TItem[]; // 再帰的に自身を呼び出す
 }
 
-interface CustomMenuItem<TContext> extends BaseMenuItem<TContext> {
+export interface CustomMenuItem<TContext> extends BaseMenuItem<TContext> {
   type: "custom";
   render: (context: TContext) => React.ReactNode;
 }
 
-interface SeparatorMenuItem<TContext> extends BaseMenuItem<TContext> {
+export interface SeparatorMenuItem<TContext> extends BaseMenuItem<TContext> {
   type: "separator";
 }
 
@@ -54,7 +54,7 @@ export type MultipleNodesContext = {
 };
 
 // フィルター用
-type WithFilterMeta<TItem, TContext> = TItem & {
+export type WithFilterMeta<TItem, TContext> = TItem & {
   isActive?: (context: TContext) => boolean;
   iconClassName?: string | ((context: TContext) => string | undefined);
   closeOnSelect?: boolean; // default: true

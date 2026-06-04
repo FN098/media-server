@@ -1,9 +1,15 @@
+import { MenuItemDef } from "@/lib/menu-items/types";
+import { isGroupMenuItem } from "@/lib/menu-items/validators";
+
 export type Transform<TItem, TContext> = (
   items: TItem[],
   context: TContext
 ) => TItem[];
 
-export function createTransformer<TItem, TContext>(
+export function createTransformer<
+  TItem extends MenuItemDef<TContext>,
+  TContext,
+>(
   transforms: readonly Transform<TItem, TContext>[]
 ): Transform<TItem, TContext> {
   function apply(items: TItem[], context: TContext): TItem[] {
@@ -17,7 +23,7 @@ export function createTransformer<TItem, TContext>(
 }
 
 export function createRecursiveTransformer<
-  TItem extends { key: string; children?: TItem[] },
+  TItem extends MenuItemDef<TContext>,
   TContext,
 >(
   transforms: readonly Transform<TItem, TContext>[]
@@ -27,9 +33,10 @@ export function createRecursiveTransformer<
       (current, transform) => transform(current, context),
       items
     );
+
     return transformed.map((item) => {
-      if (!item.children) return item;
-      return { ...item, children: apply(item.children, context) };
+      if (!isGroupMenuItem(item)) return item;
+      return { ...item, children: apply(item.children as TItem[], context) };
     });
   }
   return apply;
