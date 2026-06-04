@@ -23,10 +23,13 @@ export interface ExplorerFilterMenuContext
     RatingFilterMenuContext,
     TagFilterMenuContext {}
 
-export const explorerFilterMenuItems: FilterMenuItem<ExplorerFilterMenuContext>[] =
-  [
-    ...favoriteFilterMenuItems,
-    ...fileTypeFilterMenuItems,
-    ...ratingFilterMenuItems,
-    ...tagFilterMenuItems,
-  ];
+const items: FilterMenuItem<ExplorerFilterMenuContext>[] = [
+  ...favoriteFilterMenuItems,
+  ...fileTypeFilterMenuItems,
+  ...ratingFilterMenuItems,
+  ...tagFilterMenuItems,
+];
+
+export function useExplorerFilterMenuItems() {
+  return items;
+}

@@ -1,8 +1,4 @@
 import {
-  FavoriteFilterMenuContext,
-  favoriteFilterMenuItems,
-} from "@/lib/filter/favorite-filter";
-import {
   FileTypeFilterMenuContext,
   fileTypeFilterMenuItems,
 } from "@/lib/filter/file-type-filter";
@@ -16,17 +12,18 @@ import {
 } from "@/lib/filter/tag-filter";
 import { FilterMenuItem } from "@/lib/menu-items/types";
 
-export interface TrashFilterMenuContext
+export interface FavoritesFilterMenuContext
   extends
-    FavoriteFilterMenuContext,
     FileTypeFilterMenuContext,
     RatingFilterMenuContext,
     TagFilterMenuContext {}
 
-/** @todo explorer-filter-menu-items とほぼ同じなのでまとめたい */
-export const trashFilterMenuItems: FilterMenuItem<TrashFilterMenuContext>[] = [
-  ...favoriteFilterMenuItems,
+const items: FilterMenuItem<FavoritesFilterMenuContext>[] = [
   ...fileTypeFilterMenuItems,
   ...ratingFilterMenuItems,
   ...tagFilterMenuItems,
 ];
+
+export function useFavoritesFilterMenuItems() {
+  return items;
+}

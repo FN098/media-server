@@ -1,9 +1,9 @@
-import { isMedia } from "@/lib/media/detectors";
-import { MediaType } from "@/lib/media/types";
 import {
   ExplorerFilterMenuContext,
-  explorerFilterMenuItems,
-} from "@/lib/menu-items/explorer-filter-menu-items";
+  useExplorerFilterMenuItems,
+} from "@/hooks/explorer/use-explorer-filter-menu-items";
+import { isMedia } from "@/lib/media/detectors";
+import { MediaType } from "@/lib/media/types";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
@@ -32,7 +32,7 @@ export function useExplorerFilterMenu() {
   const mediaTypes = useMemo(
     () =>
       mediaType.value.types.filter((type): type is MediaType => isMedia(type)),
-    [mediaType]
+    [mediaType.value.types]
   );
 
   const hasRatingFilter = useMemo(
@@ -78,6 +78,8 @@ export function useExplorerFilterMenu() {
     [listing.nodes, tag.value, tagFilterDialog]
   );
 
+  const items = useExplorerFilterMenuItems();
+
   const context = useMemo(() => {
     return {
       favoriteFilterMode,
@@ -103,8 +105,8 @@ export function useExplorerFilterMenu() {
   ]);
 
   const transformed = useMemo(
-    () => transformer(explorerFilterMenuItems, context),
-    [context]
+    () => transformer(items, context),
+    [context, items]
   );
 
   return {

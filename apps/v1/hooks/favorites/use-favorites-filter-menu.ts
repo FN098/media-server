@@ -1,9 +1,9 @@
-import { isMedia } from "@/lib/media/detectors";
-import { MediaType } from "@/lib/media/types";
 import {
   FavoritesFilterMenuContext,
-  favoritesFilterMenuItems,
-} from "@/lib/menu-items/favorites-filter-menu-items";
+  useFavoritesFilterMenuItems,
+} from "@/hooks/favorites/use-favorites-filter-menu-items";
+import { isMedia } from "@/lib/media/detectors";
+import { MediaType } from "@/lib/media/types";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
@@ -27,7 +27,7 @@ export function useFavoritesFilterMenu() {
   const mediaTypes = useMemo(
     () =>
       mediaType.value.types.filter((type): type is MediaType => isMedia(type)),
-    [mediaType]
+    [mediaType.value.types]
   );
 
   const hasRatingFilter = useMemo(
@@ -61,6 +61,8 @@ export function useFavoritesFilterMenu() {
     [listing.nodes, tag.value, tagFilterDialog]
   );
 
+  const items = useFavoritesFilterMenuItems();
+
   const context = useMemo(() => {
     return {
       mediaTypes,
@@ -80,8 +82,8 @@ export function useFavoritesFilterMenu() {
   ]);
 
   const transformed = useMemo(
-    () => transformer(favoritesFilterMenuItems, context),
-    [context]
+    () => transformer(items, context),
+    [context, items]
   );
 
   return {
