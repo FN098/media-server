@@ -19,7 +19,7 @@ import {
 import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
-import React, { Fragment } from "react";
+import React, { Fragment, useMemo } from "react";
 
 const transformer = createRecursiveTransformer<
   MenuItemDef<NodeContext>,
@@ -44,8 +44,11 @@ export function NodeContextMenu({
   const isMobile = useIsMobile();
   const mounted = useMounted();
 
-  const context = { node };
-  const items = transformer(menuItems, context);
+  const context = useMemo(() => ({ node }), [node]);
+  const items = useMemo(
+    () => transformer(menuItems, context),
+    [context, menuItems]
+  );
 
   if (!mounted || disabled) return children;
 

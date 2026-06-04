@@ -21,7 +21,7 @@ import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 const transformer = createRecursiveTransformer<
   MenuItemDef<NodeContext>,
@@ -56,8 +56,14 @@ export function NodeDropdownMenu({
   const open = controlledOpen ?? internalOpen;
   const setOpen = onControlledOpenChange ?? setInternalOpen;
 
-  const context = { node, closeMenu: () => setOpen(false) };
-  const items = transformer(menuItems, context);
+  const context = useMemo(
+    () => ({ node, closeMenu: () => setOpen(false) }),
+    [node, setOpen]
+  );
+  const items = useMemo(
+    () => transformer(menuItems, context),
+    [context, menuItems]
+  );
 
   if (!mounted || hidden) return null;
 
