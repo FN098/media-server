@@ -2,6 +2,7 @@ import { FavoritesDialogs } from "@/hooks/favorites/use-favorites-dialogs";
 import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
 import { MediaListing } from "@/lib/media/types";
 import { FilterMenuItem } from "@/lib/menu-items/types";
+import { useFavoritesContext } from "@/providers/favorites-provider";
 import {
   FileTypeIcon,
   ImageIcon,
@@ -10,6 +11,7 @@ import {
   TagIcon,
   VideoIcon,
 } from "lucide-react";
+import { useMemo } from "react";
 
 interface FavoritesFilterMenuContext {
   filtering: FavoritesFiltering;
@@ -98,5 +100,18 @@ const filterMenuItems: FilterMenuItem<FavoritesFilterMenuContext>[] = [
 ];
 
 export function useFavoritesFilterMenu() {
-  return { items: filterMenuItems };
+  const { listing, filtering, dialogs } = useFavoritesContext();
+
+  const context = useMemo(() => {
+    return {
+      filtering,
+      dialogs,
+      listing,
+    };
+  }, [dialogs, filtering, listing]);
+
+  return {
+    items: filterMenuItems,
+    context,
+  };
 }
