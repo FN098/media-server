@@ -39,7 +39,7 @@ export function useTrashActionMenu() {
     return {
       listing,
       dialogs,
-    };
+    } satisfies TrashActionMenuContext;
   }, [dialogs, listing]);
 
   const transformed = useMemo(
