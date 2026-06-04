@@ -15,7 +15,7 @@ export function useMediaViewerHeader() {
     },
   });
 
-  const interact = useCallback(() => visibility.show(), []);
+  const interact = useCallback(() => visibility.show(), [visibility]);
 
   return {
     isHovered,
