@@ -23,30 +23,8 @@ interface UseExplorerMenuProps {
   thumbs: ExplorerThumbs;
 }
 
-export function useExplorerMenu({
-  listing,
-  filtering,
-  selection,
-  dialogs,
-  tagEditor,
-  navigation,
-  viewer,
-  fullscreen,
-  favorites,
-  thumbs,
-}: UseExplorerMenuProps) {
-  const items = useExplorerMenuItems({
-    listing,
-    filtering,
-    selection,
-    dialogs,
-    tagEditor,
-    navigation,
-    viewer,
-    fullscreen,
-    favorites,
-    thumbs,
-  });
+export function useExplorerMenu(props: UseExplorerMenuProps) {
+  const items = useExplorerMenuItems(props);
 
   return {
     items,
