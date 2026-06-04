@@ -26,6 +26,10 @@ export function useFavoritesSelectionBar({
     [selectedNodes]
   );
 
+  /**
+   * @todo ホイスト
+   * @see hooks/explorer/use-explorer-actions.ts
+   */
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
     () => [
       {

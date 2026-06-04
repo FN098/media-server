@@ -65,7 +65,7 @@ export function useExplorerMenu({
   } = dialogs;
 
   /**
-   * @todo グローバルホイスト
+   * @todo ホイスト
    * @see hooks/explorer/use-explorer-actions.ts
    */
   const items = useMemo<MenuItemDef<NodeContext>[]>(

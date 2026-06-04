@@ -45,7 +45,7 @@ export function useExplorerSelectionBar({
   );
 
   /**
-   * @todo グローバルホイスト
+   * @todo ホイスト
    * @see hooks/explorer/use-explorer-actions.ts
    */
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(

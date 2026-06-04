@@ -19,6 +19,10 @@ export function useTrashSelectionBar({
   const { hasSelection, selectedNodes } = selection;
   const { deleteDialog, restoreDialog } = dialogs;
 
+  /**
+   * @todo ホイスト
+   * @see hooks/explorer/use-explorer-actions.ts
+   */
   const inlineMenuItems: MenuItemDef<MultipleNodesContext>[] = useMemo(
     () => [
       {
