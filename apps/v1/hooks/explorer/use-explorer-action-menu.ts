@@ -69,27 +69,25 @@ export function useExplorerActionMenu() {
     );
   }, [filtering, favorites]);
 
-  const context = useMemo(
-    () =>
-      ({
-        listing,
-        filtering,
-        dialogs,
-        favorites,
-        selection,
-        isMobile,
-        nonFavoriteFiles,
-      }) satisfies ExplorerActionMenuContext,
-    [
+  const context = useMemo(() => {
+    return {
+      listing,
+      filtering,
       dialogs,
       favorites,
-      filtering,
-      isMobile,
-      listing,
-      nonFavoriteFiles,
       selection,
-    ]
-  );
+      isMobile,
+      nonFavoriteFiles,
+    } satisfies ExplorerActionMenuContext;
+  }, [
+    dialogs,
+    favorites,
+    filtering,
+    isMobile,
+    listing,
+    nonFavoriteFiles,
+    selection,
+  ]);
 
   const transformed = useMemo(
     () => transformer(actionMenuItems, context),
