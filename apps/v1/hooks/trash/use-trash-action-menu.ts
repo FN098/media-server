@@ -1,5 +1,7 @@
 import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { MediaListing } from "@/lib/media/types";
+import { defaultFilters } from "@/lib/menu-items/filters";
+import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { useTrashContext } from "@/providers/trash-provider";
 import { Trash2Icon } from "lucide-react";
@@ -10,10 +12,11 @@ interface TrashActionMenuContext {
   dialogs: TrashDialogs;
 }
 
-const menuItems: MenuItemDef<TrashActionMenuContext>[] = [
+const actionMenuItems: MenuItemDef<TrashActionMenuContext>[] = [
   {
     key: "empty-current-dir",
     type: "action",
+    variant: "destructive",
     label: "このフォルダ内を完全に削除",
     icon: Trash2Icon,
     onClick: (ctx) =>
@@ -21,9 +24,13 @@ const menuItems: MenuItemDef<TrashActionMenuContext>[] = [
     disabled: (ctx) => {
       return ctx.listing.nodes.length === 0;
     },
-    variant: "destructive",
   },
 ];
+
+const transformer = createRecursiveTransformer<
+  MenuItemDef<TrashActionMenuContext>,
+  TrashActionMenuContext
+>(defaultFilters);
 
 export function useTrashActionMenu() {
   const { listing, dialogs } = useTrashContext();
@@ -35,8 +42,13 @@ export function useTrashActionMenu() {
     };
   }, [dialogs, listing]);
 
+  const transformed = useMemo(
+    () => transformer(actionMenuItems, context),
+    [context]
+  );
+
   return {
-    items: menuItems,
+    items: transformed,
     context,
   };
 }
