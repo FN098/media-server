@@ -24,6 +24,7 @@ export function useMoveMenuItem({
       label: "移動",
       onClick: ({ node }) =>
         openDialog(hasSelection ? selectedNodes : [node], currentDirPath),
+      kbd: "F7",
     }),
     [openDialog, hasSelection, selectedNodes, currentDirPath]
   );
