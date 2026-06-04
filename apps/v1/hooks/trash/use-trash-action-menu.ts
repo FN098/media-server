@@ -1,7 +1,9 @@
 import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef } from "@/lib/menu-items/types";
+import { useTrashContext } from "@/providers/trash-provider";
 import { Trash2Icon } from "lucide-react";
+import { useMemo } from "react";
 
 interface TrashActionMenuContext {
   listing: MediaListing;
@@ -24,5 +26,17 @@ const menuItems: MenuItemDef<TrashActionMenuContext>[] = [
 ];
 
 export function useTrashActionMenu() {
-  return { items: menuItems };
+  const { listing, dialogs } = useTrashContext();
+
+  const context = useMemo(() => {
+    return {
+      listing,
+      dialogs,
+    };
+  }, [dialogs, listing]);
+
+  return {
+    items: menuItems,
+    context,
+  };
 }

@@ -2,6 +2,7 @@ import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { MediaListing } from "@/lib/media/types";
 import { FilterMenuItem } from "@/lib/menu-items/types";
+import { useTrashContext } from "@/providers/trash-provider";
 import {
   FileTypeIcon,
   ImageIcon,
@@ -11,6 +12,7 @@ import {
   TagIcon,
   VideoIcon,
 } from "lucide-react";
+import { useMemo } from "react";
 
 interface TrashFilterMenuContext {
   filtering: TrashFiltering;
@@ -140,5 +142,18 @@ const filterMenuItems: FilterMenuItem<TrashFilterMenuContext>[] = [
 ];
 
 export function useTrashFilterMenu() {
-  return { items: filterMenuItems };
+  const { listing, filtering, dialogs } = useTrashContext();
+
+  const context = useMemo(() => {
+    return {
+      filtering,
+      dialogs,
+      listing,
+    };
+  }, [dialogs, filtering, listing]);
+
+  return {
+    items: filterMenuItems,
+    context,
+  };
 }

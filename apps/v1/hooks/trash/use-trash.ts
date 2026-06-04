@@ -2,6 +2,7 @@ import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
+import { useSort } from "@/hooks/sort/use-sort";
 import { useTagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useTrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { useTrashFiltering } from "@/hooks/trash/use-trash-filtering";
@@ -28,6 +29,7 @@ export function useTrash({ listing }: UseTrashProps) {
     allNodes: listing.nodes,
     activeNodes: filtering.filteredNodes,
   });
+  const sort = useSort();
 
   const dialogs = useTrashDialogs({ filtering });
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
@@ -82,6 +84,7 @@ export function useTrash({ listing }: UseTrashProps) {
     viewMode,
     filtering,
     selection,
+    sort,
     dialogs,
     viewer,
     folder,

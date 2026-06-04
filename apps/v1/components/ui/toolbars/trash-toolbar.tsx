@@ -2,36 +2,17 @@ import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdo
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useSort } from "@/hooks/sort/use-sort";
 import { useTrashActionMenu } from "@/hooks/trash/use-trash-action-menu";
 import { useTrashFilterMenu } from "@/hooks/trash/use-trash-filter-menu";
 import { useTrashSortMenu } from "@/hooks/trash/use-trash-sort-menu";
 import { useTrashContext } from "@/providers/trash-provider";
-import { useMemo } from "react";
 
 export function TrashToolbar() {
-  const { listing, filtering, dialogs } = useTrashContext();
-
-  const sort = useSort();
+  const { filtering, sort } = useTrashContext();
 
   const filterMenu = useTrashFilterMenu();
   const sortMenu = useTrashSortMenu();
   const actionMenu = useTrashActionMenu();
-
-  const filterMenuContext = useMemo(() => {
-    return {
-      filtering,
-      dialogs,
-      listing,
-    };
-  }, [dialogs, filtering, listing]);
-
-  const actionMenuContext = useMemo(() => {
-    return {
-      listing,
-      dialogs,
-    };
-  }, [dialogs, listing]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2">
@@ -49,7 +30,7 @@ export function TrashToolbar() {
         <div className="w-full sm:w-[160px]">
           <FilterDropdownMenu
             items={filterMenu.items}
-            context={filterMenuContext}
+            context={filterMenu.context}
             onReset={filtering.reset}
             canReset={filtering.canReset}
           />
@@ -59,7 +40,7 @@ export function TrashToolbar() {
         <div className="w-full sm:w-[160px]">
           <ActionDropdownMenu
             items={actionMenu.items}
-            context={actionMenuContext}
+            context={actionMenu.context}
           />
         </div>
       </div>
