@@ -170,14 +170,20 @@ function MediaViewerSlides({ viewer }: MediaViewerSlidesProps) {
   } = viewer;
 
   const handleWheel = useCallback(
-    (e: React.WheelEvent, slide: ContentSlide) => {
-      if (slide.node.type !== "image") return;
+    (e: React.WheelEvent, slide: ContentSlide, active: boolean) => {
+      if (!active || slide.node.type !== "image") return;
 
       const swiper = swiperRef.current;
       if (!swiper?.zoom) return;
 
+      const deltaY = Math.abs(e.deltaY) < 4 ? 0 : e.deltaY;
+      if (deltaY === 0) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
       const currentScale = swiper.zoom.scale;
-      const delta = e.deltaY < 0 ? 0.2 : -0.2;
+      const delta = deltaY < 0 ? 0.2 : -0.2;
       const newScale = clamp(currentScale + delta, 1, 3);
 
       if (newScale === 1) {
@@ -231,7 +237,7 @@ function MediaViewerSlides({ viewer }: MediaViewerSlidesProps) {
             virtualIndex={i}
             onWheel={
               slide.type === "content"
-                ? (e) => handleWheel(e, slide)
+                ? (e) => handleWheel(e, slide, active)
                 : undefined
             }
           >
