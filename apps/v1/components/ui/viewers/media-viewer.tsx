@@ -96,10 +96,18 @@ function MediaViewerHeader() {
                 : "-"}
 
               {slideshow.enabled && (
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime-400 opacity-75" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-lime-400 shadow-[0_0_12px_rgba(163,230,53,0.9)]" />
-                </span>
+                <motion.span
+                  animate={{
+                    opacity: [0.6, 1, 0.6],
+                    scale: [1, 1.15, 1],
+                  }}
+                  transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="h-2.5 w-2.5 rounded-full bg-lime-400 shadow-[0_0_12px_rgba(163,230,53,0.9)]"
+                />
               )}
             </span>
           </div>
