@@ -60,6 +60,7 @@ function MediaViewerHeader() {
     menuItems,
     onClose,
     favorite: { rating, isFavorite, toggleFavorite },
+    slideshow,
   } = useMediaViewerContext();
 
   return (
@@ -93,10 +94,17 @@ function MediaViewerHeader() {
                 </ClickToCopy>
               </MarqueeText>
             </span>
-            <span className="text-white/60 text-sm">
+            <span className="text-white/60 text-sm flex items-center gap-2">
               {allNodes.length > 0
                 ? `${currentIndex + 1} / ${allNodes.length}`
                 : "-"}
+
+              {slideshow.enabled && (
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime-400 opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-lime-400 shadow-[0_0_12px_rgba(163,230,53,0.9)]" />
+                </span>
+              )}
             </span>
           </div>
 
