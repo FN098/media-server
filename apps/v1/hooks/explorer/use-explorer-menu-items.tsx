@@ -17,10 +17,12 @@ import { useRatingMenuItem } from "@/hooks/menu-items/use-rating-menu-item";
 import { useRenameMenuItem } from "@/hooks/menu-items/use-rename-menu-item";
 import { useSetAsPreviewMenuItem } from "@/hooks/menu-items/use-set-as-preview-menu-item";
 import { useToggleFullscreenMenuItem } from "@/hooks/menu-items/use-toggle-fullscreen-menu-item";
+import { useToggleSlideshowMenuItem } from "@/hooks/menu-items/use-toggle-slideshow-menu-item";
 import { useUpdateThumbMenuItem } from "@/hooks/menu-items/use-update-thumb-menu-item";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { Slideshow } from "@/hooks/viewer/use-slideshow";
 import { MediaListing } from "@/lib/media/types";
 import { createSeparator } from "@/lib/menu-items/factory";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
@@ -44,6 +46,7 @@ interface UseExplorerMenuItemsProps {
   fullscreen: Fullscreen;
   favorites: ExplorerFavorites;
   thumbs: ExplorerThumbs;
+  slideshow: Slideshow;
 }
 
 export function useExplorerMenuItems({
@@ -57,6 +60,7 @@ export function useExplorerMenuItems({
   fullscreen,
   favorites,
   thumbs,
+  slideshow,
 }: UseExplorerMenuItemsProps): MenuItemDef<NodeContext>[] {
   const rating = useRatingMenuItem({
     getFavorite: favorites.get,
@@ -135,11 +139,19 @@ export function useExplorerMenuItems({
     selectedNodes: selection.selectedNodes,
   });
 
+  const toggleSlideshow = useToggleSlideshowMenuItem({
+    toggleSlideshow: slideshow.toggle,
+    isSlideshowEnabled: slideshow.enabled,
+    isViewerOpen: viewer.isOpen,
+  });
+
   const deleteNode = useDeleteMenuItem({
     openDialog: dialogs.deleteDialog.open,
     hasSelection: selection.hasSelection,
     selectedNodes: selection.selectedNodes,
   });
+
+  // TODO: transformer
 
   return [
     rating,
@@ -159,6 +171,7 @@ export function useExplorerMenuItems({
     separators.etc,
     setAsPreview,
     updateThumb,
+    toggleSlideshow,
     separators.delete,
     deleteNode,
   ];

@@ -16,6 +16,7 @@ import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
+import { useSlideshowContext } from "@/providers/slideshow-provider";
 
 interface UseExplorerProps {
   listing: MediaListing;
@@ -68,6 +69,8 @@ export function useExplorer({ listing }: UseExplorerProps) {
     searchFocus,
   });
 
+  const slideshow = useSlideshowContext();
+
   const menu = useExplorerMenu({
     listing,
     filtering,
@@ -79,6 +82,7 @@ export function useExplorer({ listing }: UseExplorerProps) {
     fullscreen,
     favorites,
     thumbs,
+    slideshow,
   });
 
   const selectionbar = useExplorerSelectionBar({

@@ -19,3 +19,5 @@ export function useSlideshow() {
 
   return { enabled, delay, start, stop, toggle };
 }
+
+export type Slideshow = ReturnType<typeof useSlideshow>;

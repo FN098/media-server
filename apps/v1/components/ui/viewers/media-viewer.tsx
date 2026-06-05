@@ -57,7 +57,7 @@ function MediaViewerHeader() {
       isMenuOpen,
       setIsMenuOpen,
     },
-    headerMenuItems,
+    menuItems,
     onClose,
     favorite: { rating, isFavorite, toggleFavorite },
   } = useMediaViewerContext();
@@ -118,7 +118,7 @@ function MediaViewerHeader() {
             {currentNode && (
               <NodeDropdownMenu
                 node={currentNode}
-                menuItems={headerMenuItems}
+                menuItems={menuItems}
                 open={isMenuOpen}
                 onOpenChange={setIsMenuOpen}
                 triggerType="large"
@@ -336,6 +336,7 @@ function ImageSlide({
   onNext,
   delay = 5000,
 }: ImageSlideProps) {
+  console.log({ isSlideshowEnabled });
   useEffect(() => {
     if (!active || !isSlideshowEnabled) return;
 

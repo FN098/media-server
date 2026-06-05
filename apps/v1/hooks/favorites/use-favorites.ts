@@ -16,6 +16,7 @@ import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
+import { useSlideshowContext } from "@/providers/slideshow-provider";
 
 interface UseFavoritesProps {
   listing: MediaListing;
@@ -63,6 +64,8 @@ export function useFavorites({ listing }: UseFavoritesProps) {
     searchFocus,
   });
 
+  const slideshow = useSlideshowContext();
+
   const menu = useFavoritesMenu({
     filtering,
     selection,
@@ -71,6 +74,7 @@ export function useFavorites({ listing }: UseFavoritesProps) {
     viewer,
     fullscreen,
     favorites,
+    slideshow,
   });
 
   const selectionbar = useFavoritesSelectionBar({

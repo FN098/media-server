@@ -8,15 +8,18 @@ import { useOpenInNewTabMenuItem } from "@/hooks/menu-items/use-open-in-new-tab-
 import { useOpenParentFolderMenuItem } from "@/hooks/menu-items/use-open-parent-folder-menu-item";
 import { useRatingMenuItem } from "@/hooks/menu-items/use-rating-menu-item";
 import { useToggleFullscreenMenuItem } from "@/hooks/menu-items/use-toggle-fullscreen-menu-item";
+import { useToggleSlideshowMenuItem } from "@/hooks/menu-items/use-toggle-slideshow-menu-item";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { Slideshow } from "@/hooks/viewer/use-slideshow";
 import { createSeparator } from "@/lib/menu-items/factory";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 
 export const separators = {
   actions: createSeparator("sep-actions"),
   tags: createSeparator("sep-tags"),
+  etc: createSeparator("sep-etc"),
 } as const;
 
 interface UseFavoritesMenuItemsProps {
@@ -27,6 +30,7 @@ interface UseFavoritesMenuItemsProps {
   viewer: ViewerNavigation;
   fullscreen: Fullscreen;
   favorites: FavoritesFavorites;
+  slideshow: Slideshow;
 }
 
 export function useFavoritesMenuItems({
@@ -37,6 +41,7 @@ export function useFavoritesMenuItems({
   viewer,
   fullscreen,
   favorites,
+  slideshow,
 }: UseFavoritesMenuItemsProps): MenuItemDef<NodeContext>[] {
   const rating = useRatingMenuItem({
     getFavorite: favorites.get,
@@ -72,6 +77,12 @@ export function useFavoritesMenuItems({
     selectedNodes: selection.selectedNodes,
   });
 
+  const toggleSlideshow = useToggleSlideshowMenuItem({
+    toggleSlideshow: slideshow.toggle,
+    isSlideshowEnabled: slideshow.enabled,
+    isViewerOpen: viewer.isOpen,
+  });
+
   return [
     rating,
     separators.actions,
@@ -81,5 +92,7 @@ export function useFavoritesMenuItems({
     separators.tags,
     editTags,
     addTagFilter,
+    separators.etc,
+    toggleSlideshow,
   ];
 }

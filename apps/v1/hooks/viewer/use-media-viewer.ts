@@ -6,11 +6,10 @@ import { useMediaViewerFavorite } from "@/hooks/viewer/use-media-viewer-favorite
 import { useMediaViewerHeader } from "@/hooks/viewer/use-media-viewer-header";
 import { useMediaViewerHotkeys } from "@/hooks/viewer/use-media-viewer-hotkeys";
 import { useMediaViewerNavigation } from "@/hooks/viewer/use-media-viewer-navigation";
-import { useSlideshow } from "@/hooks/viewer/use-slideshow";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
-import { PauseIcon, PlayIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useSlideshowContext } from "@/providers/slideshow-provider";
+import { useCallback, useEffect } from "react";
 
 interface UseMediaViewerProps {
   allNodes: MediaNode[];
@@ -74,7 +73,7 @@ export function useMediaViewer({
 
   // ===== スライドショー =====
 
-  const slideshow = useSlideshow();
+  const slideshow = useSlideshowContext();
 
   // ===== 音声リピート =====
 
@@ -104,30 +103,9 @@ export function useMediaViewer({
     onChangeRating: favorite.changeRating,
   });
 
-  // ===== メニュー =====
-
-  /** @todo 別ファイルに定義 */
-  const headerMenuItems = useMemo(() => {
-    const items = [...menuItems];
-
-    if (items.length > 0) {
-      items.push({ key: `separator-${items.length}`, type: "separator" });
-    }
-
-    items.push({
-      key: "toggle-slideshow",
-      type: "action",
-      label: slideshow.enabled ? "スライドショー停止" : "スライドショー開始",
-      icon: slideshow.enabled ? PauseIcon : PlayIcon,
-      onClick: slideshow.toggle,
-    });
-
-    return items;
-  }, [menuItems, slideshow.enabled, slideshow.toggle]);
-
   return {
     header,
-    headerMenuItems,
+    menuItems,
     navigation,
     favorite,
     slideshow,

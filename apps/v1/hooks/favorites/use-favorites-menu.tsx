@@ -6,6 +6,7 @@ import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { Slideshow } from "@/hooks/viewer/use-slideshow";
 
 interface FavoritesMenuContext {
   filtering: FavoritesFiltering;
@@ -15,6 +16,7 @@ interface FavoritesMenuContext {
   viewer: ViewerNavigation;
   fullscreen: Fullscreen;
   favorites: FavoritesFavorites;
+  slideshow: Slideshow;
 }
 
 export function useFavoritesMenu(props: FavoritesMenuContext) {
