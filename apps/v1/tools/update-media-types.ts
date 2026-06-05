@@ -1,3 +1,11 @@
+/**
+ * メディアタイプ修正
+ *
+ * Media.type が未設定の行に対し、type の値を更新する。
+ *
+ * 使い方：`pnpm tsx ./tools/update-media-types.ts`
+ */
+
 import { detectMediaType, mediaTypes } from "@/lib/media/detectors";
 import { MediaType } from "@/lib/media/types";
 import { prisma } from "@/lib/prisma";

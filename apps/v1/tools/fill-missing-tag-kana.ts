@@ -1,3 +1,11 @@
+/**
+ * カナ追加
+ *
+ * Table.kana が未設定の行に対し、 kana の値を更新する。
+ *
+ * 使い方：`pnpm tsx ./tools/fill-missing-tag-kana.ts`
+ */
+
 import { prisma } from "@/lib/prisma";
 import { generateKana } from "@/lib/utils/kana";
 

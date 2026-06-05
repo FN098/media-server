@@ -1,3 +1,11 @@
+/**
+ * カナ修正
+ *
+ * Table.kana にひらがなが混じった行に対し、kana の値をカタカナに修正する。
+ *
+ * 使い方：`pnpm tsx ./tools/fix-and-fill-tag-kana.ts`
+ */
+
 import { prisma } from "@/lib/prisma";
 import { generateKana } from "@/lib/utils/kana";
 
