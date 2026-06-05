@@ -8,15 +8,6 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SwiperClass } from "swiper/react";
 
-interface UseMediaViewerNavigationProps {
-  allNodes: MediaNode[];
-  initialIndex?: number;
-  onIndexChange?: (index: number) => void;
-  onOpenPrev?: () => void;
-  onOpenNext?: () => void;
-  onNodeChange?: (node: MediaNode) => void;
-}
-
 function getSafeMediaIndex(index: number, total: number) {
   if (total === 0) return 0;
   return Math.min(Math.max(index, 0), total - 1);
@@ -24,6 +15,15 @@ function getSafeMediaIndex(index: number, total: number) {
 
 function getFirstEmptySlideIndex(hasPrev: boolean) {
   return hasPrev ? 1 : 0;
+}
+
+interface UseMediaViewerNavigationProps {
+  allNodes: MediaNode[];
+  initialIndex?: number;
+  onIndexChange?: (index: number) => void;
+  onOpenPrev?: () => void;
+  onOpenNext?: () => void;
+  onNodeChange?: (node: MediaNode) => void;
 }
 
 export function useMediaViewerNavigation({
@@ -56,12 +56,31 @@ export function useMediaViewerNavigation({
   const restoredMediaIndex = useMemo(() => {
     if (allNodes.length === 0) return 0;
 
+    // 1. パスからインデックスを探す
     const lastViewedMediaIndex = lastViewedPath
       ? allNodes.findIndex((node) => node.path === lastViewedPath)
       : -1;
 
-    return lastViewedMediaIndex === -1 ? 0 : lastViewedMediaIndex;
-  }, [allNodes, lastViewedPath]);
+    // パスが見つかった場合はそれを返す
+    if (lastViewedMediaIndex !== -1) {
+      return lastViewedMediaIndex;
+    }
+
+    // 2. 見つからない場合＝表示中だったファイルが削除されたケース
+    // currentMediaIndex は前回のレンダー時のステートが残っているため、
+    // レンダー中であっても「直前のインデックス」として安全に参照できます。
+    const targetIndex = currentMediaIndex;
+
+    // 「現在の位置（旧 index+1）」が新しい配列の範囲内ならそれをそのまま使う
+    // ※ 1つ削除されているため、旧 index+1 が自動的に現在の targetIndex の位置にスライドしてきます
+    if (targetIndex < allNodes.length) {
+      return targetIndex;
+    }
+
+    // 「旧 index+1」が配列外（＝末尾のファイルを消したケース）なら「前のファイル（index-1）」へ
+    // ※ 新しい配列の末尾（allNodes.length - 1）になります
+    return allNodes.length - 1;
+  }, [allNodes, currentMediaIndex, lastViewedPath]);
 
   const needsNodeSync =
     allNodes.length === 0
