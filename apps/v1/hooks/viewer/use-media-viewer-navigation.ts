@@ -1,4 +1,5 @@
 import { MediaNode } from "@/lib/media/types";
+import { hashObject } from "@/lib/utils/fnv1a-hash";
 import {
   buildMediaViewerSlides,
   getMediaIndex,
@@ -16,6 +17,15 @@ interface UseMediaViewerNavigationProps {
   onNodeChange?: (node: MediaNode) => void;
 }
 
+function getSafeMediaIndex(index: number, total: number) {
+  if (total === 0) return 0;
+  return Math.min(Math.max(index, 0), total - 1);
+}
+
+function getFirstEmptySlideIndex(hasPrev: boolean) {
+  return hasPrev ? 1 : 0;
+}
+
 export function useMediaViewerNavigation({
   allNodes,
   initialIndex = 0,
@@ -26,21 +36,48 @@ export function useMediaViewerNavigation({
 }: UseMediaViewerNavigationProps) {
   const hasPrev = !!onOpenPrev;
   const hasNext = !!onOpenNext;
+  const initialMediaIndex = getSafeMediaIndex(initialIndex, allNodes.length);
 
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [currentIndex, setCurrentIndex] = useState(initialMediaIndex);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(
-    getSlideIndex(initialIndex, hasPrev)
+    getSlideIndex(initialMediaIndex, hasPrev)
+  );
+  const [lastViewedPath, setLastViewedPath] = useState<string | null>(
+    allNodes[initialMediaIndex]?.path ?? null
   );
 
   const swiperRef = useRef<SwiperClass | null>(null);
 
-  const lastViewedPathRef = useRef<string | null>(
-    allNodes[initialIndex]?.path ?? null
+  const nodesKey = useMemo(
+    () => hashObject(allNodes.map((node) => node.path)),
+    [allNodes]
   );
 
+  const restoredIndex = useMemo(() => {
+    if (allNodes.length === 0) return 0;
+
+    const lastViewedIndex = lastViewedPath
+      ? allNodes.findIndex((node) => node.path === lastViewedPath)
+      : -1;
+
+    return lastViewedIndex === -1 ? 0 : lastViewedIndex;
+  }, [allNodes, lastViewedPath]);
+
+  const needsNodeSync =
+    allNodes.length === 0
+      ? currentIndex !== 0
+      : allNodes[currentIndex]?.path !== lastViewedPath;
+  const activeIndex = needsNodeSync ? restoredIndex : currentIndex;
+  const activeSlideIndex =
+    allNodes.length === 0
+      ? getFirstEmptySlideIndex(hasPrev)
+      : needsNodeSync
+        ? getSlideIndex(restoredIndex, hasPrev)
+        : currentSlideIndex;
+
   const currentNode = useMemo(
-    () => allNodes[currentIndex] ?? null,
-    [allNodes, currentIndex]
+    () => allNodes[activeIndex] ?? null,
+    [activeIndex, allNodes]
   );
 
   const allSlides = useMemo(
@@ -59,6 +96,8 @@ export function useMediaViewerNavigation({
 
       // ナビゲーション（前後のアルバムを開くなど）のトリガー
       if (slide.type === "navigation") {
+        if (needsNodeSync) return;
+
         if (slide.direction === "prev") onOpenPrev?.();
         if (slide.direction === "next") onOpenNext?.();
         return;
@@ -69,15 +108,15 @@ export function useMediaViewerNavigation({
       if (!node) return;
 
       setCurrentIndex(index);
+      setLastViewedPath(node.path);
       onNodeChange?.(node);
       onIndexChange?.(index);
-
-      lastViewedPathRef.current = node.path;
     },
     [
       allSlides,
       hasPrev,
       allNodes,
+      needsNodeSync,
       onIndexChange,
       onOpenPrev,
       onOpenNext,
@@ -86,34 +125,52 @@ export function useMediaViewerNavigation({
   );
 
   useEffect(() => {
-    const path = lastViewedPathRef.current;
-    if (!path) return;
+    if (!needsNodeSync) return;
 
-    const index = allNodes.findIndex((n) => n.path === path);
-    if (index === -1 || index === currentIndex) return;
+    if (allNodes.length === 0) {
+      const firstEmptySlideIndex = getFirstEmptySlideIndex(hasPrev);
+      const frame = requestAnimationFrame(() => {
+        setCurrentIndex(0);
+        setCurrentSlideIndex(firstEmptySlideIndex);
+        setLastViewedPath(null);
+      });
 
-    const slideIndex = getSlideIndex(index, hasPrev);
-    const node = allNodes[index];
+      return () => cancelAnimationFrame(frame);
+    }
+
+    const node = allNodes[restoredIndex];
     if (!node) return;
 
-    setCurrentIndex(index);
-    setCurrentSlideIndex(slideIndex);
-
     onNodeChange?.(node);
-    onIndexChange?.(index);
+    onIndexChange?.(restoredIndex);
 
-    swiperRef.current?.slideTo(slideIndex, 0);
-  }, [allNodes, currentIndex, hasPrev, onIndexChange, onNodeChange]);
+    const slideIndex = getSlideIndex(restoredIndex, hasPrev);
+    const frame = requestAnimationFrame(() => {
+      setCurrentIndex(restoredIndex);
+      setCurrentSlideIndex(slideIndex);
+      setLastViewedPath(node.path);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [
+    allNodes,
+    hasPrev,
+    needsNodeSync,
+    onIndexChange,
+    onNodeChange,
+    restoredIndex,
+  ]);
 
   return {
     hasPrev,
     hasNext,
-    initialIndex,
-    currentIndex,
-    currentSlideIndex,
+    initialIndex: initialMediaIndex,
+    currentIndex: activeIndex,
+    currentSlideIndex: activeSlideIndex,
     currentNode,
     allNodes,
     allSlides,
+    slidesKey: nodesKey,
     swiperRef,
     updateActiveSlide,
     setCurrentSlideIndex,

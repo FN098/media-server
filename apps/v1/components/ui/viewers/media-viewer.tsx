@@ -12,11 +12,7 @@ import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { assertNever } from "@/lib/utils/assert";
 import { clamp } from "@/lib/utils/clamp";
-import {
-  ContentSlide,
-  getSlideIndex,
-  MediaViewerSlide,
-} from "@/lib/viewer/slides";
+import { ContentSlide, MediaViewerSlide } from "@/lib/viewer/slides";
 import { useMediaViewerContext } from "@/providers/media-viewer-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
@@ -146,8 +142,7 @@ function MediaViewerSlides() {
     navigation: {
       allSlides,
       currentSlideIndex,
-      initialIndex,
-      hasPrev,
+      slidesKey,
       swiperRef,
       updateActiveSlide,
       setCurrentSlideIndex,
@@ -205,8 +200,9 @@ function MediaViewerSlides() {
         swiperRef.current = swiper;
         setCurrentSlideIndex(swiper.activeIndex);
       }}
+      key={slidesKey}
       modules={[Virtual, Navigation, Zoom]}
-      initialSlide={getSlideIndex(initialIndex, hasPrev)}
+      initialSlide={currentSlideIndex}
       onSlideChange={(swiper) => updateActiveSlide(swiper.activeIndex)}
       virtual
       zoom
