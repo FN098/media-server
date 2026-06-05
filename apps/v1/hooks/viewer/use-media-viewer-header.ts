@@ -17,7 +17,6 @@ export function useMediaViewerHeader() {
 
   const interact = useCallback(() => {
     visibility.show();
-    visibility.debouncedHide();
   }, [visibility]);
 
   return {
