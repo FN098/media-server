@@ -38,7 +38,7 @@ export function useMediaViewerNavigation({
   const hasNext = !!onOpenNext;
   const initialMediaIndex = getSafeMediaIndex(initialIndex, allNodes.length);
 
-  const [currentIndex, setCurrentIndex] = useState(initialMediaIndex);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(initialMediaIndex);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(
     getSlideIndex(initialMediaIndex, hasPrev)
   );
@@ -53,31 +53,33 @@ export function useMediaViewerNavigation({
     [allNodes]
   );
 
-  const restoredIndex = useMemo(() => {
+  const restoredMediaIndex = useMemo(() => {
     if (allNodes.length === 0) return 0;
 
-    const lastViewedIndex = lastViewedPath
+    const lastViewedMediaIndex = lastViewedPath
       ? allNodes.findIndex((node) => node.path === lastViewedPath)
       : -1;
 
-    return lastViewedIndex === -1 ? 0 : lastViewedIndex;
+    return lastViewedMediaIndex === -1 ? 0 : lastViewedMediaIndex;
   }, [allNodes, lastViewedPath]);
 
   const needsNodeSync =
     allNodes.length === 0
-      ? currentIndex !== 0
-      : allNodes[currentIndex]?.path !== lastViewedPath;
-  const activeIndex = needsNodeSync ? restoredIndex : currentIndex;
+      ? currentMediaIndex !== 0
+      : allNodes[currentMediaIndex]?.path !== lastViewedPath;
+  const activeMediaIndex = needsNodeSync
+    ? restoredMediaIndex
+    : currentMediaIndex;
   const activeSlideIndex =
     allNodes.length === 0
       ? getFirstEmptySlideIndex(hasPrev)
       : needsNodeSync
-        ? getSlideIndex(restoredIndex, hasPrev)
+        ? getSlideIndex(restoredMediaIndex, hasPrev)
         : currentSlideIndex;
 
-  const currentNode = useMemo(
-    () => allNodes[activeIndex] ?? null,
-    [activeIndex, allNodes]
+  const activeNode = useMemo(
+    () => allNodes[activeMediaIndex] ?? null,
+    [activeMediaIndex, allNodes]
   );
 
   const allSlides = useMemo(
@@ -107,7 +109,7 @@ export function useMediaViewerNavigation({
       const node = allNodes[index];
       if (!node) return;
 
-      setCurrentIndex(index);
+      setCurrentMediaIndex(index);
       setLastViewedPath(node.path);
       onNodeChange?.(node);
       onIndexChange?.(index);
@@ -130,7 +132,7 @@ export function useMediaViewerNavigation({
     if (allNodes.length === 0) {
       const firstEmptySlideIndex = getFirstEmptySlideIndex(hasPrev);
       const frame = requestAnimationFrame(() => {
-        setCurrentIndex(0);
+        setCurrentMediaIndex(0);
         setCurrentSlideIndex(firstEmptySlideIndex);
         setLastViewedPath(null);
       });
@@ -138,15 +140,15 @@ export function useMediaViewerNavigation({
       return () => cancelAnimationFrame(frame);
     }
 
-    const node = allNodes[restoredIndex];
+    const node = allNodes[restoredMediaIndex];
     if (!node) return;
 
     onNodeChange?.(node);
-    onIndexChange?.(restoredIndex);
+    onIndexChange?.(restoredMediaIndex);
 
-    const slideIndex = getSlideIndex(restoredIndex, hasPrev);
+    const slideIndex = getSlideIndex(restoredMediaIndex, hasPrev);
     const frame = requestAnimationFrame(() => {
-      setCurrentIndex(restoredIndex);
+      setCurrentMediaIndex(restoredMediaIndex);
       setCurrentSlideIndex(slideIndex);
       setLastViewedPath(node.path);
     });
@@ -158,16 +160,16 @@ export function useMediaViewerNavigation({
     needsNodeSync,
     onIndexChange,
     onNodeChange,
-    restoredIndex,
+    restoredMediaIndex,
   ]);
 
   return {
     hasPrev,
     hasNext,
     initialIndex: initialMediaIndex,
-    currentIndex: activeIndex,
+    currentIndex: activeMediaIndex,
     currentSlideIndex: activeSlideIndex,
-    currentNode,
+    currentNode: activeNode,
     allNodes,
     allSlides,
     slidesKey: nodesKey,
