@@ -10,7 +10,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <SearchFocusProvider>
-      <div className="w-full h-svh flex flex-col overflow-hidden">
+      <div className="relative w-full min-h-svh flex flex-col overflow-hidden">
+        <PageBackground accent={meta.accent} />
         <Header
           title={meta.title}
           icon={meta.icon}
@@ -18,8 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           accent={meta.accent}
         />
         <main className="flex-1 overflow-y-auto">
-          <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden">
-            <PageBackground accent={meta.accent} />
+          <div className="flex w-full h-full items-center justify-center">
             {children}
           </div>
         </main>

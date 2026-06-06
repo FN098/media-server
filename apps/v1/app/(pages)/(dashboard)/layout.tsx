@@ -8,7 +8,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   if (!meta) return;
 
   return (
-    <div className="relative flex flex-col h-screen">
+    <div className="relative flex flex-col h-screen overflow-hidden">
+      <PageBackground accent={meta.accent} />
       <Header
         title={meta.title}
         icon={meta.icon}
@@ -17,8 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         accent={meta.accent}
       />
       <main className="flex-1 overflow-y-auto">
-        <div className="relative flex w-full h-full items-center justify-center overflow-hidden">
-          <PageBackground accent={meta.accent} />
+        <div className="flex w-full h-full items-center justify-center">
           {children}
         </div>
       </main>
