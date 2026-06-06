@@ -1,6 +1,6 @@
 "use server";
 
-import { acquireLock } from "@/lib/thumb-job/lock";
+import { acquireLock } from "@/lib/redis/lock";
 import { thumbQueue } from "@/lib/thumb-job/queue";
 import { sha1Hash } from "@/lib/utils/sha1-hash";
 
