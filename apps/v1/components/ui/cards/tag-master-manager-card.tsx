@@ -1,7 +1,5 @@
 "use client";
 
-import { TagMasterCardList } from "@/components/ui/cards/tag-master-manager-card/tag-master-card-list";
-import { TagMasterTable } from "@/components/ui/cards/tag-master-manager-card/tag-master-table";
 import {
   createTagsAction,
   deleteTagAction,
@@ -9,7 +7,9 @@ import {
   markTagsAsReadAction,
   renameTagAction,
   updateTagFavoriteAction,
-} from "@/lib/tag/actions";
+} from "@/actions/tag-actions";
+import { TagMasterCardList } from "@/components/ui/cards/tag-master-manager-card/tag-master-card-list";
+import { TagMasterTable } from "@/components/ui/cards/tag-master-manager-card/tag-master-table";
 import { TagMasterItem } from "@/lib/tag/types";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";

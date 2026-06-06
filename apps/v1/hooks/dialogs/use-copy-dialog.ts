@@ -2,8 +2,8 @@ import {
   listRecentFoldersAction,
   listSubDirectoriesAction,
   togglePinVisitedFolderAction,
-} from "@/lib/folder/actions";
-import { copyNodesAction } from "@/lib/media/actions";
+} from "@/actions/folder-actions";
+import { copyNodesAction } from "@/actions/media-actions";
 import { dirname } from "path";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";

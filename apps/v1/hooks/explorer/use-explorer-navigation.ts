@@ -1,3 +1,5 @@
+import { visitFolderAction } from "@/actions/folder-actions";
+import { getTextFilePreviewAction } from "@/actions/text-file-actions";
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
@@ -9,10 +11,8 @@ import {
   ViewerNavigation,
 } from "@/hooks/navigations/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { visitFolderAction } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
-import { getFilePreviewAction } from "@/lib/text/actions";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -94,7 +94,7 @@ export function useExplorerNavigation({
       // テキストファイルならプレビュー表示
       toast.promise(
         async () => {
-          const file = await getFilePreviewAction(node.path);
+          const file = await getTextFilePreviewAction(node.path);
 
           if (!file.isText)
             throw new Error("このファイル形式は対応していません");

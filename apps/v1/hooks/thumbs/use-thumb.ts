@@ -1,4 +1,4 @@
-import { enqueueCreateThumbsJobAction } from "@/lib/thumb-job/actions";
+import { enqueueCreateThumbsJobAction } from "@/actions/thumb-job-actions";
 import { useCallback } from "react";
 
 export function useThumb() {

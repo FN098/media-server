@@ -1,7 +1,7 @@
 import {
   deleteNodesAction,
   deleteNodesPermanentlyAction,
-} from "@/lib/media/actions";
+} from "@/actions/media-actions";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 

@@ -5,7 +5,7 @@ import {
   dumpDatabaseAction,
   listBackupFilesAction,
   restoreDatabaseAction,
-} from "@/lib/db-backup/actions";
+} from "@/actions/db-backup-actions";
 import { MAX_KEEP_COUNT, MIN_KEEP_COUNT } from "@/lib/db-backup/config";
 import { DbBackupFile, DbBackupUploadResult } from "@/lib/db-backup/types";
 import {

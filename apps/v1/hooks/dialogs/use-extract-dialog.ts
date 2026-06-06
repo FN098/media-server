@@ -1,4 +1,4 @@
-import { extractMultipleArchivesNodeAction } from "@/lib/archive/actions";
+import { extractMultipleArchivesNodeAction } from "@/actions/archive-actions";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 

@@ -1,5 +1,4 @@
 "use server";
-
 import { getServerMediaPath } from "@/lib/path/helpers";
 import fs from "fs/promises";
 import iconv from "iconv-lite";
@@ -7,7 +6,8 @@ import jschardet from "jschardet";
 
 const MAX_PREVIEW_SIZE = 100 * 1024; // 100KB
 
-export async function getFilePreviewAction(virtualPath: string) {
+// プレビュー取得
+export async function getTextFilePreviewAction(virtualPath: string) {
   const normalizedPath = virtualPath.replace(/^\//, ""); // 先頭のスラッシュをトリミング
 
   const realPath = getServerMediaPath(normalizedPath);

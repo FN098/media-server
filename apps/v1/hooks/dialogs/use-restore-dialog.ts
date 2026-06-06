@@ -1,4 +1,4 @@
-import { restoreNodesAction } from "@/lib/media/actions";
+import { restoreNodesAction } from "@/actions/media-actions";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 

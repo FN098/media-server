@@ -1,10 +1,10 @@
-import { touchMediaTimestampAction } from "@/lib/media/actions";
-import { MediaListing, MediaNode } from "@/lib/media/types";
-import { updatePreviewAction } from "@/lib/preview/actions";
+import { touchMediaTimestampAction } from "@/actions/media-actions";
+import { updatePreviewAction } from "@/actions/preview-actions";
 import {
   enqueueCreateSingleThumbJobAction,
   enqueueCreateThumbsJobAction,
-} from "@/lib/thumb-job/actions";
+} from "@/actions/thumb-job-actions";
+import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";

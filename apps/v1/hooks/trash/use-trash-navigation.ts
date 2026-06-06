@@ -1,3 +1,4 @@
+import { visitFolderAction } from "@/actions/folder-actions";
 import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { History, toHistoryItem } from "@/hooks/navigations/use-history";
 import { useMediaIndex } from "@/hooks/navigations/use-media-index";
@@ -8,7 +9,6 @@ import {
 } from "@/hooks/navigations/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
-import { visitFolderAction } from "@/lib/folder/actions";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useEffect } from "react";

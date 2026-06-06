@@ -1,6 +1,6 @@
 "use client";
 
-import { getMediaByTagId } from "@/lib/tag/actions";
+import { getMediaByTagId } from "@/actions/tag-actions";
 import {
   Popover,
   PopoverContent,

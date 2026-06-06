@@ -1,4 +1,4 @@
-import { renameNodeAction } from "@/lib/media/actions";
+import { renameNodeAction } from "@/actions/media-actions";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 

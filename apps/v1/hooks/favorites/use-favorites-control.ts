@@ -5,7 +5,7 @@ import {
   revalidateMultipleFavoritesAction,
   updateFavoriteAction,
   updateMultipleFavoritesAction,
-} from "@/lib/favorite/actions";
+} from "@/actions/favorite-actions";
 import { Favorite } from "@/lib/favorite/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
