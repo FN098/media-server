@@ -1,12 +1,9 @@
 // Node 環境でのみ実行可能な初期化処理
 // Edge 環境で呼び出すとエラーになるので注意
 
-import { PASS, USER } from "@/lib/auth/basic-auth";
 import { prisma } from "@/lib/prisma";
 
 export function registerNodeOnly() {
-  console.log("BASIC 認証情報", { USER, PASS });
-
   // 重複登録防止（型安全なチェック）
   if (!globalThis.isPrismaShutdownRegistered) {
     const handleDisconnect = async (signal: string) => {
