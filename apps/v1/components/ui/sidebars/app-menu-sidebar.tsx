@@ -34,14 +34,14 @@ const menuItems = resolvePageMetas([
 ]);
 
 export function AppMenuSidebar() {
-  const { setOpenMobile } = useSidebar();
+  const { setOpen } = useSidebar();
   const router = useRouter();
 
   const handleLogout = async () => {
     await authClient.signOut();
     router.push("/sign-in");
     router.refresh();
-    setOpenMobile(false);
+    setOpen(false);
   };
 
   return (
@@ -78,7 +78,7 @@ export function AppMenuSidebar() {
                     tooltip={item.title}
                     className="group rounded-lg px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-zinc-100 transition-colors data-[active=true]:bg-indigo-50 data-[active=true]:text-indigo-700 dark:data-[active=true]:bg-indigo-500/15 dark:data-[active=true]:text-indigo-300"
                   >
-                    <Link href={item.url} onClick={() => setOpenMobile(false)}>
+                    <Link href={item.url} onClick={() => setOpen(false)}>
                       <item.icon className="h-4 w-4 shrink-0" />
                       <span>{item.title}</span>
                     </Link>
