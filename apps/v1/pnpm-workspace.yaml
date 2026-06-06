@@ -1,15 +1,19 @@
 allowBuilds:
-  '@prisma/engines': true
+  "@prisma/engines": true
   esbuild: true
   msgpackr-extract: true
   prisma: true
   sharp: true
   unrs-resolver: true
 onlyBuiltDependencies:
-  - '@prisma/client'
-  - '@prisma/engines'
+  - "@prisma/client"
+  - "@prisma/engines"
   - esbuild
   - msgpackr-extract
   - prisma
   - sharp
   - unrs-resolver
+overrides:
+  # TODO: BetterAuth バージョンアップ後、不要になったら消す
+  # BetterAuth のバグ対応（https://github.com/better-auth/better-auth/issues/9901）
+  kysely: ^0.28.17
