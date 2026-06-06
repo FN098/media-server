@@ -15,11 +15,12 @@ export const auth = betterAuth({
         after: async (user) => {
           // 初回登録ユーザーに admin 権限付与
           await db.$transaction(async (tx) => {
-            const adminCount = await tx.user.count({
+            const admin = await tx.user.findFirst({
               where: { role: "admin" },
+              select: { id: true },
             });
 
-            if (adminCount === 0) {
+            if (admin === null) {
               await db.user.update({
                 where: { id: user.id },
                 data: { role: "admin" },
