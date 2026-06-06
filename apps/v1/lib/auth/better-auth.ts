@@ -1,11 +1,15 @@
 import { db } from "@/lib/prisma";
+import { parseCsvEnv } from "@/lib/utils/env";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin } from "better-auth/plugins";
 
 // @see https://better-auth.com/docs/installation
 
+const allowedOrigins = parseCsvEnv(process.env.ALLOWED_ORIGINS);
+
 export const auth = betterAuth({
+  trustedOrigins: allowedOrigins,
   database: prismaAdapter(db, {
     provider: "mysql",
   }),
