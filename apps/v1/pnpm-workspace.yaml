@@ -17,3 +17,5 @@ overrides:
   # TODO: BetterAuth バージョンアップ後、不要になったら消す
   # BetterAuth のバグ対応（https://github.com/better-auth/better-auth/issues/9901）
   kysely: ^0.28.17
+  # TODO: 不要になったら消す
+  ioredis: "5.11.1"
