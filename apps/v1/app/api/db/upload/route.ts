@@ -1,5 +1,9 @@
 import { TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupUploadResult } from "@/lib/db-backup/types";
+import {
+  badRequestResponse,
+  internalServerErrorResponse,
+} from "@/lib/response/errors";
 import { formatBytes } from "@/lib/utils/bytes";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
@@ -9,56 +13,56 @@ import z from "zod";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
-const dbUploadSchema = z.object({
+const UploadRequestSchema = z.object({
   file: z
     .instanceof(File)
-    .refine(
-      (file) => file.size <= MAX_FILE_SIZE,
-      `最大サイズは ${formatBytes(MAX_FILE_SIZE)} です`
-    )
-    .refine(
-      (file) => [".sql"].some((ext) => file.name.endsWith(ext)),
-      ".sql ファイルのみアップロード可能です"
-    ),
+    .refine((file) => file.size <= MAX_FILE_SIZE, {
+      message: `File size must not exceed ${formatBytes(MAX_FILE_SIZE)}`,
+    })
+    .refine((file) => [".sql"].some((ext) => file.name.endsWith(ext)), {
+      message: "Must be a .sql file",
+    }),
 });
-
-// TODO: try-catch の範囲を狭くする、response/errors を使う
 
 // DB バックアップファイルをアップロードする
 export async function POST(req: NextRequest) {
+  // 入力バリデーション
+  const formData = await req.formData();
+  const file = formData.get("file");
+
+  if (!file) {
+    return badRequestResponse({
+      code: "MISSING_REQUIRED_DATA",
+      message: "file is required",
+    });
+  }
+
+  const parsed = UploadRequestSchema.safeParse({ file });
+  if (!parsed.success) {
+    return badRequestResponse({
+      code: "INVALID_REQUEST_DATA",
+      message: parsed.error.issues[0].message,
+    });
+  }
+
+  const validFile = parsed.data.file;
+
+  // 一時フォルダをアップロードの度にリセット（ストレージ節約のため）
+  await fs.rm(TEMP_DB_BACKUP_DIR, { recursive: true, force: true });
+  await fs.mkdir(TEMP_DB_BACKUP_DIR, { recursive: true });
+
+  // 保存先パスの決定
+  const newFileName = `upload_${uuidv4()}.sql`; // ユーザーから渡されたファイル名は使用しない（セキュリティのため）
+  const savePath = path.join(TEMP_DB_BACKUP_DIR, newFileName);
+
   try {
-    // 入力バリデーション
-    const formData = await req.formData();
-    const file = formData.get("file");
-
-    const parsed = dbUploadSchema.safeParse({ file });
-    if (!parsed.success) {
-      return NextResponse.json(
-        { success: false, error: parsed.error.issues[0].message },
-        { status: 400 }
-      );
-    }
-
-    const validFile = parsed.data.file;
     const buffer = Buffer.from(await validFile.arrayBuffer());
-
-    // --- 古い一時ファイルの削除とフォルダの再作成 ---
-    // recursive: true で中身ごと削除、force: true で存在しなくてもエラーにしない
-    await fs.rm(TEMP_DB_BACKUP_DIR, { recursive: true, force: true });
-    // recursive: true で親ディレクトリ含めて確実に作成
-    await fs.mkdir(TEMP_DB_BACKUP_DIR, { recursive: true });
-    // --------------------------------------------
-
-    // 一時ディレクトリに保存
-    const tmpFileName = `upload_${uuidv4()}.sql`; // ユーザーから渡されたファイル名は使用しない（セキュリティのため）
-    const tmpPath = path.join(TEMP_DB_BACKUP_DIR, tmpFileName);
-
-    await fs.writeFile(tmpPath, buffer);
+    await fs.writeFile(savePath, buffer);
 
     return NextResponse.json({
       success: true,
       backup: {
-        name: tmpFileName,
+        name: newFileName,
         label: validFile.name,
         createdAt: new Date().toISOString(),
         size: validFile.size,
@@ -66,10 +70,7 @@ export async function POST(req: NextRequest) {
       },
     } satisfies DbBackupUploadResult);
   } catch (e) {
-    console.error("upload db file error:", e);
-    return NextResponse.json(
-      { success: false, error: "サーバーエラー" },
-      { status: 500 }
-    );
+    console.error("Upload error:", e);
+    return internalServerErrorResponse();
   }
 }
