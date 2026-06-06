@@ -1,9 +1,10 @@
 import { detectMediaType, isMedia } from "@/lib/media/detectors";
 import { MediaFsContext } from "@/lib/media/fs-listing";
 import { sortNames } from "@/lib/media/sort";
-import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
+
+// TODO: fs.readdir を呼びすぎ。一回だけ呼ぶようにする
 
 // そのディレクトリ「直下」にメディアがあるかチェック
 async function hasDirectMedia(
@@ -11,13 +12,18 @@ async function hasDirectMedia(
   context: MediaFsContext
 ): Promise<boolean> {
   const realPath = context.resolveRealPath(virtualDirPath);
-  if (!(await existsPath(realPath))) return false;
 
-  const dirents = await fs.readdir(realPath, { withFileTypes: true });
-  // ファイルかつメディアタイプであるものが1つでもあればOK
-  return dirents.some(
-    (e) => !e.isDirectory() && isMedia(detectMediaType(e.name))
-  );
+  try {
+    const dirents = await fs.readdir(realPath, { withFileTypes: true });
+
+    // ファイルかつメディアタイプであるものが1つでもあればOK
+    return dirents.some(
+      (e) => !e.isDirectory() && isMedia(detectMediaType(e.name))
+    );
+  } catch {
+    // ディレクトリ読取失敗
+    return false;
+  }
 }
 
 // そのディレクトリ直下のサブディレクトリを名前順に取得
@@ -26,21 +32,26 @@ async function getSubDirs(
   context: MediaFsContext
 ): Promise<string[]> {
   const realPath = context.resolveRealPath(virtualDirPath);
-  if (!(await existsPath(realPath))) return [];
+  try {
+    const dirents = await fs.readdir(realPath, { withFileTypes: true });
 
-  const dirents = await fs.readdir(realPath, { withFileTypes: true });
-
-  return sortNames(
-    dirents
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
-      .filter((name) => {
-        const virtualPath = path.join(virtualDirPath, name).replace(/\\/g, "/");
-        return context.filterVirtualPath
-          ? context.filterVirtualPath(virtualPath)
-          : true;
-      })
-  );
+    return sortNames(
+      dirents
+        .filter((e) => e.isDirectory())
+        .map((e) => e.name)
+        .filter((name) => {
+          const virtualPath = path
+            .join(virtualDirPath, name)
+            .replace(/\\/g, "/");
+          return context.filterVirtualPath
+            ? context.filterVirtualPath(virtualPath)
+            : true;
+        })
+    );
+  } catch {
+    // ディレクトリ読取失敗
+    return [];
+  }
 }
 
 // 隣の有効なフォルダを探し、さらにその中を深く探索して「最初のメディアがあるフォルダ」を特定する
