@@ -43,7 +43,7 @@ export function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // _next を“除外して”、それ以外すべてに認証をかける
-    "/((?!_next).*)",
+    // _next と api を“除外して”、それ以外すべてに認証をかける
+    "/((?!_next|api).*)",
   ],
 };
