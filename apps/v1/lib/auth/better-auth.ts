@@ -1,6 +1,7 @@
 import { db } from "@/lib/prisma";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { admin } from "better-auth/plugins";
 
 // @see https://better-auth.com/docs/installation
 
@@ -12,4 +13,5 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: false,
   },
+  plugins: [admin()],
 });
