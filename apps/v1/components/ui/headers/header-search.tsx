@@ -8,7 +8,7 @@ import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export function HeaderSearch() {
@@ -18,19 +18,45 @@ export function HeaderSearch() {
   const isMobile = useIsMobile();
   const mounted = useMounted();
   const inputRef = useRef<HTMLInputElement>(null);
+  const shouldRestoreFocusRef = useRef(false);
   const { register } = useSearchFocusContext();
+
+  const restoreFocus = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (!shouldRestoreFocusRef.current || !inputRef.current) return;
+
+      shouldRestoreFocusRef.current = false;
+      if (document.activeElement === inputRef.current) return;
+
+      inputRef.current.focus({ preventScroll: true });
+      setFocused(true);
+    });
+  }, []);
 
   useEffect(() => {
     // 他のコンポーネントから検索バーにフォーカスできるようにする
     register(() => inputRef.current?.focus());
   }, [register]);
 
+  useEffect(() => {
+    const nextInput = value.query ?? "";
+    const frame = requestAnimationFrame(() => setInput(nextInput));
+
+    restoreFocus();
+
+    return () => cancelAnimationFrame(frame);
+  }, [restoreFocus, value.query]);
+
   const placeholder = isMobile ? "" : undefined;
   const collapsedWidth = isMobile ? 36 : 180;
   const expandedWidth = isMobile ? 180 : 320;
 
   const debouncedApply = useDebouncedCallback(
-    (v: string | null) => apply(v),
+    (v: string | null) => {
+      shouldRestoreFocusRef.current =
+        document.activeElement === inputRef.current;
+      apply(v);
+    },
     300
   );
 
