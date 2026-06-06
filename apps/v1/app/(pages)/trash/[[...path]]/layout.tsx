@@ -12,7 +12,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <SearchFocusProvider>
       <div className="w-full h-svh flex flex-col overflow-hidden">
         <PageBackground accent={meta.accent} />
-        <Header title={meta.title} icon={meta.icon} basePath={meta.url} />
+        <Header
+          title={meta.title}
+          icon={meta.icon}
+          basePath={meta.url}
+          accent={meta.accent}
+        />
         <main className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {children}
         </main>

@@ -22,6 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           features={{
             navigation: false,
           }}
+          accent={meta.accent}
         />
         <main className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <TagEditorProvider>

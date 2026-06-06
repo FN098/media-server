@@ -19,6 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           search: false,
           viewMode: false,
         }}
+        accent={meta.accent}
       />
       <main className="flex-1 flex items-center justify-center">
         {children}

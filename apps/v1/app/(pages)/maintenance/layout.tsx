@@ -19,6 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           search: false,
           viewMode: false,
         }}
+        accent={meta.accent}
       />
       <main className="flex flex-col flex-1 min-h-0">{children}</main>
     </div>
