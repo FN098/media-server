@@ -16,7 +16,7 @@ export function GET(req: NextRequest) {
   // TODO: ユーザー認証・認可追加
 
   // 入力バリデーション
-  const { searchParams } = new URL(req.url);
+  const { searchParams } = req.nextUrl;
   const fileName = searchParams.get("file");
 
   if (!fileName) {
@@ -46,7 +46,7 @@ export function GET(req: NextRequest) {
   if (!fs.existsSync(filePath)) {
     return notFoundResponse({
       code: "FILE_NOT_FOUND",
-      message: "ファイルが見つかりません",
+      message: "File not found",
     });
   }
 
