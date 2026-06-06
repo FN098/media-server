@@ -6,5 +6,8 @@ export function parseCsvEnv(value?: string): string[] {
   return parse(value, {
     relax_quotes: true,
     skip_empty_lines: true,
-  }).flat();
+  })
+    .flat()
+    .map((v: string) => v.trim())
+    .filter(Boolean);
 }
