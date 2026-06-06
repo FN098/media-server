@@ -1,19 +1,22 @@
+import { AbortError, isAbortError } from "@/lib/errors/abort-error";
 import {
   GhostMediaItem,
   GhostMediaScanEventData,
 } from "@/lib/ghost-media/types";
+import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
+import { isFsNotFoundError } from "@/lib/utils/fs";
 import { access, constants } from "fs/promises";
 import { NextRequest } from "next/server";
 
-// TODO: 必要なければ削除
-export const dynamic = "force-dynamic";
+// TODO: ユーザー認証・認可追加
 
 // ゴーストメディア（DB 上にのみ存在し、FS 上に存在しないファイル）をスキャンする
 export function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
+  const { searchParams } = req.nextUrl;
   const isFullScan = searchParams.get("full") === "true";
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
@@ -28,21 +31,21 @@ export function GET(req: NextRequest) {
       };
 
       try {
-        let finalItems: GhostMediaItem[] = [];
+        let ghostItems: GhostMediaItem[];
 
         if (isFullScan) {
-          finalItems = await runFullScan(send, req.signal);
+          ghostItems = await runFullScan(send, req.signal);
         } else {
-          finalItems = await runQuickScan(send, req.signal);
+          ghostItems = await runQuickScan(send, req.signal);
         }
 
         // 中断されていなければ最終結果を送信
         if (!req.signal.aborted) {
-          send({ type: "complete", items: finalItems });
+          send({ type: "complete", items: ghostItems });
         }
       } catch (error) {
-        console.error("Ghost Media Scan Error:", error);
-        send({ type: "error", message: "スキャン中にエラーが発生しました" });
+        logger.error("api:ghost-media-scan", error);
+        send({ type: "error", message: "Failed to scan ghost media" });
       } finally {
         controller.close();
       }
@@ -63,36 +66,60 @@ async function runFullScan(
   send: (data: GhostMediaScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostMediaItem[]> {
+  // DB 上の全ファイルを取得
   const allMedia = await prisma.media.findMany({
-    select: { id: true, title: true, path: true },
+    select: {
+      id: true,
+      title: true,
+      path: true,
+    },
   });
 
   const ghostItems: GhostMediaItem[] = [];
   const total = allMedia.length;
   const batchSize = 30;
 
-  for (let i = 0; i < total; i += batchSize) {
-    if (signal.aborted) return ghostItems;
+  try {
+    for (let i = 0; i < total; i += batchSize) {
+      if (signal.aborted) throw new AbortError();
 
-    const batch = allMedia.slice(i, i + batchSize);
-    await Promise.all(
-      batch.map(async (item) => {
-        const realPath = getServerMediaPath(item.path);
-        try {
-          await access(realPath, constants.F_OK);
-        } catch {
-          ghostItems.push({ id: item.id, title: item.title, path: item.path });
-        }
-      })
-    );
+      const batch = allMedia.slice(i, i + batchSize);
+      const results = await Promise.all(
+        batch.map(async (item) => {
+          if (signal.aborted) throw new AbortError();
 
-    send({
-      type: "progress",
-      current: Math.min(i + batchSize, total),
-      total,
-      found: ghostItems.length,
-    });
+          const realPath = getServerMediaPath(item.path);
+
+          try {
+            await access(realPath, constants.F_OK);
+            return null;
+          } catch (e) {
+            // ENOENT 以外の場合は処理中断
+            if (!isFsNotFoundError(e)) throw e;
+
+            return { ...item } satisfies GhostMediaItem;
+          }
+        })
+      );
+
+      ghostItems.push(...results.filter((item) => item != null));
+
+      send({
+        type: "progress",
+        current: Math.min(i + batchSize, total),
+        total,
+        found: ghostItems.length,
+      });
+    }
+  } catch (e) {
+    if (isAbortError(e)) {
+      return ghostItems;
+    }
+
+    // AbortError 以外の場合はエスカレーション
+    throw e;
   }
+
   return ghostItems;
 }
 
@@ -101,31 +128,68 @@ async function runQuickScan(
   send: (data: GhostMediaScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostMediaItem[]> {
-  const folders = await prisma.media.groupBy({ by: ["dirPath"] });
+  // dirPath の一覧（UNIQUE）を取得
+  const allFolders = await prisma.media.findMany({
+    distinct: ["dirPath"],
+    select: {
+      dirPath: true,
+    },
+  });
+
   const ghostItems: GhostMediaItem[] = [];
-  const total = folders.length;
+  const total = allFolders.length;
+  const batchSize = 30;
 
-  for (let i = 0; i < total; i++) {
-    if (signal.aborted) return ghostItems;
+  try {
+    for (let i = 0; i < total; i += batchSize) {
+      if (signal.aborted) throw new AbortError();
 
-    const folder = folders[i];
-    const realPath = getServerMediaPath(folder.dirPath);
-    try {
-      await access(realPath, constants.F_OK);
-    } catch {
-      const items = await prisma.media.findMany({
-        where: { dirPath: folder.dirPath },
-        select: { id: true, title: true, path: true },
+      const batch = allFolders.slice(i, i + batchSize);
+      const results = await Promise.all(
+        batch.map(async (item) => {
+          if (signal.aborted) throw new AbortError();
+
+          const realPath = getServerMediaPath(item.dirPath);
+
+          try {
+            await access(realPath, constants.F_OK);
+            return null;
+          } catch (e) {
+            // ENOENT 以外の場合は処理中断
+            if (!isFsNotFoundError(e)) throw e;
+
+            return item.dirPath;
+          }
+        })
+      );
+
+      const missingDirs = results.filter((dir): dir is string => dir != null);
+
+      // フォルダがなければ、そのフォルダ配下のファイルをゴーストとして追加
+      if (missingDirs.length > 0) {
+        const items = await prisma.media.findMany({
+          where: { dirPath: { in: missingDirs } },
+          select: { id: true, title: true, path: true },
+        });
+
+        ghostItems.push(...items);
+      }
+
+      send({
+        type: "progress",
+        current: Math.min(i + batchSize, total),
+        total,
+        found: ghostItems.length,
       });
-      ghostItems.push(...items);
+    }
+  } catch (e) {
+    if (isAbortError(e)) {
+      return ghostItems;
     }
 
-    send({
-      type: "progress",
-      current: i + 1,
-      total,
-      found: ghostItems.length,
-    });
+    // AbortError 以外の場合はエスカレーション
+    throw e;
   }
+
   return ghostItems;
 }
