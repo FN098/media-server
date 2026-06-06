@@ -13,7 +13,7 @@ import { Label } from "@/shadcn/components/ui/label";
 import { Spinner } from "@/shadcn/components/ui/spinner";
 import { cn } from "@/shadcn/lib/utils";
 
-export default function LoginPage() {
+export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -23,7 +23,7 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleSignIn = async () => {
     try {
       setIsLoading(true);
       setError("");
@@ -35,7 +35,7 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setError(error.message || "ログインに失敗しました");
+        setError(error.message || "サインインに失敗しました");
         return;
       }
 
@@ -97,7 +97,7 @@ export default function LoginPage() {
             className="px-8 pb-8 space-y-5"
             onSubmit={(e) => {
               e.preventDefault();
-              void handleLogin();
+              void handleSignIn();
             }}
           >
             {/* Email */}
