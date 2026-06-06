@@ -7,6 +7,7 @@ import {
   SettingsIcon,
   StarIcon,
   Trash2Icon,
+  UserIcon,
   WrenchIcon,
 } from "lucide-react";
 
@@ -61,6 +62,20 @@ export const pageMetas = [
     url: PATHS.client.maintenance.root,
     icon: WrenchIcon,
     accent: "zinc",
+  },
+  {
+    key: "sign-in",
+    title: "Sign in",
+    url: PATHS.client.signIn.root,
+    icon: UserIcon,
+    accent: "indigo",
+  },
+  {
+    key: "sign-up",
+    title: "Sign up",
+    url: PATHS.client.signUp.root,
+    icon: UserIcon,
+    accent: "violet",
   },
 ] as const satisfies readonly PageMetaRaw[];
 

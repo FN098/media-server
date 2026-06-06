@@ -42,6 +42,12 @@ export const PATHS = {
     maintenance: {
       root: "/maintenance",
     },
+    signIn: {
+      root: "/sign-in",
+    },
+    signUp: {
+      root: "/sign-up",
+    },
   },
   api: {
     root: "/api",
