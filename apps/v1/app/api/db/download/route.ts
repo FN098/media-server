@@ -46,10 +46,10 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const parsedFileName = parsed.data;
+  const validFileName = parsed.data;
 
   // ファイルの物理パスを取得
-  const filePath = path.join(DB_BACKUP_DIR, parsedFileName);
+  const filePath = path.join(DB_BACKUP_DIR, validFileName);
 
   // ファイルの存在確認
   if (!(await existsPath(filePath))) {
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
     // ブラウザに「ダウンロード」として認識させる
     return new NextResponse(webStream as ReadableStream, {
       headers: {
-        "Content-Disposition": `attachment; filename="${parsedFileName}"`,
+        "Content-Disposition": `attachment; filename="${validFileName}"`,
         "Content-Type": getMimetype(filePath),
       },
     });
