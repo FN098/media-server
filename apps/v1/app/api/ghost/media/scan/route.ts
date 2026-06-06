@@ -12,6 +12,8 @@ import { NextRequest } from "next/server";
 
 // TODO: ユーザー認証・認可追加
 
+const MAX_GHOST_ITEMS = 10000;
+
 // ゴーストメディア（DB 上にのみ存在し、FS 上に存在しないファイル）をスキャンする
 export function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -110,6 +112,9 @@ async function runFullScan(
         total,
         found: ghostItems.length,
       });
+
+      // しきい値を超える件数を検出したら終了
+      if (ghostItems.length > MAX_GHOST_ITEMS) throw new AbortError();
     }
   } catch (e) {
     if (isAbortError(e)) {
@@ -181,6 +186,9 @@ async function runQuickScan(
         total,
         found: ghostItems.length,
       });
+
+      // しきい値を超える件数を検出したら終了
+      if (ghostItems.length > MAX_GHOST_ITEMS) throw new AbortError();
     }
   } catch (e) {
     if (isAbortError(e)) {
