@@ -27,10 +27,12 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
   if (folders.length === 0) {
     return (
       <div className="py-12 flex flex-col items-center justify-center text-center">
-        <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-          <History className="w-6 h-6 text-muted-foreground/40" />
+        <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-3">
+          <History className="w-6 h-6 text-zinc-300 dark:text-zinc-600" />
         </div>
-        <p className="text-sm text-muted-foreground/60">履歴がまだありません</p>
+        <p className="text-sm text-zinc-400 dark:text-zinc-600">
+          履歴がまだありません
+        </p>
       </div>
     );
   }
@@ -42,56 +44,55 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
 
         return (
           <div key={folder.dirPath} className="relative group/wrapper w-full">
-            {/* メインのフォルダリンクボタン */}
             <Button
               variant="ghost"
               asChild
               className={cn(
-                "w-full h-auto py-3 pl-4 pr-16 justify-start hover:bg-accent group transition-all",
-                folder.isPinned && "bg-secondary/40" // 👈 ピン留め時は背景を少し変える
+                "w-full h-auto py-3 pl-4 pr-16 justify-start hover:bg-zinc-100 dark:hover:bg-white/[0.06] group transition-all",
+                folder.isPinned && "bg-zinc-100/70 dark:bg-white/[0.04]"
               )}
             >
               <Link
                 href={encodeURI(getClientExplorerPath(folder.dirPath))}
                 className="flex items-center gap-3"
               >
-                {/* アイコン部分 */}
-                <div className="p-2 bg-primary/10 rounded-md text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                {/* アイコン */}
+                <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-md text-indigo-500 dark:text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white dark:group-hover:bg-indigo-500 dark:group-hover:text-white transition-colors">
                   <Folder className="w-5 h-5" />
                 </div>
 
-                {/* テキスト部分 */}
+                {/* テキスト */}
                 <div className="flex flex-col items-start overflow-hidden text-left">
-                  <span className="font-medium text-sm truncate w-full">
+                  <span className="font-medium text-sm truncate w-full text-zinc-800 dark:text-zinc-200">
                     {folderName}
                   </span>
-                  <span className="text-xs text-muted-foreground truncate w-full">
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 truncate w-full">
                     {parentPath}
                   </span>
                 </div>
 
-                {/* 右側の日付 */}
-                <div className="ml-auto text-[10px] text-muted-foreground flex items-center gap-1 hover:opacity-30 transition-opacity">
+                {/* 日付 */}
+                <div className="ml-auto text-[10px] text-zinc-400 dark:text-zinc-600 flex items-center gap-1 hover:opacity-30 transition-opacity">
                   <Clock className="w-3 h-3" />
                   <LocalRecentDate value={folder.lastViewedAt} />
                 </div>
               </Link>
             </Button>
 
-            {/* ピン留めボタン（絶対配置：ホバー時、またはピン留め中のみ表示） */}
+            {/* ピン留めボタン */}
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
               <Button
                 size="icon"
                 variant="ghost"
                 className={cn(
-                  "h-8 w-8 text-muted-foreground/50 hover:text-primary transition-opacity",
+                  "h-8 w-8 text-zinc-400 dark:text-zinc-600 hover:text-indigo-500 transition-opacity",
                   !folder.isPinned &&
                     "opacity-0 group-hover/wrapper:opacity-100 focus:opacity-100",
                   isPending && "opacity-50"
                 )}
                 onClick={(e) => {
                   e.preventDefault();
-                  e.stopPropagation(); // Linkへの伝播を防止
+                  e.stopPropagation();
                   handleTogglePin(folder);
                 }}
               >
@@ -99,7 +100,7 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
                   className={cn(
                     "w-4 h-4",
                     folder.isPinned
-                      ? "fill-primary text-primary rotate-0"
+                      ? "fill-indigo-500 text-indigo-500 rotate-0"
                       : "rotate-45"
                   )}
                 />
