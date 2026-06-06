@@ -22,8 +22,12 @@ const dbUploadSchema = z.object({
     ),
 });
 
+// TODO: try-catch の範囲を狭くする、response/errors を使う
+
+// DB バックアップファイルをアップロードする
 export async function POST(req: NextRequest) {
   try {
+    // 入力バリデーション
     const formData = await req.formData();
     const file = formData.get("file");
 

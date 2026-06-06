@@ -1,6 +1,10 @@
 import { redis } from "@/lib/redis";
 import { NextRequest } from "next/server";
 
+// TODO: イベントチャンネルにユーザーIDを追加して識別、ユーザー認証追加、duplicate をやめる
+// ユーザーは一人なので現状でも問題はないが、数万ユーザーが使うようなシステムでも耐えられるように設計する
+
+// bullmq によるサムネイル作成完了通知イベント（Redis）を監視し、接続元のクライアントに通知する
 export function GET(req: NextRequest) {
   const encoder = new TextEncoder();
 

@@ -2,17 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-const ResultSchema = z.array(z.record(z.string(), z.bigint()));
+const resultSchema = z.array(z.record(z.string(), z.bigint()));
 
+// TODO: response/errors を使う
+
+// DB のヘルスチェック
 export async function GET() {
   try {
     const rawData = await prisma.$queryRaw`SELECT 1`;
 
-    // Zod でパース
-    const result = ResultSchema.parse(rawData);
+    const result = resultSchema.parse(rawData);
 
-    // BigInt は JSON.stringify できないため、
-    // レスポンスに含める場合は数値や文字列に変換する必要があります
     const isOk = result.length > 0;
 
     return NextResponse.json({ ok: isOk });

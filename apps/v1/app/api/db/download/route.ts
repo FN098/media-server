@@ -5,8 +5,12 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { Readable } from "stream";
 
+// TODO: zod でバリデーション、try-catch の範囲を狭くする、response/errors を使う
+
+// DB バックアップファイルをダウンロードする
 export function GET(req: NextRequest) {
   try {
+    // 入力バリデーション
     const { searchParams } = new URL(req.url);
     const fileName = searchParams.get("file");
 

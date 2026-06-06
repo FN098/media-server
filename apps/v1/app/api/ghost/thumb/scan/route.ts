@@ -10,7 +10,53 @@ import { glob } from "glob";
 import { NextRequest } from "next/server";
 import path from "path";
 
+// TODO: 必要なければ削除
 export const dynamic = "force-dynamic";
+
+// ゴーストサムネイル（DB 上にのみ存在し、FS 上に存在しないファイル）をスキャンする
+export function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const isFullScan = searchParams.get("full") === "true";
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (data: GhostThumbScanEventData) => {
+        if (!req.signal.aborted) {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(data)}\n\n`)
+          );
+        }
+      };
+
+      try {
+        let items: GhostThumbItem[] = [];
+        if (isFullScan) {
+          items = await runFullScan(send, req.signal);
+        } else {
+          items = await runQuickScan(send, req.signal);
+        }
+
+        if (!req.signal.aborted) {
+          send({ type: "complete", items });
+        }
+      } catch (error) {
+        console.error("Ghost Thumb Scan Error:", error);
+        send({ type: "error", message: "スキャン中にエラーが発生しました" });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
+}
 
 // フルスキャン (ファイル単位)
 async function runFullScan(
@@ -141,48 +187,4 @@ async function runQuickScan(
   }
 
   return filteredGhostItems;
-}
-
-export function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const isFullScan = searchParams.get("full") === "true";
-  const encoder = new TextEncoder();
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      const send = (data: GhostThumbScanEventData) => {
-        if (!req.signal.aborted) {
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify(data)}\n\n`)
-          );
-        }
-      };
-
-      try {
-        let items: GhostThumbItem[] = [];
-        if (isFullScan) {
-          items = await runFullScan(send, req.signal);
-        } else {
-          items = await runQuickScan(send, req.signal);
-        }
-
-        if (!req.signal.aborted) {
-          send({ type: "complete", items });
-        }
-      } catch (error) {
-        console.error("Ghost Thumb Scan Error:", error);
-        send({ type: "error", message: "スキャン中にエラーが発生しました" });
-      } finally {
-        controller.close();
-      }
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
 }

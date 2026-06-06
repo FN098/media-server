@@ -9,6 +9,8 @@ import { uniqueBy } from "@/lib/utils/array";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
+// TODO: zod でバリデーション、try-catch の範囲を狭くする、response/errors を使う
+
 const MAX_PATHS_TO_PROCESS = 500;
 const MAX_RETURN_TAGS_COUNT = 100;
 
@@ -20,10 +22,12 @@ const RequestSchema = z.object({
   limit: z.coerce.number().optional().default(MAX_RETURN_TAGS_COUNT),
 });
 
-type RequestParams = z.infer<typeof RequestSchema>;
+type ParsedRequestParams = z.infer<typeof RequestSchema>;
 
+// タグを検索
 export async function GET(request: NextRequest) {
   try {
+    // 入力バリデーション
     const { searchParams } = request.nextUrl;
     const rawPaths = searchParams.get("paths");
     const parsed = RequestSchema.safeParse(
@@ -43,7 +47,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// paths が多い場合、GET だとエラーになる可能性があるので POST も用意しておく
+// タグを検索：paths が多い場合、GET だと URL 長が上限を超えてエラーになる可能性があるので POST も用意しておく
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as unknown;
@@ -62,7 +66,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function process(params: RequestParams) {
+async function process(params: ParsedRequestParams) {
   const { ids, paths: pathsRaw, limit, query, strategy } = params;
 
   // ID 直接指定

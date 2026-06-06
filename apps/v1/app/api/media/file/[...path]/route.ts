@@ -6,6 +6,9 @@ import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import { Readable } from "stream";
 
+// TODO: try-catch の範囲を狭くする、response/errors を使う
+
+// パスパラメータで指定された仮想パスから実際のファイルデータを取得して返す
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ path: string[] }> }
