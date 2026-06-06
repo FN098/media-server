@@ -1,10 +1,6 @@
 import { auth } from "@/lib/auth/better-auth";
+import { AuthUser } from "@/lib/auth/types";
 import { headers } from "next/headers";
-
-type AuthUser = {
-  id: string;
-  name: string;
-};
 
 export async function resolveCurrentUser(): Promise<AuthUser | null> {
   const session = await auth.api.getSession({
