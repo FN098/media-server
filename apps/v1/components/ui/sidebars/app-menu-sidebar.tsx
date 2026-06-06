@@ -3,6 +3,7 @@
 import { ThemeSelect } from "@/components/ui/selects/theme-select";
 import { authClient } from "@/lib/auth/better-auth-client";
 import { resolvePageMetas } from "@/lib/page-meta/resolvers";
+import { Button } from "@/shadcn/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -15,10 +16,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/shadcn-overrides/components/ui/sidebar";
-import { Button } from "@/shadcn/components/ui/button";
+} from "@/shadcn/components/ui/sidebar";
 import { cn } from "@/shadcn/lib/utils";
-import { LogOut, LucideIcon, Menu, X } from "lucide-react";
+import { LogOut, LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -45,7 +45,7 @@ export function AppMenuSidebar() {
   };
 
   return (
-    <Sidebar forceMobile>
+    <Sidebar className="z-50">
       {/* ヘッダー */}
       <SidebarHeader className="border-b border-zinc-200 dark:border-white/[0.06] px-4 py-3">
         <div className="flex items-center justify-between">
@@ -110,29 +110,41 @@ export function AppMenuSidebar() {
 export function AppSidebarOpenButton(
   props: React.ComponentProps<typeof Button>
 ) {
-  return <AppSidebarTrigger icon={Menu} {...props} open={true} />;
+  const { setOpen } = useSidebar();
+
+  return (
+    <AppSidebarTrigger
+      icon={MenuIcon}
+      onClick={() => setOpen(true)}
+      {...props}
+    />
+  );
 }
 
 export function AppSidebarCloseButton(
   props: React.ComponentProps<typeof Button>
 ) {
-  return <AppSidebarTrigger icon={X} {...props} open={false} />;
+  const { setOpen } = useSidebar();
+
+  return (
+    <AppSidebarTrigger
+      icon={SidebarIcon}
+      onClick={() => setOpen(false)}
+      {...props}
+    />
+  );
 }
 
 interface AppSidebarTriggerProps extends React.ComponentProps<typeof Button> {
   icon: LucideIcon;
-  open: boolean;
 }
 
 function AppSidebarTrigger({
   className,
   onClick,
-  open,
   icon: Icon,
   ...props
 }: AppSidebarTriggerProps) {
-  const { setOpenMobile } = useSidebar();
-
   return (
     <Button
       data-sidebar="trigger"
@@ -142,7 +154,6 @@ function AppSidebarTrigger({
       className={cn("size-7", className)}
       onClick={(event) => {
         onClick?.(event);
-        setOpenMobile(open);
       }}
       {...props}
     >
