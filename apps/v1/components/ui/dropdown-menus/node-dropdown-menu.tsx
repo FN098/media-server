@@ -1,6 +1,6 @@
 "use client";
 
-import { useNodeDropdownMenu } from "@/hooks/dropdown-menu/use-node-context-menu";
+import { useNodeDropdownMenu } from "@/hooks/dropdown-menus/use-node-context-menu";
 import { useMounted } from "@/hooks/general/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";

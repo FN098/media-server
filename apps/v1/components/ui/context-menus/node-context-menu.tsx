@@ -1,6 +1,6 @@
 "use client";
 
-import { useNodeContextMenu } from "@/hooks/context-menu/use-node-context-menu";
+import { useNodeContextMenu } from "@/hooks/context-menus/use-node-context-menu";
 import { useMounted } from "@/hooks/general/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
