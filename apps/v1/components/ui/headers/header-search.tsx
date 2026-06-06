@@ -1,69 +1,23 @@
 "use client";
 
 import { SearchInput } from "@/components/ui/inputs/search-input";
-import { useQueryFilter } from "@/hooks/filters/use-query-filter";
 import { useMounted } from "@/hooks/general/use-mounted";
-import { useSearchFocusContext } from "@/providers/search-focus.provider";
+import { useHeaderSearch } from "@/hooks/headers/use-header-search";
 import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
 
 export function HeaderSearch() {
-  const { value, apply } = useQueryFilter();
-  const [input, setInput] = useState(value.query ?? "");
-  const [focused, setFocused] = useState(false);
+  const { input, focused, inputRef, setInput, setFocused, debouncedApply } =
+    useHeaderSearch();
+
   const isMobile = useIsMobile();
   const mounted = useMounted();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const shouldRestoreFocusRef = useRef(false);
-  const { register } = useSearchFocusContext();
-
-  const restoreFocus = useCallback(() => {
-    requestAnimationFrame(() => {
-      if (!shouldRestoreFocusRef.current || !inputRef.current) return;
-
-      shouldRestoreFocusRef.current = false;
-      if (document.activeElement === inputRef.current) return;
-
-      inputRef.current.focus({ preventScroll: true });
-      setFocused(true);
-    });
-  }, []);
-
-  useEffect(() => {
-    // 他のコンポーネントから検索バーにフォーカスできるようにする
-    register(() => inputRef.current?.focus());
-  }, [register]);
-
-  useEffect(() => {
-    const nextInput = value.query ?? "";
-    const frame = requestAnimationFrame(() => setInput(nextInput));
-
-    restoreFocus();
-
-    return () => cancelAnimationFrame(frame);
-  }, [restoreFocus, value.query]);
 
   const placeholder = isMobile ? "" : undefined;
   const collapsedWidth = isMobile ? 36 : 180;
   const expandedWidth = isMobile ? 180 : 320;
-
-  const debouncedApply = useDebouncedCallback(
-    (v: string | null) => {
-      shouldRestoreFocusRef.current =
-        document.activeElement === inputRef.current;
-      apply(v);
-    },
-    300
-  );
-
-  const handleChange = (value: string) => {
-    setInput(value); // 入力は即時反映
-    debouncedApply(value); // URL同期はデバウンス
-  };
 
   const isMobileBlur = isMobile && !focused && input === "";
   const isExpanded = focused || input.length > 0;
@@ -97,7 +51,10 @@ export function HeaderSearch() {
         placeholder={placeholder}
         inputRef={inputRef}
         value={input}
-        onChange={handleChange}
+        onChange={(value: string) => {
+          setInput(value); // 入力は即時反映
+          debouncedApply(value); // URL同期はデバウンス
+        }}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         className={cn(
