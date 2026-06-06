@@ -23,7 +23,7 @@ export async function proxy(req: NextRequest) {
   }
 
   if (!hasAdminCache) {
-    return NextResponse.redirect(new URL("/signup", req.url));
+    return NextResponse.redirect(new URL("/sign-up", req.url));
   }
 
   // ====== 認証 =======
