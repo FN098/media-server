@@ -39,12 +39,15 @@ export function SignUp({ hasAdmin }: SignUpProps) {
 
       if (error) {
         setError(error.message || "サインアップに失敗しました");
+        setIsLoading(false);
         return;
       }
 
       router.push("/");
       router.refresh();
-    } finally {
+    } catch (e) {
+      console.log("sign-in-error:", e);
+      setError("予期しないエラーが発生しました");
       setIsLoading(false);
     }
   };
