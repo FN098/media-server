@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -229,6 +230,17 @@ export default function LoginPage() {
                 "Sign in"
               )}
             </Button>
+
+            {/* Sign up リンク */}
+            <p className="text-center text-sm text-zinc-500">
+              アカウントをお持ちでない方は{" "}
+              <Link
+                href="/sign-up"
+                className="text-indigo-400 hover:text-indigo-300 transition-colors underline-offset-4 hover:underline"
+              >
+                新規登録
+              </Link>
+            </p>
           </form>
 
           {/* 下部の区切り線 */}
