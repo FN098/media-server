@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // 一般公開系のパスは素通し
+  // 一般公開パスは素通し
   if (isPublic(pathname)) {
     return NextResponse.next(); // 認可OK
   }
