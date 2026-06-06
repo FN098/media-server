@@ -39,7 +39,7 @@ export function AppMenuSidebar() {
 
   const handleLogout = async () => {
     await authClient.signOut();
-    router.push("/login");
+    router.push("/sign-in");
     router.refresh();
     setOpenMobile(false);
   };
