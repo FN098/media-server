@@ -2,7 +2,6 @@
 
 import { TagMasterCardList } from "@/components/ui/cards/tag-master-manager-card/tag-master-card-list";
 import { TagMasterTable } from "@/components/ui/cards/tag-master-manager-card/tag-master-table";
-import { useDetectMobile } from "@/hooks/general/use-mobile";
 import {
   createTagsAction,
   deleteTagAction,
@@ -12,6 +11,7 @@ import {
   updateTagFavoriteAction,
 } from "@/lib/tag/actions";
 import { TagMasterItem } from "@/lib/tag/types";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,
@@ -55,7 +55,7 @@ interface TagListProps {
 
 export function TagMasterManagerCard() {
   const queryClient = useQueryClient();
-  const isMobile = useDetectMobile();
+  const isMobile = useDetectMobileContext();
   const [filter, setFilter] = React.useState("");
   const [debouncedFilter] = useDebounce(filter, 500);
   const [editingId, setEditingId] = React.useState<string | null>(null);

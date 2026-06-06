@@ -1,9 +1,9 @@
 "use client";
 
 import { SearchInput } from "@/components/ui/inputs/search-input";
-import { useDetectMobile } from "@/hooks/general/use-mobile";
 import { useMounted } from "@/hooks/general/use-mounted";
 import { useHeaderSearch } from "@/hooks/headers/use-header-search";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,7 +12,7 @@ export function HeaderSearch() {
   const { input, focused, inputRef, setInput, setFocused, debouncedApply } =
     useHeaderSearch();
 
-  const isMobile = useDetectMobile();
+  const isMobile = useDetectMobileContext();
   const mounted = useMounted();
 
   const placeholder = isMobile ? "" : undefined;

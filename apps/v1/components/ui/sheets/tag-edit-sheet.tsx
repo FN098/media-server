@@ -6,10 +6,10 @@ import {
   EditingMode,
   TagEditMode,
 } from "@/components/ui/sheets/tag-edit-sheet/types";
-import { useDetectMobile } from "@/hooks/general/use-mobile";
 import { MediaNode } from "@/lib/media/types";
 import { createTagsAction, updateMediaTagsAction } from "@/lib/tag/actions";
 import { TagOperation } from "@/lib/tag/types";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import {
   Tabs,
@@ -49,7 +49,7 @@ export function TagEditSheet({
   const router = useRouter();
   const editor = useTagEditorContext();
   const controls = useDragControls();
-  const isMobile = useDetectMobile();
+  const isMobile = useDetectMobileContext();
   const canEdit = mode !== "none" && targetNodes.length > 0;
 
   // オープン時にアクティブ化

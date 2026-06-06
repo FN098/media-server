@@ -1,6 +1,6 @@
 "use client";
 
-import { useDetectMobile } from "@/hooks/general/use-mobile";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,
@@ -16,7 +16,7 @@ interface ViewerHeaderPinButtonProps extends React.ComponentProps<"button"> {
 }
 
 export function ViewerHeaderPinButton(props: ViewerHeaderPinButtonProps) {
-  const isMobile = useDetectMobile();
+  const isMobile = useDetectMobileContext();
 
   // モバイルなら Tooltip 使わない
   if (isMobile) {
