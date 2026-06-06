@@ -11,6 +11,8 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import z from "zod";
 
+// TODO: ユーザー認証・認可追加
+
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 const UploadRequestSchema = z.object({

@@ -12,6 +12,8 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { Readable } from "stream";
 
+// TODO: ユーザー認証・認可追加
+
 // セキュリティ対策: ファイル名にスラッシュ等が含まれないかチェック（ディレクトリトラバーサル防止）
 const SqlFileNameSchema = FileNameSchema.refine((v) => !v.includes("/"), {
   message: "Path separators are not allowed",
@@ -25,8 +27,6 @@ const SqlFileNameSchema = FileNameSchema.refine((v) => !v.includes("/"), {
 
 // DB バックアップファイルをダウンロードする
 export async function GET(req: NextRequest) {
-  // TODO: ユーザー認証・認可追加
-
   // 入力バリデーション
   const { searchParams } = req.nextUrl;
   const fileName = searchParams.get("file");
