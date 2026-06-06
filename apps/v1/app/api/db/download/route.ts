@@ -5,14 +5,26 @@ import {
   internalServerErrorResponse,
   notFoundResponse,
 } from "@/lib/response/errors";
+import { existsPath } from "@/lib/utils/fs";
 import { FileNameSchema } from "@/lib/virtual-path/schemas";
 import fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { Readable } from "stream";
 
+// セキュリティ対策: ファイル名にスラッシュ等が含まれないかチェック（ディレクトリトラバーサル防止）
+const SqlFileNameSchema = FileNameSchema.refine((v) => !v.includes("/"), {
+  message: "Path separators are not allowed",
+})
+  .refine((v) => !v.includes(".."), {
+    message: "Parent directory references are not allowed",
+  })
+  .refine((v) => v.endsWith(".sql"), {
+    message: "Must be a .sql file",
+  });
+
 // DB バックアップファイルをダウンロードする
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   // TODO: ユーザー認証・認可追加
 
   // 入力バリデーション
@@ -22,28 +34,25 @@ export function GET(req: NextRequest) {
   if (!fileName) {
     return badRequestResponse({
       code: "MISSING_REQUIRED_PARAMETER",
-      message: "Missing required parameter: file",
+      message: "file is required",
     });
   }
 
-  // セキュリティ対策: ファイル名にスラッシュ等が含まれないかチェック（ディレクトリトラバーサル防止）
-  if (
-    fileName.includes("/") ||
-    fileName.includes("..") ||
-    !fileName.endsWith(".sql") ||
-    !FileNameSchema.safeParse(fileName).success
-  ) {
+  const parsed = SqlFileNameSchema.safeParse(fileName);
+  if (!parsed.success) {
     return badRequestResponse({
       code: "INVALID_FILE_NAME",
       message: `Invalid file name: ${fileName}`,
     });
   }
 
+  const parsedFileName = parsed.data;
+
   // ファイルの物理パスを取得
-  const filePath = path.join(DB_BACKUP_DIR, fileName);
+  const filePath = path.join(DB_BACKUP_DIR, parsedFileName);
 
   // ファイルの存在確認
-  if (!fs.existsSync(filePath)) {
+  if (!(await existsPath(filePath))) {
     return notFoundResponse({
       code: "FILE_NOT_FOUND",
       message: "File not found",
@@ -66,19 +75,19 @@ export function GET(req: NextRequest) {
       { once: true }
     );
     fileStream.on("error", (err) => {
-      console.error("stream error", err);
+      console.error("Stream error:", err);
     });
 
     // レスポンスヘッダーの設定
     // ブラウザに「ダウンロード」として認識させる
     return new NextResponse(webStream as ReadableStream, {
       headers: {
-        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Disposition": `attachment; filename="${parsedFileName}"`,
         "Content-Type": getMimetype(filePath),
       },
     });
   } catch (error) {
-    console.error("Download Error:", error);
+    console.error("Download error:", error);
     return internalServerErrorResponse();
   }
 }
