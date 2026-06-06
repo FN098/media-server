@@ -1,9 +1,9 @@
 import { AnimatedCheckCircle } from "@/components/ui/icons/animated-check-circle";
+import { useDetectMobile } from "@/hooks/general/use-mobile";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
-import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -50,7 +50,7 @@ export function SelectionBar({
   className,
 }: SelectionBarProps) {
   const isAllSelected = count > 0 && count === totalCount;
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobile();
 
   const inlineItems = transformer(inlineMenuItems ?? [], context);
   const items = transformer(menuItems ?? [], context);

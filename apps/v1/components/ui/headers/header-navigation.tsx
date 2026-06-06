@@ -2,8 +2,8 @@
 
 import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs/dynamic-breadcrumbs";
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
+import { useDetectMobile } from "@/hooks/general/use-mobile";
 import { useBreadcrumbs } from "@/hooks/navigations/use-breadcrumbs";
-import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -11,7 +11,7 @@ import { useSearchParams } from "next/navigation";
 export function HeaderNavigation({ basePath }: { basePath?: string }) {
   const searchParams = useSearchParams();
   const breadcrumbs = useBreadcrumbs(basePath ?? "");
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobile();
   const current = breadcrumbs.at(-1);
   const backHref = breadcrumbs.at(-2)?.href ?? null;
   const params = new URLSearchParams(searchParams);

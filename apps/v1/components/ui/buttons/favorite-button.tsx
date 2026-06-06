@@ -1,6 +1,6 @@
 "use client";
 
-import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
+import { useDetectMobile } from "@/hooks/general/use-mobile";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,
@@ -75,7 +75,7 @@ interface FavoriteButtonProps extends React.ComponentProps<"button"> {
 }
 
 export function FavoriteButton(props: FavoriteButtonProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobile();
 
   // モバイルなら Tooltip 使わない
   if (isMobile) {

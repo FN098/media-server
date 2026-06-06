@@ -1,6 +1,6 @@
 "use client";
 
-import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
+import { useDetectMobile } from "@/hooks/general/use-mobile";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,
@@ -16,7 +16,7 @@ interface ViewerHeaderPinButtonProps extends React.ComponentProps<"button"> {
 }
 
 export function ViewerHeaderPinButton(props: ViewerHeaderPinButtonProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobile();
 
   // モバイルなら Tooltip 使わない
   if (isMobile) {

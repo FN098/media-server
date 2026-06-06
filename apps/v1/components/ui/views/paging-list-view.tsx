@@ -12,6 +12,7 @@ import { NodeDropdownMenu } from "@/components/ui/dropdown-menus/node-dropdown-m
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
+import { useDetectMobile } from "@/hooks/general/use-mobile";
 import { useGridCell } from "@/hooks/view/use-grid-cell";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
@@ -20,7 +21,6 @@ import { getExtension } from "@/lib/utils/filename";
 import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
-import { useIsMobile } from "@/shadcn-overrides/hooks/use-mobile";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { useMemo } from "react";
@@ -46,7 +46,7 @@ interface PagingListViewProps {
 }
 
 export function PagingListView(props: PagingListViewProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobile();
 
   const {
     containerRef,
