@@ -68,6 +68,8 @@ async function runFullScan(
   send: (data: GhostMediaScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostMediaItem[]> {
+  const ghostItems: GhostMediaItem[] = [];
+
   // FIXME: ファイル件数が多いとメモリを圧迫する。今のところは問題になっていないので、そのうち対応する
   // DB 上の全ファイルを取得
   const allMedia = await prisma.media.findMany({
@@ -78,8 +80,9 @@ async function runFullScan(
     },
   });
 
-  const ghostItems: GhostMediaItem[] = [];
   const total = allMedia.length;
+  if (total === 0) return [];
+
   const batchSize = 30;
 
   try {
@@ -134,6 +137,8 @@ async function runQuickScan(
   send: (data: GhostMediaScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostMediaItem[]> {
+  const ghostItems: GhostMediaItem[] = [];
+
   // dirPath の一覧（UNIQUE）を取得
   const allFolders = await prisma.media.findMany({
     distinct: ["dirPath"],
@@ -142,8 +147,9 @@ async function runQuickScan(
     },
   });
 
-  const ghostItems: GhostMediaItem[] = [];
   const total = allFolders.length;
+  if (total === 0) return [];
+
   const batchSize = 30;
 
   try {
