@@ -17,7 +17,7 @@ import { Label } from "@/shadcn/components/ui/label";
 import { Spinner } from "@/shadcn/components/ui/spinner";
 
 // TODO: remember me 追加
-export default function LoginPage() {
+export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
