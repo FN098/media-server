@@ -3,7 +3,7 @@ import {
   listSubDirectoriesAction,
   togglePinVisitedFolderAction,
 } from "@/actions/folder-actions";
-import { moveNodesAction } from "@/actions/media-actions";
+import { moveNodesAction } from "@/actions/node-actions";
 import { dirname } from "path";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
