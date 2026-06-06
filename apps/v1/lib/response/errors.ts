@@ -1,4 +1,4 @@
-import { AppErrorCode } from "@/lib/response/error-codes";
+import { AppErrorCode } from "@/lib/errors/app-error-codes";
 
 type ErrorResponseOptions = {
   code?: AppErrorCode;
