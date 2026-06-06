@@ -2,7 +2,6 @@ import {
   VirtualPathSchema,
   VirtualPathSegmentSchema,
 } from "@/lib/virtual-path/schemas";
-import { describe, expect, it } from "vitest";
 
 const RESERVED_NAMES = [
   "CON",
