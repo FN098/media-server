@@ -13,25 +13,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <SearchFocusProvider>
-      <div className="w-full h-svh flex flex-col overflow-hidden">
-        <PageBackground accent={meta.accent} />
-        <Header
-          title={meta.title}
-          icon={meta.icon}
-          basePath={meta.url}
-          features={{
-            navigation: false,
-          }}
-          accent={meta.accent}
-        />
-        <main className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <TagEditorProvider>
-            <SlideshowProvider>
-              <HistoryProvider>{children}</HistoryProvider>
-            </SlideshowProvider>
-          </TagEditorProvider>
-        </main>
-      </div>
+      <TagEditorProvider>
+        <SlideshowProvider>
+          <HistoryProvider>
+            <div className="w-full h-svh flex flex-col overflow-hidden">
+              <Header
+                title={meta.title}
+                icon={meta.icon}
+                basePath={meta.url}
+                features={{
+                  navigation: false,
+                }}
+                accent={meta.accent}
+              />
+              <main className="flex-1 overflow-y-auto">
+                <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden">
+                  <PageBackground accent={meta.accent} />
+                  {children}
+                </div>
+              </main>
+            </div>
+          </HistoryProvider>
+        </SlideshowProvider>
+      </TagEditorProvider>
     </SearchFocusProvider>
   );
 }

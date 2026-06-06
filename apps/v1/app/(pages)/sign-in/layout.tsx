@@ -8,8 +8,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <PageBackground accent={meta.accent} />
-      <div className="flex min-h-screen items-center justify-center overflow-hidden">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
+        <PageBackground accent={meta.accent} />
         {children}
       </div>
     </div>
