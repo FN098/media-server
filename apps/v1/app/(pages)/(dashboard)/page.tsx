@@ -3,7 +3,7 @@ import { RecentFolders } from "@/components/ui/lists/recent-folders";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
 import { getRecentFolders } from "@/lib/folder/repository";
 import { Button } from "@/shadcn/components/ui/button";
-import { ArrowRight, ArrowUpRight, FolderSearch2, History } from "lucide-react"; // アイコン追加
+import { ArrowRight, FolderSearch2, History } from "lucide-react"; // アイコン追加
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -18,56 +18,79 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const user = await resolveCurrentUserOrThrow();
   const folders = await getRecentFolders(user.id, RECENT_FOLDERS_LIMIT);
-  const hasHistory = folders.length > 0;
 
   return (
-    <div className="w-full bg-background">
-      <div className="max-w-4xl mx-auto px-6 py-24 flex flex-col items-center">
-        {/* ヒーローセクション */}
-        <section className="text-center mb-20">
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
-            Media Server
-          </h1>
+    <div className="relative flex w-full h-full items-center justify-center overflow-hidden bg-zinc-950">
+      {/* 背景装飾（sign-in と共通） */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)
+            `,
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-indigo-600/12 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-64 h-64 rounded-full bg-violet-600/7 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-44 h-44 rounded-full bg-sky-600/6 blur-3xl" />
+      </div>
 
-          <p className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto leading-relaxed break-keep">
+      <div className="relative w-full max-w-lg mx-6 flex flex-col gap-8">
+        {/* ヒーロー */}
+        <section className="text-center">
+          {/* ロゴ行（sign-in と同じマークアップ） */}
+          <div className="flex items-center justify-center gap-2.5 mb-5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/20 border border-indigo-500/30">
+              <div className="h-2.5 w-2.5 rounded-sm bg-indigo-400" />
+            </div>
+            <span className="text-xs font-medium tracking-widest text-zinc-500 uppercase">
+              Media Server
+            </span>
+          </div>
+
+          <p className="text-xs font-medium tracking-[0.12em] uppercase text-indigo-400 mb-2">
+            Welcome back
+          </p>
+          <h1 className="text-4xl font-black tracking-tight text-white mb-3">
+            Dashboard
+          </h1>
+          <p className="text-sm text-zinc-500 leading-relaxed">
             ファイル管理をよりスマートに。
-            <br className="hidden md:block" />
+            <br />
             直近の作業からすぐに再開できます。
           </p>
 
-          <div className="relative mt-10">
-            <Button
-              asChild
-              size="lg"
-              className="h-14 px-10 text-lg rounded-xl shadow-md hover:shadow-lg transition-all group"
-            >
-              <Link href="/explorer" className="flex items-center gap-2">
-                <FolderSearch2 className="w-5 h-5" />
-                Start Exploring
-                <ArrowRight className="w-4 h-4 ml-1 opacity-50 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </Button>
-
-            {!hasHistory && (
-              <div className="absolute -right-12 top-3/2 -translate-y-1/2 hidden lg:flex items-center gap-2 text-primary animate-pulse">
-                <ArrowUpRight className="w-6 h-6 rotate-[-90deg]" />
-                <span className="text-sm font-medium">まずはここから！</span>
-              </div>
-            )}
-          </div>
+          <Button
+            asChild
+            className="mt-6 h-11 px-6 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white border-0 rounded-xl transition-colors group"
+          >
+            <Link href="/explorer" className="inline-flex items-center gap-2">
+              <FolderSearch2 className="w-4 h-4" />
+              Start Exploring
+              <ArrowRight className="w-4 h-4 opacity-50 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </Button>
         </section>
 
-        {/* 履歴セクション */}
-        <section className="w-full max-w-md">
-          <div className="flex items-center gap-2 mb-6 px-1">
-            <History className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+        {/* 履歴 */}
+        <section>
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <History className="w-4 h-4 text-indigo-500" />
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-600">
               Recently opened
             </h2>
           </div>
 
-          <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-            <RecentFolders folders={folders} />
+          {/* カード（sign-in カードと同じガラス調） */}
+          <div className="relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl overflow-hidden">
+            {/* 上部アクセントライン */}
+            <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+            <div className="max-h-80 overflow-y-auto">
+              <RecentFolders folders={folders} />
+            </div>
           </div>
         </section>
       </div>

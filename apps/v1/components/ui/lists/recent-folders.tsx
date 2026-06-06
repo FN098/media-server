@@ -36,7 +36,7 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
   }
 
   return (
-    <div className="w-full max-w-md h-80 overflow-y-auto space-y-1 pr-1">
+    <div className="w-full space-y-1">
       {folders.map((folder) => {
         const { folderName, parentPath } = splitDirPath(folder.dirPath);
 
