@@ -1,1 +1,5 @@
-export type AppErrorCode = "AUTH_REQUIRED";
+export type AppErrorCode =
+  | "AUTH_REQUIRED"
+  | "FILE_NOT_FOUND"
+  | "MISSING_REQUIRED_PARAMETER"
+  | "INVALID_FILE_NAME";
