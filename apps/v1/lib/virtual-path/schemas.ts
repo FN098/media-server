@@ -1,31 +1,8 @@
+import {
+  WINDOWS_INVALID_CHARS,
+  WINDOWS_RESERVED_NAMES,
+} from "@/lib/virtual-path/windows-os";
 import { z } from "zod";
-
-const WINDOWS_INVALID_CHARS = /[<>:"|?*\u0000-\u001F]/;
-
-const WINDOWS_RESERVED_NAMES = new Set([
-  "CON",
-  "PRN",
-  "AUX",
-  "NUL",
-  "COM1",
-  "COM2",
-  "COM3",
-  "COM4",
-  "COM5",
-  "COM6",
-  "COM7",
-  "COM8",
-  "COM9",
-  "LPT1",
-  "LPT2",
-  "LPT3",
-  "LPT4",
-  "LPT5",
-  "LPT6",
-  "LPT7",
-  "LPT8",
-  "LPT9",
-]);
 
 export const VirtualPathSegmentSchema = z
   .string()
@@ -83,7 +60,6 @@ export const VirtualPathSegmentSchema = z
     }
   });
 
-// 仮想パス。先頭スラッシュ禁止
 export const VirtualPathSchema = z.string().superRefine((value, ctx) => {
   if (value === "") return;
 
