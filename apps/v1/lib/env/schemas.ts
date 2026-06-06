@@ -2,7 +2,7 @@ import z from "zod";
 
 export const NextPublicEnvSchema = z.object({
   NEXT_PUBLIC_WEB_UI_URL: z.url().nullable().optional(),
-  NEXT_PUBLIC_WEB_API_URL: z.url().nullable().optional(),
+  NEXT_PUBLIC_API_URL: z.url().nullable().optional(),
 });
 
 export type NextPublicEnv = z.infer<typeof NextPublicEnvSchema>;

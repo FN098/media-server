@@ -15,11 +15,11 @@ export function getWebUiUrlOrThrow(): string {
 }
 
 export function getWebApiUrl(): string | null {
-  return publicEnv.NEXT_PUBLIC_WEB_API_URL ?? null;
+  return publicEnv.NEXT_PUBLIC_API_URL ?? null;
 }
 
 export function getWebApiUrlOrThrow(): string {
   const url = getWebApiUrl();
-  if (!url) throw new Error("Missing env:NEXT_PUBLIC_WEB_API_URL");
+  if (!url) throw new Error("Missing env:NEXT_PUBLIC_API_URL");
   return url;
 }
