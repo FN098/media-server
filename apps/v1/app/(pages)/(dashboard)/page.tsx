@@ -20,25 +20,8 @@ export default async function DashboardPage() {
   const folders = await getRecentFolders(user.id, RECENT_FOLDERS_LIMIT);
 
   return (
-    <div className="relative flex w-full h-full items-center justify-center overflow-hidden bg-zinc-950">
-      {/* 背景装飾（sign-in と共通） */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)
-            `,
-            backgroundSize: "48px 48px",
-          }}
-        />
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-indigo-600/12 blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 w-64 h-64 rounded-full bg-violet-600/7 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-44 h-44 rounded-full bg-sky-600/6 blur-3xl" />
-      </div>
-
-      <div className="relative w-full max-w-lg mx-6 flex flex-col gap-8">
+    <div className="flex w-full h-full items-center justify-center overflow-hidden bg-zinc-950">
+      <div className="w-full max-w-lg mx-6 flex flex-col gap-8">
         {/* ヒーロー */}
         <section className="text-center">
           {/* ロゴ行（sign-in と同じマークアップ） */}

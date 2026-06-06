@@ -1,9 +1,5 @@
-import {
-  PageMeta,
-  PageMetaKey,
-  PageMetaRaw,
-  pageMetas,
-} from "@/lib/page-meta/meta";
+import { PageMetaKey, pageMetas } from "@/lib/page-meta/meta";
+import { PageMeta, PageMetaRaw } from "@/lib/page-meta/types";
 
 export const pageMetaMap = new Map(
   pageMetas.map((meta) => [meta.key, normalize(meta)])

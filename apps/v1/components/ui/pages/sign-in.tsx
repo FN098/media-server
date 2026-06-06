@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PageBackground } from "@/components/ui/backgrounds/page-background";
 import { authClient } from "@/lib/auth/better-auth-client";
 import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
@@ -52,23 +53,7 @@ export function SignIn() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-950">
       {/* 背景装飾 */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        {/* グリッドパターン */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)
-            `,
-            backgroundSize: "48px 48px",
-          }}
-        />
-        {/* アクセントサークル */}
-        <div className="absolute -top-48 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 w-72 h-72 rounded-full bg-violet-600/8 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full bg-sky-600/8 blur-3xl" />
-      </div>
+      <PageBackground accent="indigo" />
 
       {/* カード */}
       <div className="relative w-full max-w-sm mx-4">

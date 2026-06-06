@@ -1,8 +1,8 @@
+import { PageMetaRaw } from "@/lib/page-meta/types";
 import { PATHS } from "@/lib/path/paths";
 import {
   FolderSearchIcon,
   LayoutDashboardIcon,
-  LucideIcon,
   PackageOpenIcon,
   SettingsIcon,
   StarIcon,
@@ -10,48 +10,34 @@ import {
   WrenchIcon,
 } from "lucide-react";
 
-export type PageMetaRaw = {
-  key: string;
-  title: string;
-  url: string;
-  icon: LucideIcon;
-  hidden?: boolean;
-  developmentOnly?: boolean;
-};
-
-export type PageMeta = {
-  key: string;
-  title: string;
-  url: string;
-  icon: LucideIcon;
-  hidden: boolean;
-  developmentOnly: boolean;
-};
-
 export const pageMetas = [
   {
     key: "dashboard",
     title: "Dashboard",
     url: PATHS.client.dashboard.root,
     icon: LayoutDashboardIcon,
+    accent: "indigo",
   },
   {
     key: "explorer",
     title: "Explorer",
     url: PATHS.client.explorer.root,
     icon: FolderSearchIcon,
+    accent: "sky",
   },
   {
     key: "favorites",
     title: "Favorites",
     url: PATHS.client.favorites.root,
     icon: StarIcon,
+    accent: "amber",
   },
   {
     key: "trash",
     title: "Trash",
     url: PATHS.client.trash.root,
     icon: Trash2Icon,
+    accent: "red",
   },
   {
     key: "settings",
@@ -59,6 +45,7 @@ export const pageMetas = [
     url: PATHS.client.settings.root,
     icon: SettingsIcon,
     hidden: true,
+    accent: "orange",
   },
   {
     key: "sandbox",
@@ -66,12 +53,14 @@ export const pageMetas = [
     url: PATHS.client.sandbox.root,
     icon: PackageOpenIcon,
     developmentOnly: true,
+    accent: "teal",
   },
   {
     key: "maintenance",
     title: "Maintenance",
     url: PATHS.client.maintenance.root,
     icon: WrenchIcon,
+    accent: "zinc",
   },
 ] as const satisfies readonly PageMetaRaw[];
 
