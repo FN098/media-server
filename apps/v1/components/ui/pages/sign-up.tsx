@@ -12,7 +12,11 @@ import { Spinner } from "@/shadcn/components/ui/spinner";
 import { cn } from "@/shadcn/lib/utils";
 import Link from "next/link";
 
-export function SignUp() {
+interface SignUpProps {
+  hasAdmin: boolean;
+}
+
+export function SignUp({ hasAdmin }: SignUpProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,22 +88,24 @@ export function SignUp() {
                 Create account
               </h1>
               <p className="mt-1 text-sm text-zinc-500">
-                管理者アカウントを作成してください
+                アカウントを作成してください
               </p>
             </div>
 
             {/* 管理者バナー */}
-            <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 mb-6">
-              <ShieldAlert
-                className="mt-px h-4 w-4 shrink-0 text-amber-500"
-                aria-hidden
-              />
-              <p className="text-xs leading-relaxed text-amber-400/90">
-                システムに管理者が存在しません。最初のユーザーは自動的に
-                <span className="font-medium text-amber-300"> Admin </span>
-                となります。
-              </p>
-            </div>
+            {!hasAdmin && (
+              <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 mb-6">
+                <ShieldAlert
+                  className="mt-px h-4 w-4 shrink-0 text-amber-500"
+                  aria-hidden
+                />
+                <p className="text-xs leading-relaxed text-amber-400/90">
+                  システムに管理者が存在しません。最初のユーザーは自動的に
+                  <span className="font-medium text-amber-300"> Admin </span>
+                  となります。
+                </p>
+              </div>
+            )}
           </div>
 
           <form
