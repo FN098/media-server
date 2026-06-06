@@ -15,7 +15,7 @@ export async function proxy(req: NextRequest) {
 
   // ====== 管理者検証 =======
 
-  if (hasAdminCache === null) {
+  if (hasAdminCache !== true) {
     hasAdminCache = await hasAdmin();
   }
 
