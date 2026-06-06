@@ -68,6 +68,7 @@ async function runFullScan(
   send: (data: GhostMediaScanEventData) => void,
   signal: AbortSignal
 ): Promise<GhostMediaItem[]> {
+  // FIXME: ファイル件数が多いとメモリを圧迫する。今のところは問題になっていないので、そのうち対応する
   // DB 上の全ファイルを取得
   const allMedia = await prisma.media.findMany({
     select: {
