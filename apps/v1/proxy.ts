@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/better-auth";
 import { isBlockedClientPath } from "@/lib/path/protections";
+import { isPublic } from "@/lib/routing/public-routes";
 import { NextRequest, NextResponse } from "next/server";
 
 let hasAdminCache: boolean | null = null;
@@ -7,12 +8,8 @@ let hasAdminCache: boolean | null = null;
 export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // 認証系のパスは素通しさせる
-  if (
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname.startsWith("/api/auth/")
-  ) {
+  // 一般公開系のパスは素通し
+  if (isPublic(pathname)) {
     return NextResponse.next(); // 認可OK
   }
 
@@ -33,7 +30,7 @@ export async function proxy(req: NextRequest) {
   });
 
   if (!session) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
   // ====== 認可 =======
@@ -48,10 +45,7 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // _next, api, login などを除外して、それ以外すべてに認証をかける
-    "/((?!_next|api|login).*)",
-  ],
+  matcher: ["/((?!_next).*)"],
 };
 
 async function hasAdmin() {
