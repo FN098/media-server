@@ -7,3 +7,5 @@ export const TEMP_DB_BACKUP_DIR = path.join(os.tmpdir(), "media-server", ".db");
 
 export const MIN_KEEP_COUNT = 3;
 export const MAX_KEEP_COUNT = 30;
+
+export const MAX_UPLOAD_FILE_SIZE = 50 * 1024 * 1024; // 50MB
