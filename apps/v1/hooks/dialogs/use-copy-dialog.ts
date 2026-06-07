@@ -133,14 +133,26 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
       const paths = targets.map((n) => n.path);
       const result = await copyNodesAction(paths, currentDir);
 
-      if (result.failed === 0) {
-        toast.success(`${result.success}件のアイテムをコピーしました`);
+      if (result.success) {
+        if (result.completed.length > 0) {
+          toast.success(
+            `${result.completed.length} 件のアイテムをコピーしました`
+          );
+        }
+        if (result.failed.length > 0) {
+          toast.success(
+            `${result.failed.length} 件のアイテムのコピーに失敗しました`
+          );
+        }
+        if (result.skipped.length > 0) {
+          toast.success(
+            `${result.skipped.length} 件のアイテムのコピーをスキップしました`
+          );
+        }
         onSuccess?.();
         close();
       } else {
-        toast.error(
-          `${result.failed}件のコピーに失敗しました\n${result.errors.join("\n")}`
-        );
+        toast.error(result.message);
       }
     });
   }, [currentDir, targets, close, onSuccess]);

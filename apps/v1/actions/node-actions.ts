@@ -514,34 +514,58 @@ export async function moveNodesAction(
   };
 }
 
+type CopyNodesResult =
+  | {
+      success: true;
+      completed: { path: string }[];
+      failed: { path: string; message: string }[];
+      skipped: { path: string; message: string }[];
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
+
+type CopyNodesSuccess = Extract<CopyNodesResult, { success: true }>;
+
 // コピー
 export async function copyNodesAction(
   sourcePaths: string[],
   destDirPath: string
-) {
-  // 認証
-  const user = await resolveCurrentUserOrThrow();
-  const userId = user.id;
-
-  // 入力バリデーション+正規化
-  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
-  const normalizedDestDirPath = normalizeVirtualPath(destDirPath);
-
-  // ルートフォルダ保護
-  if (normalizedSourcePaths.some((path) => path === "")) {
+): Promise<CopyNodesResult> {
+  // 入力バリデーション＋正規化
+  if (!sourcePaths || sourcePaths.length === 0 || !destDirPath) {
     return {
-      success: 0,
-      failed: normalizedSourcePaths.length,
-      errors: ["ルートフォルダは操作できません。"],
+      success: false,
+      message: "処理対象のパスが指定されていません。",
     };
   }
 
-  // システムフォルダ保護
-  if (normalizedSourcePaths.some((path) => isSystemHiddenVirtualPath(path))) {
+  const parsed = {
+    src: VirtualPathManySchema.safeParse(sourcePaths.map(sanitize)),
+    dest: VirtualPathOneSchema.safeParse(sanitize(destDirPath)),
+  };
+  if (!parsed.src.success || !parsed.dest.success) {
     return {
-      success: 0,
-      failed: normalizedSourcePaths.length,
-      errors: ["システムフォルダは操作できません。"],
+      success: false,
+      message: "入力エラーがあります。",
+      errors: [
+        { prop: "sourcePaths", issues: parsed.src.error?.issues },
+        { prop: "destDirPath", issues: parsed.dest.error?.issues },
+      ],
+    };
+  }
+
+  const normalizedSourcePaths = unique(parsed.src.data);
+  const normalizedDestDirPath = parsed.dest.data;
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
     };
   }
 
@@ -554,15 +578,16 @@ export async function copyNodesAction(
     const entries = await readdir(realDestDirPath);
     entries.forEach((name) => existingNames.add(name));
   } catch (e) {
-    console.error("failed to read directory:", e);
+    logger.error("action:copy:read-directory", e);
     return {
-      success: 0,
-      failed: normalizedSourcePaths.length,
-      errors: ["ファイルまたはフォルダのコピーに失敗しました。"],
+      success: false,
+      message: "ファイルまたはフォルダのコピーに失敗しました。",
     };
   }
 
-  const results = { success: 0, failed: 0, errors: [] as string[] };
+  const completed: CopyNodesSuccess["completed"] = [];
+  const failed: CopyNodesSuccess["failed"] = [];
+  const skipped: CopyNodesSuccess["skipped"] = [];
 
   for (const srcVirtualPath of normalizedSourcePaths) {
     // 子孫チェック
@@ -570,10 +595,28 @@ export async function copyNodesAction(
       normalizedDestDirPath === srcVirtualPath ||
       normalizedDestDirPath.startsWith(srcVirtualPath + "/")
     ) {
-      results.failed++;
-      results.errors.push(
-        `自分自身またはサブフォルダへの操作はできません。。: ${srcVirtualPath}`
-      );
+      skipped.push({
+        path: srcVirtualPath,
+        message: "自分自身またはサブフォルダへの操作はできません。",
+      });
+      continue;
+    }
+
+    // ルートフォルダ保護
+    if (isRootPath(srcVirtualPath)) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "ルートフォルダは操作できません。",
+      });
+      continue;
+    }
+
+    // システムフォルダ保護
+    if (isSystemHiddenVirtualPath(srcVirtualPath)) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "システムフォルダは操作できません。",
+      });
       continue;
     }
 
@@ -583,37 +626,51 @@ export async function copyNodesAction(
     // ディレクトリ判定
     const srcPathInfo = await getPathInfo(srcRealPath);
     if (!srcPathInfo.exists) {
-      if (srcPathInfo.error === "not-found")
-        results.errors.push(
-          `ファイルまたはフォルダが存在しません。: ${srcVirtualPath}`
-        );
-      else
-        results.errors.push(
-          `ファイルまたはフォルダへのアクセスが拒否されました。: ${srcVirtualPath}`
-        );
+      if (srcPathInfo.error === "not-found") {
+        failed.push({
+          path: srcVirtualPath,
+          message: "ファイルまたはフォルダが存在しません。",
+        });
+        continue;
+      } else {
+        failed.push({
+          path: srcVirtualPath,
+          message: "ファイルまたはフォルダへのアクセスが拒否されました。",
+        });
+        continue;
+      }
     }
     const isDirectory = srcPathInfo.isDirectory;
 
-    const srcName = srcVirtualPath.split("/").pop() || "";
+    // 認可
+    if (
+      (!isDirectory && !hasPermission(user, "file:copy")) ||
+      (isDirectory && !hasPermission(user, "folder:copy"))
+    ) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "権限がありません。",
+      });
+      continue;
+    }
 
-    // 新しい名前を確定（名前衝突があれば (1), (2), ... などの連番を付与）
+    const srcName = basename(srcVirtualPath);
+
+    // 新しい名前を確定（名前衝突があれば (2), (3), ... などの連番を付与）
     let currentSrcName = srcName;
-    let counter = 1;
+    let counter = 2;
     while (existingNames.has(currentSrcName)) {
       if (isDirectory) {
-        // フォルダの場合: 「フォルダ名 (1)」
+        // フォルダの場合: 「フォルダ名 (2)」
         currentSrcName = `${srcName} (${counter})`;
       } else {
-        // ファイルの場合: 「ファイル名 (1).ext」
+        // ファイルの場合: 「ファイル名 (2).ext」
         const ext = extname(srcName);
         const base = basename(srcName, ext);
         currentSrcName = `${base} (${counter})${ext}`;
       }
       counter++;
     }
-
-    // 次のループのファイルがこれと衝突するのを防ぐため、確定した名前を Set に予約登録
-    existingNames.add(currentSrcName);
 
     // 最終的なパスを決定
     const destVirtualPath = `${normalizedDestDirPath}/${currentSrcName}`;
@@ -629,7 +686,7 @@ export async function copyNodesAction(
       thumbCopied = true;
     } catch (e) {
       if (!isFsNotFoundError(e)) {
-        console.error("failed to copy thumbnails:", e);
+        logger.error("action:copy:thumb", e);
       }
     }
 
@@ -637,13 +694,13 @@ export async function copyNodesAction(
     try {
       await cp(srcRealPath, destRealPath, { recursive: true });
     } catch (e) {
-      console.error("failed to copy file or directory:", e);
+      logger.error("action:copy:fs", e);
 
       // FSロールバック（中途半端なコピー結果を削除）
       try {
         await rm(destRealPath, { recursive: true, force: true });
       } catch (e) {
-        console.error("failed to remove file or directory:", e);
+        logger.error("action:copy:fs:fs-rollback", e);
       }
 
       // サムネイルロールバック
@@ -651,34 +708,33 @@ export async function copyNodesAction(
         try {
           await rm(destThumbPath, { recursive: true, force: true });
         } catch (e) {
-          console.error(
-            "failed to rollback copied thumbnail file or directory:",
-            e
-          );
+          logger.error("action:copy:fs:thumb-rollback", e);
         }
       }
 
-      results.failed++;
-      results.errors.push("ファイルまたはフォルダのコピーに失敗しました。");
+      failed.push({
+        path: srcVirtualPath,
+        message: "ファイルまたはフォルダのコピーに失敗しました。",
+      });
       continue;
     }
 
-    // DB 更新
+    // DB更新
     try {
       await copyNodeInDb({
         srcVirtualPath,
         destVirtualPath,
         isDirectory,
-        userId,
+        userId: user.id,
       });
     } catch (e) {
-      console.error("failed to update database:", e);
+      logger.error("action:copy:db", e);
 
       // FSロールバック（中途半端なコピー結果を削除）
       try {
         await rm(destRealPath, { recursive: true, force: true });
       } catch (e) {
-        console.error("failed to rollback copied file or directory:", e);
+        logger.error("action:copy:db:fs-rollback", e);
       }
 
       // サムネイルロールバック
@@ -686,25 +742,34 @@ export async function copyNodesAction(
         try {
           await rm(destThumbPath, { recursive: true, force: true });
         } catch (e) {
-          console.error(
-            "failed to rollback copied thumbnail file or directory:",
-            e
-          );
+          logger.error("action:copy:db:thumb-rollback", e);
         }
       }
 
-      results.failed++;
-      results.errors.push("ファイルまたはフォルダのコピーに失敗しました。");
+      failed.push({
+        path: srcVirtualPath,
+        message: "ファイルまたはフォルダのコピーに失敗しました。",
+      });
       continue;
     }
 
-    results.success++;
+    completed.push({ path: srcVirtualPath });
+
+    // 次のループのファイルがこれと衝突するのを防ぐため、確定した名前を Set に予約登録
+    existingNames.add(currentSrcName);
   }
 
   // キャッシュの更新
-  revalidatePath("/explorer");
+  if (completed.length > 0) {
+    revalidatePath("/explorer");
+  }
 
-  return results;
+  return {
+    success: true,
+    completed,
+    failed,
+    skipped,
+  };
 }
 
 // 削除（ゴミ箱フォルダへの移動）
