@@ -45,7 +45,7 @@ import {
   Settings2,
   Upload,
 } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type DbBackupSelectItem = {
@@ -76,10 +76,10 @@ const formatBytes = (bytes: number) => {
 };
 
 export function DatabaseBackupCard() {
-  const [isListing, startListing] = useTransition();
-  const [isCreating, startCreating] = useTransition();
-  const [isRestoring, startRestoring] = useTransition();
-  const [isUploading, startUploading] = useTransition();
+  const [isListing, setIsListing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [backupFiles, setBackupFiles] = useState<DbBackupSelectItem[]>([]);
   const [uploadedFile, setUploadedFile] = useState<DbBackupSelectItem | null>(
@@ -101,46 +101,48 @@ export function DatabaseBackupCard() {
   const [showCleanupConfirm, setShowCleanupConfirm] = useState(false);
   const [pendingDeleteCount, setPendingDeleteCount] = useState(0);
 
-  const refreshList = () => {
-    startListing(async () => {
-      const list = await listBackupFilesAction();
-      setBackupFiles(
-        list.map((v) => ({
-          key: `saved:${v.name}`,
-          value: v,
-        }))
-      );
-    });
-  };
+  const refreshList = useCallback(async () => {
+    setIsListing(true);
+    const list = await listBackupFilesAction();
+    setIsListing(false);
 
-  const handleBackup = () => {
-    startCreating(async () => {
-      const res = await dumpDatabaseAction();
-      if (res.success) {
-        toast.success("バックアップを作成しました");
+    setBackupFiles(
+      list.map((v) => ({
+        key: `saved:${v.name}`,
+        value: v,
+      }))
+    );
+  }, []);
 
-        // 自動クリーンアップがONの場合のみ実行
-        if (autoCleanup) {
-          const cleanRes = await cleanupOldBackupsAction(keepCount);
-          if (cleanRes.success && cleanRes.deletedCount! > 0) {
-            toast.info(
-              `古いバックアップを ${cleanRes.deletedCount} 件削除しました`
-            );
-          } else if (!cleanRes.success) {
-            toast.error(
-              cleanRes.error ?? "バックアップのクリーンアップに失敗しました"
-            );
-          }
+  const handleBackup = useCallback(async () => {
+    setIsCreating(true);
+    const res = await dumpDatabaseAction();
+    setIsCreating(false);
+
+    if (res.success) {
+      toast.success("バックアップを作成しました");
+
+      // 自動クリーンアップがONの場合のみ実行
+      if (autoCleanup) {
+        const cleanRes = await cleanupOldBackupsAction(keepCount);
+        if (cleanRes.success && cleanRes.deletedCount! > 0) {
+          toast.info(
+            `古いバックアップを ${cleanRes.deletedCount} 件削除しました`
+          );
+        } else if (!cleanRes.success) {
+          toast.error(
+            cleanRes.error ?? "バックアップのクリーンアップに失敗しました"
+          );
         }
-
-        refreshList();
-      } else {
-        toast.error(res.error ?? "バックアップの作成に失敗しました");
       }
-    });
-  };
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      await refreshList();
+    } else {
+      toast.error(res.error ?? "バックアップの作成に失敗しました");
+    }
+  }, [autoCleanup, keepCount, refreshList]);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
     const file = input.files?.[0];
 
@@ -153,82 +155,84 @@ export function DatabaseBackupCard() {
       return;
     }
 
-    startUploading(async () => {
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
-        const res = await fetch("/api/db/upload", {
-          method: "POST",
-          body: formData,
-        });
+    try {
+      setIsUploading(true);
+      const res = await fetch("/api/db/upload", {
+        method: "POST",
+        body: formData,
+      });
+      setIsUploading(false);
 
-        const data = (await res.json()) as DbBackupUploadResult;
+      const data = (await res.json()) as DbBackupUploadResult;
 
-        if (data.success) {
-          const uploaded = {
-            key: `upload:${data.backup.name}`,
-            value: data.backup,
-          };
-          setUploadedFile(uploaded);
-          setSelectedFile(uploaded);
-          toast.success("一時ファイルをアップロードしました");
-        } else {
-          toast.error(data.error);
-        }
-      } catch {
-        toast.error("通信エラーが発生しました");
-      } finally {
-        // 確実にリセット（既にやっていても念の為）
-        input.value = "";
+      if (data.success) {
+        const uploaded = {
+          key: `upload:${data.backup.name}`,
+          value: data.backup,
+        };
+        setUploadedFile(uploaded);
+        setSelectedFile(uploaded);
+        toast.success("一時ファイルをアップロードしました");
+      } else {
+        toast.error(data.error);
       }
-    });
+    } catch {
+      toast.error("通信エラーが発生しました");
+    } finally {
+      // 確実にリセット（既にやっていても念の為）
+      input.value = "";
+    }
   };
 
-  const handleRestore = () => {
+  const handleRestore = async () => {
     if (!selectedFile) return;
 
-    startRestoring(async () => {
-      const res = await restoreDatabaseAction(selectedFile.value);
-      if (res.success) {
-        toast.success("リストアが完了しました");
-        // 一時ファイルだった場合は、リストから消去して選択を解除
-        if (selectedFile.value.isTemp) {
-          setUploadedFile(null);
-          setSelectedFile(null);
-        }
-      } else {
-        toast.error(res.error);
+    setIsRestoring(true);
+    const res = await restoreDatabaseAction(selectedFile.value);
+    setIsRestoring(false);
+
+    if (res.success) {
+      toast.success("リストアが完了しました");
+      // 一時ファイルだった場合は、リストから消去して選択を解除
+      if (selectedFile.value.isTemp) {
+        setUploadedFile(null);
+        setSelectedFile(null);
       }
-    });
+    } else {
+      toast.error(res.error);
+    }
   };
 
-  const initiateBackup = () => {
+  const initiateBackup = async () => {
     if (!autoCleanup) {
-      handleBackup();
+      await handleBackup();
       return;
     }
 
     // 最新のリストを取得して件数を確認
     // (表示中の backupFiles を使わず、常に最新状態を取ることで判定ミスを防ぐ)
-    startListing(async () => {
-      const list = await listBackupFilesAction();
-      const mappedList = list.map((v) => ({
-        key: `saved:${v.name}`,
-        value: v,
-      }));
-      setBackupFiles(mappedList);
+    setIsListing(true);
+    const list = await listBackupFilesAction();
+    setIsListing(false);
 
-      // 今から作る1件を加えた合計が keepCount を超えるか計算
-      const deleteCount = mappedList.length + 1 - keepCount;
+    const mappedList = list.map((v) => ({
+      key: `saved:${v.name}`,
+      value: v,
+    }));
+    setBackupFiles(mappedList);
 
-      if (deleteCount > 0) {
-        setPendingDeleteCount(deleteCount);
-        setShowCleanupConfirm(true);
-      } else {
-        handleBackup();
-      }
-    });
+    // 今から作る1件を加えた合計が keepCount を超えるか計算
+    const deleteCount = mappedList.length + 1 - keepCount;
+
+    if (deleteCount > 0) {
+      setPendingDeleteCount(deleteCount);
+      setShowCleanupConfirm(true);
+    } else {
+      await handleBackup();
+    }
   };
 
   return (
@@ -246,7 +250,7 @@ export function DatabaseBackupCard() {
       <CardContent className="space-y-4">
         {/* 新規バックアップ作成ボタン */}
         <Button
-          onClick={initiateBackup}
+          onClick={() => void initiateBackup()}
           disabled={isCreating}
           className="w-full"
           variant="outline"
@@ -284,7 +288,7 @@ export function DatabaseBackupCard() {
               <AlertDialogAction
                 onClick={() => {
                   setShowCleanupConfirm(false);
-                  handleBackup();
+                  void handleBackup();
                 }}
               >
                 削除を承諾して作成
@@ -330,7 +334,7 @@ export function DatabaseBackupCard() {
             <Input
               type="file"
               accept=".sql"
-              onChange={handleUpload}
+              onChange={(e) => void handleUpload(e)}
               disabled={isUploading}
               className="hidden"
               id="db-upload"
@@ -508,7 +512,7 @@ export function DatabaseBackupCard() {
               <AlertDialogFooter>
                 <AlertDialogCancel>キャンセル</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleRestore}
+                  onClick={() => void handleRestore()}
                   variant="destructive"
                 >
                   リストアを確定する
