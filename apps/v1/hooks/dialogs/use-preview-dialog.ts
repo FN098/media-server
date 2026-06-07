@@ -2,7 +2,7 @@ import { listSubDirectoriesAction } from "@/actions/folder-actions";
 import { listMediaAction } from "@/actions/node-actions";
 import { updatePreviewAction } from "@/actions/preview-actions";
 import { dirname } from "path";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 type PreviewItemInfo = {
@@ -23,28 +23,26 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
   const [selectedTargetPath, setSelectedTargetPath] = useState<string | null>(
     null
   );
-
-  const [isNavigating, startNavigating] = useTransition();
-  const [isSaving, startSaving] = useTransition();
-  const isLoading = isNavigating || isSaving;
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
   // 1. 指定ディレクトリのコンテンツ（フォルダ＆ファイル）を同時取得
-  const fetchContents = useCallback((dirPath: string) => {
-    startNavigating(async () => {
-      const [dirRes, fileRes] = await Promise.all([
-        listSubDirectoriesAction(dirPath),
-        listMediaAction(dirPath),
-      ]);
+  const fetchContents = useCallback(async (dirPath: string) => {
+    setIsLoading(true);
+    const [dirRes, fileRes] = await Promise.all([
+      listSubDirectoriesAction(dirPath),
+      listMediaAction(dirPath),
+    ]);
+    setIsLoading(false);
 
-      if (dirRes.success && fileRes.success) {
-        setDirs(dirRes.directories || []);
-        setFiles(fileRes.files || []);
-        setCurrentDir(dirPath);
-        setSelectedTargetPath(dirPath); // 階層移動時、デフォルトでそのフォルダを設定先に
-      } else {
-        toast.error("コンテンツの取得に失敗しました");
-      }
-    });
+    if (dirRes.success && fileRes.success) {
+      setDirs(dirRes.directories || []);
+      setFiles(fileRes.files || []);
+      setCurrentDir(dirPath);
+      setSelectedTargetPath(dirPath); // 階層移動時、デフォルトでそのフォルダを設定先に
+    } else {
+      toast.error("コンテンツの取得に失敗しました");
+    }
   }, []);
 
   // 2. ダイアログを開く
@@ -55,7 +53,7 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
 
       // 開いたアセットがある親階層からブラウズを開始する
       const initialDir = dirname(targetPreviewPath).replace(/\\/g, "/") || "/";
-      fetchContents(initialDir);
+      void fetchContents(initialDir);
     },
     [fetchContents]
   );
@@ -74,23 +72,24 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
   const goBackParent = useCallback(() => {
     const parent = dirname(currentDir).replace(/\\/g, "/");
     const path = parent === "." ? "" : parent;
-    fetchContents(path);
+    void fetchContents(path);
   }, [currentDir, fetchContents]);
 
   // 5. プレビュー画像設定の保存実行
-  const performSave = useCallback(() => {
+  const performSave = useCallback(async () => {
     if (!previewPath || !selectedTargetPath) return;
 
-    startSaving(async () => {
-      const result = await updatePreviewAction(selectedTargetPath, previewPath);
-      if (result.success) {
-        toast.success("プレビューを設定しました");
-        onSuccess?.();
-        close();
-      } else {
-        toast.error(result.error || "設定に失敗しました");
-      }
-    });
+    setIsPending(true);
+    const result = await updatePreviewAction(selectedTargetPath, previewPath);
+    setIsPending(false);
+
+    if (result.success) {
+      toast.success("プレビューを設定しました");
+      onSuccess?.();
+      close();
+    } else {
+      toast.error(result.error || "設定に失敗しました");
+    }
   }, [previewPath, selectedTargetPath, close, onSuccess]);
 
   return {
@@ -101,7 +100,7 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
     files,
     selectedTargetPath,
     isLoading,
-    isSaving,
+    isPending,
     setSelectedTargetPath,
     open,
     close,

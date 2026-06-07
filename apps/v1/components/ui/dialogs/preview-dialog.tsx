@@ -33,7 +33,7 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
     files,
     selectedTargetPath,
     isLoading,
-    isSaving,
+    isPending,
     setSelectedTargetPath,
     close,
     fetchContents,
@@ -127,7 +127,7 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 shrink-0"
-                      onClick={() => fetchContents(dir.path)}
+                      onClick={() => void fetchContents(dir.path)}
                       disabled={isLoading}
                     >
                       <ChevronRight className="h-4 w-4" />
@@ -175,16 +175,16 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
               variant="outline"
               size="sm"
               onClick={close}
-              disabled={isLoading}
+              disabled={isLoading || isPending}
             >
               キャンセル
             </Button>
             <Button
               size="sm"
-              onClick={performSave}
-              disabled={!selectedTargetPath || isLoading}
+              onClick={() => void performSave()}
+              disabled={!selectedTargetPath || isLoading || isPending}
             >
-              {isSaving ? (
+              {isPending ? (
                 "保存中..."
               ) : (
                 <>
