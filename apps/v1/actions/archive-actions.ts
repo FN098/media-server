@@ -8,7 +8,7 @@ import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath, isFsNotFoundError } from "@/lib/utils/fs";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { basename, dirname, extname, join } from "@/lib/virtual-path/path";
-import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
+import { VirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import { logger } from "better-auth";
 import { lstat, mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
@@ -23,7 +23,7 @@ type ExtractArchivesResult =
   | {
       success: false;
       message: string;
-      inputErrors?: { path: string; message: string }[];
+      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 type ExtractArchivesSuccess = Extract<ExtractArchivesResult, { success: true }>;
@@ -43,38 +43,25 @@ export async function extractArchivesAction(
     };
   }
 
-  const inputErrors = [] as { path: string; message: string }[];
-
-  const normalizedArchives = sourceArchives
-    .map((arc) => {
-      const sanitized = sanitize(arc.path);
-      const parsed = VirtualPathSchema.safeParse(sanitized);
-      if (!parsed.success) {
-        inputErrors.push({ path: arc.path, message: "無効なパスです。" });
-        return null;
-      }
-
-      const path = parsed.data;
-
-      if (!isArchiveFile(path)) {
-        inputErrors.push({
-          path: arc.path,
-          message: "有効なアーカイブファイルではありません。",
-        });
-        return null;
-      }
-
-      return { path };
-    })
-    .filter((arc) => arc != null);
-
-  if (inputErrors.length > 0) {
+  const parsed = {
+    sourcePaths: VirtualPathManySchema.safeParse(
+      sourceArchives.map((arc) => sanitize(arc.path))
+    ),
+  };
+  if (!parsed.sourcePaths.success) {
     return {
       success: false,
       message: "入力エラーがあります。",
-      inputErrors,
+      errors: [
+        {
+          prop: "sourceArchives[].path",
+          issues: parsed.sourcePaths.error?.issues,
+        },
+      ],
     };
   }
+
+  const normalizedSourcePaths = parsed.sourcePaths.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -98,7 +85,15 @@ export async function extractArchivesAction(
   const skipped: ExtractArchivesSuccess["skipped"] = [];
 
   // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を使う)
-  for (const { path: sourcePath } of normalizedArchives) {
+  for (const sourcePath of normalizedSourcePaths) {
+    if (!isArchiveFile(sourcePath)) {
+      skipped.push({
+        sourcePath,
+        message: "有効なアーカイブファイルではありません。",
+      });
+      continue;
+    }
+
     // 仮想パス→物理パス
     const srcVirtualPath = sourcePath;
     const srcRealPath = getServerMediaPath(srcVirtualPath);
