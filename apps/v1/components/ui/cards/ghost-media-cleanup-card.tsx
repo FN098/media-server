@@ -36,11 +36,11 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function GhostMediaCleanupCard() {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const [isFullScan, setIsFullScan] = useState(false);
   const [items, setItems] = useState<GhostMediaItem[] | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
@@ -131,38 +131,38 @@ export function GhostMediaCleanupCard() {
   };
 
   // 削除実行
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (!items || items.length === 0) return;
 
-    startTransition(async () => {
-      try {
-        const chunks = chunk(
-          items.map((n) => n.id),
-          1000
-        );
+    try {
+      setIsPending(true);
 
-        let deletedCount = 0;
+      const chunks = chunk(
+        items.map((n) => n.id),
+        1000
+      );
 
-        for (const ids of chunks) {
-          const result = await cleanupGhostMediaAction(ids);
+      let deletedCount = 0;
 
-          if (!result.success) {
-            throw new Error(result.error);
-          }
+      for (const ids of chunks) {
+        const result = await cleanupGhostMediaAction(ids);
 
-          deletedCount += result.deletedCount ?? 0;
+        if (!result.success) {
+          throw new Error(result.error);
         }
 
-        toast.success(`${deletedCount}件の不要なメディアを削除しました`);
-        setItems(null);
-      } catch (error) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "削除中にエラーが発生しました"
-        );
+        deletedCount += result.deletedCount ?? 0;
       }
-    });
+
+      toast.success(`${deletedCount}件の不要なメディアを削除しました`);
+      setItems(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "削除中にエラーが発生しました"
+      );
+    } finally {
+      setIsPending(false);
+    }
   }, [items]);
 
   return (
@@ -324,7 +324,7 @@ export function GhostMediaCleanupCard() {
               <AlertDialogFooter>
                 <AlertDialogCancel>キャンセル</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleDelete}
+                  onClick={() => void handleDelete()}
                   className="bg-destructive hover:bg-destructive/90"
                 >
                   削除を実行
