@@ -63,7 +63,7 @@ export function DeleteDialog({ dialog }: DeleteDialogProps) {
             onClick={(e) => {
               // Shadcnのデフォルトで閉じる挙動をガード
               e.preventDefault();
-              performDelete();
+              void performDelete();
             }}
             disabled={isPending}
             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
