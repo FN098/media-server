@@ -1,6 +1,6 @@
 import pathPosix from "path/posix";
 
-// path/posix のラッパーだが、一貫性と拡張性のために使用
+// path/posix のラッパーだが、一貫性と将来の拡張性のために使用を推奨
 
 export function join(...paths: string[]): string {
   return pathPosix.join(...paths);
@@ -8,6 +8,14 @@ export function join(...paths: string[]): string {
 
 export function dirname(path: string): string {
   return pathPosix.dirname(path);
+}
+
+export function basename(path: string, suffix?: string): string {
+  return pathPosix.basename(path, suffix);
+}
+
+export function extname(path: string): string {
+  return pathPosix.extname(path);
 }
 
 export function sanitize(path: string): string {

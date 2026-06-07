@@ -50,7 +50,7 @@ export function ExtractDialog({ dialog }: ExtractDialogProps) {
             onClick={(e) => {
               // ShadcnのAlertDialogActionが勝手にダイアログを閉じるデフォルト挙動をガード
               e.preventDefault();
-              performExtract();
+              void performExtract();
             }}
             disabled={isPending}
             className="bg-primary text-primary-foreground hover:bg-primary/90"

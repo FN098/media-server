@@ -1,12 +1,22 @@
 "use server";
 
+import { isArchiveFile } from "@/lib/archive/guards";
 import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { extractArchive } from "@/lib/child_process/7z";
 import { getServerMediaPath } from "@/lib/path/helpers";
+import { existsPath } from "@/lib/utils/fs";
 import { sumBy } from "@/lib/utils/math";
-import { existsSync, promises as fsPromises } from "fs";
+import {
+  basename,
+  dirname,
+  extname,
+  join,
+  sanitize,
+} from "@/lib/virtual-path/path";
+import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
+import { logger } from "better-auth";
+import { lstat, mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import { basename, dirname, extname, join } from "path";
 
 export type ExtractionResult =
   | {
@@ -19,7 +29,7 @@ export type ExtractionResult =
       sourcePath: string;
     };
 
-export type ExtractionAllResult =
+export type ExtractionSummaryResult =
   | {
       success: true;
       completed: number;
@@ -35,9 +45,9 @@ export type ExtractionAllResult =
  * 複数のアーカイブファイルをまとめて解凍するサーバーアクション
  * @param sourceArchives エクスプローラー上の仮想パスの配列 (例: ["folder/file1.zip", "folder/file2.zip"])
  */
-export async function extractMultipleArchivesNodeAction(
+export async function extractMultipleArchivesAction(
   sourceArchives: { path: string }[]
-): Promise<ExtractionAllResult> {
+): Promise<ExtractionSummaryResult> {
   // 入力バリデーション
   if (!sourceArchives || sourceArchives.length === 0) {
     return {
@@ -68,35 +78,48 @@ export async function extractMultipleArchivesNodeAction(
   // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を使う)
   for (const { path: sourcePath } of sourceArchives) {
     // パスの正規化
-    const normalizedSourcePath = sourcePath.replace(/^\/+/, "");
-    if (normalizedSourcePath === "") {
+    const normalizedSourcePath = VirtualPathSchema.safeParse(
+      sanitize(sourcePath)
+    ).data;
+    if (!normalizedSourcePath) {
       results.push({
-        sourcePath,
         success: false,
         error: "無効なパスです。",
+        sourcePath,
       });
-      continue; // 次のファイルへ
+      continue;
     }
 
+    // アーカイブファイル判定
+    if (!isArchiveFile(normalizedSourcePath)) {
+      results.push({
+        success: false,
+        error: "有効なアーカイブファイル名ではありません。",
+        sourcePath,
+      });
+      continue;
+    }
+
+    // 仮想パス→物理パス
     const srcVirtualPath = normalizedSourcePath;
     const srcRealPath = getServerMediaPath(srcVirtualPath);
 
     // 移動元の存在・ファイル確認
     try {
-      const stats = await fsPromises.lstat(srcRealPath);
-      if (!stats.isFile()) {
+      const stats = await lstat(srcRealPath);
+      if (stats.isDirectory()) {
         results.push({
-          sourcePath,
           success: false,
           error: "ディレクトリは解凍できません。",
+          sourcePath,
         });
         continue;
       }
     } catch {
       results.push({
-        sourcePath,
         success: false,
         error: `対象ファイルが見つかりません: ${basename(srcVirtualPath)}`,
+        sourcePath,
       });
       continue;
     }
@@ -104,16 +127,28 @@ export async function extractMultipleArchivesNodeAction(
     // 解凍先フォルダ名の決定 (hoge.zip -> hoge)
     const fileBaseName = basename(srcVirtualPath, extname(srcVirtualPath));
     const parentVirtualDir = dirname(srcVirtualPath);
+    const destPath = join(parentVirtualDir, fileBaseName);
 
-    let destVirtualDir = join(parentVirtualDir, fileBaseName).replace(
-      /\\/g,
-      "/"
-    );
+    // パスの正規化
+    const normalizedDestPath = VirtualPathSchema.safeParse(
+      sanitize(destPath)
+    ).data;
+    if (!normalizedDestPath) {
+      results.push({
+        success: false,
+        error: "無効なパスです。",
+        sourcePath,
+      });
+      continue;
+    }
+
+    // 仮想パス→物理パス
+    let destVirtualDir = normalizedDestPath;
     let destRealPath = getServerMediaPath(destVirtualDir);
 
     // 同名フォルダの衝突回避
     let counter = 1;
-    while (existsSync(destRealPath)) {
+    while (await existsPath(destRealPath)) {
       destVirtualDir = join(
         parentVirtualDir,
         `${fileBaseName} (${counter})`
@@ -126,7 +161,7 @@ export async function extractMultipleArchivesNodeAction(
     let isDirCreated = false;
     try {
       // 展開先の実ディレクトリを作成
-      await fsPromises.mkdir(destRealPath, { recursive: true });
+      await mkdir(destRealPath, { recursive: true });
       isDirCreated = true;
 
       // 7-Zipを実行して解凍
@@ -138,12 +173,14 @@ export async function extractMultipleArchivesNodeAction(
         success: true,
       });
     } catch (e) {
-      console.error(`Extraction Action Error [${sourcePath}]:`, e);
+      logger.error("action:extract-multi-archives", e, {
+        sourcePath,
+      });
 
       // ロールバック処理
-      if (isDirCreated && existsSync(destRealPath)) {
+      if (isDirCreated) {
         try {
-          await fsPromises.rm(destRealPath, { recursive: true, force: true });
+          await rm(destRealPath, { recursive: true, force: true });
         } catch (rmError) {
           console.error("Extraction Rollback Error:", rmError);
         }
@@ -162,7 +199,7 @@ export async function extractMultipleArchivesNodeAction(
     }
   }
 
-  // キャッシュの更新（ループの外で1回だけ実行）
+  // キャッシュの更新
   revalidatePath("/explorer");
 
   // 結果を集計
