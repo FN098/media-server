@@ -40,7 +40,7 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
     dirs,
     recentDirs,
     isLoading,
-    isMoving,
+    isPending,
     close,
     changeDir,
     goBackParent,
@@ -192,7 +192,7 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              togglePin(dir.path, dir.pinned);
+                              void togglePin(dir.path, dir.pinned);
                             }}
                           >
                             <Pin
@@ -215,14 +215,18 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
         </Tabs>
 
         <DialogFooter className="gap-2 pt-2 border-t">
-          <Button variant="outline" onClick={close} disabled={isLoading}>
+          <Button
+            variant="outline"
+            onClick={close}
+            disabled={isLoading || isPending}
+          >
             キャンセル
           </Button>
           <Button
-            onClick={performMove}
-            disabled={isLoading || currentDir === initialDir}
+            onClick={() => void performMove()}
+            disabled={isLoading || isPending || currentDir === initialDir}
           >
-            {isMoving ? (
+            {isPending ? (
               "移動中..."
             ) : (
               <>
