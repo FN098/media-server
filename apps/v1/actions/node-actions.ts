@@ -392,15 +392,15 @@ export async function moveNodesAction(
 
     const srcName = basename(srcVirtualPath);
 
-    // 新しい名前を確定（名前衝突があれば (1), (2), ... などの連番を付与）
+    // 新しい名前を確定（名前衝突があれば (2), (3), ... などの連番を付与）
     let currentSrcName = srcName;
-    let counter = 1;
+    let counter = 2;
     while (existingNames.has(currentSrcName)) {
       if (isDirectory) {
-        // フォルダの場合: 「フォルダ名 (1)」
+        // フォルダの場合: 「フォルダ名 (2)」
         currentSrcName = `${srcName} (${counter})`;
       } else {
-        // ファイルの場合: 「ファイル名 (1).ext」
+        // ファイルの場合: 「ファイル名 (2).ext」
         const ext = extname(srcName);
         const base = basename(srcName, ext);
         currentSrcName = `${base} (${counter})${ext}`;
