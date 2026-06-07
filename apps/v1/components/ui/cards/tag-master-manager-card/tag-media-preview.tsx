@@ -8,7 +8,7 @@ import {
 } from "@/shadcn/components/ui/popover";
 import { ExternalLink, FileText, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 interface TagMediaPreviewProps {
@@ -33,28 +33,33 @@ export function TagMediaPreview({
 }: TagMediaPreviewProps) {
   const [media, setMedia] = useState<MediaInfo[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [isLoading, startTransition] = useTransition();
+  const handleOpenChange = useCallback(
+    async (open: boolean) => {
+      setIsOpen(open);
 
-  useEffect(() => {
-    if (isOpen && count > 0) {
-      startTransition(async () => {
-        try {
-          const result = await getMediaByTagId(tagId);
-          if (result.success && result.media) {
-            setMedia(result.media);
-          } else {
-            toast.error(result.error ?? "メディア情報の取得に失敗しました。");
-          }
-        } catch {
-          toast.error("通信エラーが発生しました。");
+      if (!open || count === 0) return;
+
+      try {
+        setIsLoading(true);
+        const result = await getMediaByTagId(tagId);
+        setIsLoading(false);
+
+        if (result.success && result.media) {
+          setMedia(result.media);
+        } else {
+          toast.error(result.error ?? "メディア情報の取得に失敗しました。");
         }
-      });
-    }
-  }, [isOpen, tagId, count]);
+      } catch {
+        toast.error("通信エラーが発生しました。");
+      }
+    },
+    [count, tagId]
+  );
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={(open) => void handleOpenChange(open)}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start">
         <div className="p-3 border-b bg-muted/50">
