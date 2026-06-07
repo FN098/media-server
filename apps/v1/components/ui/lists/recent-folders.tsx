@@ -9,19 +9,19 @@ import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { Clock, Folder, History, Pin } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useTransition } from "react";
+import { useCallback, useState } from "react";
 
 interface RecentFoldersProps {
   folders: VisitedFolder[];
 }
 
 export function RecentFolders({ folders }: RecentFoldersProps) {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  const handleTogglePin = useCallback((folder: VisitedFolder) => {
-    startTransition(async () => {
-      await togglePinVisitedFolderAction(folder.dirPath, folder.isPinned);
-    });
+  const handleTogglePin = useCallback(async (folder: VisitedFolder) => {
+    setIsPending(true);
+    await togglePinVisitedFolderAction(folder.dirPath, folder.isPinned);
+    setIsPending(false);
   }, []);
 
   if (folders.length === 0) {
@@ -93,7 +93,7 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleTogglePin(folder);
+                  void handleTogglePin(folder);
                 }}
               >
                 <Pin
