@@ -21,7 +21,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { LogOut, LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import * as React from "react";
+import { useCallback } from "react";
 
 const menuItems = resolvePageMetas([
   "dashboard",
@@ -110,28 +110,28 @@ export function AppMenuSidebar() {
 export function AppSidebarOpenButton(
   props: React.ComponentProps<typeof Button>
 ) {
-  const { setOpen } = useSidebar();
+  const { setOpen, setOpenMobile } = useSidebar();
 
-  return (
-    <AppSidebarTrigger
-      icon={MenuIcon}
-      onClick={() => setOpen(true)}
-      {...props}
-    />
-  );
+  const openSidebar = useCallback(() => {
+    setOpen(true);
+    setOpenMobile(true);
+  }, [setOpen, setOpenMobile]);
+
+  return <AppSidebarTrigger icon={MenuIcon} onClick={openSidebar} {...props} />;
 }
 
 export function AppSidebarCloseButton(
   props: React.ComponentProps<typeof Button>
 ) {
-  const { setOpen } = useSidebar();
+  const { setOpen, setOpenMobile } = useSidebar();
+
+  const closeSidebar = useCallback(() => {
+    setOpen(false);
+    setOpenMobile(false);
+  }, [setOpen, setOpenMobile]);
 
   return (
-    <AppSidebarTrigger
-      icon={SidebarIcon}
-      onClick={() => setOpen(false)}
-      {...props}
-    />
+    <AppSidebarTrigger icon={SidebarIcon} onClick={closeSidebar} {...props} />
   );
 }
 
