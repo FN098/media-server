@@ -21,7 +21,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { Clock, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
 
@@ -64,27 +64,33 @@ export function TagEditSheet({
     editor.setTargetNodes(targetNodes);
   }, [editor, targetNodes]);
 
-  // 編集モード
-  const [editingMode, setEditingMode] = useState<EditingMode>(
-    edit ? "edit" : "view"
-  );
-  const handleEditingModeChange = (next: EditingMode) => {
-    setEditingMode(next);
-    if (autoBlur) {
-      handleOpacityChange(next === "view" ? 0 : 100);
-    }
-  };
-  const resetEditingMode = () => handleEditingModeChange("view");
-
   // 不透明度
   const [internalOpacity, setInternalOpacity] = useState(editor.opacity);
   const opacity = controlledOpacity ?? internalOpacity;
   const setOpacity = onControlledOpacityChange ?? setInternalOpacity;
-  const handleOpacityChange = (opacity: number) => {
-    setOpacity(opacity);
-    editor.setOpacity(opacity);
-  };
+  const handleOpacityChange = useCallback(
+    (opacity: number) => {
+      setOpacity(opacity);
+      editor.setOpacity(opacity);
+    },
+    [editor, setOpacity]
+  );
   const toggleOpacity = () => handleOpacityChange(opacity === 0 ? 100 : 0);
+
+  // 編集モード
+  const [editingMode, setEditingMode] = useState<EditingMode>(
+    edit ? "edit" : "view"
+  );
+  const handleEditingModeChange = useCallback(
+    (next: EditingMode) => {
+      setEditingMode(next);
+      if (autoBlur) {
+        handleOpacityChange(next === "view" ? 0 : 100);
+      }
+    },
+    [autoBlur, handleOpacityChange]
+  );
+  const resetEditingMode = () => handleEditingModeChange("view");
 
   // 新規作成
   const handleNewAdd = (name: string) => {
@@ -105,54 +111,56 @@ export function TagEditSheet({
   };
 
   // 保存処理
-  const [isLoading, startTransition] = useTransition();
-  const handleApply = () => {
-    startTransition(async () => {
-      if (isLoading || !editor.hasChanges) return;
+  const [isLoading, setIsLoading] = useState(false);
+  const handleApply = useCallback(async () => {
+    if (isLoading || !editor.hasChanges) return;
 
-      const tagsToCreate = editor.pendingNewTags
-        .filter((t) => editor.pendingChanges[t.id] !== "remove")
-        .map((t) => t.name);
+    setIsLoading(true);
 
-      // 仮タグを DB 作成
-      const created = await createTagsAction(tagsToCreate);
-      if (!created.success) throw new Error(created.error);
+    const tagsToCreate = editor.pendingNewTags
+      .filter((t) => editor.pendingChanges[t.id] !== "remove")
+      .map((t) => t.name);
 
-      // 新規タグの操作
-      const createdOps: TagOperation[] = created.tags.map((tag) => ({
-        tagId: tag.id,
-        operator: "add",
-      }));
+    // 仮タグを DB 作成
+    const created = await createTagsAction(tagsToCreate);
+    if (!created.success) throw new Error(created.error);
 
-      // 既存タグの操作
-      const existingOps: TagOperation[] = Object.entries(
-        editor.pendingChanges
-      ).map(([tagId, operator]) => ({
-        tagId,
-        operator,
-      }));
+    // 新規タグの操作
+    const createdOps: TagOperation[] = created.tags.map((tag) => ({
+      tagId: tag.id,
+      operator: "add",
+    }));
 
-      // マージ
-      const operations = [...existingOps, ...createdOps];
-      if (operations.length === 0) return;
+    // 既存タグの操作
+    const existingOps: TagOperation[] = Object.entries(
+      editor.pendingChanges
+    ).map(([tagId, operator]) => ({
+      tagId,
+      operator,
+    }));
 
-      // 紐づけ実行
-      const result = await updateMediaTagsAction({
-        mediaPaths: targetNodes.map((n) => n.path),
-        operations,
-      });
+    // マージ
+    const operations = [...existingOps, ...createdOps];
+    if (operations.length === 0) return;
 
-      if (result.success) {
-        toast.success("保存しました", { duration: 1000 });
-        editor.resetChanges();
-
-        await editor.invalidateTags();
-        handleEditingModeChange("view");
-
-        router.refresh();
-      }
+    // 紐づけ実行
+    const result = await updateMediaTagsAction({
+      mediaPaths: targetNodes.map((n) => n.path),
+      operations,
     });
-  };
+
+    setIsLoading(false);
+
+    if (result.success) {
+      toast.success("保存しました", { duration: 1000 });
+      editor.resetChanges();
+
+      await editor.invalidateTags();
+      handleEditingModeChange("view");
+
+      router.refresh();
+    }
+  }, [editor, handleEditingModeChange, isLoading, router, targetNodes]);
 
   // 閲覧→クイック→詳細モードに移行
   const handleModeChangeUp = () => {
@@ -398,7 +406,7 @@ export function TagEditSheet({
                       </Tabs>
                       <SheetFooter
                         onReset={editor.resetChanges}
-                        onApply={handleApply}
+                        onApply={() => void handleApply()}
                         hasChanges={editor.hasChanges}
                         isLoading={isLoading}
                         opacity={opacity}
@@ -436,7 +444,7 @@ export function TagEditSheet({
                         onChange={editor.setNewTagName}
                         onAdd={() => handleNewAdd(editor.newTagName)}
                         onSelectSuggestion={editor.selectSuggestion}
-                        onApply={handleApply}
+                        onApply={() => void handleApply()}
                         onCancel={resetEditingMode}
                       />
                       <TagList
@@ -450,7 +458,7 @@ export function TagEditSheet({
                       />
                       <SheetFooter
                         onReset={editor.resetChanges}
-                        onApply={handleApply}
+                        onApply={() => void handleApply()}
                         hasChanges={editor.hasChanges}
                         isLoading={isLoading}
                         opacity={opacity}
