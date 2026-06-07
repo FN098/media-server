@@ -33,45 +33,48 @@ import {
   TableRow,
 } from "@/shadcn/components/ui/table";
 import { CheckCircle2, Loader2, Search, Tag, Trash2 } from "lucide-react";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 export function UnusedTagsCleanupCard() {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
   const [tags, setTags] = useState<UnusedTagItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // スキャン処理
-  const handleScan = useCallback(() => {
-    startTransition(async () => {
-      const result = await scanUnusedTagsAction();
-      if (result.success && result.tags) {
-        setTags(result.tags);
-        // デフォルトで全選択
-        setSelectedIds(new Set(result.tags.map((t) => t.id)));
-        setHasScanned(true);
-      } else {
-        toast.error(result.error || "スキャン中にエラーが発生しました");
-      }
-    });
+  const handleScan = useCallback(async () => {
+    setIsPending(true);
+    const result = await scanUnusedTagsAction();
+    setIsPending(false);
+
+    if (result.success && result.tags) {
+      setTags(result.tags);
+      // デフォルトで全選択
+      setSelectedIds(new Set(result.tags.map((t) => t.id)));
+      setHasScanned(true);
+    } else {
+      toast.error(result.error || "スキャン中にエラーが発生しました");
+    }
   }, []);
 
   // 削除処理
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (selectedIds.size === 0) return;
     const ids = Array.from(selectedIds);
-    startTransition(async () => {
-      const result = await deleteSelectedTagsAction(ids);
-      if (result.success) {
-        toast.success(`完了: ${result.deletedCount} 件のタグを削除しました。`);
-        setTags([]);
-        setSelectedIds(new Set());
-        setHasScanned(false);
-      } else {
-        toast.error(result.error || "削除中にエラーが発生しました");
-      }
-    });
+
+    setIsPending(true);
+    const result = await deleteSelectedTagsAction(ids);
+    setIsPending(false);
+
+    if (result.success) {
+      toast.success(`完了: ${result.deletedCount} 件のタグを削除しました。`);
+      setTags([]);
+      setSelectedIds(new Set());
+      setHasScanned(false);
+    } else {
+      toast.error(result.error || "削除中にエラーが発生しました");
+    }
   }, [selectedIds]);
 
   // 選択制御
@@ -160,7 +163,7 @@ export function UnusedTagsCleanupCard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleScan}
+            onClick={() => void handleScan()}
             disabled={isPending}
             className="flex-1"
           >
@@ -195,7 +198,7 @@ export function UnusedTagsCleanupCard() {
               <AlertDialogFooter>
                 <AlertDialogCancel>キャンセル</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleDelete}
+                  onClick={() => void handleDelete()}
                   className="bg-destructive text-destructive-foreground"
                 >
                   削除を実行
