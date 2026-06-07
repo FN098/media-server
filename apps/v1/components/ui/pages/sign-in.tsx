@@ -3,7 +3,7 @@
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { authClient } from "@/lib/auth/better-auth-client";
 import { Button } from "@/shadcn/components/ui/button";
@@ -23,16 +23,23 @@ export function SignIn() {
 
   const router = useRouter();
 
-  const handleSignIn = async () => {
+  const handleSignIn = useCallback(async () => {
     try {
       setIsLoading(true);
       setError("");
 
-      const { error } = await authClient.signIn.email({
-        email,
-        password,
-        rememberMe,
-      });
+      const { error } = await authClient.signIn.email(
+        {
+          email,
+          password,
+          rememberMe,
+        },
+        {
+          onSuccess: () => {
+            router.push("/");
+          },
+        }
+      );
 
       if (error) {
         console.error("sign-in-error:", error);
@@ -40,14 +47,12 @@ export function SignIn() {
         setIsLoading(false);
         return;
       }
-
-      router.push("/");
     } catch (e) {
       console.log("sign-in-error:", e);
       setError("予期しないエラーが発生しました");
       setIsLoading(false);
     }
-  };
+  }, [email, password, rememberMe, router]);
 
   return (
     <div className="relative w-full max-w-sm mx-4">
@@ -145,7 +150,7 @@ export function SignIn() {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword((v) => !v)}
+                onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-600 dark:hover:text-zinc-400 transition-colors focus-visible:outline-none"
                 aria-label={
                   showPassword ? "パスワードを隠す" : "パスワードを表示"
