@@ -83,160 +83,172 @@ export function DatabaseBackupCard() {
 
   const refreshList = useCallback(async () => {
     if (isListing) return;
-
     setIsListing(true);
-
-    const result = await listBackupFilesAction();
-
-    setIsListing(false);
-
-    if (result.success) {
-      setBackupFiles(
-        result.files.map((f) => ({
-          key: `saved:${f.name}`,
-          value: f,
-        }))
-      );
-    } else {
-      toast.error(result.message);
+    try {
+      const result = await listBackupFilesAction();
+      if (result.success) {
+        setBackupFiles(
+          result.files.map((f) => ({
+            key: `saved:${f.name}`,
+            value: f,
+          }))
+        );
+      } else {
+        toast.error(result.message);
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("通信エラーが発生しました");
+    } finally {
+      setIsListing(false);
     }
   }, [isListing]);
 
   const handleBackup = useCallback(async () => {
     if (isDumping) return;
-
     setIsDumping(true);
-
-    const result = await dumpDatabaseAction();
-
-    setIsDumping(false);
-
-    if (!result.success) {
-      toast.error(result.message);
-      return;
-    }
-
-    toast.success("バックアップを作成しました");
-
-    // 自動クリーンアップがONの場合のみ実行
-    if (autoCleanup) {
-      const cleanResult = await cleanupOldBackupsAction(keepCount);
-      if (cleanResult.success && cleanResult.deletedCount > 0) {
-        toast.info(
-          `古いバックアップを ${cleanResult.deletedCount} 件削除しました`
-        );
-      } else if (!cleanResult.success) {
-        toast.error(cleanResult.message);
-      }
-    }
-
-    await refreshList();
-  }, [autoCleanup, isDumping, keepCount, refreshList]);
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target;
-    const file = input.files?.[0];
-
-    if (!file) return;
-
-    // クライアント側でも簡易チェック（Zod を使ってもOK）
-    if (!file.name.endsWith(".sql")) {
-      toast.error(".sql ファイルを選択してください");
-      input.value = "";
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      setIsUploading(true);
-
-      const response = await fetch("/api/db/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      setIsUploading(false);
-
-      const data = (await response.json()) as DbBackupUploadResult;
-
-      if (data.success) {
-        const uploaded = {
-          key: `upload:${data.backup.name}`,
-          value: data.backup,
-        };
-        setUploadedFile(uploaded);
-        setSelectedFile(uploaded);
-        toast.success("一時ファイルをアップロードしました");
-      } else {
-        toast.error(data.error);
+      const result = await dumpDatabaseAction();
+      if (!result.success) {
+        toast.error(result.message);
+        return;
       }
-    } catch {
+
+      toast.success("バックアップを作成しました");
+
+      // 自動クリーンアップがONの場合のみ実行
+      if (autoCleanup) {
+        const cleanResult = await cleanupOldBackupsAction(keepCount);
+        if (cleanResult.success && cleanResult.deletedCount > 0) {
+          toast.info(
+            `古いバックアップを ${cleanResult.deletedCount} 件削除しました`
+          );
+        } else if (!cleanResult.success) {
+          toast.error(cleanResult.message);
+        }
+      }
+
+      await refreshList();
+    } catch (e) {
+      console.error(e);
       toast.error("通信エラーが発生しました");
     } finally {
-      // 確実にリセット（既にやっていても念の為）
-      input.value = "";
+      setIsDumping(false);
     }
-  };
+  }, [autoCleanup, isDumping, keepCount, refreshList]);
 
-  const handleRestore = async () => {
-    if (!selectedFile) return;
+  const handleUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const input = e.target;
+      const file = input.files?.[0];
 
-    setIsRestoring(true);
-    const result = await restoreDatabaseAction(selectedFile.value);
-    setIsRestoring(false);
+      if (!file) return;
 
-    if (result.success) {
-      toast.success("リストアが完了しました");
-      // 一時ファイルだった場合は、リストから消去して選択を解除
-      if (selectedFile.value.isTemp) {
-        setUploadedFile(null);
-        setSelectedFile(null);
+      // クライアント側でも簡易チェック（Zod を使ってもOK）
+      if (!file.name.endsWith(".sql")) {
+        toast.error(".sql ファイルを選択してください");
+        input.value = "";
+        return;
       }
-    } else {
-      toast.error(result.message);
-    }
-  };
 
-  const initiateBackup = async () => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      setIsUploading(true);
+      try {
+        const response = await fetch("/api/db/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = (await response.json()) as DbBackupUploadResult;
+        if (result.success) {
+          const uploaded = {
+            key: `upload:${result.backup.name}`,
+            value: result.backup,
+          };
+          setUploadedFile(uploaded);
+          setSelectedFile(uploaded);
+          toast.success("一時ファイルをアップロードしました");
+        } else {
+          toast.error(result.error);
+        }
+      } catch (e) {
+        console.error(e);
+        toast.error("通信エラーが発生しました");
+      } finally {
+        // 確実にリセット（既にやっていても念の為）
+        input.value = "";
+        setIsUploading(false);
+      }
+    },
+    []
+  );
+
+  const handleRestore = useCallback(async () => {
+    if (!selectedFile) return;
+    setIsRestoring(true);
+
+    try {
+      const result = await restoreDatabaseAction(selectedFile.value);
+      if (result.success) {
+        toast.success("リストアが完了しました");
+        // 一時ファイルだった場合は、リストから消去して選択を解除
+        if (selectedFile.value.isTemp) {
+          setUploadedFile(null);
+          setSelectedFile(null);
+        }
+      } else {
+        toast.error(result.message);
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("通信エラーが発生しました");
+    } finally {
+      setIsRestoring(false);
+    }
+  }, [selectedFile]);
+
+  const initiateBackup = useCallback(async () => {
     if (!autoCleanup) {
       await handleBackup();
       return;
     }
 
     if (isListing) return;
-
     setIsListing(true);
+    try {
+      // 最新のリストを取得して件数を確認
+      // (表示中の backupFiles を使わず、常に最新状態を取ることで判定ミスを防ぐ)
+      const result = await listBackupFilesAction();
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
 
-    // 最新のリストを取得して件数を確認
-    // (表示中の backupFiles を使わず、常に最新状態を取ることで判定ミスを防ぐ)
-    const result = await listBackupFilesAction();
+      const latestList = result.files.map((f) => ({
+        key: `saved:${f.name}`,
+        value: f,
+      }));
 
-    setIsListing(false);
+      setBackupFiles(latestList);
 
-    if (!result.success) {
-      toast.error(result.message);
-      return;
+      // 今から作る1件を加えた合計が keepCount を超えるか計算
+      const deleteCount = latestList.length + 1 - keepCount;
+
+      if (deleteCount > 0) {
+        setPendingDeleteCount(deleteCount);
+        setShowCleanupConfirm(true);
+      } else {
+        await handleBackup();
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("通信エラーが発生しました");
+    } finally {
+      setIsListing(false);
     }
-
-    const latestList = result.files.map((f) => ({
-      key: `saved:${f.name}`,
-      value: f,
-    }));
-
-    setBackupFiles(latestList);
-
-    // 今から作る1件を加えた合計が keepCount を超えるか計算
-    const deleteCount = latestList.length + 1 - keepCount;
-
-    if (deleteCount > 0) {
-      setPendingDeleteCount(deleteCount);
-      setShowCleanupConfirm(true);
-    } else {
-      await handleBackup();
-    }
-  };
+  }, [autoCleanup, handleBackup, isListing, keepCount]);
 
   return (
     <Card>
