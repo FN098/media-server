@@ -2,6 +2,7 @@
 
 import { isArchiveFile } from "@/lib/archive/guards";
 import { resolveCurrentUser } from "@/lib/auth/current-user";
+import { hasPermission } from "@/lib/authorization/permission";
 import { extractArchive } from "@/lib/child_process/7z";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
@@ -66,7 +67,7 @@ export async function extractMultipleArchivesAction(
   }
 
   // 認可
-  if (user.role !== "admin") {
+  if (!hasPermission(user, "archive.extract")) {
     return {
       success: false,
       error: "権限がありません。",
