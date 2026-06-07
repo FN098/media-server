@@ -52,8 +52,8 @@ export function useDeleteDialog({ onSuccess }: UseDeleteDialogProps = {}) {
         if (result.completed.length > 0) {
           toast.success(
             permanent
-              ? `${result.completed} 件のアイテムを完全に削除しました`
-              : `${result.completed} 件のアイテムをゴミ箱に移動しました`
+              ? `${result.completed.length} 件のアイテムを完全に削除しました`
+              : `${result.completed.length} 件のアイテムをゴミ箱に移動しました`
           );
         }
         if (result.failed.length > 0) {

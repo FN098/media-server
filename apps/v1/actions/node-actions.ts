@@ -45,10 +45,6 @@ function normalizeVirtualPath(path: string) {
   return VirtualPathOneSchema.parse(path);
 }
 
-function normalizeVirtualPaths(paths: string[]) {
-  return VirtualPathManySchema.parse(paths);
-}
-
 type RenameNodeResult =
   | { success: true }
   | { success: false; message: string; code?: "duplicated" };
@@ -788,7 +784,9 @@ type DeleteNodesResult =
 type DeleteNodesSuccess = Extract<DeleteNodesResult, { success: true }>;
 
 // 削除（ゴミ箱フォルダへの移動）
-export async function deleteNodesAction(sourcePaths: string[]) {
+export async function deleteNodesAction(
+  sourcePaths: string[]
+): Promise<DeleteNodesResult> {
   // 入力バリデーション＋正規化
   if (!sourcePaths || sourcePaths.length === 0) {
     return {
@@ -1082,56 +1080,126 @@ export async function restoreNodesAction(
 }
 
 // 完全に削除
-export async function deleteNodesPermanentlyAction(sourcePaths: string[]) {
+export async function deleteNodesPermanentlyAction(
+  sourcePaths: string[]
+): Promise<DeleteNodesResult> {
+  // 入力バリデーション＋正規化
+  if (!sourcePaths || sourcePaths.length === 0) {
+    return {
+      success: false,
+      message: "処理対象のパスが指定されていません。",
+    };
+  }
+
+  const parsed = {
+    sourcePaths: VirtualPathManySchema.safeParse(sourcePaths.map(sanitize)),
+  };
+  if (!parsed.sourcePaths.success) {
+    return {
+      success: false,
+      message: "入力エラーがあります。",
+      errors: [
+        { prop: "sourcePaths", issues: parsed.sourcePaths.error?.issues },
+      ],
+    };
+  }
+
+  const normalizedSourcePaths = unique(parsed.sourcePaths.data);
+
   // 認証
-  await resolveCurrentUserOrThrow();
-
-  // 入力バリデーション+正規化
-  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
-
-  // ルートフォルダ保護
-  if (normalizedSourcePaths.some((path) => path === "")) {
+  const user = await resolveCurrentUser();
+  if (!user) {
     return {
-      success: 0,
-      failed: normalizedSourcePaths.length,
-      errors: ["ルートフォルダは操作できません。"],
+      success: false,
+      message: "認証されていません。",
     };
   }
 
-  // システムフォルダ保護
-  if (normalizedSourcePaths.some((path) => isSystemHiddenVirtualPath(path))) {
-    return {
-      success: 0,
-      failed: normalizedSourcePaths.length,
-      errors: ["システムフォルダは操作できません。"],
-    };
-  }
-
-  const results = { success: 0, failed: 0, errors: [] as string[] };
+  const completed: DeleteNodesSuccess["completed"] = [];
+  const failed: DeleteNodesSuccess["failed"] = [];
+  const skipped: DeleteNodesSuccess["skipped"] = [];
 
   for (const srcVirtualPath of normalizedSourcePaths) {
+    // ルートフォルダ保護
+    if (isRootPath(srcVirtualPath)) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "ルートフォルダは操作できません。",
+      });
+      continue;
+    }
+
+    // システムフォルダ保護
+    if (isSystemHiddenVirtualPath(srcVirtualPath)) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "システムフォルダは操作できません。",
+      });
+      continue;
+    }
+
     // 仮想パス→物理パス
     const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
+
+    // ディレクトリ判定
+    const srcPathInfo = await getPathInfo(srcRealPath);
+    if (!srcPathInfo.exists) {
+      if (srcPathInfo.error === "not-found") {
+        failed.push({
+          path: srcVirtualPath,
+          message: "ファイルまたはフォルダが存在しません。",
+        });
+        continue;
+      } else {
+        failed.push({
+          path: srcVirtualPath,
+          message: "ファイルまたはフォルダへのアクセスが拒否されました。",
+        });
+        continue;
+      }
+    }
+    const isDirectory = srcPathInfo.isDirectory;
+
+    // 認可
+    if (
+      (!isDirectory && !hasPermission(user, "file:delete")) ||
+      (isDirectory && !hasPermission(user, "folder:delete"))
+    ) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "権限がありません。",
+      });
+      continue;
+    }
 
     // FS削除
     try {
       await rm(srcRealPath, { recursive: true, force: true });
     } catch (e) {
-      console.error("failed to remove file or directory:", e);
-      results.failed++;
-      results.errors.push("ファイルまたはフォルダの削除に失敗しました。");
+      logger.error("action:delete:permament", e);
+      failed.push({
+        path: srcVirtualPath,
+        message: "ファイルまたはフォルダの削除に失敗しました。",
+      });
       continue;
     }
 
     // DB更新不要
 
-    results.success++;
+    completed.push({ path: srcVirtualPath });
   }
 
   // キャッシュの更新
-  revalidatePath("/trash");
+  if (completed.length > 0) {
+    revalidatePath("/trash");
+  }
 
-  return results;
+  return {
+    success: true,
+    completed,
+    failed,
+    skipped,
+  };
 }
 
 // タイムスタンプ更新
