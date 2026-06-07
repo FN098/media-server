@@ -4,7 +4,10 @@ import { db } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function SignUpPage() {
-  const admin = await db.user.findFirst({ where: { role: "admin" } });
+  const admin = await db.user.findFirst({
+    where: { role: "admin" },
+    select: { id: true },
+  });
 
   return <SignUp hasAdmin={!!admin} />;
 }
