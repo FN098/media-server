@@ -4,12 +4,12 @@ import { isArchiveFile } from "@/lib/archive/guards";
 import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
 import { extractArchive } from "@/lib/child_process/7z";
+import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath, isFsNotFoundError } from "@/lib/utils/fs";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { basename, dirname, extname, join } from "@/lib/virtual-path/path";
 import { VirtualPathManySchema } from "@/lib/virtual-path/schemas";
-import { logger } from "better-auth";
 import { lstat, mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 

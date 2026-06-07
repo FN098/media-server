@@ -8,9 +8,9 @@ import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { parseDatabaseURL } from "@/lib/db/url-parser";
 import { getDatabaseUrlOrThrow } from "@/lib/env/env-server";
+import { logger } from "@/lib/logger";
 import { isFsNotFoundError } from "@/lib/utils/fs";
 import { FileNameSchema } from "@/lib/virtual-path/schemas";
-import { logger } from "better-auth";
 import fs from "fs/promises";
 import path from "path";
 
@@ -123,9 +123,9 @@ export async function dumpDatabaseAction(): Promise<DumpDatabaseResult> {
 
   let result: Awaited<ReturnType<typeof dumpDatabaseToFile>>;
   try {
-    logger.info("dump database started.");
+    logger.info("action:db-dump", "dump database started.");
     result = await dumpDatabaseToFile(db, filePath);
-    logger.info("dump database ended.", result);
+    logger.info("action:db-dump", "dump database ended.", result);
   } catch (error) {
     logger.error("action:db-dump", error);
     return { success: false, message: "DBダンプ中にエラーが発生しました" };
@@ -188,9 +188,9 @@ export async function restoreDatabaseAction(
 
   let result: Awaited<ReturnType<typeof restoreDatabaseFromFile>>;
   try {
-    logger.info("restore database started.");
+    logger.info("action:db-restore", "restore database started.");
     result = await restoreDatabaseFromFile(db, filePath);
-    logger.info("restore database ended:", result);
+    logger.info("action:db-restore", "restore database ended:", result);
   } catch (error) {
     logger.error("action:db-restore", error);
 
@@ -316,7 +316,7 @@ export async function cleanupOldBackupsAction(
   try {
     for (const file of filesToDelete) {
       await fs.unlink(path.join(DB_BACKUP_DIR, file.name));
-      logger.info(`Deleted old backup: ${file.name}`);
+      logger.info("action:db-backup-clean", `Deleted old backup: ${file.name}`);
     }
   } catch (error) {
     logger.error("action:db-backup-clean", error);

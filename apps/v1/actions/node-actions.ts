@@ -5,6 +5,7 @@ import {
   resolveCurrentUserOrThrow,
 } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
+import { logger } from "@/lib/logger";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
 import { copyNodeInDb, renameNodeInDb } from "@/lib/media/services";
@@ -29,7 +30,6 @@ import {
   VirtualPathOneSchema,
   VirtualPathSchema,
 } from "@/lib/virtual-path/schemas";
-import { logger } from "better-auth";
 import console from "console";
 import { Dirent } from "fs";
 import { cp, mkdir, readdir, rename, rm } from "fs/promises";
