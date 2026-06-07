@@ -1,7 +1,9 @@
 export const statements = [
   "archive:extract",
   "file:rename",
+  "file:move",
   "folder:rename",
+  "folder:move",
   "folder:update-history",
   "folder:list",
   "folder:list-history",

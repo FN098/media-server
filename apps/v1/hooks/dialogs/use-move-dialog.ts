@@ -4,6 +4,7 @@ import {
   togglePinVisitedFolderAction,
 } from "@/actions/folder-actions";
 import { moveNodesAction } from "@/actions/node-actions";
+import { sanitize } from "@/lib/virtual-path/path";
 import { dirname } from "path";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -106,7 +107,7 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
 
   // 6. 親階層へ戻る
   const goBackParent = useCallback(() => {
-    const parent = dirname(currentDir).replace(/\\/g, "/");
+    const parent = sanitize(dirname(currentDir));
     const path = parent === "." ? "" : parent;
     changeDir(path);
   }, [currentDir, changeDir]);
@@ -133,14 +134,26 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
       const paths = targets.map((n) => n.path);
       const result = await moveNodesAction(paths, currentDir);
 
-      if (result.failed === 0) {
-        toast.success(`${result.success}件のアイテムを移動しました`);
+      if (result.success) {
+        if (result.completed.length > 0) {
+          toast.success(
+            `${result.completed.length} 件のアイテムを移動しました`
+          );
+        }
+        if (result.failed.length > 0) {
+          toast.success(
+            `${result.failed.length} 件のアイテムの移動に失敗しました`
+          );
+        }
+        if (result.skipped.length > 0) {
+          toast.success(
+            `${result.skipped.length} 件のアイテムの移動をスキップしました`
+          );
+        }
         onSuccess?.();
         close();
       } else {
-        toast.error(
-          `${result.failed}件の移動に失敗しました\n${result.errors.join("\n")}`
-        );
+        toast.error(result.message);
       }
     });
   }, [currentDir, targets, onSuccess, close]);
