@@ -40,7 +40,7 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
     dirs,
     recentDirs,
     isLoading,
-    isCopying,
+    isPending,
     close,
     changeDir,
     goBackParent,
@@ -192,7 +192,7 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              togglePin(dir.path, dir.pinned);
+                              void togglePin(dir.path, dir.pinned);
                             }}
                           >
                             <Pin
@@ -215,14 +215,18 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
         </Tabs>
 
         <DialogFooter className="gap-2 pt-2 border-t">
-          <Button variant="outline" onClick={close} disabled={isLoading}>
+          <Button
+            variant="outline"
+            onClick={close}
+            disabled={isLoading || isPending}
+          >
             キャンセル
           </Button>
           <Button
-            onClick={performCopy}
-            disabled={isLoading || currentDir === initialDir}
+            onClick={() => void performCopy()}
+            disabled={isLoading || isPending || currentDir === initialDir}
           >
-            {isCopying ? (
+            {isPending ? (
               "コピー中..."
             ) : (
               <>

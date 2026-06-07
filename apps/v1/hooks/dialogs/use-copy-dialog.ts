@@ -5,7 +5,7 @@ import {
 } from "@/actions/folder-actions";
 import { copyNodesAction } from "@/actions/node-actions";
 import { dirname } from "path";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 type DirectoryInfo = {
@@ -32,47 +32,47 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
   const [dirs, setDirs] = useState<DirectoryInfo[]>([]);
   const [recentDirs, setRecentDirs] = useState<RecentDirectoryInfo[]>([]);
   const [targets, setTargets] = useState<CopyTarget[]>([]);
-
-  const [isNavigating, startNavigating] = useTransition();
-  const [isCopying, startCopying] = useTransition();
-  const isLoading = isNavigating || isCopying;
+  const [isPending, setIsPending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 1. 通常のフォルダ一覧取得
   const fetchDirs = useCallback(
-    (path: string) => {
-      startNavigating(async () => {
-        const result = await listSubDirectoriesAction(path);
-        if (result.success) {
-          // ループ防止のフィルタリング
-          const filtered = result.directories.filter(
-            (d) =>
-              !targets.some(
-                (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
-              )
-          );
-          setDirs(filtered);
-        } else {
-          toast.error(result.message);
-        }
-      });
+    async (path: string) => {
+      setIsLoading(true);
+      const result = await listSubDirectoriesAction(path);
+      setIsLoading(false);
+
+      if (result.success) {
+        // ループ防止のフィルタリング
+        const filtered = result.directories.filter(
+          (d) =>
+            !targets.some(
+              (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
+            )
+        );
+        setDirs(filtered);
+      } else {
+        toast.error(result.message);
+      }
     },
     [targets]
   );
 
   // 2. 最近のフォルダ取得
-  const fetchRecentDirs = useCallback(() => {
-    startNavigating(async () => {
-      const result = await listRecentFoldersAction();
-      if (result.success) {
-        const filtered = (result.data ?? []).filter(
-          (d: RecentDirectoryInfo) =>
-            !targets.some(
-              (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
-            )
-        );
-        setRecentDirs(filtered);
-      }
-    });
+  const fetchRecentDirs = useCallback(async () => {
+    setIsLoading(true);
+    const result = await listRecentFoldersAction();
+    setIsLoading(false);
+
+    if (result.success) {
+      const filtered = (result.data ?? []).filter(
+        (d: RecentDirectoryInfo) =>
+          !targets.some(
+            (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
+          )
+      );
+      setRecentDirs(filtered);
+    }
   }, [targets]);
 
   // 3. ダイアログを開く
@@ -82,8 +82,8 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
       setCurrentDir(path);
       setTargets(targets);
       setIsOpen(true);
-      fetchDirs(path);
-      fetchRecentDirs();
+      void fetchDirs(path);
+      void fetchRecentDirs();
     },
     [fetchDirs, fetchRecentDirs]
   );
@@ -99,7 +99,7 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
   const changeDir = useCallback(
     (path: string) => {
       setCurrentDir(path);
-      fetchDirs(path);
+      void fetchDirs(path);
     },
     [fetchDirs]
   );
@@ -113,48 +113,50 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
 
   // 7. ピン留め切り替え
   const togglePin = useCallback(
-    (path: string, currentPinned: boolean) => {
-      startNavigating(async () => {
-        const result = await togglePinVisitedFolderAction(path, currentPinned);
-        if (result.success) {
-          fetchRecentDirs();
-        } else {
-          toast.error(result.message);
-        }
-      });
+    async (path: string, currentPinned: boolean) => {
+      setIsLoading(true);
+      const result = await togglePinVisitedFolderAction(path, currentPinned);
+      setIsLoading(false);
+
+      if (result.success) {
+        void fetchRecentDirs();
+      } else {
+        toast.error(result.message);
+      }
     },
     [fetchRecentDirs]
   );
 
   // 8. コピー実行
-  const performCopy = useCallback(() => {
+  const performCopy = useCallback(async () => {
     if (!currentDir) return;
-    startCopying(async () => {
-      const paths = targets.map((n) => n.path);
-      const result = await copyNodesAction(paths, currentDir);
+    const paths = targets.map((n) => n.path);
 
-      if (result.success) {
-        if (result.completed.length > 0) {
-          toast.success(
-            `${result.completed.length} 件のアイテムをコピーしました`
-          );
-        }
-        if (result.failed.length > 0) {
-          toast.success(
-            `${result.failed.length} 件のアイテムのコピーに失敗しました`
-          );
-        }
-        if (result.skipped.length > 0) {
-          toast.success(
-            `${result.skipped.length} 件のアイテムのコピーをスキップしました`
-          );
-        }
-        onSuccess?.();
-        close();
-      } else {
-        toast.error(result.message);
+    setIsPending(true);
+    const result = await copyNodesAction(paths, currentDir);
+    setIsPending(false);
+
+    if (result.success) {
+      if (result.completed.length > 0) {
+        toast.success(
+          `${result.completed.length} 件のアイテムをコピーしました`
+        );
       }
-    });
+      if (result.failed.length > 0) {
+        toast.success(
+          `${result.failed.length} 件のアイテムのコピーに失敗しました`
+        );
+      }
+      if (result.skipped.length > 0) {
+        toast.success(
+          `${result.skipped.length} 件のアイテムのコピーをスキップしました`
+        );
+      }
+      onSuccess?.();
+      close();
+    } else {
+      toast.error(result.message);
+    }
   }, [currentDir, targets, close, onSuccess]);
 
   return {
@@ -164,7 +166,7 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
     dirs,
     recentDirs,
     isLoading,
-    isCopying,
+    isPending,
     open,
     close,
     changeDir,
