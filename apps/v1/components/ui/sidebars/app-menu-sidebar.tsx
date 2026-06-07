@@ -18,7 +18,7 @@ import {
   useSidebar,
 } from "@/shadcn/components/ui/sidebar";
 import { cn } from "@/shadcn/lib/utils";
-import { LogOut, LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";
+import { LogOutIcon, LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
@@ -34,10 +34,15 @@ const menuItems = resolvePageMetas([
 ]);
 
 export function AppMenuSidebar() {
-  const { setOpen } = useSidebar();
+  const { setOpen, setOpenMobile } = useSidebar();
   const router = useRouter();
 
-  const handleLogout = async () => {
+  const closeSidebar = useCallback(() => {
+    setOpen(false);
+    setOpenMobile(false);
+  }, [setOpen, setOpenMobile]);
+
+  const handleSignOut = async () => {
     await authClient.signOut();
     router.push("/sign-in");
     router.refresh();
@@ -78,7 +83,7 @@ export function AppMenuSidebar() {
                     tooltip={item.title}
                     className="group rounded-lg px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-zinc-100 transition-colors data-[active=true]:bg-indigo-50 data-[active=true]:text-indigo-700 dark:data-[active=true]:bg-indigo-500/15 dark:data-[active=true]:text-indigo-300"
                   >
-                    <Link href={item.url} onClick={() => setOpen(false)}>
+                    <Link href={item.url} onClick={closeSidebar}>
                       <item.icon className="h-4 w-4 shrink-0" />
                       <span>{item.title}</span>
                     </Link>
@@ -96,11 +101,11 @@ export function AppMenuSidebar() {
 
         <button
           type="button"
-          onClick={() => void handleLogout()}
+          onClick={() => void handleSignOut()}
           className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors"
         >
-          <LogOut className="h-4 w-4 shrink-0" aria-hidden />
-          <span>ログアウト</span>
+          <LogOutIcon className="h-4 w-4 shrink-0" aria-hidden />
+          <span>サインアウト</span>
         </button>
       </SidebarFooter>
     </Sidebar>
