@@ -67,7 +67,7 @@ export async function extractMultipleArchivesAction(
   }
 
   // 認可
-  if (!hasPermission(user, "archive.extract")) {
+  if (!hasPermission(user, "archive:extract")) {
     return {
       success: false,
       error: "権限がありません。",
