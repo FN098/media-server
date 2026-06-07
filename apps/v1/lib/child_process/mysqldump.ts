@@ -1,12 +1,15 @@
-import {
-  ChildProcessExitStatus,
-  DumpDatabaseResult,
-} from "@/lib/child_process/types";
+import { ChildProcessExitStatus } from "@/lib/child_process/types";
 import { ParsedDatabaseURL } from "@/lib/db/types";
 import { spawn } from "child_process";
 import { createWriteStream } from "fs";
 import { unlink } from "fs/promises";
 import { pipeline } from "stream/promises";
+
+type DumpDatabaseResult = {
+  ok: boolean;
+  exitStatus: ChildProcessExitStatus;
+  error?: string;
+};
 
 export async function dumpDatabaseToFile(
   db: ParsedDatabaseURL,

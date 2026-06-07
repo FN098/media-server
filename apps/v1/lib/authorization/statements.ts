@@ -15,6 +15,13 @@ export const statements = [
   "folder:list-history",
   "folder:pin-history",
   "folder:create",
+  "db-backup:dump",
+  "db-backup:restore",
+  "db-backup:list",
+  "db-backup:delete",
+  "db-backup:clean",
+  "db-backup:upload",
+  "db-backup:download",
 ] as const;
 
 export type Statement = (typeof statements)[number];

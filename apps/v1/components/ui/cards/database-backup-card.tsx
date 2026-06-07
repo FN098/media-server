@@ -49,30 +49,10 @@ import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type DbBackupSelectItem = {
-  key: string; // Select 用のキー。自動保存は「saved:」、アップロードは「upload:」がプレフィックスにつく。例: saved:backup_20200101000000.sql
+  // Select 用のキー。自動保存は「saved:」、アップロードは「upload:」がプレフィックスにつく。
+  // 例: saved:backup_20200101000000.sql
+  key: string;
   value: DbBackupFile;
-};
-
-const formatDateTime = (isoString: string) => {
-  const date = new Date(isoString);
-  const formatted = date.toLocaleString("ja-JP", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  return `${formatted} (JST)`;
-};
-
-const formatBytes = (bytes: number) => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
 export function DatabaseBackupCard() {
@@ -102,45 +82,56 @@ export function DatabaseBackupCard() {
   const [pendingDeleteCount, setPendingDeleteCount] = useState(0);
 
   const refreshList = useCallback(async () => {
+    if (isListing) return;
+
     setIsListing(true);
-    const list = await listBackupFilesAction();
+
+    const result = await listBackupFilesAction();
+
     setIsListing(false);
 
-    setBackupFiles(
-      list.map((v) => ({
-        key: `saved:${v.name}`,
-        value: v,
-      }))
-    );
-  }, []);
+    if (result.success) {
+      setBackupFiles(
+        result.files.map((f) => ({
+          key: `saved:${f.name}`,
+          value: f,
+        }))
+      );
+    } else {
+      toast.error(result.message);
+    }
+  }, [isListing]);
 
   const handleBackup = useCallback(async () => {
+    if (isCreating) return;
+
     setIsCreating(true);
-    const res = await dumpDatabaseAction();
+
+    const result = await dumpDatabaseAction();
+
     setIsCreating(false);
 
-    if (res.success) {
-      toast.success("バックアップを作成しました");
-
-      // 自動クリーンアップがONの場合のみ実行
-      if (autoCleanup) {
-        const cleanRes = await cleanupOldBackupsAction(keepCount);
-        if (cleanRes.success && cleanRes.deletedCount! > 0) {
-          toast.info(
-            `古いバックアップを ${cleanRes.deletedCount} 件削除しました`
-          );
-        } else if (!cleanRes.success) {
-          toast.error(
-            cleanRes.error ?? "バックアップのクリーンアップに失敗しました"
-          );
-        }
-      }
-
-      await refreshList();
-    } else {
-      toast.error(res.error ?? "バックアップの作成に失敗しました");
+    if (!result.success) {
+      toast.error(result.error);
+      return;
     }
-  }, [autoCleanup, keepCount, refreshList]);
+
+    toast.success("バックアップを作成しました");
+
+    // 自動クリーンアップがONの場合のみ実行
+    if (autoCleanup) {
+      const cleanResult = await cleanupOldBackupsAction(keepCount);
+      if (cleanResult.success && cleanResult.deletedCount > 0) {
+        toast.info(
+          `古いバックアップを ${cleanResult.deletedCount} 件削除しました`
+        );
+      } else if (!cleanResult.success) {
+        toast.error(cleanResult.message);
+      }
+    }
+
+    await refreshList();
+  }, [autoCleanup, isCreating, keepCount, refreshList]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
@@ -160,13 +151,15 @@ export function DatabaseBackupCard() {
 
     try {
       setIsUploading(true);
-      const res = await fetch("/api/db/upload", {
+
+      const response = await fetch("/api/db/upload", {
         method: "POST",
         body: formData,
       });
+
       setIsUploading(false);
 
-      const data = (await res.json()) as DbBackupUploadResult;
+      const data = (await response.json()) as DbBackupUploadResult;
 
       if (data.success) {
         const uploaded = {
@@ -191,10 +184,10 @@ export function DatabaseBackupCard() {
     if (!selectedFile) return;
 
     setIsRestoring(true);
-    const res = await restoreDatabaseAction(selectedFile.value);
+    const result = await restoreDatabaseAction(selectedFile.value);
     setIsRestoring(false);
 
-    if (res.success) {
+    if (result.success) {
       toast.success("リストアが完了しました");
       // 一時ファイルだった場合は、リストから消去して選択を解除
       if (selectedFile.value.isTemp) {
@@ -202,7 +195,7 @@ export function DatabaseBackupCard() {
         setSelectedFile(null);
       }
     } else {
-      toast.error(res.error);
+      toast.error(result.message);
     }
   };
 
@@ -212,20 +205,30 @@ export function DatabaseBackupCard() {
       return;
     }
 
+    if (isListing) return;
+
+    setIsListing(true);
+
     // 最新のリストを取得して件数を確認
     // (表示中の backupFiles を使わず、常に最新状態を取ることで判定ミスを防ぐ)
-    setIsListing(true);
-    const list = await listBackupFilesAction();
+    const result = await listBackupFilesAction();
+
     setIsListing(false);
 
-    const mappedList = list.map((v) => ({
-      key: `saved:${v.name}`,
-      value: v,
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+
+    const latestList = result.files.map((f) => ({
+      key: `saved:${f.name}`,
+      value: f,
     }));
-    setBackupFiles(mappedList);
+
+    setBackupFiles(latestList);
 
     // 今から作る1件を加えた合計が keepCount を超えるか計算
-    const deleteCount = mappedList.length + 1 - keepCount;
+    const deleteCount = latestList.length + 1 - keepCount;
 
     if (deleteCount > 0) {
       setPendingDeleteCount(deleteCount);
@@ -525,3 +528,25 @@ export function DatabaseBackupCard() {
     </Card>
   );
 }
+
+const formatDateTime = (isoString: string) => {
+  const date = new Date(isoString);
+  const formatted = date.toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  return `${formatted} (JST)`;
+};
+
+const formatBytes = (bytes: number) => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};

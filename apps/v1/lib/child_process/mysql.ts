@@ -1,11 +1,14 @@
-import {
-  ChildProcessExitStatus,
-  RestoreDatabaseResult,
-} from "@/lib/child_process/types";
+import { ChildProcessExitStatus } from "@/lib/child_process/types";
 import { ParsedDatabaseURL } from "@/lib/db/types";
 import { spawn } from "child_process";
 import { createReadStream } from "fs";
 import { pipeline } from "stream/promises";
+
+type RestoreDatabaseResult = {
+  ok: boolean;
+  exitStatus: ChildProcessExitStatus;
+  error?: string;
+};
 
 export async function restoreDatabaseFromFile(
   db: ParsedDatabaseURL,
