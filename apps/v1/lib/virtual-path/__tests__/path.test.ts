@@ -5,7 +5,6 @@ import {
   join,
   sanitize,
 } from "@/lib/virtual-path/path";
-import { describe, expect, it } from "vitest";
 
 describe("join", () => {
   it("joins paths with posix separators", () => {
