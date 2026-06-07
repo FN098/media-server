@@ -40,7 +40,7 @@ export function CreateFolderDialog({ dialog }: CreateFolderDialogProps) {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !isPending) {
                 e.preventDefault();
-                performCreate();
+                void performCreate();
               }
             }}
             disabled={isPending}
@@ -54,7 +54,7 @@ export function CreateFolderDialog({ dialog }: CreateFolderDialogProps) {
             キャンセル
           </Button>
           <Button
-            onClick={performCreate}
+            onClick={() => void performCreate()}
             disabled={isPending || !folderName.trim()}
           >
             {isPending ? "作成中..." : "作成"}

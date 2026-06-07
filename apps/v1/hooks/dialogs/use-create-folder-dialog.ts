@@ -1,5 +1,5 @@
 import { createFolderAction } from "@/actions/folder-actions";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 interface UseCreateFolderDialogProps {
@@ -12,8 +12,7 @@ export function useCreateFolderDialog({
   const [isOpen, setIsOpen] = useState(false);
   const [parentPath, setParentPath] = useState<string>("");
   const [folderName, setFolderName] = useState<string>("");
-
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
   // 1. ダイアログを開く
   const open = useCallback((parentPath: string) => {
@@ -30,7 +29,7 @@ export function useCreateFolderDialog({
   }, []);
 
   // 3. フォルダ作成実行
-  const performCreate = useCallback(() => {
+  const performCreate = useCallback(async () => {
     const trimmedName = folderName.trim();
 
     if (!trimmedName) {
@@ -38,17 +37,17 @@ export function useCreateFolderDialog({
       return;
     }
 
-    startTransition(async () => {
-      const result = await createFolderAction(parentPath, trimmedName);
+    setIsPending(true);
+    const result = await createFolderAction(parentPath, trimmedName);
+    setIsPending(false);
 
-      if (result.success) {
-        toast.success("フォルダを作成しました");
-        onSuccess?.();
-        close();
-      } else {
-        toast.error(result.message);
-      }
-    });
+    if (result.success) {
+      toast.success("フォルダを作成しました");
+      onSuccess?.();
+      close();
+    } else {
+      toast.error(result.message);
+    }
   }, [parentPath, folderName, close, onSuccess]);
 
   return {
