@@ -1,16 +1,35 @@
 "use server";
 
+import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { extractArchive } from "@/lib/child_process/7z";
 import { getServerMediaPath } from "@/lib/path/helpers";
+import { sumBy } from "@/lib/utils/math";
 import { existsSync, promises as fsPromises } from "fs";
 import { revalidatePath } from "next/cache";
 import { basename, dirname, extname, join } from "path";
 
-type ExtractionResult = {
-  sourcePath: string;
-  success: boolean;
-  error?: string;
-};
+export type ExtractionResult =
+  | {
+      success: true;
+      sourcePath: string;
+    }
+  | {
+      success: false;
+      error: string;
+      sourcePath: string;
+    };
+
+export type ExtractionAllResult =
+  | {
+      success: true;
+      completed: number;
+      failed: number;
+      results: ExtractionResult[];
+    }
+  | {
+      success: false;
+      error: string;
+    };
 
 /**
  * 複数のアーカイブファイルをまとめて解凍するサーバーアクション
@@ -18,20 +37,37 @@ type ExtractionResult = {
  */
 export async function extractMultipleArchivesNodeAction(
   sourceArchives: { path: string }[]
-) {
+): Promise<ExtractionAllResult> {
+  // 入力バリデーション
   if (!sourceArchives || sourceArchives.length === 0) {
     return {
       success: false,
       error: "処理対象のパスが指定されていません。",
-      results: [],
+    };
+  }
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      error: "認証されていません。",
+    };
+  }
+
+  // 認可
+  if (user.role !== "admin") {
+    return {
+      success: false,
+      error: "権限がありません。",
     };
   }
 
   const results: ExtractionResult[] = [];
 
-  // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を推奨)
+  // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を使う)
   for (const { path: sourcePath } of sourceArchives) {
-    // 1. パスの正規化
+    // パスの正規化
     const normalizedSourcePath = sourcePath.replace(/^\/+/, "");
     if (normalizedSourcePath === "") {
       results.push({
@@ -45,7 +81,7 @@ export async function extractMultipleArchivesNodeAction(
     const srcVirtualPath = normalizedSourcePath;
     const srcRealPath = getServerMediaPath(srcVirtualPath);
 
-    // 2. 移動元の存在・ファイル確認
+    // 移動元の存在・ファイル確認
     try {
       const stats = await fsPromises.lstat(srcRealPath);
       if (!stats.isFile()) {
@@ -65,7 +101,7 @@ export async function extractMultipleArchivesNodeAction(
       continue;
     }
 
-    // 3. 解凍先フォルダ名の決定 (hoge.zip -> hoge)
+    // 解凍先フォルダ名の決定 (hoge.zip -> hoge)
     const fileBaseName = basename(srcVirtualPath, extname(srcVirtualPath));
     const parentVirtualDir = dirname(srcVirtualPath);
 
@@ -86,7 +122,7 @@ export async function extractMultipleArchivesNodeAction(
       counter++;
     }
 
-    // 4. 解凍処理の実行
+    // 解凍処理の実行
     let isDirCreated = false;
     try {
       // 展開先の実ディレクトリを作成
@@ -126,16 +162,17 @@ export async function extractMultipleArchivesNodeAction(
     }
   }
 
-  // 5. キャッシュの更新（ループの外で1回だけ実行）
+  // キャッシュの更新（ループの外で1回だけ実行）
   revalidatePath("/explorer");
 
-  // 全て成功したかどうかを判定
-  const allSuccess = results.every((r) => r.success);
-  const anySuccess = results.some((r) => r.success);
+  // 結果を集計
+  const completed = sumBy(results, (result) => (result.success ? 1 : 0));
+  const failed = results.length - completed;
 
   return {
-    success: allSuccess,
-    hasPartialSuccess: !allSuccess && anySuccess, // 一部だけ成功したか
+    success: true,
+    completed,
+    failed,
     results,
   };
 }

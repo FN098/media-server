@@ -36,11 +36,12 @@ export function useExtractDialog({ onSuccess }: UseExtractDialogProps = {}) {
       const result = await extractMultipleArchivesNodeAction(targets);
 
       if (result.success) {
-        toast.success(
-          targets.length === 1
-            ? `${targets[0].name} の解凍が完了しました`
-            : `${targets.length} 件の解凍が完了しました`
-        );
+        if (result.completed > 0) {
+          toast.success(`${result.completed} 件の解凍が完了しました`);
+        }
+        if (result.failed > 0) {
+          toast.error(`${result.failed} 件の解凍に失敗しました`);
+        }
         onSuccess?.();
         close();
       } else {
