@@ -46,7 +46,7 @@ export function AppMenuSidebar() {
     await authClient.signOut();
     router.push("/sign-in");
     router.refresh();
-    setOpen(false);
+    closeSidebar();
   };
 
   return (
