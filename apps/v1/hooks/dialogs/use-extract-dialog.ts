@@ -47,7 +47,8 @@ export function useExtractDialog({ onSuccess }: UseExtractDialogProps = {}) {
       onSuccess?.();
       close();
     } else {
-      toast.error(result.error || "解凍に失敗しました");
+      console.error(result.inputErrors);
+      toast.error(result.message || "解凍に失敗しました");
     }
   }, [targets, close, onSuccess]);
 
