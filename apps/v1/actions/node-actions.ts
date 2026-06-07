@@ -1,6 +1,6 @@
 "use server";
 
-import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
 import { copyNodeInDb, renameNodeInDb } from "@/lib/media/services";

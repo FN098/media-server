@@ -1,4 +1,4 @@
-import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
 import { Tag } from "@/lib/tag/types";
 

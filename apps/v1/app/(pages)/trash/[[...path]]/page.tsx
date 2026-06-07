@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Trash } from "@/components/ui/pages/trash";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFolderVisitedInfo } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/formatters";
 import { getFsListing } from "@/lib/media/fs-listing";

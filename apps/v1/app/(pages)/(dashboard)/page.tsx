@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { RecentFolders } from "@/components/ui/lists/recent-folders";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getRecentFolders } from "@/lib/folder/repository";
 import { Button } from "@/shadcn/components/ui/button";
 import { ArrowRight, FolderSearch2, History } from "lucide-react";

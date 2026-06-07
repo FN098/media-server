@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Favorites } from "@/components/ui/pages/favorites";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/resolvers";
+import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import {
