@@ -39,7 +39,11 @@ export function SignUp({ hasAdmin }: SignUpProps) {
         },
         {
           onSuccess: () => {
+            router.refresh();
             router.push("/");
+
+            // NOTE: router.push で画面遷移できない場合は代わりに以下を使う
+            // window.location.href = "/";
           },
         }
       );
