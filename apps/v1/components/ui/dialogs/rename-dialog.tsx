@@ -48,7 +48,7 @@ export function RenameDialog({ dialog }: RenameDialogProps) {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !isPending) {
                   e.preventDefault();
-                  performRename();
+                  void performRename();
                 }
               }}
               disabled={isPending}
@@ -67,7 +67,7 @@ export function RenameDialog({ dialog }: RenameDialogProps) {
             キャンセル
           </Button>
           <Button
-            onClick={performRename}
+            onClick={() => void performRename()}
             disabled={isPending || !newName.trim()}
           >
             {isPending ? "実行中..." : "保存"}

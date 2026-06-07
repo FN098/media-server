@@ -1,5 +1,5 @@
 import { renameNodeAction } from "@/actions/node-actions";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type RenameTarget = {
@@ -17,8 +17,7 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
   const [target, setTarget] = useState<RenameTarget | null>(null);
   const [newName, setNewName] = useState<string>("");
   const [extension, setExtension] = useState<string>("");
-
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,7 +59,7 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
   }, []);
 
   // 3. リネーム実行
-  const performRename = useCallback(() => {
+  const performRename = useCallback(async () => {
     if (!target) return;
 
     const trimmedName = newName.trim();
@@ -77,21 +76,21 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
       return;
     }
 
-    startTransition(async () => {
-      const result = await renameNodeAction(target.path, fullNewName);
+    setIsPending(true);
+    const result = await renameNodeAction(target.path, fullNewName);
+    setIsPending(false);
 
-      if (result.success) {
-        toast.success("リネームしました");
-        onSuccess?.();
-        close();
-      } else if (result.code === "duplicated") {
-        const suggested = getSuggestedName(trimmedName); // (1)を付ける
-        setNewName(suggested);
-        toast.error("同名のファイルが存在します。名前を確認してください");
-      } else {
-        toast.error(result.message || "リネームに失敗しました");
-      }
-    });
+    if (result.success) {
+      toast.success("リネームしました");
+      onSuccess?.();
+      close();
+    } else if (result.code === "duplicated") {
+      const suggested = getSuggestedName(trimmedName); // (1)を付ける
+      setNewName(suggested);
+      toast.error("同名のファイルが存在します。名前を確認してください");
+    } else {
+      toast.error(result.message || "リネームに失敗しました");
+    }
   }, [target, newName, extension, close, onSuccess]);
 
   return {
