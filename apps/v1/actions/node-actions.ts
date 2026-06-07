@@ -47,7 +47,12 @@ function normalizeVirtualPath(path: string) {
 
 type RenameNodeResult =
   | { success: true }
-  | { success: false; message: string; code?: "duplicated" };
+  | {
+      success: false;
+      message: string;
+      code?: "duplicated";
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
 
 // リネーム
 export async function renameNodeAction(
@@ -62,25 +67,23 @@ export async function renameNodeAction(
     };
   }
 
-  const normalizedSourcePath = VirtualPathSchema.safeParse(
-    sanitize(sourcePath)
-  ).data;
-  if (!normalizedSourcePath) {
+  const parsed = {
+    sourcePath: VirtualPathSchema.safeParse(sanitize(sourcePath)),
+    newName: FileOrFolderNameSchema.safeParse(sanitize(newName)),
+  };
+  if (!parsed.sourcePath.success || !parsed.newName.success) {
     return {
       success: false,
-      message: `無効なパスです。: ${sourcePath}`,
+      message: "入力エラーがあります。",
+      errors: [
+        { prop: "sourcePath", issues: parsed.sourcePath.error?.issues },
+        { prop: "newName", issues: parsed.newName.error?.issues },
+      ],
     };
   }
 
-  const normalizedNewName = FileOrFolderNameSchema.safeParse(
-    sanitize(newName)
-  ).data;
-  if (!normalizedNewName) {
-    return {
-      success: false,
-      message: `無効な名前です。: ${newName}`,
-    };
-  }
+  const normalizedSourcePath = parsed.sourcePath.data;
+  const normalizedNewName = parsed.newName.data;
 
   // ルートフォルダ保護
   if (isRootPath(normalizedSourcePath)) {
