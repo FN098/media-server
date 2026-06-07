@@ -3,7 +3,8 @@ import pathPosix from "path/posix";
 // path/posix のラッパーだが、一貫性と将来の拡張性のために使用を推奨
 
 export function join(...paths: string[]): string {
-  return pathPosix.join(...paths);
+  const result = pathPosix.join(...paths);
+  return result === "." ? "" : result;
 }
 
 export function dirname(path: string): string {
