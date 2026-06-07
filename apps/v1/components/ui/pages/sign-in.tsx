@@ -35,6 +35,7 @@ export function SignIn() {
       });
 
       if (error) {
+        console.error("sign-in-error:", error);
         setError(error.message || "サインインに失敗しました");
         setIsLoading(false);
         return;
