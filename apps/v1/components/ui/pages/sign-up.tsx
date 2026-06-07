@@ -44,7 +44,6 @@ export function SignUp({ hasAdmin }: SignUpProps) {
       }
 
       router.push("/");
-      router.refresh();
     } catch (e) {
       console.log("sign-in-error:", e);
       setError("予期しないエラーが発生しました");

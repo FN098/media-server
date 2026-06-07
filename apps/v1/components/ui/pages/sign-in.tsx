@@ -42,7 +42,6 @@ export function SignIn() {
       }
 
       router.push("/");
-      router.refresh();
     } catch (e) {
       console.log("sign-in-error:", e);
       setError("予期しないエラーが発生しました");
