@@ -48,7 +48,7 @@ export function RestoreDialog({ dialog }: RestoreDialogProps) {
             onClick={(e) => {
               // Shadcnのデフォルトで閉じる挙動をガード
               e.preventDefault();
-              performRestore();
+              void performRestore();
             }}
             disabled={isPending}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
