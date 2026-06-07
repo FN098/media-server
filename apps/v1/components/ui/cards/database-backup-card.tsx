@@ -57,7 +57,7 @@ type DbBackupSelectItem = {
 
 export function DatabaseBackupCard() {
   const [isListing, setIsListing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isDumping, setIsDumping] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -103,16 +103,16 @@ export function DatabaseBackupCard() {
   }, [isListing]);
 
   const handleBackup = useCallback(async () => {
-    if (isCreating) return;
+    if (isDumping) return;
 
-    setIsCreating(true);
+    setIsDumping(true);
 
     const result = await dumpDatabaseAction();
 
-    setIsCreating(false);
+    setIsDumping(false);
 
     if (!result.success) {
-      toast.error(result.error);
+      toast.error(result.message);
       return;
     }
 
@@ -131,7 +131,7 @@ export function DatabaseBackupCard() {
     }
 
     await refreshList();
-  }, [autoCleanup, isCreating, keepCount, refreshList]);
+  }, [autoCleanup, isDumping, keepCount, refreshList]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target;
@@ -254,11 +254,11 @@ export function DatabaseBackupCard() {
         {/* 新規バックアップ作成ボタン */}
         <Button
           onClick={() => void initiateBackup()}
-          disabled={isCreating}
+          disabled={isDumping}
           className="w-full"
           variant="outline"
         >
-          {isCreating ? (
+          {isDumping ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Plus className="mr-2 h-4 w-4" />
