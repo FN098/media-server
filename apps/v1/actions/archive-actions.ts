@@ -5,8 +5,7 @@ import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
 import { extractArchive } from "@/lib/child_process/7z";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import { existsPath } from "@/lib/utils/fs";
-import { sumBy } from "@/lib/utils/math";
+import { existsPath, isFsNotFoundError } from "@/lib/utils/fs";
 import {
   basename,
   dirname,
@@ -22,36 +21,23 @@ import { revalidatePath } from "next/cache";
 export type ExtractionResult =
   | {
       success: true;
-      sourcePath: string;
+      completed: { sourcePath: string }[];
+      failed: { sourcePath: string; message: string }[];
+      skipped: { sourcePath: string; message: string }[];
     }
   | {
       success: false;
       message: string;
-      sourcePath: string;
-    };
-
-type InputError = { path: string; message: string };
-
-export type ExtractionSummaryResult =
-  | {
-      success: true;
-      completed: number;
-      failed: number;
-      results: ExtractionResult[];
-    }
-  | {
-      success: false;
-      message: string;
-      inputErrors?: InputError[];
+      inputErrors?: { path: string; message: string }[];
     };
 
 /**
  * 複数のアーカイブファイルをまとめて解凍するサーバーアクション
  * @param sourceArchives エクスプローラー上の仮想パスの配列 (例: ["folder/file1.zip", "folder/file2.zip"])
  */
-export async function extractMultipleArchivesAction(
+export async function extractArchivesAction(
   sourceArchives: { path: string }[]
-): Promise<ExtractionSummaryResult> {
+): Promise<ExtractionResult> {
   // 入力バリデーション＋正規化
   if (!sourceArchives || sourceArchives.length === 0) {
     return {
@@ -60,7 +46,8 @@ export async function extractMultipleArchivesAction(
     };
   }
 
-  const inputErrors = [] as InputError[];
+  const inputErrors = [] as { path: string; message: string }[];
+
   const normalizedArchives = sourceArchives
     .map((arc) => {
       const sanitized = sanitize(arc.path);
@@ -109,7 +96,10 @@ export async function extractMultipleArchivesAction(
     };
   }
 
-  const results: ExtractionResult[] = [];
+  const completed: Extract<ExtractionResult, { success: true }>["completed"] =
+    [];
+  const failed: Extract<ExtractionResult, { success: true }>["failed"] = [];
+  const skipped: Extract<ExtractionResult, { success: true }>["skipped"] = [];
 
   // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を使う)
   for (const { path: sourcePath } of normalizedArchives) {
@@ -121,20 +111,15 @@ export async function extractMultipleArchivesAction(
     try {
       const stats = await lstat(srcRealPath);
       if (stats.isDirectory()) {
-        results.push({
-          success: false,
-          message: "ディレクトリは解凍できません。",
-          sourcePath,
-        });
+        skipped.push({ sourcePath, message: "ディレクトリは解凍できません。" });
         continue;
       }
-    } catch {
-      results.push({
-        success: false,
-        message: `対象ファイルが見つかりません: ${basename(srcVirtualPath)}`,
-        sourcePath,
-      });
-      continue;
+    } catch (e) {
+      if (isFsNotFoundError(e)) {
+        failed.push({ sourcePath, message: "対象ファイルが見つかりません。" });
+        continue;
+      }
+      throw e;
     }
 
     // 解凍先フォルダ名の決定 (hoge.zip -> hoge)
@@ -165,13 +150,9 @@ export async function extractMultipleArchivesAction(
       // 7-Zipを実行して解凍
       await extractArchive(srcRealPath, destRealPath);
 
-      // 個別の成功結果を格納
-      results.push({
-        sourcePath,
-        success: true,
-      });
+      completed.push({ sourcePath });
     } catch (e) {
-      logger.error("action:extract-multi-archives", e, {
+      logger.error("action:extract-archives", e, {
         sourcePath,
       });
 
@@ -180,7 +161,7 @@ export async function extractMultipleArchivesAction(
         try {
           await rm(destRealPath, { recursive: true, force: true });
         } catch (e) {
-          logger.error("action:extract-multi-archives:rollback", e);
+          logger.error("action:extract-archives:rollback", e);
         }
       }
 
@@ -189,25 +170,17 @@ export async function extractMultipleArchivesAction(
           ? e.message
           : "解凍処理中に不明なエラーが発生しました。";
 
-      results.push({
-        sourcePath,
-        success: false,
-        message: errorMessage,
-      });
+      failed.push({ sourcePath, message: errorMessage });
     }
   }
 
   // キャッシュの更新
   revalidatePath("/explorer");
 
-  // 結果を集計
-  const completed = sumBy(results, (result) => (result.success ? 1 : 0));
-  const failed = results.length - completed;
-
   return {
     success: true,
     completed,
     failed,
-    results,
+    skipped,
   };
 }

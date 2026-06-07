@@ -1,4 +1,4 @@
-import { extractMultipleArchivesAction } from "@/actions/archive-actions";
+import { extractArchivesAction } from "@/actions/archive-actions";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -29,20 +29,23 @@ export function useExtractDialog({ onSuccess }: UseExtractDialogProps = {}) {
   const performExtract = useCallback(async () => {
     if (targets.length === 0) return;
 
-    let result: Awaited<ReturnType<typeof extractMultipleArchivesAction>>;
+    let result: Awaited<ReturnType<typeof extractArchivesAction>>;
     try {
       setIsPending(true);
-      result = await extractMultipleArchivesAction(targets);
+      result = await extractArchivesAction(targets);
     } finally {
       setIsPending(false);
     }
 
     if (result.success) {
-      if (result.completed > 0) {
-        toast.success(`${result.completed} 件の解凍が完了しました`);
+      if (result.completed.length > 0) {
+        toast.success(`${result.completed.length} 件の解凍が完了しました`);
       }
-      if (result.failed > 0) {
-        toast.error(`${result.failed} 件の解凍に失敗しました`);
+      if (result.failed.length > 0) {
+        toast.error(`${result.failed.length} 件の解凍に失敗しました`);
+      }
+      if (result.skipped.length > 0) {
+        toast.error(`${result.skipped.length} 件の解凍をスキップしました`);
       }
       onSuccess?.();
       close();
