@@ -53,7 +53,7 @@ export function FavoriteDialog({ dialog }: FavoriteDialogProps) {
             onClick={(e) => {
               // Shadcnのデフォルトで閉じる挙動をガード
               e.preventDefault();
-              performFavoriteAction();
+              void performFavoriteAction();
             }}
             disabled={isPending}
           >

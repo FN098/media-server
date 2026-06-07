@@ -1,5 +1,5 @@
 import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 type FavoriteTarget = {
@@ -16,8 +16,8 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [targets, setTargets] = useState<FavoriteTarget[]>([]);
   const [mode, setMode] = useState<FavoriteDialogMode>("add");
+  const [isPending, setIsPending] = useState(false);
 
-  const [isPending, startTransition] = useTransition();
   const { updateMultipleFavorites, deleteMultipleFavorites } =
     useFavoritesControlContext();
 
@@ -39,32 +39,32 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   }, []);
 
   // 3. お気に入り処理（追加 / 解除）の実行
-  const performFavoriteAction = useCallback(() => {
+  const performFavoriteAction = useCallback(async () => {
     if (targets.length === 0) return;
 
     const paths = targets.map((n) => n.path);
 
-    startTransition(async () => {
-      const result =
-        mode === "add"
-          ? await updateMultipleFavorites({
-              paths,
-              skipIfAlreadyFavorite: true,
-            })
-          : await deleteMultipleFavorites(paths);
+    setIsPending(true);
+    const result =
+      mode === "add"
+        ? await updateMultipleFavorites({
+            paths,
+            skipIfAlreadyFavorite: true,
+          })
+        : await deleteMultipleFavorites(paths);
+    setIsPending(false);
 
-      if (result.success) {
-        toast.success(
-          mode === "add"
-            ? "お気に入りが更新されました。"
-            : "お気に入りが解除されました。"
-        );
-        onSuccess?.();
-        close();
-      } else {
-        toast.error(result.error || "処理に失敗しました");
-      }
-    });
+    if (result.success) {
+      toast.success(
+        mode === "add"
+          ? "お気に入りが更新されました。"
+          : "お気に入りが解除されました。"
+      );
+      onSuccess?.();
+      close();
+    } else {
+      toast.error(result.error || "処理に失敗しました");
+    }
   }, [
     targets,
     mode,
