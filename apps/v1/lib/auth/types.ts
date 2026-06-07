@@ -1,4 +1,4 @@
-export type AuthUser = {
-  id: string;
-  name: string;
-};
+import { AuthUserSchema } from "@/lib/auth/schemas";
+import z from "zod";
+
+export type AuthUser = z.infer<typeof AuthUserSchema>;
