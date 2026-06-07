@@ -279,22 +279,22 @@ export async function moveNodesAction(
   }
 
   const parsed = {
-    src: VirtualPathManySchema.safeParse(sourcePaths.map(sanitize)),
-    dest: VirtualPathOneSchema.safeParse(sanitize(destDirPath)),
+    sourcePaths: VirtualPathManySchema.safeParse(sourcePaths.map(sanitize)),
+    destDirPath: VirtualPathOneSchema.safeParse(sanitize(destDirPath)),
   };
-  if (!parsed.src.success || !parsed.dest.success) {
+  if (!parsed.sourcePaths.success || !parsed.destDirPath.success) {
     return {
       success: false,
       message: "入力エラーがあります。",
       errors: [
-        { prop: "sourcePaths", issues: parsed.src.error?.issues },
-        { prop: "destDirPath", issues: parsed.dest.error?.issues },
+        { prop: "sourcePaths", issues: parsed.sourcePaths.error?.issues },
+        { prop: "destDirPath", issues: parsed.destDirPath.error?.issues },
       ],
     };
   }
 
-  const normalizedSourcePaths = unique(parsed.src.data);
-  const normalizedDestDirPath = parsed.dest.data;
+  const normalizedSourcePaths = unique(parsed.sourcePaths.data);
+  const normalizedDestDirPath = parsed.destDirPath.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -543,22 +543,22 @@ export async function copyNodesAction(
   }
 
   const parsed = {
-    src: VirtualPathManySchema.safeParse(sourcePaths.map(sanitize)),
-    dest: VirtualPathOneSchema.safeParse(sanitize(destDirPath)),
+    sourcePaths: VirtualPathManySchema.safeParse(sourcePaths.map(sanitize)),
+    destDirPath: VirtualPathOneSchema.safeParse(sanitize(destDirPath)),
   };
-  if (!parsed.src.success || !parsed.dest.success) {
+  if (!parsed.sourcePaths.success || !parsed.destDirPath.success) {
     return {
       success: false,
       message: "入力エラーがあります。",
       errors: [
-        { prop: "sourcePaths", issues: parsed.src.error?.issues },
-        { prop: "destDirPath", issues: parsed.dest.error?.issues },
+        { prop: "sourcePaths", issues: parsed.sourcePaths.error?.issues },
+        { prop: "destDirPath", issues: parsed.destDirPath.error?.issues },
       ],
     };
   }
 
-  const normalizedSourcePaths = unique(parsed.src.data);
-  const normalizedDestDirPath = parsed.dest.data;
+  const normalizedSourcePaths = unique(parsed.sourcePaths.data);
+  const normalizedDestDirPath = parsed.destDirPath.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -772,35 +772,78 @@ export async function copyNodesAction(
   };
 }
 
+type DeleteNodesResult =
+  | {
+      success: true;
+      completed: { path: string }[];
+      failed: { path: string; message: string }[];
+      skipped: { path: string; message: string }[];
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
+
+type DeleteNodesSuccess = Extract<DeleteNodesResult, { success: true }>;
+
 // 削除（ゴミ箱フォルダへの移動）
 export async function deleteNodesAction(sourcePaths: string[]) {
+  // 入力バリデーション＋正規化
+  if (!sourcePaths || sourcePaths.length === 0) {
+    return {
+      success: false,
+      message: "処理対象のパスが指定されていません。",
+    };
+  }
+
+  const parsed = {
+    sourcePaths: VirtualPathManySchema.safeParse(sourcePaths.map(sanitize)),
+  };
+  if (!parsed.sourcePaths.success) {
+    return {
+      success: false,
+      message: "入力エラーがあります。",
+      errors: [
+        { prop: "sourcePaths", issues: parsed.sourcePaths.error?.issues },
+      ],
+    };
+  }
+
+  const normalizedSourcePaths = unique(parsed.sourcePaths.data);
+
   // 認証
-  await resolveCurrentUserOrThrow();
-
-  // 入力バリデーション+正規化
-  const normalizedSourcePaths = normalizeVirtualPaths(sourcePaths);
-
-  // ルートフォルダ保護
-  if (normalizedSourcePaths.some((path) => path === "")) {
+  const user = await resolveCurrentUser();
+  if (!user) {
     return {
-      success: 0,
-      failed: normalizedSourcePaths.length,
-      errors: ["ルートフォルダは操作できません。"],
+      success: false,
+      message: "認証されていません。",
     };
   }
 
-  // システムフォルダ保護
-  if (normalizedSourcePaths.some((path) => isSystemHiddenVirtualPath(path))) {
-    return {
-      success: 0,
-      failed: normalizedSourcePaths.length,
-      errors: ["システムフォルダは操作できません。"],
-    };
-  }
-
-  const results = { success: 0, failed: 0, errors: [] as string[] };
+  const completed: DeleteNodesSuccess["completed"] = [];
+  const failed: DeleteNodesSuccess["failed"] = [];
+  const skipped: DeleteNodesSuccess["skipped"] = [];
 
   for (const srcVirtualPath of normalizedSourcePaths) {
+    // ルートフォルダ保護
+    if (isRootPath(srcVirtualPath)) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "ルートフォルダは操作できません。",
+      });
+      continue;
+    }
+
+    // システムフォルダ保護
+    if (isSystemHiddenVirtualPath(srcVirtualPath)) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "システムフォルダは操作できません。",
+      });
+      continue;
+    }
+
     // ゴミ箱に移動しても仮想パスは変わらない（物理パスのみ変更）
     const destVirtualPath = srcVirtualPath;
 
@@ -808,13 +851,46 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     const srcRealPath = getServerMediaPath(srcVirtualPath);
     const destRealPath = getServerMediaTrashPath(destVirtualPath);
 
+    // ディレクトリ判定
+    const srcPathInfo = await getPathInfo(srcRealPath);
+    if (!srcPathInfo.exists) {
+      if (srcPathInfo.error === "not-found") {
+        failed.push({
+          path: srcVirtualPath,
+          message: "ファイルまたはフォルダが存在しません。",
+        });
+        continue;
+      } else {
+        failed.push({
+          path: srcVirtualPath,
+          message: "ファイルまたはフォルダへのアクセスが拒否されました。",
+        });
+        continue;
+      }
+    }
+    const isDirectory = srcPathInfo.isDirectory;
+
+    // 認可
+    if (
+      (!isDirectory && !hasPermission(user, "file:delete")) ||
+      (isDirectory && !hasPermission(user, "folder:delete"))
+    ) {
+      skipped.push({
+        path: srcVirtualPath,
+        message: "権限がありません。",
+      });
+      continue;
+    }
+
     // 移動先フォルダ作成
     try {
       await mkdir(dirname(destRealPath), { recursive: true });
     } catch (e) {
-      console.error("failed to create directory:", e);
-      results.failed++;
-      results.errors.push("ファイルまたはフォルダの削除に失敗しました。");
+      logger.error("action:delete:create-direcory", e);
+      failed.push({
+        path: srcVirtualPath,
+        message: "ファイルまたはフォルダの削除に失敗しました。",
+      });
       continue;
     }
 
@@ -822,22 +898,31 @@ export async function deleteNodesAction(sourcePaths: string[]) {
     try {
       await recursiveMergeMove(srcRealPath, destRealPath);
     } catch (e) {
-      console.error("failed to move file or directory:", e);
-      results.failed++;
-      results.errors.push("ファイルまたはフォルダの削除に失敗しました。");
+      logger.error("action:delete:move", e);
+      failed.push({
+        path: srcVirtualPath,
+        message: "ファイルまたはフォルダの削除に失敗しました。",
+      });
       continue;
     }
 
     // DB更新不要：.trash フォルダへの移動のみ
 
-    results.success++;
+    completed.push({ path: srcVirtualPath });
   }
 
   // キャッシュの更新
-  revalidatePath("/explorer");
-  revalidatePath("/trash");
+  if (completed.length > 0) {
+    revalidatePath("/explorer");
+    revalidatePath("/trash");
+  }
 
-  return results;
+  return {
+    success: true,
+    completed,
+    failed,
+    skipped,
+  };
 }
 
 // 復元（ゴミ箱フォルダから元のフォルダへの移動）

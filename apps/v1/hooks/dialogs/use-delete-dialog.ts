@@ -48,16 +48,28 @@ export function useDeleteDialog({ onSuccess }: UseDeleteDialogProps = {}) {
         ? await deleteNodesPermanentlyAction(paths)
         : await deleteNodesAction(paths);
 
-      if (result.failed === 0) {
-        toast.success(
-          permanent
-            ? `${result.success}件のアイテムを完全に削除しました`
-            : `${result.success}件をゴミ箱に移動しました`
-        );
+      if (result.success) {
+        if (result.completed.length > 0) {
+          toast.success(
+            permanent
+              ? `${result.completed} 件のアイテムを完全に削除しました`
+              : `${result.completed} 件のアイテムをゴミ箱に移動しました`
+          );
+        }
+        if (result.failed.length > 0) {
+          toast.success(
+            `${result.failed.length} 件のアイテムの削除に失敗しました`
+          );
+        }
+        if (result.skipped.length > 0) {
+          toast.success(
+            `${result.skipped.length} 件のアイテムの削除をスキップしました`
+          );
+        }
         onSuccess?.();
         close();
       } else {
-        toast.error(`${result.failed}件の削除に失敗しました`);
+        toast.error(result.message);
       }
     });
   }, [targets, permanent, close, onSuccess]);
