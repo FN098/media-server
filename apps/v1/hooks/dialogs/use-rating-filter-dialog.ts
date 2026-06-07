@@ -7,54 +7,6 @@ import {
 } from "@/lib/filter/types";
 import { useCallback, useState } from "react";
 
-// ─── 内部データ変換ヘルパー ───────────────────────────────────────────────────
-function toFilterInput(
-  filterMode: RatingFilterMode,
-  op: RatingOperator,
-  value: RatingValue,
-  betweenMin: RatingValue,
-  betweenMax: RatingValue
-): RatingFilterValue {
-  if (filterMode === "all") return { mode: "all" };
-  if (filterMode === "unrated") return { mode: "unrated" };
-
-  const condition: RatedCondition =
-    op === "between"
-      ? { operator: "between", min: betweenMin, max: betweenMax }
-      : { operator: op, value };
-
-  return { mode: "rated", condition };
-}
-
-function fromFilterInput(input: RatingFilterValue) {
-  const defaults = {
-    op: "gte" as const,
-    value: 3 as RatingValue,
-    betweenMin: 2 as RatingValue,
-    betweenMax: 4 as RatingValue,
-  };
-  if (input.mode === "all" || input.mode === "unrated") {
-    return { filterMode: input.mode, ...defaults };
-  }
-  const { condition } = input;
-  if (condition.operator === "between") {
-    return {
-      filterMode: "rated" as const,
-      op: "between" as const,
-      value: 3 as RatingValue,
-      betweenMin: condition.min,
-      betweenMax: condition.max,
-    };
-  }
-  return {
-    filterMode: "rated" as const,
-    op: condition.operator,
-    value: condition.value,
-    betweenMin: 2 as RatingValue,
-    betweenMax: 4 as RatingValue,
-  };
-}
-
 interface UseRatingFilterDialogProps {
   onApply?: (value: RatingFilterValue) => void;
 }
@@ -137,5 +89,52 @@ export function useRatingFilterDialog({
     close,
     performReset,
     performApply,
+  };
+}
+
+function toFilterInput(
+  filterMode: RatingFilterMode,
+  op: RatingOperator,
+  value: RatingValue,
+  betweenMin: RatingValue,
+  betweenMax: RatingValue
+): RatingFilterValue {
+  if (filterMode === "all") return { mode: "all" };
+  if (filterMode === "unrated") return { mode: "unrated" };
+
+  const condition: RatedCondition =
+    op === "between"
+      ? { operator: "between", min: betweenMin, max: betweenMax }
+      : { operator: op, value };
+
+  return { mode: "rated", condition };
+}
+
+function fromFilterInput(input: RatingFilterValue) {
+  const defaults = {
+    op: "gte" as const,
+    value: 3 as RatingValue,
+    betweenMin: 2 as RatingValue,
+    betweenMax: 4 as RatingValue,
+  };
+  if (input.mode === "all" || input.mode === "unrated") {
+    return { filterMode: input.mode, ...defaults };
+  }
+  const { condition } = input;
+  if (condition.operator === "between") {
+    return {
+      filterMode: "rated" as const,
+      op: "between" as const,
+      value: 3 as RatingValue,
+      betweenMin: condition.min,
+      betweenMax: condition.max,
+    };
+  }
+  return {
+    filterMode: "rated" as const,
+    op: condition.operator,
+    value: condition.value,
+    betweenMin: 2 as RatingValue,
+    betweenMax: 4 as RatingValue,
   };
 }
