@@ -1,6 +1,10 @@
 "use server";
 
-import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
+import {
+  resolveCurrentUser,
+  resolveCurrentUserOrThrow,
+} from "@/lib/auth/current-user";
+import { hasPermission } from "@/lib/authorization/permission";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
 import { copyNodeInDb, renameNodeInDb } from "@/lib/media/services";
@@ -16,11 +20,14 @@ import {
   isFsPermissionError,
   recursiveMergeMove,
 } from "@/lib/utils/fs";
+import { isRootPath, sanitize } from "@/lib/virtual-path/path";
 import {
+  FileOrFolderNameSchema,
   VirtualPathManySchema,
   VirtualPathOneSchema,
-  VirtualPathSegmentSchema,
+  VirtualPathSchema,
 } from "@/lib/virtual-path/schemas";
+import { logger } from "better-auth";
 import console from "console";
 import { Dirent } from "fs";
 import { cp, mkdir, readdir, rename, rm } from "fs/promises";
@@ -35,34 +42,66 @@ function normalizeVirtualPaths(paths: string[]) {
   return VirtualPathManySchema.parse(paths);
 }
 
-function normalizeFileOrDirectoryName(name: string) {
-  return VirtualPathSegmentSchema.parse(name);
-}
-
 export type RenameNodeResult =
   | { success: true }
-  | { success: false; error: string; code?: "duplicated" };
+  | { success: false; message: string; code?: "duplicated" };
 
 // リネーム
 export async function renameNodeAction(
   sourcePath: string,
   newName: string
 ): Promise<RenameNodeResult> {
-  // 認証
-  await resolveCurrentUserOrThrow();
+  // 入力バリデーション＋正規化
+  if (!sourcePath || newName.length === 0) {
+    return {
+      success: false,
+      message: "処理対象のパスまたは名前が指定されていません。",
+    };
+  }
 
-  // 入力バリデーション+正規化
-  const normalizedSourcePath = normalizeVirtualPath(sourcePath);
-  const normalizedNewName = normalizeFileOrDirectoryName(newName);
+  const normalizedSourcePath = VirtualPathSchema.safeParse(
+    sanitize(sourcePath)
+  ).data;
+  if (!normalizedSourcePath) {
+    return {
+      success: false,
+      message: `無効なパスです。: ${sourcePath}`,
+    };
+  }
+
+  const normalizedNewName = FileOrFolderNameSchema.safeParse(
+    sanitize(newName)
+  ).data;
+  if (!normalizedNewName) {
+    return {
+      success: false,
+      message: `無効な名前です。: ${newName}`,
+    };
+  }
 
   // ルートフォルダ保護
-  if (normalizedSourcePath === "") {
-    return { success: false, error: "ルートフォルダは操作できません。" };
+  if (isRootPath(normalizedSourcePath)) {
+    return {
+      success: false,
+      message: "ルートフォルダは操作できません。",
+    };
   }
 
   // システムフォルダ保護
   if (isSystemHiddenVirtualPath(normalizedSourcePath)) {
-    return { success: false, error: "システムフォルダは操作できません。" };
+    return {
+      success: false,
+      message: "システムフォルダは操作できません。",
+    };
+  }
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
   }
 
   const srcVirtualPath = normalizedSourcePath;
@@ -78,22 +117,33 @@ export async function renameNodeAction(
     if (srcPathInfo.error === "not-found")
       return {
         success: false,
-        error: `ファイルまたはフォルダが存在しません。: ${srcVirtualPath}`,
+        message: `ファイルまたはフォルダが存在しません。: ${srcVirtualPath}`,
       };
     else
       return {
         success: false,
-        error: `ファイルまたはフォルダへのアクセスが拒否されました。: ${srcVirtualPath}`,
+        message: `ファイルまたはフォルダへのアクセスが拒否されました。: ${srcVirtualPath}`,
       };
   }
   const isDirectory = srcPathInfo.isDirectory;
+
+  // 認可
+  if (
+    (!isDirectory && !hasPermission(user, "file:rename")) ||
+    (isDirectory && !hasPermission(user, "folder:rename"))
+  ) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
 
   // 存在確認
   const destPathInfo = await getPathInfo(destRealPath);
   if (destPathInfo.exists) {
     return {
       success: false,
-      error: `同名のファイルまたはフォルダが既に存在します。: ${destVirtualPath}`,
+      message: `同名のファイルまたはフォルダが既に存在します。: ${destVirtualPath}`,
       code: "duplicated",
     };
   }
@@ -102,21 +152,21 @@ export async function renameNodeAction(
   if (destPathInfo.error !== "not-found") {
     return {
       success: false,
-      error: `ファイルまたはフォルダへのアクセスが拒否されました。: ${destVirtualPath}`,
+      message: `ファイルまたはフォルダへのアクセスが拒否されました。: ${destVirtualPath}`,
     };
   }
 
   const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
   const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
 
-  // サムネイルリネーム前処理（リネーム先の古い残骸をファイル・フォルダ問わずお掃除）
+  // サムネイルリネーム前処理
   try {
     await rm(destThumbPath, { recursive: true, force: true });
   } catch (e) {
-    console.error("failed to remove thumbnail file or directory:", e);
+    logger.error("action:rename:thumb-preprocess", e);
     return {
       success: false,
-      error: "ファイルまたはフォルダのリネームに失敗しました。",
+      message: "ファイルまたはフォルダのリネームに失敗しました。",
     };
   }
 
@@ -128,10 +178,10 @@ export async function renameNodeAction(
   } catch (e) {
     // サムネイル元が not found （未作成）の場合は処理継続、それ以外は失敗
     if (!isFsNotFoundError(e)) {
-      console.error("failed to rename thumbnail file or directory:", e);
+      logger.error("action:rename:thumb", e);
       return {
         success: false,
-        error: "ファイルまたはフォルダのリネームに失敗しました。",
+        message: "ファイルまたはフォルダのリネームに失敗しました。",
       };
     }
   }
@@ -140,23 +190,20 @@ export async function renameNodeAction(
   try {
     await rename(srcRealPath, destRealPath);
   } catch (e) {
-    console.error("failed to rename file or directory:", e);
+    logger.error("action:rename:fs", e);
 
     // サムネイルロールバック
     if (thumbRenamed) {
       try {
         await rename(destThumbPath, srcThumbPath);
       } catch (e) {
-        console.error(
-          "failed to rollback renamed thumbnail file or directory:",
-          e
-        );
+        logger.error("action:rename:fs:thumb-rollback", e);
       }
     }
 
     return {
       success: false,
-      error: "ファイルまたはフォルダのリネームに失敗しました。",
+      message: "ファイルまたはフォルダのリネームに失敗しました。",
     };
   }
 
@@ -164,30 +211,27 @@ export async function renameNodeAction(
   try {
     await renameNodeInDb({ srcVirtualPath, destVirtualPath, isDirectory });
   } catch (e) {
-    console.error("failed to update database:", e);
+    logger.error("action:rename:db-node", e);
 
     // FSロールバック
     try {
       await rename(destRealPath, srcRealPath);
-    } catch (err) {
-      console.error("failed to rollback renamed file or directory:", err);
+    } catch (e) {
+      logger.error("action:rename:db:fs-rollback", e);
     }
 
     // サムネイルロールバック
     if (thumbRenamed) {
       try {
         await rename(destThumbPath, srcThumbPath);
-      } catch (err) {
-        console.error(
-          "failed to rollback renamed thumbnail file or directory:",
-          err
-        );
+      } catch (e) {
+        logger.error("action:rename:db:thumb-rollback", e);
       }
     }
 
     return {
       success: false,
-      error: "ファイルまたはフォルダのリネームに失敗しました。",
+      message: "ファイルまたはフォルダのリネームに失敗しました。",
     };
   }
 

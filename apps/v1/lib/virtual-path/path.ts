@@ -25,3 +25,7 @@ export function sanitize(path: string): string {
     .replace(/\/+/g, "/") // // → /
     .replace(/^\/+|\/+$/g, ""); // 先頭・末尾の / 削除
 }
+
+export function isRootPath(path: string): boolean {
+  return path === "";
+}

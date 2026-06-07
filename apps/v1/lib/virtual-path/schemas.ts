@@ -105,3 +105,4 @@ export const VirtualPathManySchema = z.array(VirtualPathSchema);
 
 export const FileNameSchema = VirtualPathSegmentSchema;
 export const FolderNameSchema = VirtualPathSegmentSchema;
+export const FileOrFolderNameSchema = VirtualPathSegmentSchema;

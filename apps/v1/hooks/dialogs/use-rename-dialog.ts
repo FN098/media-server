@@ -89,7 +89,7 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
         setNewName(suggested);
         toast.error("同名のファイルが存在します。名前を確認してください");
       } else {
-        toast.error(result.error || "リネームに失敗しました");
+        toast.error(result.message || "リネームに失敗しました");
       }
     });
   }, [target, newName, extension, close, onSuccess]);
