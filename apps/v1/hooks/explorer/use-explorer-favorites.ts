@@ -1,6 +1,6 @@
 import { MediaNode } from "@/lib/media/types";
 import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
-import { useCallback, useTransition } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 type UpdateProps = {
@@ -11,27 +11,27 @@ type UpdateProps = {
 
 export function useExplorerFavorites() {
   const { getFavorite, updateMultipleFavorites } = useFavoritesControlContext();
-
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
   const update = useCallback(
-    ({ targets, newRating, onSuccess }: UpdateProps) => {
+    async ({ targets, newRating, onSuccess }: UpdateProps) => {
       if (isPending) return;
+      setIsPending(true);
 
-      startTransition(async () => {
-        const paths = targets.map((target) => target.path);
-        const result = await updateMultipleFavorites({
-          paths,
-          newRating,
-        });
-
-        if (result.success) {
-          toast.success("レーティングが更新されました。", { duration: 500 });
-          onSuccess?.();
-        } else {
-          toast.error(result.error);
-        }
+      const paths = targets.map((target) => target.path);
+      const result = await updateMultipleFavorites({
+        paths,
+        newRating,
       });
+
+      if (result.success) {
+        toast.success("レーティングが更新されました。", { duration: 500 });
+        onSuccess?.();
+      } else {
+        toast.error(result.error);
+      }
+
+      setIsPending(false);
     },
     [isPending, updateMultipleFavorites]
   );
