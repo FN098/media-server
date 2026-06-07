@@ -36,8 +36,8 @@ export function SignIn() {
         },
         {
           onSuccess: () => {
-            router.push("/");
             router.refresh();
+            router.push("/");
           },
         }
       );
