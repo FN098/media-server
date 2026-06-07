@@ -42,14 +42,12 @@ export async function updateVisitedFolder(
   dirPath: string,
   userId: string
 ): Promise<void> {
-  const normalizedDirPath = dirPath.replace(/\/+$/, "");
-
   await prisma.$transaction(async (tx) => {
     await tx.visitedFolder.upsert({
       where: {
         userId_dirPath: {
           userId,
-          dirPath: normalizedDirPath,
+          dirPath,
         },
       },
       update: {
@@ -57,7 +55,7 @@ export async function updateVisitedFolder(
       },
       create: {
         userId,
-        dirPath: normalizedDirPath,
+        dirPath,
       },
     });
   });

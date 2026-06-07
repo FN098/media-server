@@ -1,21 +1,21 @@
 "use server";
 
-import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
+import { resolveCurrentUser } from "@/lib/auth/current-user";
+import { hasPermission } from "@/lib/authorization/permission";
 import {
   getRecentFolders,
   togglePinVisitedFolder,
   updateVisitedFolder,
 } from "@/lib/folder/repository";
+import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import {
-  isSystemHiddenRealPath,
-  isSystemHiddenVirtualPath,
-} from "@/lib/path/protections";
+import { isBlockedVirtualPath } from "@/lib/path/protections";
 import {
   existsPath,
   isFsNotFoundError,
   isFsPermissionError,
 } from "@/lib/utils/fs";
+import { basename, join, sanitize } from "@/lib/virtual-path/path";
 import {
   FolderNameSchema,
   VirtualPathSchema,
@@ -23,73 +23,157 @@ import {
 import { Dirent } from "fs";
 import { mkdir, readdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import { basename } from "path";
-import { join } from "path/posix";
 
-function normalizeVirtualPath(path: string) {
-  return VirtualPathSchema.parse(path);
-}
+type VisitFolderResult =
+  | { success: true }
+  | {
+      success: false;
+      message: string;
+    };
 
 // フォルダ訪問履歴更新
-export async function visitFolderAction(dirPath: string): Promise<void> {
-  // 認証
-  const user = await resolveCurrentUserOrThrow();
+export async function visitFolderAction(
+  dirPath: string
+): Promise<VisitFolderResult> {
+  // 入力バリデーション＋正規化
+  if (!dirPath) {
+    return {
+      success: false,
+      message: "処理対象のパスが指定されていません。",
+    };
+  }
 
-  await updateVisitedFolder(dirPath, user.id);
+  const normalizedDirPath = VirtualPathSchema.safeParse(sanitize(dirPath)).data;
+  if (!normalizedDirPath) {
+    return {
+      success: false,
+      message: `無効なパスです。: ${dirPath}`,
+    };
+  }
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
+
+  // 認可
+  if (!hasPermission(user, "folder:update-history")) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
+
+  // フォルダ保護
+  if (isBlockedVirtualPath(normalizedDirPath)) {
+    return {
+      success: false,
+      message: "このフォルダにはアクセスできません。",
+    };
+  }
+
+  try {
+    await updateVisitedFolder(normalizedDirPath, user.id);
+  } catch (e) {
+    logger.error("action:update-folder-history", e);
+    return {
+      success: false,
+      message: "訪問済みフォルダの更新に失敗しました。",
+    };
+  }
 
   // キャッシュ更新
   revalidatePath("/dashboard");
+
+  return { success: true };
 }
+
+type CreateFolderResult =
+  | { success: true }
+  | {
+      success: false;
+      message: string;
+    };
 
 // フォルダ作成
 export async function createFolderAction(
   parentPath: string,
   folderName: string
-) {
+): Promise<CreateFolderResult> {
+  // 入力バリデーション＋正規化
+  if (!parentPath || !folderName) {
+    return {
+      success: false,
+      message: "処理対象のパスまたはフォルダ名が指定されていません。",
+    };
+  }
+
+  const normalizedParentPath = VirtualPathSchema.safeParse(
+    sanitize(parentPath)
+  ).data;
+  if (!normalizedParentPath) {
+    return {
+      success: false,
+      message: `無効なパスです。: ${parentPath}`,
+    };
+  }
+
+  const normalizedFolderName = FolderNameSchema.safeParse(
+    sanitize(folderName)
+  ).data;
+  if (!normalizedFolderName) {
+    return {
+      success: false,
+      message: `無効なフォルダ名です。: ${folderName}`,
+    };
+  }
+
   // 認証
-  await resolveCurrentUserOrThrow();
-
-  // 入力バリデーション+正規化
-  const parsedParentPath = VirtualPathSchema.safeParse(parentPath);
-  if (!parsedParentPath.success) {
+  const user = await resolveCurrentUser();
+  if (!user) {
     return {
       success: false,
-      error: parsedParentPath.error.issues[0].message,
+      message: "認証されていません。",
     };
   }
 
-  const parsedFolderName = FolderNameSchema.safeParse(folderName.trim());
-  if (!parsedFolderName.success) {
+  // 認可
+  if (!hasPermission(user, "folder:create")) {
     return {
       success: false,
-      error: parsedFolderName.error.issues[0].message,
+      message: "権限がありません。",
     };
   }
 
-  const validParentPath = parsedParentPath.data;
-  const validFolderName = parsedFolderName.data;
+  // フォルダ保護
+  if (isBlockedVirtualPath(normalizedParentPath)) {
+    return {
+      success: false,
+      message: "このフォルダにはアクセスできません。",
+    };
+  }
 
-  const newVirtualPath =
-    validParentPath === ""
-      ? validFolderName
-      : `${validParentPath}/${validFolderName}`;
-
+  const newVirtualPath = join(normalizedParentPath, normalizedFolderName);
   const newRealPath = getServerMediaPath(newVirtualPath);
 
   if (await existsPath(newRealPath)) {
     return {
       success: false,
-      error: "同名のフォルダまたはファイルが既に存在します。",
+      message: "同名のフォルダまたはファイルが既に存在します。",
     };
   }
 
   try {
     await mkdir(newRealPath, { recursive: true });
   } catch (error) {
-    console.error("failed to create new directory:", error);
+    logger.error("action:create-folder", error);
     return {
       success: false,
-      error: "フォルダ作成中にエラーが発生しました。",
+      message: "フォルダの作成に失敗しました。",
     };
   }
 
@@ -101,19 +185,47 @@ export async function createFolderAction(
   };
 }
 
+type ListRecentFolderResult =
+  | {
+      success: true;
+      data: {
+        path: string;
+        name: string;
+        pinned: boolean;
+      }[];
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
 // 最近訪問したフォルダを取得
-export async function listRecentFoldersAction() {
+export async function listRecentFoldersAction(): Promise<ListRecentFolderResult> {
   // 認証
-  const user = await resolveCurrentUserOrThrow();
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
+
+  // 認可
+  if (!hasPermission(user, "folder:list-history")) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
 
   let folders: Awaited<ReturnType<typeof getRecentFolders>>;
   try {
     folders = await getRecentFolders(user.id, 10);
   } catch (error) {
-    console.error("Get Recent Folders Error:", error);
+    logger.error("action:list-folder-history", error);
     return {
       success: false,
-      error: "フォルダ取得中にエラーが発生しました。",
+      message: "訪問済みフォルダ一覧の取得に失敗しました。",
     };
   }
 
@@ -127,21 +239,65 @@ export async function listRecentFoldersAction() {
   };
 }
 
+type TogglePinVisitedFolderResult =
+  | {
+      success: true;
+    }
+  | { success: false; message: string };
+
 // フォルダ訪問履歴ピン留めトグル
 export async function togglePinVisitedFolderAction(
   dirPath: string,
   currentPinned: boolean
-) {
+): Promise<TogglePinVisitedFolderResult> {
+  // 入力バリデーション＋正規化
+  if (!dirPath) {
+    return {
+      success: false,
+      message: "処理対象のパスが指定されていません。",
+    };
+  }
+
+  const normalizedDirPath = VirtualPathSchema.safeParse(sanitize(dirPath)).data;
+  if (!normalizedDirPath) {
+    return {
+      success: false,
+      message: `無効なパスです。: ${dirPath}`,
+    };
+  }
+
   // 認証
-  const user = await resolveCurrentUserOrThrow();
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
+
+  // 認可
+  if (!hasPermission(user, "folder:pin-history")) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
+
+  // フォルダ保護
+  if (isBlockedVirtualPath(normalizedDirPath)) {
+    return {
+      success: false,
+      message: "このフォルダにはアクセスできません。",
+    };
+  }
 
   try {
     await togglePinVisitedFolder(user.id, dirPath, currentPinned);
   } catch (error) {
-    console.error("Toggle Visited Folder Pinned Error:", error);
+    logger.error("action:toggle-pin-visited-folder", error);
     return {
       success: false,
-      error: "フォルダ更新中にエラーが発生しました。",
+      message: "訪問済みフォルダのピン留め更新に失敗しました。",
     };
   }
 
@@ -153,17 +309,56 @@ export async function togglePinVisitedFolderAction(
   };
 }
 
+type ListSubDirectoriesResult =
+  | {
+      success: true;
+      directories: { name: string; path: string }[];
+    }
+  | { success: false; message: string };
+
 // サブフォルダ一覧
-export async function listSubDirectoriesAction(dirPath: string) {
+export async function listSubDirectoriesAction(
+  dirPath: string
+): Promise<ListSubDirectoriesResult> {
+  // 入力バリデーション＋正規化
+  if (!dirPath) {
+    return {
+      success: false,
+      message: "処理対象のパスが指定されていません。",
+    };
+  }
+
+  const normalizedDirPath = VirtualPathSchema.safeParse(sanitize(dirPath)).data;
+  if (!normalizedDirPath) {
+    return {
+      success: false,
+      message: `無効なパスです。: ${dirPath}`,
+    };
+  }
+
   // 認証
-  await resolveCurrentUserOrThrow();
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
 
-  // 入力バリデーション+正規化
-  const normalizedDirPath = normalizeVirtualPath(dirPath);
+  // 認可
+  if (!hasPermission(user, "folder:list")) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
 
-  // システムフォルダ保護
-  if (isSystemHiddenVirtualPath(normalizedDirPath)) {
-    return { success: false, error: "システムフォルダは操作できません。" };
+  // フォルダ保護
+  if (isBlockedVirtualPath(normalizedDirPath)) {
+    return {
+      success: false,
+      message: "このフォルダにはアクセスできません。",
+    };
   }
 
   // 仮想パス→物理パス
@@ -174,23 +369,32 @@ export async function listSubDirectoriesAction(dirPath: string) {
     entries = await readdir(realDirPath, { withFileTypes: true });
   } catch (e) {
     if (isFsNotFoundError(e)) {
-      return { success: false, error: "フォルダが見つかりません。" };
+      return {
+        success: false,
+        message: "フォルダが見つかりません。",
+      };
     }
     if (isFsPermissionError(e)) {
-      return { success: false, error: "フォルダへのアクセス権がありません。" };
+      return {
+        success: false,
+        message: "フォルダへのアクセス権がありません。",
+      };
     }
-    console.error("failed to read directory", e);
-    return { success: false, error: "ファイル一覧の取得に失敗しました。" };
+    logger.error("action:list-sub-directories", e);
+    return {
+      success: false,
+      message: "ファイル一覧の取得に失敗しました。",
+    };
   }
 
   return {
     success: true,
     directories: entries
       .filter((e) => e.isDirectory())
-      .filter((e) => !isSystemHiddenRealPath(join(realDirPath, e.name)))
       .map((e) => ({
         name: e.name,
-        path: join(dirPath, e.name).replace(/\\/g, "/"),
-      })),
+        path: sanitize(join(dirPath, e.name)),
+      }))
+      .filter((e) => !isBlockedVirtualPath(e.path)),
   };
 }

@@ -44,7 +44,7 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
         const result = await listSubDirectoriesAction(path);
         if (result.success) {
           // ループ防止のフィルタリング
-          const filtered = result.directories!.filter(
+          const filtered = result.directories.filter(
             (d) =>
               !targets.some(
                 (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
@@ -52,7 +52,7 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
           );
           setDirs(filtered);
         } else {
-          toast.error(result.error);
+          toast.error(result.message);
         }
       });
     },
@@ -119,7 +119,7 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
         if (result.success) {
           fetchRecentDirs();
         } else {
-          toast.error(result.error || "ピン留めの更新に失敗しました");
+          toast.error(result.message);
         }
       });
     },

@@ -46,7 +46,7 @@ export function useCreateFolderDialog({
         onSuccess?.();
         close();
       } else {
-        toast.error(result.error || "作成に失敗しました");
+        toast.error(result.message);
       }
     });
   }, [parentPath, folderName, close, onSuccess]);

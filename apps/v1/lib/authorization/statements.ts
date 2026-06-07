@@ -1,6 +1,9 @@
 export const statements = [
   "archive:extract",
-  "folder:visit",
+  "folder:update-history",
+  "folder:list",
+  "folder:list-history",
+  "folder:pin-history",
   "folder:create",
 ] as const;
 
