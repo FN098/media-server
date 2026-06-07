@@ -18,7 +18,7 @@ import { logger } from "better-auth";
 import { lstat, mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 
-export type ExtractionResult =
+type ExtractArchivesResult =
   | {
       success: true;
       completed: { sourcePath: string }[];
@@ -31,13 +31,15 @@ export type ExtractionResult =
       inputErrors?: { path: string; message: string }[];
     };
 
+type ExtractArchivesSuccess = Extract<ExtractArchivesResult, { success: true }>;
+
 /**
  * 複数のアーカイブファイルをまとめて解凍するサーバーアクション
  * @param sourceArchives エクスプローラー上の仮想パスの配列 (例: ["folder/file1.zip", "folder/file2.zip"])
  */
 export async function extractArchivesAction(
   sourceArchives: { path: string }[]
-): Promise<ExtractionResult> {
+): Promise<ExtractArchivesResult> {
   // 入力バリデーション＋正規化
   if (!sourceArchives || sourceArchives.length === 0) {
     return {
@@ -96,10 +98,9 @@ export async function extractArchivesAction(
     };
   }
 
-  const completed: Extract<ExtractionResult, { success: true }>["completed"] =
-    [];
-  const failed: Extract<ExtractionResult, { success: true }>["failed"] = [];
-  const skipped: Extract<ExtractionResult, { success: true }>["skipped"] = [];
+  const completed: ExtractArchivesSuccess["completed"] = [];
+  const failed: ExtractArchivesSuccess["failed"] = [];
+  const skipped: ExtractArchivesSuccess["skipped"] = [];
 
   // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を使う)
   for (const { path: sourcePath } of normalizedArchives) {
@@ -131,7 +132,7 @@ export async function extractArchivesAction(
     let destRealPath = getServerMediaPath(destVirtualDir);
 
     // 同名フォルダの衝突回避
-    let counter = 1;
+    let counter = 2;
     while (await existsPath(destRealPath)) {
       destVirtualDir = sanitize(
         join(parentVirtualDir, `${fileBaseName} (${counter})`)
@@ -149,8 +150,6 @@ export async function extractArchivesAction(
 
       // 7-Zipを実行して解凍
       await extractArchive(srcRealPath, destRealPath);
-
-      completed.push({ sourcePath });
     } catch (e) {
       logger.error("action:extract-archives", e, {
         sourcePath,
@@ -172,10 +171,14 @@ export async function extractArchivesAction(
 
       failed.push({ sourcePath, message: errorMessage });
     }
+
+    completed.push({ sourcePath });
   }
 
   // キャッシュの更新
-  revalidatePath("/explorer");
+  if (completed.length > 0) {
+    revalidatePath("/explorer");
+  }
 
   return {
     success: true,
