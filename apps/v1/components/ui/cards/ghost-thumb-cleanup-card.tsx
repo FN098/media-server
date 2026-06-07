@@ -35,11 +35,11 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export function GhostThumbCleanupCard() {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const [isFullScan, setIsFullScan] = useState(false);
   const [items, setItems] = useState<GhostThumbItem[] | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
@@ -130,46 +130,48 @@ export function GhostThumbCleanupCard() {
   };
 
   // 削除実行
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (!items || items.length === 0) return;
+
+    setIsPending(true);
 
     const BATCH_SIZE = 500; // 1回あたりの送信件数（1MBを超えない程度に調整）
 
-    startTransition(async () => {
-      let totalDeleted = 0;
-      let hasError = false;
+    let totalDeleted = 0;
+    let hasError = false;
 
-      // パスを指定サイズごとに分割してループ
-      for (let i = 0; i < items.length; i += BATCH_SIZE) {
-        const batch = items.slice(i, i + BATCH_SIZE);
+    // パスを指定サイズごとに分割してループ
+    for (let i = 0; i < items.length; i += BATCH_SIZE) {
+      const batch = items.slice(i, i + BATCH_SIZE);
 
-        try {
-          const result = await cleanupGhostThumbnailsAction(batch);
+      try {
+        const result = await cleanupGhostThumbnailsAction(batch);
 
-          if (result.success) {
-            totalDeleted += result.deletedCount ?? 0;
-          } else {
-            toast.error(result.error || "一部の削除中にエラーが発生しました");
-            hasError = true;
-          }
-        } catch (err) {
-          console.error("Batch Delete Error:", err);
-          toast.error("通信エラーが発生しました");
+        if (result.success) {
+          totalDeleted += result.deletedCount ?? 0;
+        } else {
+          toast.error(result.error || "一部の削除中にエラーが発生しました");
           hasError = true;
-          break;
         }
+      } catch (err) {
+        console.error("Batch Delete Error:", err);
+        toast.error("通信エラーが発生しました");
+        hasError = true;
+        break;
       }
+    }
 
-      if (!hasError) {
-        toast.success(`${totalDeleted}件の不要なサムネイルを削除しました`);
-        setItems(null);
-      } else {
-        // 途中で止まった場合、再スキャンを促すか、残りの items を更新する処理を入れると親切
-        toast.info(
-          "削除処理が中断されました。再スキャンして残りを確認してください。"
-        );
-      }
-    });
+    setIsPending(false);
+
+    if (!hasError) {
+      toast.success(`${totalDeleted}件の不要なサムネイルを削除しました`);
+      setItems(null);
+    } else {
+      // 途中で止まった場合、再スキャンを促すか、残りの items を更新する処理を入れると親切
+      toast.info(
+        "削除処理が中断されました。再スキャンして残りを確認してください。"
+      );
+    }
   }, [items]);
 
   return (
@@ -323,7 +325,7 @@ export function GhostThumbCleanupCard() {
               <AlertDialogFooter>
                 <AlertDialogCancel>キャンセル</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleDelete}
+                  onClick={() => void handleDelete()}
                   className="bg-destructive hover:bg-destructive/90"
                 >
                   削除を実行
