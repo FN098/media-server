@@ -1,4 +1,4 @@
-import { isArchiveFile } from "@/lib/archive/validators";
+import { isArchiveFile } from "@/lib/archive/guards";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { PackageOpenIcon } from "lucide-react";
