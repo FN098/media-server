@@ -4,7 +4,7 @@ import { restoreDatabaseFromFile } from "@/lib/child_process/mysql";
 import { dumpDatabaseToFile } from "@/lib/child_process/mysqldump";
 import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { DbBackupFile } from "@/lib/db-backup/types";
-import { parseDatabaseURL } from "@/lib/db/parsers";
+import { parseDatabaseURL } from "@/lib/db/url-parser";
 import { getDatabaseUrlOrThrow } from "@/lib/env/env-server";
 import { FileNameSchema } from "@/lib/virtual-path/schemas";
 import fs from "fs/promises";
