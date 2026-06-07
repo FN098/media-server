@@ -36,12 +36,26 @@ export function useRestoreDialog({ onSuccess }: UseRestoreDialogProps = {}) {
     startTransition(async () => {
       const result = await restoreNodesAction(paths);
 
-      if (result.failed === 0) {
-        toast.success(`${result.success}件のアイテムを復元しました`);
+      if (result.success) {
+        if (result.completed.length > 0) {
+          toast.success(
+            `${result.completed.length} 件のアイテムを復元しました`
+          );
+        }
+        if (result.failed.length > 0) {
+          toast.success(
+            `${result.failed.length} 件のアイテムの復元に失敗しました`
+          );
+        }
+        if (result.skipped.length > 0) {
+          toast.success(
+            `${result.skipped.length} 件のアイテムの復元をスキップしました`
+          );
+        }
         onSuccess?.();
         close();
       } else {
-        toast.error(`${result.failed}件の復元に失敗しました`);
+        toast.error(result.message);
       }
     });
   }, [targets, close, onSuccess]);
