@@ -15,7 +15,8 @@ import {
   isFsNotFoundError,
   isFsPermissionError,
 } from "@/lib/utils/fs";
-import { basename, join, sanitize } from "@/lib/virtual-path/path";
+import { sanitize } from "@/lib/virtual-path/guard";
+import { basename, join } from "@/lib/virtual-path/path";
 import {
   FolderNameSchema,
   VirtualPathSchema,

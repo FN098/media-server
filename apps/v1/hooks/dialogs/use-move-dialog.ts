@@ -4,7 +4,7 @@ import {
   togglePinVisitedFolderAction,
 } from "@/actions/folder-actions";
 import { moveNodesAction } from "@/actions/node-actions";
-import { sanitize } from "@/lib/virtual-path/path";
+import { sanitize } from "@/lib/virtual-path/guard";
 import { dirname } from "path";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";

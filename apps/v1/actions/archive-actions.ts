@@ -6,13 +6,8 @@ import { hasPermission } from "@/lib/authorization/permission";
 import { extractArchive } from "@/lib/child_process/7z";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath, isFsNotFoundError } from "@/lib/utils/fs";
-import {
-  basename,
-  dirname,
-  extname,
-  join,
-  sanitize,
-} from "@/lib/virtual-path/path";
+import { sanitize } from "@/lib/virtual-path/guard";
+import { basename, dirname, extname, join } from "@/lib/virtual-path/path";
 import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
 import { logger } from "better-auth";
 import { lstat, mkdir, rm } from "fs/promises";

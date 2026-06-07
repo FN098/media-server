@@ -21,14 +21,8 @@ import {
   isFsPermissionError,
   recursiveMergeMove,
 } from "@/lib/utils/fs";
-import {
-  basename,
-  dirname,
-  extname,
-  isRootPath,
-  join,
-  sanitize,
-} from "@/lib/virtual-path/path";
+import { isRootPath, sanitize } from "@/lib/virtual-path/guard";
+import { basename, dirname, extname, join } from "@/lib/virtual-path/path";
 import {
   FileOrFolderNameSchema,
   VirtualPathManySchema,
