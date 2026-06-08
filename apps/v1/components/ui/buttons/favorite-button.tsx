@@ -12,6 +12,7 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { Star } from "lucide-react";
 import React from "react";
+
 interface FavoriteButtonProps extends React.ComponentProps<"button"> {
   isFavorite: boolean;
   rating: number | null;
