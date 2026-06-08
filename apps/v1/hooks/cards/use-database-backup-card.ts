@@ -142,7 +142,7 @@ export function useDatabaseBackupCard() {
         setIsUploading(false);
       }
     },
-    []
+    [isUploading]
   );
 
   const performRestore = useCallback(async () => {
