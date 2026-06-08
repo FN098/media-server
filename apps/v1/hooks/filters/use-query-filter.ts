@@ -2,17 +2,17 @@ import { QueryFilterValue } from "@/lib/filter/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
-type Options = {
-  queryKey?: string; // デフォルト: "q"
-};
+interface UseQueryFilterProps {
+  queryKey?: string;
+}
 
-export function useQueryFilter(options?: Options) {
+export function useQueryFilter(props?: UseQueryFilterProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   // キー名とデフォルト値の設定
-  const { queryKey = "q" } = options || {};
+  const { queryKey = "q" } = props || {};
 
   // 現在の値をURLから取得
   const query = searchParams.get(queryKey);
