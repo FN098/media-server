@@ -219,7 +219,7 @@ function DataRow(props: DataRowProps) {
               <span className="md:hidden text-[10px] text-muted-foreground truncate">
                 {node.isDirectory
                   ? "Folder"
-                  : `${getExtension(node.name)} • ${formatBytes(node.size)}`}
+                  : `${getExtension(node.name)} • ${node.size ? formatBytes(node.size) : "-"}`}
               </span>
             </div>
           </div>
