@@ -15,7 +15,7 @@ import { useTagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
-import { useSearchFocusContext } from "@/providers/search-focus.provider";
+import { useSearchFocusContext } from "@/providers/search-focus-provider";
 import { useSlideshowContext } from "@/providers/slideshow-provider";
 
 interface UseFavoritesProps {

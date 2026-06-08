@@ -1,7 +1,7 @@
 import { PageBackground } from "@/components/ui/backgrounds/page-background";
 import { Header } from "@/components/ui/headers/header";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
-import { SearchFocusProvider } from "@/providers/search-focus.provider";
+import { SearchFocusProvider } from "@/providers/search-focus-provider";
 
 const meta = resolvePageMeta("trash");
 

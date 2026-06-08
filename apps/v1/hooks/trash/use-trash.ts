@@ -14,7 +14,7 @@ import { useTrashThumbs } from "@/hooks/trash/use-trash-thumbs";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
-import { useSearchFocusContext } from "@/providers/search-focus.provider";
+import { useSearchFocusContext } from "@/providers/search-focus-provider";
 
 interface UseTrashProps {
   listing: MediaListing;
