@@ -1,6 +1,8 @@
 "use client";
 
+import { LocalDate } from "@/components/ui/dates/local-date";
 import { useDatabaseBackupCard } from "@/hooks/cards/use-database-backup-card";
+import { useLocale } from "@/hooks/general/use-locale";
 import { MAX_KEEP_COUNT, MIN_KEEP_COUNT } from "@/lib/db-backup/config";
 import { formatBytes } from "@/lib/utils/bytes";
 import {
@@ -64,6 +66,8 @@ export function DatabaseBackupCard() {
     performUpload,
     initiateDump,
   } = useDatabaseBackupCard();
+
+  const { locale } = useLocale();
 
   return (
     <Card>
@@ -280,7 +284,12 @@ export function DatabaseBackupCard() {
                                   : "bg-blue-400/50"
                               }`}
                             />
-                            {`作成日: ${formatDateTime(file.value.createdAt)}`}
+                            <span>作成日: </span>
+                            <LocalDate
+                              value={file.value.createdAt}
+                              locale={locale}
+                              showSeconds
+                            />
                           </span>
                           <span className="flex items-center gap-1 border-l pl-3 dark:border-muted/20">
                             サイズ: {formatBytes(file.value.size)}
@@ -355,17 +364,3 @@ export function DatabaseBackupCard() {
     </Card>
   );
 }
-
-const formatDateTime = (isoString: string) => {
-  const date = new Date(isoString);
-  const formatted = date.toLocaleString("ja-JP", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  return `${formatted} (JST)`;
-};
