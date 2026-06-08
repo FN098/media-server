@@ -3,7 +3,6 @@ import { cn } from "@/shadcn/lib/utils";
 import { SearchIcon } from "lucide-react";
 
 interface SearchInputProps extends React.ComponentProps<"input"> {
-  // inputRef?: RefObject<HTMLInputElement | null>;
   placeholder?: string;
 }
 
