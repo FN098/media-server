@@ -123,7 +123,7 @@ function MediaViewerHeader() {
                 variant="large"
                 rating={rating}
                 isFavorite={isFavorite}
-                onClick={toggleFavorite}
+                onClick={() => void toggleFavorite()}
               />
             )}
 

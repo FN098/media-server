@@ -45,7 +45,7 @@ export function useFavoritesMenuItems({
 }: UseFavoritesMenuItemsProps): MenuItemDef<NodeContext>[] {
   const rating = useRatingMenuItem({
     getFavorite: favorites.get,
-    updateFavorite: favorites.update,
+    updateFavorite: (props) => void favorites.update(props),
     hasSelection: selection.hasSelection,
     selectedNodes: selection.selectedNodes,
   });

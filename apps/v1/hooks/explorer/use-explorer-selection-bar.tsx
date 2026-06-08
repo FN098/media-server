@@ -69,7 +69,7 @@ function createExplorerSelectionBarMenu({
             <FavoriteRatingInput
               value={averageRating}
               onChange={(newRating) =>
-                favorites.update({
+                void favorites.update({
                   targets: nodes,
                   newRating,
                   onSuccess: closeMenu,

@@ -100,8 +100,8 @@ export function useMediaViewer({
     onClose,
     onDelete,
     onOpenParent,
-    onToggleFavorite: favorite.toggleFavorite,
-    onChangeRating: favorite.changeRating,
+    onToggleFavorite: () => void favorite.toggleFavorite(),
+    onChangeRating: (rating) => void favorite.changeRating(rating),
   });
 
   return {
