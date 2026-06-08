@@ -1,7 +1,6 @@
 import { useQueryFilter } from "@/hooks/filters/use-query-filter";
 import { useSearchFocusContext } from "@/providers/search-focus.provider";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
 
 export function useHeaderSearch() {
   const { value, apply } = useQueryFilter();
@@ -11,35 +10,45 @@ export function useHeaderSearch() {
   const [focused, setFocused] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const shouldRestoreFocusRef = useRef(false);
   const isComposingRef = useRef(false);
 
-  const restoreFocus = useCallback(() => {
-    requestAnimationFrame(() => {
-      if (!shouldRestoreFocusRef.current || !inputRef.current) return;
-      shouldRestoreFocusRef.current = false;
-      if (document.activeElement === inputRef.current) return;
-      inputRef.current.focus({ preventScroll: true });
-      setFocused(true);
-    });
+  // 確定時にURL反映
+  const commit = useCallback(() => {
+    if (isComposingRef.current) return; // IME確定待ち中はスキップ
+    apply(input.trim() === "" ? null : input);
+  }, [apply, input]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
   }, []);
 
-  const debouncedApply = useDebouncedCallback((v: string | null) => {
-    shouldRestoreFocusRef.current = document.activeElement === inputRef.current;
-    apply(v);
-  }, 300);
+  const handleCompositionStart = useCallback(() => {
+    isComposingRef.current = true;
+  }, []);
 
-  // IME確定後に即時適用（デバウンスをflush）
-  const handleCompositionEnd = useCallback(
-    (e: React.CompositionEvent<HTMLInputElement>) => {
-      isComposingRef.current = false;
-      const value = e.currentTarget.value;
-      debouncedApply.cancel();
-      shouldRestoreFocusRef.current = true;
-      apply(value);
+  const handleCompositionEnd = useCallback(() => {
+    isComposingRef.current = false;
+    // compositionend 後に enter が来たケースは handleKeyDown が拾うので不要
+  }, []);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && !isComposingRef.current) {
+        commit();
+        inputRef.current?.blur(); // モバイルのキーボードを閉じる
+      }
+      if (e.key === "Escape") {
+        setInput(value.query ?? "");
+        inputRef.current?.blur();
+      }
     },
-    [apply, debouncedApply]
+    [commit, value.query]
   );
+
+  // URL側が外部から変わったとき（リセットなど）にinputを同期
+  useEffect(() => {
+    setInput(value.query ?? "");
+  }, [value.query]);
 
   // マウント時に他のコンポーネントから検索バーにフォーカスできるようにする
   useEffect(() => {
@@ -47,35 +56,16 @@ export function useHeaderSearch() {
     return () => register(null);
   }, [register]);
 
-  // URLクエリが変更されたら、フォーカスを復元して入力状態に反映
-  useEffect(() => {
-    const nextInput = value.query ?? "";
-    const frame = requestAnimationFrame(() => setInput(nextInput));
-    restoreFocus();
-    return () => cancelAnimationFrame(frame);
-  }, [restoreFocus, value.query]);
-
-  // onChange で isComposing 中は apply しない
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const v = e.target.value;
-      setInput(v);
-      if (!isComposingRef.current) {
-        debouncedApply(v);
-      }
-    },
-    [debouncedApply]
-  );
-
   return {
     input,
     focused,
     inputRef,
-    isComposingRef,
     setInput,
     setFocused,
     handleChange,
+    handleCompositionStart,
     handleCompositionEnd,
-    debouncedApply,
+    handleKeyDown,
+    commit,
   };
 }

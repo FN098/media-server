@@ -13,10 +13,11 @@ export function HeaderSearch() {
     input,
     focused,
     inputRef,
-    isComposingRef,
     setFocused,
     handleChange,
+    handleCompositionStart,
     handleCompositionEnd,
+    handleKeyDown,
   } = useHeaderSearch();
 
   const isMobile = useDetectMobileContext();
@@ -59,10 +60,9 @@ export function HeaderSearch() {
         value={input}
         placeholder={placeholder}
         onChange={handleChange}
-        onCompositionStart={() => {
-          isComposingRef.current = true;
-        }}
+        onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
+        onKeyDown={handleKeyDown}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         className={cn(
