@@ -2,6 +2,7 @@
 
 import { useDatabaseBackupCard } from "@/hooks/cards/use-database-backup-card";
 import { MAX_KEEP_COUNT, MIN_KEEP_COUNT } from "@/lib/db-backup/config";
+import { formatBytes } from "@/lib/utils/bytes";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -367,12 +368,4 @@ const formatDateTime = (isoString: string) => {
   });
 
   return `${formatted} (JST)`;
-};
-
-const formatBytes = (bytes: number) => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
