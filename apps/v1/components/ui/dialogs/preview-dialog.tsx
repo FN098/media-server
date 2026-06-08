@@ -1,7 +1,7 @@
 "use client";
 
 import { usePreviewDialog } from "@/hooks/dialogs/use-preview-dialog";
-import { getFilenameWithoutExt } from "@/lib/utils/filename";
+import { getBasename, getFilenameWithoutExt } from "@/lib/utils/filename";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
@@ -16,7 +16,7 @@ import {
   ChevronRight,
   FileBox,
   Folder,
-  Image as ImageIcon,
+  ImageIcon,
   Save,
 } from "lucide-react";
 
@@ -43,9 +43,6 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
 
   if (!isOpen) return null;
 
-  // 選択ターゲットの末尾のファイル名・フォルダ名を取り出す簡易関数
-  const getBaseName = (p: string) => p.split("/").pop() || "/";
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent
@@ -55,31 +52,27 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
         <DialogHeader>
           <DialogTitle className="text-base flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-primary" />
-            この画像をプレビューに設定
+            {getFilenameWithoutExt(previewPath || "no preview")}{" "}
+            をプレビューに設定
           </DialogTitle>
-          <div className="text-[10px] text-muted-foreground bg-muted p-2 rounded truncate">
-            素材: {getFilenameWithoutExt(previewPath || "no preview")}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground break-all bg-muted p-2 rounded">
+            <Folder className="h-4 w-4 shrink-0" />
+            {currentDir}
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden flex flex-col gap-2 min-h-0">
-          {/* 現在の階層表示 & 戻る */}
-          <div className="flex items-center gap-2 shrink-0">
-            {currentDir !== "" && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7"
-                onClick={goBackParent}
-                disabled={isLoading}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            )}
-            <div className="text-xs font-medium truncate flex-1 bg-accent/50 px-2 py-1 rounded">
-              {currentDir}
-            </div>
-          </div>
+          {currentDir !== "" && (
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-primary shrink-0"
+              onClick={goBackParent}
+              disabled={isLoading}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              上の階層へ
+            </Button>
+          )}
 
           {/* コンテンツ表示エリア */}
           <div className="flex-1 min-h-0 relative border rounded-md">
@@ -116,7 +109,8 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
                       variant={
                         selectedTargetPath === dir.path ? "secondary" : "ghost"
                       }
-                      className="flex-1 justify-start h-9 text-sm px-2 min-w-0"
+                      // className="flex-1 justify-start h-9 text-sm px-2 min-w-0"
+                      className="w-0 flex-grow justify-start h-9 text-sm px-2"
                       onClick={() => setSelectedTargetPath(dir.path)}
                       disabled={isLoading}
                     >
@@ -166,7 +160,7 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
           <div className="text-[10px] text-muted-foreground truncate w-full text-left">
             {selectedTargetPath && (
               <span className="truncate" title={selectedTargetPath}>
-                設定先: {getBaseName(selectedTargetPath)}
+                設定先: {getBasename(selectedTargetPath)}
               </span>
             )}
           </div>

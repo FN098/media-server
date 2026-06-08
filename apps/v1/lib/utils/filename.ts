@@ -11,6 +11,10 @@ export function removeAllExtensions(filename: string): string {
   return stripped.length > 0 ? stripped : filename;
 }
 
+export function getBasename(filepath: string): string {
+  return basename(filepath);
+}
+
 export function getExtension(
   filename: string,
   options?: {
