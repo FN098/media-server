@@ -56,6 +56,7 @@ function Trigger({
     return (
       <button
         className={cn(
+          "flex items-center gap-1",
           "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
           className
         )}
@@ -79,6 +80,7 @@ function Trigger({
       <Button
         variant="ghost"
         className={cn(
+          "gap-1",
           "h-8 rounded-full bg-background/20 hover:bg-background/50",
           iconOnly ? "w-8" : "px-2",
           className
@@ -101,6 +103,7 @@ function Trigger({
     <Button
       variant="ghost"
       className={cn(
+        "gap-1",
         "h-9 rounded-full bg-background/20 hover:bg-background/50",
         iconOnly ? "w-9" : "px-2",
         className
