@@ -30,7 +30,7 @@ interface NodeDropdownMenuProps {
   className?: string;
   disabled?: boolean;
   hidden?: boolean;
-  triggerType?: "default" | "large";
+  variant?: "default" | "large";
 }
 
 export function NodeDropdownMenu({
@@ -41,7 +41,7 @@ export function NodeDropdownMenu({
   className,
   disabled,
   hidden,
-  triggerType = "default",
+  variant = "default",
 }: NodeDropdownMenuProps) {
   const isMobile = useIsMobile();
   const mounted = useMounted();
@@ -58,7 +58,7 @@ export function NodeDropdownMenu({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
         <NodeDropdownMenuTrigger
-          triggerType={triggerType}
+          variant={variant}
           className={className}
           disabled={disabled}
           onToggle={() => setOpen(!open)}
@@ -80,36 +80,42 @@ export function NodeDropdownMenu({
 }
 
 interface NodeDropdownMenuTriggerProps extends React.ComponentProps<"button"> {
-  triggerType?: "default" | "large";
+  variant?: "default" | "large";
 }
 
 function NodeDropdownMenuTrigger({
-  triggerType = "default",
+  variant = "default",
   className,
   ...rest
 }: NodeDropdownMenuTriggerProps) {
-  if (triggerType === "large") {
+  if (variant === "large") {
     return (
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         className={cn(
-          "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
+          "h-11 w-11 rounded-full bg-background/20 hover:bg-background/50",
           className
         )}
         {...rest}
       >
-        <MoreVertical size={28} />
-      </button>
+        <MoreVertical />
+      </Button>
     );
   }
 
+  // variant: default
   return (
     <Button
       variant="ghost"
       size="icon"
-      className={cn("h-8 w-8 rounded-full", className)}
+      className={cn(
+        "h-8 w-8 rounded-full bg-background/20 hover:bg-background/50",
+        className
+      )}
       {...rest}
     >
-      <MoreVertical className="h-4 w-4" />
+      <MoreVertical />
     </Button>
   );
 }

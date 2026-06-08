@@ -216,7 +216,6 @@ function Cell(props: CellProps) {
                     menuItems={menuItems}
                     open={dropdownMenuOpen}
                     onOpenChange={handleDropdownMenuOpenChange}
-                    className="h-8 w-8 bg-black/20 backdrop-blur-md hover:bg-black/40 border-none text-white rounded-full"
                   />
                 </div>
               )}

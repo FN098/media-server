@@ -133,7 +133,7 @@ function MediaViewerHeader() {
                 menuItems={menuItems}
                 open={isMenuOpen}
                 onOpenChange={setIsMenuOpen}
-                triggerType="large"
+                variant="large"
               />
             )}
           </div>
