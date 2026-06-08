@@ -15,7 +15,7 @@ import {
   isFsNotFoundError,
   isFsPermissionError,
 } from "@/lib/utils/fs";
-import { sanitize } from "@/lib/virtual-path/guard";
+import { isRootPath, sanitize } from "@/lib/virtual-path/guard";
 import { basename, join } from "@/lib/virtual-path/path";
 import {
   FolderNameSchema,
@@ -322,19 +322,18 @@ export async function listSubDirectoriesAction(
   dirPath: string
 ): Promise<ListSubDirectoriesResult> {
   // 入力バリデーション＋正規化
-  if (!dirPath) {
-    return {
-      success: false,
-      message: "処理対象のパスが指定されていません。",
-    };
-  }
-
-  const normalizedDirPath = VirtualPathSchema.safeParse(sanitize(dirPath)).data;
-  if (!normalizedDirPath) {
-    return {
-      success: false,
-      message: `無効なパスです。: ${dirPath}`,
-    };
+  let normalizedDirPath: string;
+  if (isRootPath(dirPath)) {
+    normalizedDirPath = dirPath; // ルートはバリデーションチェック回避
+  } else {
+    const parsed = VirtualPathSchema.safeParse(sanitize(dirPath));
+    if (!parsed.success) {
+      return {
+        success: false,
+        message: `無効なパスです。: ${dirPath}`,
+      };
+    }
+    normalizedDirPath = parsed.data;
   }
 
   // 認証
