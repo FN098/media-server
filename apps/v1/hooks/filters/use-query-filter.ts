@@ -31,7 +31,7 @@ export function useQueryFilter(options?: Options) {
         params.set(queryKey, next);
       }
 
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
     [pathname, router, searchParams, queryKey]
   );

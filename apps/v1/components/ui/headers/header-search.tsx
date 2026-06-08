@@ -9,8 +9,15 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
 export function HeaderSearch() {
-  const { input, focused, inputRef, setInput, setFocused, debouncedApply } =
-    useHeaderSearch();
+  const {
+    input,
+    focused,
+    inputRef,
+    isComposingRef,
+    setFocused,
+    handleChange,
+    handleCompositionEnd,
+  } = useHeaderSearch();
 
   const isMobile = useDetectMobileContext();
   const mounted = useMounted();
@@ -48,14 +55,14 @@ export function HeaderSearch() {
       style={{ maxWidth: isMobile ? "calc(100vw - 2rem)" : "none" }}
     >
       <SearchInput
-        placeholder={placeholder}
         ref={inputRef}
         value={input}
-        onChange={(e) => {
-          const value = e.target.value;
-          setInput(value); // 入力は即時反映
-          debouncedApply(value); // URL同期はデバウンス
+        placeholder={placeholder}
+        onChange={handleChange}
+        onCompositionStart={() => {
+          isComposingRef.current = true;
         }}
+        onCompositionEnd={handleCompositionEnd}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         className={cn(

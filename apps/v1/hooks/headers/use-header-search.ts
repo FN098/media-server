@@ -12,14 +12,13 @@ export function useHeaderSearch() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const shouldRestoreFocusRef = useRef(false);
+  const isComposingRef = useRef(false);
 
   const restoreFocus = useCallback(() => {
     requestAnimationFrame(() => {
       if (!shouldRestoreFocusRef.current || !inputRef.current) return;
-
       shouldRestoreFocusRef.current = false;
       if (document.activeElement === inputRef.current) return;
-
       inputRef.current.focus({ preventScroll: true });
       setFocused(true);
     });
@@ -30,10 +29,21 @@ export function useHeaderSearch() {
     apply(v);
   }, 300);
 
+  // IME確定後に即時適用（デバウンスをflush）
+  const handleCompositionEnd = useCallback(
+    (e: React.CompositionEvent<HTMLInputElement>) => {
+      isComposingRef.current = false;
+      const value = e.currentTarget.value;
+      debouncedApply.cancel();
+      shouldRestoreFocusRef.current = true;
+      apply(value);
+    },
+    [apply, debouncedApply]
+  );
+
   // マウント時に他のコンポーネントから検索バーにフォーカスできるようにする
   useEffect(() => {
     register(() => inputRef.current?.focus());
-
     return () => register(null);
   }, [register]);
 
@@ -41,18 +51,31 @@ export function useHeaderSearch() {
   useEffect(() => {
     const nextInput = value.query ?? "";
     const frame = requestAnimationFrame(() => setInput(nextInput));
-
     restoreFocus();
-
     return () => cancelAnimationFrame(frame);
   }, [restoreFocus, value.query]);
+
+  // onChange で isComposing 中は apply しない
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const v = e.target.value;
+      setInput(v);
+      if (!isComposingRef.current) {
+        debouncedApply(v);
+      }
+    },
+    [debouncedApply]
+  );
 
   return {
     input,
     focused,
     inputRef,
+    isComposingRef,
     setInput,
     setFocused,
+    handleChange,
+    handleCompositionEnd,
     debouncedApply,
   };
 }
