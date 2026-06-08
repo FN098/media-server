@@ -6,7 +6,7 @@ import { UnusedTagsCleanupCard } from "@/components/ui/cards/unused-tags-cleanup
 
 export function Maintenance() {
   return (
-    <div className="py-2 space-y-6 grid gap-6 md:grid-cols-2">
+    <div className="p-2 space-y-6 grid gap-6 md:grid-cols-2">
       <DatabaseBackupCard />
       <UnusedTagsCleanupCard />
 

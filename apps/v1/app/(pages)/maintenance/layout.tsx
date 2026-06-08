@@ -22,7 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         accent={meta.accent}
       />
       <main className="flex-1 overflow-y-auto">
-        <div className="flex w-full h-full items-center justify-center">
+        <div className="w-full h-full items-center justify-center">
           {children}
         </div>
       </main>
