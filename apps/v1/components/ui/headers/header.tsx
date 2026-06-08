@@ -67,9 +67,14 @@ export function Header({
           : "border-zinc-200 dark:border-white/[0.06]"
       )}
     >
-      <div className="flex h-full items-center gap-2 px-2 md:px-3">
+      <div
+        className="grid h-full items-center gap-2 px-2 md:px-3"
+        style={{ gridTemplateColumns: "auto auto 1fr auto" }}
+      >
+        {/* メニュー開閉ボタン */}
         <AppSidebarOpenButton />
 
+        {/* アイコン＋タイトル */}
         <div className="flex items-center gap-2 mx-2">
           {Icon && (
             <Icon
@@ -86,9 +91,13 @@ export function Header({
           </span>
         </div>
 
-        {navigation && <HeaderNavigation basePath={basePath} />}
+        {/* パンくず */}
+        <div className="min-w-0">
+          {navigation && <HeaderNavigation basePath={basePath} />}
+        </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        {/* 検索＋ビューモード */}
+        <div className="flex items-center gap-2">
           {search && <HeaderSearch />}
           {viewMode && <HeaderViewModeSwitch />}
         </div>

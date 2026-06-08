@@ -7,6 +7,7 @@ import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 
 export function HeaderNavigation({ basePath }: { basePath?: string }) {
   const searchParams = useSearchParams();
@@ -14,17 +15,23 @@ export function HeaderNavigation({ basePath }: { basePath?: string }) {
   const isMobile = useDetectMobileContext();
   const current = breadcrumbs.at(-1);
   const backHref = breadcrumbs.at(-2)?.href ?? null;
-  const params = new URLSearchParams(searchParams);
 
-  // 不要なパラメータを削除
-  params.delete("page");
-  params.delete("q");
+  const withParams = useCallback(
+    (path: string) => {
+      const params = new URLSearchParams(searchParams);
 
-  const withParams = (path: string) =>
-    params.toString() ? `${path}?${params.toString()}` : path;
+      // 不要なパラメータを削除
+      params.delete("page");
+      params.delete("q");
+
+      return params.toString() ? `${path}?${params.toString()}` : path;
+    },
+    [searchParams]
+  );
 
   return (
-    <>
+    <div className="flex items-center gap-2 min-w-0">
+      {/* 一つ上のフォルダに戻る */}
       {backHref ? (
         <Link
           href={withParams(backHref)}
@@ -38,18 +45,21 @@ export function HeaderNavigation({ basePath }: { basePath?: string }) {
         </div>
       )}
 
+      {/* 現在のフォルダ名 or パンくず */}
       {isMobile ? (
         <div className="min-w-0 flex-1 text-sm font-medium truncate">
           <ClickToCopy>{current?.label ?? ""}</ClickToCopy>
         </div>
       ) : (
-        <DynamicBreadcrumbs
-          items={breadcrumbs.map((b) => ({
-            ...b,
-            href: withParams(b.href),
-          }))}
-        />
+        <div className="min-w-0 flex-1">
+          <DynamicBreadcrumbs
+            items={breadcrumbs.map((b) => ({
+              ...b,
+              href: withParams(b.href),
+            }))}
+          />
+        </div>
       )}
-    </>
+    </div>
   );
 }
