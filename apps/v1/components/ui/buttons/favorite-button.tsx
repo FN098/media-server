@@ -14,15 +14,13 @@ import { Star } from "lucide-react";
 import React from "react";
 
 const buttonVariants = cva(
-  "flex items-center gap-1 justify-center transition-all active:scale-90 group/fav outline-none",
+  "flex items-center gap-1 justify-center transition-all bg-white/10 hover:bg-white/20 active:scale-90 group/fav outline-none",
   {
     variants: {
       variant: {
         default: "h-9 bg-transparent hover:bg-muted/50",
-        small:
-          "h-8 bg-black/60 backdrop-blur-md border border-white/10 shadow-lg rounded-full",
-        large:
-          "h-11 bg-white/10 backdrop-blur-md border border-white/10 shadow-lg rounded-full",
+        small: "h-8 bg-black/60 rounded-full",
+        large: "h-11 bg-white/10 rounded-full",
       },
       sizeMode: {
         iconOnly: "p-0",
