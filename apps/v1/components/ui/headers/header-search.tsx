@@ -49,7 +49,7 @@ export function HeaderSearch() {
     >
       <SearchInput
         placeholder={placeholder}
-        inputRef={inputRef}
+        ref={inputRef}
         value={input}
         onChange={(e) => {
           const value = e.target.value;
