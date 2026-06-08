@@ -1,6 +1,7 @@
 "use client";
 
 import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { Button } from "@/shadcn/components/ui/button";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,
@@ -9,67 +10,12 @@ import {
   TooltipTrigger,
 } from "@/shadcn/components/ui/tooltip";
 import { cn } from "@/shadcn/lib/utils";
-import { cva } from "class-variance-authority";
 import { Star } from "lucide-react";
 import React from "react";
-
-const buttonVariants = cva(
-  "flex items-center gap-1 justify-center transition-all bg-white/10 hover:bg-white/20 active:scale-90 group/fav outline-none",
-  {
-    variants: {
-      variant: {
-        default: "h-9 bg-transparent hover:bg-muted/50",
-        small: "h-8 bg-black/60 rounded-full",
-        large: "h-11 bg-white/10 rounded-full",
-      },
-      sizeMode: {
-        iconOnly: "p-0",
-        withText: "px-2",
-      },
-    },
-    compoundVariants: [
-      { variant: "small", sizeMode: "iconOnly", className: "w-8" },
-      { variant: "small", sizeMode: "withText", className: "min-w-[32px]" },
-      { variant: "large", sizeMode: "iconOnly", className: "w-11" },
-      { variant: "large", sizeMode: "withText", className: "min-w-[44px]" },
-      {
-        variant: "default",
-        sizeMode: "iconOnly",
-        className: "w-9 rounded-full",
-      },
-      { variant: "default", sizeMode: "withText", className: "w-auto" },
-    ],
-    defaultVariants: {
-      variant: "default",
-      sizeMode: "iconOnly",
-    },
-  }
-);
-
-const starVariants = cva("transition-colors", {
-  variants: {
-    variant: {
-      default: "h-5 w-5",
-      small: "h-4 w-4",
-      large: "h-6 w-6",
-    },
-  },
-});
-
-const textVariants = cva("font-bold text-yellow-400 tabular-nums", {
-  variants: {
-    variant: {
-      default: "text-[11px]",
-      small: "text-[10px]",
-      large: "text-sm",
-    },
-  },
-});
-
 interface FavoriteButtonProps extends React.ComponentProps<"button"> {
   isFavorite: boolean;
   rating: number | null;
-  variant?: "default" | "small" | "large";
+  size?: "default" | "small" | "large";
 }
 
 export function FavoriteButton(props: FavoriteButtonProps) {
@@ -100,40 +46,79 @@ export function FavoriteButton(props: FavoriteButtonProps) {
 function Trigger({
   isFavorite,
   rating,
-  variant = "default",
+  size = "default",
   className,
   ...rest
 }: FavoriteButtonProps) {
   const iconOnly = rating == null;
 
+  if (size === "large") {
+    return (
+      <button
+        className={cn(
+          "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
+          className
+        )}
+        {...rest}
+      >
+        <Star
+          size={28}
+          className={cn(isFavorite ? "fill-yellow-400 text-yellow-400" : "")}
+        />
+        {isFavorite && rating != null && (
+          <span className="text-sm font-bold text-yellow-400 tabular-nums">
+            {rating}
+          </span>
+        )}
+      </button>
+    );
+  }
+
+  if (size === "small") {
+    return (
+      <Button
+        variant="ghost"
+        className={cn(
+          "h-8 rounded-full bg-background/20 hover:bg-background/50",
+          iconOnly ? "w-8" : "px-2",
+          className
+        )}
+        {...rest}
+      >
+        <Star
+          className={cn(isFavorite ? "fill-yellow-400 text-yellow-400" : "")}
+        />
+        {isFavorite && rating != null && (
+          <span className="text-[10px] font-bold text-yellow-400 tabular-nums">
+            {rating}
+          </span>
+        )}
+      </Button>
+    );
+  }
+
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
       className={cn(
-        buttonVariants({
-          variant,
-          sizeMode: iconOnly ? "iconOnly" : "withText",
-        }),
-        // 「お気に入り状態」などの動的な枠線は、ここでインラインで足す方が圧倒的に見やすい
-        isFavorite && variant !== "default" && "border-yellow-400/30",
+        "h-9 rounded-full bg-background/20 hover:bg-background/50",
+        iconOnly ? "w-9" : "px-2",
         className
       )}
       {...rest}
     >
       <Star
         className={cn(
-          starVariants({ variant }),
           isFavorite
             ? "fill-yellow-400 text-yellow-400"
-            : variant === "default"
-              ? "text-muted-foreground opacity-40"
-              : "text-white opacity-70 group-hover/fav:opacity-100"
+            : "text-muted-foreground opacity-40"
         )}
       />
-
-      {isFavorite && rating !== null && (
-        <span className={cn(textVariants({ variant }))}>{rating}</span>
+      {isFavorite && rating != null && (
+        <span className="text-[11px] font-bold text-yellow-400 tabular-nums">
+          {rating}
+        </span>
       )}
-    </button>
+    </Button>
   );
 }

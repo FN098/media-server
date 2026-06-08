@@ -197,7 +197,7 @@ function Cell(props: CellProps) {
             <div className="absolute top-2 right-2 flex flex-col items-end gap-2">
               {!isSelectionMode && isMediaNode && (
                 <FavoriteButton
-                  variant="small"
+                  size="small"
                   rating={rating}
                   isFavorite={isFavorite}
                   onClick={toggleFavorite}

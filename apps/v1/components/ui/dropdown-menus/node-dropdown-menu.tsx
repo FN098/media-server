@@ -58,7 +58,7 @@ export function NodeDropdownMenu({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
         <NodeDropdownMenuTrigger
-          variant={variant}
+          size={variant}
           className={className}
           disabled={disabled}
           onToggle={() => setOpen(!open)}
@@ -80,31 +80,28 @@ export function NodeDropdownMenu({
 }
 
 interface NodeDropdownMenuTriggerProps extends React.ComponentProps<"button"> {
-  variant?: "default" | "large";
+  size?: "default" | "large";
 }
 
 function NodeDropdownMenuTrigger({
-  variant = "default",
+  size = "default",
   className,
   ...rest
 }: NodeDropdownMenuTriggerProps) {
-  if (variant === "large") {
+  if (size === "large") {
     return (
-      <Button
-        variant="ghost"
-        size="icon"
+      <button
         className={cn(
-          "h-11 w-11 rounded-full bg-background/20 hover:bg-background/50",
+          "p-2 text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-full outline-none",
           className
         )}
         {...rest}
       >
-        <MoreVertical />
-      </Button>
+        <MoreVertical size={28} />
+      </button>
     );
   }
 
-  // variant: default
   return (
     <Button
       variant="ghost"

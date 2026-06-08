@@ -120,7 +120,7 @@ function MediaViewerHeader() {
 
             {!!currentNode && isMedia(currentNode.type) && (
               <FavoriteButton
-                variant="large"
+                size="large"
                 rating={rating}
                 isFavorite={isFavorite}
                 onClick={() => void toggleFavorite()}
