@@ -3,24 +3,16 @@ import { cn } from "@/shadcn/lib/utils";
 import { SearchIcon } from "lucide-react";
 import { RefObject } from "react";
 
-interface SearchInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  className?: string;
+interface SearchInputProps extends React.ComponentProps<"input"> {
   inputRef?: RefObject<HTMLInputElement | null>;
   placeholder?: string;
-  onFocus?: () => void;
-  onBlur?: () => void;
 }
 
 export function SearchInput({
-  value,
-  onChange,
   className,
   inputRef,
   placeholder,
-  onFocus,
-  onBlur,
+  ...rest
 }: SearchInputProps) {
   return (
     <div className="relative group">
@@ -30,10 +22,7 @@ export function SearchInput({
         type="search"
         placeholder={placeholder ?? "Search…"}
         className={cn("w-full", className)}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        {...rest}
       />
     </div>
   );

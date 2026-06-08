@@ -51,7 +51,8 @@ export function HeaderSearch() {
         placeholder={placeholder}
         inputRef={inputRef}
         value={input}
-        onChange={(value: string) => {
+        onChange={(e) => {
+          const value = e.target.value;
           setInput(value); // 入力は即時反映
           debouncedApply(value); // URL同期はデバウンス
         }}
