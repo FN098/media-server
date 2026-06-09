@@ -1,12 +1,11 @@
-import { startTransition, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useMounted() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    startTransition(() => {
-      setMounted(true);
-    });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
   }, []);
 
   return mounted;
