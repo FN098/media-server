@@ -18,7 +18,7 @@ export function FadeIn({
 }: FadeInProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y }}
+      initial={{ opacity: 1, y }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
         delay,
