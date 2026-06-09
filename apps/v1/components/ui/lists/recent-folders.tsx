@@ -5,6 +5,7 @@ import { LocalRecentDate } from "@/components/ui/dates/local-recent-date";
 import type { VisitedFolder } from "@/generated/prisma/client";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { splitDirPath } from "@/lib/utils/path";
+import { useCanHoverContext } from "@/providers/can-hover-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { Clock, Folder, History, Pin } from "lucide-react";
@@ -17,6 +18,7 @@ interface RecentFoldersProps {
 
 export function RecentFolders({ folders }: RecentFoldersProps) {
   const [isPending, setIsPending] = useState(false);
+  const canHover = useCanHoverContext();
 
   const handleTogglePin = useCallback(async (folder: VisitedFolder) => {
     setIsPending(true);
@@ -88,6 +90,7 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
                   "h-8 w-8 text-zinc-400 dark:text-zinc-600 hover:text-indigo-500 transition-opacity",
                   !folder.isPinned &&
                     "opacity-0 group-hover/wrapper:opacity-100 focus:opacity-100",
+                  !canHover && "opacity-100",
                   isPending && "opacity-50"
                 )}
                 onClick={(e) => {
