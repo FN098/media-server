@@ -14,7 +14,6 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
-import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import {
   Tabs,
   TabsContent,
@@ -79,15 +78,7 @@ export function TagFilterDialog({
 
   const mounted = useMounted();
 
-  if (!mounted) {
-    return (
-      <div className="flex items-center">
-        <Skeleton className="h-9 w-full rounded-md" />
-      </div>
-    );
-  }
-
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>

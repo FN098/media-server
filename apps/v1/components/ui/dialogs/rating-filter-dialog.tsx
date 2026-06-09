@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
-import { Skeleton } from "@/shadcn/components/ui/skeleton";
 import { cn } from "@/shadcn/lib/utils";
 import { RotateCcw, Star } from "lucide-react";
 
@@ -59,15 +58,7 @@ export function RatingFilterDialog({ dialog }: RatingFilterDialogProps) {
 
   const mounted = useMounted();
 
-  if (!mounted) {
-    return (
-      <div className="flex items-center">
-        <Skeleton className="h-9 w-full rounded-md" />
-      </div>
-    );
-  }
-
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
