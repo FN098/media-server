@@ -1,5 +1,9 @@
 import { Maintenance } from "@/components/ui/pages/maintenance";
 
 export default function MaintenancePage() {
-  return <Maintenance />;
+  return (
+    <div className="flex items-center justify-center w-full h-full">
+      <Maintenance />
+    </div>
+  );
 }
