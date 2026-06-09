@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
-import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
 import {
   Tabs,
   TabsContent,
@@ -95,40 +94,40 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
               </Button>
             )}
 
-            <div className="flex-1 min-h-0 relative border rounded-md">
-              <ScrollArea className="h-full w-full p-2">
-                {isLoading && (
-                  <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
-                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
-                  </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  {dirs.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      このフォルダにサブフォルダはありません
-                    </div>
-                  ) : (
-                    dirs.map((dir) => (
-                      <Button
-                        key={dir.path}
-                        variant="ghost"
-                        className="w-full justify-between hover:bg-primary/10 group"
-                        onClick={() => changeDir(dir.path)}
-                        disabled={isLoading}
-                      >
-                        <div className="flex items-center">
-                          <Folder className="mr-2 h-4 w-4 text-blue-500" />
-                          <TextWithTooltip
-                            text={dir.name}
-                            className="max-w-[250px]"
-                          />
-                        </div>
-                        <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                      </Button>
-                    ))
-                  )}
+            <div className="flex-1 min-h-0 relative border rounded-md overflow-y-auto h-full p-2">
+              {isLoading && (
+                <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
+                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
                 </div>
-              </ScrollArea>
+              )}
+
+              <div className="flex flex-col gap-1 w-full min-w-0">
+                {dirs.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    このフォルダにサブフォルダはありません
+                  </div>
+                ) : (
+                  dirs.map((dir) => (
+                    <Button
+                      key={dir.path}
+                      variant="ghost"
+                      className="w-full min-w-0 justify-between hover:bg-primary/10 group gap-2"
+                      onClick={() => changeDir(dir.path)}
+                      disabled={isLoading}
+                    >
+                      <div className="flex items-center min-w-0 text-left">
+                        <Folder className="mr-2 h-4 w-4 text-blue-500 shrink-0" />
+                        <TextWithTooltip
+                          text={dir.name}
+                          className="max-w-full truncate"
+                        />
+                      </div>
+
+                      <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 shrink-0 transition-opacity" />
+                    </Button>
+                  ))
+                )}
+              </div>
             </div>
           </TabsContent>
 
