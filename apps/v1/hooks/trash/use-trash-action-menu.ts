@@ -18,7 +18,7 @@ const actionMenuItems: MenuItemDef<TrashActionMenuContext>[] = [
     label: "このフォルダ内を完全に削除",
     icon: Trash2Icon,
     onClick: (ctx) => ctx.emptyCurrentDir(),
-    disabled: (ctx) => ctx.canEmptyCurrentDir,
+    disabled: (ctx) => !ctx.canEmptyCurrentDir,
   },
 ];
 
