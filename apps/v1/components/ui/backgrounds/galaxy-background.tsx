@@ -24,8 +24,7 @@ interface GalaxyBackgroundProps {
   accent: AccentColor;
   className?: string;
 }
-
-// --- 星屑 Canvas ---
+// --- 星屑 Canvas（リアル輝き版） ---
 function StarField({ h, s }: { h: number; s: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -48,16 +47,22 @@ function StarField({ h, s }: { h: number; s: number }) {
       opacity: number;
       speed: number;
       phase: number;
+      isSparkle: boolean; // 十字の光を放つ特別な星か
     };
 
-    const stars: Star[] = Array.from({ length: 180 }, () => ({
-      x: Math.random(),
-      y: Math.random(),
-      r: Math.random() * 1.2 + 0.3,
-      opacity: Math.random() * 0.6 + 0.2,
-      speed: Math.random() * 0.8 + 0.4,
-      phase: Math.random() * Math.PI * 2,
-    }));
+    // 星の数を少し調整（180個。大きい星の比率を考慮）
+    const stars: Star[] = Array.from({ length: 180 }, () => {
+      const r = Math.random() * 1.3 + 0.2; // 0.2px 〜 1.5px
+      return {
+        x: Math.random(),
+        y: Math.random(),
+        r,
+        opacity: Math.random() * 0.5 + 0.3, // ベースの不透明度を少し高めに
+        speed: Math.random() * 0.6 + 0.3,
+        phase: Math.random() * Math.PI * 2,
+        isSparkle: r > 1.2 && Math.random() > 0.4, // 大きな星の約6割をクロス輝きにする
+      };
+    });
 
     let raf: number;
     let t = 0;
@@ -67,21 +72,65 @@ function StarField({ h, s }: { h: number; s: number }) {
       ctx.clearRect(0, 0, width, height);
 
       for (const star of stars) {
-        const twinkle =
-          star.opacity + Math.sin(t * star.speed + star.phase) * 0.25;
-        // accent色と白をランダムに混ぜる
-        const useAccent = star.r > 1.0;
-        const color = useAccent
-          ? `hsla(${h}, ${s}%, 80%, ${twinkle})`
-          : `hsla(0, 0%, 100%, ${twinkle})`;
+        // 現在のフレームでのリアルタイムな輝き度（0.1 〜 1.0 の間で明滅）
+        const twinkle = Math.max(
+          0.1,
+          star.opacity + Math.sin(t * star.speed + star.phase) * 0.35
+        );
 
+        const screenX = star.x * width;
+        const screenY = star.y * height;
+
+        // 1. グラデーションの作成（中心を白、外側をアクセントカラーに）
+        const gradient = ctx.createRadialGradient(
+          screenX,
+          screenY,
+          0,
+          screenX,
+          screenY,
+          star.r * 2 // 少し広めにグラデーションをかける
+        );
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${twinkle})`);
+        gradient.addColorStop(0.3, `hsla(${h}, ${s}%, 85%, ${twinkle * 0.7})`);
+        gradient.addColorStop(1, `hsla(${h}, ${s}%, 60%, 0)`);
+
+        // 2. グロー効果（シャドウ）の設定
+        ctx.save(); // 状態を保存
+        if (star.r > 0.8) {
+          ctx.shadowBlur = star.r * 4;
+          ctx.shadowColor = `hsla(${h}, ${s}%, 70%, ${twinkle})`;
+        }
+
+        // 星のコアを描画
         ctx.beginPath();
-        ctx.arc(star.x * width, star.y * height, star.r, 0, Math.PI * 2);
-        ctx.fillStyle = color;
+        ctx.arc(screenX, screenY, star.r, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
         ctx.fill();
+        ctx.restore(); // シャドウ効果をリセット
+
+        // 3. 特別な星には薄い十字の光（スパークル）を重ねる
+        if (star.isSparkle && twinkle > 0.4) {
+          ctx.save();
+          ctx.strokeStyle = `hsla(${h}, ${s}%, 90%, ${twinkle * 0.25})`; // 薄く繊細に
+          ctx.lineWidth = 0.5;
+
+          // 明滅に合わせて十字の長さもわずかに伸縮させる
+          const sparkleSize =
+            star.r * (4 + Math.sin(t * star.speed + star.phase) * 1.5);
+
+          ctx.beginPath();
+          // 横線
+          ctx.moveTo(screenX - sparkleSize, screenY);
+          ctx.lineTo(screenX + sparkleSize, screenY);
+          // 縦線
+          ctx.moveTo(screenX, screenY - sparkleSize);
+          ctx.lineTo(screenX, screenY + sparkleSize);
+          ctx.stroke();
+          ctx.restore();
+        }
       }
 
-      t += 0.015;
+      t += 0.012; // 明滅の速度を少しだけ緩やかにしてリアルに
       raf = requestAnimationFrame(draw);
     };
 
