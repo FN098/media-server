@@ -22,7 +22,7 @@ export function PagingControl({
   return (
     <div
       className={cn(
-        "sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "sticky bottom-0 backdrop-blur",
         "border-t p-3 flex items-center justify-center gap-2 z-20",
         className
       )}
