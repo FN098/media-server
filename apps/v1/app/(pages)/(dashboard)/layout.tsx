@@ -1,4 +1,4 @@
-import { AmbientBackground } from "@/components/ui/backgrounds/ambient-background";
+import { PageBackground } from "@/components/ui/backgrounds/page-background";
 import { Header } from "@/components/ui/headers/header";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative flex flex-col h-screen overflow-hidden">
-      <AmbientBackground accent={meta.accent} />
+      <PageBackground meta={meta} />
       <Header
         title={meta.title}
         icon={meta.icon}

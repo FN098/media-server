@@ -17,6 +17,7 @@ function normalize(meta: PageMetaRaw): PageMeta {
     ...meta,
     hidden: meta.hidden ?? false,
     developmentOnly: meta.developmentOnly ?? false,
+    backgroundType: meta.backgroundType ?? "default",
   };
 }
 

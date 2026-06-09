@@ -18,6 +18,7 @@ export const pageMetas = [
     url: PATHS.client.dashboard.root,
     icon: LayoutDashboardIcon,
     accent: "indigo",
+    backgroundType: "galaxy",
   },
   {
     key: "explorer",

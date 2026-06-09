@@ -13,6 +13,8 @@ export type AccentColor =
   | "amber"
   | "zinc";
 
+export type BackgroundType = "default" | "galaxy";
+
 export type PageMetaRaw = {
   key: string;
   title: string;
@@ -21,6 +23,7 @@ export type PageMetaRaw = {
   accent: AccentColor;
   hidden?: boolean;
   developmentOnly?: boolean;
+  backgroundType?: BackgroundType;
 };
 
 export type PageMeta = {
@@ -31,4 +34,5 @@ export type PageMeta = {
   accent: AccentColor;
   hidden: boolean;
   developmentOnly: boolean;
+  backgroundType: BackgroundType;
 };
