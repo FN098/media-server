@@ -56,12 +56,13 @@ export function NodeDropdownMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+      <DropdownMenuTrigger asChild>
         <NodeDropdownMenuTrigger
           size={variant}
           className={className}
           disabled={disabled}
-          onToggle={() => setOpen(!open)}
+          onPointerDown={(e) => e.preventDefault()}
+          onClick={() => setOpen(!open)}
         />
       </DropdownMenuTrigger>
 
