@@ -17,7 +17,10 @@ function normalize(meta: PageMetaRaw): PageMeta {
     ...meta,
     hidden: meta.hidden ?? false,
     developmentOnly: meta.developmentOnly ?? false,
-    backgroundType: meta.backgroundType ?? "default",
+    backgroundType: {
+      light: meta.backgroundType?.light ?? "default",
+      dark: meta.backgroundType?.dark ?? "default",
+    },
   };
 }
 

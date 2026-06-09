@@ -23,7 +23,10 @@ export type PageMetaRaw = {
   accent: AccentColor;
   hidden?: boolean;
   developmentOnly?: boolean;
-  backgroundType?: BackgroundType;
+  backgroundType?: {
+    light?: BackgroundType;
+    dark?: BackgroundType;
+  };
 };
 
 export type PageMeta = {
@@ -34,5 +37,8 @@ export type PageMeta = {
   accent: AccentColor;
   hidden: boolean;
   developmentOnly: boolean;
-  backgroundType: BackgroundType;
+  backgroundType: {
+    light: BackgroundType;
+    dark: BackgroundType;
+  };
 };

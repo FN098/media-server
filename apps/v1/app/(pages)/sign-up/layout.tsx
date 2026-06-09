@@ -8,7 +8,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative w-full h-screen flex flex-col">
-      <PageBackground meta={meta} />
+      <PageBackground
+        accent={meta.accent}
+        backgroundType={meta.backgroundType}
+      />
       <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );

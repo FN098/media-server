@@ -9,7 +9,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative w-full h-screen flex flex-col">
-      <PageBackground meta={meta} />
+      <PageBackground
+        accent={meta.accent}
+        backgroundType={meta.backgroundType}
+      />
       <Header
         title={meta.title}
         icon={meta.icon}

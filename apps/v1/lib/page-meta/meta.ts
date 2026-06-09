@@ -11,6 +11,8 @@ import {
   WrenchIcon,
 } from "lucide-react";
 
+// TODO: 背景タイプを Settings で設定可能にする
+
 export const pageMetas = [
   {
     key: "dashboard",
@@ -18,7 +20,9 @@ export const pageMetas = [
     url: PATHS.client.dashboard.root,
     icon: LayoutDashboardIcon,
     accent: "indigo",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
   {
     key: "explorer",
@@ -26,7 +30,9 @@ export const pageMetas = [
     url: PATHS.client.explorer.root,
     icon: FolderSearchIcon,
     accent: "sky",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
   {
     key: "favorites",
@@ -34,7 +40,9 @@ export const pageMetas = [
     url: PATHS.client.favorites.root,
     icon: StarIcon,
     accent: "amber",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
   {
     key: "trash",
@@ -42,7 +50,9 @@ export const pageMetas = [
     url: PATHS.client.trash.root,
     icon: Trash2Icon,
     accent: "red",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
   {
     key: "settings",
@@ -51,7 +61,9 @@ export const pageMetas = [
     icon: SettingsIcon,
     hidden: true,
     accent: "orange",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
   {
     key: "sandbox",
@@ -60,7 +72,9 @@ export const pageMetas = [
     icon: PackageOpenIcon,
     developmentOnly: true,
     accent: "teal",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
   {
     key: "maintenance",
@@ -68,7 +82,9 @@ export const pageMetas = [
     url: PATHS.client.maintenance.root,
     icon: WrenchIcon,
     accent: "zinc",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
   {
     key: "sign-in",
@@ -76,7 +92,9 @@ export const pageMetas = [
     url: PATHS.client.signIn.root,
     icon: UserIcon,
     accent: "indigo",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
   {
     key: "sign-up",
@@ -84,7 +102,9 @@ export const pageMetas = [
     url: PATHS.client.signUp.root,
     icon: UserIcon,
     accent: "violet",
-    backgroundType: "galaxy",
+    backgroundType: {
+      dark: "galaxy",
+    },
   },
 ] as const satisfies readonly PageMetaRaw[];
 
