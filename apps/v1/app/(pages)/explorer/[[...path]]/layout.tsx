@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <SearchFocusProvider>
-      <div className="relative w-full min-h-svh flex flex-col overflow-hidden">
+      <div className="relative w-full h-screen flex flex-col overflow-hidden">
         <PageBackground accent={meta.accent} />
         <Header
           title={meta.title}
@@ -18,11 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           basePath={meta.url}
           accent={meta.accent}
         />
-        <main className="flex-1 overflow-y-auto">
-          <div className="flex w-full h-full items-center justify-center">
-            {children}
-          </div>
-        </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </SearchFocusProvider>
   );
