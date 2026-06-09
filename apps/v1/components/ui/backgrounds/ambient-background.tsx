@@ -88,12 +88,15 @@ const float = (
   },
 });
 
-interface PageBackgroundProps {
+interface AmbientBackgroundProps {
   accent: AccentColor;
   className?: string;
 }
 
-export function PageBackground({ accent, className }: PageBackgroundProps) {
+export function AmbientBackground({
+  accent,
+  className,
+}: AmbientBackgroundProps) {
   const glow = glowMap[accent];
 
   return (
