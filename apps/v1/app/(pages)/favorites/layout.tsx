@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <TagEditorProvider>
         <SlideshowProvider>
           <HistoryProvider>
-            <div className="relative w-full h-screen flex flex-col overflow-hidden">
+            <div className="relative w-full h-screen flex flex-col">
               <PageBackground accent={meta.accent} />
               <Header
                 title={meta.title}
