@@ -1,4 +1,4 @@
-import { AmbientBackground } from "@/components/ui/backgrounds/ambient-background";
+import { PageBackground } from "@/components/ui/backgrounds/page-background";
 import { Header } from "@/components/ui/headers/header";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 import { HistoryProvider } from "@/providers/history-provider";
@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <SlideshowProvider>
           <HistoryProvider>
             <div className="relative w-full h-screen flex flex-col">
-              <AmbientBackground accent={meta.accent} />
+              <PageBackground meta={meta} />
               <Header
                 title={meta.title}
                 icon={meta.icon}

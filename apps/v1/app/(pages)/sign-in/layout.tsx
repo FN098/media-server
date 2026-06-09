@@ -1,4 +1,4 @@
-import { AmbientBackground } from "@/components/ui/backgrounds/ambient-background";
+import { PageBackground } from "@/components/ui/backgrounds/page-background";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
 const meta = resolvePageMeta("sign-in");
@@ -8,7 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative flex flex-col min-h-screen overflow-hidden">
-      <AmbientBackground accent={meta.accent} />
+      <PageBackground meta={meta} />
       <main className="flex-1 overflow-y-auto">
         <div className="flex w-full min-h-screen items-center justify-center">
           {children}
