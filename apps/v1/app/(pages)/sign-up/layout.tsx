@@ -7,13 +7,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   if (!meta) return;
 
   return (
-    <div className="relative flex flex-col min-h-screen overflow-hidden">
+    <div className="relative w-full h-screen flex flex-col">
       <PageBackground meta={meta} />
-      <main className="flex-1 overflow-y-auto">
-        <div className="flex w-full min-h-screen items-center justify-center">
-          {children}
-        </div>
-      </main>
+      <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 }

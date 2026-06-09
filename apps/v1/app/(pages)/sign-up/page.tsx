@@ -9,5 +9,9 @@ export default async function SignUpPage() {
     select: { id: true },
   });
 
-  return <SignUp hasAdmin={!!admin} />;
+  return (
+    <div className="flex items-center justify-center w-full h-full">
+      <SignUp hasAdmin={!!admin} />
+    </div>
+  );
 }
