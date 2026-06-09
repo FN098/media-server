@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
-import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
 import {
   Tabs,
   TabsContent,
@@ -79,6 +78,7 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
             </TabsTrigger>
           </TabsList>
 
+          {/* === 通常ブラウズ タブ === */}
           <TabsContent
             value="browse"
             className="flex-1 min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col gap-2"
@@ -95,81 +95,79 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
               </Button>
             )}
 
-            <div className="flex-1 min-h-0 relative border rounded-md">
-              <ScrollArea className="h-full w-full p-2">
-                {isLoading && (
-                  <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
-                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
-                  </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  {dirs.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      このフォルダにサブフォルダはありません
-                    </div>
-                  ) : (
-                    dirs.map((dir) => (
-                      <Button
-                        key={dir.path}
-                        variant="ghost"
-                        className="w-full justify-between hover:bg-primary/10 group"
-                        onClick={() => changeDir(dir.path)}
-                        disabled={isLoading}
-                      >
-                        <div className="flex items-center">
-                          <Folder className="mr-2 h-4 w-4 text-blue-500" />
-                          <TextWithTooltip
-                            text={dir.name}
-                            className="max-w-[250px]"
-                          />
-                        </div>
-                        <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                      </Button>
-                    ))
-                  )}
+            <div className="flex-1 min-h-0 relative border rounded-md overflow-y-auto h-full p-2">
+              {isLoading && (
+                <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
+                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
                 </div>
-              </ScrollArea>
+              )}
+              <div className="flex flex-col gap-1 w-full min-w-0">
+                {dirs.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    このフォルダにサブフォルダはありません
+                  </div>
+                ) : (
+                  dirs.map((dir) => (
+                    <Button
+                      key={dir.path}
+                      variant="ghost"
+                      className="w-full min-w-0 justify-between hover:bg-primary/10 group gap-2"
+                      onClick={() => changeDir(dir.path)}
+                      disabled={isLoading}
+                    >
+                      <div className="flex items-center min-w-0 text-left">
+                        <Folder className="mr-2 h-4 w-4 text-blue-500 shrink-0" />
+                        <TextWithTooltip
+                          text={dir.name}
+                          className="max-w-full truncate"
+                        />
+                      </div>
+                      <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 shrink-0 transition-opacity" />
+                    </Button>
+                  ))
+                )}
+              </div>
             </div>
           </TabsContent>
 
+          {/* === 最近のフォルダ タブ === */}
           <TabsContent
             value="recent"
             className="flex-1 min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col"
           >
-            <div className="flex-1 min-h-0 relative border rounded-md">
-              <ScrollArea className="h-full w-full p-2">
-                {isLoading && (
-                  <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
-                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+            <div className="flex-1 min-h-0 relative border rounded-md overflow-y-auto h-full p-2">
+              {isLoading && (
+                <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center backdrop-blur-[1px]">
+                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+                </div>
+              )}
+              <div className="flex flex-col gap-1 w-full min-w-0">
+                {recentDirs.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    最近訪問したフォルダはありません
                   </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  {recentDirs.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      最近訪問したフォルダはありません
-                    </div>
-                  ) : (
-                    recentDirs.map((dir) => (
-                      <div
-                        key={dir.path}
-                        className="relative group/wrapper w-full"
+                ) : (
+                  recentDirs.map((dir) => (
+                    <div
+                      key={dir.path}
+                      className="flex items-center justify-between w-full group gap-1"
+                    >
+                      {/* フォルダ選択ボタン */}
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "flex-1 min-w-0 justify-start hover:bg-primary/10 py-6 h-auto",
+                          currentDir === dir.path && "bg-primary/5 font-medium"
+                        )}
+                        onClick={() => {
+                          changeDir(dir.path);
+                          setActiveTab("browse");
+                        }}
+                        disabled={isLoading}
                       >
-                        <Button
-                          variant="ghost"
-                          className={cn(
-                            "w-full justify-start hover:bg-primary/10 group text-left pl-3 pr-12 py-6 h-auto",
-                            currentDir === dir.path &&
-                              "bg-primary/5 font-medium",
-                            dir.pinned && "bg-secondary/30"
-                          )}
-                          onClick={() => {
-                            changeDir(dir.path);
-                            setActiveTab("browse");
-                          }}
-                          disabled={isLoading}
-                        >
+                        <div className="flex items-center min-w-0 w-full">
                           <Folder className="mr-2 h-4 w-4 text-amber-500 shrink-0" />
-                          <div className="flex flex-col items-start min-w-0 pr-2">
+                          <div className="flex flex-col items-start min-w-0 text-left w-full">
                             <span className="truncate w-full text-sm">
                               {dir.name || dir.path.split("/").pop()}
                             </span>
@@ -177,39 +175,38 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
                               {dir.path}
                             </span>
                           </div>
-                        </Button>
-
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            disabled={isLoading}
-                            className={cn(
-                              "h-8 w-8 text-muted-foreground/50 hover:text-primary transition-opacity",
-                              !dir.pinned &&
-                                "opacity-0 group-hover/wrapper:opacity-100 focus:opacity-100"
-                            )}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              void togglePin(dir.path, dir.pinned);
-                            }}
-                          >
-                            <Pin
-                              className={cn(
-                                "w-3.5 h-3.5 transition-transform duration-200",
-                                dir.pinned
-                                  ? "fill-primary text-primary"
-                                  : "rotate-45"
-                              )}
-                            />
-                          </Button>
                         </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
+                      </Button>
+
+                      {/* ピン留めボタン */}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        disabled={isLoading}
+                        className={cn(
+                          "h-8 w-8 text-muted-foreground/50 hover:text-primary transition-opacity shrink-0",
+                          !dir.pinned &&
+                            "opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        )}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          void togglePin(dir.path, dir.pinned);
+                        }}
+                      >
+                        <Pin
+                          className={cn(
+                            "w-3.5 h-3.5 transition-transform duration-200",
+                            dir.pinned
+                              ? "fill-primary text-primary"
+                              : "rotate-45"
+                          )}
+                        />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
