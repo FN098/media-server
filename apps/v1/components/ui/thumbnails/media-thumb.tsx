@@ -38,7 +38,7 @@ export function MediaThumb({
         {/* アイコンのオーバーレイ表示 */}
         {showIcon && (
           <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-            <div className="p-2 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 shadow-xl">
+            <div className="p-2 rounded-full bg-black/30 border border-white/10 shadow-xl">
               <MediaThumbIcon
                 type={node.type}
                 className="w-6 h-6 text-white opacity-90"
