@@ -12,18 +12,12 @@ import { MediaViewerProvider } from "@/providers/media-viewer-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
-import { cn } from "@/shadcn/lib/utils";
 
 export function Favorites() {
   const { viewer } = useFavoritesContext();
 
   return (
-    <div
-      className={cn(
-        "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
-      )}
-      tabIndex={-1}
-    >
+    <div className="flex flex-col h-full focus:outline-none" tabIndex={-1}>
       {!viewer.isOpen && <FavoritesToolbar />}
       <FavoritesContent />
       <FavoritesOverlays />
