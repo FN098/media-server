@@ -14,18 +14,12 @@ import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
 import { useTrashContext } from "@/providers/trash-provider";
-import { cn } from "@/shadcn/lib/utils";
 
 export function Trash() {
   const { viewer } = useTrashContext();
 
   return (
-    <div
-      className={cn(
-        "flex-1 flex flex-col min-h-0 overflow-auto focus:outline-none"
-      )}
-      tabIndex={-1}
-    >
+    <div className="flex flex-col h-full focus:outline-none" tabIndex={-1}>
       {!viewer.isOpen && <TrashToolbar />}
       <TrashContent />
       <TrashOverlays />
