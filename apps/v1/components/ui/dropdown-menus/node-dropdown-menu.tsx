@@ -62,7 +62,10 @@ export function NodeDropdownMenu({
           className={className}
           disabled={disabled}
           onPointerDown={(e) => e.preventDefault()}
-          onClick={() => setOpen(!open)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(!open);
+          }}
         />
       </DropdownMenuTrigger>
 

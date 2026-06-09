@@ -205,7 +205,10 @@ function Cell(props: CellProps) {
                   size="small"
                   rating={rating}
                   isFavorite={isFavorite}
-                  onClick={toggleFavorite}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite();
+                  }}
                 />
               )}
 
