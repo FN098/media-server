@@ -13,6 +13,7 @@ import { useGridCell } from "@/hooks/view/use-grid-cell";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
+import { useCanHoverContext } from "@/providers/can-hover-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
@@ -34,6 +35,7 @@ export function PagingGridView(props: PagingGridViewProps) {
   const { onOpen, onSelectionChange, onThumbError } = props;
 
   const isMobile = useIsMobile();
+  const canHover = useCanHoverContext();
 
   const {
     containerRef,
@@ -70,6 +72,7 @@ export function PagingGridView(props: PagingGridViewProps) {
             globalIndex={(currentPage - 1) * pageSize + index}
             allNodes={props.allNodes}
             isMobile={isMobile}
+            canHover={canHover}
             totalSize={totalSize}
             onOpen={onOpen}
             onSelectionChange={onSelectionChange}
@@ -93,6 +96,7 @@ interface CellProps {
   globalIndex: number;
   allNodes: MediaNode[];
   isMobile: boolean;
+  canHover: boolean;
   totalSize: number;
   onSelectionChange?: () => void;
   onOpen?: (node: MediaNode) => void;
@@ -119,7 +123,8 @@ function Cell(props: CellProps) {
     toggleFavorite,
   } = useGridCell(props);
 
-  const { node, globalIndex, isMobile, totalSize, onThumbError } = props;
+  const { node, globalIndex, isMobile, canHover, totalSize, onThumbError } =
+    props;
 
   // 合計サイズに対するこのノードの占有率（%）
   const occupancyPercent = useMemo(() => {
@@ -208,7 +213,7 @@ function Cell(props: CellProps) {
                 <div
                   className={cn(
                     "opacity-0 group-hover:opacity-100 transition-opacity",
-                    isMobile && "opacity-100"
+                    !canHover && "opacity-100"
                   )}
                 >
                   <NodeDropdownMenu

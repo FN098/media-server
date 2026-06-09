@@ -1,5 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { AppQueryClientProvider } from "@/providers/app-query-client-provider";
+import { CanHoverProvider } from "@/providers/can-hover-provider";
 import { HotkeysClientProvider } from "@/providers/hotkeys-client-provider";
 import { DetectMobileProvider } from "@/providers/mobile-provider";
 import { ThumbEventProvider } from "@/providers/thumb-event-provider";
@@ -45,7 +46,9 @@ export default function RootLayout({
             >
               <HotkeysClientProvider>
                 <DetectMobileProvider>
-                  <ThumbEventProvider>{children}</ThumbEventProvider>
+                  <CanHoverProvider>
+                    <ThumbEventProvider>{children}</ThumbEventProvider>
+                  </CanHoverProvider>
                 </DetectMobileProvider>
               </HotkeysClientProvider>
             </ThemeProvider>
