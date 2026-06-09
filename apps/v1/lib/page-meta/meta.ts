@@ -21,7 +21,8 @@ export const pageMetas = [
     icon: LayoutDashboardIcon,
     accent: "indigo",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
   {
@@ -31,7 +32,8 @@ export const pageMetas = [
     icon: FolderSearchIcon,
     accent: "sky",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
   {
@@ -41,7 +43,8 @@ export const pageMetas = [
     icon: StarIcon,
     accent: "amber",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
   {
@@ -51,7 +54,8 @@ export const pageMetas = [
     icon: Trash2Icon,
     accent: "red",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
   {
@@ -62,7 +66,8 @@ export const pageMetas = [
     hidden: true,
     accent: "orange",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
   {
@@ -73,7 +78,8 @@ export const pageMetas = [
     developmentOnly: true,
     accent: "teal",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
   {
@@ -83,7 +89,8 @@ export const pageMetas = [
     icon: WrenchIcon,
     accent: "zinc",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
   {
@@ -93,7 +100,8 @@ export const pageMetas = [
     icon: UserIcon,
     accent: "indigo",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
   {
@@ -103,7 +111,8 @@ export const pageMetas = [
     icon: UserIcon,
     accent: "violet",
     backgroundType: {
-      dark: "galaxy",
+      light: "default",
+      dark: "default",
     },
   },
 ] as const satisfies readonly PageMetaRaw[];
