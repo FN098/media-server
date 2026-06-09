@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <TagEditorProvider>
         <SlideshowProvider>
           <HistoryProvider>
-            <div className="relative w-full h-screen flex flex-col">
+            <div className="relative w-full min-h-screen flex flex-col">
               <PageBackground meta={meta} />
               <Header
                 title={meta.title}
