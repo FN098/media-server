@@ -61,7 +61,7 @@ export function Header({
     <header
       className={cn(
         "sticky top-0 z-30 h-12 border-b",
-        "bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md",
+        "backdrop-blur-md",
         accent
           ? accentBorderMap[accent]
           : "border-zinc-200 dark:border-white/[0.06]"
