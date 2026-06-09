@@ -231,8 +231,8 @@ export function GalaxyBackground({ accent, className }: GalaxyBackgroundProps) {
       />
 
       {/* 暗黒物質風：上下をfadeで締める */}
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#04030a] to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#04030a] to-transparent" />
+      {/* <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#04030a] to-transparent" /> */}
+      {/* <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#04030a] to-transparent" /> */}
     </div>
   );
 }
