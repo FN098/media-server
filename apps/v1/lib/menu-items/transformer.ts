@@ -1,5 +1,5 @@
+import { isGroupMenuItem } from "@/lib/menu-items/guard";
 import { MenuItemDef } from "@/lib/menu-items/types";
-import { isGroupMenuItem } from "@/lib/menu-items/validators";
 
 export type Transform<TItem, TContext> = (
   items: TItem[],
