@@ -151,8 +151,6 @@ export function useExplorerMenuItems({
     selectedNodes: selection.selectedNodes,
   });
 
-  // TODO: transformer
-
   return [
     rating,
     separators.actions,
