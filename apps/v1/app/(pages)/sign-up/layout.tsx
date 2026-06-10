@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         accent={meta.accent}
         backgroundType={meta.backgroundType}
       />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="h-full">{children}</main>
     </div>
   );
 }
