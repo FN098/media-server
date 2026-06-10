@@ -340,7 +340,7 @@ export async function updateMultipleFavoritesAction(
   const userId = user.id;
 
   // 認可
-  if (!hasPermission(user, "favorite:update")) {
+  if (!hasPermission(user, "favorite:update-multiple")) {
     return {
       success: false,
       message: "権限がありません。",
@@ -363,7 +363,10 @@ export async function updateMultipleFavoritesAction(
     .filter((d): d is NonNullable<typeof d> => d !== null);
 
   if (dataToUpsert.length === 0) {
-    return { success: false, message: "更新対象のメディアがありません。" };
+    return {
+      success: false,
+      message: "お気に入り更新対象のメディアがありません。",
+    };
   }
 
   try {
@@ -373,7 +376,7 @@ export async function updateMultipleFavoritesAction(
     });
   } catch (error) {
     logger.error("action:update-multiple-favorites", error);
-    return { success: false, message: "一括更新に失敗しました" };
+    return { success: false, message: "お気に入り一括更新に失敗しました" };
   }
 
   const completed = dataToUpsert.length;
@@ -382,38 +385,95 @@ export async function updateMultipleFavoritesAction(
   return { success: true, completed, skipped };
 }
 
-// TODO
-// 一括お気に入り削除
-export async function deleteMultipleFavoritesAction(paths: string[]) {
-  // 認証
-  const user = await resolveCurrentUserOrThrow();
-  const userId = user.id;
+type DeleteMultipleFavoritesResult =
+  | {
+      success: true;
+      completed: number;
+      failed: number;
+      skipped: number;
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
 
-  // 入力バリデーション
-  const parsed = VirtualPathManySchema.safeParse(paths);
-  if (!parsed.success) {
+// 一括お気に入り削除
+export async function deleteMultipleFavoritesAction(
+  paths: string[]
+): Promise<DeleteMultipleFavoritesResult> {
+  // 入力バリデーション＋正規化
+  const parsed = {
+    paths: VirtualPathManySchema.safeParse(paths),
+  };
+  if (!parsed.paths.success) {
     return {
       success: false,
-      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "paths", issues: parsed.paths.error?.issues }],
     };
   }
 
-  const validPaths = parsed.data;
+  const normalizedPaths = parsed.paths.data;
+
+  // ルートフォルダ保護
+  if (normalizedPaths.some(isRootPath)) {
+    return {
+      success: false,
+      message: "ルートフォルダは操作できません。",
+    };
+  }
+
+  // システムフォルダ保護
+  if (normalizedPaths.some(isSystemHiddenVirtualPath)) {
+    return {
+      success: false,
+      message: "システムフォルダは操作できません。",
+    };
+  }
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
+  const userId = user.id;
+
+  // 認可
+  if (!hasPermission(user, "favorite:delete-multiple")) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
 
   // メディアID逆引き
-  const mediaMap = await getMediaIdsByPaths(validPaths);
+  const mediaMap = await getMediaIdsByPaths(normalizedPaths);
+
   const mediaIds = Object.values(mediaMap);
   if (mediaIds.length === 0) {
-    return { success: true, count: 0 };
+    return {
+      success: false,
+      message: "お気に入り削除対象のメディアがありません。",
+    };
   }
 
+  let result: Awaited<ReturnType<typeof deleteMultipleFavorites>>;
   try {
-    const { count } = await deleteMultipleFavorites({ userId, mediaIds });
-    return { success: true, count };
+    result = await deleteMultipleFavorites({ userId, mediaIds });
   } catch (error) {
-    console.error("Failed to delete multiple favorites:", error);
-    return { success: false, error: "一括解除に失敗しました" };
+    logger.error("action:delete-multiple-favorites", error);
+    return { success: false, message: "お気に入り一括解除に失敗しました" };
   }
+
+  const completed = result.count;
+  const failed = mediaIds.length - completed;
+  const skipped = normalizedPaths.length - completed - failed;
+
+  return { success: true, completed, failed, skipped };
 }
 
 // TODO
