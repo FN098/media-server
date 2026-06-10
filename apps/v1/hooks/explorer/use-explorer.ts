@@ -33,7 +33,7 @@ export function useExplorer({ listing }: UseExplorerProps) {
   });
   const sort = useSort();
 
-  const dialogs = useExplorerDialogs({ filtering });
+  const dialogs = useExplorerDialogs({ filtering, selection });
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation();
   const history = useHistoryContext();

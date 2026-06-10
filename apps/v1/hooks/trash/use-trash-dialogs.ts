@@ -2,15 +2,23 @@ import { useDeleteDialog } from "@/hooks/dialogs/use-delete-dialog";
 import { useRatingFilterDialog } from "@/hooks/dialogs/use-rating-filter-dialog";
 import { useRestoreDialog } from "@/hooks/dialogs/use-restore-dialog";
 import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { useMemo } from "react";
 
 interface UseTrashDialogsProps {
   filtering: TrashFiltering;
+  selection: MediaNodeSelection;
 }
 
-export function useTrashDialogs({ filtering }: UseTrashDialogsProps) {
-  const deleteDialog = useDeleteDialog();
+export function useTrashDialogs({
+  filtering,
+  selection,
+}: UseTrashDialogsProps) {
+  const deleteDialog = useDeleteDialog({
+    onSuccess: selection.reset,
+  });
+
   const restoreDialog = useRestoreDialog();
 
   const ratingFilterDialog = useRatingFilterDialog({

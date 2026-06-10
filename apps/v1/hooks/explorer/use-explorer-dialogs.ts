@@ -10,18 +10,25 @@ import { useRenameDialog } from "@/hooks/dialogs/use-rename-dialog";
 import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { useTextFilePreviewDialog } from "@/hooks/dialogs/use-text-file-preview-dialog";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
+import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useMemo } from "react";
 
 interface UseExplorerDialogsProps {
   filtering: ExplorerFiltering;
+  selection: MediaNodeSelection;
 }
 
-export function useExplorerDialogs({ filtering }: UseExplorerDialogsProps) {
+export function useExplorerDialogs({
+  filtering,
+  selection,
+}: UseExplorerDialogsProps) {
   const renameDialog = useRenameDialog();
   const moveDialog = useMoveDialog();
   const copyDialog = useCopyDialog();
   const createFolderDialog = useCreateFolderDialog();
-  const deleteDialog = useDeleteDialog();
+  const deleteDialog = useDeleteDialog({
+    onSuccess: selection.reset,
+  });
   const extractDialog = useExtractDialog();
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog();

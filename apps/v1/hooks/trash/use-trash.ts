@@ -31,7 +31,7 @@ export function useTrash({ listing }: UseTrashProps) {
   });
   const sort = useSort();
 
-  const dialogs = useTrashDialogs({ filtering });
+  const dialogs = useTrashDialogs({ filtering, selection });
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation();
   const history = useHistoryContext();
