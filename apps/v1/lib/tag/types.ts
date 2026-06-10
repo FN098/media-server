@@ -29,14 +29,6 @@ export type SearchTagsOptions = {
   strategy?: SearchTagStrategy;
 };
 
-export type SearchTagsRequestParams = {
-  paths?: string[];
-  ids?: string[];
-  limit?: number;
-  query?: string;
-  strategy?: SearchTagStrategy;
-};
-
 export type TagMasterItem = {
   id: string;
   name: string;

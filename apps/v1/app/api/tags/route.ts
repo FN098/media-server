@@ -1,74 +1,53 @@
 import {
+  badRequestResponse,
+  internalServerErrorResponse,
+} from "@/lib/response/errors";
+import {
   getFavoriteTags,
   getRelatedTags,
   getTagsByIds,
 } from "@/lib/tag/repository";
+import {
+  SearchTagsRequestParams,
+  SearchTagsRequestParamsSchema,
+} from "@/lib/tag/schemas";
 import { searchTags } from "@/lib/tag/search";
-import { searchTagStrategies } from "@/lib/tag/strategies";
 import { uniqueBy } from "@/lib/utils/array";
+import { safeParseRequestJson } from "@/lib/utils/request";
+import { logger } from "better-auth";
 import { NextRequest, NextResponse } from "next/server";
-import z from "zod";
-
-// TODO: zod でバリデーション、try-catch の範囲を狭くする、response/errors を使う
 
 const MAX_PATHS_TO_PROCESS = 500;
-const MAX_RETURN_TAGS_COUNT = 100;
 
-const RequestSchema = z.object({
-  query: z.string().optional(),
-  paths: z.array(z.string()).optional().default([]),
-  ids: z.array(z.string()).optional().default([]),
-  strategy: z.enum(searchTagStrategies).optional().default("default"),
-  limit: z.coerce.number().optional().default(MAX_RETURN_TAGS_COUNT),
-});
-
-type ParsedRequestParams = z.infer<typeof RequestSchema>;
-
-// タグを検索
-export async function GET(request: NextRequest) {
-  try {
-    // 入力バリデーション
-    const { searchParams } = request.nextUrl;
-    const rawPaths = searchParams.get("paths");
-    const parsed = RequestSchema.safeParse(
-      rawPaths ? JSON.parse(rawPaths) : []
-    );
-
-    if (!parsed.success) {
-      return new NextResponse("Invalid paths format", { status: 400 });
-    }
-
-    const result = await process(parsed.data);
-
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("Tag Fetch Error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
-  }
-}
-
-// タグを検索：paths が多い場合、GET だと URL 長が上限を超えてエラーになる可能性があるので POST も用意しておく
+// タグを検索：検索パラメータが複雑なので、GETではなくPOSTで実装
 export async function POST(request: NextRequest) {
+  // 入力バリデーション
+  const json = await safeParseRequestJson(request);
+  const parsed = {
+    params: SearchTagsRequestParamsSchema.safeParse(json),
+  };
+
+  if (!parsed.params.success) {
+    return badRequestResponse({ message: "Invalid input" });
+  }
+
   try {
-    const body = (await request.json()) as unknown;
-    const parsed = RequestSchema.safeParse(body);
-
-    if (!parsed.success) {
-      return new NextResponse("Invalid request body", { status: 400 });
-    }
-
-    const result = await process(parsed.data);
+    const result = await process(parsed.params.data);
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Tag Fetch Error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    logger.error("api:search-tags", error);
+    return internalServerErrorResponse();
   }
 }
 
-async function process(params: ParsedRequestParams) {
-  const { ids, paths: pathsRaw, limit, query, strategy } = params;
-
+async function process({
+  ids,
+  paths: pathsRaw,
+  limit,
+  query,
+  strategy,
+}: SearchTagsRequestParams) {
   // ID 直接指定
   if (strategy === "ids-only") {
     const tags = await getTagsByIds(ids, { limit });

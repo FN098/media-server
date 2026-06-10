@@ -1,4 +1,5 @@
-import { SearchTagsRequestParams, Tag } from "@/lib/tag/types";
+import { SearchTagsRequestParamsInput } from "@/lib/tag/schemas";
+import { Tag } from "@/lib/tag/types";
 import {
   keepPreviousData,
   useQuery,
@@ -6,22 +7,21 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 
-interface Options extends SearchTagsRequestParams {
+interface UseTagsProps extends SearchTagsRequestParamsInput {
   triggered?: boolean;
   onLoad?: (tags: Tag[]) => void;
 }
 
-export function useTags(options: Options) {
+export function useTags({ triggered = true, onLoad, ...params }: UseTagsProps) {
   const queryClient = useQueryClient();
-  const { triggered = true, onLoad, ...apiRequestParams } = options;
 
   const { data, refetch, isLoading, isPlaceholderData, isFetching } = useQuery({
-    queryKey: ["tags", apiRequestParams],
+    queryKey: ["tags", params],
     queryFn: async () => {
       const res = await fetch("/api/tags", {
         method: "POST", // GET だと URL の長さに制約があるので POST を使う
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(apiRequestParams),
+        body: JSON.stringify(params),
       });
       if (!res.ok) throw new Error("Failed to fetch tags");
       return res.json() as Promise<Tag[]>;
