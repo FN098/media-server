@@ -1,13 +1,13 @@
 import { auth } from "@/lib/auth/better-auth";
 import { isBlockedClientPath } from "@/lib/path/protections";
-import { isPublic } from "@/lib/routing/public-routes";
+import { isPublicRoute } from "@/lib/routing/public-routes";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   // 一般公開パスは素通し
-  if (isPublic(pathname)) {
+  if (isPublicRoute(pathname)) {
     return NextResponse.next(); // 認可OK
   }
 
