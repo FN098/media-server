@@ -16,7 +16,7 @@ import { useHistoryContext } from "@/providers/history-provider";
 import { useSearchFocusContext } from "@/providers/search-focus-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 
-interface UseTrashProps {
+export interface UseTrashProps {
   listing: MediaListing;
 }
 

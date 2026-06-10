@@ -1,21 +1,18 @@
 "use client";
 
-import { useTrash } from "@/hooks/trash/use-trash";
-import { MediaListing } from "@/lib/media/types";
+import { useTrash, UseTrashProps } from "@/hooks/trash/use-trash";
 import { createContext, useContext } from "react";
 
 const TrashContext = createContext<ReturnType<typeof useTrash> | undefined>(
   undefined
 );
 
-export function TrashProvider({
-  children,
-  listing,
-}: {
+interface TrashProviderProps extends UseTrashProps {
   children: React.ReactNode;
-  listing: MediaListing;
-}) {
-  const value = useTrash({ listing });
+}
+
+export function TrashProvider({ children, ...rest }: TrashProviderProps) {
+  const value = useTrash(rest);
 
   return (
     <TrashContext.Provider value={value}>{children}</TrashContext.Provider>
