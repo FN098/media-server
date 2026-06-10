@@ -23,7 +23,7 @@ export function TagEditSheet() {
     opacity,
     tagEditor,
     isLoading,
-    resetEditingMode,
+    handleReset,
     handleClose,
     handleModeChangeDown,
     handleModeChangeUp,
@@ -48,7 +48,7 @@ export function TagEditSheet() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[60] bg-black/40"
-              onClick={resetEditingMode}
+              onClick={handleReset}
             />
           )}
 
@@ -253,7 +253,7 @@ export function TagEditSheet() {
                         onAdd={() => handleNewAdd(tagEditor.newTagName)}
                         onSelectSuggestion={tagEditor.selectSuggestion}
                         onApply={() => void handleApply()}
-                        onCancel={resetEditingMode}
+                        onCancel={handleReset}
                       />
                       <TagList
                         isEditing={true}
