@@ -1,9 +1,6 @@
 "use server";
 
-import {
-  resolveCurrentUser,
-  resolveCurrentUserOrThrow,
-} from "@/lib/auth/current-user";
+import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
 import { logger } from "@/lib/logger";
 import { detectMediaType } from "@/lib/media/detectors";
@@ -30,14 +27,9 @@ import {
   VirtualPathOneSchema,
   VirtualPathSchema,
 } from "@/lib/virtual-path/schemas";
-import console from "console";
 import { Dirent } from "fs";
 import { cp, mkdir, readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
-
-function normalizeVirtualPath(path: string) {
-  return VirtualPathOneSchema.parse(path);
-}
 
 type RenameNodeResult =
   | { success: true }
@@ -1201,14 +1193,29 @@ export async function deleteNodesPermanentlyAction(
 
 // タイムスタンプ更新
 export async function touchMediaTimestampAction(sourcePath: string) {
-  // 認証
-  await resolveCurrentUserOrThrow();
+  // 入力バリデーション＋正規化
+  if (!sourcePath) {
+    return {
+      success: false,
+      message: "処理対象のパスまたは名前が指定されていません。",
+    };
+  }
 
-  // 入力バリデーション+正規化
-  const normalizedSourcePath = normalizeVirtualPath(sourcePath);
+  const parsed = {
+    sourcePath: VirtualPathSchema.safeParse(sanitize(sourcePath)),
+  };
+  if (!parsed.sourcePath.success) {
+    return {
+      success: false,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "sourcePath", issues: parsed.sourcePath.error?.issues }],
+    };
+  }
+
+  const normalizedSourcePath = parsed.sourcePath.data;
 
   // ルートフォルダ保護
-  if (normalizedSourcePath === "") {
+  if (isRootPath(normalizedSourcePath)) {
     return { success: false, error: "ルートフォルダは操作できません。" };
   }
 
@@ -1217,13 +1224,24 @@ export async function touchMediaTimestampAction(sourcePath: string) {
     return { success: false, error: "システムフォルダは操作できません。" };
   }
 
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
+
+  const srcVirtualPath = normalizedSourcePath;
+
   // FS 更新不要：タイムスタンプは utime や open->close では更新されないため
 
   // DB 更新
   try {
-    await updateMediaFileMtime({ path: normalizedSourcePath });
+    await updateMediaFileMtime({ path: srcVirtualPath });
   } catch (e) {
-    console.error("failed to update database:", e);
+    logger.error("action:touch-timestamp", e);
     return {
       success: false,
       error: "タイムスタンプの更新に失敗しました。",
@@ -1235,15 +1253,44 @@ export async function touchMediaTimestampAction(sourcePath: string) {
 
 // メディアファイル一覧
 export async function listMediaAction(dirPath: string) {
-  // 認証
-  await resolveCurrentUserOrThrow();
+  // 入力バリデーション＋正規化
+  if (!dirPath) {
+    return {
+      success: false,
+      message: "処理対象のパスまたは名前が指定されていません。",
+    };
+  }
 
-  // 入力バリデーション+正規化
-  const normalizedDirPath = normalizeVirtualPath(dirPath);
+  const parsed = {
+    dirPath: VirtualPathSchema.safeParse(sanitize(dirPath)),
+  };
+  if (!parsed.dirPath.success) {
+    return {
+      success: false,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "dirPath", issues: parsed.dirPath.error?.issues }],
+    };
+  }
+
+  const normalizedDirPath = parsed.dirPath.data;
+
+  // ルートフォルダ保護
+  if (isRootPath(normalizedDirPath)) {
+    return { success: false, error: "ルートフォルダは操作できません。" };
+  }
 
   // システムフォルダ保護
   if (isSystemHiddenVirtualPath(normalizedDirPath)) {
     return { success: false, error: "システムフォルダは操作できません。" };
+  }
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
   }
 
   // 仮想パス→物理パス
@@ -1260,7 +1307,7 @@ export async function listMediaAction(dirPath: string) {
     if (isFsPermissionError(e)) {
       return { success: false, error: "フォルダへのアクセス権がありません。" };
     }
-    console.error("failed to read directory", e);
+    logger.error("action:list-media", e);
     return { success: false, error: "ファイル一覧の取得に失敗しました。" };
   }
 
