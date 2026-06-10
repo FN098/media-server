@@ -10,55 +10,65 @@ import {
   upsertMultipleFavorites,
 } from "@/lib/favorite/repository";
 import { RatingInputSchema } from "@/lib/favorite/schemar";
+import { logger } from "@/lib/logger";
 import { getMediaIdByPath, getMediaIdsByPaths } from "@/lib/media/repository";
 import {
   VirtualPathManySchema,
   VirtualPathOneSchema,
 } from "@/lib/virtual-path/schemas";
 
+type UpdateFavoriteResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
+
 // お気に入りレーティング更新
 export async function updateFavoriteAction(
   path: string,
   rating: number | null
-) {
+): Promise<UpdateFavoriteResult> {
   // 認証
   const user = await resolveCurrentUserOrThrow();
   const userId = user.id;
 
   // 入力バリデーション
-  const parsedPath = VirtualPathOneSchema.safeParse(path);
-  if (!parsedPath.success) {
+  const parsed = {
+    path: VirtualPathOneSchema.safeParse(path),
+    rating: RatingInputSchema.safeParse(rating),
+  };
+  if (!parsed.path.success || !parsed.rating.success) {
     return {
       success: false,
-      error: `不正な入力です: ${parsedPath.error.issues[0].message}`,
+      message: "入力エラーがあります。",
+      errors: [
+        { prop: "path", issues: parsed.path.error?.issues },
+        { prop: "rating", issues: parsed.rating.error?.issues },
+      ],
     };
   }
 
-  const parsedRating = RatingInputSchema.safeParse(rating);
-  if (!parsedRating.success) {
-    return {
-      success: false,
-      error: `不正な入力です: ${parsedRating.error.issues[0].message}`,
-    };
-  }
-
-  const validPath = parsedPath.data;
-  const validRating = parsedRating.data;
+  const normalizedPath = parsed.path.data;
+  const normalizedRating = parsed.rating.data;
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(validPath);
-  if (!mediaId) return { success: false, error: "メディアが見つかりません" };
+  const mediaId = await getMediaIdByPath(normalizedPath);
+  if (!mediaId) return { success: false, message: "メディアが見つかりません" };
 
   try {
     await upsertFavorite({
       userId,
       mediaId,
-      rating: validRating,
+      rating: normalizedRating,
     });
     return { success: true };
   } catch (error) {
-    console.error("Failed to update favorite:", error);
-    return { success: false, error: "お気に入りの更新に失敗しました" };
+    logger.error("action:update-favorite", error);
+    return { success: false, message: "お気に入りの更新に失敗しました" };
   }
 }
 
