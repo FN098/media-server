@@ -2,7 +2,7 @@
 
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
 import { authClient } from "@/lib/auth/better-auth-client";
@@ -13,7 +13,11 @@ import { Label } from "@/shadcn/components/ui/label";
 import { Spinner } from "@/shadcn/components/ui/spinner";
 import { cn } from "@/shadcn/lib/utils";
 
-export function SignIn() {
+interface SignInProps {
+  redirectTo?: string;
+}
+
+export function SignIn({ redirectTo = "/" }: SignInProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -22,8 +26,6 @@ export function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") ?? "/";
 
   const handleSignIn = useCallback(async () => {
     try {

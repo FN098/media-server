@@ -1,12 +1,15 @@
 import { SignIn } from "@/components/ui/pages/sign-in";
-import { Suspense } from "react";
 
-export default function SignInPage() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirectTo?: string }>;
+}) {
+  const { redirectTo } = await searchParams;
+
   return (
     <div className="flex items-center justify-center w-full h-full">
-      <Suspense>
-        <SignIn />
-      </Suspense>
+      <SignIn redirectTo={redirectTo} />
     </div>
   );
 }
