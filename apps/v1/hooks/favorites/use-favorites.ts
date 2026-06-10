@@ -18,7 +18,7 @@ import { useSearchFocusContext } from "@/providers/search-focus-provider";
 import { useSlideshowContext } from "@/providers/slideshow-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 
-interface UseFavoritesProps {
+export interface UseFavoritesProps {
   listing: MediaListing;
 }
 
