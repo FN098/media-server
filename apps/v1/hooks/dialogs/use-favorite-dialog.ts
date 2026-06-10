@@ -63,7 +63,7 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
       onSuccess?.();
       close();
     } else {
-      toast.error(result.error || "処理に失敗しました");
+      toast.error(result.message);
     }
   }, [
     targets,

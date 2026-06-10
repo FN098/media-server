@@ -177,7 +177,7 @@ export function useFavoritesControl({
       });
 
       if (validPaths.length === 0)
-        return { success: false, error: "処理するパスがありません" };
+        return { success: false, message: "処理するパスがありません" };
 
       // すべてのパスを Flight 状態にする
       startFlight(...validPaths);
@@ -251,7 +251,7 @@ export function useFavoritesControl({
       });
 
       if (validPaths.length === 0)
-        return { success: false, error: "処理するパスがありません" };
+        return { success: false, message: "処理するパスがありません" };
 
       // すべてのパスを Flight 状態にする
       startFlight(...validPaths);
