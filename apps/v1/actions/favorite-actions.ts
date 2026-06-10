@@ -185,45 +185,95 @@ export async function deleteFavoriteAction(
   return { success: true };
 }
 
-// お気に入り再検証
-export async function revalidateFavoriteAction(path: string) {
-  // 認証
-  const user = await resolveCurrentUserOrThrow();
-  const userId = user.id;
+type RevalidateFavoriteResult =
+  | {
+      success: true;
+      favorite: {
+        path: string;
+        rating: number | null;
+      } | null;
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
 
-  // 入力バリデーション
-  const parsed = VirtualPathOneSchema.safeParse(path);
-  if (!parsed.success) {
+// お気に入り再検証
+export async function revalidateFavoriteAction(
+  path: string
+): Promise<RevalidateFavoriteResult> {
+  // 入力バリデーション＋正規化
+  const parsed = {
+    path: VirtualPathOneSchema.safeParse(path),
+  };
+  if (!parsed.path.success) {
     return {
       success: false,
-      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "path", issues: parsed.path.error?.issues }],
     };
   }
 
-  const validPath = parsed.data;
+  const normalizedPath = parsed.path.data;
+
+  // ルートフォルダ保護
+  if (isRootPath(normalizedPath)) {
+    return {
+      success: false,
+      message: "ルートフォルダは操作できません。",
+    };
+  }
+
+  // システムフォルダ保護
+  if (isSystemHiddenVirtualPath(normalizedPath)) {
+    return {
+      success: false,
+      message: "システムフォルダは操作できません。",
+    };
+  }
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
+  const userId = user.id;
+
+  // 認可
+  if (!hasPermission(user, "favorite:delete")) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(validPath);
-  if (!mediaId) return { success: false, error: "メディアが見つかりません" };
+  const mediaId = await getMediaIdByPath(normalizedPath);
+  if (!mediaId) return { success: false, message: "メディアが見つかりません" };
 
+  let favorite: Awaited<ReturnType<typeof getFavorite>>;
   try {
-    const favorite = await getFavorite({ userId, mediaId });
-
-    // お気に入り未登録の場合は成功扱いとする
-    if (!favorite) return { success: true, favorite: null };
-
-    // クライアント側が期待する { path, rating } の形式で返す
-    return {
-      success: true,
-      favorite: {
-        path: validPath,
-        rating: favorite.rating,
-      },
-    };
+    favorite = await getFavorite({ userId, mediaId });
   } catch (error) {
-    console.error("Failed to revalidate favorite:", error);
-    return { success: false, error: "再検証に失敗しました" };
+    logger.error("action:revalidate-favorite", error);
+    return { success: false, message: "再検証に失敗しました" };
   }
+
+  // お気に入り未登録の場合は成功扱いとする
+  if (!favorite) return { success: true, favorite: null };
+
+  // クライアント側が期待する { path, rating } の形式で返す
+  return {
+    success: true,
+    favorite: {
+      path: normalizedPath,
+      rating: favorite.rating,
+    },
+  };
 }
 
 // 一括お気に入り登録・更新
