@@ -6,11 +6,11 @@ import { hasPermission } from "@/lib/authorization/permission";
 import { extractArchive } from "@/lib/child_process/7z";
 import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import { existsPath, isFsNotFoundError } from "@/lib/utils/fs";
+import { existsPath, getPathInfo } from "@/lib/utils/fs";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { basename, dirname, extname, join } from "@/lib/virtual-path/path";
 import { VirtualPathManySchema } from "@/lib/virtual-path/schemas";
-import { lstat, mkdir, rm } from "fs/promises";
+import { mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 
 type ExtractArchivesResult =
@@ -99,18 +99,18 @@ export async function extractArchivesAction(
     const srcRealPath = getServerMediaPath(srcVirtualPath);
 
     // 移動元の存在・ファイル確認
-    try {
-      const stats = await lstat(srcRealPath);
-      if (stats.isDirectory()) {
-        skipped.push({ sourcePath, message: "ディレクトリは解凍できません。" });
-        continue;
-      }
-    } catch (e) {
-      if (isFsNotFoundError(e)) {
+    const srcPathInfo = await getPathInfo(srcRealPath);
+    if (srcPathInfo.exists && srcPathInfo.isDirectory) {
+      skipped.push({ sourcePath, message: "ディレクトリは解凍できません。" });
+      continue;
+    }
+    if (!srcPathInfo.exists) {
+      if (srcPathInfo.error === "not-found") {
         failed.push({ sourcePath, message: "対象ファイルが見つかりません。" });
         continue;
       }
-      throw e;
+      failed.push({ sourcePath, message: "対象パスにアクセスできません。" });
+      continue;
     }
 
     // 解凍先フォルダ名の決定 (hoge.zip -> hoge)
@@ -134,7 +134,7 @@ export async function extractArchivesAction(
     // 解凍処理の実行
     let isDirCreated = false;
     try {
-      // 展開先の実ディレクトリを作成
+      // 展開先のディレクトリを作成
       await mkdir(destRealPath, { recursive: true });
       isDirCreated = true;
 
