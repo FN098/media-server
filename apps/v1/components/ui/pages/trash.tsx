@@ -106,7 +106,10 @@ function TrashOverlays() {
         inlineMenuItems={selectionbar.menu.inlineItems}
       />
 
-      <TagEditSheetProvider tagEditor={tagEditor}>
+      <TagEditSheetProvider
+        tagEditor={tagEditor}
+        targetNodes={selection.selectedNodes}
+      >
         <TagEditSheet />
       </TagEditSheetProvider>
 

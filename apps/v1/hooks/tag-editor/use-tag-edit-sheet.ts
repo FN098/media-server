@@ -1,6 +1,7 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { useTagEditorHotkeys } from "@/hooks/tag-editor/use-tag-editor-hotkeys";
+import { MediaNode } from "@/lib/media/types";
 import { EditingMode } from "@/lib/tag-editor/types";
 import { TagOperation } from "@/lib/tag/types";
 import { useRouter } from "next/navigation";
@@ -11,6 +12,7 @@ const initialEditingMode: EditingMode = "view";
 
 export interface UseTagEditSheetProps {
   tagEditor: TagEditor;
+  targetNodes: MediaNode[];
   mode?: EditingMode;
   onModeChange?: (mode: EditingMode) => void;
   autoBlur?: boolean; // 編集モード切り替え時に自動で背景ブラーを有効化
@@ -18,12 +20,12 @@ export interface UseTagEditSheetProps {
 
 export function useTagEditSheet({
   tagEditor,
+  targetNodes,
   mode: controlledMode,
   onModeChange: onControlledModeChange,
   autoBlur = true,
 }: UseTagEditSheetProps) {
   const {
-    targetNodes,
     isOpen,
     activate,
     opacity,
@@ -38,6 +40,7 @@ export function useTagEditSheet({
     resetChanges,
     invalidateTags,
     close,
+    setTargetNodes,
   } = tagEditor;
 
   const router = useRouter();
@@ -57,6 +60,11 @@ export function useTagEditSheet({
       activate();
     }
   }, [activate, isOpen]);
+
+  // 対象が変更されたらコンテキストに反映
+  useEffect(() => {
+    setTargetNodes(targetNodes);
+  }, [setTargetNodes, targetNodes]);
 
   // 不透明度変更
   const handleOpacityChange = useCallback(
@@ -84,11 +92,11 @@ export function useTagEditSheet({
     [autoBlur, handleOpacityChange, setEditingMode]
   );
 
-  // 編集モードリセット
-  const resetEditingMode = useCallback(
-    () => handleModeChange(initialEditingMode),
-    [handleModeChange]
-  );
+  // リセット
+  const handleReset = useCallback(() => {
+    resetChanges();
+    handleModeChange(initialEditingMode);
+  }, [handleModeChange, resetChanges]);
 
   // 新規追加
   const handleNewAdd = useCallback(
@@ -224,7 +232,7 @@ export function useTagEditSheet({
     opacity,
     tagEditor,
     isLoading,
-    resetEditingMode,
+    hasChanges,
     handleClose,
     handleModeChangeDown,
     handleModeChangeUp,
@@ -232,5 +240,6 @@ export function useTagEditSheet({
     handleOpacityChange,
     handleApply,
     handleNewAdd,
+    handleReset,
   };
 }
