@@ -1,20 +1,16 @@
 import { MediaNode } from "@/lib/media/types";
 import { useState } from "react";
 
-export type History = ReturnType<typeof useHistory>;
-
 type HistoryItem = {
   path: string;
   type: "file" | "directory";
 };
 
-type Options = {
+interface UseHistoryProps {
   maxLength?: number;
-};
+}
 
-export function useHistory(options: Options) {
-  const { maxLength = 10 } = options ?? {};
-
+export function useHistory({ maxLength = 10 }: UseHistoryProps = {}) {
   const [items, setItems] = useState<HistoryItem[]>([]);
 
   const push = (item: HistoryItem) => {
@@ -51,6 +47,8 @@ export function useHistory(options: Options) {
     last,
   };
 }
+
+export type History = ReturnType<typeof useHistory>;
 
 export const toHistoryItem = (media: MediaNode): HistoryItem => ({
   path: media.path,
