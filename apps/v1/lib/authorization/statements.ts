@@ -1,6 +1,7 @@
 export const statements = [
   "archive:extract",
   "favorite:update",
+  "favorite:delete",
   "file:rename",
   "file:move",
   "file:copy",

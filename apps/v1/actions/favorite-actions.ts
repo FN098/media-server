@@ -109,33 +109,80 @@ export async function updateFavoriteAction(
   return { success: true };
 }
 
-// お気に入り削除 (レコード自体の消去)
-export async function deleteFavoriteAction(path: string) {
-  // 認証
-  const user = await resolveCurrentUserOrThrow();
-  const userId = user.id;
+type DeleteFavoriteResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
 
-  // 入力バリデーション
-  const parsed = VirtualPathOneSchema.safeParse(path);
-  if (!parsed.success) {
+// お気に入り削除 (レコード自体の消去)
+export async function deleteFavoriteAction(
+  path: string
+): Promise<DeleteFavoriteResult> {
+  // 入力バリデーション＋正規化
+  const parsed = {
+    path: VirtualPathOneSchema.safeParse(path),
+  };
+  if (!parsed.path.success) {
     return {
       success: false,
-      error: `不正な入力です: ${parsed.error.issues[0].message}`,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "path", issues: parsed.path.error?.issues }],
     };
   }
-  const validPath = parsed.data;
+
+  const normalizedPath = parsed.path.data;
+
+  // ルートフォルダ保護
+  if (isRootPath(normalizedPath)) {
+    return {
+      success: false,
+      message: "ルートフォルダは操作できません。",
+    };
+  }
+
+  // システムフォルダ保護
+  if (isSystemHiddenVirtualPath(normalizedPath)) {
+    return {
+      success: false,
+      message: "システムフォルダは操作できません。",
+    };
+  }
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
+  const userId = user.id;
+
+  // 認可
+  if (!hasPermission(user, "favorite:delete")) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(validPath);
-  if (!mediaId) return { success: false, error: "メディアが見つかりません" };
+  const mediaId = await getMediaIdByPath(normalizedPath);
+  if (!mediaId) return { success: false, message: "メディアが見つかりません" };
 
   try {
     await deleteFavorite({ userId, mediaId });
-    return { success: true };
   } catch (error) {
-    console.error("Failed to delete favorite:", error);
-    return { success: false, error: "お気に入り解除に失敗しました" };
+    logger.error("action:delete-favorite", error);
+    return { success: false, message: "お気に入り解除に失敗しました" };
   }
+
+  return { success: true };
 }
 
 // お気に入り再検証
