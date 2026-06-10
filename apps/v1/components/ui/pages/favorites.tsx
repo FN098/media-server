@@ -17,7 +17,7 @@ export function Favorites() {
   const { viewer } = useFavoritesContext();
 
   return (
-    <div className="flex flex-col h-full focus:outline-none" tabIndex={-1}>
+    <div className="flex flex-col focus:outline-none" tabIndex={-1}>
       {!viewer.isOpen && <FavoritesToolbar />}
       <FavoritesContent />
       <FavoritesOverlays />
@@ -45,13 +45,11 @@ function FavoritesContent() {
   }
 
   return (
-    <div className="flex-1">
-      <MenuItemsProvider items={menu.items}>
-        <PagingProvider totalItems={filtering.filteredCount}>
-          <FavoritesListingView />
-        </PagingProvider>
-      </MenuItemsProvider>
-    </div>
+    <MenuItemsProvider items={menu.items}>
+      <PagingProvider totalItems={filtering.filteredCount}>
+        <FavoritesListingView />
+      </PagingProvider>
+    </MenuItemsProvider>
   );
 }
 
