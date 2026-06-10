@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="100%" height="100%">
+  <style>
+    /* ライトモード（デフォルト） */
+    .bg { fill: #E0E7FF; stroke: #C7D2FE; stroke-width: 1; }
+    .inner { fill: #6366F1; }
+
+    /* ダークモード（ブラウザのテーマに連動） */
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: rgba(99, 102, 241, 0.2); stroke: rgba(99, 102, 241, 0.3); stroke-width: 1; }
+      .inner { fill: #818CF8; }
+    }
+  </style>
+  <rect class="bg" width="28" height="28" rx="8" />
+  <rect class="inner" x="8.75" y="8.75" width="10" height="10" rx="2" />
+</svg>
