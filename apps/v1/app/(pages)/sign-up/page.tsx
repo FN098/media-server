@@ -10,7 +10,7 @@ export default async function SignUpPage() {
   });
 
   return (
-    <div className="flex items-center justify-center w-full h-full">
+    <div className="flex items-center justify-center w-full min-h-full">
       <SignUp hasAdmin={!!admin} />
     </div>
   );
