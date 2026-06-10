@@ -1,6 +1,6 @@
 import { useSelection } from "@/hooks/selections/use-selection";
 
-export function usePathSelection(initialSelectedPaths?: Iterable<string>) {
+export function usePathSelection() {
   const {
     isSelectionMode,
     enterSelectionMode,
@@ -21,7 +21,7 @@ export function usePathSelection(initialSelectedPaths?: Iterable<string>) {
     setLastSelectedKey,
     anchorKey,
     setAnchorKey,
-  } = useSelection<string>(initialSelectedPaths);
+  } = useSelection<string>();
 
   return {
     // 選択モード

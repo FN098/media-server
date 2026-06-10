@@ -1,11 +1,9 @@
 import { useCallback, useState } from "react";
 
-export function useSelection<K>(initialSelectedKeys?: Iterable<K>) {
+export function useSelection<K>() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
-  const [selectedKeys, setSelectedKeys] = useState<Set<K>>(
-    () => new Set(initialSelectedKeys)
-  );
+  const [selectedKeys, setSelectedKeys] = useState<Set<K>>(() => new Set());
 
   const selectedCount = selectedKeys.size;
 

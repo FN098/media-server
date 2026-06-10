@@ -7,14 +7,14 @@ const PathSelectionContext = createContext<
   ReturnType<typeof usePathSelection> | undefined
 >(undefined);
 
+interface PathSelectionProviderProps {
+  children: React.ReactNode;
+}
+
 export function PathSelectionProvider({
   children,
-  selectedPaths,
-}: {
-  children: React.ReactNode;
-  selectedPaths?: Iterable<string>;
-}) {
-  const value = usePathSelection(selectedPaths);
+}: PathSelectionProviderProps) {
+  const value = usePathSelection();
 
   return (
     <PathSelectionContext.Provider value={value}>
