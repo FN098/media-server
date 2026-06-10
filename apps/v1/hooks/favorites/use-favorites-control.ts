@@ -15,7 +15,7 @@ type FavoriteMsg =
   | { type: "UPDATE_MANY"; paths: string[]; rating: number | null }
   | { type: "DELETE_MANY"; paths: string[] };
 
-interface UseFavoriteControlProps {
+export interface UseFavoriteControlProps {
   favorites?: Favorite[];
 }
 

@@ -1,21 +1,24 @@
 "use client";
 
-import { useFavoritesControl } from "@/hooks/favorites/use-favorites-control";
-import { Favorite } from "@/lib/favorite/types";
+import {
+  UseFavoriteControlProps,
+  useFavoritesControl,
+} from "@/hooks/favorites/use-favorites-control";
 import { createContext, useContext } from "react";
 
 const FavoritesControlContext = createContext<
   ReturnType<typeof useFavoritesControl> | undefined
 >(undefined);
 
+interface FavoritesControlProvider extends UseFavoriteControlProps {
+  children: React.ReactNode;
+}
+
 export function FavoritesControlProvider({
   children,
-  favorites,
-}: {
-  children: React.ReactNode;
-  favorites?: Favorite[];
-}) {
-  const value = useFavoritesControl({ favorites });
+  ...rest
+}: FavoritesControlProvider) {
+  const value = useFavoritesControl(rest);
 
   return (
     <FavoritesControlContext.Provider value={value}>
