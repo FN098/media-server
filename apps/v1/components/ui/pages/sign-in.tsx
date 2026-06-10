@@ -58,7 +58,7 @@ export function SignIn() {
       setError("予期しないエラーが発生しました");
       setIsLoading(false);
     }
-  }, [email, password, rememberMe, router]);
+  }, [email, password, redirectTo, rememberMe, router]);
 
   return (
     <div className="relative w-full max-w-sm mx-4">
