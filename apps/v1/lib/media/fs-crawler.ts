@@ -1,29 +1,29 @@
 import { detectMediaType, isMedia } from "@/lib/media/detectors";
 import { MediaFsContext } from "@/lib/media/fs-listing";
 import { sortNames } from "@/lib/media/sort";
+import { Dirent } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
-// TODO: fs.readdir を呼びすぎ。一回だけ呼ぶようにする
-
-// そのディレクトリ「直下」にメディアがあるかチェック
-async function hasDirectMedia(
+async function readVirtualDir(
   virtualDirPath: string,
   context: MediaFsContext
-): Promise<boolean> {
-  const realPath = context.resolveRealPath(virtualDirPath);
+): Promise<Dirent[]> {
+  const realDirPath = context.resolveRealPath(virtualDirPath);
 
   try {
-    const dirents = await fs.readdir(realPath, { withFileTypes: true });
-
-    // ファイルかつメディアタイプであるものが1つでもあればOK
-    return dirents.some(
-      (e) => !e.isDirectory() && isMedia(detectMediaType(e.name))
-    );
+    return await fs.readdir(realDirPath, { withFileTypes: true });
   } catch {
-    // ディレクトリ読取失敗
-    return false;
+    return [];
   }
+}
+
+// そのディレクトリ「直下」にメディアがあるかチェック
+function hasDirectMedia(dirents: Dirent[]): boolean {
+  // ファイルかつメディアタイプであるものが1つでもあればOK
+  return dirents.some(
+    (e) => !e.isDirectory() && isMedia(detectMediaType(e.name))
+  );
 }
 
 // そのディレクトリ直下のサブディレクトリを名前順に取得
@@ -31,27 +31,19 @@ async function getSubDirs(
   virtualDirPath: string,
   context: MediaFsContext
 ): Promise<string[]> {
-  const realPath = context.resolveRealPath(virtualDirPath);
-  try {
-    const dirents = await fs.readdir(realPath, { withFileTypes: true });
+  const dirents = await readVirtualDir(virtualDirPath, context);
 
-    return sortNames(
-      dirents
-        .filter((e) => e.isDirectory())
-        .map((e) => e.name)
-        .filter((name) => {
-          const virtualPath = path
-            .join(virtualDirPath, name)
-            .replace(/\\/g, "/");
-          return context.filterVirtualPath
-            ? context.filterVirtualPath(virtualPath)
-            : true;
-        })
-    );
-  } catch {
-    // ディレクトリ読取失敗
-    return [];
-  }
+  return sortNames(
+    dirents
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter((name) => {
+        const virtualPath = path.join(virtualDirPath, name).replace(/\\/g, "/");
+        return context.filterVirtualPath
+          ? context.filterVirtualPath(virtualPath)
+          : true;
+      })
+  );
 }
 
 // 隣の有効なフォルダを探し、さらにその中を深く探索して「最初のメディアがあるフォルダ」を特定する
@@ -66,7 +58,8 @@ async function findDeepestMediaFolder(
 
   // 1. Next(first)なら、まず自分自身の直下をチェック
   if (priority === "first") {
-    if (await hasDirectMedia(virtualDirPath, context)) return virtualDirPath;
+    const dirents = await readVirtualDir(virtualDirPath, context);
+    if (hasDirectMedia(dirents)) return virtualDirPath;
   }
 
   // 2. 子フォルダを探索
@@ -81,7 +74,8 @@ async function findDeepestMediaFolder(
 
   // 3. Prev(last)なら、子を全部見た後に自分自身をチェック
   if (priority === "last") {
-    if (await hasDirectMedia(virtualDirPath, context)) return virtualDirPath;
+    const dirents = await readVirtualDir(virtualDirPath, context);
+    if (hasDirectMedia(dirents)) return virtualDirPath;
   }
 
   return null;
@@ -148,7 +142,8 @@ async function findGlobalPrevFolder(
   }
 
   // 2. 前の兄弟がいなければ、「親自身」がメディアを持っているか確認
-  if (parentPath !== "" && (await hasDirectMedia(parentPath, context))) {
+  const dirents = await readVirtualDir(parentPath, context);
+  if (parentPath !== "" && hasDirectMedia(dirents)) {
     return parentPath;
   }
 
