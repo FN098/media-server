@@ -9,3 +9,6 @@ export const searchTagStrategies = [
 ] as const;
 
 export const sortTagStrategies = ["default", "by-name"] as const;
+
+export type SearchTagStrategy = (typeof searchTagStrategies)[number];
+export type SortTagStrategy = (typeof sortTagStrategies)[number];

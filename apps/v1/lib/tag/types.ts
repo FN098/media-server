@@ -1,4 +1,4 @@
-import { searchTagStrategies, sortTagStrategies } from "@/lib/tag/strategies";
+import { SearchTagStrategy } from "@/lib/tag/strategies";
 
 export type {
   MediaTag as PrismaMediaTag,
@@ -32,7 +32,6 @@ export type CreateTagsResult =
       error: string;
     };
 
-export type SearchTagStrategy = (typeof searchTagStrategies)[number];
 export type SearchTagsOptions = {
   excludeIds?: string[];
   limit?: number;
@@ -46,8 +45,6 @@ export type SearchTagsRequestParams = {
   query?: string;
   strategy?: SearchTagStrategy;
 };
-
-export type SortTagStrategy = (typeof sortTagStrategies)[number];
 
 export type PendingChanges = Record<string, TagOperator>;
 
