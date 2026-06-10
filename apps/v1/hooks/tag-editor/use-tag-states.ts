@@ -1,7 +1,10 @@
 import { MediaNode } from "@/lib/media/types";
-import { Tag, TagCounts, TagStates } from "@/lib/tag/types";
+import { Tag, TagState } from "@/lib/tag/types";
 import { uniqueBy } from "@/lib/utils/array";
 import { useMemo } from "react";
+
+type TagStates = Record<string, TagState>;
+type TagCounts = Record<string, number>;
 
 export function useTagStates(
   selectedNodes: MediaNode[],

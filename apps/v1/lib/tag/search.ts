@@ -1,6 +1,14 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { SearchTagsOptions, Tag } from "@/lib/tag/types";
+import { SearchTagStrategy } from "@/lib/tag/strategies";
+import { Tag } from "@/lib/tag/types";
+
+type SearchTagsOptions = {
+  excludeIds?: string[];
+  limit?: number;
+  query?: string;
+  strategy?: SearchTagStrategy;
+};
 
 export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {
   const strategy = options?.strategy ?? "most-related";

@@ -1,5 +1,3 @@
-import { SearchTagStrategy } from "@/lib/tag/strategies";
-
 export type {
   MediaTag as PrismaMediaTag,
   Tag as PrismaTag,
@@ -10,8 +8,6 @@ export type Tag = {
   name: string;
 };
 
-export type TagNameType = string;
-
 export type TagOperator = "add" | "remove";
 export type TagOperation = {
   tagId: string;
@@ -19,15 +15,6 @@ export type TagOperation = {
 };
 
 export type TagState = "all" | "some" | "none";
-export type TagStates = Record<TagNameType, TagState>;
-export type TagCounts = Record<TagNameType, number>;
-
-export type SearchTagsOptions = {
-  excludeIds?: string[];
-  limit?: number;
-  query?: string;
-  strategy?: SearchTagStrategy;
-};
 
 export type TagMasterItem = {
   id: string;
