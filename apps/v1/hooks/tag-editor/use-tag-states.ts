@@ -10,17 +10,8 @@ export function useTagStates(
   selectedNodes: MediaNode[],
   allTags: Tag[]
 ): TagStates {
-  return useMemo(() => {
-    const totalSelected = selectedNodes.length;
-
-    // 何も選択されていない場合はすべて none
-    if (totalSelected === 0) {
-      const emptyStates: TagStates = {};
-      allTags.forEach((tag) => (emptyStates[tag.name] = "none"));
-      return emptyStates;
-    }
-
-    const tagCounts: TagCounts = {};
+  const tagCounts = useMemo(() => {
+    const result: TagCounts = {};
 
     // 選択ノードのタグを集計
     selectedNodes
@@ -28,23 +19,34 @@ export function useTagStates(
       .forEach((node) => {
         const uniqueTags = uniqueBy(node.tags!, "name");
         uniqueTags.forEach((tag) => {
-          tagCounts[tag.name] = (tagCounts[tag.name] || 0) + 1;
+          result[tag.name] = (result[tag.name] || 0) + 1;
         });
       });
 
-    const tagStates: TagStates = {};
+    return result;
+  }, [selectedNodes]);
 
-    // タグごとの状態を決定
-    // - all: すべての選択ノードにタグが含まれる
-    // - some: 一部の選択ノードにタグが含まれる
-    // - none: 選択ノードにタグが含まれていない
-    allTags.forEach((tag) => {
-      const count = tagCounts[tag.name] || 0;
-      if (count === 0) tagStates[tag.name] = "none";
-      else if (count === totalSelected) tagStates[tag.name] = "all";
-      else tagStates[tag.name] = "some";
-    });
+  const tagStates = useMemo(() => {
+    const result: TagStates = {};
 
-    return tagStates;
-  }, [allTags, selectedNodes]);
+    if (selectedNodes.length === 0) {
+      // 何も選択されていない場合はすべて none
+      allTags.forEach((tag) => (result[tag.name] = "none"));
+    } else {
+      // タグごとの状態を決定
+      // - all: すべての選択ノードにタグが含まれる
+      // - some: 一部の選択ノードにタグが含まれる
+      // - none: 選択ノードにタグが含まれていない
+      allTags.forEach((tag) => {
+        const count = tagCounts[tag.name] || 0;
+        if (count === 0) result[tag.name] = "none";
+        else if (count === selectedNodes.length) result[tag.name] = "all";
+        else result[tag.name] = "some";
+      });
+    }
+
+    return result;
+  }, [allTags, selectedNodes.length, tagCounts]);
+
+  return tagStates;
 }
