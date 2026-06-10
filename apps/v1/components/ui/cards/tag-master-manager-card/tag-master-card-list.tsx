@@ -72,7 +72,7 @@ export function TagMasterCardList({
   return (
     <div
       ref={parentRef}
-      className="h-[600px] overflow-auto scrollbar-thin bg-background border sm:rounded-lg"
+      className="h-[300px] overflow-auto scrollbar-thin bg-background border sm:rounded-lg"
     >
       <div
         style={{

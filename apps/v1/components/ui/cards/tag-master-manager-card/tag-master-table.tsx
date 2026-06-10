@@ -89,7 +89,7 @@ export function TagMasterTable({
       </div>
 
       {/* スクロールコンテナ */}
-      <div ref={parentRef} className="h-[600px] overflow-auto scrollbar-thin">
+      <div ref={parentRef} className="h-[300px] overflow-auto scrollbar-thin">
         <div
           style={{
             height: `${virtualizer.getTotalSize()}px`,
