@@ -19,7 +19,7 @@ export function Trash() {
   const { viewer } = useTrashContext();
 
   return (
-    <div className="flex flex-col h-full focus:outline-none" tabIndex={-1}>
+    <div className="flex flex-col focus:outline-none" tabIndex={-1}>
       {!viewer.isOpen && <TrashToolbar />}
       <TrashContent />
       <TrashOverlays />
@@ -51,13 +51,11 @@ function TrashContent() {
   }
 
   return (
-    <div className="flex-1">
-      <MenuItemsProvider items={menu.items}>
-        <PagingProvider totalItems={filtering.filteredCount}>
-          <TrashListingView />
-        </PagingProvider>
-      </MenuItemsProvider>
-    </div>
+    <MenuItemsProvider items={menu.items}>
+      <PagingProvider totalItems={filtering.filteredCount}>
+        <TrashListingView />
+      </PagingProvider>
+    </MenuItemsProvider>
   );
 }
 
