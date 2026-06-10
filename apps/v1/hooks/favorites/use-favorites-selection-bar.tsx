@@ -1,7 +1,7 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
 import { FavoritesFavorites } from "@/hooks/favorites/use-favorites-favorites";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { hasMedia } from "@/lib/media/detectors";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { averageBy } from "@/lib/utils/math";
@@ -10,7 +10,7 @@ import { useMemo } from "react";
 
 interface FavoritesSelectionBarMenuContext {
   isMediaSelected: boolean;
-  tagEditor: TagEditorControl;
+  tagEditor: TagEditor;
   favorites: FavoritesFavorites;
 }
 
@@ -64,7 +64,7 @@ function createFavoritesSelectionBarMenu({
 
 interface UseFavoritesSelectionBarProps {
   selection: MediaNodeSelection;
-  tagEditor: TagEditorControl;
+  tagEditor: TagEditor;
   favorites: FavoritesFavorites;
 }
 

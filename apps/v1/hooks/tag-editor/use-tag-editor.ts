@@ -1,3 +1,4 @@
+import { TagEditMode } from "@/components/ui/sheets/tag-edit-sheet/types";
 import { useTagStates } from "@/hooks/tag-editor/use-tag-states";
 import { useTags } from "@/hooks/tags/use-tags";
 import { MediaNode } from "@/lib/media/types";
@@ -41,6 +42,20 @@ export function useTagEditor() {
     () => targetNodes.map((n) => n.path),
     [targetNodes]
   );
+
+  const mode: TagEditMode = targetNodes.length === 1 ? "single" : "default";
+
+  const open = useCallback(() => {
+    setIsOpen(true);
+  }, [setIsOpen]);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+  }, [setIsOpen]);
+
+  const toggle = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, [setIsOpen]);
 
   // ベースタグ
   const {
@@ -212,9 +227,14 @@ export function useTagEditor() {
     targetNodes,
     setTargetNodes,
 
-    // 編集状態
+    // エディター表示制御
     isOpen,
-    setIsOpen,
+    open,
+    close,
+    toggle,
+
+    // 編集状態
+    mode,
     newTagName,
     setNewTagName,
     pendingNewTags,
@@ -251,3 +271,5 @@ export function useTagEditor() {
     activate,
   };
 }
+
+export type TagEditor = ReturnType<typeof useTagEditor>;

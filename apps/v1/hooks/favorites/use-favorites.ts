@@ -11,12 +11,12 @@ import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useSort } from "@/hooks/sort/use-sort";
-import { useTagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { useSearchFocusContext } from "@/providers/search-focus-provider";
 import { useSlideshowContext } from "@/providers/slideshow-provider";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 
 interface UseFavoritesProps {
   listing: MediaListing;
@@ -45,9 +45,7 @@ export function useFavorites({ listing }: UseFavoritesProps) {
 
   const favorites = useFavoritesFavorites();
 
-  const tagEditor = useTagEditorControl({
-    targetCount: selection.selectedCount,
-  });
+  const tagEditor = useTagEditorContext();
 
   const dialogs = useFavoritesDialogs({ filtering });
   const thumbs = useFavoritesThumbs();

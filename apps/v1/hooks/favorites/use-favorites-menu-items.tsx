@@ -11,7 +11,7 @@ import { useToggleFullscreenMenuItem } from "@/hooks/menu-items/use-toggle-fulls
 import { useToggleSlideshowMenuItem } from "@/hooks/menu-items/use-toggle-slideshow-menu-item";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { Slideshow } from "@/hooks/viewer/use-slideshow";
 import { createSeparator } from "@/lib/menu-items/factory";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
@@ -25,7 +25,7 @@ export const separators = {
 interface UseFavoritesMenuItemsProps {
   filtering: FavoritesFiltering;
   selection: MediaNodeSelection;
-  tagEditor: TagEditorControl;
+  tagEditor: TagEditor;
   navigation: FavoritesNavigation;
   viewer: ViewerNavigation;
   fullscreen: Fullscreen;

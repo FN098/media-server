@@ -4,7 +4,7 @@ import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { SearchFocus } from "@/hooks/search/use-search-focus";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 
@@ -15,7 +15,7 @@ interface UseFavoritesHotkeysProps {
   filtering: FavoritesFiltering;
   selection: MediaNodeSelection;
   dialogs: FavoritesDialogs;
-  tagEditor: TagEditorControl;
+  tagEditor: TagEditor;
   viewer: ViewerNavigation;
   fullscreen: Fullscreen;
   searchFocus: SearchFocus;

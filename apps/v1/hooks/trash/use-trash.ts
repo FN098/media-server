@@ -3,7 +3,6 @@ import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useSort } from "@/hooks/sort/use-sort";
-import { useTagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
 import { useTrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { useTrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { useTrashHotkeys } from "@/hooks/trash/use-trash-hotkeys";
@@ -15,6 +14,7 @@ import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { useSearchFocusContext } from "@/providers/search-focus-provider";
+import { useTagEditorContext } from "@/providers/tag-editor-provider";
 
 interface UseTrashProps {
   listing: MediaListing;
@@ -45,9 +45,7 @@ export function useTrash({ listing }: UseTrashProps) {
     folder,
   });
 
-  const tagEditor = useTagEditorControl({
-    targetCount: selection.selectedCount,
-  });
+  const tagEditor = useTagEditorContext();
 
   const thumbs = useTrashThumbs({ listing });
   const fullscreen = useFullscreen();

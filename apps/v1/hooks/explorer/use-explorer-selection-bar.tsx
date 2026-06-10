@@ -3,7 +3,7 @@ import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
 import { ExplorerThumbs } from "@/hooks/explorer/use-explorer-thumbs";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { hasMedia } from "@/lib/media/detectors";
 import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
@@ -24,7 +24,7 @@ interface ExplorerSelectionBarMenuContext {
   selectedNodes: MediaNodeSelection["selectedNodes"];
   hasSelection: boolean;
   isMediaSelected: boolean;
-  tagEditor: TagEditorControl;
+  tagEditor: TagEditor;
   favorites: ExplorerFavorites;
   thumbs: ExplorerThumbs;
   favoriteDialog: ExplorerDialogs["favoriteDialog"];
@@ -154,7 +154,7 @@ interface UseExplorerSelectionBarProps {
   listing: MediaListing;
   selection: MediaNodeSelection;
   dialogs: ExplorerDialogs;
-  tagEditor: TagEditorControl;
+  tagEditor: TagEditor;
   favorites: ExplorerFavorites;
   thumbs: ExplorerThumbs;
 }
