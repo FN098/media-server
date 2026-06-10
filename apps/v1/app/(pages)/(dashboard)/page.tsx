@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   const folders = await getRecentFolders(user.id, RECENT_FOLDERS_LIMIT);
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full min-h-full flex items-center justify-center">
       <div className="flex flex-col w-full max-w-lg mx-6 gap-8">
         {/* ヒーロー */}
         <section className="text-center">
