@@ -93,7 +93,8 @@ export async function updateFavoriteAction(
 
   // メディアID逆引き
   const mediaId = await getMediaIdByPath(normalizedPath);
-  if (!mediaId) return { success: false, message: "メディアが見つかりません" };
+  if (!mediaId)
+    return { success: false, message: "メディアが見つかりません。" };
 
   try {
     await upsertFavorite({
@@ -103,7 +104,7 @@ export async function updateFavoriteAction(
     });
   } catch (error) {
     logger.error("action:update-favorite", error);
-    return { success: false, message: "お気に入りの更新に失敗しました" };
+    return { success: false, message: "お気に入りの更新に失敗しました。" };
   }
 
   return { success: true };
@@ -276,43 +277,81 @@ export async function revalidateFavoriteAction(
   };
 }
 
+type UpdateMultipleFavoritesResult =
+  | {
+      success: true;
+      completed: number;
+      skipped: number;
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
+
 // 一括お気に入り登録・更新
 export async function updateMultipleFavoritesAction(
   paths: string[],
   rating: number | null
-) {
+): Promise<UpdateMultipleFavoritesResult> {
+  // 入力バリデーション＋正規化
+  const parsed = {
+    paths: VirtualPathManySchema.safeParse(paths),
+    rating: RatingInputSchema.safeParse(rating),
+  };
+  if (!parsed.paths.success || !parsed.rating.success) {
+    return {
+      success: false,
+      message: "入力エラーがあります。",
+      errors: [
+        { prop: "paths", issues: parsed.paths.error?.issues },
+        { prop: "rating", issues: parsed.rating.error?.issues },
+      ],
+    };
+  }
+
+  const normalizedPaths = parsed.paths.data;
+  const normalizedRating = parsed.rating.data;
+
+  // ルートフォルダ保護
+  if (normalizedPaths.some(isRootPath)) {
+    return {
+      success: false,
+      message: "ルートフォルダは操作できません。",
+    };
+  }
+
+  // システムフォルダ保護
+  if (normalizedPaths.some(isSystemHiddenVirtualPath)) {
+    return {
+      success: false,
+      message: "システムフォルダは操作できません。",
+    };
+  }
+
   // 認証
-  const user = await resolveCurrentUserOrThrow();
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
   const userId = user.id;
 
-  // 入力バリデーション
-  const parsedPaths = VirtualPathManySchema.safeParse(paths);
-  if (!parsedPaths.success) {
+  // 認可
+  if (!hasPermission(user, "favorite:update")) {
     return {
       success: false,
-      error: `不正な入力です: ${parsedPaths.error.issues[0].message}`,
+      message: "権限がありません。",
     };
   }
-
-  const parsedRating = RatingInputSchema.safeParse(rating);
-  if (!parsedRating.success) {
-    return {
-      success: false,
-      error: `不正な入力です: ${parsedRating.error.issues[0].message}`,
-    };
-  }
-
-  const validPaths = parsedPaths.data;
-  const validRating = parsedRating.data;
 
   // メディアID逆引き
-  const mediaMap = await getMediaIdsByPaths(validPaths);
-  if (Object.keys(mediaMap).length === 0) {
-    return { success: true, count: 0 };
-  }
+  const mediaMap = await getMediaIdsByPaths(normalizedPaths);
 
   // 有効なデータのみを抽出して整形
-  const dataToUpsert = validPaths
+  const dataToUpsert = normalizedPaths
     .map((path) => {
       const mediaId = mediaMap[path];
       if (!mediaId) return null;
@@ -324,21 +363,26 @@ export async function updateMultipleFavoritesAction(
     .filter((d): d is NonNullable<typeof d> => d !== null);
 
   if (dataToUpsert.length === 0) {
-    return { success: true, count: 0 };
+    return { success: false, message: "更新対象のメディアがありません。" };
   }
 
   try {
     await upsertMultipleFavorites({
       data: dataToUpsert,
-      rating: validRating,
+      rating: normalizedRating,
     });
-    return { success: true, count: dataToUpsert.length };
   } catch (error) {
-    console.error("Failed to update multiple favorites:", error);
-    return { success: false, error: "一括更新に失敗しました" };
+    logger.error("action:update-multiple-favorites", error);
+    return { success: false, message: "一括更新に失敗しました" };
   }
+
+  const completed = dataToUpsert.length;
+  const skipped = normalizedPaths.length - completed;
+
+  return { success: true, completed, skipped };
 }
 
+// TODO
 // 一括お気に入り削除
 export async function deleteMultipleFavoritesAction(paths: string[]) {
   // 認証
@@ -372,6 +416,7 @@ export async function deleteMultipleFavoritesAction(paths: string[]) {
   }
 }
 
+// TODO
 // 一括お気に入り再検証
 export async function revalidateMultipleFavoritesAction(paths: string[]) {
   // 認証
