@@ -40,6 +40,7 @@ export function SignIn({ redirectTo = "/" }: SignInProps) {
         },
         {
           onSuccess: () => {
+            // NOTE: 先に refresh しておかないと、push 時に認証 Cookie が送信されないぽい
             router.refresh();
             router.push(redirectTo);
 
