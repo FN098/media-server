@@ -14,7 +14,7 @@ import { useDebounce } from "use-debounce";
 import { v4 } from "uuid";
 
 export function useTagEditor() {
-  const [isTagEditMode, setIsTagEditMode] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [targetNodes, setTargetNodes] = useState<MediaNode[]>([]);
   const [newTagName, setNewTagName] = useState("");
   const [pendingNewTags, setPendingNewTags] = useState<Tag[]>([]);
@@ -213,8 +213,8 @@ export function useTagEditor() {
     setTargetNodes,
 
     // 編集状態
-    isTagEditMode,
-    setIsTagEditMode,
+    isOpen,
+    setIsOpen,
     newTagName,
     setNewTagName,
     pendingNewTags,

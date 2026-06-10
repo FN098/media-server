@@ -11,8 +11,7 @@ export function useTagEditorControl({
 }: UseTagEditorHandlersProps) {
   const mode: TagEditMode = targetCount == 1 ? "single" : "default";
 
-  const { isTagEditMode: isOpen, setIsTagEditMode: setIsOpen } =
-    useTagEditorContext();
+  const { isOpen, setIsOpen } = useTagEditorContext();
 
   const open = useCallback(() => {
     setIsOpen(true);
