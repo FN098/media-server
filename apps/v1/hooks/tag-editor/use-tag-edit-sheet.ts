@@ -1,76 +1,79 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
-import {
-  EditingMode,
-  TagEditMode,
-} from "@/components/ui/sheets/tag-edit-sheet/types";
+import { EditingMode } from "@/components/ui/sheets/tag-edit-sheet/types";
+import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { useTagEditorHotkeys } from "@/hooks/tag-editor/use-tag-editor-hotkeys";
-import { MediaNode } from "@/lib/media/types";
 import { TagOperation } from "@/lib/tag/types";
-import { useTagEditorContext } from "@/providers/tag-editor-provider";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-interface UseTagEditSheetProps {
-  open: boolean;
-  targetNodes: MediaNode[];
-  mode?: TagEditMode;
-  opacity?: number; // 背景の不透明度 (0~100)
-  onOpacityChange?: (opacity: number) => void;
-  edit?: boolean;
-  onClose: () => void;
+const initialEditingMode: EditingMode = "view";
+
+export interface UseTagEditSheetProps {
+  tagEditor: TagEditor;
+  mode?: EditingMode;
+  onModeChange?: (mode: EditingMode) => void;
   autoBlur?: boolean; // 編集モード切り替え時に自動で背景ブラーを有効化
 }
 
 export function useTagEditSheet({
-  open,
-  targetNodes,
-  mode = "default",
-  opacity: controlledOpacity,
-  onOpacityChange: onControlledOpacityChange,
-  edit,
-  onClose,
+  tagEditor,
+  mode: controlledMode,
+  onModeChange: onControlledModeChange,
   autoBlur = true,
 }: UseTagEditSheetProps) {
+  const {
+    targetNodes,
+    isOpen,
+    activate,
+    opacity,
+    setOpacity,
+    pendingNewTags,
+    pendingChanges,
+    setTagChange,
+    setNewTagName,
+    addPendingNewTag,
+    hasChanges,
+    editModeTags,
+    resetChanges,
+    invalidateTags,
+    close,
+  } = tagEditor;
+
   const router = useRouter();
-  const editor = useTagEditorContext();
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const [internalOpacity, setInternalOpacity] = useState(editor.opacity);
-  const opacity = controlledOpacity ?? internalOpacity;
-  const setOpacity = onControlledOpacityChange ?? setInternalOpacity;
+  const [internalEditingMode, setInternalEditingMode] =
+    useState<EditingMode>(initialEditingMode);
+  const editingMode = controlledMode ?? internalEditingMode;
+  const setEditingMode = onControlledModeChange ?? setInternalEditingMode;
 
-  const [editingMode, setEditingMode] = useState<EditingMode>(
-    edit ? "edit" : "view"
-  );
-
-  const canEdit = mode !== "none" && targetNodes.length > 0;
+  const canEdit = targetNodes.length > 0;
 
   // オープン時にアクティブ化
   useEffect(() => {
-    if (open) {
-      editor.activate();
+    if (isOpen) {
+      activate();
     }
-  }, [editor, open]);
+  }, [activate, isOpen]);
 
-  // 対象が変更されたらコンテキストに反映
-  useEffect(() => {
-    editor.setTargetNodes(targetNodes);
-  }, [editor, targetNodes]);
-
-  // 不透明度
+  // 不透明度変更
   const handleOpacityChange = useCallback(
     (opacity: number) => {
       setOpacity(opacity);
-      editor.setOpacity(opacity);
+      setOpacity(opacity);
     },
-    [editor, setOpacity]
+    [setOpacity]
   );
 
-  const toggleOpacity = () => handleOpacityChange(opacity === 0 ? 100 : 0);
+  // 不透明度トグル
+  const toggleOpacity = useCallback(
+    () => handleOpacityChange(opacity === 0 ? 100 : 0),
+    [handleOpacityChange, opacity]
+  );
 
-  // 編集モード
+  // 編集モード切り替え
   const handleModeChange = useCallback(
     (next: EditingMode) => {
       setEditingMode(next);
@@ -78,37 +81,44 @@ export function useTagEditSheet({
         handleOpacityChange(next === "view" ? 0 : 100);
       }
     },
-    [autoBlur, handleOpacityChange]
+    [autoBlur, handleOpacityChange, setEditingMode]
   );
 
-  const resetEditingMode = () => handleModeChange("view");
+  // 編集モードリセット
+  const resetEditingMode = useCallback(
+    () => handleModeChange(initialEditingMode),
+    [handleModeChange]
+  );
 
-  // 新規作成
-  const handleNewAdd = (name: string) => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
+  // 新規追加
+  const handleNewAdd = useCallback(
+    (name: string) => {
+      const trimmed = name.trim();
+      if (!trimmed) return;
 
-    // 既に存在すれば「追加候補」
-    const existing = editor.editModeTags.find((t) => t.name === trimmed);
-    if (existing) {
-      editor.setTagChange(existing, "add");
-      editor.setNewTagName("");
-      return;
-    }
+      // 既に存在すれば「追加候補」
+      const existing = editModeTags.find((t) => t.name === trimmed);
+      if (existing) {
+        setTagChange(existing, "add");
+        setNewTagName("");
+        return;
+      }
 
-    // 存在しない場合は仮タグとしてメモリに積む
-    editor.addPendingNewTag(trimmed);
-    editor.setNewTagName("");
-  };
+      // 存在しない場合は仮タグとしてメモリに積む
+      addPendingNewTag(trimmed);
+      setNewTagName("");
+    },
+    [addPendingNewTag, editModeTags, setNewTagName, setTagChange]
+  );
 
   // 保存処理
   const handleApply = useCallback(async () => {
-    if (isLoading || !editor.hasChanges) return;
+    if (isLoading || !hasChanges) return;
 
     setIsLoading(true);
 
-    const tagsToCreate = editor.pendingNewTags
-      .filter((t) => editor.pendingChanges[t.id] !== "remove")
+    const tagsToCreate = pendingNewTags
+      .filter((t) => pendingChanges[t.id] !== "remove")
       .map((t) => t.name);
 
     // 仮タグを DB 作成
@@ -122,12 +132,12 @@ export function useTagEditSheet({
     }));
 
     // 既存タグの操作
-    const existingOps: TagOperation[] = Object.entries(
-      editor.pendingChanges
-    ).map(([tagId, operator]) => ({
-      tagId,
-      operator,
-    }));
+    const existingOps: TagOperation[] = Object.entries(pendingChanges).map(
+      ([tagId, operator]) => ({
+        tagId,
+        operator,
+      })
+    );
 
     // マージ
     const operations = [...existingOps, ...createdOps];
@@ -143,17 +153,33 @@ export function useTagEditSheet({
 
     if (result.success) {
       toast.success("保存しました", { duration: 1000 });
-      editor.resetChanges();
+      resetChanges();
 
-      await editor.invalidateTags();
+      await invalidateTags();
       handleModeChange("view");
 
       router.refresh();
     }
-  }, [editor, handleModeChange, isLoading, router, targetNodes]);
+  }, [
+    isLoading,
+    hasChanges,
+    pendingNewTags,
+    pendingChanges,
+    targetNodes,
+    resetChanges,
+    invalidateTags,
+    handleModeChange,
+    router,
+  ]);
 
-  // 閲覧→クイック→詳細モードに移行
-  const handleModeChangeUp = () => {
+  // 閉じる
+  const handleClose = useCallback(() => {
+    handleModeChange("view");
+    close();
+  }, [close, handleModeChange]);
+
+  // モードチェンジ↑：閲覧→クイック→詳細
+  const handleModeChangeUp = useCallback(() => {
     const modeMap = {
       view: "quick",
       quick: "edit",
@@ -161,11 +187,12 @@ export function useTagEditSheet({
     } as const;
 
     const nextMode = modeMap[editingMode];
-    handleModeChange(nextMode);
-  };
 
-  // 詳細→クイック→閲覧モードに移行 or 閉じる
-  const handleModeChangeDown = () => {
+    handleModeChange(nextMode);
+  }, [editingMode, handleModeChange]);
+
+  // モードチェンジ↓：詳細→クイック→閲覧→閉じる
+  const handleModeChangeDown = useCallback(() => {
     const modeMap = {
       edit: "quick",
       quick: "view",
@@ -177,31 +204,25 @@ export function useTagEditSheet({
       handleClose();
       return;
     }
-    handleModeChange(nextMode);
-  };
 
-  // 閉じる
-  const handleClose = useCallback(() => {
-    handleModeChange("view");
-    onClose?.();
-  }, [handleModeChange, onClose]);
+    handleModeChange(nextMode);
+  }, [editingMode, handleClose, handleModeChange]);
 
   // ショートカット
   useTagEditorHotkeys({
-    open,
+    isOpen,
     handleModeChangeDown,
     handleModeChange,
     toggleOpacity,
   });
 
   return {
-    open,
+    isOpen,
     canEdit,
     editingMode,
     targetNodes,
-    mode,
     opacity,
-    editor,
+    tagEditor,
     isLoading,
     resetEditingMode,
     handleClose,

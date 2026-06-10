@@ -12,6 +12,7 @@ import { MediaViewerProvider } from "@/providers/media-viewer-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
 import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
+import { TagEditSheetProvider } from "@/providers/tag-edit-sheet-provider";
 
 export function Favorites() {
   const { viewer } = useFavoritesContext();
@@ -99,12 +100,9 @@ function FavoritesOverlays() {
         inlineMenuItems={selectionbar.menu.inlineItems}
       />
 
-      <TagEditSheet
-        open={tagEditor.isOpen}
-        targetNodes={selection.selectedNodes}
-        onClose={tagEditor.close}
-        mode={tagEditor.mode}
-      />
+      <TagEditSheetProvider tagEditor={tagEditor}>
+        <TagEditSheet />
+      </TagEditSheetProvider>
 
       {!viewer.isOpen && <FavoritesToolbarDialogs />}
     </>

@@ -2,10 +2,8 @@ import { SheetFooter } from "@/components/ui/sheets/tag-edit-sheet/seet-footer";
 import { SheetHeader } from "@/components/ui/sheets/tag-edit-sheet/seet-header";
 import { TagInput } from "@/components/ui/sheets/tag-edit-sheet/tag-input";
 import { TagList } from "@/components/ui/sheets/tag-edit-sheet/tag-list";
-import { TagEditMode } from "@/components/ui/sheets/tag-edit-sheet/types";
-import { useTagEditSheet } from "@/hooks/tag-editor/use-tag-edit-sheet";
-import { MediaNode } from "@/lib/media/types";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { useTagEditSheetContext } from "@/providers/tag-edit-sheet-provider";
 import {
   Tabs,
   TabsContent,
@@ -16,26 +14,14 @@ import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { Clock, Star } from "lucide-react";
 
-interface TagEditSheetProps {
-  open: boolean;
-  targetNodes: MediaNode[];
-  mode?: TagEditMode;
-  opacity?: number;
-  onOpacityChange?: (opacity: number) => void;
-  edit?: boolean;
-  onClose: () => void;
-  autoBlur?: boolean;
-}
-
-export function TagEditSheet(props: TagEditSheetProps) {
+export function TagEditSheet() {
   const {
-    open,
+    isOpen,
     canEdit,
     editingMode,
     targetNodes,
-    mode,
     opacity,
-    editor,
+    tagEditor,
     isLoading,
     resetEditingMode,
     handleClose,
@@ -45,14 +31,14 @@ export function TagEditSheet(props: TagEditSheetProps) {
     handleOpacityChange,
     handleApply,
     handleNewAdd,
-  } = useTagEditSheet(props);
+  } = useTagEditSheetContext();
 
   const controls = useDragControls();
   const isMobile = useDetectMobileContext();
 
   return (
     <AnimatePresence>
-      {open && (
+      {isOpen && (
         <>
           {/* 暗転オーバーレイ */}
           {(editingMode === "edit" || editingMode === "quick") && (
@@ -132,7 +118,7 @@ export function TagEditSheet(props: TagEditSheetProps) {
                       className="space-y-4"
                     >
                       <SheetHeader
-                        mode={mode}
+                        mode={tagEditor.mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
@@ -144,11 +130,11 @@ export function TagEditSheet(props: TagEditSheetProps) {
                       />
                       <TagList
                         isEditing={false}
-                        tags={editor.relatedTags}
-                        pendingChanges={editor.pendingChanges}
-                        pendingNewTags={editor.pendingNewTags}
-                        tagStates={editor.tagStates}
-                        onToggle={editor.toggleTagChange}
+                        tags={tagEditor.relatedTags}
+                        pendingChanges={tagEditor.pendingChanges}
+                        pendingNewTags={tagEditor.pendingNewTags}
+                        tagStates={tagEditor.tagStates}
+                        onToggle={tagEditor.toggleTagChange}
                         opacity={opacity}
                       />
                     </motion.div>
@@ -164,7 +150,7 @@ export function TagEditSheet(props: TagEditSheetProps) {
                       className="space-y-4"
                     >
                       <SheetHeader
-                        mode={mode}
+                        mode={tagEditor.mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
@@ -176,11 +162,11 @@ export function TagEditSheet(props: TagEditSheetProps) {
                       />
                       <TagList
                         isEditing={true}
-                        tags={editor.relatedTags}
-                        pendingChanges={editor.pendingChanges}
-                        pendingNewTags={editor.pendingNewTags}
-                        tagStates={editor.tagStates}
-                        onToggle={editor.toggleTagChange}
+                        tags={tagEditor.relatedTags}
+                        pendingChanges={tagEditor.pendingChanges}
+                        pendingNewTags={tagEditor.pendingNewTags}
+                        tagStates={tagEditor.tagStates}
+                        onToggle={tagEditor.toggleTagChange}
                         opacity={opacity}
                       />
                       <Tabs defaultValue="recent" className="w-full">
@@ -202,11 +188,11 @@ export function TagEditSheet(props: TagEditSheetProps) {
                           >
                             <TagList
                               isEditing={true}
-                              tags={editor.recentTags}
-                              pendingChanges={editor.pendingChanges}
-                              pendingNewTags={editor.pendingNewTags}
-                              tagStates={editor.tagStates}
-                              onToggle={editor.toggleTagChange}
+                              tags={tagEditor.recentTags}
+                              pendingChanges={tagEditor.pendingChanges}
+                              pendingNewTags={tagEditor.pendingNewTags}
+                              tagStates={tagEditor.tagStates}
+                              onToggle={tagEditor.toggleTagChange}
                               opacity={opacity}
                             />
                           </TabsContent>
@@ -216,20 +202,20 @@ export function TagEditSheet(props: TagEditSheetProps) {
                           >
                             <TagList
                               isEditing={true}
-                              tags={editor.favoriteTags}
-                              pendingChanges={editor.pendingChanges}
-                              pendingNewTags={editor.pendingNewTags}
-                              tagStates={editor.tagStates}
-                              onToggle={editor.toggleTagChange}
+                              tags={tagEditor.favoriteTags}
+                              pendingChanges={tagEditor.pendingChanges}
+                              pendingNewTags={tagEditor.pendingNewTags}
+                              tagStates={tagEditor.tagStates}
+                              onToggle={tagEditor.toggleTagChange}
                               opacity={opacity}
                             />
                           </TabsContent>
                         </div>
                       </Tabs>
                       <SheetFooter
-                        onReset={editor.resetChanges}
+                        onReset={tagEditor.resetChanges}
                         onApply={() => void handleApply()}
-                        hasChanges={editor.hasChanges}
+                        hasChanges={tagEditor.hasChanges}
                         isLoading={isLoading}
                         opacity={opacity}
                       />
@@ -246,7 +232,7 @@ export function TagEditSheet(props: TagEditSheetProps) {
                       className="space-y-4"
                     >
                       <SheetHeader
-                        mode={mode}
+                        mode={tagEditor.mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
@@ -257,31 +243,31 @@ export function TagEditSheet(props: TagEditSheetProps) {
                         onOpacityChange={handleOpacityChange}
                       />
                       <TagInput
-                        value={editor.newTagName}
+                        value={tagEditor.newTagName}
                         opacity={opacity}
                         disabled={isLoading}
                         autoFocus={!isMobile}
                         autoBlur={isMobile}
-                        suggestions={editor.suggestedTags}
-                        onChange={editor.setNewTagName}
-                        onAdd={() => handleNewAdd(editor.newTagName)}
-                        onSelectSuggestion={editor.selectSuggestion}
+                        suggestions={tagEditor.suggestedTags}
+                        onChange={tagEditor.setNewTagName}
+                        onAdd={() => handleNewAdd(tagEditor.newTagName)}
+                        onSelectSuggestion={tagEditor.selectSuggestion}
                         onApply={() => void handleApply()}
                         onCancel={resetEditingMode}
                       />
                       <TagList
                         isEditing={true}
-                        tags={editor.editModeTags}
-                        pendingChanges={editor.pendingChanges}
-                        pendingNewTags={editor.pendingNewTags}
-                        tagStates={editor.tagStates}
-                        onToggle={editor.toggleTagChange}
+                        tags={tagEditor.editModeTags}
+                        pendingChanges={tagEditor.pendingChanges}
+                        pendingNewTags={tagEditor.pendingNewTags}
+                        tagStates={tagEditor.tagStates}
+                        onToggle={tagEditor.toggleTagChange}
                         opacity={opacity}
                       />
                       <SheetFooter
-                        onReset={editor.resetChanges}
+                        onReset={tagEditor.resetChanges}
                         onApply={() => void handleApply()}
-                        hasChanges={editor.hasChanges}
+                        hasChanges={tagEditor.hasChanges}
                         isLoading={isLoading}
                         opacity={opacity}
                       />

@@ -2,14 +2,14 @@ import { EditingMode } from "@/components/ui/sheets/tag-edit-sheet/types";
 import { useHotkeys } from "react-hotkeys-hook";
 
 interface UseTagEditorHotkeysProps {
-  open: boolean;
+  isOpen: boolean;
   handleModeChangeDown: () => void;
   handleModeChange: (mode: EditingMode) => void;
   toggleOpacity: () => void;
 }
 
 export function useTagEditorHotkeys({
-  open,
+  isOpen,
   handleModeChangeDown,
   handleModeChange,
   toggleOpacity,
@@ -17,30 +17,30 @@ export function useTagEditorHotkeys({
   // Escape / Backspace: 閉じる
   useHotkeys(["escape", "backspace"], () => handleModeChangeDown(), {
     scopes: "tag-editor",
-    enabled: open,
+    enabled: isOpen,
   });
 
   // E: 詳細モード
   useHotkeys("e", () => handleModeChange("edit"), {
     scopes: "tag-editor",
-    enabled: open,
+    enabled: isOpen,
   });
 
   // Q: クイックモード
   useHotkeys("q", () => handleModeChange("quick"), {
     scopes: "tag-editor",
-    enabled: open,
+    enabled: isOpen,
   });
 
   // V: 閲覧モード
   useHotkeys("v", () => handleModeChange("view"), {
     scopes: "tag-editor",
-    enabled: open,
+    enabled: isOpen,
   });
 
   // B: 不透明度トグル
   useHotkeys("b", () => toggleOpacity(), {
     scopes: "tag-editor",
-    enabled: open,
+    enabled: isOpen,
   });
 }
