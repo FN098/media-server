@@ -1,7 +1,7 @@
 import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
-import { EditingMode } from "@/components/ui/sheets/tag-edit-sheet/types";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { useTagEditorHotkeys } from "@/hooks/tag-editor/use-tag-editor-hotkeys";
+import { EditingMode } from "@/lib/tag-editor/types";
 import { TagOperation } from "@/lib/tag/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";

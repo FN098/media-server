@@ -1,4 +1,4 @@
-import { EditingMode } from "@/components/ui/sheets/tag-edit-sheet/types";
+import { EditingMode } from "@/lib/tag-editor/types";
 import { useHotkeys } from "react-hotkeys-hook";
 
 interface UseTagEditorHotkeysProps {

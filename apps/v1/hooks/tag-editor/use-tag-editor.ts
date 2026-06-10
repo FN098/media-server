@@ -1,7 +1,7 @@
-import { TagEditMode } from "@/components/ui/sheets/tag-edit-sheet/types";
 import { useTagStates } from "@/hooks/tag-editor/use-tag-states";
 import { useTags } from "@/hooks/tags/use-tags";
 import { MediaNode } from "@/lib/media/types";
+import { TagEditMode } from "@/lib/tag-editor/types";
 import {
   PendingChanges,
   SearchTagStrategy,

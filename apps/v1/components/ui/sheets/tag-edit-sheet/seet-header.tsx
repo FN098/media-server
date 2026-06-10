@@ -1,7 +1,4 @@
-import {
-  EditingMode,
-  TagEditMode,
-} from "@/components/ui/sheets/tag-edit-sheet/types";
+import { EditingMode, TagEditMode } from "@/lib/tag-editor/types";
 import { Button } from "@/shadcn/components/ui/button";
 import { Label } from "@/shadcn/components/ui/label";
 import { Switch } from "@/shadcn/components/ui/switch";
