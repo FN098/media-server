@@ -1,24 +1,18 @@
 "use client";
 
-import { usePaging } from "@/hooks/navigation/use-paging";
+import { usePaging, UsePagingProps } from "@/hooks/navigation/use-paging";
 import { createContext, ReactNode, useContext } from "react";
 
 const PagingContext = createContext<ReturnType<typeof usePaging> | undefined>(
   undefined
 );
 
-export function PagingProvider({
-  children,
-  totalCount,
-  defaultPageSize,
-  history,
-}: {
+interface PagingProviderProps extends UsePagingProps {
   children: ReactNode;
-  totalCount: number;
-  defaultPageSize?: number;
-  history?: "push" | "replace";
-}) {
-  const value = usePaging({ totalCount, defaultPageSize, history });
+}
+
+export function PagingProvider({ children, ...rest }: PagingProviderProps) {
+  const value = usePaging(rest);
 
   return (
     <PagingContext.Provider value={value}>{children}</PagingContext.Provider>

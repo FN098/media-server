@@ -7,7 +7,7 @@ const MAX_PAGE = 100;
 const MIN_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 100;
 
-interface UsePagingProps {
+export interface UsePagingProps {
   totalCount: number;
   defaultPageSize?: number;
   pageKey?: string;
