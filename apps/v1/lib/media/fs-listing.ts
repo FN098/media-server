@@ -1,16 +1,11 @@
 import { detectMediaType } from "@/lib/media/detectors";
 import { findGlobalAdjacentFolder } from "@/lib/media/fs-crawler";
-import { MediaFsListing, MediaFsNode } from "@/lib/media/types";
+import { MediaFsContext, MediaFsListing, MediaFsNode } from "@/lib/media/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
-
-export interface MediaFsContext {
-  resolveRealPath: (virtualPath: string) => string;
-  filterVirtualPath?: (virtualPath: string) => boolean;
-}
 
 const defaultContext: MediaFsContext = {
   resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),

@@ -1,9 +1,9 @@
 import { detectMediaType, isMedia } from "@/lib/media/detectors";
-import { MediaFsContext } from "@/lib/media/fs-listing";
 import { sortNames } from "@/lib/media/sort";
 import { Dirent } from "fs";
 import fs from "fs/promises";
 import path from "path";
+import { MediaFsContext } from "./types";
 
 async function readVirtualDir(
   virtualDirPath: string,
@@ -11,9 +11,19 @@ async function readVirtualDir(
 ): Promise<Dirent[]> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
 
+  if (!context.dirCache) {
+    context.dirCache = new Map();
+  }
+
+  const cached = context.dirCache.get(realDirPath);
+  if (cached) return cached;
+
   try {
-    return await fs.readdir(realDirPath, { withFileTypes: true });
+    const dirents = await fs.readdir(realDirPath, { withFileTypes: true });
+    context.dirCache.set(realDirPath, dirents);
+    return dirents;
   } catch {
+    context.dirCache.set(realDirPath, []);
     return [];
   }
 }
@@ -81,6 +91,7 @@ async function findDeepestMediaFolder(
   return null;
 }
 
+// 次のフォルダを探索
 async function findGlobalNextFolder(
   currentVirtualDirPath: string,
   context: MediaFsContext
@@ -121,6 +132,7 @@ async function findNextStepUpward(
   return findNextStepUpward(parentPath, context);
 }
 
+// 前のフォルダを探索
 async function findGlobalPrevFolder(
   currentVirtualDirPath: string,
   context: MediaFsContext
