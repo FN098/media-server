@@ -21,8 +21,6 @@ export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {
       return searchRecentlyCreatedTags(options);
 
     case "recently-used":
-      return searchRecentlyUsedTags(options);
-
     default:
       return searchRecentlyUsedTags(options);
   }
