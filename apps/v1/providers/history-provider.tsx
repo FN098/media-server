@@ -1,20 +1,18 @@
 "use client";
 
-import { useHistory } from "@/hooks/navigation/use-history";
+import { useHistory, UseHistoryProps } from "@/hooks/navigation/use-history";
 import { createContext, useContext } from "react";
 
 const HistoryContext = createContext<ReturnType<typeof useHistory> | undefined>(
   undefined
 );
 
-export function HistoryProvider({
-  children,
-  maxLength,
-}: {
+interface HistoryProviderProps extends UseHistoryProps {
   children: React.ReactNode;
-  maxLength?: number;
-}) {
-  const value = useHistory({ maxLength });
+}
+
+export function HistoryProvider({ children, ...rest }: HistoryProviderProps) {
+  const value = useHistory(rest);
 
   return (
     <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>

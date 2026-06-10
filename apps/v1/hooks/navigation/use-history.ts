@@ -6,7 +6,7 @@ type HistoryItem = {
   type: "file" | "directory";
 };
 
-interface UseHistoryProps {
+export interface UseHistoryProps {
   maxLength?: number;
 }
 
