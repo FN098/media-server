@@ -18,7 +18,14 @@ export async function proxy(req: NextRequest) {
   });
 
   if (!session) {
-    return NextResponse.redirect(new URL("/sign-in", req.url));
+    const signInUrl = new URL("/sign-in", req.url);
+
+    signInUrl.searchParams.set(
+      "redirectTo",
+      req.nextUrl.pathname + req.nextUrl.search
+    );
+
+    return NextResponse.redirect(signInUrl);
   }
 
   // ====== 認可 =======

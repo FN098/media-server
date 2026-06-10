@@ -2,7 +2,7 @@
 
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
 import { authClient } from "@/lib/auth/better-auth-client";
@@ -22,6 +22,8 @@ export function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") ?? "/";
 
   const handleSignIn = useCallback(async () => {
     try {
@@ -37,10 +39,10 @@ export function SignIn() {
         {
           onSuccess: () => {
             router.refresh();
-            router.push("/");
+            router.push(redirectTo);
 
             // NOTE: router.push で画面遷移できない場合は代わりに以下を使う
-            // window.location.href = "/";
+            // window.location.href = redirectTo;
           },
         }
       );
