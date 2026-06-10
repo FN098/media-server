@@ -1,21 +1,18 @@
 "use client";
 
-import { useExplorer } from "@/hooks/explorer/use-explorer";
-import { MediaListing } from "@/lib/media/types";
+import { useExplorer, UseExplorerProps } from "@/hooks/explorer/use-explorer";
 import { createContext, useContext } from "react";
 
 const ExplorerContext = createContext<
   ReturnType<typeof useExplorer> | undefined
 >(undefined);
 
-export function ExplorerProvider({
-  children,
-  listing,
-}: {
+interface ExplorerProviderProps extends UseExplorerProps {
   children: React.ReactNode;
-  listing: MediaListing;
-}) {
-  const value = useExplorer({ listing });
+}
+
+export function ExplorerProvider({ children, ...rest }: ExplorerProviderProps) {
+  const value = useExplorer(rest);
 
   return (
     <ExplorerContext.Provider value={value}>
