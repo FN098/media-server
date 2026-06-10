@@ -1,4 +1,4 @@
-import { IndexLike } from "@/hooks/navigations/use-viewer-navigation";
+import { IndexLike } from "@/hooks/navigation/use-viewer-navigation";
 import { resolveClientPath } from "@/lib/path/resolvers";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";

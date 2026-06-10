@@ -2,7 +2,7 @@ import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { ExplorerNavigation } from "@/hooks/explorer/use-explorer-navigation";
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
-import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
 import { SearchFocus } from "@/hooks/search/use-search-focus";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";

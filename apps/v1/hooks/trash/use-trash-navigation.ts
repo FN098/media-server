@@ -1,12 +1,12 @@
 import { visitFolderAction } from "@/actions/folder-actions";
-import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
-import { History, toHistoryItem } from "@/hooks/navigations/use-history";
-import { useMediaIndex } from "@/hooks/navigations/use-media-index";
-import { useParentPathname } from "@/hooks/navigations/use-parent-pathname";
+import { FolderNavigation } from "@/hooks/navigation/use-folder-navigation";
+import { History, toHistoryItem } from "@/hooks/navigation/use-history";
+import { useMediaIndex } from "@/hooks/navigation/use-media-index";
+import { useParentPathname } from "@/hooks/navigation/use-parent-pathname";
 import {
   IndexLike,
   ViewerNavigation,
-} from "@/hooks/navigations/use-viewer-navigation";
+} from "@/hooks/navigation/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { isMedia } from "@/lib/media/detectors";

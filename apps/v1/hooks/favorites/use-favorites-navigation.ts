@@ -1,8 +1,8 @@
 import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
-import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
-import { History, toHistoryItem } from "@/hooks/navigations/use-history";
-import { useMediaIndex } from "@/hooks/navigations/use-media-index";
-import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { FolderNavigation } from "@/hooks/navigation/use-folder-navigation";
+import { History, toHistoryItem } from "@/hooks/navigation/use-history";
+import { useMediaIndex } from "@/hooks/navigation/use-media-index";
+import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";

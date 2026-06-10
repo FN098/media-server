@@ -9,7 +9,7 @@ import { useOpenParentFolderMenuItem } from "@/hooks/menu-items/use-open-parent-
 import { useRatingMenuItem } from "@/hooks/menu-items/use-rating-menu-item";
 import { useToggleFullscreenMenuItem } from "@/hooks/menu-items/use-toggle-fullscreen-menu-item";
 import { useToggleSlideshowMenuItem } from "@/hooks/menu-items/use-toggle-slideshow-menu-item";
-import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { Slideshow } from "@/hooks/viewer/use-slideshow";

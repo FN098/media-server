@@ -7,8 +7,8 @@ import { useFavoritesNavigation } from "@/hooks/favorites/use-favorites-navigati
 import { useFavoritesSelectionBar } from "@/hooks/favorites/use-favorites-selection-bar";
 import { useFavoritesThumbs } from "@/hooks/favorites/use-favorites-thumbs";
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
-import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
-import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { useFolderNavigation } from "@/hooks/navigation/use-folder-navigation";
+import { useViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
 import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useSort } from "@/hooks/sort/use-sort";
 import { useViewMode } from "@/hooks/view/use-view-mode";

@@ -1,6 +1,6 @@
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
-import { useFolderNavigation } from "@/hooks/navigations/use-folder-navigation";
-import { useViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { useFolderNavigation } from "@/hooks/navigation/use-folder-navigation";
+import { useViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
 import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useSort } from "@/hooks/sort/use-sort";
 import { useTrashDialogs } from "@/hooks/trash/use-trash-dialogs";

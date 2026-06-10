@@ -2,14 +2,14 @@ import { visitFolderAction } from "@/actions/folder-actions";
 import { getTextFilePreviewAction } from "@/actions/text-file-actions";
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { FolderNavigation } from "@/hooks/navigations/use-folder-navigation";
-import { History, toHistoryItem } from "@/hooks/navigations/use-history";
-import { useMediaIndex } from "@/hooks/navigations/use-media-index";
-import { useParentPathname } from "@/hooks/navigations/use-parent-pathname";
+import { FolderNavigation } from "@/hooks/navigation/use-folder-navigation";
+import { History, toHistoryItem } from "@/hooks/navigation/use-history";
+import { useMediaIndex } from "@/hooks/navigation/use-media-index";
+import { useParentPathname } from "@/hooks/navigation/use-parent-pathname";
 import {
   IndexLike,
   ViewerNavigation,
-} from "@/hooks/navigations/use-viewer-navigation";
+} from "@/hooks/navigation/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";

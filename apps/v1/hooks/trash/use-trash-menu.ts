@@ -1,5 +1,5 @@
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
-import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { useTrashMenuItems } from "@/hooks/trash/use-trash-menu-items";

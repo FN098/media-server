@@ -5,7 +5,7 @@ import { useOpenNextFolderMenuItem } from "@/hooks/menu-items/use-open-next-fold
 import { useOpenPrevFolderMenuItem } from "@/hooks/menu-items/use-open-prev-folder-menu-item";
 import { useRestoreMenuItem } from "@/hooks/menu-items/use-restore-menu-item";
 import { useToggleFullscreenMenuItem } from "@/hooks/menu-items/use-toggle-fullscreen-menu-item";
-import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
+import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { TrashNavigation } from "@/hooks/trash/use-trash-navigation";

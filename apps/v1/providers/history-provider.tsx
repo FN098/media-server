@@ -1,6 +1,6 @@
 "use client";
 
-import { useHistory } from "@/hooks/navigations/use-history";
+import { useHistory } from "@/hooks/navigation/use-history";
 import { createContext, useContext } from "react";
 
 const HistoryContext = createContext<ReturnType<typeof useHistory> | undefined>(
