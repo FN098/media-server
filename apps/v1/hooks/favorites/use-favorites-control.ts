@@ -89,16 +89,19 @@ export function useFavoritesControl({
         const result = await updateFavoriteAction(path, rating);
         if (!result.success) {
           // 失敗時のロールバック
-          const { favorite } = await revalidateFavoriteAction(path);
-          setFavorites((m) => {
-            const next = new Map(m);
-            if (favorite) {
-              next.set(path, favorite.rating);
-            } else {
-              next.delete(path);
-            }
-            return next;
-          });
+          const revalidated = await revalidateFavoriteAction(path);
+          if (revalidated.success) {
+            const { favorite } = revalidated;
+            setFavorites((m) => {
+              const next = new Map(m);
+              if (favorite) {
+                next.set(path, favorite.rating);
+              } else {
+                next.delete(path);
+              }
+              return next;
+            });
+          }
         }
         return result;
       } finally {
@@ -127,8 +130,9 @@ export function useFavoritesControl({
         const result = await deleteFavoriteAction(path);
         if (!result.success) {
           // 失敗時のロールバック
-          const { favorite } = await revalidateFavoriteAction(path);
-          if (favorite) {
+          const revalidated = await revalidateFavoriteAction(path);
+          if (revalidated.success && revalidated.favorite) {
+            const { favorite } = revalidated;
             setFavorites((m) => new Map(m).set(path, favorite.rating));
           }
         }
