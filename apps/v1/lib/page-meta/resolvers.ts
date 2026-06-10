@@ -24,7 +24,7 @@ function normalize(meta: PageMetaRaw): PageMeta {
   };
 }
 
-export function getPageMeta(key: PageMetaKey): PageMeta | null {
+function getPageMeta(key: PageMetaKey): PageMeta | null {
   return pageMetaMap.get(key) ?? null;
 }
 
