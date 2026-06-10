@@ -11,8 +11,6 @@ import {
   WrenchIcon,
 } from "lucide-react";
 
-// TODO: 背景タイプを Settings で設定可能にする
-
 export const pageMetas = [
   {
     key: "dashboard",
