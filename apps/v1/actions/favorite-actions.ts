@@ -1,6 +1,10 @@
 "use server";
 
-import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
+import {
+  resolveCurrentUser,
+  resolveCurrentUserOrThrow,
+} from "@/lib/auth/current-user";
+import { hasPermission } from "@/lib/authorization/permission";
 import {
   deleteFavorite,
   deleteMultipleFavorites,
@@ -12,6 +16,8 @@ import {
 import { RatingInputSchema } from "@/lib/favorite/schemar";
 import { logger } from "@/lib/logger";
 import { getMediaIdByPath, getMediaIdsByPaths } from "@/lib/media/repository";
+import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
+import { isRootPath } from "@/lib/virtual-path/guard";
 import {
   VirtualPathManySchema,
   VirtualPathOneSchema,
@@ -32,11 +38,7 @@ export async function updateFavoriteAction(
   path: string,
   rating: number | null
 ): Promise<UpdateFavoriteResult> {
-  // 認証
-  const user = await resolveCurrentUserOrThrow();
-  const userId = user.id;
-
-  // 入力バリデーション
+  // 入力バリデーション＋正規化
   const parsed = {
     path: VirtualPathOneSchema.safeParse(path),
     rating: RatingInputSchema.safeParse(rating),
@@ -55,6 +57,40 @@ export async function updateFavoriteAction(
   const normalizedPath = parsed.path.data;
   const normalizedRating = parsed.rating.data;
 
+  // ルートフォルダ保護
+  if (isRootPath(normalizedPath)) {
+    return {
+      success: false,
+      message: "ルートフォルダは操作できません。",
+    };
+  }
+
+  // システムフォルダ保護
+  if (isSystemHiddenVirtualPath(normalizedPath)) {
+    return {
+      success: false,
+      message: "システムフォルダは操作できません。",
+    };
+  }
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "認証されていません。",
+    };
+  }
+  const userId = user.id;
+
+  // 認可
+  if (!hasPermission(user, "favorite:update")) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
+
   // メディアID逆引き
   const mediaId = await getMediaIdByPath(normalizedPath);
   if (!mediaId) return { success: false, message: "メディアが見つかりません" };
@@ -65,11 +101,12 @@ export async function updateFavoriteAction(
       mediaId,
       rating: normalizedRating,
     });
-    return { success: true };
   } catch (error) {
     logger.error("action:update-favorite", error);
     return { success: false, message: "お気に入りの更新に失敗しました" };
   }
+
+  return { success: true };
 }
 
 // お気に入り削除 (レコード自体の消去)
