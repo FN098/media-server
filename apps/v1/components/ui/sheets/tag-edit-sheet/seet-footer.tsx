@@ -5,7 +5,6 @@ import { RotateCcw, Save } from "lucide-react";
 interface SheetFooterProps {
   hasChanges: boolean;
   isLoading: boolean;
-  opacity: number;
   onReset: () => void;
   onApply: () => void;
 }

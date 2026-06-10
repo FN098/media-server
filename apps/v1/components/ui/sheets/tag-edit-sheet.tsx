@@ -123,9 +123,7 @@ export function TagEditSheet() {
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
                         opacity={opacity}
-                        canEdit={canEdit}
                         onClose={handleClose}
-                        onEditClick={handleModeChangeUp}
                         onOpacityChange={handleOpacityChange}
                       />
                       <TagList
@@ -155,9 +153,7 @@ export function TagEditSheet() {
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
                         opacity={opacity}
-                        canEdit={canEdit}
                         onClose={handleClose}
-                        onEditClick={handleModeChangeUp}
                         onOpacityChange={handleOpacityChange}
                       />
                       <TagList
@@ -217,7 +213,6 @@ export function TagEditSheet() {
                         onApply={() => void handleApply()}
                         hasChanges={tagEditor.hasChanges}
                         isLoading={isLoading}
-                        opacity={opacity}
                       />
                     </motion.div>
                   )}
@@ -237,14 +232,11 @@ export function TagEditSheet() {
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
                         opacity={opacity}
-                        canEdit={canEdit}
-                        onEditClick={() => {}}
                         onClose={handleClose}
                         onOpacityChange={handleOpacityChange}
                       />
                       <TagInput
                         value={tagEditor.newTagName}
-                        opacity={opacity}
                         disabled={isLoading}
                         autoFocus={!isMobile}
                         autoBlur={isMobile}
@@ -269,7 +261,6 @@ export function TagEditSheet() {
                         onApply={() => void handleApply()}
                         hasChanges={tagEditor.hasChanges}
                         isLoading={isLoading}
-                        opacity={opacity}
                       />
                     </motion.div>
                   )}

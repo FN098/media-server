@@ -11,7 +11,6 @@ interface TagInputProps {
   suggestions: Tag[];
   autoFocus?: boolean;
   autoBlur?: boolean; // autoFocus と排反 (focus 優先)
-  opacity: number;
   onChange: (val: string) => void;
   onAdd: () => void;
   onSelectSuggestion: (tag: Tag) => void;

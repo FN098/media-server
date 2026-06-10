@@ -10,10 +10,8 @@ interface SheetHeaderProps {
   onModeChange: (mode: EditingMode) => void;
   count: number;
   editingMode: EditingMode;
-  canEdit: boolean;
   opacity: number;
   onOpacityChange: (val: number) => void;
-  onEditClick: () => void;
   onClose: () => void;
 }
 
