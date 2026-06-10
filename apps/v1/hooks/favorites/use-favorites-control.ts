@@ -76,8 +76,11 @@ export function useFavoritesControl({
 
   // お気に入り状態を更新
   const updateFavorite = useCallback(
-    async (path: string, rating: number | null) => {
-      if (isInFlight(path)) return { success: false, error: "処理中です" };
+    async (
+      path: string,
+      rating: number | null
+    ): ReturnType<typeof updateFavoriteAction> => {
+      if (isInFlight(path)) return { success: false, message: "処理中です" };
       startFlight(path);
 
       // 楽観的アップデート
@@ -113,8 +116,8 @@ export function useFavoritesControl({
 
   // お気に入り状態を削除
   const deleteFavorite = useCallback(
-    async (path: string) => {
-      if (isInFlight(path)) return { success: false, error: "処理中です" };
+    async (path: string): ReturnType<typeof deleteFavoriteAction> => {
+      if (isInFlight(path)) return { success: false, message: "処理中です" };
       startFlight(path);
 
       // 楽観的アップデート
@@ -159,7 +162,9 @@ export function useFavoritesControl({
       paths,
       newRating = null,
       skipIfAlreadyFavorite = false,
-    }: UpdateMultipleFavoriteProps) => {
+    }: UpdateMultipleFavoriteProps): ReturnType<
+      typeof updateMultipleFavoritesAction
+    > => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);
@@ -236,7 +241,9 @@ export function useFavoritesControl({
 
   // 一括お気に入り解除
   const deleteMultipleFavorites = useCallback(
-    async (paths: string[]) => {
+    async (
+      paths: string[]
+    ): ReturnType<typeof deleteMultipleFavoritesAction> => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);

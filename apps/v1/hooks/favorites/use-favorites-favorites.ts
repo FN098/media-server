@@ -25,7 +25,7 @@ export function useFavoritesFavorites() {
         toast.success("レーティングが更新されました。", { duration: 500 });
         onSuccess?.();
       } else {
-        toast.error(result.error);
+        toast.error(result.message);
       }
 
       setIsPending(false);
