@@ -2,7 +2,7 @@ import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigations/use-viewer-navigation";
 import { SearchFocus } from "@/hooks/search/use-search-focus";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { TagEditorControl } from "@/hooks/tag-editor/use-tag-editor-control";
+import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
 import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
 import { TrashNavigation } from "@/hooks/trash/use-trash-navigation";
@@ -16,7 +16,7 @@ interface UseTrashHotkeysProps {
   filtering: TrashFiltering;
   selection: MediaNodeSelection;
   dialogs: TrashDialogs;
-  tagEditor: TagEditorControl;
+  tagEditor: TagEditor;
   navigation: TrashNavigation;
   viewer: ViewerNavigation;
   fullscreen: Fullscreen;
