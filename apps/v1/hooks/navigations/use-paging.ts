@@ -8,7 +8,7 @@ const MIN_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 100;
 
 interface UsePagingProps {
-  totalItems: number;
+  totalCount: number;
   defaultPageSize?: number;
   pageKey?: string;
   pageSizeKey?: string;
@@ -16,7 +16,7 @@ interface UsePagingProps {
 }
 
 export function usePaging({
-  totalItems,
+  totalCount,
   defaultPageSize = 48,
   pageKey = "page",
   pageSizeKey = "pageSize",
@@ -71,7 +71,7 @@ export function usePaging({
     [searchParams, pageSizeKey, navigate, pathname]
   );
 
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const effectivePage = clamp(page, 1, totalPages);
 

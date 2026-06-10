@@ -9,16 +9,16 @@ const PagingContext = createContext<ReturnType<typeof usePaging> | undefined>(
 
 export function PagingProvider({
   children,
-  totalItems,
+  totalCount,
   defaultPageSize,
   history,
 }: {
   children: ReactNode;
-  totalItems: number;
+  totalCount: number;
   defaultPageSize?: number;
   history?: "push" | "replace";
 }) {
-  const value = usePaging({ totalItems, defaultPageSize, history });
+  const value = usePaging({ totalCount, defaultPageSize, history });
 
   return (
     <PagingContext.Provider value={value}>{children}</PagingContext.Provider>

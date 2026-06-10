@@ -46,7 +46,7 @@ function FavoritesContent() {
 
   return (
     <MenuItemsProvider items={menu.items}>
-      <PagingProvider totalItems={filtering.filteredCount}>
+      <PagingProvider totalCount={filtering.filteredCount}>
         <FavoritesListingView />
       </PagingProvider>
     </MenuItemsProvider>

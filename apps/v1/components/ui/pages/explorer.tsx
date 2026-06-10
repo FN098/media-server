@@ -52,7 +52,7 @@ function ExplorerContent() {
 
   return (
     <MenuItemsProvider items={menu.items}>
-      <PagingProvider totalItems={filtering.filteredCount}>
+      <PagingProvider totalCount={filtering.filteredCount}>
         <ExplorerListingView />
       </PagingProvider>
     </MenuItemsProvider>

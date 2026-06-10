@@ -52,7 +52,7 @@ function TrashContent() {
 
   return (
     <MenuItemsProvider items={menu.items}>
-      <PagingProvider totalItems={filtering.filteredCount}>
+      <PagingProvider totalCount={filtering.filteredCount}>
         <TrashListingView />
       </PagingProvider>
     </MenuItemsProvider>
