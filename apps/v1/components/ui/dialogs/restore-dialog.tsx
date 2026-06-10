@@ -35,7 +35,7 @@ export function RestoreDialog({ dialog }: RestoreDialogProps) {
           <AlertDialogDescription>
             選択された {count} 件のアイテムを元の場所に復元しますか？
             <br />
-            同名のファイルが元の場所にある場合は上書きされます。
+            同名のファイルまたはフォルダが元の場所にある場合は上書きされます。
           </AlertDialogDescription>
         </AlertDialogHeader>
 

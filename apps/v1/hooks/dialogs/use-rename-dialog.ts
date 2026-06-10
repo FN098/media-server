@@ -87,7 +87,9 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
     } else if (result.code === "duplicated") {
       const suggested = getSuggestedName(trimmedName); // (1)を付ける
       setNewName(suggested);
-      toast.error("同名のファイルが存在します。名前を確認してください");
+      toast.error(
+        "同名のファイルまたはフォルダが存在します。名前を確認してください"
+      );
     } else {
       toast.error(result.message || "リネームに失敗しました");
     }
