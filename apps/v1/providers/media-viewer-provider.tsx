@@ -1,26 +1,17 @@
 "use client";
 
-import { useMediaViewer } from "@/hooks/viewer/use-media-viewer";
-import { MediaNode } from "@/lib/media/types";
-import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
+import {
+  useMediaViewer,
+  UseMediaViewerProps,
+} from "@/hooks/viewer/use-media-viewer";
 import { createContext, useContext } from "react";
 
 const MediaViewerContext = createContext<
   ReturnType<typeof useMediaViewer> | undefined
 >(undefined);
 
-interface MediaViewerProviderProps {
+interface MediaViewerProviderProps extends UseMediaViewerProps {
   children: React.ReactNode;
-  allNodes: MediaNode[];
-  initialIndex?: number;
-  hotkeysEnabled?: boolean;
-  menuItems?: MenuItemDef<NodeContext>[];
-  onIndexChange: (index: number) => void;
-  onClose: () => void;
-  onOpenPrev?: () => void;
-  onOpenNext?: () => void;
-  onOpenParent?: (node: MediaNode) => void;
-  onDelete?: (node: MediaNode) => void;
 }
 
 export function MediaViewerProvider({

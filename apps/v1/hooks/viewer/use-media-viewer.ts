@@ -11,7 +11,7 @@ import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { useSlideshowContext } from "@/providers/slideshow-provider";
 import { useCallback, useEffect } from "react";
 
-interface UseMediaViewerProps {
+export interface UseMediaViewerProps {
   allNodes: MediaNode[];
   initialIndex?: number;
   hotkeysEnabled?: boolean;
