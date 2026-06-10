@@ -22,48 +22,19 @@ export type TagState = "all" | "some" | "none";
 export type TagStates = Record<TagNameType, TagState>;
 export type TagCounts = Record<TagNameType, number>;
 
-export type CreateTagsResult =
-  | {
-      success: true;
-      tags: Tag[];
-    }
-  | {
-      success: false;
-      error: string;
-    };
-
 export type SearchTagsOptions = {
   excludeIds?: string[];
   limit?: number;
   query?: string;
   strategy?: SearchTagStrategy;
 };
+
 export type SearchTagsRequestParams = {
   paths?: string[];
   ids?: string[];
   limit?: number;
   query?: string;
   strategy?: SearchTagStrategy;
-};
-
-export type PendingChanges = Record<string, TagOperator>;
-
-export type UnusedTagItem = {
-  id: string;
-  name: string;
-  usageCount: number;
-};
-
-export type UnusedTagScanResult = {
-  success: boolean;
-  tags?: UnusedTagItem[];
-  error?: string;
-};
-
-export type UnusedTagDeleteResult = {
-  success: boolean;
-  deletedCount?: number;
-  error?: string;
 };
 
 export type TagMasterItem = {

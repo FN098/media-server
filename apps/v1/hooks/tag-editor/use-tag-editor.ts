@@ -3,11 +3,13 @@ import { useTags } from "@/hooks/tags/use-tags";
 import { MediaNode } from "@/lib/media/types";
 import { TagEditMode } from "@/lib/tag-editor/types";
 import { SearchTagStrategy, SortTagStrategy } from "@/lib/tag/strategies";
-import { PendingChanges, Tag, TagOperator } from "@/lib/tag/types";
+import { Tag, TagOperator } from "@/lib/tag/types";
 import { uniqueBy } from "@/lib/utils/array";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { v4 } from "uuid";
+
+type PendingChanges = Record<string, TagOperator>;
 
 export function useTagEditor() {
   const [isOpen, setIsOpen] = useState(false);

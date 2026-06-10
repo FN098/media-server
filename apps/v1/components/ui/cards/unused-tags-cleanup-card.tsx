@@ -4,7 +4,6 @@ import {
   deleteSelectedTagsAction,
   scanUnusedTagsAction,
 } from "@/actions/tag-actions";
-import { UnusedTagItem } from "@/lib/tag/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +34,12 @@ import {
 import { CheckCircle2, Loader2, Search, Tag, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+
+type UnusedTagItem = {
+  id: string;
+  name: string;
+  usageCount: number;
+};
 
 export function UnusedTagsCleanupCard() {
   const [isPending, setIsPending] = useState(false);

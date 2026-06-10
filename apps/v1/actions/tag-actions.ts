@@ -5,7 +5,7 @@ import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
-import { CreateTagsResult, TagOperation } from "@/lib/tag/types";
+import { Tag, TagOperation } from "@/lib/tag/types";
 import { generateKana } from "@/lib/utils/kana";
 import { basename } from "path";
 
@@ -84,6 +84,16 @@ export async function updateMediaTagsAction(payload: {
     return { success: false, error: "タグの更新に失敗しました" };
   }
 }
+
+type CreateTagsResult =
+  | {
+      success: true;
+      tags: Tag[];
+    }
+  | {
+      success: false;
+      error: string;
+    };
 
 // タグ一括作成
 export async function createTagsAction(
