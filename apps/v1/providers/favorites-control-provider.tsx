@@ -15,7 +15,7 @@ export function FavoritesControlProvider({
   children: React.ReactNode;
   favorites?: Favorite[];
 }) {
-  const value = useFavoritesControl({ initialData: favorites });
+  const value = useFavoritesControl({ favorites });
 
   return (
     <FavoritesControlContext.Provider value={value}>

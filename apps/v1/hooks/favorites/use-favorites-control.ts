@@ -15,33 +15,24 @@ type FavoriteMsg =
   | { type: "UPDATE_MANY"; paths: string[]; rating: number | null }
   | { type: "DELETE_MANY"; paths: string[] };
 
-interface UpdateMultipleFavoriteProps {
-  paths: string[];
-  newRating?: number | null;
-  skipIfAlreadyFavorite?: boolean;
-}
-
 interface UseFavoriteControlProps {
-  initialData?: Favorite[];
+  favorites?: Favorite[];
 }
 
-export function useFavoritesControl({
-  initialData = [],
-}: UseFavoriteControlProps) {
-  const [favorites, setFavorites] = useState(
-    () =>
-      new Map(
-        initialData
-          .filter((f) => !!f.favoritedAt)
-          .map((f) => [f.path, f.rating]) ?? []
-      )
-  );
+export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
+  const [ratingMap, setRatingMap] = useState(() => {
+    return new Map(
+      favorites
+        ?.filter((f) => !!f.favoritedAt)
+        .map((f) => [f.path, f.rating]) ?? []
+    );
+  });
 
   const { startFlight, finishFlight, isInFlight } = useInFlight();
 
   // タブ間同期
   const { broadcast } = useFavoriteChannel((msg: FavoriteMsg) => {
-    setFavorites((prev) => {
+    setRatingMap((prev) => {
       const next = new Map(prev);
 
       switch (msg.type) {
@@ -67,11 +58,11 @@ export function useFavoritesControl({
   const getFavorite = useCallback(
     (path: string) => {
       return {
-        isFavorite: favorites.has(path),
-        rating: favorites.get(path) ?? null,
+        isFavorite: ratingMap.has(path),
+        rating: ratingMap.get(path) ?? null,
       };
     },
-    [favorites]
+    [ratingMap]
   );
 
   // お気に入り状態を更新
@@ -84,7 +75,7 @@ export function useFavoritesControl({
       startFlight(path);
 
       // 楽観的アップデート
-      setFavorites((m) => new Map(m).set(path, rating));
+      setRatingMap((m) => new Map(m).set(path, rating));
       broadcast({ type: "UPDATE", path, rating });
 
       // サーバー処理開始
@@ -95,7 +86,7 @@ export function useFavoritesControl({
           const revalidated = await revalidateFavoriteAction(path);
           if (revalidated.success) {
             const { favorite } = revalidated;
-            setFavorites((m) => {
+            setRatingMap((m) => {
               const next = new Map(m);
               if (favorite) {
                 next.set(path, favorite.rating);
@@ -121,7 +112,7 @@ export function useFavoritesControl({
       startFlight(path);
 
       // 楽観的アップデート
-      setFavorites((m) => {
+      setRatingMap((m) => {
         const next = new Map(m);
         next.delete(path);
         return next;
@@ -136,7 +127,7 @@ export function useFavoritesControl({
           const revalidated = await revalidateFavoriteAction(path);
           if (revalidated.success && revalidated.favorite) {
             const { favorite } = revalidated;
-            setFavorites((m) => new Map(m).set(path, favorite.rating));
+            setRatingMap((m) => new Map(m).set(path, favorite.rating));
           }
         }
         return result;
@@ -162,9 +153,11 @@ export function useFavoritesControl({
       paths,
       newRating = null,
       skipIfAlreadyFavorite = false,
-    }: UpdateMultipleFavoriteProps): ReturnType<
-      typeof updateMultipleFavoritesAction
-    > => {
+    }: {
+      paths: string[];
+      newRating?: number | null;
+      skipIfAlreadyFavorite?: boolean;
+    }): ReturnType<typeof updateMultipleFavoritesAction> => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);
@@ -188,7 +181,7 @@ export function useFavoritesControl({
       startFlight(...validPaths);
 
       // 楽観的アップデート
-      setFavorites((prev) => {
+      setRatingMap((prev) => {
         const next = new Map(prev);
         validPaths.forEach((path) => next.set(path, newRating));
         return next;
@@ -210,7 +203,7 @@ export function useFavoritesControl({
             await revalidateMultipleFavoritesAction(validPaths);
 
           if (revalidateResult.success && revalidateResult.favorites) {
-            setFavorites((prev) => {
+            setRatingMap((prev) => {
               const next = new Map(prev);
 
               // 失敗した対象パスを一度全部消すか、最新状態で上書き
@@ -264,7 +257,7 @@ export function useFavoritesControl({
       startFlight(...validPaths);
 
       // 楽観的アップデート
-      setFavorites((prev) => {
+      setRatingMap((prev) => {
         const next = new Map(prev);
         validPaths.forEach((path) => next.delete(path));
         return next;
@@ -283,7 +276,7 @@ export function useFavoritesControl({
             await revalidateMultipleFavoritesAction(validPaths);
 
           if (revalidateResult.success && revalidateResult.favorites) {
-            setFavorites((prev) => {
+            setRatingMap((prev) => {
               const next = new Map(prev);
 
               // 失敗した対象パスを一度全部消すか、最新状態で上書き
@@ -313,7 +306,6 @@ export function useFavoritesControl({
   );
 
   return {
-    favorites,
     getFavorite,
     updateFavorite,
     updateMultipleFavorites,
