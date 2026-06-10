@@ -20,10 +20,10 @@ export async function proxy(req: NextRequest) {
   if (!session) {
     const signInUrl = new URL("/sign-in", req.url);
 
-    signInUrl.searchParams.set(
-      "redirectTo",
-      req.nextUrl.pathname + req.nextUrl.search
-    );
+    const currentUrl = req.nextUrl.pathname + req.nextUrl.search;
+    if (currentUrl) {
+      signInUrl.searchParams.set("redirectTo", currentUrl);
+    }
 
     return NextResponse.redirect(signInUrl);
   }
