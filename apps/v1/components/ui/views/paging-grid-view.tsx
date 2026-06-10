@@ -15,8 +15,8 @@ import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
 import { useCanHoverContext } from "@/providers/can-hover-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { useMemo } from "react";
 
@@ -34,7 +34,7 @@ interface PagingGridViewProps {
 export function PagingGridView(props: PagingGridViewProps) {
   const { onOpen, onSelectionChange, onThumbError } = props;
 
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobileContext();
   const canHover = useCanHoverContext();
 
   const {

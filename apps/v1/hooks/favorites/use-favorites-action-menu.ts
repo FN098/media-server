@@ -1,7 +1,7 @@
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { useMemo } from "react";
 
 interface FavoritesActionMenuContext {
@@ -18,7 +18,7 @@ const transformer = createRecursiveTransformer<
 >(defaultFilters);
 
 export function useFavoritesActionMenu() {
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobileContext();
 
   const context = useMemo(() => {
     return {

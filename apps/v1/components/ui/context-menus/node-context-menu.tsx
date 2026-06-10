@@ -5,6 +5,7 @@ import { useMounted } from "@/hooks/general/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -16,7 +17,6 @@ import {
   ContextMenuTrigger,
 } from "@/shadcn/components/ui/context-menu";
 import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import React, { Fragment } from "react";
 
@@ -35,7 +35,7 @@ export function NodeContextMenu({
   onOpenChange,
   disabled,
 }: NodeContextMenuProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobileContext();
   const mounted = useMounted();
   const { context, items } = useNodeContextMenu({ node, menuItems });
 

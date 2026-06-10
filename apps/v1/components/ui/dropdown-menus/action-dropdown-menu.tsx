@@ -1,5 +1,6 @@
 import { MenuItemDef } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -12,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { ChevronRight, Wand2 } from "lucide-react";
 import { Fragment } from "react/jsx-runtime";
@@ -27,7 +27,7 @@ export function ActionDropdownMenu<T>({
   items,
   context,
 }: ActionDropdownMenuProps<T>) {
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobileContext();
 
   return (
     <DropdownMenu>

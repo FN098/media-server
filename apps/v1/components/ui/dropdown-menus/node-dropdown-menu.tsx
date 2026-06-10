@@ -5,6 +5,7 @@ import { useMounted } from "@/hooks/general/use-mounted";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
+import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/shadcn/components/ui/kbd";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { cn } from "@/shadcn/lib/utils";
 import { MoreVertical } from "lucide-react";
 import { Fragment, useState } from "react";
@@ -43,7 +43,7 @@ export function NodeDropdownMenu({
   hidden,
   variant = "default",
 }: NodeDropdownMenuProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useDetectMobileContext();
   const mounted = useMounted();
 
   const [internalOpen, setInternalOpen] = useState(false);
