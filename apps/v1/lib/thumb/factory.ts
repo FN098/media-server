@@ -4,7 +4,7 @@ import {
   getServerMediaPath,
   getServerMediaThumbPath,
 } from "@/lib/path/helpers";
-import { createImageThumb } from "@/lib/thumb/image";
+import { createImageThumb } from "@/lib/thumb/sharp";
 import { existsPath } from "@/lib/utils/fs";
 import { mkdir } from "fs/promises";
 import { dirname } from "path";
