@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
+import { internalServerErrorResponse } from "@/lib/response/errors";
+import { logger } from "better-auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const resultSchema = z.array(z.record(z.string(), z.bigint()));
-
-// TODO: response/errors を使う
 
 // DB のヘルスチェック
 export async function GET() {
@@ -16,8 +16,8 @@ export async function GET() {
     const isOk = result.length > 0;
 
     return NextResponse.json({ ok: isOk });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ ok: false }, { status: 500 });
+  } catch (error) {
+    logger.error("api:db-health-check", error);
+    return internalServerErrorResponse();
   }
 }
