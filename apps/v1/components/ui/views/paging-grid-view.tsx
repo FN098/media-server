@@ -52,7 +52,7 @@ export function PagingGridView(props: PagingGridViewProps) {
   return (
     <div
       ref={containerRef}
-      className="h-full flex flex-col relative outline-none"
+      className="flex flex-col relative outline-none"
       tabIndex={0} // フォーカス可能にし、keydownイベントを拾う
       onKeyDown={handleKeyDown}
     >

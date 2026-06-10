@@ -19,7 +19,7 @@ export function Explorer() {
   const { viewer } = useExplorerContext();
 
   return (
-    <div className="flex flex-col h-full focus:outline-none" tabIndex={-1}>
+    <div className="flex flex-col focus:outline-none" tabIndex={-1}>
       {!viewer.isOpen && <ExplorerToolbar />}
       <ExplorerContent />
       <ExplorerOverlays />
@@ -51,13 +51,11 @@ function ExplorerContent() {
   }
 
   return (
-    <div className="flex-1">
-      <MenuItemsProvider items={menu.items}>
-        <PagingProvider totalItems={filtering.filteredCount}>
-          <ExplorerListingView />
-        </PagingProvider>
-      </MenuItemsProvider>
-    </div>
+    <MenuItemsProvider items={menu.items}>
+      <PagingProvider totalItems={filtering.filteredCount}>
+        <ExplorerListingView />
+      </PagingProvider>
+    </MenuItemsProvider>
   );
 }
 

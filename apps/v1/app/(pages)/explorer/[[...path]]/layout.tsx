@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           basePath={meta.url}
           accent={meta.accent}
         />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main>{children}</main>
       </div>
     </SearchFocusProvider>
   );
