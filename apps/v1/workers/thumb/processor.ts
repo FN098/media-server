@@ -2,7 +2,7 @@ import { getFsNode, listFsNodes } from "@/lib/media/fs-listing";
 import { sortNodes } from "@/lib/media/sort";
 import { redis } from "@/lib/redis";
 import { ThumbJobData } from "@/lib/thumb-job/types";
-import { createThumbs } from "@/lib/thumb/creator";
+import { createThumbs } from "@/lib/thumb/factory";
 import { chunk } from "@/lib/utils/array";
 import { Job } from "bullmq";
 
