@@ -1,8 +1,4 @@
-import {
-  FavoriteFilterMode,
-  FavoriteFilterOptions,
-  FavoriteFilterValue,
-} from "@/lib/filter/types";
+import { FavoriteFilterMode, FavoriteFilterValue } from "@/lib/filter/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
@@ -30,9 +26,13 @@ function buildParams(
 
 // --- hook ---
 
-export function useFavoriteFilter(options?: FavoriteFilterOptions) {
-  const { modeKey = "favoriteFilterMode" } = options ?? {};
+interface UseFavoriteFilterProps {
+  modeKey?: string;
+}
 
+export function useFavoriteFilter({
+  modeKey = "favoriteFilterMode",
+}: UseFavoriteFilterProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

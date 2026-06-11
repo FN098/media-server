@@ -25,19 +25,9 @@ export type RatingFilterValue =
   | { mode: "unrated" }
   | { mode: "rated"; condition: RatedCondition };
 
-export type RatingFilterOptions = {
-  ratingModeKey?: string;
-  ratingOpKey?: string;
-  ratingValKey?: string;
-};
-
 // ===== 種別フィルター =====
 export type MediaTypeFilterValue = {
   types: MediaFsNodeType[];
-};
-
-export type MediaTypeFilterOptions = {
-  mediaTypeKey?: string;
 };
 
 // ===== タグフィルター =====
@@ -48,18 +38,9 @@ export type TagFilterValue = {
   mode: TagFilterMode;
 };
 
-export type TagFilterOptions = {
-  tagsKey?: string;
-  modeKey?: string;
-};
-
 // ===== お気に入りフィルター =====
 export type FavoriteFilterMode = "all" | "only_favorites" | "exclude_favorites";
 
 export type FavoriteFilterValue = {
   mode: FavoriteFilterMode;
-};
-
-export type FavoriteFilterOptions = {
-  modeKey?: string;
 };

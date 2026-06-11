@@ -1,6 +1,5 @@
 import {
   RatedCondition,
-  RatingFilterOptions,
   RatingFilterValue,
   RatingValue,
 } from "@/lib/filter/types";
@@ -84,13 +83,17 @@ function buildParams(
   params.set(valKey, val);
 }
 
-export function useRatingFilter(options?: RatingFilterOptions) {
-  const {
-    ratingModeKey = "ratingMode",
-    ratingOpKey = "ratingOp",
-    ratingValKey = "ratingVal",
-  } = options ?? {};
+interface UseRatingFilterProps {
+  ratingModeKey?: string;
+  ratingOpKey?: string;
+  ratingValKey?: string;
+}
 
+export function useRatingFilter({
+  ratingModeKey = "ratingMode",
+  ratingOpKey = "ratingOp",
+  ratingValKey = "ratingVal",
+}: UseRatingFilterProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

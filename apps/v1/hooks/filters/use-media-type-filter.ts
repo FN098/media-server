@@ -1,7 +1,4 @@
-import {
-  MediaTypeFilterOptions,
-  MediaTypeFilterValue,
-} from "@/lib/filter/types";
+import { MediaTypeFilterValue } from "@/lib/filter/types";
 import { MediaFsNodeType } from "@/lib/media/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
@@ -46,9 +43,13 @@ function buildParams(
 
 // --- hook ---
 
-export function useMediaTypeFilter(options?: MediaTypeFilterOptions) {
-  const { mediaTypeKey = "mediaType" } = options ?? {};
+interface UseMediaTypeFilterProps {
+  mediaTypeKey?: string;
+}
 
+export function useMediaTypeFilter({
+  mediaTypeKey = "mediaType",
+}: UseMediaTypeFilterProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

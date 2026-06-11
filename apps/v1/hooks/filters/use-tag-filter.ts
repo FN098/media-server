@@ -1,9 +1,5 @@
 import { useTags } from "@/hooks/tags/use-tags";
-import {
-  TagFilterMode,
-  TagFilterOptions,
-  TagFilterValue,
-} from "@/lib/filter/types";
+import { TagFilterMode, TagFilterValue } from "@/lib/filter/types";
 import { unique } from "@/lib/utils/array";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
@@ -42,13 +38,18 @@ function buildParams(
 
 // --- hook ---
 
-export function useTagFilter(options?: TagFilterOptions) {
+interface UseTagFilterProps {
+  tagsKey?: string;
+  modeKey?: string;
+}
+
+export function useTagFilter({
+  tagsKey = "tagIds",
+  modeKey = "tagFilterMode",
+}: UseTagFilterProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  // キー名とデフォルト値の設定
-  const { tagsKey = "tagIds", modeKey = "tagFilterMode" } = options ?? {};
 
   // 現在の値をURLから取得
   const tagIds = useMemo(
