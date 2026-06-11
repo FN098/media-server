@@ -12,8 +12,6 @@ const transformer = createRecursiveTransformer<
 interface UseNodeDropdownMenuProps {
   node: MediaNode;
   menuItems: MenuItemDef<NodeContext>[];
-  onOpenChange?: (open: boolean) => void;
-  disabled?: boolean;
 }
 
 export function useNodeDropdownMenu({
