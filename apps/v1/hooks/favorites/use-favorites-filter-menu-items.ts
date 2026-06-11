@@ -1,15 +1,15 @@
 import {
   FileTypeFilterMenuContext,
   fileTypeFilterMenuItems,
-} from "@/lib/filter/file-type-filter";
+} from "@/lib/filter-menu-items/file-type-filter-menu-items";
 import {
   RatingFilterMenuContext,
   ratingFilterMenuItems,
-} from "@/lib/filter/rating-filter";
+} from "@/lib/filter-menu-items/rating-filter-menu-items";
 import {
   TagFilterMenuContext,
   tagFilterMenuItems,
-} from "@/lib/filter/tag-filter";
+} from "@/lib/filter-menu-items/tag-filter-menu-items";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
