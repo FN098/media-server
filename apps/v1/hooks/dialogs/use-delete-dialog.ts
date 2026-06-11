@@ -1,7 +1,5 @@
-import {
-  deleteNodesAction,
-  deleteNodesPermanentlyAction,
-} from "@/actions/node-actions";
+import { deleteNodesAction } from "@/actions/node/delete";
+import { deleteNodesPermanentlyAction } from "@/actions/node/delete-permanent";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 

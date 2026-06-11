@@ -1,4 +1,4 @@
-import { restoreNodesAction } from "@/actions/node-actions";
+import { restoreNodesAction } from "@/actions/node/restore";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 

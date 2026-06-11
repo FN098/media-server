@@ -1,4 +1,4 @@
-import { touchMediaTimestampAction } from "@/actions/node-actions";
+import { touchMediaTimestampAction } from "@/actions/node/touch";
 import { updatePreviewAction } from "@/actions/preview/update";
 import { enqueueCreateSingleThumbJobAction } from "@/actions/thumb/enque-create-thumb-job";
 import { enqueueCreateThumbsJobAction } from "@/actions/thumb/enque-create-thumbs-job";

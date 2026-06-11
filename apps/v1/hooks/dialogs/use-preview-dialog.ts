@@ -1,5 +1,5 @@
 import { listSubDirectoriesAction } from "@/actions/folder/list-sub";
-import { listMediaAction } from "@/actions/node-actions";
+import { listMediaAction } from "@/actions/node/list";
 import { updatePreviewAction } from "@/actions/preview/update";
 import { dirname } from "path";
 import { useCallback, useState } from "react";

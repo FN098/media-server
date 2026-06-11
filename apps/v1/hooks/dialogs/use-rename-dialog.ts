@@ -1,4 +1,4 @@
-import { renameNodeAction } from "@/actions/node-actions";
+import { renameNodeAction } from "@/actions/node/rename";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
