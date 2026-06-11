@@ -1,4 +1,4 @@
-import { createFolderAction } from "@/actions/folder-actions";
+import { createFolderAction } from "@/actions/folders/create";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 

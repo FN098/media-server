@@ -1,4 +1,4 @@
-import { visitFolderAction } from "@/actions/folder-actions";
+import { visitFolderAction } from "@/actions/folders/visit";
 import { getTextFilePreviewAction } from "@/actions/text-file-actions";
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";

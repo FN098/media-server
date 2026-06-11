@@ -1,4 +1,4 @@
-import { listSubDirectoriesAction } from "@/actions/folder-actions";
+import { listSubDirectoriesAction } from "@/actions/folders/list-sub";
 import { listMediaAction } from "@/actions/node-actions";
 import { updatePreviewAction } from "@/actions/preview-actions";
 import { dirname } from "path";

@@ -1,4 +1,4 @@
-import { visitFolderAction } from "@/actions/folder-actions";
+import { visitFolderAction } from "@/actions/folders/visit";
 import { FolderNavigation } from "@/hooks/navigation/use-folder-navigation";
 import { History, toHistoryItem } from "@/hooks/navigation/use-history";
 import { useMediaIndex } from "@/hooks/navigation/use-media-index";
