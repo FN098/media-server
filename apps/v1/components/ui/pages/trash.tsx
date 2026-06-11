@@ -20,7 +20,7 @@ export function Trash() {
   const { viewer } = useTrashContext();
 
   return (
-    <div className="flex flex-col focus:outline-none" tabIndex={-1}>
+    <div className="flex flex-col focus:outline-none">
       {!viewer.isOpen && <TrashToolbar />}
       <TrashContent />
       <TrashOverlays />

@@ -20,7 +20,7 @@ export function Explorer() {
   const { viewer } = useExplorerContext();
 
   return (
-    <div className="flex flex-col focus:outline-none" tabIndex={-1}>
+    <div className="flex flex-col focus:outline-none">
       {!viewer.isOpen && <ExplorerToolbar />}
       <ExplorerContent />
       <ExplorerOverlays />

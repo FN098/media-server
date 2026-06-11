@@ -18,7 +18,7 @@ export function Favorites() {
   const { viewer } = useFavoritesContext();
 
   return (
-    <div className="flex flex-col focus:outline-none" tabIndex={-1}>
+    <div className="flex flex-col focus:outline-none">
       {!viewer.isOpen && <FavoritesToolbar />}
       <FavoritesContent />
       <FavoritesOverlays />
