@@ -77,7 +77,6 @@ export function useMediaViewer({
 
   // ===== 音声リピート =====
 
-  // TODO: Context + Provider
   const audioRepeating = useAudioRepeating();
 
   // スライドショーON時はリピートをOFF
