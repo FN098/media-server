@@ -10,7 +10,7 @@ interface MediaFsDfsContext extends MediaFsContext {
   dirCache?: Map<string, CachedFsEntry[]>;
 }
 
-async function readVirtualDirCached(
+async function readVirtualDir(
   virtualDirPath: string,
   context: MediaFsDfsContext
 ): Promise<CachedFsEntry[]> {
@@ -54,7 +54,7 @@ async function hasDirectMedia(
   virtualDirPath: string,
   context: MediaFsDfsContext
 ): Promise<boolean> {
-  const entries = await readVirtualDirCached(virtualDirPath, context);
+  const entries = await readVirtualDir(virtualDirPath, context);
   return entries.some((e) => e.isMedia);
 }
 
@@ -63,7 +63,7 @@ async function getSubDirs(
   virtualDirPath: string,
   context: MediaFsDfsContext
 ): Promise<CachedFsEntry[]> {
-  const entries = await readVirtualDirCached(virtualDirPath, context);
+  const entries = await readVirtualDir(virtualDirPath, context);
 
   return sortNodes(
     entries
@@ -126,7 +126,7 @@ async function findGlobalNextFolder(
     if (found) return found;
   }
 
-  // 子になければ、「親の階層」に上がって、自分の「次の兄弟」を探す
+  // 子から見つからなければ、自分の「次の兄弟」へ
   return findNextStepUpward(currentVirtualDirPath, context);
 }
 
@@ -142,7 +142,7 @@ async function findNextStepUpward(
   const currentDirName = basename(currentVirtualDirPath);
   const currentIndex = siblings.findIndex((e) => e.name === currentDirName);
 
-  // 次の兄弟から順に探索
+  // 次の兄弟からメディアを探す（順方向）
   for (let i = currentIndex + 1; i < siblings.length; i++) {
     const targetPath = siblings[i].virtualPath;
     const found = await findDeepestMediaFolder(targetPath, "first", context);
@@ -166,7 +166,7 @@ async function findGlobalPrevFolder(
   const currentDirName = basename(currentVirtualDirPath);
   const currentIndex = siblings.findIndex((e) => e.name === currentDirName);
 
-  // 前の兄弟からメディアを探す
+  // 前の兄弟からメディアを探す（逆方向）
   for (let i = currentIndex - 1; i >= 0; i--) {
     const targetPath = siblings[i].virtualPath;
     const found = await findDeepestMediaFolder(targetPath, "last", context);
