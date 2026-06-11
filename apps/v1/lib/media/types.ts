@@ -1,5 +1,3 @@
-import { Dirent } from "fs";
-
 export type { Media as PrismaMedia } from "@/generated/prisma/client";
 
 export type MediaFsNodeType =
@@ -68,8 +66,15 @@ export type MediaDbNode = {
   favoritedAt?: Date;
 };
 
+export type CachedFsEntry = {
+  virtualPath: string;
+  name: string;
+  isDirectory: boolean;
+  isMedia: boolean;
+};
+
 export interface MediaFsContext {
   resolveRealPath: (virtualPath: string) => string;
   filterVirtualPath?: (virtualPath: string) => boolean;
-  dirCache?: Map<string, Dirent[]>;
+  dirCache?: Map<string, CachedFsEntry[]>;
 }

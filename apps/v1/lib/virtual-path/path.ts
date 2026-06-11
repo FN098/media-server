@@ -18,3 +18,8 @@ export function basename(path: string, suffix?: string): string {
 export function extname(path: string): string {
   return pathPosix.extname(path);
 }
+
+export function parentpath(path: string): string | null {
+  if (path === "") return null;
+  return path.split("/").slice(0, -1).join("/");
+}
