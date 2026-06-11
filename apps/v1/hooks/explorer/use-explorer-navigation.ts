@@ -1,5 +1,5 @@
+import { getTextFilePreviewAction } from "@/actions/file/get-text-preview";
 import { visitFolderAction } from "@/actions/folder/visit";
-import { getTextFilePreviewAction } from "@/actions/text-file-actions";
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { FolderNavigation } from "@/hooks/navigation/use-folder-navigation";
