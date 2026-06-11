@@ -1,8 +1,8 @@
 import { ChildProcessExitStatus } from "@/lib/child_process/types";
+import { ParsedDatabaseURL } from "@/lib/db/url-parser";
 import { spawn } from "child_process";
 import { createReadStream } from "fs";
 import { pipeline } from "stream/promises";
-import { ParsedDatabaseURL } from "../db/url-parser";
 
 type RestoreDatabaseResult = {
   ok: boolean;

@@ -1,9 +1,9 @@
 import { ChildProcessExitStatus } from "@/lib/child_process/types";
+import { ParsedDatabaseURL } from "@/lib/db/url-parser";
 import { spawn } from "child_process";
 import { createWriteStream } from "fs";
 import { unlink } from "fs/promises";
 import { pipeline } from "stream/promises";
-import { ParsedDatabaseURL } from "../db/url-parser";
 
 type DumpDatabaseResult = {
   ok: boolean;
