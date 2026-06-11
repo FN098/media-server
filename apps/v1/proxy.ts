@@ -12,30 +12,6 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next(); // 認可OK
   }
 
-  // TODO: セッション有効期限切れの回避策。後で有効化する
-  // const isPrefetch =
-  //   req.headers.get("purpose") === "prefetch" ||
-  //   req.headers.has("next-router-prefetch");
-
-  // if (isPrefetch) {
-  //   return NextResponse.next();
-  // }
-
-  // TODO: セッション有効期限切れしていないのにサインインページにリダイレクトされる問題を調べる
-  logger.info("proxy", "request info", {
-    time: new Date(),
-    path: pathname,
-    url: req.url,
-    currentUrl: req.nextUrl.pathname + req.nextUrl.search,
-    cookie: req.headers.get("cookie"),
-    purpose: req.headers.get("purpose"),
-    prefetch: req.headers.get("next-router-prefetch"),
-    userAgent: req.headers.get("user-agent"),
-    host: req.headers.get("host"),
-    xForwardedHost: req.headers.get("x-forwarded-host"),
-    xForwardedProto: req.headers.get("x-forwarded-proto"),
-  });
-
   // ====== 認証 =======
 
   const session = await auth.api.getSession({
@@ -43,6 +19,20 @@ export async function proxy(req: NextRequest) {
   });
 
   if (!session) {
+    logger.info("proxy", "NO SESSION", {
+      time: new Date(),
+      path: pathname,
+      url: req.url,
+      currentUrl: req.nextUrl.pathname + req.nextUrl.search,
+      cookie: req.headers.get("cookie"),
+      purpose: req.headers.get("purpose"),
+      prefetch: req.headers.get("next-router-prefetch"),
+      userAgent: req.headers.get("user-agent"),
+      host: req.headers.get("host"),
+      xForwardedHost: req.headers.get("x-forwarded-host"),
+      xForwardedProto: req.headers.get("x-forwarded-proto"),
+    });
+
     const signInUrl = new URL("/sign-in", req.url);
 
     const currentUrl = req.nextUrl.pathname + req.nextUrl.search;
