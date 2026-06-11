@@ -2,10 +2,9 @@
 
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useActionState, useState } from "react";
 
-import { authClient } from "@/lib/auth/better-auth-client";
+import { signInAction } from "@/actions/auth-actions";
 import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { Input } from "@/shadcn/components/ui/input";
@@ -16,52 +15,9 @@ import { cn } from "@/shadcn/lib/utils";
 interface SignInProps {
   redirectTo?: string;
 }
-
 export function SignIn({ redirectTo = "/" }: SignInProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [state, action, isPending] = useActionState(signInAction, undefined);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const router = useRouter();
-
-  const handleSignIn = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError("");
-
-      const { error } = await authClient.signIn.email(
-        {
-          email,
-          password,
-          rememberMe,
-        },
-        {
-          onSuccess: () => {
-            // NOTE: 先に refresh しておかないと、push 時に認証 Cookie が送信されないぽい
-            router.refresh();
-            router.push(redirectTo);
-
-            // NOTE: router.push で画面遷移できない場合は代わりに以下を使う
-            // window.location.href = redirectTo;
-          },
-        }
-      );
-
-      if (error) {
-        console.error("sign-in-error:", error);
-        setError(error.message || "サインインに失敗しました");
-        setIsLoading(false);
-        return;
-      }
-    } catch (e) {
-      console.log("sign-in-error:", e);
-      setError("予期しないエラーが発生しました");
-      setIsLoading(false);
-    }
-  }, [email, password, redirectTo, rememberMe, router]);
 
   return (
     <div className="relative w-full max-w-sm mx-4">
@@ -87,13 +43,10 @@ export function SignIn({ redirectTo = "/" }: SignInProps) {
           </div>
         </div>
 
-        <form
-          className="px-8 pb-8 space-y-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void handleSignIn();
-          }}
-        >
+        <form action={action} className="px-8 pb-8 space-y-5">
+          {/* redirectTo を hidden で渡す（必要な場合） */}
+          <input type="hidden" name="redirectTo" value={redirectTo} />
+
           {/* Email */}
           <div className="space-y-1.5">
             <Label
@@ -109,22 +62,31 @@ export function SignIn({ redirectTo = "/" }: SignInProps) {
               />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 autoComplete="email"
                 placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
+                disabled={isPending}
                 required
+                aria-describedby={
+                  state?.errors?.email ? "email-error" : undefined
+                }
                 className={cn(
                   "pl-9 h-10 text-sm",
                   "bg-zinc-50 border-zinc-200 dark:bg-white/[0.04] dark:border-white/[0.08]",
                   "text-zinc-900 placeholder:text-zinc-400 dark:text-zinc-100 dark:placeholder:text-zinc-600",
                   "focus-visible:ring-1 focus-visible:ring-indigo-500/60 focus-visible:border-indigo-500/60",
-                  "transition-colors"
+                  "transition-colors",
+                  state?.errors?.email &&
+                    "border-red-400 dark:border-red-500/60"
                 )}
               />
             </div>
+            {state?.errors?.email && (
+              <p id="email-error" className="text-xs text-red-500 mt-1">
+                {state.errors.email[0]}
+              </p>
+            )}
           </div>
 
           {/* Password */}
@@ -142,19 +104,23 @@ export function SignIn({ redirectTo = "/" }: SignInProps) {
               />
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
+                disabled={isPending}
                 required
+                aria-describedby={
+                  state?.errors?.password ? "password-error" : undefined
+                }
                 className={cn(
                   "pl-9 pr-10 h-10 text-sm",
                   "bg-zinc-50 border-zinc-200 dark:bg-white/[0.04] dark:border-white/[0.08]",
                   "text-zinc-900 placeholder:text-zinc-400 dark:text-zinc-100 dark:placeholder:text-zinc-600",
                   "focus-visible:ring-1 focus-visible:ring-indigo-500/60 focus-visible:border-indigo-500/60",
-                  "transition-colors"
+                  "transition-colors",
+                  state?.errors?.password &&
+                    "border-red-400 dark:border-red-500/60"
                 )}
               />
               <button
@@ -173,15 +139,19 @@ export function SignIn({ redirectTo = "/" }: SignInProps) {
                 )}
               </button>
             </div>
+            {state?.errors?.password && (
+              <p id="password-error" className="text-xs text-red-500 mt-1">
+                {state.errors.password[0]}
+              </p>
+            )}
           </div>
 
           {/* Remember me */}
           <div className="flex items-center gap-2.5">
             <Checkbox
               id="remember-me"
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked === true)}
-              disabled={isLoading}
+              name="rememberMe"
+              disabled={isPending}
               className={cn(
                 "h-4 w-4 rounded border-zinc-300 bg-zinc-50 dark:border-white/[0.15] dark:bg-white/[0.04]",
                 "data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
@@ -195,18 +165,18 @@ export function SignIn({ redirectTo = "/" }: SignInProps) {
             </Label>
           </div>
 
-          {/* Error */}
-          {error && (
+          {/* フォームレベルエラー */}
+          {state?.message && (
             <div className="flex items-start gap-2 rounded-lg border border-red-300/60 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10 px-3 py-2.5 text-sm text-red-600 dark:text-red-400">
               <span className="mt-px shrink-0 text-red-500">✕</span>
-              <span>{error}</span>
+              <span>{state.message}</span>
             </div>
           )}
 
           {/* Submit */}
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isPending}
             className={cn(
               "w-full h-10 mt-1 text-sm font-medium tracking-wide",
               "bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700",
@@ -215,7 +185,7 @@ export function SignIn({ redirectTo = "/" }: SignInProps) {
               "disabled:opacity-50"
             )}
           >
-            {isLoading ? (
+            {isPending ? (
               <>
                 <Spinner className="mr-2 h-4 w-4" />
                 <span>Signing in...</span>
