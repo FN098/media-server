@@ -1,4 +1,5 @@
 "use server";
+
 import { GhostThumbItem } from "@/lib/ghost-thumb/types";
 import { PATHS } from "@/lib/path/paths";
 import { rm } from "fs/promises";
