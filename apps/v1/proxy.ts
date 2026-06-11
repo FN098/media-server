@@ -12,6 +12,15 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next(); // 認可OK
   }
 
+  // TODO: セッション有効期限切れの回避策。後で有効化する
+  // const isPrefetch =
+  //   req.headers.get("purpose") === "prefetch" ||
+  //   req.headers.has("next-router-prefetch");
+
+  // if (isPrefetch) {
+  //   return NextResponse.next();
+  // }
+
   // ====== 認証 =======
 
   const session = await auth.api.getSession({
@@ -22,9 +31,11 @@ export async function proxy(req: NextRequest) {
     // NOTE: セッション有効期限切れしていないのにサインインページにリダイレクトされる問題を調べる
     logger.info("proxy", "NO SESSION", {
       path: pathname,
+      url: req.url,
+      cookie: req.headers.get("cookie")?.slice(0, 50),
       purpose: req.headers.get("purpose"),
       prefetch: req.headers.get("next-router-prefetch"),
-      cookie: !!req.headers.get("cookie"),
+      userAgent: req.headers.get("user-agent"),
     });
 
     const signInUrl = new URL("/sign-in", req.url);
