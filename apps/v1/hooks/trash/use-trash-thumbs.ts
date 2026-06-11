@@ -1,9 +1,7 @@
 import { touchMediaTimestampAction } from "@/actions/node-actions";
 import { updatePreviewAction } from "@/actions/preview/update";
-import {
-  enqueueCreateSingleThumbJobAction,
-  enqueueCreateThumbsJobAction,
-} from "@/actions/thumb-job-actions";
+import { enqueueCreateSingleThumbJobAction } from "@/actions/thumb/enque-create-thumb-job";
+import { enqueueCreateThumbsJobAction } from "@/actions/thumb/enque-create-thumbs-job";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";

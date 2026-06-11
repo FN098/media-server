@@ -1,4 +1,4 @@
-import { enqueueCreateThumbsJobAction } from "@/actions/thumb-job-actions";
+import { enqueueCreateThumbsJobAction } from "@/actions/thumb/enque-create-thumbs-job";
 import { FallbackImage } from "@/components/ui/images/fallback-image";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useThumbEventObserver } from "@/hooks/thumbs/use-thumb-event-observer";
