@@ -31,6 +31,9 @@ export async function proxy(req: NextRequest) {
     purpose: req.headers.get("purpose"),
     prefetch: req.headers.get("next-router-prefetch"),
     userAgent: req.headers.get("user-agent"),
+    host: req.headers.get("host"),
+    xForwardedHost: req.headers.get("x-forwarded-host"),
+    xForwardedProto: req.headers.get("x-forwarded-proto"),
   });
 
   // ====== 認証 =======
