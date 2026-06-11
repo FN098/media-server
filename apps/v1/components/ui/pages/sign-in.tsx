@@ -15,6 +15,7 @@ import { cn } from "@/shadcn/lib/utils";
 interface SignInProps {
   redirectTo?: string;
 }
+
 export function SignIn({ redirectTo = "/" }: SignInProps) {
   const [state, action, isPending] = useActionState(signInAction, undefined);
   const [showPassword, setShowPassword] = useState(false);

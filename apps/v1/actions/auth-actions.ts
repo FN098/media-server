@@ -22,6 +22,7 @@ export async function signInAction(
   if (!parsed.success) {
     return {
       errors: z.flattenError(parsed.error).fieldErrors,
+      message: "入力エラーがあります。",
     };
   }
 

@@ -2,6 +2,7 @@ import { db } from "@/lib/prisma";
 import { parseCsvEnv } from "@/lib/utils/env";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
 
 // @see https://better-auth.com/docs/installation
@@ -39,5 +40,12 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: false,
   },
-  plugins: [admin()],
+  plugins: [
+    // サーバーアクションでレスポンスに Set-Cookie を自動で付与するプラグイン
+    // https://better-auth.com/docs/integrations/next#server-action-cookies
+    nextCookies(),
+
+    // 管理者ユーザー用のAPI拡張プラグイン
+    admin(),
+  ],
 });

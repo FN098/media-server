@@ -18,7 +18,7 @@ export const SignInFormSchema = z.object({
     .min(1, { message: "パスワードを入力してください。" })
     .trim(),
   rememberMe: z.boolean().optional(),
-  redirectTo: z.url().optional(),
+  redirectTo: z.string().optional(),
 });
 
 export type SignInFormState =
