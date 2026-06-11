@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth/better-auth";
-import { AuthUserSchema } from "@/lib/auth/schemas";
-import { AuthUser } from "@/lib/auth/types";
+import { AuthUser, AuthUserSchema } from "@/lib/auth/schemas";
 import { AppError } from "@/lib/errors/app-error";
 import { headers } from "next/headers";
 
