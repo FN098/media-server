@@ -1,6 +1,7 @@
 import { detectMediaType, isMedia } from "@/lib/media/detectors";
 import { sortNodes } from "@/lib/media/sort";
 import { CachedFsEntry, MediaFsContext } from "@/lib/media/types";
+import { isRootPath } from "@/lib/virtual-path/guard";
 import { basename, join, parentpath } from "@/lib/virtual-path/path";
 import { Dirent } from "fs";
 import { readdir } from "fs/promises";
@@ -117,7 +118,7 @@ async function findGlobalNextFolder(
   currentVirtualDirPath: string,
   context: MediaFsDfsContext
 ): Promise<string | null> {
-  // 1. まず、自分の「子」の中にメディアがないか探す
+  // 自分の子からメディアを探す
   const subDirs = await getSubDirs(currentVirtualDirPath, context);
   for (const dir of subDirs) {
     const subPath = dir.virtualPath;
@@ -125,7 +126,7 @@ async function findGlobalNextFolder(
     if (found) return found;
   }
 
-  // 2. 子になければ、「親の階層」に上がって、自分の「次の兄弟」を探す
+  // 子になければ、「親の階層」に上がって、自分の「次の兄弟」を探す
   return findNextStepUpward(currentVirtualDirPath, context);
 }
 
@@ -133,6 +134,7 @@ async function findNextStepUpward(
   currentVirtualDirPath: string,
   context: MediaFsDfsContext
 ): Promise<string | null> {
+  // 自分の「次の兄弟」を探す
   const parentPath = parentpath(currentVirtualDirPath);
   if (parentPath === null) return null;
 
@@ -140,14 +142,14 @@ async function findNextStepUpward(
   const currentDirName = basename(currentVirtualDirPath);
   const currentIndex = siblings.findIndex((e) => e.name === currentDirName);
 
-  // 自分の次の兄弟から順に探索
+  // 次の兄弟から順に探索
   for (let i = currentIndex + 1; i < siblings.length; i++) {
     const targetPath = siblings[i].virtualPath;
     const found = await findDeepestMediaFolder(targetPath, "first", context);
     if (found) return found;
   }
 
-  // 自分の兄弟にもいなければ、さらに親の階層へ
+  // 次の兄弟から見つからなければ、さらに親の階層へ
   return findNextStepUpward(parentPath, context);
 }
 
@@ -156,6 +158,7 @@ async function findGlobalPrevFolder(
   currentVirtualDirPath: string,
   context: MediaFsDfsContext
 ): Promise<string | null> {
+  // 自分の「前の兄弟」を探す
   const parentPath = parentpath(currentVirtualDirPath);
   if (parentPath === null) return null;
 
@@ -163,19 +166,19 @@ async function findGlobalPrevFolder(
   const currentDirName = basename(currentVirtualDirPath);
   const currentIndex = siblings.findIndex((e) => e.name === currentDirName);
 
-  // 1. 自分の「前の兄弟」がいれば、その中の「最後(last)」のメディアを探す
+  // 前の兄弟からメディアを探す
   for (let i = currentIndex - 1; i >= 0; i--) {
     const targetPath = siblings[i].virtualPath;
     const found = await findDeepestMediaFolder(targetPath, "last", context);
     if (found) return found;
   }
 
-  // 2. 前の兄弟がいなければ、「親自身」がメディアを持っているか確認
-  if (parentPath !== "" && (await hasDirectMedia(parentPath, context))) {
+  // 前の兄弟から見つからなければ、「親自身」がメディアを持っているか確認
+  if (!isRootPath(parentPath) && (await hasDirectMedia(parentPath, context))) {
     return parentPath;
   }
 
-  // 3. 親もダメなら、さらに親の階層へ
+  // 親もダメなら、さらに親の階層へ
   return findGlobalPrevFolder(parentPath, context);
 }
 
