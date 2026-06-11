@@ -1,6 +1,6 @@
 import { listSubDirectoriesAction } from "@/actions/folder/list-sub";
 import { listMediaAction } from "@/actions/node-actions";
-import { updatePreviewAction } from "@/actions/preview-actions";
+import { updatePreviewAction } from "@/actions/preview/update";
 import { dirname } from "path";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";

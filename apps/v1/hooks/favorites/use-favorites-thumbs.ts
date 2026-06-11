@@ -1,5 +1,5 @@
 import { touchMediaTimestampAction } from "@/actions/node-actions";
-import { updatePreviewAction } from "@/actions/preview-actions";
+import { updatePreviewAction } from "@/actions/preview/update";
 import { enqueueCreateSingleThumbJobAction } from "@/actions/thumb-job-actions";
 import { MediaNode } from "@/lib/media/types";
 import { useRouter } from "next/navigation";
