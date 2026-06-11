@@ -1,9 +1,7 @@
-import {
-  cleanupOldBackupsAction,
-  dumpDatabaseAction,
-  listBackupFilesAction,
-  restoreDatabaseAction,
-} from "@/actions/db-backup-actions";
+import { cleanupOldBackupsAction } from "@/actions/db-backup/cleanup";
+import { dumpDatabaseAction } from "@/actions/db-backup/dump";
+import { listBackupFilesAction } from "@/actions/db-backup/list";
+import { restoreDatabaseAction } from "@/actions/db-backup/restore";
 import { DbBackupUploadResult } from "@/app/api/db/upload/route";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { useCallback, useMemo, useState } from "react";
