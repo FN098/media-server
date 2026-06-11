@@ -21,6 +21,18 @@ export async function proxy(req: NextRequest) {
   //   return NextResponse.next();
   // }
 
+  // TODO: セッション有効期限切れしていないのにサインインページにリダイレクトされる問題を調べる
+  logger.info("proxy", "NO SESSION", {
+    time: new Date(),
+    path: pathname,
+    url: req.url,
+    currentUrl: req.nextUrl.pathname + req.nextUrl.search,
+    cookie: req.headers.get("cookie"),
+    purpose: req.headers.get("purpose"),
+    prefetch: req.headers.get("next-router-prefetch"),
+    userAgent: req.headers.get("user-agent"),
+  });
+
   // ====== 認証 =======
 
   const session = await auth.api.getSession({
@@ -28,16 +40,6 @@ export async function proxy(req: NextRequest) {
   });
 
   if (!session) {
-    // NOTE: セッション有効期限切れしていないのにサインインページにリダイレクトされる問題を調べる
-    logger.info("proxy", "NO SESSION", {
-      path: pathname,
-      url: req.url,
-      cookie: req.headers.get("cookie")?.slice(0, 50),
-      purpose: req.headers.get("purpose"),
-      prefetch: req.headers.get("next-router-prefetch"),
-      userAgent: req.headers.get("user-agent"),
-    });
-
     const signInUrl = new URL("/sign-in", req.url);
 
     const currentUrl = req.nextUrl.pathname + req.nextUrl.search;
