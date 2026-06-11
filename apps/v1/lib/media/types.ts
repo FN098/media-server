@@ -76,5 +76,4 @@ export type CachedFsEntry = {
 export interface MediaFsContext {
   resolveRealPath: (virtualPath: string) => string;
   filterVirtualPath?: (virtualPath: string) => boolean;
-  dirCache?: Map<string, CachedFsEntry[]>;
 }

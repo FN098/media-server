@@ -5,9 +5,13 @@ import { basename, join, parentpath } from "@/lib/virtual-path/path";
 import { Dirent } from "fs";
 import { readdir } from "fs/promises";
 
+interface MediaFsDfsContext extends MediaFsContext {
+  dirCache?: Map<string, CachedFsEntry[]>;
+}
+
 async function readVirtualDirCached(
   virtualDirPath: string,
-  context: MediaFsContext
+  context: MediaFsDfsContext
 ): Promise<CachedFsEntry[]> {
   if (!context.dirCache) {
     context.dirCache = new Map();
@@ -47,7 +51,7 @@ async function readVirtualDirCached(
 // そのディレクトリ「直下」にメディアがあるかチェック
 async function hasDirectMedia(
   virtualDirPath: string,
-  context: MediaFsContext
+  context: MediaFsDfsContext
 ): Promise<boolean> {
   const entries = await readVirtualDirCached(virtualDirPath, context);
   return entries.some((e) => e.isMedia);
@@ -56,7 +60,7 @@ async function hasDirectMedia(
 // そのディレクトリ直下のサブディレクトリを名前順に取得
 async function getSubDirs(
   virtualDirPath: string,
-  context: MediaFsContext
+  context: MediaFsDfsContext
 ): Promise<CachedFsEntry[]> {
   const entries = await readVirtualDirCached(virtualDirPath, context);
 
@@ -71,7 +75,7 @@ async function getSubDirs(
 async function findDeepestMediaFolder(
   virtualDirPath: string,
   priority: "first" | "last",
-  context: MediaFsContext
+  context: MediaFsDfsContext
 ): Promise<string | null> {
   if (context.filterVirtualPath?.(virtualDirPath) === false) {
     return null;
@@ -111,7 +115,7 @@ async function findDeepestMediaFolder(
 // 次のフォルダを探索
 async function findGlobalNextFolder(
   currentVirtualDirPath: string,
-  context: MediaFsContext
+  context: MediaFsDfsContext
 ): Promise<string | null> {
   // 1. まず、自分の「子」の中にメディアがないか探す
   const subDirs = await getSubDirs(currentVirtualDirPath, context);
@@ -127,7 +131,7 @@ async function findGlobalNextFolder(
 
 async function findNextStepUpward(
   currentVirtualDirPath: string,
-  context: MediaFsContext
+  context: MediaFsDfsContext
 ): Promise<string | null> {
   const parentPath = parentpath(currentVirtualDirPath);
   if (parentPath === null) return null;
@@ -150,7 +154,7 @@ async function findNextStepUpward(
 // 前のフォルダを探索
 async function findGlobalPrevFolder(
   currentVirtualDirPath: string,
-  context: MediaFsContext
+  context: MediaFsDfsContext
 ): Promise<string | null> {
   const parentPath = parentpath(currentVirtualDirPath);
   if (parentPath === null) return null;
