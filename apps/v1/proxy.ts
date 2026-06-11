@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth/better-auth";
+import { logger } from "@/lib/logger";
 import { isBlockedClientPath } from "@/lib/path/protections";
 import { isPublicRoute } from "@/lib/routing/public-routes";
 import { NextRequest, NextResponse } from "next/server";
@@ -18,6 +19,14 @@ export async function proxy(req: NextRequest) {
   });
 
   if (!session) {
+    // NOTE: セッション有効期限切れしていないのにサインインページにリダイレクトされる問題を調べる
+    logger.info("proxy", "NO SESSION", {
+      path: pathname,
+      purpose: req.headers.get("purpose"),
+      prefetch: req.headers.get("next-router-prefetch"),
+      cookie: !!req.headers.get("cookie"),
+    });
+
     const signInUrl = new URL("/sign-in", req.url);
 
     const currentUrl = req.nextUrl.pathname + req.nextUrl.search;
