@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { detectMediaType } from "@/lib/media/detectors";
 import { updateMediaFileMtime } from "@/lib/media/repository";
 import { copyNodeInDb, renameNodeInDb } from "@/lib/media/services";
+import { MediaType } from "@/lib/media/types";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
@@ -1263,8 +1264,25 @@ export async function touchMediaTimestampAction(
   return { success: true };
 }
 
+type ListMediaActionResult =
+  | {
+      success: true;
+      files: {
+        name: string;
+        path: string;
+        type: MediaType;
+      }[];
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
+
 // メディアファイル一覧
-export async function listMediaAction(dirPath: string) {
+export async function listMediaAction(
+  dirPath: string
+): Promise<ListMediaActionResult> {
   // 入力バリデーション＋正規化
   if (!dirPath) {
     return {
@@ -1288,12 +1306,12 @@ export async function listMediaAction(dirPath: string) {
 
   // ルートフォルダ保護
   if (isRootPath(normalizedDirPath)) {
-    return { success: false, error: "ルートフォルダは操作できません。" };
+    return { success: false, message: "ルートフォルダは操作できません。" };
   }
 
   // システムフォルダ保護
   if (isSystemHiddenVirtualPath(normalizedDirPath)) {
-    return { success: false, error: "システムフォルダは操作できません。" };
+    return { success: false, message: "システムフォルダは操作できません。" };
   }
 
   // 認証
@@ -1314,13 +1332,16 @@ export async function listMediaAction(dirPath: string) {
     entries = await readdir(realDirPath, { withFileTypes: true });
   } catch (e) {
     if (isFsNotFoundError(e)) {
-      return { success: false, error: "フォルダが見つかりません。" };
+      return { success: false, message: "フォルダが見つかりません。" };
     }
     if (isFsPermissionError(e)) {
-      return { success: false, error: "フォルダへのアクセス権がありません。" };
+      return {
+        success: false,
+        message: "フォルダへのアクセス権がありません。",
+      };
     }
     logger.error("action:list-media", e);
-    return { success: false, error: "ファイル一覧の取得に失敗しました。" };
+    return { success: false, message: "ファイル一覧の取得に失敗しました。" };
   }
 
   const mediaFiles = entries
