@@ -2,7 +2,7 @@ import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
 import { TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { UploadRequestSchema } from "@/lib/db-backup/schemas";
-import { DbBackupUploadResult } from "@/lib/db-backup/types";
+import { DbBackupFile } from "@/lib/db-backup/types";
 import { logger } from "@/lib/logger";
 import {
   badRequestResponse,
@@ -14,6 +14,16 @@ import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+
+export type DbBackupUploadResult =
+  | {
+      success: true;
+      backup: DbBackupFile;
+    }
+  | {
+      success: false;
+      error: string;
+    };
 
 // DB バックアップファイルをアップロードする
 export async function POST(req: NextRequest) {

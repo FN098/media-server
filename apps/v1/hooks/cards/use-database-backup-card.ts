@@ -4,7 +4,8 @@ import {
   listBackupFilesAction,
   restoreDatabaseAction,
 } from "@/actions/db-backup-actions";
-import { DbBackupFile, DbBackupUploadResult } from "@/lib/db-backup/types";
+import { DbBackupUploadResult } from "@/app/api/db/upload/route";
+import { DbBackupFile } from "@/lib/db-backup/types";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
