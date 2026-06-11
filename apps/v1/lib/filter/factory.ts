@@ -10,7 +10,7 @@ import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { isMatchJapanese } from "@/lib/utils/japanese";
 
-export type MediaNodeFilter = (node: MediaNode) => boolean;
+type MediaNodeFilter = (node: MediaNode) => boolean;
 
 export function withDirectoryControl(
   filter: MediaNodeFilter,
