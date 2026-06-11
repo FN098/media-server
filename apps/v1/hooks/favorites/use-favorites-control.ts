@@ -1,9 +1,9 @@
-import { deleteFavoriteAction } from "@/actions/favorites/delete";
-import { deleteMultipleFavoritesAction } from "@/actions/favorites/delete-multiple";
-import { revalidateFavoriteAction } from "@/actions/favorites/revalidate";
-import { revalidateMultipleFavoritesAction } from "@/actions/favorites/revalidate-multiple";
-import { updateFavoriteAction } from "@/actions/favorites/update";
-import { updateMultipleFavoritesAction } from "@/actions/favorites/update-multiple";
+import { deleteFavoriteAction } from "@/actions/favorite/delete";
+import { deleteMultipleFavoritesAction } from "@/actions/favorite/delete-multiple";
+import { revalidateFavoriteAction } from "@/actions/favorite/revalidate";
+import { revalidateMultipleFavoritesAction } from "@/actions/favorite/revalidate-multiple";
+import { updateFavoriteAction } from "@/actions/favorite/update";
+import { updateMultipleFavoritesAction } from "@/actions/favorite/update-multiple";
 import { Favorite } from "@/lib/favorite/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 

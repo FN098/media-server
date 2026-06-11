@@ -1,4 +1,4 @@
-import { extractArchivesAction } from "@/actions/archives/extract";
+import { extractArchivesAction } from "@/actions/archive/extract";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 

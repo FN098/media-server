@@ -1,6 +1,6 @@
 "use client";
 
-import { togglePinVisitedFolderAction } from "@/actions/folders/toggle-pin-visited";
+import { togglePinVisitedFolderAction } from "@/actions/folder/toggle-pin-visited";
 import { LocalRecentDate } from "@/components/ui/dates/local-recent-date";
 import type { VisitedFolder } from "@/generated/prisma/client";
 import { getClientExplorerPath } from "@/lib/path/helpers";

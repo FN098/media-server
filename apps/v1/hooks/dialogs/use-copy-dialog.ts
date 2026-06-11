@@ -1,6 +1,6 @@
-import { listRecentFoldersAction } from "@/actions/folders/list-recent";
-import { listSubDirectoriesAction } from "@/actions/folders/list-sub";
-import { togglePinVisitedFolderAction } from "@/actions/folders/toggle-pin-visited";
+import { listRecentFoldersAction } from "@/actions/folder/list-recent";
+import { listSubDirectoriesAction } from "@/actions/folder/list-sub";
+import { togglePinVisitedFolderAction } from "@/actions/folder/toggle-pin-visited";
 import { copyNodesAction } from "@/actions/node-actions";
 import { dirname } from "path";
 import { useCallback, useState } from "react";
