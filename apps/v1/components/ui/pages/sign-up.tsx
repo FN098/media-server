@@ -4,7 +4,7 @@ import { Eye, EyeOff, Lock, Mail, ShieldAlert, User } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
-import { signUpAction } from "@/actions/auth-actions";
+import { signUpAction } from "@/actions/auth/sign-up";
 import { Button } from "@/shadcn/components/ui/button";
 import { Input } from "@/shadcn/components/ui/input";
 import { Label } from "@/shadcn/components/ui/label";
