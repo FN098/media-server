@@ -93,9 +93,8 @@ const updateThumb = async (node: MediaNode) => {
   // DB timestamp 更新
   if (!node.isDirectory) {
     const touched = await touchMediaTimestampAction(node.path);
-
-    if (touched.error) {
-      toast.error(touched.error);
+    if (!touched.success) {
+      toast.error(touched.message);
     }
   }
 

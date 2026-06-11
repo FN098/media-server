@@ -1191,8 +1191,20 @@ export async function deleteNodesPermanentlyAction(
   };
 }
 
+type TouchMediaTimestampActionResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
+
 // タイムスタンプ更新
-export async function touchMediaTimestampAction(sourcePath: string) {
+export async function touchMediaTimestampAction(
+  sourcePath: string
+): Promise<TouchMediaTimestampActionResult> {
   // 入力バリデーション＋正規化
   if (!sourcePath) {
     return {
@@ -1216,12 +1228,12 @@ export async function touchMediaTimestampAction(sourcePath: string) {
 
   // ルートフォルダ保護
   if (isRootPath(normalizedSourcePath)) {
-    return { success: false, error: "ルートフォルダは操作できません。" };
+    return { success: false, message: "ルートフォルダは操作できません。" };
   }
 
   // システムフォルダ保護
   if (isSystemHiddenVirtualPath(normalizedSourcePath)) {
-    return { success: false, error: "システムフォルダは操作できません。" };
+    return { success: false, message: "システムフォルダは操作できません。" };
   }
 
   // 認証
@@ -1244,7 +1256,7 @@ export async function touchMediaTimestampAction(sourcePath: string) {
     logger.error("action:touch-timestamp", e);
     return {
       success: false,
-      error: "タイムスタンプの更新に失敗しました。",
+      message: "タイムスタンプの更新に失敗しました。",
     };
   }
 
