@@ -1,4 +1,5 @@
-import { createTagsAction, updateMediaTagsAction } from "@/actions/tag-actions";
+import { createTagsAction } from "@/actions/tag/create";
+import { updateMediaTagsAction } from "@/actions/tag/update";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { useTagEditorHotkeys } from "@/hooks/tag-editor/use-tag-editor-hotkeys";
 import { MediaNode } from "@/lib/media/types";

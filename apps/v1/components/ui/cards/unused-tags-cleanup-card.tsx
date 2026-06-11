@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  deleteSelectedTagsAction,
-  scanUnusedTagsAction,
-} from "@/actions/tag-actions";
+import { deleteMultipleTagsAction } from "@/actions/tag/delete-multiple";
+import { scanUnusedTagsAction } from "@/actions/tag/scan-unused";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,7 +67,7 @@ export function UnusedTagsCleanupCard() {
     const ids = Array.from(selectedIds);
 
     setIsPending(true);
-    const result = await deleteSelectedTagsAction(ids);
+    const result = await deleteMultipleTagsAction(ids);
     setIsPending(false);
 
     if (result.success) {

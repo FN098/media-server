@@ -1,13 +1,11 @@
 "use client";
 
-import {
-  createTagsAction,
-  deleteTagAction,
-  getTagsInfiniteAction,
-  markTagsAsReadAction,
-  renameTagAction,
-  updateTagFavoriteAction,
-} from "@/actions/tag-actions";
+import { createTagsAction } from "@/actions/tag/create";
+import { deleteTagAction } from "@/actions/tag/delete";
+import { getTagsInfiniteAction } from "@/actions/tag/get-infinite";
+import { markTagsAsReadAction } from "@/actions/tag/mark-as-read";
+import { renameTagAction } from "@/actions/tag/rename";
+import { updateTagFavoriteAction } from "@/actions/tag/update-favorite";
 import { TagMasterCardList } from "@/components/ui/cards/tag-master-manager-card/tag-master-card-list";
 import { TagMasterTable } from "@/components/ui/cards/tag-master-manager-card/tag-master-table";
 import { TagMasterItem } from "@/lib/tag/types";
