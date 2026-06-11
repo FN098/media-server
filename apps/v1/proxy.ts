@@ -22,7 +22,7 @@ export async function proxy(req: NextRequest) {
   // }
 
   // TODO: セッション有効期限切れしていないのにサインインページにリダイレクトされる問題を調べる
-  logger.info("proxy", "NO SESSION", {
+  logger.info("proxy", "request info", {
     time: new Date(),
     path: pathname,
     url: req.url,
