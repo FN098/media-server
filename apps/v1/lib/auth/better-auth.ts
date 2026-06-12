@@ -11,15 +11,32 @@ const allowedOrigins = parseCsvEnv(process.env.ALLOWED_ORIGINS);
 
 export const auth = betterAuth({
   trustedOrigins: allowedOrigins,
+
   database: prismaAdapter(db, {
     provider: "mysql",
   }),
+
   session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7日
+    updateAge: 60 * 60 * 24, // 1日ごとにDB更新
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60, // Cache duration in seconds
+      maxAge: 5 * 60, // 5分
     },
+    disableSessionRefresh: false,
   },
+
+  // 検証用
+  // session: {
+  //   expiresIn: 60 * 10, // 10分
+  //   updateAge: 60 * 1, // 1分
+  //   cookieCache: {
+  //     enabled: true,
+  //     maxAge: 5, // 5秒
+  //   },
+  //   disableSessionRefresh: false,
+  // },
+
   databaseHooks: {
     user: {
       create: {
@@ -42,10 +59,12 @@ export const auth = betterAuth({
       },
     },
   },
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
   },
+
   plugins: [
     // 管理者ユーザー用のAPI拡張プラグイン
     admin(),
