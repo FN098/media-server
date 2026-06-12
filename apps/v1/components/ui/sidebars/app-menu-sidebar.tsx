@@ -1,7 +1,7 @@
 "use client";
 
+import { signOutAction } from "@/actions/auth/sign-out";
 import { ThemeSelect } from "@/components/ui/selects/theme-select";
-import { authClient } from "@/lib/auth/better-auth-client";
 import { resolvePageMetas } from "@/lib/page-meta/resolvers";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -20,7 +20,6 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { LogOutIcon, LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 const menuItems = resolvePageMetas([
@@ -35,19 +34,11 @@ const menuItems = resolvePageMetas([
 
 export function AppMenuSidebar() {
   const { setOpen, setOpenMobile } = useSidebar();
-  const router = useRouter();
 
   const closeSidebar = useCallback(() => {
     setOpen(false);
     setOpenMobile(false);
   }, [setOpen, setOpenMobile]);
-
-  const handleSignOut = async () => {
-    await authClient.signOut();
-    router.push("/sign-in");
-    router.refresh();
-    closeSidebar();
-  };
 
   return (
     <Sidebar className="z-50">
@@ -99,14 +90,15 @@ export function AppMenuSidebar() {
       <SidebarFooter className="border-t border-zinc-200 dark:border-white/[0.06] px-4 py-4 space-y-3">
         <ThemeSelect />
 
-        <button
-          type="button"
-          onClick={() => void handleSignOut()}
-          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors"
-        >
-          <LogOutIcon className="h-4 w-4 shrink-0" aria-hidden />
-          <span>Sign out</span>
-        </button>
+        <form action={signOutAction}>
+          <button
+            type="submit"
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors"
+          >
+            <LogOutIcon className="h-4 w-4 shrink-0" aria-hidden />
+            <span>Sign out</span>
+          </button>
+        </form>
       </SidebarFooter>
     </Sidebar>
   );
