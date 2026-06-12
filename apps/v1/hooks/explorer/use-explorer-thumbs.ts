@@ -27,20 +27,17 @@ export function useExplorerThumbs({
   // サムネイル自動作成
   useEffect(() => {
     if (!currentDir || !autoCreateThumbs) return;
-
     void enqueueCreateThumbsJobAction(currentDir);
   }, [autoCreateThumbs, currentDir]);
 
   const update = useCallback(
     async (node: MediaNode) => {
       if (updatingRef.current) return;
-
       updatingRef.current = true;
-      setIsLoading(true);
 
+      setIsLoading(true);
       try {
         await updateThumb(node);
-
         router.refresh();
       } finally {
         updatingRef.current = false;
@@ -53,14 +50,11 @@ export function useExplorerThumbs({
   const updateParallel = useCallback(
     async (nodes: MediaNode[]) => {
       if (updatingRef.current) return;
-
       updatingRef.current = true;
+
       setIsLoading(true);
-
       try {
-        // 並列化
         await Promise.all(nodes.map(updateThumb));
-
         router.refresh();
       } finally {
         updatingRef.current = false;
@@ -79,28 +73,26 @@ export function useExplorerThumbs({
 
 const updateThumb = async (node: MediaNode) => {
   // サムネイル再生成ジョブ投入
-  const queued = await enqueueCreateSingleThumbJobAction(node.path, {
+  const enqueResult = await enqueueCreateSingleThumbJobAction(node.path, {
     force: true,
   });
-
-  if (queued?.error) {
-    toast.error(queued.error);
+  if (enqueResult?.error) {
+    toast.error(enqueResult.error);
     return;
   }
 
   // DB timestamp 更新
   if (!node.isDirectory) {
-    const touched = await touchMediaTimestampAction(node.path);
-    if (!touched.success) {
-      toast.error(touched.message);
+    const touchResult = await touchMediaTimestampAction(node.path);
+    if (!touchResult.success) {
+      toast.error(touchResult.message);
     }
   }
 
   // preview リセット
-  const updated = await updatePreviewAction(node.path, null);
-
-  if (updated.error) {
-    toast.error(updated.error);
+  const updateResult = await updatePreviewAction(node.path, null);
+  if (!updateResult.success) {
+    toast.error(updateResult.message);
   }
 };
 

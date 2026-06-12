@@ -86,13 +86,12 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
     setIsPending(true);
     try {
       const result = await updatePreviewAction(selectedTargetPath, previewPath);
-
       if (result.success) {
         toast.success("プレビューを設定しました");
         onSuccess?.();
         close();
       } else {
-        toast.error(result.error || "プレビュー設定に失敗しました");
+        toast.error(result.message);
       }
     } finally {
       setIsPending(false);
