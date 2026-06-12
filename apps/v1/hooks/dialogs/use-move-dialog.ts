@@ -122,7 +122,6 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
       setIsLoading(true);
       try {
         const result = await togglePinVisitedFolderAction(path, currentPinned);
-
         if (result.success) {
           void fetchRecentDirs();
         } else {
