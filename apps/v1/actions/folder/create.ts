@@ -20,6 +20,7 @@ type CreateFolderResult =
   | {
       success: false;
       message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 // フォルダ作成
@@ -35,25 +36,29 @@ export async function createFolderAction(
     };
   }
 
-  const normalizedParentPath = VirtualPathSchema.safeParse(
-    sanitize(parentPath)
-  ).data;
-  if (!normalizedParentPath) {
+  const parsed = {
+    parentPath: VirtualPathSchema.safeParse(sanitize(parentPath)),
+    folderName: FolderNameSchema.safeParse(sanitize(folderName)),
+  };
+
+  if (!parsed.parentPath.success) {
     return {
       success: false,
-      message: `無効なパスです。: ${parentPath}`,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "parentPath", issues: parsed.parentPath.error?.issues }],
     };
   }
 
-  const normalizedFolderName = FolderNameSchema.safeParse(
-    sanitize(folderName)
-  ).data;
-  if (!normalizedFolderName) {
+  if (!parsed.folderName.success) {
     return {
       success: false,
-      message: `無効なフォルダ名です。: ${folderName}`,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "folderName", issues: parsed.folderName.error?.issues }],
     };
   }
+
+  const normalizedParentPath = parsed.parentPath.data;
+  const normalizedFolderName = parsed.folderName.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -80,6 +85,7 @@ export async function createFolderAction(
     };
   }
 
+  // 仮想パス→物理パス
   const newVirtualPath = join(normalizedParentPath, normalizedFolderName);
   const newRealPath = getServerMediaPath(newVirtualPath);
 
@@ -103,7 +109,5 @@ export async function createFolderAction(
   // キャッシュ更新
   revalidatePath("/explorer");
 
-  return {
-    success: true,
-  };
+  return { success: true };
 }

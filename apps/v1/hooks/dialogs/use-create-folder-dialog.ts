@@ -14,21 +14,21 @@ export function useCreateFolderDialog({
   const [folderName, setFolderName] = useState<string>("");
   const [isPending, setIsPending] = useState(false);
 
-  // 1. ダイアログを開く
+  // ダイアログを開く
   const open = useCallback((parentPath: string) => {
     setParentPath(parentPath);
     setFolderName(""); // 開くときに入力をクリア
     setIsOpen(true);
   }, []);
 
-  // 2. ダイアログを閉じる
+  // ダイアログを閉じる
   const close = useCallback(() => {
     setIsOpen(false);
     setParentPath("");
     setFolderName("");
   }, []);
 
-  // 3. フォルダ作成実行
+  // フォルダ作成実行
   const performCreate = useCallback(async () => {
     const trimmedName = folderName.trim();
 
@@ -38,15 +38,18 @@ export function useCreateFolderDialog({
     }
 
     setIsPending(true);
-    const result = await createFolderAction(parentPath, trimmedName);
-    setIsPending(false);
+    try {
+      const result = await createFolderAction(parentPath, trimmedName);
 
-    if (result.success) {
-      toast.success("フォルダを作成しました");
-      onSuccess?.();
-      close();
-    } else {
-      toast.error(result.message);
+      if (result.success) {
+        toast.success("フォルダを作成しました");
+        onSuccess?.();
+        close();
+      } else {
+        toast.error(result.message);
+      }
+    } finally {
+      setIsPending(false);
     }
   }, [parentPath, folderName, close, onSuccess]);
 
