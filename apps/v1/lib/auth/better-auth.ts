@@ -41,11 +41,11 @@ export const auth = betterAuth({
     requireEmailVerification: false,
   },
   plugins: [
+    // 管理者ユーザー用のAPI拡張プラグイン
+    admin(),
+
     // サーバーアクションでレスポンスに Set-Cookie を自動で付与するプラグイン
     // https://better-auth.com/docs/integrations/next#server-action-cookies
     nextCookies(),
-
-    // 管理者ユーザー用のAPI拡張プラグイン
-    admin(),
   ],
 });
