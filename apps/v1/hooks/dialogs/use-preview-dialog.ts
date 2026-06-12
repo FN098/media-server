@@ -2,7 +2,7 @@ import { listSubFoldersAction } from "@/actions/folder/list-sub";
 import { listMediaAction } from "@/actions/node/list";
 import { updatePreviewAction } from "@/actions/preview/update";
 import { sanitize } from "@/lib/virtual-path/guard";
-import { dirname } from "path";
+import { dirname } from "@/lib/virtual-path/path";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -56,13 +56,13 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
       setIsOpen(true);
 
       // 開いたアセットがある親階層からブラウズを開始する
-      const initialDir = sanitize(dirname(targetPreviewPath).replace(/\\/g, "/") || "/";
+      const initialDir = sanitize(dirname(targetPreviewPath));
       void fetchEntries(initialDir);
     },
     [fetchEntries]
   );
 
-  // 3. ダイアログを閉じる
+  // ダイアログを閉じる
   const close = useCallback(() => {
     setIsOpen(false);
     setPreviewPath("");
@@ -72,27 +72,30 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
     setSelectedTargetPath(null);
   }, []);
 
-  // 4. 親階層へ戻る
+  // 親階層へ戻る
   const goBackParent = useCallback(() => {
-    const parent = dirname(currentDir).replace(/\\/g, "/");
+    const parent = sanitize(dirname(currentDir));
     const path = parent === "." ? "" : parent;
     void fetchEntries(path);
   }, [currentDir, fetchEntries]);
 
-  // 5. プレビュー画像設定の保存実行
+  // プレビュー画像設定の保存実行
   const performSave = useCallback(async () => {
     if (!previewPath || !selectedTargetPath) return;
 
     setIsPending(true);
-    const result = await updatePreviewAction(selectedTargetPath, previewPath);
-    setIsPending(false);
+    try {
+      const result = await updatePreviewAction(selectedTargetPath, previewPath);
 
-    if (result.success) {
-      toast.success("プレビューを設定しました");
-      onSuccess?.();
-      close();
-    } else {
-      toast.error(result.error || "設定に失敗しました");
+      if (result.success) {
+        toast.success("プレビューを設定しました");
+        onSuccess?.();
+        close();
+      } else {
+        toast.error(result.error || "プレビュー設定に失敗しました");
+      }
+    } finally {
+      setIsPending(false);
     }
   }, [previewPath, selectedTargetPath, close, onSuccess]);
 
