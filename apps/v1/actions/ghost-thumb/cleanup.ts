@@ -1,45 +1,66 @@
 "use server";
 
-import { GhostThumbItem } from "@/lib/ghost-thumb/types";
 import { PATHS } from "@/lib/path/paths";
+import { chunk } from "@/lib/utils/array";
+import { logger } from "better-auth";
 import { rm } from "fs/promises";
 import path from "path";
 
+type CleanupGhostThumbnailsResult =
+  | {
+      success: false;
+      message: string;
+    }
+  | {
+      success: true;
+      deletedCount: number;
+    };
+
 // 不要サムネイル削除
-export async function cleanupGhostThumbnailsAction(items: GhostThumbItem[]) {
+export async function cleanupGhostThumbnailsAction(
+  items: { path: string }[]
+): Promise<CleanupGhostThumbnailsResult> {
+  if (!items || items.length === 0) {
+    return {
+      success: false,
+      message: "削除対象のメディアIDが指定されていません。",
+    };
+  }
+
+  const thumbRoot = path.resolve(PATHS.server.media.thumb.root);
+
+  const chunks = chunk(
+    items.map((n) => n.path),
+    50 // 並列処理数
+  );
+
+  let deletedCount = 0;
+
   try {
-    const thumbRoot = path.resolve(PATHS.server.media.thumb.root);
-    let deletedCount = 0;
-
-    // メモリ保護のためバッチ処理
-    const CHUNK_SIZE = 50;
-    for (let i = 0; i < items.length; i += CHUNK_SIZE) {
-      const chunk = items.slice(i, i + CHUNK_SIZE);
-
+    for (const paths of chunks) {
       await Promise.all(
-        chunk.map(async (item) => {
+        paths.map(async (path) => {
           // 安全確認: thumbRoot配下であること
-          if (!item.path.startsWith(thumbRoot)) return;
+          if (!path.startsWith(thumbRoot)) return;
 
           try {
-            if (item.isDirectory) {
-              // ディレクトリごと一撃で消去
-              await rm(item.path, { recursive: true, force: true });
-            } else {
-              // 個別ファイルの消去
-              await rm(item.path, { force: true });
-            }
-            deletedCount++;
+            await rm(path, { recursive: true, force: true });
           } catch (e) {
-            console.error(`Failed to delete: ${item.path}`, e);
+            logger.error("action:cleanup-ghost-thumb", e);
+            return;
           }
+
+          deletedCount++;
         })
       );
     }
-
-    return { success: true, deletedCount };
   } catch (error) {
-    console.error("Cleanup Error:", error);
-    return { success: false, error: "削除中にエラーが発生しました。" };
+    logger.error("action:cleanup-ghost-thumb", error);
+    return {
+      success: false,
+      message: "ゴーストサムネイルの削除に失敗しました。",
+    };
   }
+
+  return { success: true, deletedCount };
 }

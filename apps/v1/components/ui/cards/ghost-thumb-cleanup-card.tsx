@@ -150,7 +150,7 @@ export function GhostThumbCleanupCard() {
         if (result.success) {
           totalDeleted += result.deletedCount ?? 0;
         } else {
-          toast.error(result.error || "一部の削除中にエラーが発生しました");
+          toast.error(result.message);
           hasError = true;
         }
       } catch (err) {
