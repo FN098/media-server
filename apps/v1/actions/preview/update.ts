@@ -1,11 +1,11 @@
 "use server";
 
+import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { getPathInfo } from "@/lib/utils/fs";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
-import { logger } from "better-auth";
 import { revalidatePath } from "next/cache";
 
 type UpdatePreviewActionResult =

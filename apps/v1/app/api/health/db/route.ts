@@ -1,6 +1,6 @@
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { internalServerErrorResponse } from "@/lib/response/errors";
-import { logger } from "better-auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 

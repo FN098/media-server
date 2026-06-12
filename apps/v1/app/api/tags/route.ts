@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import {
   badRequestResponse,
   internalServerErrorResponse,
@@ -14,7 +15,6 @@ import {
 import { searchTags } from "@/lib/tag/search";
 import { uniqueBy } from "@/lib/utils/array";
 import { safeParseRequestJson } from "@/lib/utils/request";
-import { logger } from "better-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 const MAX_PATHS_TO_PROCESS = 500;

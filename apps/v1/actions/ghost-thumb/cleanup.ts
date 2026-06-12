@@ -1,8 +1,8 @@
 "use server";
 
+import { logger } from "@/lib/logger";
 import { PATHS } from "@/lib/path/paths";
 import { chunk } from "@/lib/utils/array";
-import { logger } from "better-auth";
 import { rm } from "fs/promises";
 import path from "path";
 
