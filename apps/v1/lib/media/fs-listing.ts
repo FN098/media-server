@@ -14,7 +14,7 @@ const defaultContext: MediaFsContext = {
 
 export async function listFsNodes(
   virtualDirPath: string,
-  context: MediaFsContext = defaultContext
+  context: MediaFsContext = { ...defaultContext }
 ): Promise<MediaFsNode[]> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
   const dirents = await fs.readdir(realDirPath, { withFileTypes: true });
@@ -55,7 +55,7 @@ export async function listFsNodes(
 
 export async function getFsNode(
   virtualFilePath: string,
-  context: MediaFsContext = defaultContext
+  context: MediaFsContext = { ...defaultContext }
 ): Promise<MediaFsNode> {
   const virtualPath = virtualFilePath.replace(/\\/g, "/");
   const realPath = context.resolveRealPath(virtualPath);
@@ -75,7 +75,7 @@ export async function getFsNode(
 
 export async function getFsListing(
   virtualDirPath: string,
-  context: MediaFsContext = defaultContext
+  context: MediaFsContext = { ...defaultContext }
 ): Promise<MediaFsListing | null> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
   if (!(await existsPath(realDirPath))) return null;
