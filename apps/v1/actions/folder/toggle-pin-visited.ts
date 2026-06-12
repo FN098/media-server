@@ -13,7 +13,11 @@ type TogglePinVisitedFolderResult =
   | {
       success: true;
     }
-  | { success: false; message: string };
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
 
 // フォルダ訪問履歴ピン留めトグル
 export async function togglePinVisitedFolderAction(
@@ -28,13 +32,19 @@ export async function togglePinVisitedFolderAction(
     };
   }
 
-  const normalizedDirPath = VirtualPathSchema.safeParse(sanitize(dirPath)).data;
-  if (!normalizedDirPath) {
+  const parsed = {
+    dirPath: VirtualPathSchema.safeParse(sanitize(dirPath)),
+  };
+
+  if (!parsed.dirPath.success) {
     return {
       success: false,
-      message: `無効なパスです。: ${dirPath}`,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "dirPath", issues: parsed.dirPath.error?.issues }],
     };
   }
+
+  const normalizedDirPath = parsed.dirPath.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -67,14 +77,12 @@ export async function togglePinVisitedFolderAction(
     logger.error("action:toggle-pin-visited-folder", error);
     return {
       success: false,
-      message: "訪問済みフォルダのピン留め更新に失敗しました。",
+      message: "フォルダ訪問履歴ピン留め更新に失敗しました。",
     };
   }
 
   // キャッシュ更新
   revalidatePath("/dashboard");
 
-  return {
-    success: true,
-  };
+  return { success: true };
 }
