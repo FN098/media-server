@@ -10,10 +10,13 @@ import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
 import { revalidatePath } from "next/cache";
 
 type VisitFolderResult =
-  | { success: true }
+  | {
+      success: true;
+    }
   | {
       success: false;
       message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 // フォルダ訪問履歴更新
@@ -28,13 +31,19 @@ export async function visitFolderAction(
     };
   }
 
-  const normalizedDirPath = VirtualPathSchema.safeParse(sanitize(dirPath)).data;
-  if (!normalizedDirPath) {
+  const parsed = {
+    dirPath: VirtualPathSchema.safeParse(sanitize(dirPath)),
+  };
+
+  if (!parsed.dirPath.success) {
     return {
       success: false,
-      message: `無効なパスです。: ${dirPath}`,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "dirPath", issues: parsed.dirPath.error?.issues }],
     };
   }
+
+  const normalizedDirPath = parsed.dirPath.data;
 
   // 認証
   const user = await resolveCurrentUser();
