@@ -1,6 +1,7 @@
 "use client";
 
 import { cleanupGhostMediaAction } from "@/actions/ghost-media/cleanup";
+import { AbortError } from "@/lib/errors/abort-error";
 import {
   GhostMediaItem,
   GhostMediaScanEventData,
@@ -134,27 +135,25 @@ export function GhostMediaCleanupCard() {
   const handleDelete = useCallback(async () => {
     if (!items || items.length === 0) return;
 
+    // 一度に対象にサーバーに送信すると 1MB の制限にひっかかるので分割
+    const chunks = chunk(
+      items.map((n) => n.id),
+      1000
+    );
+
+    let deletedCount = 0;
+
+    setIsPending(true);
     try {
-      setIsPending(true);
-
-      const chunks = chunk(
-        items.map((n) => n.id),
-        1000
-      );
-
-      let deletedCount = 0;
-
       for (const ids of chunks) {
         const result = await cleanupGhostMediaAction(ids);
-
         if (!result.success) {
-          throw new Error(result.error);
+          throw new AbortError(result.message);
         }
-
         deletedCount += result.deletedCount ?? 0;
       }
 
-      toast.success(`${deletedCount}件の不要なメディアを削除しました`);
+      toast.success(`${deletedCount} 件の不要なメディアを削除しました`);
       setItems(null);
     } catch (error) {
       toast.error(
