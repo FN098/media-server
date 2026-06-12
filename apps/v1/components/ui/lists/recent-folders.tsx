@@ -11,6 +11,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { Clock, Folder, History, Pin } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 
 interface RecentFoldersProps {
   folders: VisitedFolder[];
@@ -22,8 +23,17 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
 
   const handleTogglePin = useCallback(async (folder: VisitedFolder) => {
     setIsPending(true);
-    await togglePinVisitedFolderAction(folder.dirPath, folder.isPinned);
-    setIsPending(false);
+    try {
+      const result = await togglePinVisitedFolderAction(
+        folder.dirPath,
+        folder.isPinned
+      );
+      if (!result.success) {
+        toast.error(result.message);
+      }
+    } finally {
+      setIsPending(false);
+    }
   }, []);
 
   if (folders.length === 0) {
