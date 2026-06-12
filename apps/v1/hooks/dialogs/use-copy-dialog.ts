@@ -1,5 +1,5 @@
 import { listRecentFoldersAction } from "@/actions/folder/list-recent";
-import { listSubDirectoriesAction } from "@/actions/folder/list-sub";
+import { listSubFoldersAction } from "@/actions/folder/list-sub";
 import { togglePinVisitedFolderAction } from "@/actions/folder/toggle-pin-visited";
 import { copyNodesAction } from "@/actions/node/copy";
 import { dirname } from "path";
@@ -38,10 +38,10 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
     async (path: string) => {
       setIsLoading(true);
       try {
-        const result = await listSubDirectoriesAction(path);
+        const result = await listSubFoldersAction(path);
         if (result.success) {
           // ループ防止のフィルタリング
-          const filtered = result.directories.filter(
+          const filtered = result.folders.filter(
             (d) =>
               !targets.some(
                 (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")

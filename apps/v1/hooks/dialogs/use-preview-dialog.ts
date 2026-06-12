@@ -1,6 +1,7 @@
-import { listSubDirectoriesAction } from "@/actions/folder/list-sub";
+import { listSubFoldersAction } from "@/actions/folder/list-sub";
 import { listMediaAction } from "@/actions/node/list";
 import { updatePreviewAction } from "@/actions/preview/update";
+import { sanitize } from "@/lib/virtual-path/guard";
 import { dirname } from "path";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -26,36 +27,39 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
-  // 1. 指定ディレクトリのコンテンツ（フォルダ＆ファイル）を同時取得
-  const fetchContents = useCallback(async (dirPath: string) => {
+  // エントリ一覧取得
+  const fetchEntries = useCallback(async (dirPath: string) => {
     setIsLoading(true);
-    const [dirRes, fileRes] = await Promise.all([
-      listSubDirectoriesAction(dirPath),
-      listMediaAction(dirPath),
-    ]);
-    setIsLoading(false);
+    try {
+      const [sub, media] = await Promise.all([
+        listSubFoldersAction(dirPath),
+        listMediaAction(dirPath),
+      ]);
 
-    if (dirRes.success && fileRes.success) {
-      setDirs(dirRes.directories || []);
-      setFiles(fileRes.files || []);
-      setCurrentDir(dirPath);
-      setSelectedTargetPath(dirPath); // 階層移動時、デフォルトでそのフォルダを設定先に
-    } else {
-      toast.error("コンテンツの取得に失敗しました");
+      if (sub.success && media.success) {
+        setDirs(sub.folders || []);
+        setFiles(media.files || []);
+        setCurrentDir(dirPath);
+        setSelectedTargetPath(dirPath); // 階層移動時、デフォルトでそのフォルダを設定先に
+      } else {
+        toast.error("コンテンツの取得に失敗しました");
+      }
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  // 2. ダイアログを開く
+  // ダイアログを開く
   const open = useCallback(
     (targetPreviewPath: string) => {
       setPreviewPath(targetPreviewPath);
       setIsOpen(true);
 
       // 開いたアセットがある親階層からブラウズを開始する
-      const initialDir = dirname(targetPreviewPath).replace(/\\/g, "/") || "/";
-      void fetchContents(initialDir);
+      const initialDir = sanitize(dirname(targetPreviewPath).replace(/\\/g, "/") || "/";
+      void fetchEntries(initialDir);
     },
-    [fetchContents]
+    [fetchEntries]
   );
 
   // 3. ダイアログを閉じる
@@ -72,8 +76,8 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
   const goBackParent = useCallback(() => {
     const parent = dirname(currentDir).replace(/\\/g, "/");
     const path = parent === "." ? "" : parent;
-    void fetchContents(path);
-  }, [currentDir, fetchContents]);
+    void fetchEntries(path);
+  }, [currentDir, fetchEntries]);
 
   // 5. プレビュー画像設定の保存実行
   const performSave = useCallback(async () => {
@@ -104,7 +108,7 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
     setSelectedTargetPath,
     open,
     close,
-    fetchContents,
+    fetchContents: fetchEntries,
     goBackParent,
     performSave,
   };

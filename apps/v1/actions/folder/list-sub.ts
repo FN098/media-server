@@ -15,27 +15,43 @@ import { readdir } from "fs/promises";
 type ListSubDirectoriesResult =
   | {
       success: true;
-      directories: { name: string; path: string }[];
+      folders: { name: string; path: string }[];
     }
-  | { success: false; message: string };
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
 
 // サブフォルダ一覧
-export async function listSubDirectoriesAction(
+export async function listSubFoldersAction(
   dirPath: string
 ): Promise<ListSubDirectoriesResult> {
   // 入力バリデーション＋正規化
-  let normalizedDirPath: string;
-  if (isRootPath(dirPath)) {
-    normalizedDirPath = dirPath; // ルートはバリデーションチェック回避
-  } else {
-    const parsed = VirtualPathSchema.safeParse(sanitize(dirPath));
-    if (!parsed.success) {
+  let normalizedDirPath = isRootPath(dirPath) ? dirPath : null;
+
+  // ルートの場合は正規化スキップ
+  if (normalizedDirPath == null) {
+    if (!dirPath) {
       return {
         success: false,
-        message: `無効なパスです。: ${dirPath}`,
+        message: "処理対象のパスが指定されていません。",
       };
     }
-    normalizedDirPath = parsed.data;
+
+    const parsed = {
+      dirPath: VirtualPathSchema.safeParse(sanitize(dirPath)),
+    };
+
+    if (!parsed.dirPath.success) {
+      return {
+        success: false,
+        message: "入力エラーがあります。",
+        errors: [{ prop: "dirPath", issues: parsed.dirPath.error?.issues }],
+      };
+    }
+
+    normalizedDirPath = parsed.dirPath.data;
   }
 
   // 認証
@@ -82,7 +98,7 @@ export async function listSubDirectoriesAction(
         message: "フォルダへのアクセス権がありません。",
       };
     }
-    logger.error("action:list-sub-directories", e);
+    logger.error("action:list-sub-folders", e);
     return {
       success: false,
       message: "ファイル一覧の取得に失敗しました。",
@@ -91,11 +107,11 @@ export async function listSubDirectoriesAction(
 
   return {
     success: true,
-    directories: entries
+    folders: entries
       .filter((e) => e.isDirectory())
       .map((e) => ({
         name: e.name,
-        path: sanitize(join(dirPath, e.name)),
+        path: sanitize(join(normalizedDirPath, e.name)),
       }))
       .filter((e) => !isBlockedVirtualPath(e.path)),
   };
