@@ -1,6 +1,6 @@
 "use server";
 
-import { DeleteNodesResult, DeleteNodesSuccess } from "@/actions/node/delete";
+import { DeleteNodesSuccess } from "@/actions/node/delete";
 import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
 import { logger } from "@/lib/logger";
@@ -13,10 +13,23 @@ import { VirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import { rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 
+export type DeleteNodesPermanentlyResult =
+  | {
+      success: true;
+      completed: { path: string }[];
+      failed: { path: string; message: string }[];
+      skipped: { path: string; message: string }[];
+    }
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    };
+
 // 完全に削除
 export async function deleteNodesPermanentlyAction(
   sourcePaths: string[]
-): Promise<DeleteNodesResult> {
+): Promise<DeleteNodesPermanentlyResult> {
   // 入力バリデーション＋正規化
   if (!sourcePaths || sourcePaths.length === 0) {
     return {
