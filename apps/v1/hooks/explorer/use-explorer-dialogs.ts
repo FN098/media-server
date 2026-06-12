@@ -9,6 +9,7 @@ import { useRatingFilterDialog } from "@/hooks/dialogs/use-rating-filter-dialog"
 import { useRenameDialog } from "@/hooks/dialogs/use-rename-dialog";
 import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { useTextFilePreviewDialog } from "@/hooks/dialogs/use-text-file-preview-dialog";
+import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useMemo } from "react";
@@ -16,13 +17,18 @@ import { useMemo } from "react";
 interface UseExplorerDialogsProps {
   filtering: ExplorerFiltering;
   selection: MediaNodeSelection;
+  favorites: ExplorerFavorites;
 }
 
 export function useExplorerDialogs({
   filtering,
   selection,
+  favorites,
 }: UseExplorerDialogsProps) {
-  const renameDialog = useRenameDialog();
+  const renameDialog = useRenameDialog({
+    onSuccess: ({ nextPath, prevPath }) =>
+      void favorites.refreshPath(prevPath, nextPath),
+  });
   const moveDialog = useMoveDialog();
   const copyDialog = useCopyDialog();
   const createFolderDialog = useCreateFolderDialog();

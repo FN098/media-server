@@ -20,7 +20,11 @@ import { rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 
 type RenameNodeResult =
-  | { success: true }
+  | {
+      success: true;
+      from: string;
+      to: string;
+    }
   | {
       success: false;
       message: string;
@@ -220,5 +224,7 @@ export async function renameNodeAction(
 
   return {
     success: true,
+    from: srcVirtualPath,
+    to: destVirtualPath,
   };
 }

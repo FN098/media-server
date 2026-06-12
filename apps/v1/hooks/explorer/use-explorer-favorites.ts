@@ -10,7 +10,12 @@ type UpdateProps = {
 };
 
 export function useExplorerFavorites() {
-  const { getFavorite, updateMultipleFavorites } = useFavoritesControlContext();
+  const {
+    getFavorite,
+    updateMultipleFavorites,
+    updateFavorite,
+    deleteFavorite,
+  } = useFavoritesControlContext();
   const [isPending, setIsPending] = useState(false);
 
   const update = useCallback(
@@ -36,9 +41,19 @@ export function useExplorerFavorites() {
     [isPending, updateMultipleFavorites]
   );
 
+  const refreshPath = useCallback(
+    async (prevPath: string, nextPath: string) => {
+      const fav = getFavorite(prevPath);
+      await deleteFavorite(prevPath);
+      await updateFavorite(nextPath, fav.rating);
+    },
+    [deleteFavorite, getFavorite, updateFavorite]
+  );
+
   return {
     get: getFavorite,
     update,
+    refreshPath,
   };
 }
 

@@ -9,7 +9,7 @@ type RenameTarget = {
 };
 
 interface UseRenameDialogProps {
-  onSuccess?: () => void;
+  onSuccess?: (data: { prevPath: string; nextPath: string }) => void;
 }
 
 export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
@@ -28,7 +28,7 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
     }
   }, [isPending, isOpen]);
 
-  // 1. ダイアログを開く
+  // ダイアログを開く
   const open = useCallback((target: RenameTarget) => {
     setTarget(target);
     setIsOpen(true);
@@ -50,7 +50,7 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
     }
   }, []);
 
-  // 2. ダイアログを閉じる
+  // ダイアログを閉じる
   const close = useCallback(() => {
     setIsOpen(false);
     setTarget(null);
@@ -58,7 +58,7 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
     setExtension("");
   }, []);
 
-  // 3. リネーム実行
+  // リネーム実行
   const performRename = useCallback(async () => {
     if (!target) return;
 
@@ -77,21 +77,26 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
     }
 
     setIsPending(true);
-    const result = await renameNodeAction(target.path, fullNewName);
-    setIsPending(false);
-
-    if (result.success) {
-      toast.success("リネームしました");
-      onSuccess?.();
-      close();
-    } else if (result.code === "duplicated") {
-      const suggested = getSuggestedName(trimmedName); // (1)を付ける
-      setNewName(suggested);
-      toast.error(
-        "同名のファイルまたはフォルダが存在します。名前を確認してください"
-      );
-    } else {
-      toast.error(result.message || "リネームに失敗しました");
+    try {
+      const result = await renameNodeAction(target.path, fullNewName);
+      if (result.success) {
+        toast.success("リネームしました");
+        onSuccess?.({
+          prevPath: result.from,
+          nextPath: result.to,
+        });
+        close();
+      } else if (result.code === "duplicated") {
+        const suggested = getSuggestedName(trimmedName); // (1)を付ける
+        setNewName(suggested);
+        toast.error(
+          "同名のファイルまたはフォルダが存在します。名前を確認してください"
+        );
+      } else {
+        toast.error(result.message || "リネームに失敗しました");
+      }
+    } finally {
+      setIsPending(false);
     }
   }, [target, newName, extension, close, onSuccess]);
 
