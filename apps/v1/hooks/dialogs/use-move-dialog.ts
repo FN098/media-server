@@ -34,47 +34,53 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
   const [isPending, setIsPending] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1. 通常のフォルダ一覧取得
+  // 通常のフォルダ一覧取得
   const fetchDirs = useCallback(
     async (path: string) => {
       setIsLoading(true);
-      const result = await listSubDirectoriesAction(path);
-      setIsLoading(false);
+      try {
+        const result = await listSubDirectoriesAction(path);
 
-      if (result.success) {
-        // ループ防止のフィルタリング
-        const filtered = result.directories.filter(
-          (d) =>
-            !targets.some(
-              (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
-            )
-        );
-        setDirs(filtered);
-      } else {
-        toast.error(result.message);
+        if (result.success) {
+          // ループ防止のフィルタリング
+          const filtered = result.directories.filter(
+            (d) =>
+              !targets.some(
+                (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
+              )
+          );
+          setDirs(filtered);
+        } else {
+          toast.error(result.message);
+        }
+      } finally {
+        setIsLoading(false);
       }
     },
     [targets]
   );
 
-  // 2. 最近のフォルダ取得
+  // 最近のフォルダ取得
   const fetchRecentDirs = useCallback(async () => {
     setIsLoading(true);
-    const result = await listRecentFoldersAction();
-    setIsLoading(false);
+    try {
+      const result = await listRecentFoldersAction();
 
-    if (result.success) {
-      const filtered = (result.data ?? []).filter(
-        (d: RecentDirectoryInfo) =>
-          !targets.some(
-            (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
-          )
-      );
-      setRecentDirs(filtered);
+      if (result.success) {
+        const filtered = (result.data ?? []).filter(
+          (d: RecentDirectoryInfo) =>
+            !targets.some(
+              (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")
+            )
+        );
+        setRecentDirs(filtered);
+      }
+    } finally {
+      setIsLoading(false);
     }
   }, [targets]);
 
-  // 3. ダイアログを開く
+  // ダイアログを開く
   const open = useCallback(
     (targets: MoveTarget[], path: string) => {
       setInitialDir(path);
@@ -87,14 +93,14 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
     [fetchDirs, fetchRecentDirs]
   );
 
-  // 4. ダイアログを閉じる
+  // ダイアログを閉じる
   const close = useCallback(() => {
     setIsOpen(false);
     setDirs([]);
     setRecentDirs([]);
   }, []);
 
-  // 5. 特定のフォルダに深く潜る/切り替える
+  // 特定のフォルダに深く潜る/切り替える
   const changeDir = useCallback(
     (path: string) => {
       setCurrentDir(path);
@@ -103,57 +109,65 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
     [fetchDirs]
   );
 
-  // 6. 親階層へ戻る
+  // 親階層へ戻る
   const goBackParent = useCallback(() => {
     const parent = sanitize(dirname(currentDir));
     const path = parent === "." ? "" : parent;
     void changeDir(path);
   }, [currentDir, changeDir]);
 
-  // 7. ピン留め切り替え
+  // ピン留め切り替え
   const togglePin = useCallback(
     async (path: string, currentPinned: boolean) => {
       setIsLoading(true);
-      const result = await togglePinVisitedFolderAction(path, currentPinned);
-      setIsLoading(false);
+      try {
+        const result = await togglePinVisitedFolderAction(path, currentPinned);
 
-      if (result.success) {
-        void fetchRecentDirs();
-      } else {
-        toast.error(result.message);
+        if (result.success) {
+          void fetchRecentDirs();
+        } else {
+          toast.error(result.message);
+        }
+      } finally {
+        setIsLoading(false);
       }
     },
     [fetchRecentDirs]
   );
 
-  // 8. 移動実行
+  // 移動実行
   const performMove = useCallback(async () => {
     if (!currentDir) return;
 
     const paths = targets.map((n) => n.path);
 
     setIsPending(true);
-    const result = await moveNodesAction(paths, currentDir);
-    setIsPending(false);
+    try {
+      const result = await moveNodesAction(paths, currentDir);
 
-    if (result.success) {
-      if (result.completed.length > 0) {
-        toast.success(`${result.completed.length} 件のアイテムを移動しました`);
+      if (result.success) {
+        if (result.completed.length > 0) {
+          toast.success(
+            `${result.completed.length} 件のアイテムを移動しました`
+          );
+        }
+        if (result.failed.length > 0) {
+          toast.success(
+            `${result.failed.length} 件のアイテムの移動に失敗しました`
+          );
+        }
+        if (result.skipped.length > 0) {
+          toast.success(
+            `${result.skipped.length} 件のアイテムの移動をスキップしました`
+          );
+        }
+        onSuccess?.();
+        close();
+      } else {
+        toast.error(result.message);
       }
-      if (result.failed.length > 0) {
-        toast.success(
-          `${result.failed.length} 件のアイテムの移動に失敗しました`
-        );
-      }
-      if (result.skipped.length > 0) {
-        toast.success(
-          `${result.skipped.length} 件のアイテムの移動をスキップしました`
-        );
-      }
-      onSuccess?.();
-      close();
-    } else {
-      toast.error(result.message);
+    } finally {
+      setIsPending(false);
     }
   }, [currentDir, targets, onSuccess, close]);
 
