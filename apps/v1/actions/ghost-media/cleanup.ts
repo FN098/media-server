@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { logger } from "better-auth";
 
-type GhostMediaDeleteResult =
+type CleanupGhostMediaResult =
   | {
       success: false;
       message: string;
@@ -16,7 +16,7 @@ type GhostMediaDeleteResult =
 // 不要なメディアを削除
 export async function cleanupGhostMediaAction(
   ids: string[]
-): Promise<GhostMediaDeleteResult> {
+): Promise<CleanupGhostMediaResult> {
   if (!ids || ids.length === 0) {
     return {
       success: false,
@@ -24,13 +24,15 @@ export async function cleanupGhostMediaAction(
     };
   }
 
-  let deleteResult: { count: number };
+  let deletedCount: number;
   try {
-    deleteResult = await prisma.media.deleteMany({
+    const result = await prisma.media.deleteMany({
       where: {
         id: { in: ids },
       },
     });
+
+    deletedCount = result.count;
   } catch (error) {
     logger.error("action:cleanup-ghost-media", error);
     return {
@@ -41,6 +43,6 @@ export async function cleanupGhostMediaAction(
 
   return {
     success: true,
-    deletedCount: deleteResult.count,
+    deletedCount,
   };
 }
