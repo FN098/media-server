@@ -35,13 +35,6 @@ export function useMediaViewerFavorite({
 
       await control.toggleFavorite(currentNode.path);
 
-      toast.info(
-        nextIsFavorite
-          ? "⭐お気に入りに登録しました"
-          : "お気に入りを解除しました",
-        { duration: 1000 }
-      );
-
       onChange?.({ isFavorite: nextIsFavorite, rating: null });
     } catch (e) {
       console.error(e);
@@ -58,13 +51,6 @@ export function useMediaViewerFavorite({
 
       try {
         await control.updateFavorite(currentNode.path, rating);
-
-        toast.info(
-          rating != null
-            ? "⭐レーティングを更新しました"
-            : "レーティングを解除しました",
-          { duration: 1000 }
-        );
 
         onChange?.({ isFavorite: true, rating });
       } catch (e) {
