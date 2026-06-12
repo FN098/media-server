@@ -3,9 +3,20 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/better-auth";
-import { SignUpFormSchema, SignUpFormState } from "@/lib/auth/schemas";
+import { SignUpFormSchema } from "@/lib/auth/schemas";
 import { logger } from "@/lib/logger";
 import z from "zod";
+
+type SignUpFormState =
+  | {
+      errors?: {
+        name?: string[];
+        email?: string[];
+        password?: string[];
+      };
+      message?: string;
+    }
+  | undefined;
 
 export async function signUpAction(
   _state: SignUpFormState,

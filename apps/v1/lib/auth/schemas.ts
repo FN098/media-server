@@ -21,16 +21,6 @@ export const SignInFormSchema = z.object({
   redirectTo: z.string().optional(),
 });
 
-export type SignInFormState =
-  | {
-      errors?: {
-        email?: string[];
-        password?: string[];
-      };
-      message?: string;
-    }
-  | undefined;
-
 export const SignUpFormSchema = z.object({
   name: z
     .string()
@@ -47,14 +37,3 @@ export const SignUpFormSchema = z.object({
     .regex(/[0-9]/, { message: "数字を1文字以上含めてください。" }),
   redirectTo: z.string().optional(),
 });
-
-export type SignUpFormState =
-  | {
-      errors?: {
-        name?: string[];
-        email?: string[];
-        password?: string[];
-      };
-      message?: string;
-    }
-  | undefined;
