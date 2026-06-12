@@ -1,22 +1,20 @@
-import pathPosix from "path/posix";
-
-// path/posix のラッパーだが、一貫性と将来の拡張性のために使用を推奨
+import pathPrimitive from "path";
 
 export function join(...paths: string[]): string {
-  const result = pathPosix.join(...paths);
+  const result = pathPrimitive.join(...paths);
   return result === "." ? "" : result;
 }
 
 export function dirname(path: string): string {
-  return pathPosix.dirname(path);
+  return pathPrimitive.dirname(path);
 }
 
 export function basename(path: string, suffix?: string): string {
-  return pathPosix.basename(path, suffix);
+  return pathPrimitive.basename(path, suffix);
 }
 
 export function extname(path: string): string {
-  return pathPosix.extname(path);
+  return pathPrimitive.extname(path);
 }
 
 export function parentpath(path: string): string | null {
