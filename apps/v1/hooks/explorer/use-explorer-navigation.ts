@@ -94,18 +94,16 @@ export function useExplorerNavigation({
       // テキストファイルならプレビュー表示
       toast.promise(
         async () => {
-          const file = await getTextFilePreviewAction(node.path);
+          const result = await getTextFilePreviewAction(node.path);
 
-          if (!file.isText)
+          if (!result.success)
             throw new Error("このファイル形式は対応していません");
-
-          if (!file.content) throw new Error("空のファイルです");
 
           dialogs.textFilePreviewDialog.open({
             title: node.name,
-            content: file.content,
-            encoding: file.encoding,
-            isTruncated: file.isTruncated,
+            content: result.content,
+            encoding: result.encoding,
+            isTruncated: result.isTruncated,
           });
         },
         {

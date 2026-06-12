@@ -1,34 +1,64 @@
 "use server";
+import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
+import { VirtualPathOneSchema } from "@/lib/virtual-path/schemas";
 import fs from "fs/promises";
 import iconv from "iconv-lite";
 import jschardet from "jschardet";
 
 const MAX_PREVIEW_SIZE = 100 * 1024; // 100KB
 
+type GetTextFilePreviewResult =
+  | {
+      success: false;
+      message: string;
+      errors?: { prop: string; issues?: unknown[] }[];
+    }
+  | {
+      success: true;
+      content: string;
+      isTruncated: boolean;
+      encoding: string;
+    };
+
 // プレビュー取得
-export async function getTextFilePreviewAction(virtualPath: string) {
-  const normalizedPath = virtualPath.replace(/^\//, ""); // 先頭のスラッシュをトリミング
+export async function getTextFilePreviewAction(
+  path: string
+): Promise<GetTextFilePreviewResult> {
+  // 入力バリデーション＋正規化
+  const parsed = {
+    path: VirtualPathOneSchema.safeParse(path),
+  };
+  if (!parsed.path.success) {
+    return {
+      success: false,
+      message: "入力エラーがあります。",
+      errors: [{ prop: "path", issues: parsed.path.error?.issues }],
+    };
+  }
+
+  const normalizedPath = parsed.path.data;
 
   const realPath = getServerMediaPath(normalizedPath);
 
   try {
     const stat = await fs.stat(realPath);
-    if (!stat.isFile()) return { isText: false };
+    if (!stat.isFile())
+      return { success: false, message: "ファイルではありません。" };
 
-    // 1. 先頭から制限サイズ分だけバッファとして読み込む
+    // 先頭から制限サイズ分だけバッファとして読み込む
     const readSize = Math.min(stat.size, MAX_PREVIEW_SIZE);
     const buffer = Buffer.alloc(readSize);
     const fd = await fs.open(realPath, "r");
     await fd.read(buffer, 0, readSize, 0);
     await fd.close();
 
-    // 2. 簡易的なバイナリチェック（ヌルバイトが含まれている場合はバイナリとみなす）
+    // 簡易的なバイナリチェック（ヌルバイトが含まれている場合はバイナリとみなす）
     if (buffer.includes(0)) {
-      return { isText: false };
+      return { success: false, message: "バイナリファイルです。" };
     }
 
-    // 3. 文字コードの判定 (jschardet)
+    // 文字コードの判定 (jschardet)
     // 精度を上げるため、バッファ全体ではなく最初の数KB〜全体を渡す
     const detected = jschardet.detect(buffer);
 
@@ -41,7 +71,7 @@ export async function getTextFilePreviewAction(virtualPath: string) {
       encoding = "UTF-8";
     }
 
-    // 4. 判定された文字コードでデコード
+    // 判定された文字コードでデコード
     // 対応していないエンコード名が返ってきたときのために try-catch
     let content = "";
     try {
@@ -55,13 +85,16 @@ export async function getTextFilePreviewAction(virtualPath: string) {
     const isTruncated = stat.size > MAX_PREVIEW_SIZE;
 
     return {
-      isText: true,
+      success: true,
       content,
       isTruncated,
       encoding,
     };
   } catch (e) {
-    console.error("Text file read error", e);
-    return { isText: false };
+    logger.error("action:get-text-file-preview", e);
+    return {
+      success: false,
+      message: "テキストファイル読み込みに失敗しました。",
+    };
   }
 }
