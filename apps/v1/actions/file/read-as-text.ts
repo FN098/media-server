@@ -1,19 +1,24 @@
 "use server";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { getPathInfo } from "@/lib/utils/fs";
-import { VirtualPathOneSchema } from "@/lib/virtual-path/schemas";
+import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import fs from "fs/promises";
 import iconv from "iconv-lite";
 import jschardet from "jschardet";
+import z from "zod";
 
 const MAX_READ_SIZE = 100 * 1024; // 100KB
+
+const InputSchema = z.object({
+  path: EditableVirtualPathSchema,
+});
 
 type ReadAsTextResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     }
   | {
       success: true;
@@ -25,43 +30,43 @@ type ReadAsTextResult =
 
 // テキストデータ取得
 export async function readAsTextAction(
-  path: string
+  input: z.input<typeof InputSchema>
 ): Promise<ReadAsTextResult> {
   // 入力バリデーション＋正規化
-  const parsed = {
-    path: VirtualPathOneSchema.safeParse(path),
-  };
-  if (!parsed.path.success) {
-    return {
-      success: false,
-      message: "入力エラーがあります。",
-      errors: [{ prop: "path", issues: parsed.path.error?.issues }],
-    };
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  const normalizedPath = parsed.path.data;
+  const { path } = parsed.data;
 
-  const realPath = getServerMediaPath(normalizedPath);
+  // 認証＋認可
+  const auth = await authorize("file:read-as-text");
+  if (!auth.success) {
+    return auth;
+  }
+
+  const realPath = getServerMediaPath(path);
+
+  const pathInfo = await getPathInfo(realPath);
+  if (!pathInfo.exists) {
+    return {
+      success: false,
+      message:
+        pathInfo.error === "not-found"
+          ? "パスが存在しません。"
+          : "パスにアクセスできません。",
+    };
+  }
+  if (pathInfo.isDirectory) {
+    return { success: false, message: "ファイルではありません。" };
+  }
+
+  const fileSize = pathInfo.size;
+  const readSize = Math.min(fileSize, MAX_READ_SIZE);
 
   try {
-    const pathInfo = await getPathInfo(realPath);
-    if (!pathInfo.exists) {
-      return {
-        success: false,
-        message:
-          pathInfo.error === "not-found"
-            ? "パスが存在しません。"
-            : "パスにアクセスできません。",
-      };
-    }
-    if (pathInfo.isDirectory) {
-      return { success: false, message: "ファイルではありません。" };
-    }
-
-    const fileSize = pathInfo.size;
-
     // 先頭から制限サイズ分だけバッファとして読み込む
-    const readSize = Math.min(fileSize, MAX_READ_SIZE);
     const buffer = await readBuffer(realPath, readSize);
 
     // 簡易的なバイナリチェック（ヌルバイトが含まれている場合はバイナリとみなす）

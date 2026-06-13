@@ -101,7 +101,7 @@ export function useExplorerNavigation({
       }
 
       // ファイル（テキスト）
-      const preview = await readAsTextAction(node.path);
+      const preview = await readAsTextAction({ path: node.path });
       if (!preview.success) {
         toast.error(preview.message);
         return;
