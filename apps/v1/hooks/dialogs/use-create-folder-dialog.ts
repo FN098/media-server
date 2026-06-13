@@ -39,7 +39,10 @@ export function useCreateFolderDialog({
 
     setIsPending(true);
     try {
-      const result = await createFolderAction(parentPath, trimmedName);
+      const result = await createFolderAction({
+        parentPath,
+        folderName: trimmedName,
+      });
 
       if (result.success) {
         toast.success("フォルダを作成しました");
