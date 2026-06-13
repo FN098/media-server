@@ -1,6 +1,5 @@
 "use server";
 
-import { DeleteNodesSuccess } from "@/actions/node/delete-many";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
@@ -16,7 +15,7 @@ const InputSchema = z.object({
   ),
 });
 
-export type ActionResult =
+type ActionResult =
   | {
       success: true;
       completed: { path: string }[];
@@ -27,6 +26,8 @@ export type ActionResult =
       success: false;
       message: string;
     };
+
+type Success = Extract<ActionResult, { success: true }>;
 
 // 完全に削除
 export async function deleteManyNodesPermanentlyAction(
@@ -49,9 +50,9 @@ export async function deleteManyNodesPermanentlyAction(
     return auth;
   }
 
-  const completed: DeleteNodesSuccess["completed"] = [];
-  const failed: DeleteNodesSuccess["failed"] = [];
-  const skipped: DeleteNodesSuccess["skipped"] = [];
+  const completed: Success["completed"] = [];
+  const failed: Success["failed"] = [];
+  const skipped: Success["skipped"] = [];
 
   for (const srcVirtualPath of sourcePaths) {
     // 仮想パス→物理パス

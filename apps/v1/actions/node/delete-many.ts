@@ -20,7 +20,7 @@ const InputSchema = z.object({
   ),
 });
 
-export type DeleteNodesResult =
+type ActionResult =
   | {
       success: true;
       completed: { path: string }[];
@@ -32,12 +32,12 @@ export type DeleteNodesResult =
       message: string;
     };
 
-export type DeleteNodesSuccess = Extract<DeleteNodesResult, { success: true }>;
+type Success = Extract<ActionResult, { success: true }>;
 
 // 削除（ゴミ箱フォルダへの移動）
 export async function deleteManyNodesAction(
   input: z.input<typeof InputSchema>
-): Promise<DeleteNodesResult> {
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
@@ -52,9 +52,9 @@ export async function deleteManyNodesAction(
     return auth;
   }
 
-  const completed: DeleteNodesSuccess["completed"] = [];
-  const failed: DeleteNodesSuccess["failed"] = [];
-  const skipped: DeleteNodesSuccess["skipped"] = [];
+  const completed: Success["completed"] = [];
+  const failed: Success["failed"] = [];
+  const skipped: Success["skipped"] = [];
 
   for (const srcVirtualPath of sourcePaths) {
     // ゴミ箱に移動しても仮想パスは変わらない（物理パスのみ変更）
