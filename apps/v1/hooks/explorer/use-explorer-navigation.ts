@@ -11,6 +11,7 @@ import {
   ViewerNavigation,
 } from "@/hooks/navigation/use-viewer-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
+import { isArchiveFile } from "@/lib/archive/guards";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useEffect } from "react";
@@ -93,6 +94,12 @@ export function useExplorerNavigation({
         return;
       }
 
+      // ファイル（アーカイブ）
+      if (isArchiveFile(node.path)) {
+        dialogs.extractDialog.open([node]);
+        return;
+      }
+
       // ファイル（テキスト）
       const preview = await readAsTextAction(node.path);
       if (!preview.success) {
@@ -107,7 +114,13 @@ export function useExplorerNavigation({
         isTruncated: preview.isTruncated,
       });
     },
-    [dialogs.textFilePreviewDialog, folder, getMediaIndex, viewer]
+    [
+      dialogs.extractDialog,
+      dialogs.textFilePreviewDialog,
+      folder,
+      getMediaIndex,
+      viewer,
+    ]
   );
 
   // 新しいタブで開く
