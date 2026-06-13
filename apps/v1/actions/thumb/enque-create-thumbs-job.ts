@@ -29,27 +29,26 @@ type ActionResult = { success: true } | { success: false; message: string };
 
 // サムネ生成ジョブ登録（ディレクトリ単位）
 export async function enqueueCreateThumbsJobAction(
-  dirPath: string,
-  options?: {
-    force?: boolean;
-  }
+  input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse({ dirPath, options });
+  const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.message };
   }
 
-  const normalizedPath = parsed.data.dirPath;
-  const forceCreate = parsed.data.options.force;
+  const {
+    dirPath,
+    options: { force: forceCreate },
+  } = parsed.data;
 
   // ルートフォルダ保護
-  if (isRootPath(normalizedPath)) {
+  if (isRootPath(dirPath)) {
     return { success: false, message: "ルートフォルダは操作できません。" };
   }
 
   // システムフォルダ保護
-  if (isSystemHiddenVirtualPath(normalizedPath)) {
+  if (isSystemHiddenVirtualPath(dirPath)) {
     return { success: false, message: "システムフォルダは操作できません。" };
   }
 
@@ -65,7 +64,7 @@ export async function enqueueCreateThumbsJobAction(
   }
 
   try {
-    const lockKey = `thumb-lock:dir:${sha1Hash(normalizedPath)}`;
+    const lockKey = `thumb-lock:dir:${sha1Hash(dirPath)}`;
     const locked = await acquireLock(lockKey);
 
     if (!locked) {
@@ -76,7 +75,7 @@ export async function enqueueCreateThumbsJobAction(
       "create-thumbs",
       {
         type: "directory",
-        path: normalizedPath,
+        path: dirPath,
         createdAt: Date.now(),
         lockKey,
         forceCreate: forceCreate,

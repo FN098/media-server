@@ -28,7 +28,7 @@ export function useTrashThumbs({
   useEffect(() => {
     if (!currentDir || !autoCreateThumbs) return;
 
-    void enqueueCreateThumbsJobAction(currentDir);
+    void enqueueCreateThumbsJobAction({ dirPath: currentDir });
   }, [autoCreateThumbs, currentDir]);
 
   const update = useCallback(

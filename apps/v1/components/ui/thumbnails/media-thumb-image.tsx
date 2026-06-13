@@ -79,11 +79,11 @@ export function MediaThumbImage({
 
       try {
         // サムネイルを作成するディレクトリを enqueue
-        const targetDir = previewPath
+        const dirPath = previewPath
           ? getParentDirPath(previewPath)
           : getParentDirPath(node.path);
 
-        void enqueueCreateThumbsJobAction(targetDir);
+        void enqueueCreateThumbsJobAction({ dirPath });
       } catch (e) {
         console.error("Failed to enqueue thumb job", e);
         setIsProcessing(false);
