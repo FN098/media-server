@@ -118,7 +118,10 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
     async (path: string, currentPinned: boolean) => {
       setIsLoading(true);
       try {
-        const result = await togglePinVisitedFolderAction(path, currentPinned);
+        const result = await togglePinVisitedFolderAction({
+          dirPath: path,
+          currentPinned,
+        });
         if (result.success) {
           void fetchRecentDirs();
         } else {

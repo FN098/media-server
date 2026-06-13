@@ -24,10 +24,10 @@ export function RecentFolders({ folders }: RecentFoldersProps) {
   const handleTogglePin = useCallback(async (folder: VisitedFolder) => {
     setIsPending(true);
     try {
-      const result = await togglePinVisitedFolderAction(
-        folder.dirPath,
-        folder.isPinned
-      );
+      const result = await togglePinVisitedFolderAction({
+        dirPath: folder.dirPath,
+        currentPinned: folder.isPinned,
+      });
       if (!result.success) {
         toast.error(result.message);
       }

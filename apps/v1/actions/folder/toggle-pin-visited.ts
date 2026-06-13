@@ -1,13 +1,16 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { togglePinVisitedFolder } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
-import { isBlockedVirtualPath } from "@/lib/path/protections";
-import { sanitize } from "@/lib/virtual-path/guard";
-import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
+import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import { revalidatePath } from "next/cache";
+import z from "zod";
+
+const InputSchema = z.object({
+  dirPath: EditableVirtualPathSchema,
+  currentPinned: z.boolean(),
+});
 
 type TogglePinVisitedFolderResult =
   | {
@@ -21,55 +24,22 @@ type TogglePinVisitedFolderResult =
 
 // フォルダ訪問履歴ピン留めトグル
 export async function togglePinVisitedFolderAction(
-  dirPath: string,
-  currentPinned: boolean
+  input: z.input<typeof InputSchema>
 ): Promise<TogglePinVisitedFolderResult> {
   // 入力バリデーション＋正規化
-  if (!dirPath) {
-    return {
-      success: false,
-      message: "処理対象のパスが指定されていません。",
-    };
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  const parsed = {
-    dirPath: VirtualPathSchema.safeParse(sanitize(dirPath)),
-  };
+  const { dirPath, currentPinned } = parsed.data;
 
-  if (!parsed.dirPath.success) {
-    return {
-      success: false,
-      message: "入力エラーがあります。",
-      errors: [{ prop: "dirPath", issues: parsed.dirPath.error?.issues }],
-    };
+  // 認証＋認可
+  const auth = await authorize("folder:pin-visited");
+  if (!auth.success) {
+    return auth;
   }
-
-  const normalizedDirPath = parsed.dirPath.data;
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
-  }
-
-  // 認可
-  if (!hasPermission(user, "folder:pin-history")) {
-    return {
-      success: false,
-      message: "権限がありません。",
-    };
-  }
-
-  // フォルダ保護
-  if (isBlockedVirtualPath(normalizedDirPath)) {
-    return {
-      success: false,
-      message: "このフォルダにはアクセスできません。",
-    };
-  }
+  const { user } = auth;
 
   try {
     await togglePinVisitedFolder(user.id, dirPath, currentPinned);
