@@ -119,7 +119,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
       // サーバー処理開始
       try {
-        const result = await deleteFavoriteAction(path);
+        const result = await deleteFavoriteAction({ path });
         if (!result.success) {
           // 失敗時のロールバック
           const revalidated = await revalidateFavoriteAction(path);
