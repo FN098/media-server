@@ -76,9 +76,7 @@ const updateThumb = async (node: MediaNode) => {
   // サムネイル再生成ジョブ投入
   const enqueResult = await enqueueCreateSingleThumbJobAction({
     filePath: node.path,
-    options: {
-      force: true,
-    },
+    force: true,
   });
   if (!enqueResult.success) {
     toast.error(enqueResult.message);

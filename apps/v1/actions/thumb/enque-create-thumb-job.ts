@@ -8,18 +8,9 @@ import { sha1Hash } from "@/lib/utils/sha1-hash";
 import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
 
-const OptionsSchema = z
-  .object({
-    force: z.boolean().optional(),
-  })
-  .optional()
-  .transform((v) => ({
-    force: v?.force ?? false,
-  }));
-
 const InputSchema = z.object({
   filePath: EditableVirtualPathSchema,
-  options: OptionsSchema,
+  force: z.boolean().optional().default(false),
 });
 
 type ActionResult = { success: true } | { success: false; message: string };
@@ -34,10 +25,7 @@ export async function enqueueCreateSingleThumbJobAction(
     return { success: false, message: parsed.error.message };
   }
 
-  const {
-    filePath,
-    options: { force: forceCreate },
-  } = parsed.data;
+  const { filePath, force: forceCreate } = parsed.data;
 
   // 認証＋認可
   const auth = await authorize("thumbnail:create");
