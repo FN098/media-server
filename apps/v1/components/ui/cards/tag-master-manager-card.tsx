@@ -147,7 +147,11 @@ export function TagMasterManagerCard() {
 
   // タグ一括既読
   const { mutate: markAsRead, isPending: isMarking } = useMutation({
-    mutationFn: (ids: string[]) => markTagsAsReadAction(ids),
+    mutationFn: async (ids: string[]) => {
+      const res = await markTagsAsReadAction(ids);
+      if (!res.success) throw new Error(res.message);
+      return res;
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["tags"] });
       toast.success("既読にしました");
