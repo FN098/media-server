@@ -22,7 +22,7 @@ type ActionResult =
 // 最近訪問したフォルダを取得
 export async function listRecentFoldersAction(): Promise<ActionResult> {
   // 認証＋認可
-  const auth = await authorize("folder:list-history");
+  const auth = await authorize("folder:list-visited");
   if (!auth.success) {
     return auth;
   }
@@ -40,7 +40,7 @@ export async function listRecentFoldersAction(): Promise<ActionResult> {
       })),
     };
   } catch (error) {
-    logger.error("action:list-folder-history", error);
+    logger.error("action:list-recent-folders", error);
     return {
       success: false,
       message: "訪問済みフォルダ一覧の取得に失敗しました。",

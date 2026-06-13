@@ -34,7 +34,7 @@ export const statements = [
   "folder:list",
   "folder:list-media",
   "folder:list-subfolders",
-  "folder:list-history",
+  "folder:list-visited",
   "folder:pin-visited",
   "folder:create",
   "folder:update-preview",
