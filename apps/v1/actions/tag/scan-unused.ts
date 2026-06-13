@@ -1,7 +1,6 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { prisma } from "@/lib/prisma";
 import { logger } from "better-auth";
 
@@ -17,15 +16,10 @@ type ActionResult =
 
 // 不要タグスキャン
 export async function scanUnusedTagsAction(): Promise<ActionResult> {
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
-  }
-
-  // 認可
-  if (!hasPermission(user, "tag:scan-unused")) {
-    return { success: false, message: "権限がありません。" };
+  // 認証＋認可
+  const auth = await authorize("tag:scan-unused");
+  if (!auth.success) {
+    return auth;
   }
 
   try {

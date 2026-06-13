@@ -1,7 +1,6 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import z from "zod";
@@ -27,16 +26,13 @@ export async function updateTagFavoriteAction(
 
   const { id, isFavorite } = parsed.data;
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
+  // 認証＋認可
+  const auth = await authorize("tag:update-favorite");
+  if (!auth.success) {
+    return auth;
   }
 
-  // 認可
-  if (!hasPermission(user, "tag:update-favorite")) {
-    return { success: false, message: "権限がありません。" };
-  }
+  const { user } = auth;
 
   try {
     if (isFavorite) {

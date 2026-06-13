@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteMultipleTagsAction } from "@/actions/tag/delete-multiple";
+import { deleteManyTagsAction } from "@/actions/tag/delete-many";
 import { scanUnusedTagsAction } from "@/actions/tag/scan-unused";
 import {
   AlertDialog,
@@ -70,7 +70,7 @@ export function UnusedTagsCleanupCard() {
 
     setIsPending(true);
     try {
-      const result = await deleteMultipleTagsAction({ ids });
+      const result = await deleteManyTagsAction({ ids });
       if (result.success) {
         toast.success(`完了: ${result.deletedCount} 件のタグを削除しました。`);
         setTags([]);

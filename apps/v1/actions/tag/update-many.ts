@@ -39,7 +39,7 @@ const InputSchema = z.object({
 type ActionResult = { success: true } | { success: false; message: string };
 
 // タグ紐づけ・クリーンアップ
-export async function updateMediaTagsAction(
+export async function updateManyMediaTagsAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
@@ -62,9 +62,12 @@ export async function updateMediaTagsAction(
     .filter((op) => op.operator === "remove")
     .map((op) => op.tagId);
 
-  // NOTE: 将来的に「追加だけ」「削除だけ」の権限を持つユーザーが出てきた場合は修正予定
   // 認証＋認可
-  const auth = await authorize("tag:link-media", "tag:create", "tag:delete");
+  const auth = await authorize(
+    "media-tag:create-many",
+    "media-tag:delete-many",
+    "tag:delete-unused"
+  );
   if (!auth.success) {
     return auth;
   }
@@ -126,7 +129,7 @@ export async function updateMediaTagsAction(
 
     return { success: true };
   } catch (error) {
-    logger.error("action:update-media-tags", error);
+    logger.error("action:update-many-media-tags", error);
     return { success: false, message: "タグの更新に失敗しました" };
   }
 }

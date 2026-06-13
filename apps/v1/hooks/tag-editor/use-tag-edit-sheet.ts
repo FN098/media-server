@@ -1,5 +1,5 @@
 import { createTagsAction } from "@/actions/tag/create";
-import { updateMediaTagsAction } from "@/actions/tag/update";
+import { updateManyMediaTagsAction } from "@/actions/tag/update-many";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { useTagEditorHotkeys } from "@/hooks/tag-editor/use-tag-editor-hotkeys";
 import { MediaNode } from "@/lib/media/types";
@@ -122,55 +122,58 @@ export function useTagEditSheet({
 
   // 保存処理
   const handleApply = useCallback(async () => {
-    if (isLoading || !hasChanges) return;
+    if (!hasChanges) return;
 
     setIsLoading(true);
+    try {
+      const tagsToCreate = pendingNewTags
+        .filter((t) => pendingChanges[t.id] === "add")
+        .map((t) => t.name);
 
-    const tagsToCreate = pendingNewTags
-      .filter((t) => pendingChanges[t.id] !== "remove")
-      .map((t) => t.name);
+      let createdOps: TagOperation[] = [];
+      if (tagsToCreate.length > 0) {
+        // 仮タグを DB 作成
+        const created = await createTagsAction({ names: tagsToCreate });
+        if (!created.success) throw new Error(created.message);
 
-    // 仮タグを DB 作成
-    const created = await createTagsAction({ names: tagsToCreate });
-    if (!created.success) throw new Error(created.message);
+        // 新規タグの操作
+        createdOps = created.tags.map((tag) => ({
+          tagId: tag.id,
+          operator: "add",
+        }));
+      }
 
-    // 新規タグの操作
-    const createdOps: TagOperation[] = created.tags.map((tag) => ({
-      tagId: tag.id,
-      operator: "add",
-    }));
+      // 既存タグの操作
+      const existingOps: TagOperation[] = Object.entries(pendingChanges).map(
+        ([tagId, operator]) => ({
+          tagId,
+          operator,
+        })
+      );
 
-    // 既存タグの操作
-    const existingOps: TagOperation[] = Object.entries(pendingChanges).map(
-      ([tagId, operator]) => ({
-        tagId,
-        operator,
-      })
-    );
+      // マージ
+      const operations = [...existingOps, ...createdOps];
+      if (operations.length === 0) return;
 
-    // マージ
-    const operations = [...existingOps, ...createdOps];
-    if (operations.length === 0) return;
+      // 紐づけ実行
+      const result = await updateManyMediaTagsAction({
+        mediaPaths: targetNodes.map((n) => n.path),
+        operations,
+      });
 
-    // 紐づけ実行
-    const result = await updateMediaTagsAction({
-      mediaPaths: targetNodes.map((n) => n.path),
-      operations,
-    });
+      if (result.success) {
+        toast.success("保存しました", { duration: 1000 });
+        resetChanges();
 
-    setIsLoading(false);
+        await invalidateTags();
+        handleModeChange("view");
 
-    if (result.success) {
-      toast.success("保存しました", { duration: 1000 });
-      resetChanges();
-
-      await invalidateTags();
-      handleModeChange("view");
-
-      router.refresh();
+        router.refresh();
+      }
+    } finally {
+      setIsLoading(false);
     }
   }, [
-    isLoading,
     hasChanges,
     pendingNewTags,
     pendingChanges,

@@ -1,13 +1,12 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import z from "zod";
 
 const InputSchema = z.object({
-  ids: z.array(z.uuid()),
+  ids: z.array(z.uuid()).min(1, "タグを1件以上指定してください。"),
 });
 
 type ActionResult =
@@ -15,7 +14,7 @@ type ActionResult =
   | { success: false; message: string };
 
 // タグ一括削除
-export async function deleteMultipleTagsAction(
+export async function deleteManyTagsAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
@@ -25,19 +24,11 @@ export async function deleteMultipleTagsAction(
   }
 
   const { ids } = parsed.data;
-  if (ids.length === 0) {
-    return { success: false, message: "削除対象のタグがありません。" };
-  }
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
-  }
-
-  // 認可
-  if (!hasPermission(user, "tag:delete")) {
-    return { success: false, message: "権限がありません。" };
+  // 認証＋認可
+  const auth = await authorize("tag:delete-many");
+  if (!auth.success) {
+    return auth;
   }
 
   try {
@@ -52,7 +43,7 @@ export async function deleteMultipleTagsAction(
       deletedCount: result.count,
     };
   } catch (error) {
-    logger.error("action:delete-tags", error);
-    return { success: false, message: "タグの削除に失敗しました。" };
+    logger.error("action:delete-many-tags", error);
+    return { success: false, message: "タグの一括削除に失敗しました。" };
   }
 }

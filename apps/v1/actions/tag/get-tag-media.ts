@@ -1,7 +1,6 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermissions } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
@@ -24,6 +23,7 @@ type ActionResult =
   | { success: true; media: TagMedia[] }
   | { success: false; message: string };
 
+// タグに紐づくメディア情報を一覧取得
 export async function getTagMediaAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
@@ -35,15 +35,10 @@ export async function getTagMediaAction(
 
   const { tagId, limit } = parsed.data;
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
-  }
-
-  // 認可
-  if (!hasPermissions(user, ["file:describe", "file:list"])) {
-    return { success: false, message: "権限がありません。" };
+  // 認証＋認可
+  const auth = await authorize("file:describe", "file:list");
+  if (!auth.success) {
+    return auth;
   }
 
   try {

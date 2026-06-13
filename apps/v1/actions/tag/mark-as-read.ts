@@ -1,13 +1,12 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import z from "zod";
 
 const InputSchema = z.object({
-  ids: z.array(z.uuid()),
+  ids: z.array(z.uuid()).min(1, "タグを1件以上指定してください。"),
 });
 
 type ActionResult = { success: true } | { success: false; message: string };
@@ -23,19 +22,11 @@ export async function markTagsAsReadAction(
   }
 
   const { ids } = parsed.data;
-  if (ids.length === 0) {
-    return { success: false, message: "既読対象のタグがありません。" };
-  }
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
-  }
-
-  // 認可
-  if (!hasPermission(user, "tag:mark-as-read")) {
-    return { success: false, message: "権限がありません。" };
+  // 認証＋認可
+  const auth = await authorize("tag:mark-as-read");
+  if (!auth.success) {
+    return auth;
   }
 
   try {

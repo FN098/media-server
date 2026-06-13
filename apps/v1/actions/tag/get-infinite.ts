@@ -1,8 +1,7 @@
 "use server";
 
 import { Prisma } from "@/generated/prisma/client";
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { TagMasterItem } from "@/lib/tag/types";
@@ -32,16 +31,13 @@ export async function getTagsInfiniteAction(
 
   const { cursor, limit } = parsed.data;
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
+  // 認証＋認可
+  const auth = await authorize("tag:get-infinite");
+  if (!auth.success) {
+    return auth;
   }
 
-  // 認可
-  if (!hasPermission(user, "tag:get-infinite")) {
-    return { success: false, message: "権限がありません。" };
-  }
+  const { user } = auth;
 
   const tagWhere = buildTagWhere({
     ...parsed.data,

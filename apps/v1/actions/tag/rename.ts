@@ -1,8 +1,7 @@
 "use server";
 
 import { Tag } from "@/generated/prisma/client";
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
@@ -41,15 +40,10 @@ export async function renameTagAction(
 
   const { id, newName, newKana } = parsed.data;
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
-  }
-
-  // 認可
-  if (!hasPermission(user, "tag:rename")) {
-    return { success: false, message: "権限がありません。" };
+  // 認証＋認可
+  const auth = await authorize("tag:rename");
+  if (!auth.success) {
+    return auth;
   }
 
   try {

@@ -1,7 +1,6 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
@@ -15,7 +14,8 @@ const NormalizedNamesSchema = z
   .transform((names) =>
     names.map(normalizeTagName).filter((n): n is string => !!n)
   )
-  .transform((names) => unique(names));
+  .transform((names) => unique(names))
+  .pipe(z.array(z.string()).min(1, "タグを1件以上指定してください。"));
 
 const InputSchema = z.object({
   names: NormalizedNamesSchema,
@@ -35,28 +35,20 @@ export async function createTagsAction(
     return { success: false, message: parsed.error.message };
   }
 
-  const normalizedNames = parsed.data.names;
-  if (normalizedNames.length === 0) {
-    return { success: true, tags: [] };
-  }
+  const { names } = parsed.data;
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
-  }
-
-  // 認可
-  if (!hasPermission(user, "tag:create")) {
-    return { success: false, message: "権限がありません。" };
+  // 認証＋認可
+  const auth = await authorize("tag:create-many");
+  if (!auth.success) {
+    return auth;
   }
 
   try {
-    const existingNames = await getExistingTagNames(normalizedNames);
+    const existingNames = await getExistingTagNames(names);
 
     // 未存在のタグのみ、カナを含めてデータ作成
     const toCreateData = await Promise.all(
-      normalizedNames
+      names
         .filter((name) => !existingNames.has(name))
         .map(async (name) => ({
           name,
@@ -73,7 +65,7 @@ export async function createTagsAction(
     }
 
     const tags = await prisma.tag.findMany({
-      where: { name: { in: normalizedNames } },
+      where: { name: { in: names } },
     });
 
     return { success: true, tags };
