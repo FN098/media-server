@@ -29,6 +29,7 @@ export async function getTagsInfiniteAction(
   if (!parsed.success) {
     return { success: false, message: parsed.error.message };
   }
+
   const { cursor, query, limit, onlyFavorites, onlyNew } = parsed.data;
 
   // 認証
