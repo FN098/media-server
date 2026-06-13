@@ -47,14 +47,6 @@ export async function listSubFoldersAction(
     return auth;
   }
 
-  // フォルダ保護
-  if (isBlockedVirtualPath(dirPath)) {
-    return {
-      success: false,
-      message: "このフォルダにはアクセスできません。",
-    };
-  }
-
   // 仮想パス→物理パス
   const realDirPath = getServerMediaPath(dirPath);
 
@@ -68,7 +60,8 @@ export async function listSubFoldersAction(
         .map((e) => ({
           name: e.name,
           path: sanitize(join(dirPath, e.name)),
-        })),
+        }))
+        .filter((e) => !isBlockedVirtualPath(join(dirPath, e.name))),
     };
   } catch (e) {
     if (isFsNotFoundError(e)) {
