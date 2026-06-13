@@ -1,6 +1,6 @@
 "use client";
 
-import { cleanupGhostMediaAction } from "@/actions/ghost-media/cleanup";
+import { deleteManyMediaAction } from "@/actions/media/delete-many";
 import { AbortError } from "@/lib/errors/abort-error";
 import {
   GhostMediaItem,
@@ -146,7 +146,7 @@ export function GhostMediaCleanupCard() {
     setIsPending(true);
     try {
       for (const ids of chunks) {
-        const result = await cleanupGhostMediaAction(ids);
+        const result = await deleteManyMediaAction({ ids });
         if (!result.success) {
           throw new AbortError(result.message);
         }

@@ -48,6 +48,7 @@ export const statements = [
   "tag:mark-as-read",
   "tag:rename",
   "tag:scan-unused",
+  "media:delete-many",
   "media-tag:create-many",
   "media-tag:delete-many",
   "user-tag-favorite:create-many",
