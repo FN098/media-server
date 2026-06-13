@@ -90,7 +90,7 @@ export function TagMasterManagerCard() {
   const { mutate: createTags, isPending: isCreating } = useMutation({
     mutationFn: async (names: string[]) => {
       const res = await createTagsAction(names);
-      if (!res.success) throw new Error(res.error);
+      if (!res.success) throw new Error(res.message);
       return res;
     },
     onSuccess: (res) => {

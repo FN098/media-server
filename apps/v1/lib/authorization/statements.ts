@@ -22,6 +22,7 @@ export const statements = [
   "folder:pin-history",
   "folder:create",
   "thumbnail:create",
+  "tag:create",
   "db-backup:dump",
   "db-backup:restore",
   "db-backup:list",

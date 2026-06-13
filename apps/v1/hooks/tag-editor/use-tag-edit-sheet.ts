@@ -132,7 +132,7 @@ export function useTagEditSheet({
 
     // 仮タグを DB 作成
     const created = await createTagsAction(tagsToCreate);
-    if (!created.success) throw new Error(created.error);
+    if (!created.success) throw new Error(created.message);
 
     // 新規タグの操作
     const createdOps: TagOperation[] = created.tags.map((tag) => ({
