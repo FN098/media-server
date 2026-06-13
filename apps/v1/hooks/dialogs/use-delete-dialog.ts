@@ -1,5 +1,5 @@
 import { deleteNodesAction } from "@/actions/node/delete";
-import { deleteNodesPermanentlyAction } from "@/actions/node/delete-permanent";
+import { deleteManyNodesPermanentlyAction } from "@/actions/node/delete-many-permanently";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -42,7 +42,7 @@ export function useDeleteDialog({ onSuccess }: UseDeleteDialogProps = {}) {
 
     setIsPending(true);
     const result = permanent
-      ? await deleteNodesPermanentlyAction(paths)
+      ? await deleteManyNodesPermanentlyAction({ sourcePaths: paths })
       : await deleteNodesAction(paths);
     setIsPending(false);
 
