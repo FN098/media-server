@@ -67,8 +67,6 @@ export async function readAsTextAction(
     // 簡易的なバイナリチェック（ヌルバイトが含まれている場合はバイナリとみなす）
     const isProbablyBinary = buffer.includes(0);
 
-    const isTruncated = fileSize > MAX_READ_SIZE;
-
     const { content, encoding } = decodeBuffer(
       buffer,
       isProbablyBinary ? "UTF-8" : undefined
@@ -78,7 +76,7 @@ export async function readAsTextAction(
       success: true,
       isText: !isProbablyBinary,
       content,
-      isTruncated,
+      isTruncated: fileSize > MAX_READ_SIZE,
       encoding,
     };
   } catch (e) {
