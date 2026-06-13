@@ -37,7 +37,7 @@ export async function createTagsAction(
 
   const normalizedNames = parsed.data.names;
   if (normalizedNames.length === 0) {
-    return { success: false, message: "作成対象のタグがありません。" };
+    return { success: true, tags: [] };
   }
 
   // 認証
