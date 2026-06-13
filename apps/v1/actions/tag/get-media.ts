@@ -12,7 +12,7 @@ const InputSchema = z.object({
   limit: z.number().min(1).max(100).optional().default(20),
 });
 
-export type TagMedia = {
+export type MediaInfo = {
   id: string;
   title: string;
   path: string;
@@ -20,11 +20,11 @@ export type TagMedia = {
 };
 
 type ActionResult =
-  | { success: true; media: TagMedia[] }
+  | { success: true; media: MediaInfo[] }
   | { success: false; message: string };
 
 // タグに紐づくメディア情報を一覧取得
-export async function getTagMediaAction(
+export async function getMediaInfoByTagIdAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化

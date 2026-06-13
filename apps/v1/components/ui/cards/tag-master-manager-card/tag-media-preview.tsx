@@ -1,6 +1,6 @@
 "use client";
 
-import { getTagMediaAction, TagMedia } from "@/actions/tag/get-tag-media";
+import { getMediaInfoByTagIdAction, MediaInfo } from "@/actions/tag/get-media";
 import {
   Popover,
   PopoverContent,
@@ -24,7 +24,7 @@ export function TagMediaPreview({
   count,
   children,
 }: TagMediaPreviewProps) {
-  const [media, setMedia] = useState<TagMedia[]>([]);
+  const [media, setMedia] = useState<MediaInfo[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +36,7 @@ export function TagMediaPreview({
 
       setIsLoading(true);
       try {
-        const result = await getTagMediaAction({ tagId });
+        const result = await getMediaInfoByTagIdAction({ tagId });
         if (result.success) {
           setMedia(result.media);
         } else {
