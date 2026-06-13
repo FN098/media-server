@@ -49,8 +49,6 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
 
   const [activeTab, setActiveTab] = useState<string>("browse");
 
-  if (!isOpen) return null;
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent

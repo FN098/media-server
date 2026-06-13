@@ -1,7 +1,6 @@
 "use client";
 
 import { useRatingFilterDialog } from "@/hooks/dialogs/use-rating-filter-dialog";
-import { useMounted } from "@/hooks/general/use-mounted";
 import {
   RatingFilterMode,
   RatingOperator,
@@ -56,9 +55,8 @@ export function RatingFilterDialog({ dialog }: RatingFilterDialogProps) {
     performApply,
   } = dialog;
 
-  const mounted = useMounted();
-
-  if (!isOpen || !mounted) return null;
+  // const mounted = useMounted();
+  // if (!mounted) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>

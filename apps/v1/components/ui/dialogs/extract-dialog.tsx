@@ -20,9 +20,6 @@ interface ExtractDialogProps {
 export function ExtractDialog({ dialog }: ExtractDialogProps) {
   const { isOpen, targets, isPending, close, performExtract } = dialog;
 
-  // ターゲットがない、または空の時は何も描画しない
-  if (!isOpen || !targets || targets.length === 0) return null;
-
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <AlertDialogContent

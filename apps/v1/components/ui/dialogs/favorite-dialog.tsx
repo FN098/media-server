@@ -21,10 +21,6 @@ export function FavoriteDialog({ dialog }: FavoriteDialogProps) {
   const { isOpen, targets, mode, isPending, close, performFavoriteAction } =
     dialog;
 
-  if (!isOpen || !targets || targets.length === 0) return null;
-
-  const count = targets.length;
-
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <AlertDialogContent
@@ -37,9 +33,15 @@ export function FavoriteDialog({ dialog }: FavoriteDialogProps) {
           </AlertDialogTitle>
           <AlertDialogDescription>
             {mode === "add" ? (
-              <>選択された {count} 件のアイテムをお気に入りに追加しますか？</>
+              <>
+                選択された {targets.length}{" "}
+                件のアイテムをお気に入りに追加しますか？
+              </>
             ) : (
-              <>選択された {count} 件のアイテムのお気に入りを解除しますか？</>
+              <>
+                選択された {targets.length}{" "}
+                件のアイテムのお気に入りを解除しますか？
+              </>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>

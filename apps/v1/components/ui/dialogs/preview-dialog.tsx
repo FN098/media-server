@@ -41,8 +41,6 @@ export function PreviewDialog({ dialog }: PreviewDialogProps) {
     performSave,
   } = dialog;
 
-  if (!isOpen) return null;
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent

@@ -21,10 +21,6 @@ export function DeleteDialog({ dialog }: DeleteDialogProps) {
   const { isOpen, targets, permanent, isPending, close, performDelete } =
     dialog;
 
-  if (!isOpen || !targets || targets.length === 0) return null;
-
-  const count = targets.length;
-
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <AlertDialogContent
@@ -38,7 +34,7 @@ export function DeleteDialog({ dialog }: DeleteDialogProps) {
           <AlertDialogDescription>
             {permanent ? (
               <>
-                選択された {count} 件のアイテムを完全に削除します。
+                選択された {targets.length} 件のアイテムを完全に削除します。
                 <br />
                 <span className="text-destructive font-semibold">
                   この操作は取り消せません。
@@ -46,7 +42,7 @@ export function DeleteDialog({ dialog }: DeleteDialogProps) {
               </>
             ) : (
               <>
-                選択された {count} 件のアイテムをゴミ箱に移動しますか？
+                選択された {targets.length} 件のアイテムをゴミ箱に移動しますか？
                 <br />
                 この操作は後でゴミ箱フォルダから戻すことができます。
               </>

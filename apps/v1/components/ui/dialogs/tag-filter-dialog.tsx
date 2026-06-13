@@ -1,7 +1,6 @@
 "use client";
 
 import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
-import { useMounted } from "@/hooks/general/use-mounted";
 import { TagFilterMode } from "@/lib/filter/types";
 import { Tag as TagType } from "@/lib/tag/types";
 import { Badge } from "@/shadcn/components/ui/badge";
@@ -76,9 +75,8 @@ export function TagFilterDialog({
     recentTags,
   } = dialog;
 
-  const mounted = useMounted();
-
-  if (!isOpen || !mounted) return null;
+  // const mounted = useMounted();
+  // if (!mounted) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>

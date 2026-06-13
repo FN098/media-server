@@ -19,8 +19,6 @@ export function CreateFolderDialog({ dialog }: CreateFolderDialogProps) {
   const { isOpen, folderName, isPending, setFolderName, close, performCreate } =
     dialog;
 
-  if (!isOpen) return null;
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent
