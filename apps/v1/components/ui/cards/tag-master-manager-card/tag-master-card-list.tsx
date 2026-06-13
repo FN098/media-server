@@ -3,7 +3,7 @@
 
 import { TagDeleteButton } from "@/components/ui/buttons/tag-delete-button";
 import { TagMediaPreview } from "@/components/ui/cards/tag-master-manager-card/tag-media-preview";
-import { TagMasterItem } from "@/lib/tag/types";
+import { useTagMasterContext } from "@/providers/tag-master-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { Input } from "@/shadcn/components/ui/input";
@@ -12,47 +12,30 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { Check, Edit2, Loader2, Star, X } from "lucide-react";
 import * as React from "react";
 
-interface TagMasterCardListProps {
-  tags: TagMasterItem[];
-  editingId: string | null;
-  editValue: { name: string; kana: string };
-  isUpdating: boolean;
-  isDeleting: boolean;
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  isMarking: boolean;
-  onToggleFavorite: (current: { id: string; isFavorite: boolean }) => void;
-  onStartEdit: (tag: TagMasterItem) => void;
-  onSaveEdit: (id: string) => void;
-  onCancelEdit: () => void;
-  onEditValueChange: (value: { name: string; kana: string }) => void;
-  onDelete: (id: string) => void;
-  onFetchNext: () => void;
-  onMarkAsRead: (id: string) => void;
-}
+export function TagMasterCardList() {
+  const {
+    hasNextPage,
+    allTags,
+    isFetchingNextPage,
+    fetchNextPage,
+    editingId,
+    toggleTagFavorite,
+    editValue,
+    setEditValue,
+    markAsRead,
+    isMarking,
+    saveChanges,
+    isUpdating,
+    cancelEdit,
+    startEdit,
+    deleteTag,
+    isDeleting,
+  } = useTagMasterContext();
 
-export function TagMasterCardList({
-  tags,
-  editingId,
-  editValue,
-  isUpdating,
-  isDeleting,
-  hasNextPage,
-  isFetchingNextPage,
-  isMarking,
-  onToggleFavorite,
-  onStartEdit,
-  onSaveEdit,
-  onCancelEdit,
-  onEditValueChange,
-  onDelete,
-  onFetchNext,
-  onMarkAsRead,
-}: TagMasterCardListProps) {
   const parentRef = React.useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
-    count: hasNextPage ? tags.length + 1 : tags.length,
+    count: hasNextPage ? allTags.length + 1 : allTags.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 88, // カード高さ: p-3 + 2行 + gap + my-1 x2
     overscan: 10,
@@ -60,11 +43,11 @@ export function TagMasterCardList({
       const lastItem = instance.getVirtualItems().at(-1);
       if (!lastItem) return;
       if (
-        lastItem.index >= tags.length - 1 &&
+        lastItem.index >= allTags.length - 1 &&
         hasNextPage &&
         !isFetchingNextPage
       ) {
-        onFetchNext();
+        void fetchNextPage();
       }
     },
   });
@@ -81,7 +64,7 @@ export function TagMasterCardList({
         }}
       >
         {virtualizer.getVirtualItems().map((virtualRow) => {
-          const tag = tags[virtualRow.index];
+          const tag = allTags[virtualRow.index];
           if (!tag) return null;
           return (
             <div
@@ -108,7 +91,7 @@ export function TagMasterCardList({
                         ? "text-yellow-500 hover:text-yellow-300"
                         : "text-muted-foreground/30 hover:text-yellow-500"
                     )}
-                    onClick={() => onToggleFavorite(tag)}
+                    onClick={() => toggleTagFavorite(tag)}
                   >
                     <Star
                       className={cn(
@@ -123,7 +106,7 @@ export function TagMasterCardList({
                       autoFocus
                       value={editValue.name}
                       onChange={(e) =>
-                        onEditValueChange({
+                        setEditValue({
                           ...editValue,
                           name: e.target.value,
                         })
@@ -137,7 +120,7 @@ export function TagMasterCardList({
                         <button
                           onClick={(e) => {
                             e.stopPropagation(); // 行のクリックイベントなどがあれば伝播を防止
-                            onMarkAsRead(tag.id);
+                            markAsRead([tag.id]);
                           }}
                           disabled={isMarking}
                           className="group/new-badge relative inline-flex"
@@ -177,7 +160,7 @@ export function TagMasterCardList({
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 text-green-600 hover:bg-green-50"
-                        onClick={() => onSaveEdit(tag.id)}
+                        onClick={() => saveChanges(tag.id)}
                       >
                         {isUpdating ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -189,7 +172,7 @@ export function TagMasterCardList({
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 text-destructive hover:bg-red-50"
-                        onClick={onCancelEdit}
+                        onClick={cancelEdit}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -200,14 +183,14 @@ export function TagMasterCardList({
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8"
-                        onClick={() => onStartEdit(tag)}
+                        onClick={() => startEdit(tag)}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
                       <TagDeleteButton
                         tagName={tag.name}
                         mediaCount={tag.relatedMediaCount}
-                        onDelete={() => onDelete(tag.id)}
+                        onDelete={() => deleteTag(tag.id)}
                         isDeleting={isDeleting}
                       />
                     </div>
@@ -220,7 +203,7 @@ export function TagMasterCardList({
                     <Input
                       value={editValue.kana}
                       onChange={(e) =>
-                        onEditValueChange({
+                        setEditValue({
                           ...editValue,
                           kana: e.target.value,
                         })

@@ -2,9 +2,8 @@
 
 import { TagMasterCardList } from "@/components/ui/cards/tag-master-manager-card/tag-master-card-list";
 import { TagMasterTable } from "@/components/ui/cards/tag-master-manager-card/tag-master-table";
-import { useTagMaster } from "@/hooks/tags/use-tag-master";
-import { TagMasterItem } from "@/lib/tag/types";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { useTagMasterContext } from "@/providers/tag-master-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,
@@ -19,38 +18,10 @@ import { Switch } from "@/shadcn/components/ui/switch";
 import { cn } from "@/shadcn/lib/utils";
 import { Check, CheckCheck, Loader2, Plus, Search, Tags } from "lucide-react";
 
-interface TagListProps {
-  tags: TagMasterItem[];
-  editingId: string | null;
-  editValue: { name: string; kana: string };
-  isUpdating: boolean;
-  isDeleting: boolean;
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  isMarking: boolean;
-  onToggleFavorite: (current: { id: string; isFavorite: boolean }) => void;
-  onStartEdit: (tag: TagMasterItem) => void;
-  onSaveEdit: (id: string) => void;
-  onCancelEdit: () => void;
-  onEditValueChange: (value: { name: string; kana: string }) => void;
-  onDelete: (id: string) => void;
-  onFetchNext: () => void;
-  onMarkAsRead: (id: string) => void;
-}
-
 export function TagMasterManagerCard() {
-  const tagMaster = useTagMaster();
-
   const {
     filter,
     setFilter,
-    allTags,
-    editingId,
-    editValue,
-    isUpdating,
-    isDeleting,
-    hasNextPage,
-    isFetchingNextPage,
     isMarking,
     newTagsInput,
     isCreating,
@@ -61,34 +32,8 @@ export function TagMasterManagerCard() {
     newTagsCount,
     setNewTagsInput,
     handleCreateTags,
-    deleteTag,
-    fetchNextPage,
     markAsRead,
-    saveChanges,
-    startEdit,
-    cancelEdit,
-    setEditValue,
-    toggleTagFavorite,
-  } = tagMaster;
-
-  const listProps = {
-    tags: allTags,
-    editingId,
-    editValue,
-    isUpdating,
-    isDeleting,
-    hasNextPage,
-    isFetchingNextPage,
-    isMarking,
-    onToggleFavorite: toggleTagFavorite,
-    onStartEdit: startEdit,
-    onSaveEdit: saveChanges,
-    onCancelEdit: cancelEdit,
-    onEditValueChange: setEditValue,
-    onDelete: (id: string) => deleteTag(id),
-    onFetchNext: () => void fetchNextPage(),
-    onMarkAsRead: (id: string) => markAsRead([id]),
-  } satisfies TagListProps;
+  } = useTagMasterContext();
 
   const isMobile = useDetectMobileContext();
 
@@ -197,11 +142,7 @@ export function TagMasterManagerCard() {
 
         {/* タグ一覧 */}
         <div className="pt-2">
-          {isMobile ? (
-            <TagMasterCardList {...listProps} />
-          ) : (
-            <TagMasterTable {...listProps} />
-          )}
+          {isMobile ? <TagMasterCardList /> : <TagMasterTable />}
         </div>
       </CardContent>
     </Card>
