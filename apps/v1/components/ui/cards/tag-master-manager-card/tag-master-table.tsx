@@ -213,18 +213,18 @@ export function TagMasterTable({
                   <TagMediaPreview
                     tagId={tag.id}
                     tagName={tag.name}
-                    count={tag._count.mediaTags}
+                    count={tag.relatedMediaCount}
                   >
                     <button
                       className={cn(
                         "inline-flex items-center px-2.5 py-0.5 rounded-full border text-[11px] font-mono bg-muted/30 transition-colors",
-                        tag._count.mediaTags > 0
+                        tag.relatedMediaCount > 0
                           ? "hover:bg-primary/10 hover:border-primary/30 cursor-pointer"
                           : "opacity-50 cursor-default"
                       )}
-                      disabled={tag._count.mediaTags === 0}
+                      disabled={tag.relatedMediaCount === 0}
                     >
-                      {tag._count.mediaTags.toLocaleString()}
+                      {tag.relatedMediaCount.toLocaleString()}
                     </button>
                   </TagMediaPreview>
                 </div>
@@ -270,7 +270,7 @@ export function TagMasterTable({
                         </Button>
                         <TagDeleteButton
                           tagName={tag.name}
-                          mediaCount={tag._count.mediaTags}
+                          mediaCount={tag.relatedMediaCount}
                           onDelete={() => onDelete(tag.id)}
                           isDeleting={isDeleting}
                         />
