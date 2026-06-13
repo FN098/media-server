@@ -98,7 +98,7 @@ export function useTagMaster() {
       name: string;
       kana?: string;
     }) => {
-      const res = await renameTagAction(id, name, kana);
+      const res = await renameTagAction({ id, newName: name, newKana: kana });
       if (!res.success) throw new Error(res.message);
       return res;
     },

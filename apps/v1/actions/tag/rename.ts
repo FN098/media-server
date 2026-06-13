@@ -31,19 +31,15 @@ type ActionResult =
 
 // タグリネーム
 export async function renameTagAction(
-  id: string,
-  newName: string,
-  newKana?: string
+  input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse({ id, newName, newKana });
+  const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.message };
   }
 
-  const normalizedId = parsed.data.id;
-  const normalizedNewName = parsed.data.newName;
-  const normalizedNewKana = parsed.data.newKana;
+  const { id, newName, newKana } = parsed.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -58,10 +54,10 @@ export async function renameTagAction(
 
   try {
     const tag = await prisma.tag.update({
-      where: { id: normalizedId },
+      where: { id: id },
       data: {
-        name: normalizedNewName,
-        kana: normalizedNewKana,
+        name: newName,
+        kana: newKana,
       },
     });
     return { success: true, tag };
