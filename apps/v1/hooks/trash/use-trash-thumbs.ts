@@ -1,4 +1,4 @@
-import { touchMediaTimestampAction } from "@/actions/node/touch";
+import { touchMediaTimestampAction } from "@/actions/node/touch-timestamp";
 import { updatePreviewAction } from "@/actions/preview/update";
 import { enqueueCreateSingleThumbJobAction } from "@/actions/thumb/enque-create-thumb-job";
 import { enqueueCreateThumbsJobAction } from "@/actions/thumb/enque-create-thumbs-job";
@@ -85,7 +85,9 @@ const updateThumb = async (node: MediaNode) => {
 
   // DB timestamp 更新
   if (!node.isDirectory) {
-    const touchResult = await touchMediaTimestampAction(node.path);
+    const touchResult = await touchMediaTimestampAction({
+      sourcePath: node.path,
+    });
     if (!touchResult.success) {
       toast.error(touchResult.message);
       return;
