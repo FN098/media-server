@@ -53,6 +53,6 @@ export async function deleteMultipleTagsAction(
     };
   } catch (error) {
     logger.error("action:delete-tags", error);
-    return { success: false, message: "タグの削除中にエラーが発生しました。" };
+    return { success: false, message: "タグの削除に失敗しました。" };
   }
 }
