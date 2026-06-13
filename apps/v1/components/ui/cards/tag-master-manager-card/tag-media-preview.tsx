@@ -36,7 +36,7 @@ export function TagMediaPreview({
 
       setIsLoading(true);
       try {
-        const result = await getTagMediaAction(tagId);
+        const result = await getTagMediaAction({ tagId });
         if (result.success) {
           setMedia(result.media);
         } else {

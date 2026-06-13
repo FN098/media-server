@@ -25,17 +25,15 @@ type ActionResult =
   | { success: false; message: string };
 
 export async function getTagMediaAction(
-  tagId: string,
-  limit?: number
+  input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse({ tagId, limit });
+  const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.message };
   }
 
-  const normalizedTagId = parsed.data.tagId;
-  const normalizedLimit = parsed.data.limit;
+  const { tagId, limit } = parsed.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -53,7 +51,7 @@ export async function getTagMediaAction(
       where: {
         mediaTags: {
           some: {
-            tagId: normalizedTagId,
+            tagId: tagId,
           },
         },
       },
@@ -68,7 +66,7 @@ export async function getTagMediaAction(
       orderBy: {
         dirPath: "asc",
       },
-      take: normalizedLimit,
+      take: limit,
     });
 
     const result = media.map((m) => {
@@ -76,7 +74,7 @@ export async function getTagMediaAction(
         id: m.id,
         title: basename(m.dirPath),
         path: m.path,
-        url: `${getClientExplorerPath(m.dirPath)}?tagIds=${normalizedTagId}`,
+        url: `${getClientExplorerPath(m.dirPath)}?tagIds=${tagId}`,
       };
     });
 
