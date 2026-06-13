@@ -7,6 +7,7 @@ import {
   getServerMediaPath,
   getServerMediaThumbPath,
 } from "@/lib/path/helpers";
+import { unique } from "@/lib/utils/array";
 import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";
 import { basename, extname } from "@/lib/virtual-path/path";
 import {
@@ -22,7 +23,8 @@ const InputSchema = z
     sourcePaths: EditableVirtualPathManySchema.min(
       1,
       "ファイルまたはフォルダを1件以上指定してください。"
-    ),
+    ).transform((paths) => unique(paths)),
+
     destDirPath: EditableVirtualPathSchema,
   })
   .superRefine(({ sourcePaths, destDirPath }, ctx) => {
@@ -34,7 +36,7 @@ const InputSchema = z
         ctx.addIssue({
           code: "custom",
           path: ["destDirPath"],
-          message: "移動先に自分自身またはそのサブフォルダは指定できません。",
+          message: "コピー先に自分自身またはそのサブフォルダは指定できません。",
         });
 
         return;

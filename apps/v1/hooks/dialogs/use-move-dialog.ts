@@ -1,7 +1,7 @@
 import { listRecentFoldersAction } from "@/actions/folder/list-recent";
 import { listSubFoldersAction } from "@/actions/folder/list-sub";
 import { togglePinVisitedFolderAction } from "@/actions/folder/toggle-pin-visited";
-import { moveNodesAction } from "@/actions/node/move";
+import { moveManyNodesAction } from "@/actions/node/move";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { dirname } from "path";
 import { useCallback, useState } from "react";
@@ -142,7 +142,10 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
 
     setIsPending(true);
     try {
-      const result = await moveNodesAction(paths, currentDir);
+      const result = await moveManyNodesAction({
+        sourcePaths: paths,
+        destDirPath: currentDir,
+      });
 
       if (result.success) {
         if (result.completed.length > 0) {

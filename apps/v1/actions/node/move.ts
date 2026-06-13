@@ -1,26 +1,50 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { renameNodeInDb } from "@/lib/media/services";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
 } from "@/lib/path/helpers";
-import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { unique } from "@/lib/utils/array";
 import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";
-import { isRootPath, sanitize } from "@/lib/virtual-path/guard";
 import { basename, extname, join } from "@/lib/virtual-path/path";
 import {
-  VirtualPathManySchema,
-  VirtualPathOneSchema,
+  EditableVirtualPathManySchema,
+  EditableVirtualPathSchema,
 } from "@/lib/virtual-path/schemas";
 import { readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
+import z from "zod";
 
-type MoveNodesResult =
+const InputSchema = z
+  .object({
+    sourcePaths: EditableVirtualPathManySchema.min(
+      1,
+      "ファイルまたはフォルダを1件以上指定してください。"
+    ).transform((paths) => unique(paths)),
+
+    destDirPath: EditableVirtualPathSchema,
+  })
+  .superRefine(({ sourcePaths, destDirPath }, ctx) => {
+    for (const sourcePath of sourcePaths) {
+      if (
+        destDirPath === sourcePath ||
+        destDirPath.startsWith(sourcePath + "/")
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["destDirPath"],
+          message: "移動先に自分自身またはそのサブフォルダは指定できません。",
+        });
+
+        return;
+      }
+    }
+  });
+
+type ActionResult =
   | {
       success: true;
       completed: { path: string }[];
@@ -33,50 +57,28 @@ type MoveNodesResult =
       errors?: { prop: string; issues?: unknown[] }[];
     };
 
-type MoveNodesSuccess = Extract<MoveNodesResult, { success: true }>;
+type Success = Extract<ActionResult, { success: true }>;
 
 // 移動
-export async function moveNodesAction(
-  sourcePaths: string[],
-  destDirPath: string
-): Promise<MoveNodesResult> {
+export async function moveManyNodesAction(
+  input: z.input<typeof InputSchema>
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  if (!sourcePaths || sourcePaths.length === 0 || !destDirPath) {
-    return {
-      success: false,
-      message: "処理対象のパスが指定されていません。",
-    };
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  const parsed = {
-    sourcePaths: VirtualPathManySchema.safeParse(sourcePaths.map(sanitize)),
-    destDirPath: VirtualPathOneSchema.safeParse(sanitize(destDirPath)),
-  };
-  if (!parsed.sourcePaths.success || !parsed.destDirPath.success) {
-    return {
-      success: false,
-      message: "入力エラーがあります。",
-      errors: [
-        { prop: "sourcePaths", issues: parsed.sourcePaths.error?.issues },
-        { prop: "destDirPath", issues: parsed.destDirPath.error?.issues },
-      ],
-    };
-  }
+  const { sourcePaths, destDirPath } = parsed.data;
 
-  const normalizedSourcePaths = unique(parsed.sourcePaths.data);
-  const normalizedDestDirPath = parsed.destDirPath.data;
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
+  // 認証＋認可
+  const auth = await authorize("file:move-many", "folder:move-many");
+  if (!auth.success) {
+    return auth;
   }
 
   // 仮想パス→物理パス
-  const realDestDirPath = getServerMediaPath(normalizedDestDirPath);
+  const realDestDirPath = getServerMediaPath(destDirPath);
 
   // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
   const existingNames = new Set<string>();
@@ -91,41 +93,11 @@ export async function moveNodesAction(
     };
   }
 
-  const completed: MoveNodesSuccess["completed"] = [];
-  const failed: MoveNodesSuccess["failed"] = [];
-  const skipped: MoveNodesSuccess["skipped"] = [];
+  const completed: Success["completed"] = [];
+  const failed: Success["failed"] = [];
+  const skipped: Success["skipped"] = [];
 
-  for (const srcVirtualPath of normalizedSourcePaths) {
-    // 子孫チェック
-    if (
-      normalizedDestDirPath === srcVirtualPath ||
-      normalizedDestDirPath.startsWith(srcVirtualPath + "/")
-    ) {
-      skipped.push({
-        path: srcVirtualPath,
-        message: "自分自身またはサブフォルダへの操作はできません。",
-      });
-      continue;
-    }
-
-    // ルートフォルダ保護
-    if (isRootPath(srcVirtualPath)) {
-      skipped.push({
-        path: srcVirtualPath,
-        message: "ルートフォルダは操作できません。",
-      });
-      continue;
-    }
-
-    // システムフォルダ保護
-    if (isSystemHiddenVirtualPath(srcVirtualPath)) {
-      skipped.push({
-        path: srcVirtualPath,
-        message: "システムフォルダは操作できません。",
-      });
-      continue;
-    }
-
+  for (const srcVirtualPath of sourcePaths) {
     // 仮想パス→物理パス
     const srcRealPath = getServerMediaPath(srcVirtualPath);
 
@@ -148,18 +120,6 @@ export async function moveNodesAction(
     }
     const isDirectory = srcPathInfo.isDirectory;
 
-    // 認可
-    if (
-      (!isDirectory && !hasPermission(user, "file:move")) ||
-      (isDirectory && !hasPermission(user, "folder:move"))
-    ) {
-      skipped.push({
-        path: srcVirtualPath,
-        message: "権限がありません。",
-      });
-      continue;
-    }
-
     const srcName = basename(srcVirtualPath);
 
     // 新しい名前を確定（名前衝突があれば (2), (3), ... などの連番を付与）
@@ -179,7 +139,7 @@ export async function moveNodesAction(
     }
 
     // 最終的なパスを決定
-    const destVirtualPath = join(normalizedDestDirPath, currentSrcName);
+    const destVirtualPath = join(destDirPath, currentSrcName);
     const destRealPath = getServerMediaPath(destVirtualPath);
 
     const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
