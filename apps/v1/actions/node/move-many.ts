@@ -54,7 +54,6 @@ type ActionResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 type Success = Extract<ActionResult, { success: true }>;

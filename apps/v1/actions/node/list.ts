@@ -28,7 +28,6 @@ type ActionResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 // メディアファイル一覧
