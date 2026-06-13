@@ -1,4 +1,4 @@
-import { restoreNodesAction } from "@/actions/node/restore";
+import { restoreManyNodesAction } from "@/actions/node/restore";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -15,46 +15,50 @@ export function useRestoreDialog({ onSuccess }: UseRestoreDialogProps = {}) {
   const [targets, setTargets] = useState<RestoreTarget[]>([]);
   const [isPending, setIsPending] = useState(false);
 
-  // 1. ダイアログを開く
+  // ダイアログを開く
   const open = useCallback((targets: RestoreTarget[]) => {
     setTargets(targets);
     setIsOpen(true);
   }, []);
 
-  // 2. ダイアログを閉じる
+  // ダイアログを閉じる
   const close = useCallback(() => {
     setIsOpen(false);
     setTargets([]);
   }, []);
 
-  // 3. 復元処理の実行
+  // 復元処理の実行
   const performRestore = useCallback(async () => {
     if (targets.length === 0) return;
 
     const paths = targets.map((n) => n.path);
 
     setIsPending(true);
-    const result = await restoreNodesAction(paths);
-    setIsPending(false);
-
-    if (result.success) {
-      if (result.completed.length > 0) {
-        toast.success(`${result.completed.length} 件のアイテムを復元しました`);
+    try {
+      const result = await restoreManyNodesAction({ sourcePaths: paths });
+      if (result.success) {
+        if (result.completed.length > 0) {
+          toast.success(
+            `${result.completed.length} 件のアイテムを復元しました`
+          );
+        }
+        if (result.failed.length > 0) {
+          toast.success(
+            `${result.failed.length} 件のアイテムの復元に失敗しました`
+          );
+        }
+        if (result.skipped.length > 0) {
+          toast.success(
+            `${result.skipped.length} 件のアイテムの復元をスキップしました`
+          );
+        }
+        onSuccess?.();
+        close();
+      } else {
+        toast.error(result.message);
       }
-      if (result.failed.length > 0) {
-        toast.success(
-          `${result.failed.length} 件のアイテムの復元に失敗しました`
-        );
-      }
-      if (result.skipped.length > 0) {
-        toast.success(
-          `${result.skipped.length} 件のアイテムの復元をスキップしました`
-        );
-      }
-      onSuccess?.();
-      close();
-    } else {
-      toast.error(result.message);
+    } finally {
+      setIsPending(false);
     }
   }, [targets, close, onSuccess]);
 
