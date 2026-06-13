@@ -76,11 +76,11 @@ export function useTagMaster() {
   // タグお気に入りトグル
   const { mutate: toggleTagFavorite } = useMutation({
     mutationFn: async (current: { id: string; isFavorite: boolean }) => {
-      const res = await updateTagFavoriteAction(
-        current.id,
-        !current.isFavorite
-      );
-      if (!res.success) throw new Error(res.error);
+      const res = await updateTagFavoriteAction({
+        ...current,
+        isFavorite: !current.isFavorite,
+      });
+      if (!res.success) throw new Error(res.message);
       return res;
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["tags"] }),

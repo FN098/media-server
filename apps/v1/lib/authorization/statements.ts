@@ -30,6 +30,7 @@ export const statements = [
   "tag:mark-as-read",
   "tag:rename",
   "tag:scan-unused",
+  "tag:update-favorite",
   "db-backup:dump",
   "db-backup:restore",
   "db-backup:list",
