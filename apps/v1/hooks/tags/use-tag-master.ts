@@ -113,7 +113,7 @@ export function useTagMaster() {
   // タグ削除
   const { mutate: deleteTag, isPending: isDeleting } = useMutation({
     mutationFn: async (id: string) => {
-      const res = await deleteTagAction(id);
+      const res = await deleteTagAction({ id });
       if (!res.success) throw new Error(res.message);
       return res;
     },

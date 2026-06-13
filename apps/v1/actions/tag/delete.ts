@@ -16,14 +16,16 @@ type ActionResult =
   | { success: false; message: string };
 
 // タグ削除
-export async function deleteTagAction(id: string): Promise<ActionResult> {
+export async function deleteTagAction(
+  input: z.input<typeof InputSchema>
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse({ id });
+  const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.message };
   }
 
-  const normalizedId = parsed.data.id;
+  const { id } = parsed.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -39,7 +41,7 @@ export async function deleteTagAction(id: string): Promise<ActionResult> {
   try {
     const tag = await prisma.tag.delete({
       where: {
-        id: normalizedId,
+        id: id,
       },
     });
 
