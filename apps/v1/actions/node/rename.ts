@@ -1,25 +1,28 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { renameNodeInDb } from "@/lib/media/services";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
 } from "@/lib/path/helpers";
-import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";
-import { isRootPath, sanitize } from "@/lib/virtual-path/guard";
 import { dirname, join } from "@/lib/virtual-path/path";
 import {
+  EditableVirtualPathSchema,
   FileOrFolderNameSchema,
-  VirtualPathSchema,
 } from "@/lib/virtual-path/schemas";
 import { rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
+import z from "zod";
 
-type RenameNodeResult =
+const InputSchema = z.object({
+  sourcePath: EditableVirtualPathSchema,
+  newName: FileOrFolderNameSchema,
+});
+
+type ActionResult =
   | {
       success: true;
       from: string;
@@ -28,68 +31,29 @@ type RenameNodeResult =
   | {
       success: false;
       message: string;
-      code?: "duplicated";
-      errors?: { prop: string; issues?: unknown[] }[];
+      hasConflictName?: true;
     };
 
 // リネーム
 export async function renameNodeAction(
-  sourcePath: string,
-  newName: string
-): Promise<RenameNodeResult> {
+  input: z.input<typeof InputSchema>
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  if (!sourcePath || newName.length === 0) {
-    return {
-      success: false,
-      message: "処理対象のパスまたは名前が指定されていません。",
-    };
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  const parsed = {
-    sourcePath: VirtualPathSchema.safeParse(sanitize(sourcePath)),
-    newName: FileOrFolderNameSchema.safeParse(sanitize(newName)),
-  };
-  if (!parsed.sourcePath.success || !parsed.newName.success) {
-    return {
-      success: false,
-      message: "入力エラーがあります。",
-      errors: [
-        { prop: "sourcePath", issues: parsed.sourcePath.error?.issues },
-        { prop: "newName", issues: parsed.newName.error?.issues },
-      ],
-    };
+  const { sourcePath, newName } = parsed.data;
+
+  // 認証＋認可
+  const auth = await authorize("file:rename", "folder:rename");
+  if (!auth.success) {
+    return auth;
   }
 
-  const normalizedSourcePath = parsed.sourcePath.data;
-  const normalizedNewName = parsed.newName.data;
-
-  // ルートフォルダ保護
-  if (isRootPath(normalizedSourcePath)) {
-    return {
-      success: false,
-      message: "ルートフォルダは操作できません。",
-    };
-  }
-
-  // システムフォルダ保護
-  if (isSystemHiddenVirtualPath(normalizedSourcePath)) {
-    return {
-      success: false,
-      message: "システムフォルダは操作できません。",
-    };
-  }
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
-  }
-
-  const srcVirtualPath = normalizedSourcePath;
-  const destVirtualPath = join(dirname(srcVirtualPath), normalizedNewName);
+  const srcVirtualPath = sourcePath;
+  const destVirtualPath = join(dirname(srcVirtualPath), newName);
 
   // 仮想パス→物理パス
   const srcRealPath = getServerMediaPath(srcVirtualPath);
@@ -111,24 +75,13 @@ export async function renameNodeAction(
   }
   const isDirectory = srcPathInfo.isDirectory;
 
-  // 認可
-  if (
-    (!isDirectory && !hasPermission(user, "file:rename")) ||
-    (isDirectory && !hasPermission(user, "folder:rename"))
-  ) {
-    return {
-      success: false,
-      message: "権限がありません。",
-    };
-  }
-
   // 存在確認
   const destPathInfo = await getPathInfo(destRealPath);
   if (destPathInfo.exists) {
     return {
       success: false,
       message: `同名のファイルまたはフォルダが既に存在します。: ${destVirtualPath}`,
-      code: "duplicated",
+      hasConflictName: true,
     };
   }
 

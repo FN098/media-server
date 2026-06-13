@@ -78,7 +78,10 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
 
     setIsPending(true);
     try {
-      const result = await renameNodeAction(target.path, fullNewName);
+      const result = await renameNodeAction({
+        sourcePath: target.path,
+        newName: fullNewName,
+      });
       if (result.success) {
         toast.success("リネームしました");
         onSuccess?.({
@@ -86,7 +89,7 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
           nextPath: result.to,
         });
         close();
-      } else if (result.code === "duplicated") {
+      } else if (result.hasConflictName) {
         const suggested = getSuggestedName(trimmedName); // (1)を付ける
         setNewName(suggested);
         toast.error(
