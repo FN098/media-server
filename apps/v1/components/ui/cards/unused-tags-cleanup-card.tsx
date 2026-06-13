@@ -70,7 +70,7 @@ export function UnusedTagsCleanupCard() {
 
     setIsPending(true);
     try {
-      const result = await deleteMultipleTagsAction(ids);
+      const result = await deleteMultipleTagsAction({ ids });
       if (result.success) {
         toast.success(`完了: ${result.deletedCount} 件のタグを削除しました。`);
         setTags([]);
