@@ -1,12 +1,11 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { getRecentFolders } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
 import { basename } from "@/lib/virtual-path/path";
 
-type ListRecentFolderResult =
+type ActionResult =
   | {
       success: true;
       data: {
@@ -21,27 +20,25 @@ type ListRecentFolderResult =
     };
 
 // 最近訪問したフォルダを取得
-export async function listRecentFoldersAction(): Promise<ListRecentFolderResult> {
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
+export async function listRecentFoldersAction(): Promise<ActionResult> {
+  // 認証＋認可
+  const auth = await authorize("folder:list-history");
+  if (!auth.success) {
+    return auth;
   }
+  const { user } = auth;
 
-  // 認可
-  if (!hasPermission(user, "folder:list-history")) {
-    return {
-      success: false,
-      message: "権限がありません。",
-    };
-  }
-
-  let folders: Awaited<ReturnType<typeof getRecentFolders>>;
   try {
-    folders = await getRecentFolders(user.id, 10);
+    const folders = await getRecentFolders(user.id, 10);
+
+    return {
+      success: true,
+      data: folders.map((f) => ({
+        path: f.dirPath,
+        name: basename(f.dirPath),
+        pinned: f.isPinned,
+      })),
+    };
   } catch (error) {
     logger.error("action:list-folder-history", error);
     return {
@@ -49,13 +46,4 @@ export async function listRecentFoldersAction(): Promise<ListRecentFolderResult>
       message: "訪問済みフォルダ一覧の取得に失敗しました。",
     };
   }
-
-  return {
-    success: true,
-    data: folders.map((f) => ({
-      path: f.dirPath,
-      name: basename(f.dirPath),
-      pinned: f.isPinned,
-    })),
-  };
 }

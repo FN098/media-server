@@ -40,7 +40,6 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
       setIsLoading(true);
       try {
         const result = await listSubFoldersAction(path);
-
         if (result.success) {
           // ループ防止のフィルタリング
           const filtered = result.folders.filter(
@@ -65,7 +64,6 @@ export function useMoveDialog({ onSuccess }: UseMoveDialogProps = {}) {
     setIsLoading(true);
     try {
       const result = await listRecentFoldersAction();
-
       if (result.success) {
         const filtered = (result.data ?? []).filter(
           (d: RecentDirectoryInfo) =>
