@@ -78,7 +78,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
       // サーバー処理開始
       try {
-        const result = await updateFavoriteAction(path, rating);
+        const result = await updateFavoriteAction({ path, rating });
         if (!result.success) {
           // 失敗時のロールバック
           const revalidated = await revalidateFavoriteAction({ path });
