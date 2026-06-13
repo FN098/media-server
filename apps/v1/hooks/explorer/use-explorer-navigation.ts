@@ -98,17 +98,14 @@ export function useExplorerNavigation({
       if (!preview.success) {
         toast.error(preview.message);
         return;
-      } else if (preview.isText) {
-        dialogs.textFilePreviewDialog.open({
-          title: node.name,
-          content: preview.content,
-          encoding: preview.encoding,
-          isTruncated: preview.isTruncated,
-        });
-        return;
       }
 
-      toast.error("このファイル形式は対応していません");
+      dialogs.textFilePreviewDialog.open({
+        title: node.name,
+        content: preview.content,
+        encoding: preview.encoding,
+        isTruncated: preview.isTruncated,
+      });
     },
     [dialogs.textFilePreviewDialog, folder, getMediaIndex, viewer]
   );
