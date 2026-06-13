@@ -69,8 +69,6 @@ export async function signUpAction(
     if (!response) {
       return { message: "アカウントの作成に失敗しました。" };
     }
-
-    redirect(redirectTo);
   } catch (e) {
     logger.error("action:sign-up", e);
 
@@ -79,4 +77,6 @@ export async function signUpAction(
 
     return { message };
   }
+
+  redirect(redirectTo);
 }

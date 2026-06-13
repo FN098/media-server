@@ -60,8 +60,6 @@ export async function signInAction(
     if (!response) {
       return { message: "サインインに失敗しました。" };
     }
-
-    redirect(redirectTo);
   } catch (e) {
     logger.error("action:sign-in", e);
 
@@ -70,4 +68,6 @@ export async function signInAction(
 
     return { message };
   }
+
+  redirect(redirectTo);
 }
