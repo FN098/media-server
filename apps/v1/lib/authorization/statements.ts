@@ -63,6 +63,8 @@ export const statements = [
   "db-backup:cleanup",
   "db-backup:upload",
   "db-backup:download",
+  "ghost-media:scan",
+  "ghost-thumbnail:scan",
 ] as const;
 
 export type Statement = (typeof statements)[number];

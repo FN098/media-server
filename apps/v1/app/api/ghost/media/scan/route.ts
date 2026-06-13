@@ -1,3 +1,4 @@
+import { authorize } from "@/lib/authorization/authorize";
 import { scanGhostMedia } from "@/lib/ghost-media/scan";
 import { GhostMediaScanEventData } from "@/lib/ghost-media/types";
 import { logger } from "@/lib/logger";
@@ -10,7 +11,7 @@ const InputSchema = z.object({
 });
 
 // ゴーストメディア（DB 上にのみ存在し、FS 上に存在しないファイル）をスキャンする
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   // 入力バリデーション
   const { searchParams } = req.nextUrl;
   const parsed = InputSchema.safeParse({
@@ -25,6 +26,12 @@ export function GET(req: NextRequest) {
   }
 
   const { full: isFullScan } = parsed.data;
+
+  // 認証＋認可
+  const auth = await authorize("ghost-media:scan");
+  if (!auth.success) {
+    return auth;
+  }
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -54,7 +61,7 @@ export function GET(req: NextRequest) {
           },
         });
       } catch (error) {
-        logger.error("api:ghost-media-scan", error);
+        logger.error("api:scan-ghost-media", error);
         send({ type: "error", message: "Failed to scan ghost media" });
       } finally {
         controller.close();

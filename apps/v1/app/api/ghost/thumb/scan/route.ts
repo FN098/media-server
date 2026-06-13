@@ -1,3 +1,4 @@
+import { authorize } from "@/lib/authorization/authorize";
 import { scanGhostThumb } from "@/lib/ghost-thumb/scan";
 import { GhostThumbScanEventData } from "@/lib/ghost-thumb/types";
 import { logger } from "@/lib/logger";
@@ -10,7 +11,7 @@ const InputSchema = z.object({
 });
 
 // ゴーストサムネイル（DB 上にのみ存在し、FS 上に存在しないファイル）をスキャンする
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   // 入力バリデーション
   const { searchParams } = req.nextUrl;
   const parsed = InputSchema.safeParse({
@@ -25,6 +26,12 @@ export function GET(req: NextRequest) {
   }
 
   const { full: isFullScan } = parsed.data;
+
+  // 認証＋認可
+  const auth = await authorize("ghost-thumbnail:scan");
+  if (!auth.success) {
+    return auth;
+  }
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -54,8 +61,8 @@ export function GET(req: NextRequest) {
           },
         });
       } catch (error) {
-        logger.error("api:ghost-thumb-scan", error);
-        send({ type: "error", message: "Failed to scan ghost thumb" });
+        logger.error("api:scan-ghost-thumbnail", error);
+        send({ type: "error", message: "Failed to scan ghost thumbnail" });
       } finally {
         controller.close();
       }
