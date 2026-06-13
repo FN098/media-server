@@ -13,3 +13,10 @@ export function hasPermission(user: AuthUser, statement: Statement): boolean {
   const statements = roleStatementSet[user.role];
   return statements.has(statement);
 }
+
+export function hasPermissions(
+  user: AuthUser,
+  statements: Statement[]
+): boolean {
+  return statements.every((stmt) => hasPermission(user, stmt));
+}

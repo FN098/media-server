@@ -1,6 +1,6 @@
 "use client";
 
-import { getMediaByTagId } from "@/actions/tag/get-media";
+import { getTagMediaAction, TagMedia } from "@/actions/tag/get-tag-media";
 import {
   Popover,
   PopoverContent,
@@ -18,20 +18,13 @@ interface TagMediaPreviewProps {
   children: React.ReactNode;
 }
 
-type MediaInfo = {
-  id: string;
-  title: string;
-  path: string;
-  url: string;
-};
-
 export function TagMediaPreview({
   tagId,
   tagName,
   count,
   children,
 }: TagMediaPreviewProps) {
-  const [media, setMedia] = useState<MediaInfo[]>([]);
+  const [media, setMedia] = useState<TagMedia[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,18 +34,18 @@ export function TagMediaPreview({
 
       if (!open || count === 0) return;
 
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const result = await getMediaByTagId(tagId);
-        setIsLoading(false);
-
-        if (result.success && result.media) {
+        const result = await getTagMediaAction(tagId);
+        if (result.success) {
           setMedia(result.media);
         } else {
-          toast.error(result.error ?? "メディア情報の取得に失敗しました。");
+          toast.error(result.message);
         }
       } catch {
         toast.error("通信エラーが発生しました。");
+      } finally {
+        setIsLoading(false);
       }
     },
     [count, tagId]

@@ -11,6 +11,8 @@ export const statements = [
   "file:copy",
   "file:delete",
   "file:restore",
+  "file:describe",
+  "file:list",
   "folder:rename",
   "folder:move",
   "folder:copy",
