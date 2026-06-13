@@ -4,6 +4,7 @@ import { authorize } from "@/lib/authorization/authorize";
 import { AbortError } from "@/lib/errors/abort-error";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { unique } from "@/lib/utils/array";
 import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
 
@@ -31,8 +32,16 @@ const UniqueMediaTagOperationsSchema = z
   });
 
 const InputSchema = z.object({
-  mediaPaths: EditableVirtualPathManySchema,
-  operations: UniqueMediaTagOperationsSchema,
+  mediaPaths: EditableVirtualPathManySchema.min(
+    1,
+    "ファイルを1件以上指定してください。"
+  ).transform((paths) => unique(paths)),
+
+  operations: UniqueMediaTagOperationsSchema.min(
+    1,
+    "オペレーションを1件以上指定してください。"
+  ),
+
   strict: z.boolean().optional().default(false),
 });
 
@@ -49,10 +58,6 @@ export async function updateManyMediaTagsAction(
   }
 
   const { mediaPaths, operations, strict } = parsed.data;
-
-  if (mediaPaths.length === 0 || operations.length === 0) {
-    return { success: true };
-  }
 
   const tagIdsToAdd = operations
     .filter((op) => op.operator === "add")
