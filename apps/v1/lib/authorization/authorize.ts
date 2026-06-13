@@ -1,5 +1,5 @@
+import { AuthUser } from "@/lib/auth/auth-user";
 import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { AuthUser } from "@/lib/auth/schemas";
 import { hasPermissions } from "@/lib/authorization/permission";
 import { Statement } from "@/lib/authorization/statements";
 

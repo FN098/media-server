@@ -1,4 +1,4 @@
-import { AuthUser } from "@/lib/auth/schemas";
+import { AuthUser } from "@/lib/auth/auth-user";
 import { roleStatements } from "@/lib/authorization/role-statements";
 import { Statement } from "@/lib/authorization/statements";
 import { Role } from "@/lib/user/roles";

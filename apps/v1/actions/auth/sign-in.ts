@@ -1,11 +1,24 @@
 "use server";
 
-import { redirect } from "next/navigation";
-
 import { auth } from "@/lib/auth/better-auth";
-import { SignInFormSchema } from "@/lib/auth/schemas";
 import { logger } from "@/lib/logger";
+import { redirect } from "next/navigation";
 import z from "zod";
+
+const SignInFormSchema = z.object({
+  email: z
+    .email({ message: "有効なメールアドレスを入力してください。" })
+    .trim(),
+
+  password: z
+    .string()
+    .min(1, { message: "パスワードを入力してください。" })
+    .trim(),
+
+  rememberMe: z.boolean().optional(),
+
+  redirectTo: z.string().optional().default("/"),
+});
 
 type SignInFormState =
   | {
@@ -36,7 +49,7 @@ export async function signInAction(
     };
   }
 
-  const { email, password, rememberMe, redirectTo = "/" } = parsed.data;
+  const { email, password, rememberMe, redirectTo } = parsed.data;
 
   // better-auth サーバー API でサインイン
   try {
@@ -47,15 +60,14 @@ export async function signInAction(
     if (!response) {
       return { message: "サインインに失敗しました。" };
     }
+
+    redirect(redirectTo);
   } catch (e) {
     logger.error("action:sign-in", e);
 
-    // better-auth は認証失敗時に APIError をスローする
     const message =
       e instanceof Error ? e.message : "予期しないエラーが発生しました。";
 
     return { message };
   }
-
-  redirect(redirectTo);
 }

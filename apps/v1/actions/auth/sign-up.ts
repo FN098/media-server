@@ -3,9 +3,29 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/better-auth";
-import { SignUpFormSchema } from "@/lib/auth/schemas";
 import { logger } from "@/lib/logger";
 import z from "zod";
+
+const SignUpFormSchema = z.object({
+  name: z
+    .string()
+    .min(2, { message: "名前は2文字以上で入力してください。" })
+    .trim(),
+
+  email: z
+    .email({ message: "有効なメールアドレスを入力してください。" })
+    .trim(),
+
+  password: z
+    .string()
+    .min(8, { message: "8文字以上で入力してください。" })
+    .regex(/[a-zA-Z]/, { message: "英字を1文字以上含めてください。" })
+    .regex(/[0-9]/, { message: "数字を1文字以上含めてください。" }),
+
+  rememberMe: z.boolean().optional(),
+
+  redirectTo: z.string().optional().default("/"),
+});
 
 type SignUpFormState =
   | {
@@ -27,6 +47,7 @@ export async function signUpAction(
     name: formData.get("name"),
     email: formData.get("email"),
     password: formData.get("password"),
+    rememberMe: formData.get("rememberMe") === "on",
     redirectTo: formData.get("redirectTo"),
   });
 
@@ -37,17 +58,19 @@ export async function signUpAction(
     };
   }
 
-  const { name, email, password, redirectTo = "/" } = parsed.data;
+  const { name, email, password, rememberMe, redirectTo } = parsed.data;
 
   // better-auth サーバー API でサインアップ
   try {
     const response = await auth.api.signUpEmail({
-      body: { name, email, password },
+      body: { name, email, password, rememberMe },
     });
 
     if (!response) {
       return { message: "アカウントの作成に失敗しました。" };
     }
+
+    redirect(redirectTo);
   } catch (e) {
     logger.error("action:sign-up", e);
 
@@ -56,6 +79,4 @@ export async function signUpAction(
 
     return { message };
   }
-
-  redirect(redirectTo);
 }

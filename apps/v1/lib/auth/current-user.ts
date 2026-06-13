@@ -1,5 +1,5 @@
+import { AuthUser, AuthUserSchema } from "@/lib/auth/auth-user";
 import { auth } from "@/lib/auth/better-auth";
-import { AuthUser, AuthUserSchema } from "@/lib/auth/schemas";
 import { buildSignInUrl } from "@/lib/auth/sign-in-url";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
