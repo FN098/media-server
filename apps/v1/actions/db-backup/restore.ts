@@ -1,18 +1,22 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { restoreDatabaseFromFile } from "@/lib/child_process/mysql";
 import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
-import { DbBackupFile } from "@/lib/db-backup/types";
 import { parseDatabaseURL } from "@/lib/db/url-parser";
 import { getDatabaseUrlOrThrow } from "@/lib/env/env-server";
 import { logger } from "@/lib/logger";
 import { isFsNotFoundError } from "@/lib/utils/fs";
 import { FileNameSchema } from "@/lib/virtual-path/schemas";
 import path from "path";
+import z from "zod";
 
-type RestoreDatabaseResult =
+const InputSchema = z.object({
+  name: FileNameSchema.endsWith(".sql"),
+  isTemp: z.boolean(),
+});
+
+type ActionResult =
   | {
       success: true;
     }
@@ -23,45 +27,42 @@ type RestoreDatabaseResult =
 
 // DBリストア
 export async function restoreDatabaseAction(
-  file: DbBackupFile
-): Promise<RestoreDatabaseResult> {
-  // 入力バリデーション
-  const parsed = {
-    fileName: FileNameSchema.safeParse(file.name),
-  };
-  if (!parsed.fileName.success) {
-    return { success: false, message: "不正なファイル名です" };
+  input: z.input<typeof InputSchema>
+): Promise<ActionResult> {
+  // 入力バリデーション＋正規化
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
+  const { name, isTemp } = parsed.data;
+
+  // 認証＋認可
+  const auth = await authorize("db-backup:restore");
+  if (!auth.success) {
+    return auth;
   }
 
-  // 認可
-  if (!hasPermission(user, "db-backup:restore")) {
-    return {
-      success: false,
-      message: "権限がありません。",
-    };
-  }
-
-  const filePath = file.isTemp
-    ? path.join(TEMP_DB_BACKUP_DIR, parsed.fileName.data)
-    : path.join(DB_BACKUP_DIR, parsed.fileName.data);
+  const filePath = isTemp
+    ? path.join(TEMP_DB_BACKUP_DIR, name)
+    : path.join(DB_BACKUP_DIR, name);
 
   const databaseUrl = getDatabaseUrlOrThrow();
   const db = parseDatabaseURL(databaseUrl);
 
-  let result: Awaited<ReturnType<typeof restoreDatabaseFromFile>>;
   try {
     logger.info("action:db-restore", "restore database started.");
-    result = await restoreDatabaseFromFile(db, filePath);
+
+    const result = await restoreDatabaseFromFile(db, filePath);
+    if (!result.ok) {
+      return {
+        success: false,
+        message: "DBリストアが正常に終了しませんでした",
+      };
+    }
+
     logger.info("action:db-restore", "restore database ended:", result);
+    return { success: true };
   } catch (error) {
     logger.error("action:db-restore", error);
 
@@ -71,10 +72,4 @@ export async function restoreDatabaseAction(
 
     return { success: false, message };
   }
-
-  if (!result.ok) {
-    return { success: false, message: "DBリストアが正常に終了しませんでした" };
-  }
-
-  return { success: true };
 }

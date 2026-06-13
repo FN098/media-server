@@ -60,7 +60,7 @@ export const statements = [
   "db-backup:restore",
   "db-backup:list",
   "db-backup:delete",
-  "db-backup:clean",
+  "db-backup:cleanup",
   "db-backup:upload",
   "db-backup:download",
 ] as const;

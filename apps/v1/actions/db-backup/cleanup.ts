@@ -1,17 +1,18 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { listSqlFiles } from "@/lib/db-backup/fs";
 import { logger } from "@/lib/logger";
 import fs from "fs/promises";
 import path from "path";
+import z from "zod";
 
-const MIN_KEEP_COUNT = 3;
-const MAX_KEEP_COUNT = 100;
+const InputSchema = z.object({
+  keepCount: z.number().min(5).max(100).optional().default(10),
+});
 
-type CleanupOldBackupsResult =
+type ActionResult =
   | {
       success: true;
       deletedCount: number;
@@ -23,31 +24,20 @@ type CleanupOldBackupsResult =
 
 // バックアップの世代管理
 export async function cleanupOldBackupsAction(
-  keepCount: number = 10
-): Promise<CleanupOldBackupsResult> {
-  // 入力バリデーション
-  if (keepCount < MIN_KEEP_COUNT || keepCount > MAX_KEEP_COUNT) {
-    return {
-      success: false,
-      message: `keepCount は ${MIN_KEEP_COUNT} 以上 ${MAX_KEEP_COUNT} 以下で入力してください。`,
-    };
+  input: z.input<typeof InputSchema>
+): Promise<ActionResult> {
+  // 入力バリデーション＋正規化
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
-  }
+  const { keepCount } = parsed.data;
 
-  // 認可
-  if (!hasPermission(user, "db-backup:clean")) {
-    return {
-      success: false,
-      message: "権限がありません。",
-    };
+  // 認証＋認可
+  const auth = await authorize("db-backup:cleanup");
+  if (!auth.success) {
+    return auth;
   }
 
   const files = await listSqlFiles(DB_BACKUP_DIR);
@@ -61,15 +51,17 @@ export async function cleanupOldBackupsAction(
   try {
     for (const file of filesToDelete) {
       await fs.unlink(path.join(DB_BACKUP_DIR, file.name));
-      logger.info("action:db-backup-clean", `Deleted old backup: ${file.name}`);
+      logger.info(
+        "action:db-backup-cleanup",
+        `Deleted old backup: ${file.name}`
+      );
     }
+    return { success: true, deletedCount: filesToDelete.length };
   } catch (error) {
-    logger.error("action:db-backup-clean", error);
+    logger.error("action:cleanup-db-backup", error);
     return {
       success: false,
       message: "古いバックアップファイルのクリーンアップに失敗しました",
     };
   }
-
-  return { success: true, deletedCount: filesToDelete.length };
 }

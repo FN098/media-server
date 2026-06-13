@@ -1,6 +1,6 @@
 import { cleanupOldBackupsAction } from "@/actions/db-backup/cleanup";
 import { dumpDatabaseAction } from "@/actions/db-backup/dump";
-import { listBackupFilesAction } from "@/actions/db-backup/list";
+import { listDbBackupsAction } from "@/actions/db-backup/list";
 import { restoreDatabaseAction } from "@/actions/db-backup/restore";
 import { DbBackupUploadResult } from "@/app/api/db/upload/route";
 import { DbBackupFile } from "@/lib/db-backup/types";
@@ -44,7 +44,7 @@ export function useDatabaseBackupCard() {
     if (isListing) return;
     setIsListing(true);
     try {
-      const result = await listBackupFilesAction();
+      const result = await listDbBackupsAction();
       if (result.success) {
         setBackupFiles(
           result.files.map((f) => ({
@@ -77,7 +77,7 @@ export function useDatabaseBackupCard() {
 
       // 自動クリーンアップがONの場合のみ実行
       if (autoCleanup) {
-        const cleanResult = await cleanupOldBackupsAction(keepCount);
+        const cleanResult = await cleanupOldBackupsAction({ keepCount });
         if (cleanResult.success && cleanResult.deletedCount > 0) {
           toast.info(
             `古いバックアップを ${cleanResult.deletedCount} 件削除しました`
@@ -146,10 +146,13 @@ export function useDatabaseBackupCard() {
 
   const performRestore = useCallback(async () => {
     if (!selectedFile || isRestoring) return;
-    setIsRestoring(true);
 
+    setIsRestoring(true);
     try {
-      const result = await restoreDatabaseAction(selectedFile.value);
+      const result = await restoreDatabaseAction({
+        isTemp: selectedFile.value.isTemp,
+        name: selectedFile.value.name,
+      });
       if (result.success) {
         toast.success("リストアが完了しました");
         // 一時ファイルだった場合は、リストから消去して選択を解除
@@ -179,7 +182,7 @@ export function useDatabaseBackupCard() {
     try {
       // 最新のリストを取得して件数を確認
       // (表示中の backupFiles を使わず、常に最新状態を取ることで判定ミスを防ぐ)
-      const result = await listBackupFilesAction();
+      const result = await listDbBackupsAction();
       if (!result.success) {
         toast.error(result.message);
         return;
