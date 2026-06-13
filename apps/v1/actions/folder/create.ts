@@ -4,6 +4,7 @@ import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath } from "@/lib/utils/fs";
+import { sanitize } from "@/lib/virtual-path/guard";
 import { join } from "@/lib/virtual-path/path";
 import {
   EditableVirtualPathSchema,
@@ -44,7 +45,7 @@ export async function createFolderAction(
   }
 
   // 仮想パス→物理パス
-  const newVirtualPath = join(parentPath, folderName);
+  const newVirtualPath = sanitize(join(parentPath, folderName));
   const newRealPath = getServerMediaPath(newVirtualPath);
 
   if (await existsPath(newRealPath)) {
