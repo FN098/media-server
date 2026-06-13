@@ -4,16 +4,15 @@ import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { PATHS } from "@/lib/path/paths";
 import { chunk, unique } from "@/lib/utils/array";
-import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import { rm } from "fs/promises";
 import path from "path";
 import z from "zod";
 
 const InputSchema = z.object({
-  sourcePaths: EditableVirtualPathManySchema.min(
-    1,
-    "ファイルまたはフォルダを1件以上指定してください。"
-  ).transform((paths) => unique(paths)),
+  sourcePaths: z
+    .array(z.string())
+    .min(1, "ファイルまたはフォルダを1件以上指定してください。")
+    .transform((paths) => unique(paths)),
 });
 
 type ActionResult =
