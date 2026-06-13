@@ -2,12 +2,12 @@
 
 import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { Tag } from "@/lib/tag/types";
 import { unique } from "@/lib/utils/array";
 import { generateKana } from "@/lib/utils/kana";
-import { logger } from "better-auth";
 import z from "zod";
 
 const NormalizedNamesSchema = z

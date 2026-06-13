@@ -3,9 +3,9 @@
 import { Prisma } from "@/generated/prisma/client";
 import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { TagMasterItem } from "@/lib/tag/types";
-import { logger } from "better-auth";
 import z from "zod";
 
 const InputSchema = z.object({

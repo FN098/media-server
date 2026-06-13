@@ -2,13 +2,13 @@
 
 import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
+import { logger } from "@/lib/logger";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { acquireLock } from "@/lib/redis/lock";
 import { thumbQueue } from "@/lib/thumb-job/queue";
 import { sha1Hash } from "@/lib/utils/sha1-hash";
 import { isRootPath } from "@/lib/virtual-path/guard";
 import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
-import { logger } from "better-auth";
 import z from "zod";
 
 const OptionsSchema = z
