@@ -1,14 +1,11 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
-import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { acquireLock } from "@/lib/redis/lock";
 import { thumbQueue } from "@/lib/thumb-job/queue";
 import { sha1Hash } from "@/lib/utils/sha1-hash";
-import { isRootPath } from "@/lib/virtual-path/guard";
-import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
+import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
 
 const OptionsSchema = z
@@ -21,7 +18,7 @@ const OptionsSchema = z
   }));
 
 const InputSchema = z.object({
-  filePath: VirtualPathSchema,
+  filePath: EditableVirtualPathSchema,
   options: OptionsSchema,
 });
 
@@ -42,25 +39,10 @@ export async function enqueueCreateSingleThumbJobAction(
     options: { force: forceCreate },
   } = parsed.data;
 
-  // ルートフォルダ保護
-  if (isRootPath(filePath)) {
-    return { success: false, message: "ルートフォルダは操作できません。" };
-  }
-
-  // システムフォルダ保護
-  if (isSystemHiddenVirtualPath(filePath)) {
-    return { success: false, message: "システムフォルダは操作できません。" };
-  }
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
-  }
-
-  // 認可
-  if (!hasPermission(user, "thumbnail:create")) {
-    return { success: false, message: "権限がありません。" };
+  // 認証＋認可
+  const auth = await authorize("thumbnail:create");
+  if (!auth.success) {
+    return auth;
   }
 
   try {

@@ -1,3 +1,5 @@
+import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
+import { isRootPath } from "@/lib/virtual-path/guard";
 import {
   WINDOWS_INVALID_CHARS,
   WINDOWS_RESERVED_NAMES,
@@ -106,3 +108,21 @@ export const VirtualPathManySchema = z.array(VirtualPathSchema);
 export const FileNameSchema = VirtualPathSegmentSchema;
 export const FolderNameSchema = VirtualPathSegmentSchema;
 export const FileOrFolderNameSchema = VirtualPathSegmentSchema;
+
+export const EditableVirtualPathSchema = VirtualPathSchema.superRefine(
+  (path, ctx) => {
+    if (isRootPath(path)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "ルートフォルダは操作できません。",
+      });
+    }
+
+    if (isSystemHiddenVirtualPath(path)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "システムフォルダは操作できません。",
+      });
+    }
+  }
+);
