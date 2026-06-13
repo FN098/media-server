@@ -1,13 +1,10 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermissions } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { AbortError } from "@/lib/errors/abort-error";
 import { logger } from "@/lib/logger";
-import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { prisma } from "@/lib/prisma";
-import { isRootPath } from "@/lib/virtual-path/guard";
-import { VirtualPathManySchema } from "@/lib/virtual-path/schemas";
+import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
 
 const MediaTagOperationSchema = z.object({
@@ -15,28 +12,9 @@ const MediaTagOperationSchema = z.object({
   operator: z.enum(["add", "remove"]),
 });
 
-const InputSchema = z.object({
-  mediaPaths: VirtualPathManySchema.superRefine((paths, ctx) => {
-    for (const [index, path] of paths.entries()) {
-      if (isRootPath(path)) {
-        ctx.addIssue({
-          code: "custom",
-          path: [index],
-          message: "ルートフォルダは操作できません。",
-        });
-      }
-
-      if (isSystemHiddenVirtualPath(path)) {
-        ctx.addIssue({
-          code: "custom",
-          path: [index],
-          message: "システムフォルダは操作できません。",
-        });
-      }
-    }
-  }),
-
-  operations: z.array(MediaTagOperationSchema).superRefine((ops, ctx) => {
+const UniqueMediaTagOperationsSchema = z
+  .array(MediaTagOperationSchema)
+  .superRefine((ops, ctx) => {
     const seen = new Set<string>();
 
     for (const [index, op] of ops.entries()) {
@@ -50,8 +28,11 @@ const InputSchema = z.object({
 
       seen.add(op.tagId);
     }
-  }),
+  });
 
+const InputSchema = z.object({
+  mediaPaths: EditableVirtualPathManySchema,
+  operations: UniqueMediaTagOperationsSchema,
   strict: z.boolean().optional().default(false),
 });
 
@@ -81,20 +62,11 @@ export async function updateMediaTagsAction(
     .filter((op) => op.operator === "remove")
     .map((op) => op.tagId);
 
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return { success: false, message: "認証されていません。" };
-  }
-
-  // 認可
-  if (
-    (tagIdsToAdd.length > 0 &&
-      !hasPermissions(user, ["tag:link-media", "tag:create"])) ||
-    (tagIdsToRemove.length > 0 &&
-      !hasPermissions(user, ["tag:link-media", "tag:delete"]))
-  ) {
-    return { success: false, message: "権限がありません。" };
+  // NOTE: 将来的に「追加だけ」「削除だけ」の権限を持つユーザーが出てきた場合は修正予定
+  // 認証＋認可
+  const auth = await authorize("tag:link-media", "tag:create", "tag:delete");
+  if (!auth.success) {
+    return auth;
   }
 
   try {

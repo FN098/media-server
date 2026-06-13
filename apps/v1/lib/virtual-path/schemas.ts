@@ -126,3 +126,5 @@ export const EditableVirtualPathSchema = VirtualPathSchema.superRefine(
     }
   }
 );
+export const EditableVirtualPathOneSchema = EditableVirtualPathSchema;
+export const EditableVirtualPathManySchema = z.array(EditableVirtualPathSchema);
