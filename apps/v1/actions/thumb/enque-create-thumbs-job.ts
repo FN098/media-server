@@ -11,18 +11,9 @@ import { isRootPath } from "@/lib/virtual-path/guard";
 import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
 
-const OptionsSchema = z
-  .object({
-    force: z.boolean().optional(),
-  })
-  .optional()
-  .transform((v) => ({
-    force: v?.force ?? false,
-  }));
-
 const InputSchema = z.object({
   dirPath: VirtualPathSchema,
-  options: OptionsSchema,
+  force: z.boolean().optional().default(false),
 });
 
 type ActionResult = { success: true } | { success: false; message: string };
@@ -37,10 +28,7 @@ export async function enqueueCreateThumbsJobAction(
     return { success: false, message: parsed.error.message };
   }
 
-  const {
-    dirPath,
-    options: { force: forceCreate },
-  } = parsed.data;
+  const { dirPath, force: forceCreate } = parsed.data;
 
   // ルートフォルダ保護
   if (isRootPath(dirPath)) {
