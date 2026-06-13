@@ -1,19 +1,31 @@
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
-import { TEMP_DB_BACKUP_DIR } from "@/lib/db-backup/config";
-import { UploadRequestSchema } from "@/lib/db-backup/schemas";
+import { authorize } from "@/lib/authorization/authorize";
+import {
+  MAX_UPLOAD_FILE_SIZE,
+  TEMP_DB_BACKUP_DIR,
+} from "@/lib/db-backup/config";
+import { buildDbUploadFileName } from "@/lib/db-backup/filename";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { logger } from "@/lib/logger";
 import {
   badRequestResponse,
-  forbiddenResponse,
   internalServerErrorResponse,
-  unauthorizedResponse,
 } from "@/lib/response/errors";
+import { formatBytes } from "@/lib/utils/bytes";
 import fs from "fs/promises";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import path from "path";
-import { v4 as uuidv4 } from "uuid";
+import z from "zod";
+
+const InputSchema = z.object({
+  file: z
+    .instanceof(File)
+    .refine((file) => file.size <= MAX_UPLOAD_FILE_SIZE, {
+      message: `File size must not exceed ${formatBytes(MAX_UPLOAD_FILE_SIZE)}`,
+    })
+    .refine((file) => file.name.endsWith(".sql"), {
+      message: "Must be a .sql file",
+    }),
+});
 
 export type DbBackupUploadResult =
   | {
@@ -29,40 +41,27 @@ export type DbBackupUploadResult =
 export async function POST(req: NextRequest) {
   // 入力バリデーション
   const formData = await req.formData();
-  const file = formData.get("file");
+  const parsed = InputSchema.safeParse({
+    file: formData.get("file"),
+  });
 
-  if (!file) {
+  if (!parsed.success) {
     return badRequestResponse({
-      code: "MISSING_REQUIRED_DATA",
-      message: "file is required",
+      code: "INVALID_REQUEST",
+      message: parsed.error.message,
     });
   }
 
-  const parsed = {
-    form: UploadRequestSchema.safeParse({ file }),
-  };
-  if (!parsed.form.success) {
-    return badRequestResponse({
-      code: "INVALID_REQUEST_DATA",
-      message: parsed.form.error.issues[0].message,
-    });
-  }
+  const { file } = parsed.data;
 
-  const validFile = parsed.form.data.file;
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return unauthorizedResponse();
-  }
-
-  // 認可
-  if (!hasPermission(user, "db-backup:upload")) {
-    return forbiddenResponse();
+  // 認証＋認可
+  const auth = await authorize("db-backup:upload");
+  if (!auth.success) {
+    return auth;
   }
 
   // 保存先パスの決定
-  const newFileName = `upload_${uuidv4()}.sql`; // ユーザーから渡されたファイル名は使用しない（セキュリティのため）
+  const newFileName = buildDbUploadFileName();
   const savePath = path.join(TEMP_DB_BACKUP_DIR, newFileName);
 
   try {
@@ -70,21 +69,21 @@ export async function POST(req: NextRequest) {
     await fs.rm(TEMP_DB_BACKUP_DIR, { recursive: true, force: true });
     await fs.mkdir(TEMP_DB_BACKUP_DIR, { recursive: true });
 
-    const buffer = Buffer.from(await validFile.arrayBuffer());
+    const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(savePath, buffer);
+
+    return Response.json({
+      success: true,
+      backup: {
+        name: newFileName,
+        label: file.name,
+        createdAt: new Date().toISOString(),
+        size: file.size,
+        isTemp: true,
+      },
+    } satisfies DbBackupUploadResult);
   } catch (error) {
     logger.error("api:db-upload", error);
     return internalServerErrorResponse();
   }
-
-  return NextResponse.json({
-    success: true,
-    backup: {
-      name: newFileName,
-      label: validFile.name,
-      createdAt: new Date().toISOString(),
-      size: validFile.size,
-      isTemp: true,
-    },
-  } satisfies DbBackupUploadResult);
 }

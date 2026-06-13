@@ -1,60 +1,57 @@
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { DB_BACKUP_DIR } from "@/lib/db-backup/config";
-import { DownloadRequestSchema } from "@/lib/db-backup/schemas";
 import { logger } from "@/lib/logger";
 import { getMimetype } from "@/lib/media/mimetype";
 import {
   badRequestResponse,
-  forbiddenResponse,
   internalServerErrorResponse,
   notFoundResponse,
-  unauthorizedResponse,
 } from "@/lib/response/errors";
 import { existsPath } from "@/lib/utils/fs";
+import { FileNameSchema } from "@/lib/virtual-path/schemas";
 import fs from "fs";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import path from "path";
 import { Readable } from "stream";
+import z from "zod";
+
+const InputSchema = z.object({
+  file: FileNameSchema.refine((name) => !name.includes("/"), {
+    message: "Path separators are not allowed",
+  })
+    .refine((name) => !name.includes(".."), {
+      message: "Parent directory references are not allowed",
+    })
+    .refine((name) => name.endsWith(".sql"), {
+      message: "Must be a .sql file",
+    }),
+});
 
 // DB バックアップファイルをダウンロードする
 export async function GET(req: NextRequest) {
-  // 入力バリデーション
+  // 入力バリデーション＋正規化
   const { searchParams } = req.nextUrl;
-  const file = searchParams.get("file");
+  const parsed = InputSchema.safeParse({
+    file: searchParams.get("file"),
+  });
 
-  if (!file) {
+  if (!parsed.success) {
     return badRequestResponse({
-      code: "MISSING_REQUIRED_PARAMETER",
-      message: "file is required",
+      code: "INVALID_REQUEST",
+      message: parsed.error.message,
     });
   }
 
-  const parsed = {
-    params: DownloadRequestSchema.safeParse({ file }),
-  };
-  if (!parsed.params.success) {
-    return badRequestResponse({
-      code: "INVALID_FILE_NAME",
-      message: `Invalid file name: ${file}`,
-    });
-  }
+  const { file: fileName } = parsed.data;
 
-  const validFileName = parsed.params.data.file;
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return unauthorizedResponse();
-  }
-
-  // 認可
-  if (!hasPermission(user, "db-backup:download")) {
-    return forbiddenResponse();
+  // 認証＋認可
+  const auth = await authorize("db-backup:download");
+  if (!auth.success) {
+    return auth;
   }
 
   // ファイルの物理パスを取得
-  const filePath = path.join(DB_BACKUP_DIR, validFileName);
+  const filePath = path.join(DB_BACKUP_DIR, fileName);
 
   // ファイルの存在確認
   if (!(await existsPath(filePath))) {
@@ -79,20 +76,21 @@ export async function GET(req: NextRequest) {
       },
       { once: true }
     );
+
     fileStream.on("error", (error) => {
       logger.error("api:db-download:file-stream", error);
     });
 
     // レスポンスヘッダーの設定
     // ブラウザに「ダウンロード」として認識させる
-    return new NextResponse(webStream as ReadableStream, {
+    return new Response(webStream as ReadableStream, {
       headers: {
-        "Content-Disposition": `attachment; filename="${validFileName}"`,
+        "Content-Disposition": `attachment; filename="${fileName}"`,
         "Content-Type": getMimetype(filePath),
       },
     });
   } catch (error) {
-    logger.error("api:db-download", error);
+    logger.error("api:db-backup-download", error);
     return internalServerErrorResponse();
   }
 }
