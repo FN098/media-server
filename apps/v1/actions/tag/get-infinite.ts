@@ -30,7 +30,7 @@ export async function getTagsInfiniteAction(
     return { success: false, message: parsed.error.message };
   }
 
-  const { cursor, query, limit, onlyFavorites, onlyNew } = parsed.data;
+  const { cursor, limit } = parsed.data;
 
   // 認証
   const user = await resolveCurrentUser();
@@ -43,28 +43,10 @@ export async function getTagsInfiniteAction(
     return { success: false, message: "権限がありません。" };
   }
 
-  const buildTagWhere = (): Prisma.TagWhereInput => {
-    const where: Prisma.TagWhereInput = {
-      isActive: true,
-    };
-
-    if (query) {
-      where.OR = [{ kana: { contains: query } }, { name: { contains: query } }];
-    }
-
-    if (onlyFavorites) {
-      where.userFavorites = {
-        some: { userId: user.id },
-      };
-    }
-
-    if (onlyNew) {
-      where.isNew = true;
-    }
-
-    return where;
-  };
-  const tagWhere = buildTagWhere();
+  const tagWhere = buildTagWhere({
+    ...parsed.data,
+    userId: user.id,
+  });
 
   try {
     const rawTags = await prisma.tag.findMany({
@@ -87,8 +69,7 @@ export async function getTagsInfiniteAction(
       },
     });
 
-    const tags = rawTags.map((tag) => {
-      const { userFavorites, _count, ...rest } = tag;
+    const tags = rawTags.map(({ userFavorites, _count, ...rest }) => {
       return {
         ...rest,
         isFavorite: userFavorites.length > 0,
@@ -105,3 +86,32 @@ export async function getTagsInfiniteAction(
     return { success: false, message: "タグの取得に失敗しました。" };
   }
 }
+
+const buildTagWhere = ({
+  query,
+  onlyFavorites,
+  onlyNew,
+  userId,
+}: z.infer<typeof InputSchema> & {
+  userId: string;
+}) => {
+  const where: Prisma.TagWhereInput = {
+    isActive: true,
+  };
+
+  if (query) {
+    where.OR = [{ kana: { contains: query } }, { name: { contains: query } }];
+  }
+
+  if (onlyFavorites) {
+    where.userFavorites = {
+      some: { userId: userId },
+    };
+  }
+
+  if (onlyNew) {
+    where.isNew = true;
+  }
+
+  return where;
+};
