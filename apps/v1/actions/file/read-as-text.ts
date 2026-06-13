@@ -71,7 +71,7 @@ export async function readAsTextAction(
 
     const { content, encoding } = decodeBuffer(
       buffer,
-      isProbablyBinary ? "ascii" : undefined
+      isProbablyBinary ? "UTF-8" : undefined
     );
 
     return {
