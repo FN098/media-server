@@ -31,7 +31,7 @@ export async function updatePreviewAction(
   const { targetPath, previewResourcePath } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("thumbnail:create");
+  const auth = await authorize("file:update-preview", "folder:update-preview");
   if (!auth.success) {
     return auth;
   }
