@@ -138,7 +138,10 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
 
     setIsPending(true);
     try {
-      const result = await copyNodesAction(paths, currentDir);
+      const result = await copyNodesAction({
+        sourcePaths: paths,
+        destDirPath: currentDir,
+      });
       if (result.success) {
         if (result.completed.length > 0) {
           toast.success(
