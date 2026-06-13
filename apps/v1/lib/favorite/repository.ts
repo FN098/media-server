@@ -50,7 +50,7 @@ export async function deleteFavorite({
   });
 }
 
-export async function upsertMultipleFavorites({
+export async function upsertManyFavorites({
   data,
   rating,
 }: {
@@ -69,7 +69,7 @@ export async function upsertMultipleFavorites({
   `;
 }
 
-export async function getMultipleFavorites({
+export async function getManyFavorites({
   userId,
   mediaIds,
 }: {
@@ -99,7 +99,7 @@ export async function getMultipleFavorites({
   }));
 }
 
-export async function deleteMultipleFavorites({
+export async function deleteManyFavorites({
   userId,
   mediaIds,
 }: {

@@ -2,7 +2,7 @@
 
 import { resolveCurrentUser } from "@/lib/auth/current-user";
 import { hasPermission } from "@/lib/authorization/permission";
-import { upsertMultipleFavorites } from "@/lib/favorite/repository";
+import { upsertManyFavorites } from "@/lib/favorite/repository";
 import { RatingInputSchema } from "@/lib/favorite/schemar";
 import { logger } from "@/lib/logger";
 import { getMediaIdsByPaths } from "@/lib/media/repository";
@@ -103,7 +103,7 @@ export async function updateMultipleFavoritesAction(
   }
 
   try {
-    await upsertMultipleFavorites({
+    await upsertManyFavorites({
       data: dataToUpsert,
       rating: normalizedRating,
     });

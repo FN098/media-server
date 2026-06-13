@@ -5,7 +5,7 @@ export const statements = [
   "favorite:delete",
   "favorite:delete-many",
   "favorite:revalidate",
-  "favorite:revalidate-multiple",
+  "favorite:revalidate-many",
   "file:rename",
   "file:move",
   "file:move-many",

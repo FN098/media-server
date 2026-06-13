@@ -1,7 +1,7 @@
 import { deleteFavoriteAction } from "@/actions/favorite/delete";
 import { deleteManyFavoritesAction } from "@/actions/favorite/delete-many";
 import { revalidateFavoriteAction } from "@/actions/favorite/revalidate";
-import { revalidateMultipleFavoritesAction } from "@/actions/favorite/revalidate-multiple";
+import { revalidateManyFavoritesAction } from "@/actions/favorite/revalidate-many";
 import { updateFavoriteAction } from "@/actions/favorite/update";
 import { updateMultipleFavoritesAction } from "@/actions/favorite/update-multiple";
 import { Favorite } from "@/lib/favorite/types";
@@ -197,8 +197,9 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
         if (!result.success) {
           // 失敗時のロールバック
-          const revalidateResult =
-            await revalidateMultipleFavoritesAction(validPaths);
+          const revalidateResult = await revalidateManyFavoritesAction({
+            paths: validPaths,
+          });
 
           if (revalidateResult.success && revalidateResult.favorites) {
             setRatingMap((prev) => {
@@ -268,8 +269,9 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
         if (!result.success) {
           // 失敗時のロールバック
-          const revalidateResult =
-            await revalidateMultipleFavoritesAction(validPaths);
+          const revalidateResult = await revalidateManyFavoritesAction({
+            paths: validPaths,
+          });
 
           if (revalidateResult.success && revalidateResult.favorites) {
             setRatingMap((prev) => {

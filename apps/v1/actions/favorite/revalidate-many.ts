@@ -1,7 +1,7 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { deleteManyFavorites } from "@/lib/favorite/repository";
+import { getManyFavorites } from "@/lib/favorite/repository";
 import { logger } from "@/lib/logger";
 import { getMediaIdsByPaths } from "@/lib/media/repository";
 import { unique } from "@/lib/utils/array";
@@ -18,6 +18,10 @@ const InputSchema = z.object({
 type ActionResult =
   | {
       success: true;
+      favorites: {
+        path: string;
+        rating: number | null;
+      }[];
     }
   | {
       success: false;
@@ -25,8 +29,8 @@ type ActionResult =
       errors?: { prop: string; issues?: unknown[] }[];
     };
 
-// 一括お気に入り削除
-export async function deleteManyFavoritesAction(
+// 一括お気に入り再検証
+export async function revalidateManyFavoritesAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
@@ -38,7 +42,7 @@ export async function deleteManyFavoritesAction(
   const { paths } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("favorite:delete-many");
+  const auth = await authorize("favorite:revalidate-many");
   if (!auth.success) {
     return auth;
   }
@@ -52,15 +56,19 @@ export async function deleteManyFavoritesAction(
   if (mediaIds.length === 0) {
     return {
       success: false,
-      message: "お気に入り削除対象のメディアがありません。",
+      message: "お気に入り再検証対象のメディアがありません。",
     };
   }
 
   try {
-    await deleteManyFavorites({ userId: user.id, mediaIds });
-    return { success: true };
+    const favorites = await getManyFavorites({ userId: user.id, mediaIds });
+
+    return {
+      success: true,
+      favorites: favorites.map((f) => ({ path: f.path, rating: f.rating })),
+    };
   } catch (error) {
-    logger.error("action:delete-multiple-favorites", error);
-    return { success: false, message: "お気に入り一括解除に失敗しました" };
+    logger.error("action:revalidate-many-favorites", error);
+    return { success: false, message: "お気に入り一括再検証に失敗しました" };
   }
 }
