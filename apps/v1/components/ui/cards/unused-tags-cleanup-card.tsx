@@ -50,13 +50,13 @@ export function UnusedTagsCleanupCard() {
     setIsPending(true);
     try {
       const result = await scanUnusedTagsAction();
-      if (result.success && result.tags) {
+      if (result.success) {
         setTags(result.tags);
         // デフォルトで全選択
         setSelectedIds(new Set(result.tags.map((t) => t.id)));
         setHasScanned(true);
       } else {
-        toast.error(result.error || "スキャン中にエラーが発生しました");
+        toast.error(result.message);
       }
     } finally {
       setIsPending(false);
