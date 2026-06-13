@@ -149,7 +149,9 @@ export function TagMasterTable({
                     />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <span className="font-medium truncate">{tag.name}</span>
+                      <span className="font-medium truncate" title={tag.name}>
+                        {tag.name}
+                      </span>
                       {tag.isNew && (
                         <button
                           onClick={(e) => {
@@ -202,8 +204,11 @@ export function TagMasterTable({
                       className="h-9 text-xs"
                     />
                   ) : (
-                    <span className="text-xs text-muted-foreground truncate block">
-                      {tag.kana || "---"}
+                    <span
+                      className="text-xs text-muted-foreground truncate block"
+                      title={tag.kana ?? "-"}
+                    >
+                      {tag.kana || "-"}
                     </span>
                   )}
                 </div>
