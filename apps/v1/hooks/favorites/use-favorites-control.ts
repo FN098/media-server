@@ -1,5 +1,5 @@
 import { deleteFavoriteAction } from "@/actions/favorite/delete";
-import { deleteMultipleFavoritesAction } from "@/actions/favorite/delete-multiple";
+import { deleteManyFavoritesAction } from "@/actions/favorite/delete-many";
 import { revalidateFavoriteAction } from "@/actions/favorite/revalidate";
 import { revalidateMultipleFavoritesAction } from "@/actions/favorite/revalidate-multiple";
 import { updateFavoriteAction } from "@/actions/favorite/update";
@@ -232,9 +232,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
   // 一括お気に入り解除
   const deleteMultipleFavorites = useCallback(
-    async (
-      paths: string[]
-    ): ReturnType<typeof deleteMultipleFavoritesAction> => {
+    async (paths: string[]): ReturnType<typeof deleteManyFavoritesAction> => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);
@@ -266,7 +264,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
       // サーバー処理開始
       try {
-        const result = await deleteMultipleFavoritesAction(validPaths);
+        const result = await deleteManyFavoritesAction({ paths: validPaths });
 
         if (!result.success) {
           // 失敗時のロールバック

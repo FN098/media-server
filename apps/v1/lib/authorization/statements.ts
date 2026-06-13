@@ -3,7 +3,7 @@ export const statements = [
   "favorite:update",
   "favorite:update-multiple",
   "favorite:delete",
-  "favorite:delete-multiple",
+  "favorite:delete-many",
   "favorite:revalidate",
   "favorite:revalidate-multiple",
   "file:rename",
