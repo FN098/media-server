@@ -113,14 +113,14 @@ export const EditableVirtualPathSchema = VirtualPathSchema.superRefine(
   (path, ctx) => {
     if (isRootPath(path)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "ルートフォルダは操作できません。",
       });
     }
 
     if (isSystemHiddenVirtualPath(path)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "システムフォルダは操作できません。",
       });
     }

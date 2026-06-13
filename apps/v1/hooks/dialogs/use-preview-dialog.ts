@@ -85,7 +85,10 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
 
     setIsPending(true);
     try {
-      const result = await updatePreviewAction(selectedTargetPath, previewPath);
+      const result = await updatePreviewAction({
+        targetPath: selectedTargetPath,
+        previewResourcePath: previewPath,
+      });
       if (result.success) {
         toast.success("プレビューを設定しました");
         onSuccess?.();

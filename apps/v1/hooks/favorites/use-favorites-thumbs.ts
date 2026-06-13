@@ -77,9 +77,12 @@ const updateThumb = async (node: MediaNode) => {
   }
 
   // preview リセット
-  const updated = await updatePreviewAction(node.path, null);
-  if (!updated.success) {
-    toast.error(updated.message);
+  const previewResult = await updatePreviewAction({
+    targetPath: node.path,
+    previewResourcePath: null,
+  });
+  if (!previewResult.success) {
+    toast.error(previewResult.message);
     return;
   }
 };
