@@ -31,6 +31,7 @@ export const statements = [
   "tag:rename",
   "tag:scan-unused",
   "tag:update-favorite",
+  "tag:link-media",
   "db-backup:dump",
   "db-backup:restore",
   "db-backup:list",
