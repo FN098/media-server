@@ -33,7 +33,7 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
     try {
       const [sub, media] = await Promise.all([
         listSubFoldersAction(dirPath),
-        listMediaAction(dirPath),
+        listMediaAction({ dirPath }),
       ]);
 
       if (sub.success && media.success) {

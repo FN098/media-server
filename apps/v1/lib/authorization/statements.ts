@@ -27,6 +27,7 @@ export const statements = [
   "folder:restore",
   "folder:update-history",
   "folder:list",
+  "folder:list-media",
   "folder:list-history",
   "folder:pin-history",
   "folder:create",
