@@ -12,7 +12,7 @@ const InputSchema = z.object({
   currentPinned: z.boolean(),
 });
 
-type TogglePinVisitedFolderResult =
+type ActionResult =
   | {
       success: true;
     }
@@ -25,7 +25,7 @@ type TogglePinVisitedFolderResult =
 // フォルダ訪問履歴ピン留めトグル
 export async function togglePinVisitedFolderAction(
   input: z.input<typeof InputSchema>
-): Promise<TogglePinVisitedFolderResult> {
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {

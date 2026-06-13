@@ -15,7 +15,7 @@ const InputSchema = z.object({
   path: EditableVirtualPathSchema,
 });
 
-type ReadAsTextResult =
+type ActionResult =
   | {
       success: false;
       message: string;
@@ -31,7 +31,7 @@ type ReadAsTextResult =
 // テキストデータ取得
 export async function readAsTextAction(
   input: z.input<typeof InputSchema>
-): Promise<ReadAsTextResult> {
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {

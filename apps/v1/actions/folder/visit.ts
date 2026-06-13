@@ -11,7 +11,7 @@ const InputSchema = z.object({
   dirPath: EditableVirtualPathSchema,
 });
 
-type VisitFolderResult =
+type ActionResult =
   | {
       success: true;
     }
@@ -24,7 +24,7 @@ type VisitFolderResult =
 // フォルダ訪問履歴更新
 export async function visitFolderAction(
   input: z.input<typeof InputSchema>
-): Promise<VisitFolderResult> {
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
