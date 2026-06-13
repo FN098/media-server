@@ -14,16 +14,16 @@ type ActionResult = { success: true } | { success: false; message: string };
 
 // タグ既読チェック
 export async function markTagsAsReadAction(
-  ids: string[]
+  input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse({ ids });
+  const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.message };
   }
 
-  const normalizedIds = parsed.data.ids;
-  if (normalizedIds.length === 0) {
+  const { ids } = parsed.data;
+  if (ids.length === 0) {
     return { success: false, message: "既読対象のタグがありません。" };
   }
 

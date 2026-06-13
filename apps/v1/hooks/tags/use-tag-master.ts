@@ -127,7 +127,7 @@ export function useTagMaster() {
   // タグ一括既読
   const { mutate: markAsRead, isPending: isMarking } = useMutation({
     mutationFn: async (ids: string[]) => {
-      const res = await markTagsAsReadAction(ids);
+      const res = await markTagsAsReadAction({ ids });
       if (!res.success) throw new Error(res.message);
       return res;
     },
