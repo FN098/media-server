@@ -3,6 +3,7 @@
 import { authorize } from "@/lib/authorization/authorize";
 import { dumpDatabaseToFile } from "@/lib/child_process/mysqldump";
 import { DB_BACKUP_DIR } from "@/lib/db-backup/config";
+import { buildDbBackupFileName } from "@/lib/db-backup/filename";
 import { parseDatabaseURL } from "@/lib/db/url-parser";
 import { getDatabaseUrlOrThrow } from "@/lib/env/env-server";
 import { logger } from "@/lib/logger";
@@ -19,8 +20,7 @@ export async function dumpDatabaseAction(): Promise<ActionResult> {
     return auth;
   }
 
-  const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
-  const fileName = `backup_${timestamp}.sql`;
+  const fileName = buildDbBackupFileName();
   const filePath = path.join(DB_BACKUP_DIR, fileName);
 
   const databaseUrl = getDatabaseUrlOrThrow();
