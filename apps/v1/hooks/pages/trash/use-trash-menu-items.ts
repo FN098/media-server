@@ -6,9 +6,9 @@ import { useOpenPrevFolderMenuItem } from "@/hooks/menu-items/use-open-prev-fold
 import { useRestoreMenuItem } from "@/hooks/menu-items/use-restore-menu-item";
 import { useToggleFullscreenMenuItem } from "@/hooks/menu-items/use-toggle-fullscreen-menu-item";
 import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
+import { TrashDialogs } from "@/hooks/pages/trash/use-trash-dialogs";
+import { TrashNavigation } from "@/hooks/pages/trash/use-trash-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
-import { TrashNavigation } from "@/hooks/trash/use-trash-navigation";
 import { createSeparator } from "@/lib/menu-items/factory";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 

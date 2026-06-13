@@ -9,8 +9,8 @@ import { useRatingFilterDialog } from "@/hooks/dialogs/use-rating-filter-dialog"
 import { useRenameDialog } from "@/hooks/dialogs/use-rename-dialog";
 import { useTagFilterDialog } from "@/hooks/dialogs/use-tag-filter-dialog";
 import { useTextFilePreviewDialog } from "@/hooks/dialogs/use-text-file-preview-dialog";
-import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
-import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
+import { ExplorerFavorites } from "@/hooks/pages/explorer/use-explorer-favorites";
+import { ExplorerFiltering } from "@/hooks/pages/explorer/use-explorer-filtering";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useMemo } from "react";
 

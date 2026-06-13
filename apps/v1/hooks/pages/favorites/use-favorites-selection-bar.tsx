@@ -1,5 +1,5 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
-import { FavoritesFavorites } from "@/hooks/favorites/use-favorites-favorites";
+import { FavoritesFavorites } from "@/hooks/pages/favorites/use-favorites-favorites";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { hasMedia } from "@/lib/media/detectors";

@@ -1,62 +1,57 @@
-import { useExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
-import { useExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
-import { useExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
-import { useExplorerHotkeys } from "@/hooks/explorer/use-explorer-hotkeys";
-import { useExplorerMenu } from "@/hooks/explorer/use-explorer-menu";
-import { useExplorerNavigation } from "@/hooks/explorer/use-explorer-navigation";
-import { useExplorerSelectionBar } from "@/hooks/explorer/use-explorer-selection-bar";
-import { useExplorerThumbs } from "@/hooks/explorer/use-explorer-thumbs";
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigation/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
+import { useTrashDialogs } from "@/hooks/pages/trash/use-trash-dialogs";
+import { useTrashFiltering } from "@/hooks/pages/trash/use-trash-filtering";
+import { useTrashHotkeys } from "@/hooks/pages/trash/use-trash-hotkeys";
+import { useTrashMenu } from "@/hooks/pages/trash/use-trash-menu";
+import { useTrashNavigation } from "@/hooks/pages/trash/use-trash-navigation";
+import { useTrashSelectionBar } from "@/hooks/pages/trash/use-trash-selection-bar";
+import { useTrashThumbs } from "@/hooks/pages/trash/use-trash-thumbs";
 import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useSort } from "@/hooks/sort/use-sort";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { useSearchFocusContext } from "@/providers/search-focus-provider";
-import { useSlideshowContext } from "@/providers/slideshow-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 
-export interface UseExplorerProps {
+export interface UseTrashProps {
   listing: MediaListing;
 }
 
-export function useExplorer({ listing }: UseExplorerProps) {
+export function useTrash({ listing }: UseTrashProps) {
   const searchFocus = useSearchFocusContext();
   const viewMode = useViewMode();
 
-  const filtering = useExplorerFiltering({ listing });
+  const filtering = useTrashFiltering({ listing });
   const selection = useMediaNodeSelection({
     allNodes: listing.nodes,
     activeNodes: filtering.filteredNodes,
   });
   const sort = useSort();
 
-  const favorites = useExplorerFavorites();
-  const dialogs = useExplorerDialogs({ filtering, selection, favorites });
+  const dialogs = useTrashDialogs({ filtering, selection });
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation();
   const history = useHistoryContext();
 
-  const navigation = useExplorerNavigation({
+  const navigation = useTrashNavigation({
     listing,
     filtering,
     selection,
     viewer,
     history,
     folder,
-    dialogs,
   });
 
   const tagEditor = useTagEditorContext();
 
-  const thumbs = useExplorerThumbs({ listing });
+  const thumbs = useTrashThumbs({ listing });
   const fullscreen = useFullscreen();
 
-  useExplorerHotkeys({
+  useTrashHotkeys({
     enabled: true,
-    listing,
     filtering,
     selection,
     dialogs,
@@ -67,29 +62,18 @@ export function useExplorer({ listing }: UseExplorerProps) {
     searchFocus,
   });
 
-  const slideshow = useSlideshowContext();
-
-  const menu = useExplorerMenu({
-    listing,
-    filtering,
+  const menu = useTrashMenu({
     selection,
     dialogs,
-    tagEditor,
     navigation,
     viewer,
     fullscreen,
-    favorites,
-    thumbs,
-    slideshow,
   });
 
-  const selectionbar = useExplorerSelectionBar({
-    listing,
+  const selectionbar = useTrashSelectionBar({
     selection,
     dialogs,
     tagEditor,
-    favorites,
-    thumbs,
   });
 
   return {
@@ -103,7 +87,6 @@ export function useExplorer({ listing }: UseExplorerProps) {
     viewer,
     folder,
     history,
-    favorites,
     navigation,
     tagEditor,
     thumbs,

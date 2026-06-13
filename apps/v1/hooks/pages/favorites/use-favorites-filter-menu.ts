@@ -1,7 +1,7 @@
 import {
   FavoritesFilterMenuContext,
   useFavoritesFilterMenuItems,
-} from "@/hooks/favorites/use-favorites-filter-menu-items";
+} from "@/hooks/pages/favorites/use-favorites-filter-menu-items";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaType } from "@/lib/media/types";
 import { useFavoritesContext } from "@/providers/favorites-provider";

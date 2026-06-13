@@ -1,30 +1,33 @@
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
+import { ExplorerDialogs } from "@/hooks/pages/explorer/use-explorer-dialogs";
+import { ExplorerFiltering } from "@/hooks/pages/explorer/use-explorer-filtering";
+import { ExplorerNavigation } from "@/hooks/pages/explorer/use-explorer-navigation";
 import { SearchFocus } from "@/hooks/search/use-search-focus";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
-import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
-import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
-import { TrashNavigation } from "@/hooks/trash/use-trash-navigation";
+import { MediaListing } from "@/lib/media/types";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 
-const ALL_SCOPES = ["trash", "tag-editor", "viewer", "dialog"] as const;
+const ALL_SCOPES = ["explorer", "tag-editor", "viewer", "dialog"] as const;
 
-interface UseTrashHotkeysProps {
+interface UseExplorerHotkeysProps {
   enabled: boolean;
-  filtering: TrashFiltering;
+  listing: MediaListing;
+  filtering: ExplorerFiltering;
   selection: MediaNodeSelection;
-  dialogs: TrashDialogs;
+  dialogs: ExplorerDialogs;
   tagEditor: TagEditor;
-  navigation: TrashNavigation;
+  navigation: ExplorerNavigation;
   viewer: ViewerNavigation;
   fullscreen: Fullscreen;
   searchFocus: SearchFocus;
 }
 
-export function useTrashHotkeys({
+export function useExplorerHotkeys({
   enabled,
+  listing,
   filtering,
   selection,
   dialogs,
@@ -33,7 +36,7 @@ export function useTrashHotkeys({
   viewer,
   fullscreen,
   searchFocus,
-}: UseTrashHotkeysProps) {
+}: UseExplorerHotkeysProps) {
   // スコープ切り替えフック
   const { enableScope, disableScope } = useHotkeysContext();
 
@@ -42,7 +45,7 @@ export function useTrashHotkeys({
     if (dialogs.isOpen) return "dialog";
     else if (tagEditor.isOpen) return "tag-editor";
     else if (viewer.isOpen) return "viewer";
-    else return "trash";
+    else return "explorer";
   }, [dialogs.isOpen, tagEditor.isOpen, viewer.isOpen]);
 
   // スコープの排他的制御
@@ -58,32 +61,31 @@ export function useTrashHotkeys({
   }, [activeScope, disableScope, enableScope]);
 
   useHotkeys("escape", () => selection.reset(), {
-    scopes: "trash",
+    scopes: "explorer",
     enabled,
   });
 
   useHotkeys("backspace", () => navigation.openParentFolder(), {
-    scopes: ["trash"],
+    scopes: ["explorer"],
     enabled,
   });
 
   useHotkeys(
     "delete",
-    () =>
-      dialogs.deleteDialog.open(selection.selectedNodes, { isPermanent: true }),
+    () => dialogs.deleteDialog.open(selection.selectedNodes),
     {
-      scopes: "trash",
+      scopes: "explorer",
       enabled: enabled && selection.hasSelection,
     }
   );
 
   useHotkeys("t", () => tagEditor.toggle(), {
-    scopes: ["trash", "viewer", "tag-editor"],
+    scopes: ["explorer", "viewer", "tag-editor"],
     enabled,
   });
 
   useHotkeys("f", () => void fullscreen.toggle(), {
-    scopes: ["trash", "viewer", "tag-editor"],
+    scopes: ["explorer", "viewer", "tag-editor"],
     enabled,
   });
 
@@ -94,7 +96,7 @@ export function useTrashHotkeys({
       selection.selectAll();
     },
     {
-      scopes: ["trash", "tag-editor"],
+      scopes: ["explorer", "tag-editor"],
       enabled,
     }
   );
@@ -106,23 +108,65 @@ export function useTrashHotkeys({
       searchFocus.trigger();
     },
     {
-      scopes: "trash",
+      scopes: "explorer",
       enabled,
     }
   );
 
+  useHotkeys(
+    "f2",
+    (e) => {
+      e.preventDefault();
+      if (selection.lastSelectedNode) {
+        dialogs.renameDialog.open(selection.lastSelectedNode);
+      }
+    },
+    {
+      scopes: ["explorer", "viewer"],
+      enabled: enabled && selection.hasSelection,
+    }
+  );
+
+  useHotkeys(
+    "f7",
+    (e) => {
+      e.preventDefault();
+      if (selection.lastSelectedNode) {
+        dialogs.moveDialog.open(selection.selectedNodes, listing.path);
+      }
+    },
+    {
+      scopes: ["explorer", "viewer"],
+      enabled: enabled && selection.hasSelection,
+    }
+  );
+
+  useHotkeys(
+    "f8",
+    (e) => {
+      e.preventDefault();
+      if (selection.lastSelectedNode) {
+        dialogs.copyDialog.open(selection.selectedNodes, listing.path);
+      }
+    },
+    {
+      scopes: ["explorer", "viewer"],
+      enabled: enabled && selection.hasSelection,
+    }
+  );
+
   useHotkeys("ctrl+left", () => navigation.openPrevFolder("first"), {
-    scopes: ["trash", "viewer", "tag-editor"],
+    scopes: ["explorer", "viewer", "tag-editor"],
     enabled,
   });
 
   useHotkeys("ctrl+right", () => navigation.openNextFolder("first"), {
-    scopes: ["trash", "viewer", "tag-editor"],
+    scopes: ["explorer", "viewer", "tag-editor"],
     enabled,
   });
 
   useHotkeys("r", () => filtering.reset(), {
-    scopes: ["trash"],
+    scopes: ["explorer"],
     enabled: enabled && filtering.canReset,
   });
 }

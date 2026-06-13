@@ -1,6 +1,3 @@
-import { FavoritesFavorites } from "@/hooks/favorites/use-favorites-favorites";
-import { FavoritesFiltering } from "@/hooks/favorites/use-favorites-filtering";
-import { FavoritesNavigation } from "@/hooks/favorites/use-favorites-navigation";
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { useAddTagFilterMenuItem } from "@/hooks/menu-items/use-add-tag-filter-menu-item";
 import { useEditTagsMenuItem } from "@/hooks/menu-items/use-edit-tags-menu-item";
@@ -10,6 +7,9 @@ import { useRatingMenuItem } from "@/hooks/menu-items/use-rating-menu-item";
 import { useToggleFullscreenMenuItem } from "@/hooks/menu-items/use-toggle-fullscreen-menu-item";
 import { useToggleSlideshowMenuItem } from "@/hooks/menu-items/use-toggle-slideshow-menu-item";
 import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
+import { FavoritesFavorites } from "@/hooks/pages/favorites/use-favorites-favorites";
+import { FavoritesFiltering } from "@/hooks/pages/favorites/use-favorites-filtering";
+import { FavoritesNavigation } from "@/hooks/pages/favorites/use-favorites-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { Slideshow } from "@/hooks/viewer/use-slideshow";

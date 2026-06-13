@@ -3,9 +3,9 @@ import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdo
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useFavoritesActionMenu } from "@/hooks/favorites/use-favorites-action-menu";
-import { useFavoritesFilterMenu } from "@/hooks/favorites/use-favorites-filter-menu";
-import { useFavoritesSortMenu } from "@/hooks/favorites/use-favorites-sort-menu";
+import { useFavoritesActionMenu } from "@/hooks/pages/favorites/use-favorites-action-menu";
+import { useFavoritesFilterMenu } from "@/hooks/pages/favorites/use-favorites-filter-menu";
+import { useFavoritesSortMenu } from "@/hooks/pages/favorites/use-favorites-sort-menu";
 import { useFavoritesContext } from "@/providers/favorites-provider";
 
 export function FavoritesToolbar() {

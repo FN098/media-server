@@ -1,7 +1,7 @@
 import { FavoriteRatingInput } from "@/components/ui/buttons/favorite-rating-input";
-import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
-import { ExplorerFavorites } from "@/hooks/explorer/use-explorer-favorites";
-import { ExplorerThumbs } from "@/hooks/explorer/use-explorer-thumbs";
+import { ExplorerDialogs } from "@/hooks/pages/explorer/use-explorer-dialogs";
+import { ExplorerFavorites } from "@/hooks/pages/explorer/use-explorer-favorites";
+import { ExplorerThumbs } from "@/hooks/pages/explorer/use-explorer-thumbs";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { hasMedia } from "@/lib/media/detectors";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTrash, UseTrashProps } from "@/hooks/trash/use-trash";
+import { useTrash, UseTrashProps } from "@/hooks/pages/trash/use-trash";
 import { createContext, useContext } from "react";
 
 const TrashContext = createContext<ReturnType<typeof useTrash> | undefined>(

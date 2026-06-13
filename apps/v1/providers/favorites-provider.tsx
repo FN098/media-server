@@ -3,7 +3,7 @@
 import {
   useFavorites,
   UseFavoritesProps,
-} from "@/hooks/favorites/use-favorites";
+} from "@/hooks/pages/favorites/use-favorites";
 import { createContext, useContext } from "react";
 
 const FavoritesContext = createContext<

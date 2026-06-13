@@ -1,57 +1,62 @@
 import { useFullscreen } from "@/hooks/general/use-fullscreen";
 import { useFolderNavigation } from "@/hooks/navigation/use-folder-navigation";
 import { useViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
+import { useExplorerDialogs } from "@/hooks/pages/explorer/use-explorer-dialogs";
+import { useExplorerFavorites } from "@/hooks/pages/explorer/use-explorer-favorites";
+import { useExplorerFiltering } from "@/hooks/pages/explorer/use-explorer-filtering";
+import { useExplorerHotkeys } from "@/hooks/pages/explorer/use-explorer-hotkeys";
+import { useExplorerMenu } from "@/hooks/pages/explorer/use-explorer-menu";
+import { useExplorerNavigation } from "@/hooks/pages/explorer/use-explorer-navigation";
+import { useExplorerSelectionBar } from "@/hooks/pages/explorer/use-explorer-selection-bar";
+import { useExplorerThumbs } from "@/hooks/pages/explorer/use-explorer-thumbs";
 import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { useSort } from "@/hooks/sort/use-sort";
-import { useTrashDialogs } from "@/hooks/trash/use-trash-dialogs";
-import { useTrashFiltering } from "@/hooks/trash/use-trash-filtering";
-import { useTrashHotkeys } from "@/hooks/trash/use-trash-hotkeys";
-import { useTrashMenu } from "@/hooks/trash/use-trash-menu";
-import { useTrashNavigation } from "@/hooks/trash/use-trash-navigation";
-import { useTrashSelectionBar } from "@/hooks/trash/use-trash-selection-bar";
-import { useTrashThumbs } from "@/hooks/trash/use-trash-thumbs";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
 import { useHistoryContext } from "@/providers/history-provider";
 import { useSearchFocusContext } from "@/providers/search-focus-provider";
+import { useSlideshowContext } from "@/providers/slideshow-provider";
 import { useTagEditorContext } from "@/providers/tag-editor-provider";
 
-export interface UseTrashProps {
+export interface UseExplorerProps {
   listing: MediaListing;
 }
 
-export function useTrash({ listing }: UseTrashProps) {
+export function useExplorer({ listing }: UseExplorerProps) {
   const searchFocus = useSearchFocusContext();
   const viewMode = useViewMode();
 
-  const filtering = useTrashFiltering({ listing });
+  const filtering = useExplorerFiltering({ listing });
   const selection = useMediaNodeSelection({
     allNodes: listing.nodes,
     activeNodes: filtering.filteredNodes,
   });
   const sort = useSort();
 
-  const dialogs = useTrashDialogs({ filtering, selection });
+  const favorites = useExplorerFavorites();
+  const dialogs = useExplorerDialogs({ filtering, selection, favorites });
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
   const folder = useFolderNavigation();
   const history = useHistoryContext();
 
-  const navigation = useTrashNavigation({
+  const navigation = useExplorerNavigation({
     listing,
     filtering,
     selection,
     viewer,
     history,
     folder,
+    dialogs,
   });
 
   const tagEditor = useTagEditorContext();
 
-  const thumbs = useTrashThumbs({ listing });
+  const thumbs = useExplorerThumbs({ listing });
   const fullscreen = useFullscreen();
 
-  useTrashHotkeys({
+  useExplorerHotkeys({
     enabled: true,
+    listing,
     filtering,
     selection,
     dialogs,
@@ -62,18 +67,29 @@ export function useTrash({ listing }: UseTrashProps) {
     searchFocus,
   });
 
-  const menu = useTrashMenu({
-    selection,
-    dialogs,
-    navigation,
-    viewer,
-    fullscreen,
-  });
+  const slideshow = useSlideshowContext();
 
-  const selectionbar = useTrashSelectionBar({
+  const menu = useExplorerMenu({
+    listing,
+    filtering,
     selection,
     dialogs,
     tagEditor,
+    navigation,
+    viewer,
+    fullscreen,
+    favorites,
+    thumbs,
+    slideshow,
+  });
+
+  const selectionbar = useExplorerSelectionBar({
+    listing,
+    selection,
+    dialogs,
+    tagEditor,
+    favorites,
+    thumbs,
   });
 
   return {
@@ -87,6 +103,7 @@ export function useTrash({ listing }: UseTrashProps) {
     viewer,
     folder,
     history,
+    favorites,
     navigation,
     tagEditor,
     thumbs,

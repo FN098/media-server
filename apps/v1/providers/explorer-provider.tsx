@@ -1,6 +1,9 @@
 "use client";
 
-import { useExplorer, UseExplorerProps } from "@/hooks/explorer/use-explorer";
+import {
+  useExplorer,
+  UseExplorerProps,
+} from "@/hooks/pages/explorer/use-explorer";
 import { createContext, useContext } from "react";
 
 const ExplorerContext = createContext<

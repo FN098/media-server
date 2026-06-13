@@ -1,9 +1,9 @@
 import { Fullscreen } from "@/hooks/general/use-fullscreen";
 import { ViewerNavigation } from "@/hooks/navigation/use-viewer-navigation";
+import { TrashDialogs } from "@/hooks/pages/trash/use-trash-dialogs";
+import { useTrashMenuItems } from "@/hooks/pages/trash/use-trash-menu-items";
+import { TrashNavigation } from "@/hooks/pages/trash/use-trash-navigation";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { TrashDialogs } from "@/hooks/trash/use-trash-dialogs";
-import { useTrashMenuItems } from "@/hooks/trash/use-trash-menu-items";
-import { TrashNavigation } from "@/hooks/trash/use-trash-navigation";
 
 interface UseTrashMenuProps {
   selection: MediaNodeSelection;

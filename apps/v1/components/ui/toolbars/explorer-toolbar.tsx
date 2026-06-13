@@ -2,9 +2,9 @@ import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdo
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useExplorerActionMenu } from "@/hooks/explorer/use-explorer-action-menu";
-import { useExplorerFilterMenu } from "@/hooks/explorer/use-explorer-filter-menu";
-import { useExplorerSortMenu } from "@/hooks/explorer/use-explorer-sort-menu";
+import { useExplorerActionMenu } from "@/hooks/pages/explorer/use-explorer-action-menu";
+import { useExplorerFilterMenu } from "@/hooks/pages/explorer/use-explorer-filter-menu";
+import { useExplorerSortMenu } from "@/hooks/pages/explorer/use-explorer-sort-menu";
 import { useExplorerContext } from "@/providers/explorer-provider";
 
 export function ExplorerToolbar() {

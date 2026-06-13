@@ -1,3 +1,4 @@
+import { readFileAsTextAction } from "@/actions/file/read-as-text";
 import { visitFolderAction } from "@/actions/folder/visit";
 import { FolderNavigation } from "@/hooks/navigation/use-folder-navigation";
 import { History, toHistoryItem } from "@/hooks/navigation/use-history";
@@ -7,30 +8,34 @@ import {
   IndexLike,
   ViewerNavigation,
 } from "@/hooks/navigation/use-viewer-navigation";
+import { ExplorerDialogs } from "@/hooks/pages/explorer/use-explorer-dialogs";
+import { ExplorerFiltering } from "@/hooks/pages/explorer/use-explorer-filtering";
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
-import { TrashFiltering } from "@/hooks/trash/use-trash-filtering";
+import { isArchiveFile } from "@/lib/archive/guards";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
-interface UseTrashNavigationProps {
+interface UseExplorerNavigationProps {
   listing: MediaListing;
-  filtering: TrashFiltering;
+  filtering: ExplorerFiltering;
   selection: MediaNodeSelection;
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;
+  dialogs: ExplorerDialogs;
 }
 
-export function useTrashNavigation({
+export function useExplorerNavigation({
   listing,
   filtering,
   selection,
   viewer,
   history,
   folder,
-}: UseTrashNavigationProps) {
+  dialogs,
+}: UseExplorerNavigationProps) {
   const { path: currentDir, next: nextDir, prev: prevDir } = listing;
   const { mediaOnly } = filtering;
 
@@ -74,12 +79,14 @@ export function useTrashNavigation({
 
   // ファイル/フォルダオープン
   const open = useCallback(
-    (node: MediaNode) => {
+    async (node: MediaNode) => {
+      // フォルダ
       if (node.isDirectory) {
-        folder.navigate({ path: node.path, resetPage: true, deleted: true });
+        folder.navigate({ path: node.path, resetPage: true });
         return;
       }
 
+      // ファイル（動画・画像・オーディオ）
       if (isMedia(node.type)) {
         const index = getMediaIndex(node.path);
         if (index == null) return;
@@ -87,16 +94,40 @@ export function useTrashNavigation({
         return;
       }
 
-      toast.warning("このファイル形式は対応していません");
+      // ファイル（アーカイブ）
+      if (isArchiveFile(node.path)) {
+        dialogs.extractDialog.open([node]);
+        return;
+      }
+
+      // ファイル（テキスト）
+      const text = await readFileAsTextAction({ path: node.path });
+      if (!text.success) {
+        toast.error(text.message);
+        return;
+      }
+
+      dialogs.textFilePreviewDialog.open({
+        title: node.name,
+        content: text.content,
+        encoding: text.encoding,
+        isTruncated: text.isTruncated,
+      });
     },
-    [folder, getMediaIndex, viewer]
+    [
+      dialogs.extractDialog,
+      dialogs.textFilePreviewDialog,
+      folder,
+      getMediaIndex,
+      viewer,
+    ]
   );
 
   // 新しいタブで開く
   const openInNewTab = useCallback(
     (node: MediaNode) => {
       if (node.isDirectory) {
-        folder.navigate({ path: node.path, newTab: true, deleted: true });
+        folder.navigate({ path: node.path, newTab: true });
         return;
       }
 
@@ -116,7 +147,7 @@ export function useTrashNavigation({
   const openPrevFolder = useCallback(
     (at: IndexLike = "last") => {
       if (prevDir) {
-        folder.navigate({ path: prevDir, at, deleted: true });
+        folder.navigate({ path: prevDir, at });
       }
     },
     [folder, prevDir]
@@ -126,24 +157,24 @@ export function useTrashNavigation({
   const openNextFolder = useCallback(
     (at: IndexLike = "first") => {
       if (nextDir) {
-        folder.navigate({ path: nextDir, at, deleted: true });
+        folder.navigate({ path: nextDir, at });
       }
     },
     [folder, nextDir]
   );
 
   // 一つ上のフォルダを開く
-  const { navigateToParent } = useParentPathname();
+  const { navigateToParent: openParentFolder } = useParentPathname();
 
   return {
     open,
     openInNewTab,
     openPrevFolder,
     openNextFolder,
-    openParentFolder: navigateToParent,
+    openParentFolder,
     onScrollRestored,
     onIndexChange,
   };
 }
 
-export type TrashNavigation = ReturnType<typeof useTrashNavigation>;
+export type ExplorerNavigation = ReturnType<typeof useExplorerNavigation>;

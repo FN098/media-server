@@ -1,20 +1,20 @@
+import { MediaType } from "@/generated/prisma/enums";
 import {
-  ExplorerFilterMenuContext,
-  useExplorerFilterMenuItems,
-} from "@/hooks/explorer/use-explorer-filter-menu-items";
+  TrashFilterMenuContext,
+  useTrashFilterMenuItems,
+} from "@/hooks/pages/trash/use-trash-filter-menu-items";
 import { isMedia } from "@/lib/media/detectors";
-import { MediaType } from "@/lib/media/types";
-import { useExplorerContext } from "@/providers/explorer-provider";
+import { useTrashContext } from "@/providers/trash-provider";
 import { useCallback, useMemo } from "react";
 
-export function useExplorerFilterMenu() {
+export function useTrashFilterMenu() {
   const {
     listing,
     filtering: {
       controls: { favorite, mediaType, rating, tag },
     },
     dialogs: { ratingFilterDialog, tagFilterDialog },
-  } = useExplorerContext();
+  } = useTrashContext();
 
   const favoriteFilterMode = useMemo(
     () => favorite.value.mode,
@@ -81,7 +81,7 @@ export function useExplorerFilterMenu() {
       toggleMediaType,
       openRatingFilter,
       openTagFilter,
-    } satisfies ExplorerFilterMenuContext;
+    } satisfies TrashFilterMenuContext;
   }, [
     favoriteFilterMode,
     mediaTypes,
@@ -94,7 +94,7 @@ export function useExplorerFilterMenu() {
     toggleNonFavoriteOnly,
   ]);
 
-  const items = useExplorerFilterMenuItems({ context });
+  const items = useTrashFilterMenuItems({ context });
 
   return {
     items,

@@ -2,9 +2,9 @@ import { ActionDropdownMenu } from "@/components/ui/dropdown-menus/action-dropdo
 import { FilterDropdownMenu } from "@/components/ui/dropdown-menus/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/components/ui/dropdown-menus/sort-dropdown-menu";
 import { FilterResultText } from "@/components/ui/texts/filter-result-text";
-import { useTrashActionMenu } from "@/hooks/trash/use-trash-action-menu";
-import { useTrashFilterMenu } from "@/hooks/trash/use-trash-filter-menu";
-import { useTrashSortMenu } from "@/hooks/trash/use-trash-sort-menu";
+import { useTrashActionMenu } from "@/hooks/pages/trash/use-trash-action-menu";
+import { useTrashFilterMenu } from "@/hooks/pages/trash/use-trash-filter-menu";
+import { useTrashSortMenu } from "@/hooks/pages/trash/use-trash-sort-menu";
 import { useTrashContext } from "@/providers/trash-provider";
 
 export function TrashToolbar() {
