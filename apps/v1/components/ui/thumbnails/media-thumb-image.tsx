@@ -50,9 +50,12 @@ export function MediaThumbImage({
   useThumbEventObserver((event) => {
     if (!isProcessing) return;
 
-    if (event.filePath === displayPath) {
+    if (event.type === "file" && event.path === displayPath) {
       update();
-    } else if (event.dirPath === getParentDirPath(displayPath)) {
+    } else if (
+      event.type === "directory" &&
+      event.path === getParentDirPath(displayPath)
+    ) {
       setTimeout(update, 300);
     }
   });

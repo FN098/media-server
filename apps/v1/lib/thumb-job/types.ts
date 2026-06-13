@@ -1,12 +1,17 @@
 export interface ThumbJobData {
-  dirPath?: string;
-  filePath?: string;
+  type: "file" | "directory";
+  path: string;
   createdAt: number; // ジョブのタイムスタンプ
   lockKey: string;
   forceCreate?: boolean;
 }
 
-export interface ThumbJobCompletedEvent {
-  dirPath?: string;
-  filePath?: string;
-}
+export type ThumbJobCompletedEvent =
+  | {
+      type: "directory";
+      path: string;
+    }
+  | {
+      type: "file";
+      path: string;
+    };

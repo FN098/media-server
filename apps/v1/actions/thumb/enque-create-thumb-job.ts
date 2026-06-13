@@ -75,7 +75,8 @@ export async function enqueueCreateSingleThumbJobAction(
     await thumbQueue.add(
       "create-thumb-single",
       {
-        filePath: normalizedPath,
+        type: "file",
+        path: normalizedPath,
         createdAt: Date.now(),
         lockKey,
         forceCreate: forceCreate,

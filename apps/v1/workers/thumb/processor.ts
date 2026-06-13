@@ -1,7 +1,7 @@
 import { getFsNode, listFsNodes } from "@/lib/media/fs-listing";
 import { sortNodes } from "@/lib/media/sort";
 import { redis } from "@/lib/redis";
-import { ThumbJobData } from "@/lib/thumb-job/types";
+import { ThumbJobCompletedEvent, ThumbJobData } from "@/lib/thumb-job/types";
 import { createThumbs } from "@/lib/thumb/factory";
 import { chunk } from "@/lib/utils/array";
 import { Job } from "bullmq";
@@ -36,15 +36,15 @@ export async function processThumbJob(job: Job<ThumbJobData>) {
 
 // フォルダ単位でサムネイル作成
 async function handleCreateThumbs(job: Job<ThumbJobData>) {
-  const { dirPath, forceCreate } = job.data;
+  const { type, path, forceCreate } = job.data;
 
-  if (!dirPath) {
-    throw new Error("dirPath is required for create-thumbs");
+  if (type !== "directory" || !path) {
+    throw new Error("Invalid input");
   }
 
-  console.log(`[Job ${job.id}] Batch Processing: ${dirPath}`);
+  console.log(`[Job ${job.id}] Batch Processing: ${path}`);
 
-  const nodes = await listFsNodes(dirPath);
+  const nodes = await listFsNodes(path);
   const sorted = sortNodes(nodes);
 
   let completed = 0;
@@ -57,7 +57,8 @@ async function handleCreateThumbs(job: Job<ThumbJobData>) {
     await Promise.all(
       batch.map((node) =>
         publishThumbCompleted({
-          filePath: node.path,
+          type: "file",
+          path: node.path,
         })
       )
     );
@@ -67,43 +68,38 @@ async function handleCreateThumbs(job: Job<ThumbJobData>) {
     console.log(`[Job ${job.id}] Progress: ${completed}/${nodes.length}`);
   }
 
-  await publishThumbCompleted({ dirPath });
+  await publishThumbCompleted({ type: "directory", path });
 
-  console.log(`[Job ${job.id}] Notified completion for: ${dirPath}`);
+  console.log(`[Job ${job.id}] Notified completion for: ${path}`);
 }
 
 // ファイル単位でサムネイル作成
 async function handleCreateThumbSingle(job: Job<ThumbJobData>) {
-  const { filePath, forceCreate } = job.data;
+  const { type, path, forceCreate } = job.data;
 
-  if (!filePath) {
-    throw new Error("filePath is required for create-thumb-single");
+  if (type !== "file" || !path) {
+    throw new Error("Invalid input");
   }
 
-  console.log(`[Job ${job.id}] Single Processing: ${filePath}`);
+  console.log(`[Job ${job.id}] Single Processing: ${path}`);
 
-  const node = await getFsNode(filePath);
+  const node = await getFsNode(path);
 
   await createThumbs([node], {
     force: forceCreate,
   });
 
-  await publishThumbCompleted({
-    filePath,
-  });
+  await publishThumbCompleted({ type, path });
 
-  console.log(`[Job ${job.id}] Notified completion for: ${filePath}`);
+  console.log(`[Job ${job.id}] Notified completion for: ${path}`);
 }
 
 //
 // common functions
 //
 
-async function publishThumbCompleted(payload: {
-  filePath?: string;
-  dirPath?: string;
-}) {
-  await redis.publish("thumb-completed", JSON.stringify(payload));
+async function publishThumbCompleted(event: ThumbJobCompletedEvent) {
+  await redis.publish("thumb-completed", JSON.stringify(event));
 }
 
 async function withLockRelease(
