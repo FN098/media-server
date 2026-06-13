@@ -21,13 +21,9 @@ type ActionResult =
   | { success: false; message: string };
 
 // タグ一覧無限スクロール
-export async function getTagsInfiniteAction(input: {
-  cursor?: string;
-  query?: string;
-  limit?: number;
-  onlyFavorites?: boolean;
-  onlyNew?: boolean;
-}): Promise<ActionResult> {
+export async function getTagsInfiniteAction(
+  input: z.input<typeof InputSchema>
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
