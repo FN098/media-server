@@ -27,6 +27,7 @@ export const statements = [
   "tag:create",
   "tag:delete",
   "tag:get-infinite",
+  "tag:mark-as-read",
   "db-backup:dump",
   "db-backup:restore",
   "db-backup:list",
