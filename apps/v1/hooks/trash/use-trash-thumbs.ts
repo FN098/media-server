@@ -77,8 +77,8 @@ const updateThumb = async (node: MediaNode) => {
   const enqueResult = await enqueueCreateSingleThumbJobAction(node.path, {
     force: true,
   });
-  if (enqueResult?.error) {
-    toast.error(enqueResult.error);
+  if (!enqueResult.success) {
+    toast.error(enqueResult.message);
     return;
   }
 
@@ -87,6 +87,7 @@ const updateThumb = async (node: MediaNode) => {
     const touchResult = await touchMediaTimestampAction(node.path);
     if (!touchResult.success) {
       toast.error(touchResult.message);
+      return;
     }
   }
 
@@ -94,6 +95,7 @@ const updateThumb = async (node: MediaNode) => {
   const updateResult = await updatePreviewAction(node.path, null);
   if (!updateResult.success) {
     toast.error(updateResult.message);
+    return;
   }
 };
 
