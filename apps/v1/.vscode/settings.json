@@ -12,6 +12,11 @@
   "files.insertFinalNewline": true,
   "js/ts.preferences.importModuleSpecifier": "non-relative",
   "js/ts.preferences.importModuleSpecifierEnding": "minimal",
+  "js/ts.preferences.autoImportFileExcludePatterns": [
+    "**/generated/**",
+    "**/dist/**",
+    "**/better-auth/**"
+  ],
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
