@@ -26,9 +26,11 @@ type ActionResult =
   | { success: false; message: string };
 
 // タグ一括作成
-export async function createTagsAction(names: string[]): Promise<ActionResult> {
+export async function createTagsAction(
+  input: z.input<typeof InputSchema>
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse({ names });
+  const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.message };
   }

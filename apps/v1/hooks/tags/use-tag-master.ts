@@ -51,7 +51,7 @@ export function useTagMaster() {
   // タグ作成
   const { mutate: createTags, isPending: isCreating } = useMutation({
     mutationFn: async (names: string[]) => {
-      const res = await createTagsAction(names);
+      const res = await createTagsAction({ names });
       if (!res.success) throw new Error(res.message);
       return res;
     },
