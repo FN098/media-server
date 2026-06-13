@@ -22,5 +22,5 @@ export type TagMasterItem = {
   kana: string | null;
   isFavorite: boolean;
   isNew: boolean;
-  _count: { mediaTags: number };
+  relatedMediaCount: number;
 };

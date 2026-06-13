@@ -24,6 +24,7 @@ export const statements = [
   "thumbnail:create",
   "tag:create",
   "tag:delete",
+  "tag:get-infinite",
   "db-backup:dump",
   "db-backup:restore",
   "db-backup:list",

@@ -71,15 +71,14 @@ export function TagMasterManagerCard() {
           query: debouncedFilter,
           onlyNew: showNewOnly,
         });
-        if (!res.success) throw new Error(res.error);
+        if (!res.success) throw new Error(res.message);
         return res;
       },
       initialPageParam: undefined as string | undefined,
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     });
 
-  const allTags =
-    data?.pages.flatMap((page) => (page.tags as TagMasterItem[]) ?? []) ?? [];
+  const allTags = data?.pages.flatMap((page) => page.tags) ?? [];
 
   const newTags = allTags.filter((tag) => tag.isNew);
   const newTagIds = newTags.map((tag) => tag.id);
