@@ -33,6 +33,7 @@ export const statements = [
   "folder:update-history",
   "folder:list",
   "folder:list-media",
+  "folder:list-subfolders",
   "folder:list-history",
   "folder:pin-history",
   "folder:create",

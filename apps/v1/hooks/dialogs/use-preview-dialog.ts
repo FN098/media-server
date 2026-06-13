@@ -1,4 +1,4 @@
-import { listSubFoldersAction } from "@/actions/folder/list-sub";
+import { listSubFoldersAction } from "@/actions/folder/list-subfolders";
 import { listMediaAction } from "@/actions/node/list";
 import { updatePreviewAction } from "@/actions/preview/update";
 import { sanitize } from "@/lib/virtual-path/guard";
@@ -32,7 +32,7 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
     setIsLoading(true);
     try {
       const [sub, media] = await Promise.all([
-        listSubFoldersAction(dirPath),
+        listSubFoldersAction({ dirPath }),
         listMediaAction({ dirPath }),
       ]);
 
