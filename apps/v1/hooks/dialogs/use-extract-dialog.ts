@@ -1,4 +1,4 @@
-import { extractArchivesAction } from "@/actions/archive/extract";
+import { extractManyArchivesAction } from "@/actions/archive/extract";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -29,29 +29,28 @@ export function useExtractDialog({ onSuccess }: UseExtractDialogProps = {}) {
   const performExtract = useCallback(async () => {
     if (targets.length === 0) return;
 
-    let result: Awaited<ReturnType<typeof extractArchivesAction>>;
+    const paths = targets.map((t) => t.path);
+
+    setIsPending(true);
     try {
-      setIsPending(true);
-      result = await extractArchivesAction(targets);
+      const result = await extractManyArchivesAction({ paths });
+      if (result.success) {
+        if (result.completed.length > 0) {
+          toast.success(`${result.completed.length} 件の解凍が完了しました`);
+        }
+        if (result.failed.length > 0) {
+          toast.error(`${result.failed.length} 件の解凍に失敗しました`);
+        }
+        if (result.skipped.length > 0) {
+          toast.warning(`${result.skipped.length} 件の解凍をスキップしました`);
+        }
+        onSuccess?.();
+        close();
+      } else {
+        toast.error(result.message);
+      }
     } finally {
       setIsPending(false);
-    }
-
-    if (result.success) {
-      if (result.completed.length > 0) {
-        toast.success(`${result.completed.length} 件の解凍が完了しました`);
-      }
-      if (result.failed.length > 0) {
-        toast.error(`${result.failed.length} 件の解凍に失敗しました`);
-      }
-      if (result.skipped.length > 0) {
-        toast.error(`${result.skipped.length} 件の解凍をスキップしました`);
-      }
-      onSuccess?.();
-      close();
-    } else {
-      console.error(result.errors);
-      toast.error(result.message);
     }
   }, [targets, close, onSuccess]);
 

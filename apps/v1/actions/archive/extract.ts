@@ -1,19 +1,33 @@
 "use server";
 
 import { isArchiveFile } from "@/lib/archive/guards";
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { extractArchive } from "@/lib/child_process/7z";
 import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath, getPathInfo } from "@/lib/utils/fs";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { basename, dirname, extname, join } from "@/lib/virtual-path/path";
-import { VirtualPathManySchema } from "@/lib/virtual-path/schemas";
+import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import { mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
+import z from "zod";
 
-type ExtractArchivesResult =
+const InputSchema = z.object({
+  paths: EditableVirtualPathManySchema.superRefine((paths, ctx) => {
+    paths.forEach((path, index) => {
+      if (!isArchiveFile(path)) {
+        ctx.addIssue({
+          code: "custom",
+          path: [index],
+          message: "有効なアーカイブファイルではありません。",
+        });
+      }
+    });
+  }),
+});
+
+type ActionResult =
   | {
       success: true;
       completed: { sourcePath: string }[];
@@ -23,77 +37,33 @@ type ExtractArchivesResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     };
 
-type ExtractArchivesSuccess = Extract<ExtractArchivesResult, { success: true }>;
+type Success = Extract<ActionResult, { success: true }>;
 
-/**
- * 複数のアーカイブファイルをまとめて解凍するサーバーアクション
- * @param sourceArchives エクスプローラー上の仮想パスの配列 (例: ["folder/file1.zip", "folder/file2.zip"])
- */
-export async function extractArchivesAction(
-  sourceArchives: { path: string }[]
-): Promise<ExtractArchivesResult> {
+export async function extractManyArchivesAction(
+  input: z.input<typeof InputSchema>
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  if (!sourceArchives || sourceArchives.length === 0) {
-    return {
-      success: false,
-      message: "処理対象のパスが指定されていません。",
-    };
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  const parsed = {
-    sourcePaths: VirtualPathManySchema.safeParse(
-      sourceArchives.map((arc) => sanitize(arc.path))
-    ),
-  };
-  if (!parsed.sourcePaths.success) {
-    return {
-      success: false,
-      message: "入力エラーがあります。",
-      errors: [
-        {
-          prop: "sourceArchives[].path",
-          issues: parsed.sourcePaths.error?.issues,
-        },
-      ],
-    };
+  const { paths } = parsed.data;
+
+  // 認証＋認可
+  const auth = await authorize("archive:extract-many");
+  if (!auth.success) {
+    return auth;
   }
 
-  const normalizedSourcePaths = parsed.sourcePaths.data;
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
-  }
-
-  // 認可
-  if (!hasPermission(user, "archive:extract")) {
-    return {
-      success: false,
-      message: "権限がありません。",
-    };
-  }
-
-  const completed: ExtractArchivesSuccess["completed"] = [];
-  const failed: ExtractArchivesSuccess["failed"] = [];
-  const skipped: ExtractArchivesSuccess["skipped"] = [];
+  const completed: Success["completed"] = [];
+  const failed: Success["failed"] = [];
+  const skipped: Success["skipped"] = [];
 
   // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を使う)
-  for (const sourcePath of normalizedSourcePaths) {
-    if (!isArchiveFile(sourcePath)) {
-      skipped.push({
-        sourcePath,
-        message: "有効なアーカイブファイルではありません。",
-      });
-      continue;
-    }
-
+  for (const sourcePath of paths) {
     // 仮想パス→物理パス
     const srcVirtualPath = sourcePath;
     const srcRealPath = getServerMediaPath(srcVirtualPath);
@@ -140,6 +110,8 @@ export async function extractArchivesAction(
 
       // 7-Zipを実行して解凍
       await extractArchive(srcRealPath, destRealPath);
+
+      completed.push({ sourcePath });
     } catch (e) {
       logger.error("action:extract-archives", e, {
         sourcePath,
@@ -161,8 +133,6 @@ export async function extractArchivesAction(
 
       failed.push({ sourcePath, message: errorMessage });
     }
-
-    completed.push({ sourcePath });
   }
 
   // キャッシュの更新
