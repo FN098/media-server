@@ -1,4 +1,4 @@
-import { createTagsAction } from "@/actions/tag/create";
+import { createManyTagsAction } from "@/actions/tag/create-many";
 import { deleteTagAction } from "@/actions/tag/delete";
 import { getTagsInfiniteAction } from "@/actions/tag/get-infinite";
 import { markTagsAsReadAction } from "@/actions/tag/mark-as-read";
@@ -51,9 +51,9 @@ export function useTagMaster() {
   // タグ作成
   const { mutate: createTags, isPending: isCreating } = useMutation({
     mutationFn: async (names: string[]) => {
-      const res = await createTagsAction({ names });
-      if (!res.success) throw new Error(res.message);
-      return res;
+      const result = await createManyTagsAction({ names });
+      if (!result.success) throw new Error(result.message);
+      return result;
     },
     onSuccess: (res) => {
       void queryClient.invalidateQueries({ queryKey: ["tags"] });

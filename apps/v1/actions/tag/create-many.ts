@@ -26,7 +26,7 @@ type ActionResult =
   | { success: false; message: string };
 
 // タグ一括作成
-export async function createTagsAction(
+export async function createManyTagsAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
@@ -45,11 +45,12 @@ export async function createTagsAction(
 
   try {
     const existingNames = await getExistingTagNames(names);
+    const existingNameSet = new Set(existingNames);
 
     // 未存在のタグのみ、カナを含めてデータ作成
     const toCreateData = await Promise.all(
       names
-        .filter((name) => !existingNames.has(name))
+        .filter((name) => !existingNameSet.has(name))
         .map(async (name) => ({
           name,
           kana: await generateKana(name),
@@ -70,15 +71,15 @@ export async function createTagsAction(
 
     return { success: true, tags };
   } catch (error) {
-    logger.error("action:create-tags", error);
+    logger.error("action:create-many-tags", error);
     return { success: false, message: "タグの一括作成に失敗しました" };
   }
 }
 
-async function getExistingTagNames(names: string[]): Promise<Set<string>> {
+async function getExistingTagNames(names: string[]): Promise<string[]> {
   const existingTags = await prisma.tag.findMany({
     where: { name: { in: names } },
   });
 
-  return new Set(existingTags.map((t) => t.name));
+  return existingTags.map((t) => t.name);
 }

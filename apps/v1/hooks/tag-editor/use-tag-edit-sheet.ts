@@ -1,5 +1,5 @@
 import { updateManyMediaTagsAction } from "@/actions/media-tag/update-many";
-import { createTagsAction } from "@/actions/tag/create";
+import { createManyTagsAction } from "@/actions/tag/create-many";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { useTagEditorHotkeys } from "@/hooks/tag-editor/use-tag-editor-hotkeys";
 import { MediaNode } from "@/lib/media/types";
@@ -133,7 +133,7 @@ export function useTagEditSheet({
       let createdOps: TagOperation[] = [];
       if (tagsToCreate.length > 0) {
         // 仮タグを DB 作成
-        const created = await createTagsAction({ names: tagsToCreate });
+        const created = await createManyTagsAction({ names: tagsToCreate });
         if (!created.success) throw new Error(created.message);
 
         // 新規タグの操作
