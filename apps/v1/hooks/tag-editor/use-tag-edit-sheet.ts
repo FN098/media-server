@@ -1,5 +1,5 @@
+import { updateManyMediaTagsAction } from "@/actions/media-tag/update-many";
 import { createTagsAction } from "@/actions/tag/create";
-import { updateManyMediaTagsAction } from "@/actions/tag/update-many";
 import { TagEditor } from "@/hooks/tag-editor/use-tag-editor";
 import { useTagEditorHotkeys } from "@/hooks/tag-editor/use-tag-editor-hotkeys";
 import { MediaNode } from "@/lib/media/types";
