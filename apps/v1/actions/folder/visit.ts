@@ -1,13 +1,15 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { updateVisitedFolder } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
-import { isBlockedVirtualPath } from "@/lib/path/protections";
-import { sanitize } from "@/lib/virtual-path/guard";
-import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
+import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import { revalidatePath } from "next/cache";
+import z from "zod";
+
+const InputSchema = z.object({
+  dirPath: EditableVirtualPathSchema,
+});
 
 type VisitFolderResult =
   | {
@@ -21,59 +23,28 @@ type VisitFolderResult =
 
 // フォルダ訪問履歴更新
 export async function visitFolderAction(
-  dirPath: string
+  input: z.input<typeof InputSchema>
 ): Promise<VisitFolderResult> {
   // 入力バリデーション＋正規化
-  if (!dirPath) {
-    return {
-      success: false,
-      message: "処理対象のパスが指定されていません。",
-    };
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  const parsed = {
-    dirPath: VirtualPathSchema.safeParse(sanitize(dirPath)),
-  };
+  const { dirPath } = parsed.data;
 
-  if (!parsed.dirPath.success) {
-    return {
-      success: false,
-      message: "入力エラーがあります。",
-      errors: [{ prop: "dirPath", issues: parsed.dirPath.error?.issues }],
-    };
+  // 認証＋認可
+  const auth = await authorize("folder:update-visited");
+  if (!auth.success) {
+    return auth;
   }
 
-  const normalizedDirPath = parsed.dirPath.data;
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
-  }
-
-  // 認可
-  if (!hasPermission(user, "folder:update-history")) {
-    return {
-      success: false,
-      message: "権限がありません。",
-    };
-  }
-
-  // フォルダ保護
-  if (isBlockedVirtualPath(normalizedDirPath)) {
-    return {
-      success: false,
-      message: "このフォルダにはアクセスできません。",
-    };
-  }
+  const { user } = auth;
 
   try {
-    await updateVisitedFolder(normalizedDirPath, user.id);
-  } catch (e) {
-    logger.error("action:update-folder-history", e);
+    await updateVisitedFolder(dirPath, user.id);
+  } catch (error) {
+    logger.error("action:update-folder-history", error);
     return {
       success: false,
       message: "訪問済みフォルダの更新に失敗しました。",

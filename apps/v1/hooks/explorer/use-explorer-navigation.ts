@@ -53,7 +53,7 @@ export function useExplorerNavigation({
   // フォルダ訪問履歴自動更新
   useEffect(() => {
     if (currentDir) {
-      void visitFolderAction(currentDir);
+      void visitFolderAction({ dirPath: currentDir });
     }
   }, [currentDir]);
 

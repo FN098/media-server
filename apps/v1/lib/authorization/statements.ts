@@ -30,7 +30,7 @@ export const statements = [
   "folder:delete-many-permanently",
   "folder:restore",
   "folder:restore-many",
-  "folder:update-history",
+  "folder:update-visited",
   "folder:list",
   "folder:list-media",
   "folder:list-subfolders",
