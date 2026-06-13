@@ -20,7 +20,6 @@ export function useTextFilePreviewDialog() {
   // ダイアログを閉じる
   const close = useCallback(() => {
     setIsOpen(false);
-    // 閉じアニメーションが終わる前に中身が消えてガタつくのを防ぐため、少し遅らせてクリアしても良い
     setTarget(null);
   }, []);
 

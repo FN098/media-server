@@ -6,9 +6,9 @@ import fs from "fs/promises";
 import iconv from "iconv-lite";
 import jschardet from "jschardet";
 
-const MAX_PREVIEW_SIZE = 100 * 1024; // 100KB
+const MAX_READ_SIZE = 100 * 1024; // 100KB
 
-type GetTextFilePreviewResult =
+type ReadAsTextResult =
   | {
       success: false;
       message: string;
@@ -16,15 +16,16 @@ type GetTextFilePreviewResult =
     }
   | {
       success: true;
+      isText: boolean;
       content: string;
       isTruncated: boolean;
       encoding: string;
     };
 
 // プレビュー取得
-export async function getTextFilePreviewAction(
+export async function readAsTextAction(
   path: string
-): Promise<GetTextFilePreviewResult> {
+): Promise<ReadAsTextResult> {
   // 入力バリデーション＋正規化
   const parsed = {
     path: VirtualPathOneSchema.safeParse(path),
@@ -47,16 +48,14 @@ export async function getTextFilePreviewAction(
       return { success: false, message: "ファイルではありません。" };
 
     // 先頭から制限サイズ分だけバッファとして読み込む
-    const readSize = Math.min(stat.size, MAX_PREVIEW_SIZE);
+    const readSize = Math.min(stat.size, MAX_READ_SIZE);
     const buffer = Buffer.alloc(readSize);
     const fd = await fs.open(realPath, "r");
     await fd.read(buffer, 0, readSize, 0);
     await fd.close();
 
     // 簡易的なバイナリチェック（ヌルバイトが含まれている場合はバイナリとみなす）
-    if (buffer.includes(0)) {
-      return { success: false, message: "バイナリファイルです。" };
-    }
+    const isProbablyBinary = buffer.includes(0);
 
     // 文字コードの判定 (jschardet)
     // 精度を上げるため、バッファ全体ではなく最初の数KB〜全体を渡す
@@ -82,19 +81,20 @@ export async function getTextFilePreviewAction(
       encoding = "UTF-8";
     }
 
-    const isTruncated = stat.size > MAX_PREVIEW_SIZE;
+    const isTruncated = stat.size > MAX_READ_SIZE;
 
     return {
       success: true,
+      isText: !isProbablyBinary,
       content,
       isTruncated,
       encoding,
     };
   } catch (e) {
-    logger.error("action:get-text-file-preview", e);
+    logger.error("action:read-as-text", e);
     return {
       success: false,
-      message: "テキストファイル読み込みに失敗しました。",
+      message: "ファイル読み込みに失敗しました。",
     };
   }
 }

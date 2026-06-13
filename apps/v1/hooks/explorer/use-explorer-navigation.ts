@@ -1,4 +1,4 @@
-import { getTextFilePreviewAction } from "@/actions/file/get-text-preview";
+import { readAsTextAction } from "@/actions/file/read-as-text";
 import { visitFolderAction } from "@/actions/folder/visit";
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
@@ -78,12 +78,14 @@ export function useExplorerNavigation({
 
   // ファイル/フォルダオープン
   const open = useCallback(
-    (node: MediaNode) => {
+    async (node: MediaNode) => {
+      // フォルダ
       if (node.isDirectory) {
         folder.navigate({ path: node.path, resetPage: true });
         return;
       }
 
+      // ファイル（動画・画像・オーディオ）
       if (isMedia(node.type)) {
         const index = getMediaIndex(node.path);
         if (index == null) return;
@@ -91,28 +93,22 @@ export function useExplorerNavigation({
         return;
       }
 
-      // テキストファイルならプレビュー表示
-      toast.promise(
-        async () => {
-          const result = await getTextFilePreviewAction(node.path);
+      // ファイル（テキスト）
+      const preview = await readAsTextAction(node.path);
+      if (!preview.success) {
+        toast.error(preview.message);
+        return;
+      } else if (preview.isText) {
+        dialogs.textFilePreviewDialog.open({
+          title: node.name,
+          content: preview.content,
+          encoding: preview.encoding,
+          isTruncated: preview.isTruncated,
+        });
+        return;
+      }
 
-          if (!result.success)
-            throw new Error("このファイル形式は対応していません");
-
-          dialogs.textFilePreviewDialog.open({
-            title: node.name,
-            content: result.content,
-            encoding: result.encoding,
-            isTruncated: result.isTruncated,
-          });
-        },
-        {
-          loading: "読み込み中...",
-          success: "読み込み完了",
-          error: (e) =>
-            (e as Error).message || "ファイルの読み込みに失敗しました",
-        }
-      );
+      toast.error("このファイル形式は対応していません");
     },
     [dialogs.textFilePreviewDialog, folder, getMediaIndex, viewer]
   );
