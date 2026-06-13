@@ -3,7 +3,7 @@ import { deleteManyFavoritesAction } from "@/actions/favorite/delete-many";
 import { revalidateFavoriteAction } from "@/actions/favorite/revalidate";
 import { revalidateManyFavoritesAction } from "@/actions/favorite/revalidate-many";
 import { updateFavoriteAction } from "@/actions/favorite/update";
-import { updateMultipleFavoritesAction } from "@/actions/favorite/update-multiple";
+import { updateManyFavoritesAction } from "@/actions/favorite/update-many";
 import { Favorite } from "@/lib/favorite/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -81,7 +81,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
         const result = await updateFavoriteAction(path, rating);
         if (!result.success) {
           // 失敗時のロールバック
-          const revalidated = await revalidateFavoriteAction(path);
+          const revalidated = await revalidateFavoriteAction({ path });
           if (revalidated.success) {
             const { favorite } = revalidated;
             setRatingMap((m) => {
@@ -122,7 +122,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
         const result = await deleteFavoriteAction({ path });
         if (!result.success) {
           // 失敗時のロールバック
-          const revalidated = await revalidateFavoriteAction(path);
+          const revalidated = await revalidateFavoriteAction({ path });
           if (revalidated.success && revalidated.favorite) {
             const { favorite } = revalidated;
             setRatingMap((m) => new Map(m).set(path, favorite.rating));
@@ -155,7 +155,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
       paths: string[];
       newRating?: number | null;
       skipIfAlreadyFavorite?: boolean;
-    }): ReturnType<typeof updateMultipleFavoritesAction> => {
+    }): ReturnType<typeof updateManyFavoritesAction> => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);
@@ -190,10 +190,10 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
       // サーバー処理開始
       try {
-        const result = await updateMultipleFavoritesAction(
-          validPaths,
-          newRating
-        );
+        const result = await updateManyFavoritesAction({
+          paths: validPaths,
+          rating: newRating,
+        });
 
         if (!result.success) {
           // 失敗時のロールバック

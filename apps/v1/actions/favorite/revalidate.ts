@@ -1,13 +1,15 @@
 "use server";
 
-import { resolveCurrentUser } from "@/lib/auth/current-user";
-import { hasPermission } from "@/lib/authorization/permission";
+import { authorize } from "@/lib/authorization/authorize";
 import { getFavorite } from "@/lib/favorite/repository";
 import { logger } from "@/lib/logger";
 import { getMediaIdByPath } from "@/lib/media/repository";
-import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
-import { isRootPath } from "@/lib/virtual-path/guard";
-import { VirtualPathOneSchema } from "@/lib/virtual-path/schemas";
+import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
+import z from "zod";
+
+const InputSchema = z.object({
+  path: EditableVirtualPathSchema,
+});
 
 type RevalidateFavoriteResult =
   | {
@@ -25,77 +27,43 @@ type RevalidateFavoriteResult =
 
 // お気に入り再検証
 export async function revalidateFavoriteAction(
-  path: string
+  input: z.input<typeof InputSchema>
 ): Promise<RevalidateFavoriteResult> {
   // 入力バリデーション＋正規化
-  const parsed = {
-    path: VirtualPathOneSchema.safeParse(path),
-  };
-  if (!parsed.path.success) {
-    return {
-      success: false,
-      message: "入力エラーがあります。",
-      errors: [{ prop: "path", issues: parsed.path.error?.issues }],
-    };
+  const parsed = InputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
   }
 
-  const normalizedPath = parsed.path.data;
+  const { path } = parsed.data;
 
-  // ルートフォルダ保護
-  if (isRootPath(normalizedPath)) {
-    return {
-      success: false,
-      message: "ルートフォルダは操作できません。",
-    };
+  // 認証＋認可
+  const auth = await authorize("favorite:revalidate");
+  if (!auth.success) {
+    return auth;
   }
 
-  // システムフォルダ保護
-  if (isSystemHiddenVirtualPath(normalizedPath)) {
-    return {
-      success: false,
-      message: "システムフォルダは操作できません。",
-    };
-  }
-
-  // 認証
-  const user = await resolveCurrentUser();
-  if (!user) {
-    return {
-      success: false,
-      message: "認証されていません。",
-    };
-  }
-  const userId = user.id;
-
-  // 認可
-  if (!hasPermission(user, "favorite:revalidate")) {
-    return {
-      success: false,
-      message: "権限がありません。",
-    };
-  }
+  const { user } = auth;
 
   // メディアID逆引き
-  const mediaId = await getMediaIdByPath(normalizedPath);
+  const mediaId = await getMediaIdByPath(path);
   if (!mediaId) return { success: false, message: "メディアが見つかりません" };
 
-  let favorite: Awaited<ReturnType<typeof getFavorite>>;
   try {
-    favorite = await getFavorite({ userId, mediaId });
+    const favorite = await getFavorite({ userId: user.id, mediaId });
+
+    // お気に入り未登録の場合は成功扱いとする
+    if (!favorite) return { success: true, favorite: null };
+
+    return {
+      success: true,
+      favorite: {
+        path: path,
+        rating: favorite.rating,
+      },
+    };
   } catch (error) {
     logger.error("action:revalidate-favorite", error);
-    return { success: false, message: "再検証に失敗しました" };
+    return { success: false, message: "お気に入り再検証に失敗しました" };
   }
-
-  // お気に入り未登録の場合は成功扱いとする
-  if (!favorite) return { success: true, favorite: null };
-
-  // クライアント側が期待する { path, rating } の形式で返す
-  return {
-    success: true,
-    favorite: {
-      path: normalizedPath,
-      rating: favorite.rating,
-    },
-  };
 }

@@ -1,7 +1,7 @@
 export const statements = [
   "archive:extract",
   "favorite:update",
-  "favorite:update-multiple",
+  "favorite:update-many",
   "favorite:delete",
   "favorite:delete-many",
   "favorite:revalidate",
