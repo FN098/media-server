@@ -38,6 +38,7 @@ export const statements = [
   "folder:create",
   "folder:update-preview",
   "thumbnail:create",
+  "thumbnail:delete-many",
   "tag:create",
   "tag:create-many",
   "tag:delete",

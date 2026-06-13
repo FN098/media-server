@@ -1,6 +1,6 @@
 "use client";
 
-import { cleanupGhostThumbnailsAction } from "@/actions/ghost-thumb/cleanup";
+import { deleteManyThumbnailsAction } from "@/actions/thumb/delete-many";
 import {
   GhostThumbItem,
   GhostThumbScanEventData,
@@ -145,8 +145,9 @@ export function GhostThumbCleanupCard() {
       const batch = items.slice(i, i + BATCH_SIZE);
 
       try {
-        const result = await cleanupGhostThumbnailsAction(batch);
-
+        const result = await deleteManyThumbnailsAction({
+          sourcePaths: batch.map((item) => item.path),
+        });
         if (result.success) {
           totalDeleted += result.deletedCount ?? 0;
         } else {
