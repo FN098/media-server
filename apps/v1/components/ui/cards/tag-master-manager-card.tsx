@@ -1,13 +1,8 @@
 "use client";
 
-import { createTagsAction } from "@/actions/tag/create";
-import { deleteTagAction } from "@/actions/tag/delete";
-import { getTagsInfiniteAction } from "@/actions/tag/get-infinite";
-import { markTagsAsReadAction } from "@/actions/tag/mark-as-read";
-import { renameTagAction } from "@/actions/tag/rename";
-import { updateTagFavoriteAction } from "@/actions/tag/update-favorite";
 import { TagMasterCardList } from "@/components/ui/cards/tag-master-manager-card/tag-master-card-list";
 import { TagMasterTable } from "@/components/ui/cards/tag-master-manager-card/tag-master-table";
+import { useTagMaster } from "@/hooks/tags/use-tag-master";
 import { TagMasterItem } from "@/lib/tag/types";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";
@@ -22,15 +17,7 @@ import { Input } from "@/shadcn/components/ui/input";
 import { Label } from "@/shadcn/components/ui/label";
 import { Switch } from "@/shadcn/components/ui/switch";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { Check, CheckCheck, Loader2, Plus, Search, Tags } from "lucide-react";
-import * as React from "react";
-import { toast } from "sonner";
-import { useDebounce } from "use-debounce";
 
 interface TagListProps {
   tags: TagMasterItem[];
@@ -41,7 +28,7 @@ interface TagListProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   isMarking: boolean;
-  onToggleFavorite: (id: string, isFavorite: boolean) => void;
+  onToggleFavorite: (current: { id: string; isFavorite: boolean }) => void;
   onStartEdit: (tag: TagMasterItem) => void;
   onSaveEdit: (id: string) => void;
   onCancelEdit: () => void;
@@ -52,135 +39,37 @@ interface TagListProps {
 }
 
 export function TagMasterManagerCard() {
-  const queryClient = useQueryClient();
-  const isMobile = useDetectMobileContext();
-  const [filter, setFilter] = React.useState("");
-  const [debouncedFilter] = useDebounce(filter, 500);
-  const [editingId, setEditingId] = React.useState<string | null>(null);
-  const [editValue, setEditValue] = React.useState({ name: "", kana: "" });
-  const [showNewOnly, setShowNewOnly] = React.useState(false);
-  const [newTagsInput, setNewTagsInput] = React.useState("");
+  const tagMaster = useTagMaster();
 
-  // タグ無限スクロール
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["tags", debouncedFilter, showNewOnly],
-      queryFn: async ({ pageParam }) => {
-        const res = await getTagsInfiniteAction({
-          cursor: pageParam,
-          query: debouncedFilter,
-          onlyNew: showNewOnly,
-        });
-        if (!res.success) throw new Error(res.message);
-        return res;
-      },
-      initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    });
-
-  const allTags = data?.pages.flatMap((page) => page.tags) ?? [];
-
-  const newTags = allTags.filter((tag) => tag.isNew);
-  const newTagIds = newTags.map((tag) => tag.id);
-  const newTagsCount = newTags.length;
-  const hasNewTags = newTagsCount > 0;
-
-  // タグ作成
-  const { mutate: createTags, isPending: isCreating } = useMutation({
-    mutationFn: async (names: string[]) => {
-      const res = await createTagsAction(names);
-      if (!res.success) throw new Error(res.message);
-      return res;
-    },
-    onSuccess: (res) => {
-      void queryClient.invalidateQueries({ queryKey: ["tags"] });
-      toast.success(`${res.tags.length} 件のタグを登録しました`);
-      setNewTagsInput("");
-    },
-    onError: (err: Error) => toast.error(err.message),
-  });
-
-  // タグお気に入りトグル
-  const { mutate: toggleFavorite } = useMutation({
-    mutationFn: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
-      updateTagFavoriteAction(id, isFavorite),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["tags"] }),
-    onError: () => toast.error("更新に失敗しました"),
-  });
-
-  // タグリネーム
-  const { mutate: renameTag, isPending: isUpdating } = useMutation({
-    mutationFn: async ({
-      id,
-      name,
-      kana,
-    }: {
-      id: string;
-      name: string;
-      kana?: string;
-    }) => {
-      const res = await renameTagAction(id, name, kana);
-      if (!res.success) throw new Error(res.message);
-      return res;
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["tags"] });
-      setEditingId(null);
-      toast.success("タグ情報を更新しました");
-    },
-    onError: (err: Error) => toast.error(err.message),
-  });
-
-  // タグ削除
-  const { mutate: performDelete, isPending: isDeleting } = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await deleteTagAction(id);
-      if (!res.success) throw new Error(res.message);
-      return res;
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["tags"] });
-      toast.success("タグを削除しました");
-    },
-    onError: (err: Error) => toast.error(err.message),
-  });
-
-  // タグ一括既読
-  const { mutate: markAsRead, isPending: isMarking } = useMutation({
-    mutationFn: async (ids: string[]) => {
-      const res = await markTagsAsReadAction(ids);
-      if (!res.success) throw new Error(res.message);
-      return res;
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["tags"] });
-      toast.success("既読にしました");
-    },
-    onError: () => toast.error("処理に失敗しました"),
-  });
-
-  // タグ作成
-  const handleCreateTags = (e: React.FormEvent) => {
-    e.preventDefault();
-    const names = newTagsInput
-      .split(/[,、\n]/)
-      .map((s) => s.trim())
-      .filter((s) => s !== "");
-    if (names.length === 0) return;
-    createTags(names);
-  };
-
-  // タグ編集開始
-  const handleStartEdit = (tag: TagMasterItem) => {
-    setEditingId(tag.id);
-    setEditValue({ name: tag.name, kana: tag.kana ?? "" });
-  };
-
-  // タグ編集保存
-  const handleSaveEdit = (id: string) => {
-    if (!editValue.name.trim()) return toast.error("名前は必須です");
-    renameTag({ id, ...editValue });
-  };
+  const {
+    filter,
+    setFilter,
+    allTags,
+    editingId,
+    editValue,
+    isUpdating,
+    isDeleting,
+    hasNextPage,
+    isFetchingNextPage,
+    isMarking,
+    newTagsInput,
+    isCreating,
+    showNewOnly,
+    setShowNewOnly,
+    hasNewTags,
+    newTagIds,
+    newTagsCount,
+    setNewTagsInput,
+    handleCreateTags,
+    deleteTag,
+    fetchNextPage,
+    markAsRead,
+    saveChanges,
+    startEdit,
+    cancelEdit,
+    setEditValue,
+    toggleTagFavorite,
+  } = tagMaster;
 
   const listProps = {
     tags: allTags,
@@ -188,19 +77,20 @@ export function TagMasterManagerCard() {
     editValue,
     isUpdating,
     isDeleting,
-    hasNextPage: hasNextPage ?? false,
+    hasNextPage,
     isFetchingNextPage,
-    isMarking: isMarking,
-    onToggleFavorite: (id: string, isFavorite: boolean) =>
-      toggleFavorite({ id, isFavorite }),
-    onStartEdit: handleStartEdit,
-    onSaveEdit: handleSaveEdit,
-    onCancelEdit: () => setEditingId(null),
+    isMarking,
+    onToggleFavorite: toggleTagFavorite,
+    onStartEdit: startEdit,
+    onSaveEdit: saveChanges,
+    onCancelEdit: cancelEdit,
     onEditValueChange: setEditValue,
-    onDelete: (id: string) => performDelete(id),
+    onDelete: (id: string) => deleteTag(id),
     onFetchNext: () => void fetchNextPage(),
     onMarkAsRead: (id: string) => markAsRead([id]),
   } satisfies TagListProps;
+
+  const isMobile = useDetectMobileContext();
 
   return (
     <Card className="shadow-md border-muted/60">

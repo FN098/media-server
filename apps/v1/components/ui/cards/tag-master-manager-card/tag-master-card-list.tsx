@@ -21,7 +21,7 @@ interface TagMasterCardListProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   isMarking: boolean;
-  onToggleFavorite: (id: string, isFavorite: boolean) => void;
+  onToggleFavorite: (current: { id: string; isFavorite: boolean }) => void;
   onStartEdit: (tag: TagMasterItem) => void;
   onSaveEdit: (id: string) => void;
   onCancelEdit: () => void;
@@ -108,7 +108,7 @@ export function TagMasterCardList({
                         ? "text-yellow-500 hover:text-yellow-300"
                         : "text-muted-foreground/30 hover:text-yellow-500"
                     )}
-                    onClick={() => onToggleFavorite(tag.id, !tag.isFavorite)}
+                    onClick={() => onToggleFavorite(tag)}
                   >
                     <Star
                       className={cn(
