@@ -42,7 +42,7 @@ const InputSchema = z
     }
   });
 
-type CopyNodesResult =
+type ActionResult =
   | {
       success: true;
       completed: { path: string }[];
@@ -55,12 +55,12 @@ type CopyNodesResult =
       errors?: { prop: string; issues?: unknown[] }[];
     };
 
-type CopyNodesSuccess = Extract<CopyNodesResult, { success: true }>;
+type Success = Extract<ActionResult, { success: true }>;
 
 // コピー
-export async function copyNodesAction(
+export async function copyManyNodesAction(
   input: z.input<typeof InputSchema>
-): Promise<CopyNodesResult> {
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
@@ -70,7 +70,7 @@ export async function copyNodesAction(
   const { sourcePaths, destDirPath } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("file:copy", "folder:copy");
+  const auth = await authorize("file:copy-many", "folder:copy-many");
   if (!auth.success) {
     return auth;
   }
@@ -93,9 +93,9 @@ export async function copyNodesAction(
     };
   }
 
-  const completed: CopyNodesSuccess["completed"] = [];
-  const failed: CopyNodesSuccess["failed"] = [];
-  const skipped: CopyNodesSuccess["skipped"] = [];
+  const completed: Success["completed"] = [];
+  const failed: Success["failed"] = [];
+  const skipped: Success["skipped"] = [];
 
   for (const srcVirtualPath of sourcePaths) {
     // 仮想パス→物理パス

@@ -1,7 +1,7 @@
 import { listRecentFoldersAction } from "@/actions/folder/list-recent";
 import { listSubFoldersAction } from "@/actions/folder/list-sub";
 import { togglePinVisitedFolderAction } from "@/actions/folder/toggle-pin-visited";
-import { copyNodesAction } from "@/actions/node/copy";
+import { copyManyNodesAction } from "@/actions/node/copy-many";
 import { dirname } from "path";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -138,7 +138,7 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
 
     setIsPending(true);
     try {
-      const result = await copyNodesAction({
+      const result = await copyManyNodesAction({
         sourcePaths: paths,
         destDirPath: currentDir,
       });
