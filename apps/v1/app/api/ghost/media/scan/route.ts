@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 import z from "zod";
 
 const InputSchema = z.object({
-  isFullScan: z.boolean(),
+  full: z.boolean(),
 });
 
 // ゴーストメディア（DB 上にのみ存在し、FS 上に存在しないファイル）をスキャンする
@@ -14,7 +14,7 @@ export function GET(req: NextRequest) {
   // 入力バリデーション
   const { searchParams } = req.nextUrl;
   const parsed = InputSchema.safeParse({
-    isFullScan: searchParams.get("full") === "true",
+    full: searchParams.get("full") === "true",
   });
 
   if (!parsed.success) {
@@ -24,7 +24,7 @@ export function GET(req: NextRequest) {
     });
   }
 
-  const { isFullScan } = parsed.data;
+  const { full: isFullScan } = parsed.data;
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
