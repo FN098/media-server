@@ -1,4 +1,4 @@
-import { readAsTextAction } from "@/actions/file/read-as-text";
+import { readFileAsTextAction } from "@/actions/file/read-as-text";
 import { visitFolderAction } from "@/actions/folder/visit";
 import { ExplorerDialogs } from "@/hooks/explorer/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/hooks/explorer/use-explorer-filtering";
@@ -101,17 +101,17 @@ export function useExplorerNavigation({
       }
 
       // ファイル（テキスト）
-      const preview = await readAsTextAction({ path: node.path });
-      if (!preview.success) {
-        toast.error(preview.message);
+      const text = await readFileAsTextAction({ path: node.path });
+      if (!text.success) {
+        toast.error(text.message);
         return;
       }
 
       dialogs.textFilePreviewDialog.open({
         title: node.name,
-        content: preview.content,
-        encoding: preview.encoding,
-        isTruncated: preview.isTruncated,
+        content: text.content,
+        encoding: text.encoding,
+        isTruncated: text.isTruncated,
       });
     },
     [

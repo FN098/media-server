@@ -29,7 +29,7 @@ type ActionResult =
     };
 
 // テキストデータ取得
-export async function readAsTextAction(
+export async function readFileAsTextAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
