@@ -1,6 +1,6 @@
 "use server";
 
-import { DeleteNodesSuccess } from "@/actions/node/delete";
+import { DeleteNodesSuccess } from "@/actions/node/delete-many";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
@@ -26,7 +26,6 @@ export type ActionResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 // 完全に削除
