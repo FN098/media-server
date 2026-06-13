@@ -15,7 +15,7 @@ type ActionResult =
   | { success: false; message: string };
 
 // タグお気に入り更新
-export async function updateTagFavoriteAction(
+export async function updateManyUserTagFavoriteAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
@@ -27,7 +27,11 @@ export async function updateTagFavoriteAction(
   const { id, isFavorite } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("tag:update-favorite");
+  const auth = await authorize(
+    "user-tag-favorite:create-many",
+    "user-tag-favorite:update-many",
+    "user-tag-favorite:delete-many"
+  );
   if (!auth.success) {
     return auth;
   }
@@ -65,7 +69,7 @@ export async function updateTagFavoriteAction(
     // フロントエンドとの互換性のために、現在の状態を返す
     return { success: true, isFavorite };
   } catch (error) {
-    logger.error("action:update-tag-favorite", error);
+    logger.error("action:update-many-user-tag-favorite", error);
     return { success: false, message: "タグのお気に入り更新に失敗しました。" };
   }
 }

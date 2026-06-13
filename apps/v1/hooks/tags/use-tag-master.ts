@@ -3,7 +3,7 @@ import { deleteTagAction } from "@/actions/tag/delete";
 import { getTagsInfiniteAction } from "@/actions/tag/get-infinite";
 import { markTagsAsReadAction } from "@/actions/tag/mark-as-read";
 import { renameTagAction } from "@/actions/tag/rename";
-import { updateTagFavoriteAction } from "@/actions/tag/update-favorite";
+import { updateManyUserTagFavoriteAction } from "@/actions/user-tag-favorite/update-many";
 import { TagMasterItem } from "@/lib/tag/types";
 import {
   useInfiniteQuery,
@@ -76,12 +76,12 @@ export function useTagMaster() {
   // タグお気に入りトグル
   const { mutate: toggleTagFavorite } = useMutation({
     mutationFn: async (current: { id: string; isFavorite: boolean }) => {
-      const res = await updateTagFavoriteAction({
+      const result = await updateManyUserTagFavoriteAction({
         ...current,
         isFavorite: !current.isFavorite,
       });
-      if (!res.success) throw new Error(res.message);
-      return res;
+      if (!result.success) throw new Error(result.message);
+      return result;
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["tags"] }),
     onError: () => toast.error("更新に失敗しました"),
