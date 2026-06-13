@@ -1,7 +1,7 @@
 import { listRecentFoldersAction } from "@/actions/folder/list-recent";
 import { listSubFoldersAction } from "@/actions/folder/list-sub";
 import { togglePinVisitedFolderAction } from "@/actions/folder/toggle-pin-visited";
-import { moveManyNodesAction } from "@/actions/node/move";
+import { moveManyNodesAction } from "@/actions/node/move-many";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { dirname } from "path";
 import { useCallback, useState } from "react";
