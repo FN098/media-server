@@ -16,7 +16,7 @@ import { Readable } from "stream";
 import z from "zod";
 
 const InputSchema = z.object({
-  file: FileNameSchema.refine((name) => !name.includes("/"), {
+  fileName: FileNameSchema.refine((name) => !name.includes("/"), {
     message: "Path separators are not allowed",
   })
     .refine((name) => !name.includes(".."), {
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
   // 入力バリデーション＋正規化
   const { searchParams } = req.nextUrl;
   const parsed = InputSchema.safeParse({
-    file: searchParams.get("file"),
+    fileName: searchParams.get("file"),
   });
 
   if (!parsed.success) {
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const { file: fileName } = parsed.data;
+  const { fileName } = parsed.data;
 
   // 認証＋認可
   const auth = await authorize("db-backup:download");
