@@ -74,8 +74,11 @@ export function useTrashThumbs({
 
 const updateThumb = async (node: MediaNode) => {
   // サムネイル再生成ジョブ投入
-  const enqueResult = await enqueueCreateSingleThumbJobAction(node.path, {
-    force: true,
+  const enqueResult = await enqueueCreateSingleThumbJobAction({
+    filePath: node.path,
+    options: {
+      force: true,
+    },
   });
   if (!enqueResult.success) {
     toast.error(enqueResult.message);

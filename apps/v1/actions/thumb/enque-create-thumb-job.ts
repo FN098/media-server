@@ -29,27 +29,26 @@ type ActionResult = { success: true } | { success: false; message: string };
 
 // サムネ生成ジョブ登録（ファイル単位）
 export async function enqueueCreateSingleThumbJobAction(
-  filePath: string,
-  options?: {
-    force?: boolean;
-  }
+  input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse({ filePath, options });
+  const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.message };
   }
 
-  const normalizedPath = parsed.data.filePath;
-  const forceCreate = parsed.data.options.force;
+  const {
+    filePath,
+    options: { force: forceCreate },
+  } = parsed.data;
 
   // ルートフォルダ保護
-  if (isRootPath(normalizedPath)) {
+  if (isRootPath(filePath)) {
     return { success: false, message: "ルートフォルダは操作できません。" };
   }
 
   // システムフォルダ保護
-  if (isSystemHiddenVirtualPath(normalizedPath)) {
+  if (isSystemHiddenVirtualPath(filePath)) {
     return { success: false, message: "システムフォルダは操作できません。" };
   }
 
@@ -65,7 +64,7 @@ export async function enqueueCreateSingleThumbJobAction(
   }
 
   try {
-    const lockKey = `thumb-lock:file:${sha1Hash(normalizedPath)}`;
+    const lockKey = `thumb-lock:file:${sha1Hash(filePath)}`;
     const isLocked = await acquireLock(lockKey);
 
     if (!isLocked) {
@@ -76,7 +75,7 @@ export async function enqueueCreateSingleThumbJobAction(
       "create-thumb-single",
       {
         type: "file",
-        path: normalizedPath,
+        path: filePath,
         createdAt: Date.now(),
         lockKey,
         forceCreate: forceCreate,
