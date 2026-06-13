@@ -1,6 +1,6 @@
 "use client";
 
-import { useDetectMobile } from "@/hooks/general/use-mobile";
+import { useDetectMobile } from "@/hooks/mobile/use-mobile";
 import { createContext, ReactNode, useContext } from "react";
 
 const DetectMobileContext = createContext<
