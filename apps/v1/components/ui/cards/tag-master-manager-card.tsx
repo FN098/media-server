@@ -136,7 +136,7 @@ export function TagMasterManagerCard() {
   const { mutate: performDelete, isPending: isDeleting } = useMutation({
     mutationFn: async (id: string) => {
       const res = await deleteTagAction(id);
-      if (!res.success) throw new Error(res.error);
+      if (!res.success) throw new Error(res.message);
       return res;
     },
     onSuccess: () => {

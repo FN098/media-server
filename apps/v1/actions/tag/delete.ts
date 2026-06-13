@@ -1,26 +1,51 @@
 "use server";
 
+import { Tag } from "@/generated/prisma/client";
+import { resolveCurrentUser } from "@/lib/auth/current-user";
+import { hasPermission } from "@/lib/authorization/permission";
 import { prisma } from "@/lib/prisma";
+import { logger } from "better-auth";
+import z from "zod";
+
+const InputSchema = z.object({
+  id: z.uuid(),
+});
+
+type ActionResult =
+  | { success: true; tag: Tag }
+  | { success: false; message: string };
 
 // タグ削除
-export async function deleteTagAction(id: string) {
+export async function deleteTagAction(id: string): Promise<ActionResult> {
+  // 入力バリデーション＋正規化
+  const parsed = InputSchema.safeParse({ id });
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
+  }
+
+  const normalizedId = parsed.data.id;
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return { success: false, message: "認証されていません。" };
+  }
+
+  // 認可
+  if (!hasPermission(user, "tag:delete")) {
+    return { success: false, message: "権限がありません。" };
+  }
+
   try {
     const tag = await prisma.tag.delete({
       where: {
-        id,
+        id: normalizedId,
       },
     });
 
-    return {
-      success: true,
-      tag,
-      message: `タグ「${tag.name}」を削除しました。`,
-    };
+    return { success: true, tag };
   } catch (error) {
-    console.error("Delete Tag Error:", error);
-    return {
-      success: false,
-      error: "タグの削除に失敗しました。既に削除されている可能性があります。",
-    };
+    logger.error("action:delete-tag", error);
+    return { success: false, message: "タグの削除に失敗しました。" };
   }
 }
