@@ -22,7 +22,6 @@ type RevalidateFavoriteResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 // お気に入り再検証

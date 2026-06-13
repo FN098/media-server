@@ -26,7 +26,6 @@ type ActionResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 // サブフォルダ一覧

@@ -26,7 +26,6 @@ type ActionResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 // 一括お気に入り再検証

@@ -19,7 +19,6 @@ type ActionResult =
   | {
       success: false;
       message: string;
-      errors?: { prop: string; issues?: unknown[] }[];
     };
 
 // フォルダ訪問履歴ピン留めトグル
