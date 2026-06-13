@@ -1,31 +1,72 @@
 "use server";
 
+import { Tag } from "@/generated/prisma/client";
+import { resolveCurrentUser } from "@/lib/auth/current-user";
+import { hasPermission } from "@/lib/authorization/permission";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
 import { generateKana } from "@/lib/utils/kana";
+import z from "zod";
+
+const InputSchema = z
+  .object({
+    id: z.uuid(),
+    newName: z.string(),
+    newKana: z.string().optional(),
+  })
+  .transform(async ({ id, newName, newKana }) => {
+    const normalizedName = normalizeTagName(newName);
+
+    return {
+      id,
+      newName: normalizedName,
+      newKana: newKana ?? (await generateKana(normalizedName)),
+    };
+  });
+
+type ActionResult =
+  | { success: true; tag: Tag }
+  | { success: false; message: string };
 
 // タグリネーム
 export async function renameTagAction(
   id: string,
   newName: string,
   newKana?: string
-) {
+): Promise<ActionResult> {
+  // 入力バリデーション＋正規化
+  const parsed = InputSchema.safeParse({ id, newName, newKana });
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.message };
+  }
+
+  const normalizedId = parsed.data.id;
+  const normalizedNewName = parsed.data.newName;
+  const normalizedNewKana = parsed.data.newKana;
+
+  // 認証
+  const user = await resolveCurrentUser();
+  if (!user) {
+    return { success: false, message: "認証されていません。" };
+  }
+
+  // 認可
+  if (!hasPermission(user, "tag:rename")) {
+    return { success: false, message: "権限がありません。" };
+  }
+
   try {
-    const normalizedName = normalizeTagName(newName);
-    if (!normalizedName) throw new Error("Invalid name");
-
-    const kana = newKana || (await generateKana(normalizedName));
-
     const tag = await prisma.tag.update({
-      where: { id },
+      where: { id: normalizedId },
       data: {
-        name: normalizedName,
-        kana, // 名前が変わったら読みも更新
+        name: normalizedNewName,
+        kana: normalizedNewKana,
       },
     });
     return { success: true, tag };
   } catch (error) {
-    console.error("Rename Tag Error:", error);
-    return { success: false, error: "タグの名前変更に失敗しました。" };
+    logger.error("action:rename-tag", error);
+    return { success: false, message: "タグのリネームに失敗しました。" };
   }
 }

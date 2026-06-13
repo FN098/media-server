@@ -120,7 +120,7 @@ export function TagMasterManagerCard() {
       kana?: string;
     }) => {
       const res = await renameTagAction(id, name, kana);
-      if (!res.success) throw new Error(res.error);
+      if (!res.success) throw new Error(res.message);
       return res;
     },
     onSuccess: () => {
