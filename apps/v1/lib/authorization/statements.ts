@@ -23,6 +23,7 @@ export const statements = [
   "folder:create",
   "thumbnail:create",
   "tag:create",
+  "tag:delete",
   "db-backup:dump",
   "db-backup:restore",
   "db-backup:list",

@@ -45,42 +45,46 @@ export function UnusedTagsCleanupCard() {
   const [tags, setTags] = useState<UnusedTagItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // スキャン処理
+  // スキャン
   const handleScan = useCallback(async () => {
     setIsPending(true);
-    const result = await scanUnusedTagsAction();
-    setIsPending(false);
-
-    if (result.success && result.tags) {
-      setTags(result.tags);
-      // デフォルトで全選択
-      setSelectedIds(new Set(result.tags.map((t) => t.id)));
-      setHasScanned(true);
-    } else {
-      toast.error(result.error || "スキャン中にエラーが発生しました");
+    try {
+      const result = await scanUnusedTagsAction();
+      if (result.success && result.tags) {
+        setTags(result.tags);
+        // デフォルトで全選択
+        setSelectedIds(new Set(result.tags.map((t) => t.id)));
+        setHasScanned(true);
+      } else {
+        toast.error(result.error || "スキャン中にエラーが発生しました");
+      }
+    } finally {
+      setIsPending(false);
     }
   }, []);
 
-  // 削除処理
+  // 削除
   const handleDelete = useCallback(async () => {
     if (selectedIds.size === 0) return;
     const ids = Array.from(selectedIds);
 
     setIsPending(true);
-    const result = await deleteMultipleTagsAction(ids);
-    setIsPending(false);
-
-    if (result.success) {
-      toast.success(`完了: ${result.deletedCount} 件のタグを削除しました。`);
-      setTags([]);
-      setSelectedIds(new Set());
-      setHasScanned(false);
-    } else {
-      toast.error(result.error || "削除中にエラーが発生しました");
+    try {
+      const result = await deleteMultipleTagsAction(ids);
+      if (result.success) {
+        toast.success(`完了: ${result.deletedCount} 件のタグを削除しました。`);
+        setTags([]);
+        setSelectedIds(new Set());
+        setHasScanned(false);
+      } else {
+        toast.error(result.message);
+      }
+    } finally {
+      setIsPending(false);
     }
   }, [selectedIds]);
 
-  // 選択制御
+  // 全選択/解除
   const toggleSelectAll = () => {
     if (selectedIds.size === tags.length) {
       setSelectedIds(new Set());
@@ -89,6 +93,7 @@ export function UnusedTagsCleanupCard() {
     }
   };
 
+  // 選択/解除
   const toggleSelect = (id: string) => {
     const newSet = new Set(selectedIds);
     if (newSet.has(id)) newSet.delete(id);
