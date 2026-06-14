@@ -145,6 +145,7 @@ function StarField({ h, s }: { h: number; s: number }) {
 }
 
 // --- メインコンポーネント ---
+// NOTE: かなり重たい。性能の低い端末だとUXが悪化する恐れあり。バッテリーも消耗しそう
 export function GalaxyBackground({ accent, className }: GalaxyBackgroundProps) {
   const { h, s } = accentPalette[accent];
 
