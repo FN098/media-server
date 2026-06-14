@@ -24,9 +24,8 @@ export function useMediaNodeViewItem({
   onSelectionChange,
   onOpen,
 }: UseMediaNodeViewItemProps) {
-  const isMobile = useDetectMobileContext();
-
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
+  const isMobile = useDetectMobileContext();
 
   const { getFavorite, toggleFavorite, updateFavorite } =
     useFavoritesControlContext();

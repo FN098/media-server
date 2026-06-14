@@ -29,8 +29,6 @@ import {
 } from "@/providers/media-node-view-item-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
-import { usePagingContext } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
@@ -46,11 +44,8 @@ const GRID_TEMPLATE = cn(
 );
 
 export function PagingListView() {
-  const pagingView = useMediaNodePagingViewContext();
-  const paging = usePagingContext();
-  const selection = usePathSelectionContext();
-
-  const { allNodes, onOpen, onSelectionChange, onMoveNode } = pagingView;
+  const { allNodes, onOpen, onSelectionChange, onMoveNode } =
+    useMediaNodePagingViewContext();
 
   const {
     containerRef,
@@ -62,7 +57,7 @@ export function PagingListView() {
     pageSize,
     handlePageChange,
     handleKeyDown,
-  } = usePagingGridView({ pagingView, paging, selection });
+  } = usePagingGridView();
 
   return (
     <MediaNodeDndProvider onDragEnd={onMoveNode}>
@@ -155,6 +150,7 @@ function DataRow() {
     useMediaNodeDndItem({ node });
 
   const isMobile = useDetectMobileContext();
+
   const { locale } = useLocaleContext();
 
   return (

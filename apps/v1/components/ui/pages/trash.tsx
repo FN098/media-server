@@ -9,6 +9,7 @@ import { TrashToolbar } from "@/components/ui/toolbars/trash-toolbar";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
+import { MediaNodePagingViewProvider } from "@/providers/media-node-paging-view-provider";
 import { MediaViewerProvider } from "@/providers/media-viewer-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
@@ -64,27 +65,18 @@ function TrashListingView() {
   const { viewMode, filtering, history, navigation, thumbs } =
     useTrashContext();
 
-  if (viewMode.value === "grid") {
-    return (
-      <PagingGridView
-        allNodes={filtering.filteredNodes}
-        initialScrollPath={history.last?.path}
-        onScrollRestored={navigation.onScrollRestored}
-        onThumbError={(node) => void thumbs.update(node)}
-        onOpen={navigation.open}
-        focusOnPageChange
-      />
-    );
-  }
-
   return (
-    <PagingListView
+    <MediaNodePagingViewProvider
       allNodes={filtering.filteredNodes}
       initialScrollPath={history.last?.path}
       onScrollRestored={navigation.onScrollRestored}
-      onOpen={navigation.open}
+      onThumbError={(node) => void thumbs.update(node)}
+      onOpen={(node) => void navigation.open(node)}
       focusOnPageChange
-    />
+    >
+      {viewMode.value === "grid" && <PagingGridView />}
+      {viewMode.value === "list" && <PagingListView />}
+    </MediaNodePagingViewProvider>
   );
 }
 
