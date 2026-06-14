@@ -34,7 +34,6 @@ interface CopyDialogProps {
 export function CopyDialog({ dialog }: CopyDialogProps) {
   const {
     isOpen,
-    initialDir,
     currentDir,
     dirs,
     recentDirs,
@@ -219,7 +218,7 @@ export function CopyDialog({ dialog }: CopyDialogProps) {
           </Button>
           <Button
             onClick={() => void performCopy()}
-            disabled={isLoading || isPending || currentDir === initialDir}
+            disabled={isLoading || isPending}
           >
             {isPending ? (
               "コピー中..."
