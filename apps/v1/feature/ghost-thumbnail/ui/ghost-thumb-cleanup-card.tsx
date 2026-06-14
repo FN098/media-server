@@ -60,6 +60,7 @@ export function GhostThumbCleanupCard() {
     setFoundCount(0);
     setProgress({ current: 0, total: 0 });
     setEta(null);
+    setElapsedDisplay(0);
     setIsScanning(true);
     startTimeRef.current = Date.now();
 
