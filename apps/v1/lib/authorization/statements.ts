@@ -42,6 +42,7 @@ export const statements = [
   "folder:update-preview",
   "thumbnail:create",
   "thumbnail:delete-many",
+  "thumbnail:subscribe-events",
   "tag:create",
   "tag:create-many",
   "tag:delete",
