@@ -21,6 +21,7 @@ export const statements = [
   "file:update-preview",
   "file:touch-timestamp",
   "file:read-as-text",
+  "file:download",
   "folder:rename",
   "folder:move",
   "folder:move-many",

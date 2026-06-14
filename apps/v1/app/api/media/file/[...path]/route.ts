@@ -1,40 +1,76 @@
+import { authorize } from "@/lib/authorization/authorize";
+import { logger } from "@/lib/logger";
 import { getMimetype } from "@/lib/media/mimetype";
 import { getServerMediaPath } from "@/lib/path/helpers";
-import { isErrnoException } from "@/lib/utils/error";
-import fsSync from "fs";
-import fs from "fs/promises";
-import { NextRequest, NextResponse } from "next/server";
+import {
+  badRequestResponse,
+  forbiddenResponse,
+  internalServerErrorResponse,
+  notFoundResponse,
+} from "@/lib/response/errors";
+import { getPathInfo } from "@/lib/utils/fs";
+import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
+import { createReadStream } from "fs";
 import { Readable } from "stream";
+import z from "zod";
 
-// TODO: try-catch の範囲を狭くする、response/errors を使う
+const InputSchema = z.object({
+  path: VirtualPathSchema,
+});
 
 // パスパラメータで指定された仮想パスから実際のファイルデータを取得して返す
 export async function GET(
-  req: NextRequest,
+  req: Request,
   context: { params: Promise<{ path: string[] }> }
 ) {
-  try {
-    const { path: p } = await context.params;
-    const rel = p.join("/");
-    const filePath = getServerMediaPath(rel);
+  // 入力バリデーション＋正規化
+  const { path: pathRaw } = await context.params;
+  const parsed = InputSchema.safeParse({
+    path: pathRaw.join("/"),
+  });
 
-    let stat;
-    try {
-      stat = await fs.stat(filePath);
-    } catch (e: unknown) {
-      if (isErrnoException(e) && e.code === "ENOENT") {
-        return new NextResponse("File not found", { status: 404 });
-      }
-      throw e;
+  if (!parsed.success) {
+    return badRequestResponse({
+      code: "INVALID_REQUEST",
+      message: parsed.error.message,
+    });
+  }
+
+  const { path } = parsed.data;
+
+  // 認証＋認可
+  const auth = await authorize("file:download");
+  if (!auth.success) {
+    return auth;
+  }
+
+  // 仮想パス→物理パス
+  const filePath = getServerMediaPath(path);
+
+  const fileInfo = await getPathInfo(filePath);
+  if (!fileInfo.exists) {
+    if (fileInfo.error === "not-found") {
+      return notFoundResponse();
+    } else {
+      return forbiddenResponse();
     }
-    const fileSize = stat.size;
+  }
+  if (fileInfo.isDirectory) {
+    return badRequestResponse({
+      code: "INVALID_REQUEST",
+      message: "not file",
+    });
+  }
 
+  const fileSize = fileInfo.size;
+
+  try {
     // ---- Range リクエスト ----
     const range = req.headers.get("Range");
     if (range) {
       const match = range.match(/bytes=(\d*)-(\d*)/);
       if (!match) {
-        return new NextResponse("Invalid Range", { status: 416 });
+        return new Response("Invalid Range", { status: 416 });
       }
 
       const truncate = (n: number) => Math.max(0, Math.min(n, fileSize - 1));
@@ -42,12 +78,12 @@ export async function GET(
       const end = match[2] ? truncate(Number(match[2])) : fileSize - 1;
 
       if (start >= fileSize || start > end) {
-        return new NextResponse("Range Not Satisfiable", { status: 416 });
+        return new Response("Range Not Satisfiable", { status: 416 });
       }
 
       const chunkSize = end - start + 1;
 
-      const fileStream = fsSync.createReadStream(filePath, {
+      const fileStream = createReadStream(filePath, {
         start,
         end,
       });
@@ -67,7 +103,7 @@ export async function GET(
         console.error("stream error", err);
       });
 
-      return new NextResponse(webStream as ReadableStream, {
+      return new Response(webStream as ReadableStream, {
         status: 206,
         headers: {
           "Content-Range": `bytes ${start}-${end}/${fileSize}`,
@@ -79,7 +115,7 @@ export async function GET(
     }
 
     // ---- 通常リクエスト ----
-    const fileStream = fsSync.createReadStream(filePath);
+    const fileStream = createReadStream(filePath);
     const webStream = Readable.toWeb(fileStream);
 
     // ファイルロックが解除されない問題の対策
@@ -92,18 +128,19 @@ export async function GET(
       },
       { once: true }
     );
+
     fileStream.on("error", (err) => {
       console.error("stream error", err);
     });
 
-    return new NextResponse(webStream as ReadableStream, {
+    return new Response(webStream as ReadableStream, {
       headers: {
         "Content-Length": fileSize.toString(),
         "Content-Type": getMimetype(filePath),
       },
     });
-  } catch (e) {
-    console.error(e);
-    return new NextResponse("Internal Server Error", { status: 500 });
+  } catch (error) {
+    logger.error("api:download-file", error);
+    return internalServerErrorResponse();
   }
 }

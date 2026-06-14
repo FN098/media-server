@@ -11,7 +11,7 @@ type AuthorizeResult =
   | {
       success: false;
       message: string;
-      code: "unauthorized" | "forbidden";
+      reason: "unauthorized" | "forbidden";
     };
 
 export async function authorize(
@@ -23,12 +23,16 @@ export async function authorize(
     return {
       success: false,
       message: "認証されていません。",
-      code: "unauthorized",
+      reason: "unauthorized",
     };
   }
 
   if (!hasPermissions(user, statements)) {
-    return { success: false, message: "権限がありません。", code: "forbidden" };
+    return {
+      success: false,
+      message: "権限がありません。",
+      reason: "forbidden",
+    };
   }
 
   return { success: true, user };
