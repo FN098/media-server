@@ -13,6 +13,7 @@ import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
+import { usePercent } from "@/hooks/general/use-percent";
 import { useGridCell } from "@/hooks/view/use-grid-cell";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
@@ -29,7 +30,6 @@ import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
-import { useMemo } from "react";
 import { createPortal } from "react-dom";
 
 // スマホ: Checkbox, Name, Rating, Actions
@@ -173,10 +173,10 @@ function DataRow(props: DataRowProps) {
     useMediaNodeDndItem({ node });
 
   // 占有率計算
-  const occupancyPercent = useMemo(() => {
-    if (!node.size || totalSize === 0) return 0;
-    return (node.size / totalSize) * 100;
-  }, [node.size, totalSize]);
+  const occupancyPercent = usePercent({
+    value: node.size ?? 0,
+    total: totalSize,
+  });
 
   const title = node.title ?? node.name;
 
