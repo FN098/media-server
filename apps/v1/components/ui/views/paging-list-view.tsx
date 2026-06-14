@@ -14,7 +14,6 @@ import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
-import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
 import { getExtension } from "@/lib/utils/filename";
 import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
@@ -128,8 +127,6 @@ function DataRow() {
     node,
     globalIndex,
     isMediaNode,
-    isFavorite,
-    rating,
     isSelected,
     dropdownMenuOpen,
     contextMenuOpen,
@@ -139,9 +136,7 @@ function DataRow() {
     handleClick,
     handleDoubleClick,
     handleContextMenu,
-    toggleFavorite,
     toggleSelection,
-    updateFavorite,
     occupancyPercent,
     title,
   } = useMediaNodeViewItemContext();
@@ -258,15 +253,7 @@ function DataRow() {
             className="flex justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <RatingCell
-              node={node}
-              rating={rating}
-              isFavorite={isFavorite}
-              toggleFavorite={toggleFavorite}
-              updateFavorite={(path, rating) =>
-                void updateFavorite(path, rating)
-              }
-            />
+            <RatingCell />
           </div>
 
           {/* Actions */}
@@ -305,21 +292,10 @@ function DragMediaNodeListOverlay() {
   );
 }
 
-interface RatingCellProps {
-  node: MediaNode;
-  rating: number | null;
-  isFavorite: boolean;
-  toggleFavorite: () => void;
-  updateFavorite: (path: string, rating: number | null) => void;
-}
+function RatingCell() {
+  const { node, isFavorite, rating, toggleFavorite, updateFavorite } =
+    useMediaNodeViewItemContext();
 
-function RatingCell({
-  node,
-  rating,
-  isFavorite,
-  toggleFavorite,
-  updateFavorite,
-}: RatingCellProps) {
   if (node.isDirectory) {
     return (
       <>
@@ -339,7 +315,7 @@ function RatingCell({
     <>
       <FavoriteRatingInput
         value={rating}
-        onChange={(rating) => updateFavorite(node.path, rating)}
+        onChange={(rating) => void updateFavorite(node.path, rating)}
         className="hidden md:flex"
       />
       <FavoriteButton
