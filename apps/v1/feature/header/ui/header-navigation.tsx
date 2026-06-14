@@ -1,8 +1,8 @@
 "use client";
 
+import { useBreadcrumbs } from "@/feature/header/hooks/use-breadcrumbs";
+import { DynamicBreadcrumbs } from "@/feature/header/ui/dynamic-breadcrumbs";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
-import { useBreadcrumbs } from "@/feature/navigation/hooks/use-breadcrumbs";
-import { DynamicBreadcrumbs } from "@/feature/navigation/ui/dynamic-breadcrumbs";
 import { ClickToCopy } from "@/feature/text/ui/click-to-copy";
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";

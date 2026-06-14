@@ -1,8 +1,8 @@
 import { APP_CONFIG } from "@/app.config";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
-import { Trash } from "@/feature/page/trash";
-import { TrashProvider } from "@/feature/page/trash/providers/trash-provider";
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
+import { Trash } from "@/feature/trash";
+import { TrashProvider } from "@/feature/trash/providers/trash-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFolderVisitedInfo } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/formatters";

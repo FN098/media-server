@@ -1,5 +1,5 @@
-import { AnimatedCheckCircle } from "@/feature/general/ui/animated-check-circle";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
+import { AnimatedCheckCircle } from "@/feature/selection/ui/animated-check-circle";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
