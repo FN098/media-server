@@ -6,9 +6,6 @@ import {
   internalServerErrorResponse,
 } from "@/lib/response/errors";
 
-// TODO: イベントチャンネルにユーザーIDを追加して識別、ユーザー認証追加、duplicate をやめる
-// ユーザーは一人なので現状でも問題はないが、数万ユーザーが使うようなシステムでも耐えられるように設計する
-
 // サムネイルイベント購読
 export async function GET(req: Request) {
   // 認証＋認可
