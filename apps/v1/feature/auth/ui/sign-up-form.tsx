@@ -11,11 +11,11 @@ import { Label } from "@/shadcn/components/ui/label";
 import { Spinner } from "@/shadcn/components/ui/spinner";
 import { cn } from "@/shadcn/lib/utils";
 
-interface SignUpProps {
+interface SignUpFormProps {
   hasAdmin: boolean;
 }
 
-export function SignUp({ hasAdmin }: SignUpProps) {
+export function SignUpForm({ hasAdmin }: SignUpFormProps) {
   const [state, action, isPending] = useActionState(signUpAction, undefined);
   const [showPassword, setShowPassword] = useState(false);
 

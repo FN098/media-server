@@ -12,11 +12,11 @@ import { Label } from "@/shadcn/components/ui/label";
 import { Spinner } from "@/shadcn/components/ui/spinner";
 import { cn } from "@/shadcn/lib/utils";
 
-interface SignInProps {
+interface SignInFormProps {
   redirectTo?: string;
 }
 
-export function SignIn({ redirectTo = "/" }: SignInProps) {
+export function SignInForm({ redirectTo = "/" }: SignInFormProps) {
   const [state, action, isPending] = useActionState(signInAction, undefined);
   const [showPassword, setShowPassword] = useState(false);
 

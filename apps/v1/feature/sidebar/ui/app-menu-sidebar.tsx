@@ -1,6 +1,6 @@
 "use client";
 
-import { signOutAction } from "@/feature/auth/actions/sign-out";
+import { SignOutButton } from "@/feature/auth/ui/sign-out-button";
 import { ThemeSelect } from "@/feature/theme/ui/theme-select";
 import { resolvePageMetas } from "@/lib/page-meta/resolvers";
 import { Button } from "@/shadcn/components/ui/button";
@@ -18,7 +18,7 @@ import {
   useSidebar,
 } from "@/shadcn/components/ui/sidebar";
 import { cn } from "@/shadcn/lib/utils";
-import { LogOutIcon, LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";
+import { LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback } from "react";
 
@@ -89,16 +89,7 @@ export function AppMenuSidebar() {
       {/* フッター */}
       <SidebarFooter className="border-t border-zinc-200 dark:border-white/[0.06] px-4 py-4 space-y-3">
         <ThemeSelect />
-
-        <form action={signOutAction}>
-          <button
-            type="submit"
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400 transition-colors"
-          >
-            <LogOutIcon className="h-4 w-4 shrink-0" aria-hidden />
-            <span>Sign out</span>
-          </button>
-        </form>
+        <SignOutButton />
       </SidebarFooter>
     </Sidebar>
   );

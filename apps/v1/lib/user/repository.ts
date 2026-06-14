@@ -12,3 +12,12 @@ export async function findUserByIdOrThrow(id: string): Promise<User> {
     where: { id },
   });
 }
+
+export async function existsAdminUser() {
+  const admin = await prisma.user.findFirst({
+    where: { role: "admin" },
+    select: { id: true },
+  });
+
+  return !!admin;
+}

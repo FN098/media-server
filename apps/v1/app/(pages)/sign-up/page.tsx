@@ -1,17 +1,14 @@
-import { SignUp } from "@/feature/page/sign-up";
-import { db } from "@/lib/prisma";
+import { SignUpForm } from "@/feature/auth/ui/sign-up-form";
+import { existsAdminUser } from "@/lib/user/repository";
 
 export const dynamic = "force-dynamic";
 
 export default async function SignUpPage() {
-  const admin = await db.user.findFirst({
-    where: { role: "admin" },
-    select: { id: true },
-  });
+  const hasAdmin = await existsAdminUser();
 
   return (
     <div className="flex items-center justify-center w-full min-h-full">
-      <SignUp hasAdmin={!!admin} />
+      <SignUpForm hasAdmin={hasAdmin} />
     </div>
   );
 }
