@@ -1,9 +1,9 @@
 "use server";
 
-import { Tag } from "@/generated/prisma/client";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { Tag } from "@/lib/tag/types";
 import z from "zod";
 
 const InputSchema = z.object({

@@ -1,10 +1,10 @@
 "use server";
 
-import { Tag } from "@/generated/prisma/client";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { normalizeTagName } from "@/lib/tag/normalize";
+import { Tag } from "@/lib/tag/types";
 import { generateKana } from "@/lib/utils/kana";
 import z from "zod";
 

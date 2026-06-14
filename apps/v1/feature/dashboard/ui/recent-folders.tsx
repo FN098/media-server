@@ -3,7 +3,7 @@
 import { LocalRecentDate } from "@/feature/datetime/ui/local-recent-date";
 import { togglePinVisitedFolderAction } from "@/feature/folder/actions/toggle-pin-visited";
 import { useCanHoverContext } from "@/feature/general/providers/can-hover-provider";
-import type { VisitedFolder } from "@/generated/prisma/client";
+import { VisitedFolder } from "@/lib/folder/types";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { splitDirPath } from "@/lib/utils/path";
 import { Button } from "@/shadcn/components/ui/button";

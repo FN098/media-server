@@ -1,8 +1,8 @@
-import { VisitedFolder } from "@/generated/prisma/client";
 import {
   FolderFavoriteInfo,
   FolderMeta,
   FolderVisitedInfo,
+  VisitedFolder,
 } from "@/lib/folder/types";
 import { prisma } from "@/lib/prisma";
 
