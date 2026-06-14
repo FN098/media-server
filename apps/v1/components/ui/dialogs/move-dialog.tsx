@@ -34,7 +34,6 @@ interface MoveDialogProps {
 export function MoveDialog({ dialog }: MoveDialogProps) {
   const {
     isOpen,
-    initialDir,
     currentDir,
     dirs,
     recentDirs,
@@ -219,7 +218,7 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
           </Button>
           <Button
             onClick={() => void performMove()}
-            disabled={isLoading || isPending || currentDir === initialDir}
+            disabled={isLoading || isPending}
           >
             {isPending ? (
               "移動中..."
