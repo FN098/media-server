@@ -3,7 +3,7 @@ import { GhostMediaCleanupCard } from "@/components/ui/cards/ghost-media-cleanup
 import { GhostThumbCleanupCard } from "@/components/ui/cards/ghost-thumb-cleanup-card";
 import { TagMasterManagerCard } from "@/components/ui/cards/tag-master-manager-card";
 import { UnusedTagsCleanupCard } from "@/components/ui/cards/unused-tags-cleanup-card";
-import { TagMasterProvider } from "@/providers/tag-master-provider";
+import { TagMasterProvider } from "@/providers/tag-editor/tag-master-provider";
 
 export function Maintenance() {
   return (

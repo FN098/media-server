@@ -1,5 +1,5 @@
 import { useQueryFilter } from "@/hooks/filters/use-query-filter";
-import { useSearchFocusContext } from "@/providers/search-focus-provider";
+import { useSearchFocusContext } from "@/providers/search/search-focus-provider";
 import {
   startTransition,
   useCallback,

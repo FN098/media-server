@@ -4,7 +4,7 @@ import {
   useTrashFilterMenuItems,
 } from "@/hooks/pages/trash/use-trash-filter-menu-items";
 import { isMedia } from "@/lib/media/detectors";
-import { useTrashContext } from "@/providers/trash-provider";
+import { useTrashContext } from "@/providers/pages/trash-provider";
 import { useCallback, useMemo } from "react";
 
 export function useTrashFilterMenu() {

@@ -1,5 +1,5 @@
 import { ThumbJobCompletedEvent } from "@/lib/thumb-job/types";
-import { useThumbEventContext } from "@/providers/thumb-event-provider";
+import { useThumbEventContext } from "@/providers/thumbs/thumb-event-provider";
 import { useEffect } from "react";
 
 export function useThumbEventObserver(

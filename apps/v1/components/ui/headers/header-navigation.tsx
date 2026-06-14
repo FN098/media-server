@@ -3,7 +3,7 @@
 import { DynamicBreadcrumbs } from "@/components/ui/breadcrumbs/dynamic-breadcrumbs";
 import { ClickToCopy } from "@/components/ui/texts/click-to-copy";
 import { useBreadcrumbs } from "@/hooks/navigation/use-breadcrumbs";
-import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

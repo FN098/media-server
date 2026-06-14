@@ -1,4 +1,4 @@
-import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
+import { useFavoritesControlContext } from "@/providers/favorites/favorites-control-provider";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 

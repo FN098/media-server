@@ -5,7 +5,7 @@ import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useTrashActionMenu } from "@/hooks/pages/trash/use-trash-action-menu";
 import { useTrashFilterMenu } from "@/hooks/pages/trash/use-trash-filter-menu";
 import { useTrashSortMenu } from "@/hooks/pages/trash/use-trash-sort-menu";
-import { useTrashContext } from "@/providers/trash-provider";
+import { useTrashContext } from "@/providers/pages/trash-provider";
 
 export function TrashToolbar() {
   const { filtering, sort } = useTrashContext();

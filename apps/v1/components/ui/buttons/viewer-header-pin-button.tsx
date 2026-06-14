@@ -1,6 +1,6 @@
 "use client";
 
-import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,

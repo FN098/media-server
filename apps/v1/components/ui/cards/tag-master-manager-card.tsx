@@ -2,8 +2,8 @@
 
 import { TagMasterCardList } from "@/components/ui/cards/tag-master-manager-card/tag-master-card-list";
 import { TagMasterTable } from "@/components/ui/cards/tag-master-manager-card/tag-master-table";
-import { useDetectMobileContext } from "@/providers/mobile-provider";
-import { useTagMasterContext } from "@/providers/tag-master-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
+import { useTagMasterContext } from "@/providers/tag-editor/tag-master-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,

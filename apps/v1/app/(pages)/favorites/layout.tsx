@@ -1,10 +1,10 @@
 import { PageBackground } from "@/components/ui/backgrounds/page-background";
 import { Header } from "@/components/ui/headers/header";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
-import { HistoryProvider } from "@/providers/history-provider";
-import { SearchFocusProvider } from "@/providers/search-focus-provider";
-import { SlideshowProvider } from "@/providers/slideshow-provider";
-import { TagEditorProvider } from "@/providers/tag-editor-provider";
+import { HistoryProvider } from "@/providers/navigation/history-provider";
+import { SearchFocusProvider } from "@/providers/search/search-focus-provider";
+import { TagEditorProvider } from "@/providers/tag-editor/tag-editor-provider";
+import { SlideshowProvider } from "@/providers/viewer/slideshow-provider";
 
 const meta = resolvePageMeta("favorites");
 

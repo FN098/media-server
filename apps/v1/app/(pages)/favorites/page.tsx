@@ -11,9 +11,9 @@ import {
 import { formatNodes } from "@/lib/media/formatters";
 import { SortDirection } from "@/lib/media/sort";
 import { hashObject } from "@/lib/utils/fnv1a-hash";
-import { FavoritesControlProvider } from "@/providers/favorites-control-provider";
-import { FavoritesProvider } from "@/providers/favorites-provider";
-import { PathSelectionProvider } from "@/providers/path-selection-provider";
+import { FavoritesControlProvider } from "@/providers/favorites/favorites-control-provider";
+import { FavoritesProvider } from "@/providers/pages/favorites-provider";
+import { PathSelectionProvider } from "@/providers/selections/path-selection-provider";
 import { Metadata } from "next";
 
 // 動的ページとしてレンダリング

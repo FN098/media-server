@@ -5,7 +5,7 @@ import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useExplorerActionMenu } from "@/hooks/pages/explorer/use-explorer-action-menu";
 import { useExplorerFilterMenu } from "@/hooks/pages/explorer/use-explorer-filter-menu";
 import { useExplorerSortMenu } from "@/hooks/pages/explorer/use-explorer-sort-menu";
-import { useExplorerContext } from "@/providers/explorer-provider";
+import { useExplorerContext } from "@/providers/pages/explorer-provider";
 
 export function ExplorerToolbar() {
   const { filtering, sort } = useExplorerContext();

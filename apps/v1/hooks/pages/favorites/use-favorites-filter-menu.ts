@@ -4,7 +4,7 @@ import {
 } from "@/hooks/pages/favorites/use-favorites-filter-menu-items";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaType } from "@/lib/media/types";
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useFavoritesContext } from "@/providers/pages/favorites-provider";
 import { useCallback, useMemo } from "react";
 
 export function useFavoritesFilterMenu() {

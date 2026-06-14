@@ -1,6 +1,6 @@
 import { DeleteDialog } from "@/components/ui/dialogs/delete-dialog";
 import { RestoreDialog } from "@/components/ui/dialogs/restore-dialog";
-import { useTrashContext } from "@/providers/trash-provider";
+import { useTrashContext } from "@/providers/pages/trash-provider";
 
 export function TrashDialogs() {
   const { dialogs } = useTrashContext();

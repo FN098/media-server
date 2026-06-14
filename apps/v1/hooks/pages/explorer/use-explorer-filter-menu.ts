@@ -4,7 +4,7 @@ import {
 } from "@/hooks/pages/explorer/use-explorer-filter-menu-items";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaType } from "@/lib/media/types";
-import { useExplorerContext } from "@/providers/explorer-provider";
+import { useExplorerContext } from "@/providers/pages/explorer-provider";
 import { useCallback, useMemo } from "react";
 
 export function useExplorerFilterMenu() {

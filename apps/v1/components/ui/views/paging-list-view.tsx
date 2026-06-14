@@ -16,18 +16,21 @@ import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { formatBytes } from "@/lib/utils/bytes";
 import { getExtension } from "@/lib/utils/filename";
-import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
-import {
-  MediaNodeControlProvider,
-  useMediaNodeControlContext,
-} from "@/providers/media-node-control-provider";
 import {
   MediaNodeDndProvider,
   useMediaNodeDndContext,
-} from "@/providers/media-node-dnd-provider";
-import { useMediaNodePagingViewContext } from "@/providers/media-node-paging-view-provider";
-import { useMenuItemsContext } from "@/providers/menu-items-provider";
-import { useDetectMobileContext } from "@/providers/mobile-provider";
+} from "@/providers/dnd/media-node-dnd-provider";
+import {
+  LocaleProvider,
+  useLocaleContext,
+} from "@/providers/general/locale-provider";
+import { useMenuItemsContext } from "@/providers/menu-items/menu-items-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
+import {
+  MediaNodeControlProvider,
+  useMediaNodeControlContext,
+} from "@/providers/view/media-node-control-provider";
+import { useMediaNodePagingViewContext } from "@/providers/view/media-node-paging-view-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";

@@ -6,7 +6,7 @@ import { FilterResultText } from "@/components/ui/texts/filter-result-text";
 import { useFavoritesActionMenu } from "@/hooks/pages/favorites/use-favorites-action-menu";
 import { useFavoritesFilterMenu } from "@/hooks/pages/favorites/use-favorites-filter-menu";
 import { useFavoritesSortMenu } from "@/hooks/pages/favorites/use-favorites-sort-menu";
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useFavoritesContext } from "@/providers/pages/favorites-provider";
 
 export function FavoritesToolbar() {
   const { filtering, sort } = useFavoritesContext();

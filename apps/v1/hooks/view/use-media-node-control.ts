@@ -2,9 +2,9 @@ import { usePercent } from "@/hooks/general/use-percent";
 import { useLongPress } from "@/hooks/mobile/use-long-press";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
-import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
-import { useDetectMobileContext } from "@/providers/mobile-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
+import { useFavoritesControlContext } from "@/providers/favorites/favorites-control-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
+import { usePathSelectionContext } from "@/providers/selections/path-selection-provider";
 import { useCallback, useMemo, useState } from "react";
 
 export interface UseMediaNodeControlProps {

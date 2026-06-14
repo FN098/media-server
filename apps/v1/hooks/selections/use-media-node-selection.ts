@@ -1,5 +1,5 @@
 import { MediaNode } from "@/lib/media/types";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
+import { usePathSelectionContext } from "@/providers/selections/path-selection-provider";
 import { useCallback, useMemo } from "react";
 
 export type MediaNodeSelection = ReturnType<typeof useMediaNodeSelection>;

@@ -3,7 +3,7 @@
 
 import { TagDeleteButton } from "@/components/ui/buttons/tag-delete-button";
 import { TagMediaPreview } from "@/components/ui/cards/tag-master-manager-card/tag-media-preview";
-import { useTagMasterContext } from "@/providers/tag-master-provider";
+import { useTagMasterContext } from "@/providers/tag-editor/tag-master-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { Input } from "@/shadcn/components/ui/input";

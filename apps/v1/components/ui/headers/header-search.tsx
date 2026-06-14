@@ -3,7 +3,7 @@
 import { SearchInput } from "@/components/ui/inputs/search-input";
 import { useMounted } from "@/hooks/general/use-mounted";
 import { useHeaderSearch } from "@/hooks/headers/use-header-search";
-import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";

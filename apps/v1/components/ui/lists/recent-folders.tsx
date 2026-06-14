@@ -5,7 +5,7 @@ import { LocalRecentDate } from "@/components/ui/dates/local-recent-date";
 import type { VisitedFolder } from "@/generated/prisma/client";
 import { getClientExplorerPath } from "@/lib/path/helpers";
 import { splitDirPath } from "@/lib/utils/path";
-import { useCanHoverContext } from "@/providers/can-hover-provider";
+import { useCanHoverContext } from "@/providers/general/can-hover-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { Clock, Folder, History, Pin } from "lucide-react";

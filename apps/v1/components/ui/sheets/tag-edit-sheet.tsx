@@ -2,8 +2,8 @@ import { SheetFooter } from "@/components/ui/sheets/tag-edit-sheet/seet-footer";
 import { SheetHeader } from "@/components/ui/sheets/tag-edit-sheet/seet-header";
 import { TagInput } from "@/components/ui/sheets/tag-edit-sheet/tag-input";
 import { TagList } from "@/components/ui/sheets/tag-edit-sheet/tag-list";
-import { useDetectMobileContext } from "@/providers/mobile-provider";
-import { useTagEditSheetContext } from "@/providers/tag-edit-sheet-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
+import { useTagEditSheetContext } from "@/providers/tag-editor/tag-edit-sheet-provider";
 import {
   Tabs,
   TabsContent,

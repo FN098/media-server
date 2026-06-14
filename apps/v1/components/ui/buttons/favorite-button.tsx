@@ -1,6 +1,6 @@
 "use client";
 
-import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {

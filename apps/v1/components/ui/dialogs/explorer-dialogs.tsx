@@ -7,7 +7,7 @@ import { MoveDialog } from "@/components/ui/dialogs/move-dialog";
 import { PreviewDialog } from "@/components/ui/dialogs/preview-dialog";
 import { RenameDialog } from "@/components/ui/dialogs/rename-dialog";
 import { TextFilePreviewDialog } from "@/components/ui/dialogs/text-file-preview-dialog";
-import { useExplorerContext } from "@/providers/explorer-provider";
+import { useExplorerContext } from "@/providers/pages/explorer-provider";
 
 export function ExplorerDialogs() {
   const { dialogs } = useExplorerContext();

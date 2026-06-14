@@ -13,7 +13,7 @@ import { MediaNode } from "@/lib/media/types";
 import { assertNever } from "@/lib/utils/assert";
 import { clamp } from "@/lib/utils/clamp";
 import { ContentSlide, MediaViewerSlide } from "@/lib/viewer/slides";
-import { useMediaViewerContext } from "@/providers/media-viewer-provider";
+import { useMediaViewerContext } from "@/providers/viewer/media-viewer-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect } from "react";

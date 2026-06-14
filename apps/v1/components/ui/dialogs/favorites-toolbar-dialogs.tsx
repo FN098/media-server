@@ -1,6 +1,6 @@
 import { RatingFilterDialog } from "@/components/ui/dialogs/rating-filter-dialog";
 import { TagFilterDialog } from "@/components/ui/dialogs/tag-filter-dialog";
-import { useFavoritesContext } from "@/providers/favorites-provider";
+import { useFavoritesContext } from "@/providers/pages/favorites-provider";
 
 export function FavoritesToolbarDialogs() {
   const { dialogs } = useFavoritesContext();

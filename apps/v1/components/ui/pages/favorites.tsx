@@ -7,13 +7,13 @@ import { FavoritesToolbar } from "@/components/ui/toolbars/favorites-toolbar";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import { useFavoritesContext } from "@/providers/favorites-provider";
-import { MediaNodePagingViewProvider } from "@/providers/media-node-paging-view-provider";
-import { MediaViewerProvider } from "@/providers/media-viewer-provider";
-import { MenuItemsProvider } from "@/providers/menu-items-provider";
-import { PagingProvider } from "@/providers/paging-provider";
-import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
-import { TagEditSheetProvider } from "@/providers/tag-edit-sheet-provider";
+import { ScrollLockProvider } from "@/providers/general/scroll-lock-provider";
+import { MenuItemsProvider } from "@/providers/menu-items/menu-items-provider";
+import { PagingProvider } from "@/providers/navigation/paging-provider";
+import { useFavoritesContext } from "@/providers/pages/favorites-provider";
+import { TagEditSheetProvider } from "@/providers/tag-editor/tag-edit-sheet-provider";
+import { MediaNodePagingViewProvider } from "@/providers/view/media-node-paging-view-provider";
+import { MediaViewerProvider } from "@/providers/viewer/media-viewer-provider";
 
 export function Favorites() {
   const { viewer } = useFavoritesContext();

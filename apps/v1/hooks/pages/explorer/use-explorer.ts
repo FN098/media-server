@@ -13,10 +13,10 @@ import { useMediaNodeSelection } from "@/hooks/selections/use-media-node-selecti
 import { useSort } from "@/hooks/sort/use-sort";
 import { useViewMode } from "@/hooks/view/use-view-mode";
 import { MediaListing } from "@/lib/media/types";
-import { useHistoryContext } from "@/providers/history-provider";
-import { useSearchFocusContext } from "@/providers/search-focus-provider";
-import { useSlideshowContext } from "@/providers/slideshow-provider";
-import { useTagEditorContext } from "@/providers/tag-editor-provider";
+import { useHistoryContext } from "@/providers/navigation/history-provider";
+import { useSearchFocusContext } from "@/providers/search/search-focus-provider";
+import { useTagEditorContext } from "@/providers/tag-editor/tag-editor-provider";
+import { useSlideshowContext } from "@/providers/viewer/slideshow-provider";
 
 export interface UseExplorerProps {
   listing: MediaListing;

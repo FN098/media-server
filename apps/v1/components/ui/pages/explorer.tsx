@@ -9,13 +9,13 @@ import { ExplorerToolbar } from "@/components/ui/toolbars/explorer-toolbar";
 import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
-import { useExplorerContext } from "@/providers/explorer-provider";
-import { MediaNodePagingViewProvider } from "@/providers/media-node-paging-view-provider";
-import { MediaViewerProvider } from "@/providers/media-viewer-provider";
-import { MenuItemsProvider } from "@/providers/menu-items-provider";
-import { PagingProvider } from "@/providers/paging-provider";
-import { ScrollLockProvider } from "@/providers/scroll-lock-provider";
-import { TagEditSheetProvider } from "@/providers/tag-edit-sheet-provider";
+import { ScrollLockProvider } from "@/providers/general/scroll-lock-provider";
+import { MenuItemsProvider } from "@/providers/menu-items/menu-items-provider";
+import { PagingProvider } from "@/providers/navigation/paging-provider";
+import { useExplorerContext } from "@/providers/pages/explorer-provider";
+import { TagEditSheetProvider } from "@/providers/tag-editor/tag-edit-sheet-provider";
+import { MediaNodePagingViewProvider } from "@/providers/view/media-node-paging-view-provider";
+import { MediaViewerProvider } from "@/providers/viewer/media-viewer-provider";
 
 export function Explorer() {
   const { viewer } = useExplorerContext();

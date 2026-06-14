@@ -10,9 +10,9 @@ import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
-import { FavoritesControlProvider } from "@/providers/favorites-control-provider";
-import { PathSelectionProvider } from "@/providers/path-selection-provider";
-import { TrashProvider } from "@/providers/trash-provider";
+import { FavoritesControlProvider } from "@/providers/favorites/favorites-control-provider";
+import { TrashProvider } from "@/providers/pages/trash-provider";
+import { PathSelectionProvider } from "@/providers/selections/path-selection-provider";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 

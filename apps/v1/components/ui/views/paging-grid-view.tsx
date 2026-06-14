@@ -12,19 +12,19 @@ import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { formatBytes } from "@/lib/utils/bytes";
-import { useCanHoverContext } from "@/providers/can-hover-provider";
-import {
-  MediaNodeControlProvider,
-  useMediaNodeControlContext,
-} from "@/providers/media-node-control-provider";
 import {
   MediaNodeDndProvider,
   useMediaNodeDndContext,
-} from "@/providers/media-node-dnd-provider";
-import { useMediaNodePagingViewContext } from "@/providers/media-node-paging-view-provider";
-import { useMenuItemsContext } from "@/providers/menu-items-provider";
-import { useDetectMobileContext } from "@/providers/mobile-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
+} from "@/providers/dnd/media-node-dnd-provider";
+import { useCanHoverContext } from "@/providers/general/can-hover-provider";
+import { useMenuItemsContext } from "@/providers/menu-items/menu-items-provider";
+import { useDetectMobileContext } from "@/providers/mobile/mobile-provider";
+import { usePathSelectionContext } from "@/providers/selections/path-selection-provider";
+import {
+  MediaNodeControlProvider,
+  useMediaNodeControlContext,
+} from "@/providers/view/media-node-control-provider";
+import { useMediaNodePagingViewContext } from "@/providers/view/media-node-paging-view-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
