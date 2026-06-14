@@ -30,7 +30,7 @@ import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
 
 export function PagingGridView() {
-  const { allNodes, onOpen, onSelectionChange, onMoveNode } =
+  const { allNodes, onOpen, onSelectionChange, onDragEnd } =
     useMediaNodePagingViewContext();
 
   const {
@@ -48,7 +48,7 @@ export function PagingGridView() {
   const isMobile = useDetectMobileContext();
 
   return (
-    <MediaNodeDndProvider onDragEnd={onMoveNode}>
+    <MediaNodeDndProvider onDragEnd={onDragEnd}>
       <div
         ref={containerRef}
         className="flex flex-col relative outline-none"

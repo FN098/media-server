@@ -1,3 +1,4 @@
+import { useModifiers } from "@/feature/keyboard/hooks/use-modifiers";
 import { MediaNode } from "@/lib/media/types";
 import {
   DragEndEvent,
@@ -8,12 +9,25 @@ import {
 } from "@dnd-kit/core";
 import { useCallback, useState } from "react";
 
+// 呼び出し側が判定に使えるよう、押されている修飾キーのオブジェクトを定義
+export interface DragModifiers {
+  ctrlKey: boolean;
+  metaKey: boolean; // Mac の Command キー
+  shiftKey: boolean;
+}
+
 export interface UseMediaNodeDndProps {
-  onDragEnd?: (activeNode: MediaNode, overNode: MediaNode) => void;
+  onDragEnd?: (ctx: {
+    activeNode: MediaNode;
+    overNode: MediaNode;
+    modifiers: DragModifiers;
+  }) => void;
 }
 
 export function useMediaNodeDnd({ onDragEnd }: UseMediaNodeDndProps) {
   const [activeNode, setActiveNode] = useState<MediaNode | null>(null);
+
+  const modifiers = useModifiers();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -41,10 +55,10 @@ export function useMediaNodeDnd({ onDragEnd }: UseMediaNodeDndProps) {
       const overNode = over.data.current?.node as MediaNode;
 
       if (activeNode && overNode && overNode.isDirectory) {
-        onDragEnd?.(activeNode, overNode);
+        onDragEnd?.({ activeNode, overNode, modifiers });
       }
     },
-    [onDragEnd]
+    [modifiers, onDragEnd]
   );
 
   return { activeNode, sensors, handleDragStart, handleDragEnd };

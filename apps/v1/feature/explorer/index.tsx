@@ -72,9 +72,14 @@ function ExplorerListingView() {
       onScrollRestored={navigation.onScrollRestored}
       onThumbError={(node) => void thumbs.update(node)}
       onOpen={(node) => void navigation.open(node)}
-      onMoveNode={(node, targetFolderNode) =>
-        dialogs.moveDialog.open([node], targetFolderNode.path)
-      }
+      onDragEnd={({ activeNode, modifiers, overNode }) => {
+        if (!overNode.isDirectory) return;
+        if (modifiers.ctrlKey) {
+          dialogs.moveDialog.open([activeNode], overNode.path);
+        } else {
+          dialogs.copyDialog.open([activeNode], overNode.path);
+        }
+      }}
       focusOnPageChange
     >
       {viewMode.value === "grid" && <PagingGridView />}

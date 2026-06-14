@@ -1,3 +1,4 @@
+import { Modifiers } from "@/feature/keyboard/hooks/use-modifiers";
 import { MediaNode } from "@/lib/media/types";
 
 export interface UseMediaNodePagingViewProps {
@@ -9,7 +10,11 @@ export interface UseMediaNodePagingViewProps {
   onSelectionChange?: () => void;
   onOpen?: (node: MediaNode) => void;
   onThumbError?: (node: MediaNode) => void;
-  onMoveNode?: (node: MediaNode, targetFolderNode: MediaNode) => void;
+  onDragEnd?: (ctx: {
+    activeNode: MediaNode;
+    overNode: MediaNode;
+    modifiers: Modifiers;
+  }) => void;
 }
 
 export function useMediaNodePagingView(props: UseMediaNodePagingViewProps) {

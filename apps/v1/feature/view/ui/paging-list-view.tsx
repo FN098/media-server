@@ -46,8 +46,12 @@ const GRID_TEMPLATE = cn(
 );
 
 export function PagingListView() {
-  const { allNodes, onOpen, onSelectionChange, onMoveNode } =
-    useMediaNodePagingViewContext();
+  const {
+    allNodes,
+    onOpen,
+    onSelectionChange,
+    onDragEnd: onMoveNode,
+  } = useMediaNodePagingViewContext();
 
   const {
     containerRef,
