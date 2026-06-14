@@ -39,7 +39,8 @@ interface PagingGridViewProps {
 }
 
 export function PagingGridView(props: PagingGridViewProps) {
-  const { onOpen, onSelectionChange, onThumbError, onMoveNode } = props;
+  const { allNodes, onOpen, onSelectionChange, onThumbError, onMoveNode } =
+    props;
 
   const {
     containerRef,
@@ -78,7 +79,7 @@ export function PagingGridView(props: PagingGridViewProps) {
               key={node.path}
               node={node}
               globalIndex={(currentPage - 1) * pageSize + index}
-              allNodes={props.allNodes}
+              allNodes={allNodes}
               isMobile={isMobile}
               canHover={canHover}
               totalSize={totalSize}
