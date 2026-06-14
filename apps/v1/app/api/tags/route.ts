@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) {
     return badRequestResponse({
       code: "INVALID_REQUEST",
-      message: parsed.error.message,
+      message: parsed.error.issues[0].message,
     });
   }
 

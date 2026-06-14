@@ -42,7 +42,7 @@ export async function restoreManyNodesAction(
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, message: parsed.error.message };
+    return { success: false, message: parsed.error.issues[0].message };
   }
 
   const { sourcePaths } = parsed.data;

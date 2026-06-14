@@ -33,7 +33,7 @@ export async function updateManyFavoritesAction(
 ): Promise<ActionResult> {
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, message: parsed.error.message };
+    return { success: false, message: parsed.error.issues[0].message };
   }
 
   const { paths, rating } = parsed.data;
