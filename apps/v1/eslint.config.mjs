@@ -13,6 +13,20 @@ const eslintConfig = defineConfig([
         projectService: true,
       },
     },
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "lucide-react",
+              importNames: ["Link", "Image"],
+              message: "Use NextLink from next/link instead.",
+            },
+          ],
+        },
+      ],
+    },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([
