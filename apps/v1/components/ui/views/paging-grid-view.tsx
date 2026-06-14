@@ -9,6 +9,8 @@ import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
+import { useMediaNodeDndContext } from "@/hooks/dnd/use-media-node-dnd-context";
+import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
 import { useGridCell } from "@/hooks/view/use-grid-cell";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
@@ -18,18 +20,8 @@ import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useDraggable,
-  useDroppable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { useMemo, useState } from "react";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
+import { useMemo } from "react";
 
 interface PagingGridViewProps {
   allNodes: MediaNode[];
@@ -61,38 +53,10 @@ export function PagingGridView(props: PagingGridViewProps) {
   const isMobile = useDetectMobileContext();
   const canHover = useCanHoverContext();
 
-  const [activeNode, setActiveNode] = useState<MediaNode | null>(null);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // 8px以上動かしたらドラッグとみなす（誤クリック防止）
-      },
-    })
-  );
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const draggedNode = event.active.data.current?.node as MediaNode;
-    if (draggedNode) {
-      setActiveNode(draggedNode);
-    }
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveNode(null);
-
-    if (!over || active.id === over.id) return;
-
-    // active.data や over.data からノード情報を取り出す
-    const draggedNode = active.data.current?.node as MediaNode;
-    const targetFolderNode = over.data.current?.node as MediaNode;
-
-    if (draggedNode && targetFolderNode && targetFolderNode.isDirectory) {
-      onMoveNode?.(draggedNode, targetFolderNode);
-      console.log({ draggedNode, targetFolderNode });
-    }
-  };
+  const { activeNode, sensors, handleDragStart, handleDragEnd } =
+    useMediaNodeDndContext({
+      onDrag: onMoveNode,
+    });
 
   return (
     <DndContext
@@ -195,21 +159,8 @@ function Cell(props: CellProps) {
     toggleFavorite,
   } = useGridCell(props);
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef: setDragRef,
-    isDragging,
-  } = useDraggable({
-    id: `drag-${node.path}`,
-    data: { node },
-  });
-
-  const { setNodeRef: setDropRef, isOver } = useDroppable({
-    id: `drop-${node.path}`,
-    disabled: !node.isDirectory, // フォルダ以外はドロップ不可
-    data: { node },
-  });
+  const { attributes, listeners, isDragging, isOver, setDndRef } =
+    useMediaNodeDndItem({ node });
 
   // 合計サイズに対するこのノードの占有率（%）
   const occupancyPercent = useMemo(() => {
@@ -221,10 +172,7 @@ function Cell(props: CellProps) {
 
   return (
     <div
-      ref={(el) => {
-        setDragRef(el);
-        setDropRef(el); // ドラッグとドロップの両方のRefを1つの要素にバインド
-      }}
+      ref={setDndRef}
       {...attributes}
       {...listeners} // これにより要素全体がドラッグハンドルになります
       className={cn(
