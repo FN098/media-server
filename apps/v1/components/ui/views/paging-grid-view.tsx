@@ -11,7 +11,7 @@ import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
 import { usePercent } from "@/hooks/general/use-percent";
-import { useGridCell } from "@/hooks/view/use-grid-cell";
+import { useMediaNodeListItem } from "@/hooks/view/use-media-node-list-item";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
@@ -136,7 +136,7 @@ function Cell(props: CellProps) {
     handleDoubleClick,
     handleContextMenu,
     toggleFavorite,
-  } = useGridCell(props);
+  } = useMediaNodeListItem(props);
 
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });

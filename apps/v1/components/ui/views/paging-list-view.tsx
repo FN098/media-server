@@ -14,7 +14,7 @@ import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
 import { usePercent } from "@/hooks/general/use-percent";
-import { useGridCell } from "@/hooks/view/use-grid-cell";
+import { useMediaNodeListItem } from "@/hooks/view/use-media-node-list-item";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
@@ -149,7 +149,6 @@ function DataRow(props: DataRowProps) {
   const { items: menuItems } = useMenuItemsContext();
   const { updateFavorite } = useFavoritesControlContext();
 
-  // Cell用ロジックフックの再利用
   const {
     isMediaNode,
     isFavorite,
@@ -165,7 +164,7 @@ function DataRow(props: DataRowProps) {
     handleContextMenu,
     toggleFavorite,
     toggleSelection,
-  } = useGridCell(props);
+  } = useMediaNodeListItem(props);
 
   const { node, globalIndex, isMobile, totalSize } = props;
 
