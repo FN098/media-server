@@ -8,13 +8,11 @@ import {
 } from "@dnd-kit/core";
 import { useCallback, useState } from "react";
 
-interface UseMediaNodeDndContextProps {
-  onDrag?: (activeNode: MediaNode, overNode: MediaNode) => void;
+export interface UseMediaNodeDndProps {
+  onDragEnd?: (activeNode: MediaNode, overNode: MediaNode) => void;
 }
 
-export function useMediaNodeDndContext({
-  onDrag,
-}: UseMediaNodeDndContextProps) {
+export function useMediaNodeDnd({ onDragEnd }: UseMediaNodeDndProps) {
   const [activeNode, setActiveNode] = useState<MediaNode | null>(null);
 
   const sensors = useSensors(
@@ -43,10 +41,10 @@ export function useMediaNodeDndContext({
       const overNode = over.data.current?.node as MediaNode;
 
       if (activeNode && overNode && overNode.isDirectory) {
-        onDrag?.(activeNode, overNode);
+        onDragEnd?.(activeNode, overNode);
       }
     },
-    [onDrag]
+    [onDragEnd]
   );
 
   return { activeNode, sensors, handleDragStart, handleDragEnd };

@@ -9,18 +9,21 @@ import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
-import { useMediaNodeDndContext } from "@/hooks/dnd/use-media-node-dnd-context";
 import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
 import { useGridCell } from "@/hooks/view/use-grid-cell";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
 import { useCanHoverContext } from "@/providers/can-hover-provider";
+import {
+  MediaNodeDndProvider,
+  useMediaNodeDndContext,
+} from "@/providers/media-node-dnd-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
-import { DndContext, DragOverlay } from "@dnd-kit/core";
+import { DragOverlay } from "@dnd-kit/core";
 import { useMemo } from "react";
 
 interface PagingGridViewProps {
@@ -53,17 +56,8 @@ export function PagingGridView(props: PagingGridViewProps) {
   const isMobile = useDetectMobileContext();
   const canHover = useCanHoverContext();
 
-  const { activeNode, sensors, handleDragStart, handleDragEnd } =
-    useMediaNodeDndContext({
-      onDrag: onMoveNode,
-    });
-
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
+    <MediaNodeDndProvider onDragEnd={onMoveNode}>
       <div
         ref={containerRef}
         className="flex flex-col relative outline-none"
@@ -103,24 +97,8 @@ export function PagingGridView(props: PagingGridViewProps) {
         />
       </div>
 
-      <DragOverlay dropAnimation={null}>
-        {activeNode ? (
-          <div className="w-[180px] aspect-[4/5] opacity-80 pointer-events-none border border-primary rounded-xl overflow-hidden shadow-2xl scale-95 origin-center">
-            <MediaThumb
-              node={activeNode}
-              className="w-full h-full object-cover"
-              showIcon
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-            <div className="absolute bottom-0 left-0 right-0 p-2">
-              <p className="text-[11px] font-medium text-white text-center truncate">
-                {activeNode.title ?? activeNode.name}
-              </p>
-            </div>
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+      <DragCellOverlay />
+    </MediaNodeDndProvider>
   );
 }
 
@@ -315,5 +293,28 @@ function Cell(props: CellProps) {
         </HoverPreviewPortal>
       </div>
     </div>
+  );
+}
+
+function DragCellOverlay() {
+  const { activeNode } = useMediaNodeDndContext();
+  if (!activeNode) return null;
+
+  return (
+    <DragOverlay dropAnimation={null}>
+      <div className="w-[180px] aspect-[4/5] opacity-80 pointer-events-none border border-primary rounded-xl overflow-hidden shadow-2xl scale-95 origin-center">
+        <MediaThumb
+          node={activeNode}
+          className="w-full h-full object-cover"
+          showIcon
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+        <div className="absolute bottom-0 left-0 right-0 p-2">
+          <p className="text-[11px] font-medium text-white text-center truncate">
+            {activeNode.title ?? activeNode.name}
+          </p>
+        </div>
+      </div>
+    </DragOverlay>
   );
 }
