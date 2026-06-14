@@ -1,4 +1,5 @@
 import { MediaNode } from "@/lib/media/types";
+import { useMediaNodeDndContext } from "@/providers/media-node-dnd-provider";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useCallback } from "react";
 
@@ -7,6 +8,8 @@ interface UseMediaNodeDndItemProps {
 }
 
 export function useMediaNodeDndItem({ node }: UseMediaNodeDndItemProps) {
+  const { activeNode } = useMediaNodeDndContext();
+
   const {
     attributes,
     listeners,
@@ -17,9 +20,11 @@ export function useMediaNodeDndItem({ node }: UseMediaNodeDndItemProps) {
     data: { node },
   });
 
+  const isSelfDragging = activeNode?.path === node.path;
+
   const { setNodeRef: setDropRef, isOver } = useDroppable({
     id: `drop-${node.path}`,
-    disabled: !node.isDirectory, // フォルダ以外はドロップ不可
+    disabled: !node.isDirectory || isSelfDragging,
     data: { node },
   });
 
