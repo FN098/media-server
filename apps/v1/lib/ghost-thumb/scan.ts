@@ -105,16 +105,22 @@ async function runQuickScan(
   const total = thumbDirs.length;
 
   // DB 上の dirPath 一覧を取得
-  const allMedia = await db.media.findMany({ select: { dirPath: true } });
-  const validDirParts = new Set<string>();
+  const allFolders = await db.media.findMany({
+    distinct: ["dirPath"],
+    select: { dirPath: true },
+  });
+
+  const seen = new Set<string>();
 
   // ひとつでもファイルがDBに登録されていれば、そのファイルの先祖をすべて有効なディレクトリエントリとして登録
-  for (const m of allMedia) {
-    let currentPath = sanitize(m.dirPath);
+  for (const f of allFolders) {
+    let currentPath = f.dirPath;
     while (currentPath) {
       if (signal.aborted) return [];
 
-      validDirParts.add(currentPath);
+      if (seen.has(currentPath)) break;
+
+      seen.add(currentPath);
       const parent = path.dirname(currentPath);
       if (parent === "." || parent === "/" || parent === currentPath) break;
       currentPath = parent;
@@ -125,21 +131,22 @@ async function runQuickScan(
     for (let i = 0; i < total; i++) {
       if (signal.aborted) throw new AbortError();
 
-      const fullDirPath = sanitize(thumbDirs[i]);
+      const fullDirPath = thumbDirs[i];
+      const normalizedFullDirPath = sanitize(fullDirPath);
 
       // 【超重要】絶対条件：ルートディレクトリ自体は絶対に削除対象に入れない
-      if (fullDirPath === normalizedRoot) continue;
+      if (normalizedFullDirPath === normalizedRoot) continue;
 
       // 相対パスに変換
-      let relativeDirPath = fullDirPath.slice(normalizedRoot.length);
-      if (relativeDirPath.startsWith("/"))
-        relativeDirPath = relativeDirPath.substring(1);
+      const relativeDirPath = sanitize(
+        normalizedFullDirPath.slice(normalizedRoot.length)
+      );
 
       // 空文字（root）はスキップ
       if (!relativeDirPath) continue;
 
       // 判定：DB上のどのファイルのパス（およびその親）にも含まれていなければ「丸ごと不要」
-      if (!validDirParts.has(relativeDirPath)) {
+      if (!seen.has(relativeDirPath)) {
         ghostItems.push({ path: fullDirPath, isDirectory: true });
       }
 
