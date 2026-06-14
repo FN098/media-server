@@ -1,5 +1,8 @@
 import { APP_CONFIG } from "@/app.config";
-import { Favorites } from "@/components/ui/pages/favorites";
+import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
+import { Favorites } from "@/feature/page/favorites";
+import { FavoritesProvider } from "@/feature/page/favorites/providers/favorites-provider";
+import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
@@ -11,9 +14,6 @@ import {
 import { formatNodes } from "@/lib/media/formatters";
 import { SortDirection } from "@/lib/media/sort";
 import { hashObject } from "@/lib/utils/fnv1a-hash";
-import { FavoritesControlProvider } from "@/providers/favorites/favorites-control-provider";
-import { FavoritesProvider } from "@/providers/pages/favorites-provider";
-import { PathSelectionProvider } from "@/providers/selections/path-selection-provider";
 import { Metadata } from "next";
 
 // 動的ページとしてレンダリング

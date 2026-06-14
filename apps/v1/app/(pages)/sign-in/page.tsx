@@ -1,4 +1,4 @@
-import { SignIn } from "@/components/ui/pages/sign-in";
+import { SignIn } from "@/feature/page/sign-in";
 
 export default async function Page({
   searchParams,

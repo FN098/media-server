@@ -1,5 +1,5 @@
-import { PageBackground } from "@/components/ui/backgrounds/page-background";
-import { Header } from "@/components/ui/headers/header";
+import { PageBackground } from "@/feature/background/ui/page-background";
+import { Header } from "@/feature/header/ui/header";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
 const meta = resolvePageMeta("sandbox");

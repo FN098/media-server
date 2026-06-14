@@ -1,4 +1,4 @@
-import { Maintenance } from "@/components/ui/pages/maintenance";
+import { Maintenance } from "@/feature/page/maintenance";
 
 export default function MaintenancePage() {
   return (

@@ -1,5 +1,8 @@
 import { APP_CONFIG } from "@/app.config";
-import { Trash } from "@/components/ui/pages/trash";
+import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
+import { Trash } from "@/feature/page/trash";
+import { TrashProvider } from "@/feature/page/trash/providers/trash-provider";
+import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFolderVisitedInfo } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/media/formatters";
@@ -10,9 +13,6 @@ import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
-import { FavoritesControlProvider } from "@/providers/favorites/favorites-control-provider";
-import { TrashProvider } from "@/providers/pages/trash-provider";
-import { PathSelectionProvider } from "@/providers/selections/path-selection-provider";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 

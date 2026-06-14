@@ -1,5 +1,8 @@
 import { APP_CONFIG } from "@/app.config";
-import { Explorer } from "@/components/ui/pages/explorer";
+import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
+import { Explorer } from "@/feature/page/explorer";
+import { ExplorerProvider } from "@/feature/page/explorer/providers/explorer-provider";
+import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite } from "@/lib/favorite/types";
 import {
@@ -15,9 +18,6 @@ import { getMediaDbNodes } from "@/lib/media/repository";
 import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { syncMediaDir } from "@/lib/media/sync";
 import { MediaNode } from "@/lib/media/types";
-import { FavoritesControlProvider } from "@/providers/favorites/favorites-control-provider";
-import { ExplorerProvider } from "@/providers/pages/explorer-provider";
-import { PathSelectionProvider } from "@/providers/selections/path-selection-provider";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { basename, extname } from "path";

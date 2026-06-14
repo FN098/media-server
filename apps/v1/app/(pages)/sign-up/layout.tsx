@@ -1,4 +1,4 @@
-import { PageBackground } from "@/components/ui/backgrounds/page-background";
+import { PageBackground } from "@/feature/background/ui/page-background";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
 const meta = resolvePageMeta("sign-up");

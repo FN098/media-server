@@ -1,4 +1,4 @@
-import { SignUp } from "@/components/ui/pages/sign-up";
+import { SignUp } from "@/feature/page/sign-up";
 import { db } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";

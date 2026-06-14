@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { RecentFolders } from "@/components/ui/lists/recent-folders";
+import { RecentFolders } from "@/feature/page/dashboard/ui/recent-folders";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getRecentFolders } from "@/lib/folder/repository";
 import { Button } from "@/shadcn/components/ui/button";

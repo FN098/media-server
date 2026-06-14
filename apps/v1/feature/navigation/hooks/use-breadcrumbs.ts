@@ -1,0 +1,53 @@
+import { BreadcrumbLinkItem } from "@/feature/navigation/types";
+import { joinUrlPath } from "@/lib/utils/url";
+import { usePathname } from "next/navigation";
+import { useMemo } from "react";
+
+type BreadcrumbFormatContext = {
+  part: string;
+  index: number;
+  parts: string[];
+  href: string;
+  isLast: boolean;
+};
+
+type Options = {
+  formatLabel?: (ctx: BreadcrumbFormatContext) => string;
+};
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+export function useBreadcrumbs(basePath: string, options?: Options) {
+  const { formatLabel } = options ?? {};
+  const pathname = usePathname();
+
+  return useMemo<BreadcrumbLinkItem[]>(() => {
+    const parts = pathname
+      .replace(new RegExp(`^${escapeRegExp(basePath)}/?`), "")
+      .split("/")
+      .filter(Boolean)
+      .map(decodeURIComponent);
+
+    return [
+      { key: "home", label: "Home", href: basePath },
+      ...parts.map((part, index) => {
+        const relativePath = parts.slice(0, index + 1).join("/");
+        const href = joinUrlPath(basePath, relativePath);
+        const label =
+          formatLabel?.({
+            part,
+            index,
+            parts,
+            href,
+            isLast: index === parts.length - 1,
+          }) ?? part;
+
+        return {
+          key: href,
+          label,
+          href,
+        };
+      }),
+    ];
+  }, [pathname, basePath, formatLabel]);
+}
