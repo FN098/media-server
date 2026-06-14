@@ -23,6 +23,7 @@ type ActionResult =
     };
 
 // バックアップファイルの削除
+/** @deprecated 未使用 */
 export async function deleteBackupAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
