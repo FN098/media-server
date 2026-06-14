@@ -18,14 +18,14 @@ import { formatBytes } from "@/lib/utils/bytes";
 import { getExtension } from "@/lib/utils/filename";
 import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
 import {
+  MediaNodeControlProvider,
+  useMediaNodeControlContext,
+} from "@/providers/media-node-control-provider";
+import {
   MediaNodeDndProvider,
   useMediaNodeDndContext,
 } from "@/providers/media-node-dnd-provider";
 import { useMediaNodePagingViewContext } from "@/providers/media-node-paging-view-provider";
-import {
-  MediaNodeViewItemProvider,
-  useMediaNodeViewItemContext,
-} from "@/providers/media-node-view-item-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
@@ -71,7 +71,7 @@ export function PagingListView() {
         <LocaleProvider>
           <div ref={gridRef} className="flex-1 overflow-y-auto">
             {currentNodes.map((node, index) => (
-              <MediaNodeViewItemProvider
+              <MediaNodeControlProvider
                 key={node.path}
                 node={node}
                 globalIndex={(currentPage - 1) * pageSize + index}
@@ -81,7 +81,7 @@ export function PagingListView() {
                 onSelectionChange={onSelectionChange}
               >
                 <DataRow />
-              </MediaNodeViewItemProvider>
+              </MediaNodeControlProvider>
             ))}
           </div>
         </LocaleProvider>
@@ -139,7 +139,7 @@ function DataRow() {
     toggleSelection,
     occupancyPercent,
     title,
-  } = useMediaNodeViewItemContext();
+  } = useMediaNodeControlContext();
 
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });
@@ -294,7 +294,7 @@ function DragMediaNodeListOverlay() {
 
 function RatingCell() {
   const { node, isFavorite, rating, toggleFavorite, updateFavorite } =
-    useMediaNodeViewItemContext();
+    useMediaNodeControlContext();
 
   if (node.isDirectory) {
     return (

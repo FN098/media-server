@@ -7,7 +7,7 @@ import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useCallback, useMemo, useState } from "react";
 
-export interface UseMediaNodeViewItemProps {
+export interface UseMediaNodeControlProps {
   node: MediaNode;
   globalIndex: number;
   allNodes: MediaNode[];
@@ -16,14 +16,14 @@ export interface UseMediaNodeViewItemProps {
   onOpen?: (node: MediaNode) => void;
 }
 
-export function useMediaNodeViewItem({
+export function useMediaNodeControl({
   node,
   globalIndex,
   allNodes,
   totalSize,
   onSelectionChange,
   onOpen,
-}: UseMediaNodeViewItemProps) {
+}: UseMediaNodeControlProps) {
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const isMobile = useDetectMobileContext();
 
@@ -55,6 +55,11 @@ export function useMediaNodeViewItem({
   const isSelected = isSelectedPath(node.path);
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
+
+  const occupancyPercent = usePercent({
+    value: node.size ?? 0,
+    total: totalSize,
+  });
 
   const handleDropdownMenuOpenChange = useCallback(
     (open: boolean) => {
@@ -135,11 +140,6 @@ export function useMediaNodeViewItem({
       togglePath,
     ]
   );
-
-  const occupancyPercent = usePercent({
-    value: node.size ?? 0,
-    total: totalSize,
-  });
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -253,7 +253,8 @@ export function useMediaNodeViewItem({
     isFavorite,
     rating,
     isSelected,
-    isSelectionMode,
+    occupancyPercent,
+    title: node.title ?? node.name,
     dropdownMenuOpen,
     contextMenuOpen,
     setContextMenuOpen,
@@ -272,7 +273,5 @@ export function useMediaNodeViewItem({
     toggleFavorite: () => void toggleFavorite(node.path),
     toggleSelection,
     updateFavorite,
-    occupancyPercent,
-    title: node.title ?? node.name,
   };
 }

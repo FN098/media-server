@@ -14,16 +14,17 @@ import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { formatBytes } from "@/lib/utils/bytes";
 import { useCanHoverContext } from "@/providers/can-hover-provider";
 import {
+  MediaNodeControlProvider,
+  useMediaNodeControlContext,
+} from "@/providers/media-node-control-provider";
+import {
   MediaNodeDndProvider,
   useMediaNodeDndContext,
 } from "@/providers/media-node-dnd-provider";
 import { useMediaNodePagingViewContext } from "@/providers/media-node-paging-view-provider";
-import {
-  MediaNodeViewItemProvider,
-  useMediaNodeViewItemContext,
-} from "@/providers/media-node-view-item-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
@@ -64,7 +65,7 @@ export function PagingGridView() {
           )}
         >
           {currentNodes.map((node, index) => (
-            <MediaNodeViewItemProvider
+            <MediaNodeControlProvider
               key={node.path}
               node={node}
               globalIndex={(currentPage - 1) * pageSize + index}
@@ -74,7 +75,7 @@ export function PagingGridView() {
               onSelectionChange={onSelectionChange}
             >
               <Cell />
-            </MediaNodeViewItemProvider>
+            </MediaNodeControlProvider>
           ))}
         </div>
 
@@ -102,7 +103,6 @@ function Cell() {
     isFavorite,
     rating,
     isSelected,
-    isSelectionMode,
     dropdownMenuOpen,
     contextMenuOpen,
     setContextMenuOpen,
@@ -114,7 +114,9 @@ function Cell() {
     toggleFavorite,
     occupancyPercent,
     title,
-  } = useMediaNodeViewItemContext();
+  } = useMediaNodeControlContext();
+
+  const { isSelectionMode } = usePathSelectionContext();
 
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });
