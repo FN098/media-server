@@ -86,6 +86,9 @@ function ExplorerListingView() {
       initialScrollPath={history.last?.path}
       onScrollRestored={navigation.onScrollRestored}
       onOpen={(node) => void navigation.open(node)}
+      onMoveNode={(node, targetFolderNode) =>
+        dialogs.moveDialog.open([node], targetFolderNode.path)
+      }
       focusOnPageChange
     />
   );

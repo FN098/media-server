@@ -12,6 +12,7 @@ import { NodeDropdownMenu } from "@/components/ui/dropdown-menus/node-dropdown-m
 import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
+import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
 import { useGridCell } from "@/hooks/view/use-grid-cell";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
@@ -19,11 +20,17 @@ import { formatBytes } from "@/lib/utils/bytes";
 import { getExtension } from "@/lib/utils/filename";
 import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
+import {
+  MediaNodeDndProvider,
+  useMediaNodeDndContext,
+} from "@/providers/media-node-dnd-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
+import { DragOverlay } from "@dnd-kit/core";
 import { useMemo } from "react";
+import { createPortal } from "react-dom";
 
 // スマホ: Checkbox, Name, Rating, Actions
 // タブレット: Checkbox, Name, Type, Size, Rating, Actions
@@ -43,10 +50,12 @@ interface PagingListViewProps {
   onSelectionChange?: () => void;
   onOpen?: (node: MediaNode) => void;
   onThumbError?: (node: MediaNode) => void;
+  onMoveNode?: (node: MediaNode, targetFolderNode: MediaNode) => void;
 }
 
 export function PagingListView(props: PagingListViewProps) {
-  const isMobile = useDetectMobileContext();
+  const { allNodes, onOpen, onSelectionChange, onThumbError, onMoveNode } =
+    props;
 
   const {
     containerRef,
@@ -60,41 +69,45 @@ export function PagingListView(props: PagingListViewProps) {
     handleKeyDown,
   } = usePagingGridView(props);
 
-  const { allNodes, onOpen, onSelectionChange, onThumbError } = props;
+  const isMobile = useDetectMobileContext();
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full flex flex-col bg-background outline-none"
-      tabIndex={0} // フォーカス可能にし、keydownイベントを拾う
-      onKeyDown={handleKeyDown}
-    >
-      <HeaderRow />
+    <MediaNodeDndProvider onDragEnd={onMoveNode}>
+      <div
+        ref={containerRef}
+        className="w-full h-full flex flex-col bg-background outline-none"
+        tabIndex={0} // フォーカス可能にし、keydownイベントを拾う
+        onKeyDown={handleKeyDown}
+      >
+        <HeaderRow />
 
-      <LocaleProvider>
-        <div ref={gridRef} className="flex-1 overflow-y-auto">
-          {currentNodes.map((node, index) => (
-            <DataRow
-              key={node.path}
-              node={node}
-              globalIndex={(currentPage - 1) * pageSize + index}
-              allNodes={allNodes}
-              isMobile={isMobile}
-              totalSize={totalSize}
-              onOpen={onOpen}
-              onSelectionChange={onSelectionChange}
-              onThumbError={onThumbError}
-            />
-          ))}
-        </div>
-      </LocaleProvider>
+        <LocaleProvider>
+          <div ref={gridRef} className="flex-1 overflow-y-auto">
+            {currentNodes.map((node, index) => (
+              <DataRow
+                key={node.path}
+                node={node}
+                globalIndex={(currentPage - 1) * pageSize + index}
+                allNodes={allNodes}
+                isMobile={isMobile}
+                totalSize={totalSize}
+                onOpen={onOpen}
+                onSelectionChange={onSelectionChange}
+                onThumbError={onThumbError}
+              />
+            ))}
+          </div>
+        </LocaleProvider>
 
-      <PagingControl
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
-    </div>
+        <PagingControl
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+
+      <DragMediaNodeListOverlay />
+    </MediaNodeDndProvider>
   );
 }
 
@@ -156,6 +169,9 @@ function DataRow(props: DataRowProps) {
 
   const { node, globalIndex, isMobile, totalSize } = props;
 
+  const { attributes, listeners, isDragging, isOver, setDndRef } =
+    useMediaNodeDndItem({ node });
+
   // 占有率計算
   const occupancyPercent = useMemo(() => {
     if (!node.size || totalSize === 0) return 0;
@@ -179,6 +195,9 @@ function DataRow(props: DataRowProps) {
         disabled={isMobile}
       >
         <div
+          ref={setDndRef}
+          {...attributes}
+          {...listeners}
           id={`media-item-${globalIndex}`}
           role="row"
           {...longPressProps}
@@ -190,7 +209,10 @@ function DataRow(props: DataRowProps) {
             GRID_TEMPLATE,
             isSelected
               ? "bg-primary/10 hover:bg-primary/15"
-              : "hover:bg-muted/50"
+              : "hover:bg-muted/50",
+            isDragging && "opacity-20", // ドラッグ中の行を半透明に
+            isOver &&
+              "bg-emerald-500/20 hover:bg-emerald-500/25 border-y border-y-emerald-500 z-10" // フォルダ行の上にホバーした際のエフェクト
           )}
         >
           {/* Checkbox */}
@@ -286,6 +308,27 @@ function DataRow(props: DataRowProps) {
         </div>
       </NodeContextMenu>
     </HoverPreviewPortal>
+  );
+}
+
+function DragMediaNodeListOverlay() {
+  const { activeNode } = useMediaNodeDndContext();
+  if (!activeNode) return null;
+
+  return createPortal(
+    <DragOverlay dropAnimation={null}>
+      {/* 行のような細長い半透明の枠をマウスに追従させる */}
+      <div className="flex items-center gap-3 px-4 h-12 w-[320px] bg-background/90 backdrop-blur border-2 border-primary rounded-xl shadow-2xl pointer-events-none opacity-90 z-[9999]">
+        <MediaThumbIcon
+          type={activeNode.type}
+          className="w-5 h-5 shrink-0 text-primary"
+        />
+        <span className="truncate font-medium text-sm text-foreground">
+          {activeNode.title ?? activeNode.name}
+        </span>
+      </div>
+    </DragOverlay>,
+    document.body
   );
 }
 
