@@ -72,12 +72,12 @@ function ExplorerListingView() {
       onScrollRestored={navigation.onScrollRestored}
       onThumbError={(node) => void thumbs.update(node)}
       onOpen={(node) => void navigation.open(node)}
-      onDragEnd={({ activeNode, modifiers, overNode }) => {
+      onDragEnd={({ activeNode, overNode, modifiers }) => {
         if (!overNode.isDirectory) return;
         if (modifiers.ctrlKey) {
-          dialogs.moveDialog.open([activeNode], overNode.path);
-        } else {
           dialogs.copyDialog.open([activeNode], overNode.path);
+        } else {
+          dialogs.moveDialog.open([activeNode], overNode.path);
         }
       }}
       focusOnPageChange
