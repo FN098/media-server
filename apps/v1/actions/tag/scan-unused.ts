@@ -1,8 +1,8 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { logger } from "better-auth";
 
 type TagInfo = {
   id: string;

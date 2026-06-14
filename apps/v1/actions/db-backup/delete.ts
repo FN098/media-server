@@ -2,9 +2,9 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import { DB_BACKUP_DIR } from "@/lib/db-backup/config";
+import { logger } from "@/lib/logger";
 import { isFsNotFoundError } from "@/lib/utils/fs";
 import { FileNameSchema } from "@/lib/virtual-path/schemas";
-import { logger } from "better-auth";
 import fs from "fs/promises";
 import path from "path";
 import z from "zod";
