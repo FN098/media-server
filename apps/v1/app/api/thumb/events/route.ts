@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 
         // Redis のメッセージを受け取って SSE 形式で送信
         await subscriber.subscribe("thumb-completed", (err) => {
-          if (err) console.error("Redis subscribe error:", err);
+          if (err) logger.error("api:subscribe-thumb-events", err);
         });
 
         subscriber.on("message", (channel, message) => {
