@@ -61,7 +61,7 @@ function ExplorerContent() {
 }
 
 function ExplorerListingView() {
-  const { viewMode, filtering, history, navigation, thumbs } =
+  const { viewMode, filtering, history, navigation, thumbs, dialogs } =
     useExplorerContext();
 
   if (viewMode.value === "grid") {
@@ -71,7 +71,10 @@ function ExplorerListingView() {
         initialScrollPath={history.last?.path}
         onScrollRestored={navigation.onScrollRestored}
         onThumbError={(node) => void thumbs.update(node)}
-        onOpen={navigation.open}
+        onOpen={(node) => void navigation.open(node)}
+        onMoveNode={(node, targetFolderNode) =>
+          dialogs.moveDialog.open([node], targetFolderNode.path)
+        }
         focusOnPageChange
       />
     );
@@ -82,7 +85,7 @@ function ExplorerListingView() {
       allNodes={filtering.filteredNodes}
       initialScrollPath={history.last?.path}
       onScrollRestored={navigation.onScrollRestored}
-      onOpen={navigation.open}
+      onOpen={(node) => void navigation.open(node)}
       focusOnPageChange
     />
   );
