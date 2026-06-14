@@ -16,3 +16,5 @@ export type FolderMeta = {
   totalSize: number;
   fileCount: number;
 };
+
+export type { VisitedFolder } from "@/generated/prisma/client";
