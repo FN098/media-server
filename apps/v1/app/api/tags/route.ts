@@ -1,3 +1,4 @@
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import {
   badRequestResponse,
@@ -15,26 +16,31 @@ import {
 import { searchTags } from "@/lib/tag/search";
 import { uniqueBy } from "@/lib/utils/array";
 import { safeParseRequestJson } from "@/lib/utils/request";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
-const MAX_PATHS_TO_PROCESS = 500;
-
-// タグを検索：検索パラメータが複雑なので、GETではなくPOSTで実装
+// タグ検索
 export async function POST(request: NextRequest) {
   // 入力バリデーション
   const json = await safeParseRequestJson(request);
-  const parsed = {
-    params: SearchTagsRequestParamsSchema.safeParse(json),
-  };
+  const parsed = SearchTagsRequestParamsSchema.safeParse(json);
+  if (!parsed.success) {
+    return badRequestResponse({
+      code: "INVALID_REQUEST",
+      message: parsed.error.message,
+    });
+  }
 
-  if (!parsed.params.success) {
-    return badRequestResponse({ message: "Invalid input" });
+  const params = parsed.data;
+
+  // 認証＋認可
+  const auth = await authorize("tag:search");
+  if (!auth.success) {
+    return auth;
   }
 
   try {
-    const result = await process(parsed.params.data);
-
-    return NextResponse.json(result);
+    const result = await process(params);
+    return Response.json(result);
   } catch (error) {
     logger.error("api:search-tags", error);
     return internalServerErrorResponse();
@@ -43,7 +49,7 @@ export async function POST(request: NextRequest) {
 
 async function process({
   ids,
-  paths: pathsRaw,
+  paths,
   limit,
   query,
   strategy,
@@ -53,9 +59,6 @@ async function process({
     const tags = await getTagsByIds(ids, { limit });
     return tags;
   }
-
-  // パスが多すぎる場合は、先頭からカットして処理（DB負荷対策）
-  const paths = pathsRaw.slice(0, MAX_PATHS_TO_PROCESS);
 
   // 関連タグのみ
   if (strategy === "related-only") {
@@ -69,11 +72,8 @@ async function process({
     return favoriteTags;
   }
 
-  // === これ移行は strategy に合わせて検索 ===
-
   // 関連タグは必ず取得
   const relatedTags = await getRelatedTags(paths, { limit });
-
   const excludeIds = relatedTags.map((t) => t.id);
   const remain = limit - relatedTags.length;
 
