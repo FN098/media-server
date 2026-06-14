@@ -2,13 +2,16 @@ import { spawn } from "child_process";
 
 export async function createVideoThumb(
   videoPath: string,
-  thumbPath: string
+  thumbPath: string,
+  seekSeconds: number = 0
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const childProcess = spawn("ffmpeg", [
       "-y",
       "-v",
       "quiet",
+      "-ss",
+      seekSeconds.toString(),
       "-i",
       videoPath,
       "-vframes",

@@ -13,6 +13,7 @@ export async function createThumbs(
   nodes: MediaFsNode[],
   options?: {
     force?: boolean;
+    seekSeconds?: number;
   }
 ): Promise<void> {
   if (nodes.length === 0) return;
@@ -44,7 +45,7 @@ export async function createThumbs(
 
       try {
         if (n.type === "video") {
-          await createVideoThumb(media, thumb);
+          await createVideoThumb(media, thumb, options?.seekSeconds);
         } else if (n.type === "image") {
           await createImageThumb(media, thumb);
         }
