@@ -52,20 +52,20 @@ export async function GET(req: NextRequest) {
         if (!req.signal.aborted) {
           send({ type: "complete", items: ghostItems });
         }
-
-        return new Response(stream, {
-          headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
-          },
-        });
       } catch (error) {
         logger.error("api:scan-ghost-media", error);
         send({ type: "error", message: "Failed to scan ghost media" });
       } finally {
         controller.close();
       }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
     },
   });
 }
