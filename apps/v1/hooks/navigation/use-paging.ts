@@ -107,3 +107,5 @@ export function usePaging({
     paginate,
   };
 }
+
+export type Paging = ReturnType<typeof usePaging>;

@@ -50,3 +50,5 @@ export function usePathSelection() {
     setAnchorPath: setAnchorKey,
   };
 }
+
+export type PathSelection = ReturnType<typeof usePathSelection>;

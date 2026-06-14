@@ -1,3 +1,4 @@
+import { usePercent } from "@/hooks/general/use-percent";
 import { useLongPress } from "@/hooks/mobile/use-long-press";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
@@ -6,30 +7,34 @@ import { useDetectMobileContext } from "@/providers/mobile-provider";
 import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { useCallback, useMemo, useState } from "react";
 
-interface UseMediaNodeListItemProps {
+export interface UseMediaNodeViewItemProps {
   node: MediaNode;
   globalIndex: number;
   allNodes: MediaNode[];
+  totalSize: number;
   onSelectionChange?: () => void;
   onOpen?: (node: MediaNode) => void;
 }
 
-export function useMediaNodeListItem({
+export function useMediaNodeViewItem({
   node,
   globalIndex,
   allNodes,
+  totalSize,
   onSelectionChange,
   onOpen,
-}: UseMediaNodeListItemProps) {
+}: UseMediaNodeViewItemProps) {
+  const isMobile = useDetectMobileContext();
+
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
 
-  const { getFavorite, toggleFavorite } = useFavoritesControlContext();
+  const { getFavorite, toggleFavorite, updateFavorite } =
+    useFavoritesControlContext();
+
   const { isFavorite, rating } = useMemo(
     () => getFavorite(node.path),
     [getFavorite, node.path]
   );
-
-  const isMobile = useDetectMobileContext();
 
   const {
     isSelectedPath,
@@ -131,6 +136,11 @@ export function useMediaNodeListItem({
       togglePath,
     ]
   );
+
+  const occupancyPercent = usePercent({
+    value: node.size ?? 0,
+    total: totalSize,
+  });
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -238,6 +248,8 @@ export function useMediaNodeListItem({
   ]);
 
   return {
+    node,
+    globalIndex,
     isMediaNode,
     isFavorite,
     rating,
@@ -260,5 +272,8 @@ export function useMediaNodeListItem({
     handleContextMenu: !isMobile ? handleContextMenu : undefined,
     toggleFavorite: () => void toggleFavorite(node.path),
     toggleSelection,
+    updateFavorite,
+    occupancyPercent,
+    title: node.title ?? node.name,
   };
 }

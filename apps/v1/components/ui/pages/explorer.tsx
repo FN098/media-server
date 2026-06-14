@@ -10,6 +10,7 @@ import { MediaViewer } from "@/components/ui/viewers/media-viewer";
 import { PagingGridView } from "@/components/ui/views/paging-grid-view";
 import { PagingListView } from "@/components/ui/views/paging-list-view";
 import { useExplorerContext } from "@/providers/explorer-provider";
+import { MediaNodePagingViewProvider } from "@/providers/media-node-paging-view-provider";
 import { MediaViewerProvider } from "@/providers/media-viewer-provider";
 import { MenuItemsProvider } from "@/providers/menu-items-provider";
 import { PagingProvider } from "@/providers/paging-provider";
@@ -64,33 +65,21 @@ function ExplorerListingView() {
   const { viewMode, filtering, history, navigation, thumbs, dialogs } =
     useExplorerContext();
 
-  if (viewMode.value === "grid") {
-    return (
-      <PagingGridView
-        allNodes={filtering.filteredNodes}
-        initialScrollPath={history.last?.path}
-        onScrollRestored={navigation.onScrollRestored}
-        onThumbError={(node) => void thumbs.update(node)}
-        onOpen={(node) => void navigation.open(node)}
-        onMoveNode={(node, targetFolderNode) =>
-          dialogs.moveDialog.open([node], targetFolderNode.path)
-        }
-        focusOnPageChange
-      />
-    );
-  }
-
   return (
-    <PagingListView
+    <MediaNodePagingViewProvider
       allNodes={filtering.filteredNodes}
       initialScrollPath={history.last?.path}
       onScrollRestored={navigation.onScrollRestored}
+      onThumbError={(node) => void thumbs.update(node)}
       onOpen={(node) => void navigation.open(node)}
       onMoveNode={(node, targetFolderNode) =>
         dialogs.moveDialog.open([node], targetFolderNode.path)
       }
       focusOnPageChange
-    />
+    >
+      {viewMode.value === "grid" && <PagingGridView />}
+      {viewMode.value === "list" && <PagingListView />}
+    </MediaNodePagingViewProvider>
   );
 }
 

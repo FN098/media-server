@@ -13,20 +13,24 @@ import { PagingControl } from "@/components/ui/paginations/pagination-control";
 import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
-import { usePercent } from "@/hooks/general/use-percent";
-import { useMediaNodeListItem } from "@/hooks/view/use-media-node-list-item";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
 import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
 import { getExtension } from "@/lib/utils/filename";
-import { useFavoritesControlContext } from "@/providers/favorites-control-provider";
 import { LocaleProvider, useLocaleContext } from "@/providers/locale-provider";
 import {
   MediaNodeDndProvider,
   useMediaNodeDndContext,
 } from "@/providers/media-node-dnd-provider";
+import { useMediaNodePagingViewContext } from "@/providers/media-node-paging-view-provider";
+import {
+  MediaNodeViewItemProvider,
+  useMediaNodeViewItemContext,
+} from "@/providers/media-node-view-item-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { usePagingContext } from "@/providers/paging-provider";
+import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
@@ -41,25 +45,16 @@ const GRID_TEMPLATE = cn(
   "lg:grid-cols-[40px_1fr_80px_140px_180px_140px_80px_80px]"
 );
 
-interface PagingListViewProps {
-  allNodes: MediaNode[];
-  initialScrollPath?: string | null;
-  focusOnPageChange?: boolean;
-  onPageChange?: (page: number) => void;
-  onScrollRestored?: () => void;
-  onSelectionChange?: () => void;
-  onOpen?: (node: MediaNode) => void;
-  onThumbError?: (node: MediaNode) => void;
-  onMoveNode?: (node: MediaNode, targetFolderNode: MediaNode) => void;
-}
+export function PagingListView() {
+  const pagingView = useMediaNodePagingViewContext();
+  const paging = usePagingContext();
+  const selection = usePathSelectionContext();
 
-export function PagingListView(props: PagingListViewProps) {
-  const { allNodes, onOpen, onSelectionChange, onThumbError, onMoveNode } =
-    props;
+  const { allNodes, onOpen, onSelectionChange, onMoveNode } = pagingView;
 
   const {
     containerRef,
-    gridRef, // ListViewでは全行を包む親要素（仮想的なグリッド）にアタッチ
+    gridRef,
     currentNodes,
     totalSize,
     currentPage,
@@ -67,9 +62,7 @@ export function PagingListView(props: PagingListViewProps) {
     pageSize,
     handlePageChange,
     handleKeyDown,
-  } = usePagingGridView(props);
-
-  const isMobile = useDetectMobileContext();
+  } = usePagingGridView({ pagingView, paging, selection });
 
   return (
     <MediaNodeDndProvider onDragEnd={onMoveNode}>
@@ -84,17 +77,17 @@ export function PagingListView(props: PagingListViewProps) {
         <LocaleProvider>
           <div ref={gridRef} className="flex-1 overflow-y-auto">
             {currentNodes.map((node, index) => (
-              <DataRow
+              <MediaNodeViewItemProvider
                 key={node.path}
                 node={node}
                 globalIndex={(currentPage - 1) * pageSize + index}
                 allNodes={allNodes}
-                isMobile={isMobile}
                 totalSize={totalSize}
                 onOpen={onOpen}
                 onSelectionChange={onSelectionChange}
-                onThumbError={onThumbError}
-              />
+              >
+                <DataRow />
+              </MediaNodeViewItemProvider>
             ))}
           </div>
         </LocaleProvider>
@@ -133,23 +126,12 @@ function HeaderRow() {
   );
 }
 
-interface DataRowProps {
-  node: MediaNode;
-  globalIndex: number;
-  allNodes: MediaNode[];
-  isMobile: boolean;
-  totalSize: number;
-  onSelectionChange?: () => void;
-  onOpen?: (node: MediaNode) => void;
-  onThumbError?: (node: MediaNode) => void;
-}
-
-function DataRow(props: DataRowProps) {
-  const { locale } = useLocaleContext();
+function DataRow() {
   const { items: menuItems } = useMenuItemsContext();
-  const { updateFavorite } = useFavoritesControlContext();
 
   const {
+    node,
+    globalIndex,
     isMediaNode,
     isFavorite,
     rating,
@@ -164,20 +146,16 @@ function DataRow(props: DataRowProps) {
     handleContextMenu,
     toggleFavorite,
     toggleSelection,
-  } = useMediaNodeListItem(props);
-
-  const { node, globalIndex, isMobile, totalSize } = props;
+    updateFavorite,
+    occupancyPercent,
+    title,
+  } = useMediaNodeViewItemContext();
 
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });
 
-  // 占有率計算
-  const occupancyPercent = usePercent({
-    value: node.size ?? 0,
-    total: totalSize,
-  });
-
-  const title = node.title ?? node.name;
+  const isMobile = useDetectMobileContext();
+  const { locale } = useLocaleContext();
 
   return (
     <HoverPreviewPortal

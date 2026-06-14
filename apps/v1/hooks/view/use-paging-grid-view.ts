@@ -1,32 +1,29 @@
-import { MediaNode } from "@/lib/media/types";
-import { usePagingContext } from "@/providers/paging-provider";
-import { usePathSelectionContext } from "@/providers/path-selection-provider";
+import { Paging } from "@/hooks/navigation/use-paging";
+import { PathSelection } from "@/hooks/selections/use-path-selection";
+import { MediaNodePagingView } from "@/hooks/view/use-media-node-paging-view";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface UsePagingGridViewProps {
-  allNodes: MediaNode[];
-  initialScrollPath?: string | null;
-  focusOnPageChange?: boolean;
-  onPageChange?: (page: number) => void;
-  onScrollRestored?: () => void;
-  onOpen?: (node: MediaNode) => void;
+  pagingView: MediaNodePagingView;
+  paging: Paging;
+  selection: PathSelection;
 }
 
 export function usePagingGridView({
-  allNodes,
-  initialScrollPath,
-  focusOnPageChange = false,
-  onPageChange,
-  onScrollRestored,
-  onOpen,
+  pagingView,
+  paging,
+  selection,
 }: UsePagingGridViewProps) {
   const {
-    page: currentPage,
-    pageSize,
-    totalPages,
-    setPage,
-    paginate,
-  } = usePagingContext();
+    allNodes,
+    initialScrollPath,
+    focusOnPageChange = false,
+    onPageChange,
+    onScrollRestored,
+    onOpen,
+  } = pagingView;
+
+  const { page: currentPage, pageSize, totalPages, setPage, paginate } = paging;
 
   const {
     lastSelectedPath,
@@ -36,7 +33,7 @@ export function usePagingGridView({
     setAnchorPath,
     enterSelectionMode,
     selectPaths,
-  } = usePathSelectionContext();
+  } = selection;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);

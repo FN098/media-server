@@ -10,37 +10,32 @@ import { HoverPreviewPortal } from "@/components/ui/portals/hover-preview-portal
 import { MarqueeText } from "@/components/ui/texts/marquee-text";
 import { MediaThumb } from "@/components/ui/thumbnails/media-thumb";
 import { useMediaNodeDndItem } from "@/hooks/dnd/use-media-node-dnd-item";
-import { usePercent } from "@/hooks/general/use-percent";
-import { useMediaNodeListItem } from "@/hooks/view/use-media-node-list-item";
 import { usePagingGridView } from "@/hooks/view/use-paging-grid-view";
-import { MediaNode } from "@/lib/media/types";
 import { formatBytes } from "@/lib/utils/bytes";
 import { useCanHoverContext } from "@/providers/can-hover-provider";
 import {
   MediaNodeDndProvider,
   useMediaNodeDndContext,
 } from "@/providers/media-node-dnd-provider";
+import { useMediaNodePagingViewContext } from "@/providers/media-node-paging-view-provider";
+import {
+  MediaNodeViewItemProvider,
+  useMediaNodeViewItemContext,
+} from "@/providers/media-node-view-item-provider";
 import { useMenuItemsContext } from "@/providers/menu-items-provider";
 import { useDetectMobileContext } from "@/providers/mobile-provider";
+import { usePagingContext } from "@/providers/paging-provider";
+import { usePathSelectionContext } from "@/providers/path-selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
 
-interface PagingGridViewProps {
-  allNodes: MediaNode[];
-  initialScrollPath?: string | null;
-  focusOnPageChange?: boolean;
-  onPageChange?: (page: number) => void;
-  onScrollRestored?: () => void;
-  onSelectionChange?: () => void;
-  onOpen?: (node: MediaNode) => void;
-  onThumbError?: (node: MediaNode) => void;
-  onMoveNode?: (node: MediaNode, targetFolderNode: MediaNode) => void;
-}
+export function PagingGridView() {
+  const pagingView = useMediaNodePagingViewContext();
+  const paging = usePagingContext();
+  const selection = usePathSelectionContext();
 
-export function PagingGridView(props: PagingGridViewProps) {
-  const { allNodes, onOpen, onSelectionChange, onThumbError, onMoveNode } =
-    props;
+  const { allNodes, onOpen, onSelectionChange, onMoveNode } = pagingView;
 
   const {
     containerRef,
@@ -52,10 +47,9 @@ export function PagingGridView(props: PagingGridViewProps) {
     pageSize,
     handlePageChange,
     handleKeyDown,
-  } = usePagingGridView(props);
+  } = usePagingGridView({ pagingView, paging, selection });
 
   const isMobile = useDetectMobileContext();
-  const canHover = useCanHoverContext();
 
   return (
     <MediaNodeDndProvider onDragEnd={onMoveNode}>
@@ -75,18 +69,17 @@ export function PagingGridView(props: PagingGridViewProps) {
           )}
         >
           {currentNodes.map((node, index) => (
-            <Cell
+            <MediaNodeViewItemProvider
               key={node.path}
               node={node}
               globalIndex={(currentPage - 1) * pageSize + index}
               allNodes={allNodes}
-              isMobile={isMobile}
-              canHover={canHover}
               totalSize={totalSize}
               onOpen={onOpen}
               onSelectionChange={onSelectionChange}
-              onThumbError={onThumbError}
-            />
+            >
+              <Cell />
+            </MediaNodeViewItemProvider>
           ))}
         </div>
 
@@ -103,25 +96,13 @@ export function PagingGridView(props: PagingGridViewProps) {
   );
 }
 
-interface CellProps {
-  node: MediaNode;
-  globalIndex: number;
-  allNodes: MediaNode[];
-  isMobile: boolean;
-  canHover: boolean;
-  totalSize: number;
-  onSelectionChange?: () => void;
-  onOpen?: (node: MediaNode) => void;
-  onThumbError?: (node: MediaNode) => void;
-}
-
-function Cell(props: CellProps) {
-  const { node, globalIndex, isMobile, canHover, totalSize, onThumbError } =
-    props;
-
+function Cell() {
+  const { onThumbError } = useMediaNodePagingViewContext();
   const { items: menuItems } = useMenuItemsContext();
 
   const {
+    node,
+    globalIndex,
     isMediaNode,
     isFavorite,
     rating,
@@ -136,18 +117,15 @@ function Cell(props: CellProps) {
     handleDoubleClick,
     handleContextMenu,
     toggleFavorite,
-  } = useMediaNodeListItem(props);
+    occupancyPercent,
+    title,
+  } = useMediaNodeViewItemContext();
 
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });
 
-  // 占有率計算
-  const occupancyPercent = usePercent({
-    value: node.size ?? 0,
-    total: totalSize,
-  });
-
-  const title = node.title ?? node.name;
+  const isMobile = useDetectMobileContext();
+  const canHover = useCanHoverContext();
 
   return (
     <div
