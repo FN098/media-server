@@ -9,7 +9,7 @@ import {
 } from "@/lib/path/helpers";
 import { unique } from "@/lib/utils/array";
 import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";
-import { basename, extname, join } from "@/lib/virtual-path/path";
+import { basename, dirname, extname, join } from "@/lib/virtual-path/path";
 import {
   EditableVirtualPathManySchema,
   EditableVirtualPathSchema,
@@ -29,6 +29,18 @@ const InputSchema = z
   })
   .superRefine(({ sourcePaths, destDirPath }, ctx) => {
     for (const sourcePath of sourcePaths) {
+      const currentDir = dirname(sourcePath);
+
+      if (destDirPath === currentDir) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["destDirPath"],
+          message: "移動先が現在のフォルダと同じです。",
+        });
+
+        return;
+      }
+
       if (
         destDirPath === sourcePath ||
         destDirPath.startsWith(sourcePath + "/")
@@ -65,7 +77,7 @@ export async function moveManyNodesAction(
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, message: parsed.error.message };
+    return { success: false, message: parsed.error.issues[0].message };
   }
 
   const { sourcePaths, destDirPath } = parsed.data;
