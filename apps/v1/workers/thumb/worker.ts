@@ -1,6 +1,6 @@
 import { redis } from "@/lib/redis";
+import { processThumbJob } from "@/lib/thumb-job/processor";
 import { ThumbJobData } from "@/lib/thumb-job/types";
-import { processThumbJob } from "@/workers/thumb/processor";
 import { Worker } from "bullmq";
 
 export const startThumbWorker = () => {
