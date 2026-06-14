@@ -1,7 +1,8 @@
 import { RecentFolders } from "@/feature/dashboard/ui/recent-folders";
 import { VisitedFolder } from "@/lib/folder/types";
 import { Button } from "@/shadcn/components/ui/button";
-import { ArrowRight, FolderSearch2, HistoryIcon, Link } from "lucide-react";
+import { ArrowRight, FolderSearch2, HistoryIcon } from "lucide-react";
+import Link from "next/link";
 
 export function Dashboard({ folders }: { folders: VisitedFolder[] }) {
   return (
