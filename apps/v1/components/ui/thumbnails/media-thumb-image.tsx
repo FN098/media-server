@@ -3,8 +3,8 @@ import { FallbackImage } from "@/components/ui/images/fallback-image";
 import { MediaThumbIcon } from "@/components/ui/thumbnails/media-thumb-icons";
 import { useThumbEventObserver } from "@/hooks/thumbs/use-thumb-event-observer";
 import { MediaNode } from "@/lib/media/types";
-import { getParentDirPath } from "@/lib/path/helpers";
 import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";
+import { parentpath } from "@/lib/virtual-path/path";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useRef, useState } from "react";
 
@@ -54,7 +54,7 @@ export function MediaThumbImage({
       update();
     } else if (
       event.type === "directory" &&
-      event.path === getParentDirPath(displayPath)
+      event.path === parentpath(displayPath)
     ) {
       setTimeout(update, 300);
     }
@@ -79,11 +79,13 @@ export function MediaThumbImage({
 
       try {
         // サムネイルを作成するディレクトリを enqueue
-        const dirPath = previewPath
-          ? getParentDirPath(previewPath)
-          : getParentDirPath(node.path);
+        const parent = previewPath
+          ? parentpath(previewPath)
+          : parentpath(node.path);
 
-        void enqueueCreateThumbsJobAction({ dirPath });
+        if (parent !== null) {
+          void enqueueCreateThumbsJobAction({ dirPath: parent });
+        }
       } catch (e) {
         console.error("Failed to enqueue thumb job", e);
         setIsProcessing(false);

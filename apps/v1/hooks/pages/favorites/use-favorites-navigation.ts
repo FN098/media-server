@@ -6,7 +6,7 @@ import { FavoritesFiltering } from "@/hooks/pages/favorites/use-favorites-filter
 import { MediaNodeSelection } from "@/hooks/selections/use-media-node-selection";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
-import { getParentDirPath } from "@/lib/path/helpers";
+import { parentpath } from "@/lib/virtual-path/path";
 import { useCallback } from "react";
 import { toast } from "sonner";
 
@@ -94,8 +94,10 @@ export function useFavoritesNavigation({
 
   // 親フォルダを開く
   const openParentFolder = (node: MediaNode) => {
-    const path = getParentDirPath(node.path);
-    folder.navigate({ path, at: null });
+    const parent = parentpath(node.path);
+    if (parent !== null) {
+      folder.navigate({ path: parent, at: null });
+    }
   };
 
   return {

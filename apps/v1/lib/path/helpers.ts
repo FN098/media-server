@@ -61,14 +61,6 @@ export function getClientTrashPath(virtualPath: string): string {
   return joinUrlPath(PATHS.client.trash.root, virtualPath);
 }
 
-export function getParentDirPath(virtualPath: string): string {
-  const dir = path.dirname(virtualPath);
-
-  // path.dirname はルート付近で "." を返すことがあるため、
-  // アプリケーションの仕様に合わせて調整（空文字にする等）
-  return dir === "." ? "" : dir.replace(/\\/g, "/");
-}
-
 /**
  * サムネイルの絶対パスから、DB上の mediaPath を復元する
  */
