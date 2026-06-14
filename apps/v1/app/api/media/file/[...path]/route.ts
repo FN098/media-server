@@ -1,4 +1,3 @@
-import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { getMimetype } from "@/lib/media/mimetype";
 import { getServerMediaPath } from "@/lib/path/helpers";
@@ -39,10 +38,10 @@ export async function GET(
   const { path } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("file:download");
-  if (!auth.success) {
-    return forbiddenResponse();
-  }
+  // const auth = await authorize("file:download");
+  // if (!auth.success) {
+  //   return forbiddenResponse();
+  // }
 
   // 仮想パス→物理パス
   const filePath = getServerMediaPath(path);
