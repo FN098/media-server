@@ -41,7 +41,7 @@ export async function GET(
   // 認証＋認可
   const auth = await authorize("file:download");
   if (!auth.success) {
-    return auth;
+    return forbiddenResponse();
   }
 
   // 仮想パス→物理パス

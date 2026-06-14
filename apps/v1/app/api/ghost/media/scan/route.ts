@@ -2,7 +2,7 @@ import { authorize } from "@/lib/authorization/authorize";
 import { scanGhostMedia } from "@/lib/ghost-media/scan";
 import { GhostMediaScanEventData } from "@/lib/ghost-media/types";
 import { logger } from "@/lib/logger";
-import { badRequestResponse } from "@/lib/response/errors";
+import { badRequestResponse, forbiddenResponse } from "@/lib/response/errors";
 import { NextRequest } from "next/server";
 import z from "zod";
 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   // 認証＋認可
   const auth = await authorize("ghost-media:scan");
   if (!auth.success) {
-    return auth;
+    return forbiddenResponse();
   }
 
   const encoder = new TextEncoder();

@@ -2,6 +2,7 @@ import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import {
   badRequestResponse,
+  forbiddenResponse,
   internalServerErrorResponse,
 } from "@/lib/response/errors";
 import {
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
   // 認証＋認可
   const auth = await authorize("tag:search");
   if (!auth.success) {
-    return auth;
+    return forbiddenResponse();
   }
 
   try {

@@ -1,7 +1,10 @@
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { redis } from "@/lib/redis";
-import { internalServerErrorResponse } from "@/lib/response/errors";
+import {
+  forbiddenResponse,
+  internalServerErrorResponse,
+} from "@/lib/response/errors";
 
 // TODO: イベントチャンネルにユーザーIDを追加して識別、ユーザー認証追加、duplicate をやめる
 // ユーザーは一人なので現状でも問題はないが、数万ユーザーが使うようなシステムでも耐えられるように設計する
@@ -11,7 +14,7 @@ export async function GET(req: Request) {
   // 認証＋認可
   const auth = await authorize("thumbnail:subscribe-events");
   if (!auth.success) {
-    return auth;
+    return forbiddenResponse();
   }
 
   try {

@@ -2,7 +2,7 @@ import { authorize } from "@/lib/authorization/authorize";
 import { scanGhostThumb } from "@/lib/ghost-thumb/scan";
 import { GhostThumbScanEventData } from "@/lib/ghost-thumb/types";
 import { logger } from "@/lib/logger";
-import { badRequestResponse } from "@/lib/response/errors";
+import { badRequestResponse, forbiddenResponse } from "@/lib/response/errors";
 import { NextRequest } from "next/server";
 import z from "zod";
 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   // 認証＋認可
   const auth = await authorize("ghost-thumbnail:scan");
   if (!auth.success) {
-    return auth;
+    return forbiddenResponse();
   }
 
   const encoder = new TextEncoder();

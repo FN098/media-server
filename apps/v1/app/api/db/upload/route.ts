@@ -8,6 +8,7 @@ import { DbBackupFile } from "@/lib/db-backup/types";
 import { logger } from "@/lib/logger";
 import {
   badRequestResponse,
+  forbiddenResponse,
   internalServerErrorResponse,
 } from "@/lib/response/errors";
 import { formatBytes } from "@/lib/utils/bytes";
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
   // 認証＋認可
   const auth = await authorize("db-backup:upload");
   if (!auth.success) {
-    return auth;
+    return forbiddenResponse();
   }
 
   // 保存先パスの決定

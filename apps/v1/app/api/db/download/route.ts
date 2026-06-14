@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { getMimetype } from "@/lib/media/mimetype";
 import {
   badRequestResponse,
+  forbiddenResponse,
   internalServerErrorResponse,
   notFoundResponse,
 } from "@/lib/response/errors";
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
   // 認証＋認可
   const auth = await authorize("db-backup:download");
   if (!auth.success) {
-    return auth;
+    return forbiddenResponse();
   }
 
   // ファイルの物理パスを取得
