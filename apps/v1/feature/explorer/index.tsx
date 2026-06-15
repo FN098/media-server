@@ -62,8 +62,15 @@ function ExplorerContent() {
 }
 
 function ExplorerListingView() {
-  const { viewMode, filtering, history, navigation, thumbs, dialogs } =
-    useExplorerContext();
+  const {
+    viewMode,
+    filtering,
+    history,
+    navigation,
+    thumbs,
+    dialogs,
+    selection,
+  } = useExplorerContext();
 
   return (
     <MediaNodePagingViewProvider
@@ -74,10 +81,13 @@ function ExplorerListingView() {
       onOpen={(node) => void navigation.open(node)}
       onDragEnd={({ activeNode, overNode, modifiers }) => {
         if (!overNode.isDirectory) return;
+        const targets = selection.hasSelection
+          ? selection.selectedNodes
+          : [activeNode];
         if (modifiers.ctrlKey) {
-          dialogs.copyDialog.open([activeNode], overNode.path);
+          dialogs.copyDialog.open(targets, overNode.path);
         } else {
-          dialogs.moveDialog.open([activeNode], overNode.path);
+          dialogs.moveDialog.open(targets, overNode.path);
         }
       }}
       focusOnPageChange
