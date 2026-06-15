@@ -102,10 +102,13 @@ export function usePagingGridView() {
     }
   }, [currentPage, pageSize, initialScrollTargetIndex, onScrollRestored]);
 
-  const handlePageChange = (page: number) => {
-    setPage(page);
-    onPageChange?.(page);
-  };
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setPage(page);
+      onPageChange?.(page);
+    },
+    [onPageChange, setPage]
+  );
 
   // リサイズ監視による列数計算
   useEffect(() => {
@@ -140,6 +143,7 @@ export function usePagingGridView() {
       if (!moveKeys.includes(e.key)) return;
 
       e.preventDefault();
+
       const currentPath = lastSelectedPath;
       const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
 
@@ -150,11 +154,11 @@ export function usePagingGridView() {
       }
 
       if (currentIndex === -1) {
-        const first = allNodes[0];
-        if (first) {
-          replaceSelection(first.path);
-          setLastSelectedPath(first.path);
-          setAnchorPath(first.path);
+        const fallback = allNodes[0];
+        if (fallback) {
+          replaceSelection(fallback.path);
+          setLastSelectedPath(fallback.path);
+          setAnchorPath(fallback.path);
         }
         return;
       }
