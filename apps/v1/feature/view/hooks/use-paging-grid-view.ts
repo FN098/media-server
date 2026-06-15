@@ -37,6 +37,7 @@ export function usePagingGridView() {
   const hasRestored = useRef(false);
 
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const totalSize = useMemo(() => {
     return allNodes.reduce((acc, n) => acc + (n.size ?? 0), 0);
@@ -154,7 +155,8 @@ export function usePagingGridView() {
       }
 
       if (currentIndex === -1) {
-        const fallback = allNodes[0];
+        const fallbackIndex = Math.max(0, activeIndex - 1);
+        const fallback = allNodes[fallbackIndex];
         if (fallback) {
           replaceSelection(fallback.path);
           setLastSelectedPath(fallback.path);
@@ -188,6 +190,7 @@ export function usePagingGridView() {
       }
 
       setLastSelectedPath(nextNode.path);
+      setActiveIndex(nextIndex);
 
       const nextPage = Math.floor(nextIndex / pageSize) + 1;
       if (nextPage !== currentPage) {
@@ -207,11 +210,12 @@ export function usePagingGridView() {
       pageSize,
       currentPage,
       onOpen,
+      activeIndex,
       replaceSelection,
       setAnchorPath,
+      anchorPath,
       enterSelectionMode,
       selectPaths,
-      anchorPath,
       setPage,
     ]
   );
