@@ -39,15 +39,25 @@ export function usePagingGridView() {
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // path -> index
+  const indexMap = useMemo(
+    () => new Map(allNodes.map((n, i) => [n.path, i])),
+    [allNodes]
+  );
+  const getIndex = useCallback(
+    (path: string) => indexMap.get(path) ?? -1,
+    [indexMap]
+  );
+
   const totalSize = useMemo(() => {
     return allNodes.reduce((acc, n) => acc + (n.size ?? 0), 0);
   }, [allNodes]);
 
   const initialScrollTargetIndex = useMemo(() => {
     if (!initialScrollPath) return null;
-    const index = allNodes.findIndex((n) => n.path === initialScrollPath);
+    const index = getIndex(initialScrollPath);
     return index !== -1 ? index : null;
-  }, [allNodes, initialScrollPath]);
+  }, [getIndex, initialScrollPath]);
 
   // 初期スクロール対象に関する初期化処理
   useEffect(() => {
@@ -146,7 +156,7 @@ export function usePagingGridView() {
       e.preventDefault();
 
       const currentPath = lastSelectedPath;
-      const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
+      const currentIndex = currentPath ? getIndex(currentPath) : -1;
 
       if (e.key === "Enter" && currentPath) {
         const node = allNodes[currentIndex];
@@ -177,7 +187,7 @@ export function usePagingGridView() {
 
       if (e.shiftKey) {
         const path = anchorPath ?? currentPath;
-        const anchorIndex = allNodes.findIndex((n) => n.path === path);
+        const anchorIndex = path ? getIndex(path) : 0;
         const start = Math.min(anchorIndex, nextIndex);
         const end = Math.max(anchorIndex, nextIndex);
         const paths = allNodes.slice(start, end + 1).map((n) => n.path);
@@ -204,8 +214,8 @@ export function usePagingGridView() {
     },
     [
       lastSelectedPath,
-      allNodes,
       columnCount,
+      allNodes,
       setLastSelectedPath,
       pageSize,
       currentPage,
@@ -214,6 +224,7 @@ export function usePagingGridView() {
       replaceSelection,
       setAnchorPath,
       anchorPath,
+      getIndex,
       enterSelectionMode,
       selectPaths,
       setPage,
@@ -229,14 +240,14 @@ export function usePagingGridView() {
     const currentPath = lastSelectedPath;
     if (!currentPath) return;
 
-    const currentIndex = allNodes.findIndex((n) => n.path === currentPath);
+    const currentIndex = getIndex(currentPath);
     if (currentIndex === -1) return;
 
     requestAnimationFrame(() => {
       const el = document.getElementById(`media-item-${currentIndex}`);
       el?.scrollIntoView({ behavior: "instant", block: "nearest" });
     });
-  }, [currentPage, focusOnPageChange, allNodes, lastSelectedPath]);
+  }, [currentPage, focusOnPageChange, allNodes, lastSelectedPath, getIndex]);
 
   return {
     containerRef,
