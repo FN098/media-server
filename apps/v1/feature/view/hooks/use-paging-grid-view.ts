@@ -37,7 +37,6 @@ export function usePagingGridView() {
   const hasRestored = useRef(false);
 
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
-  const [activeIndex, setActiveIndex] = useState(0);
 
   // path -> index
   const indexMap = useMemo(
@@ -58,6 +57,8 @@ export function usePagingGridView() {
     const index = getIndex(initialScrollPath);
     return index !== -1 ? index : null;
   }, [getIndex, initialScrollPath]);
+
+  const [activeIndex, setActiveIndex] = useState(initialScrollTargetIndex ?? 0);
 
   // 初期スクロール対象に関する初期化処理
   useEffect(() => {
