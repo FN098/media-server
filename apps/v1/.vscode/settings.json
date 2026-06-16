@@ -14,7 +14,8 @@
   "js/ts.preferences.importModuleSpecifierEnding": "minimal",
   "js/ts.preferences.autoImportFileExcludePatterns": [
     "**/generated/**",
-    "**/better-auth/**"
+    "**/better-auth/**",
+    "**/radix-ui/**"
   ],
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
