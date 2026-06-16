@@ -20,8 +20,13 @@ const eslintConfig = defineConfig([
           paths: [
             {
               name: "lucide-react",
-              importNames: ["Link", "Image"],
-              message: "Use NextLink from next/link instead.",
+              importNames: ["Link"],
+              message: "Use LinkIcon instead.",
+            },
+            {
+              name: "lucide-image",
+              importNames: ["Image"],
+              message: "Use ImageIcon instead.",
             },
           ],
         },
