@@ -127,7 +127,8 @@ export function useTagEditSheet({
     setIsLoading(true);
     try {
       const tagsToCreate = pendingNewTags
-        .filter((t) => pendingChanges[t.id] === "add")
+        // add | undefined を通す
+        .filter((t) => pendingChanges[t.id] !== "remove")
         .map((t) => t.name);
 
       let createdOps: TagOperation[] = [];
