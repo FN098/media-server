@@ -57,7 +57,7 @@ async function handleCreateThumbs(job: Job<ThumbJobData>) {
     await Promise.all(
       batch.map((node) =>
         publishThumbCompleted({
-          type: "file",
+          type: "directory",
           path: node.path,
         })
       )
@@ -99,6 +99,7 @@ async function handleCreateThumbSingle(job: Job<ThumbJobData>) {
 //
 
 async function publishThumbCompleted(event: ThumbJobCompletedEvent) {
+  console.log("publish:", event);
   await redis.publish("thumb-completed", JSON.stringify(event));
 }
 
