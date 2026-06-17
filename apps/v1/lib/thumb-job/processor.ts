@@ -57,7 +57,7 @@ async function handleCreateThumbs(job: Job<ThumbJobData>) {
     await Promise.all(
       batch.map((node) =>
         publishThumbCompleted({
-          type: "directory",
+          type: "file",
           path: node.path,
         })
       )
