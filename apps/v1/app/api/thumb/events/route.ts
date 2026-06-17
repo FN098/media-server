@@ -1,9 +1,19 @@
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { redis } from "@/lib/redis";
-import { internalServerErrorResponse } from "@/lib/response/errors";
+import {
+  forbiddenResponse,
+  internalServerErrorResponse,
+} from "@/lib/response/errors";
 
 // サムネイルイベント購読
-export function GET(req: Request) {
+export async function GET(req: Request) {
+  // 認証＋認可
+  const auth = await authorize("thumbnail:subscribe-events");
+  if (!auth.success) {
+    return forbiddenResponse();
+  }
+
   try {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -18,6 +28,7 @@ export function GET(req: Request) {
         });
 
         subscriber.on("message", (channel, message) => {
+          // console.log("thumb-event-message:", message);
           if (channel === "thumb-completed") {
             controller.enqueue(encoder.encode(`data: ${message}\n\n`));
           }

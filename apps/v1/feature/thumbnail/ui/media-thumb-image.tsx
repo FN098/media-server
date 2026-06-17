@@ -50,6 +50,8 @@ export function MediaThumbImage({
   useThumbEventObserver((event) => {
     if (!isProcessing) return;
 
+    // console.log({ event });
+
     if (event.type === "file" && event.path === displayPath) {
       update();
     } else if (
