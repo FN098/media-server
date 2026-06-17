@@ -1,19 +1,9 @@
-import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { redis } from "@/lib/redis";
-import {
-  forbiddenResponse,
-  internalServerErrorResponse,
-} from "@/lib/response/errors";
+import { internalServerErrorResponse } from "@/lib/response/errors";
 
 // サムネイルイベント購読
-export async function GET(req: Request) {
-  // 認証＋認可
-  const auth = await authorize("thumbnail:subscribe-events");
-  if (!auth.success) {
-    return forbiddenResponse();
-  }
-
+export function GET(req: Request) {
   try {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
