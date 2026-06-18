@@ -1,9 +1,9 @@
 "use client";
 
 import { FavoriteButton } from "@/feature/favorite/ui/favorite-button";
+import { NodeDropdownMenu } from "@/feature/menu/ui/node-dropdown-menu";
 import { ClickToCopy } from "@/feature/text/ui/click-to-copy";
 import { MarqueeText } from "@/feature/text/ui/marquee-text";
-import { NodeDropdownMenu } from "@/feature/view/ui/node-dropdown-menu";
 import { useMediaViewerContext } from "@/feature/viewer/providers/media-viewer-provider";
 import { AudioPlayer } from "@/feature/viewer/ui/audio-player";
 import { ImageViewer } from "@/feature/viewer/ui/image-viewer";

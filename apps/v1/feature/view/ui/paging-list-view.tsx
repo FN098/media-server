@@ -13,6 +13,8 @@ import {
   useLocaleContext,
 } from "@/feature/general/providers/locale-provider";
 import { useMenuItemsContext } from "@/feature/menu-items/providers/menu-items-provider";
+import { NodeContextMenu } from "@/feature/menu/ui/node-context-menu";
+import { NodeDropdownMenu } from "@/feature/menu/ui/node-dropdown-menu";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { HoverPreviewPortal } from "@/feature/preview/ui/hover-preview-portal";
 import { MediaThumbIcon } from "@/feature/thumbnail/ui/media-thumb-icons";
@@ -25,8 +27,6 @@ import { useMediaNodePagingViewContext } from "@/feature/view/providers/media-no
 import { AverageRatingBadge } from "@/feature/view/ui/average-rating-badge";
 import { FavoriteRatingDisplay } from "@/feature/view/ui/favorite-rating-display";
 import { FolderStatusBadge } from "@/feature/view/ui/folder-status-badge";
-import { NodeContextMenu } from "@/feature/view/ui/node-context-menu";
-import { NodeDropdownMenu } from "@/feature/view/ui/node-dropdown-menu";
 import { PagingControl } from "@/feature/view/ui/pagination-control";
 import { SizeBar } from "@/feature/view/ui/size-bar";
 import { formatBytes } from "@/lib/utils/bytes";
