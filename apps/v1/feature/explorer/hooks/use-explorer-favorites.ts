@@ -44,8 +44,10 @@ export function useExplorerFavorites() {
   const refreshPath = useCallback(
     async (prevPath: string, nextPath: string) => {
       const fav = getFavorite(prevPath);
-      await deleteFavorite(prevPath);
-      await updateFavorite(nextPath, fav.rating);
+      if (fav.isFavorite) {
+        await deleteFavorite(prevPath);
+        await updateFavorite(nextPath, fav.rating);
+      }
     },
     [deleteFavorite, getFavorite, updateFavorite]
   );
