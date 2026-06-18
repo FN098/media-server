@@ -68,7 +68,7 @@ export function useTrashHotkeys({
   });
 
   useHotkeys(
-    "delete",
+    "shift+delete",
     () =>
       dialogs.deleteDialog.open(selection.selectedNodes, { isPermanent: true }),
     {

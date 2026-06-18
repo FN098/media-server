@@ -1,5 +1,5 @@
 import { Fullscreen } from "@/feature/general/hooks/use-fullscreen";
-import { useDeleteMenuItem } from "@/feature/menu-items/hooks/use-delete-menu-item";
+import { useDeletePermanentlyMenuItem } from "@/feature/menu-items/hooks/use-delete-permanently-menu-item";
 import { useOpenInNewTabMenuItem } from "@/feature/menu-items/hooks/use-open-in-new-tab-menu-item";
 import { useOpenNextFolderMenuItem } from "@/feature/menu-items/hooks/use-open-next-folder-menu-item";
 import { useOpenPrevFolderMenuItem } from "@/feature/menu-items/hooks/use-open-prev-folder-menu-item";
@@ -60,8 +60,9 @@ export function useTrashMenuItems({
     selectedNodes: selection.selectedNodes,
   });
 
-  const deleteNode = useDeleteMenuItem({
-    openDialog: dialogs.deleteDialog.open,
+  const deleteNode = useDeletePermanentlyMenuItem({
+    openDialog: (nodes) =>
+      dialogs.deleteDialog.open(nodes, { isPermanent: true }),
     hasSelection: selection.hasSelection,
     selectedNodes: selection.selectedNodes,
   });
