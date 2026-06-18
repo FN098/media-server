@@ -192,7 +192,7 @@ function NodeDropdownMenuItem({
           <KbdGroup className="shrink-0">
             {castArray(item.kbd).map((key, index) => (
               <Fragment key={key}>
-                {index > 0 && <span>+</span>}
+                {index > 0 && <span className="text-muted-foreground">+</span>}
                 <Kbd>{key}</Kbd>
               </Fragment>
             ))}
