@@ -8,21 +8,11 @@ import { Tag } from "@/lib/tag/types";
 import { generateKana } from "@/lib/utils/kana";
 import z from "zod";
 
-const InputSchema = z
-  .object({
-    id: z.uuid(),
-    newName: z.string(),
-    newKana: z.string().optional(),
-  })
-  .transform(async ({ id, newName, newKana }) => {
-    const normalizedName = normalizeTagName(newName);
-
-    return {
-      id,
-      newName: normalizedName,
-      newKana: newKana ?? (await generateKana(normalizedName)),
-    };
-  });
+const InputSchema = z.object({
+  id: z.uuid(),
+  newName: z.string(),
+  newKana: z.string().optional(),
+});
 
 type ActionResult =
   | { success: true; tag: Tag }
@@ -32,13 +22,16 @@ type ActionResult =
 export async function renameTagAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
+  // 入力バリデーション
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
 
-  const { id, newName, newKana } = parsed.data;
+  // 正規化
+  const id = parsed.data.id;
+  const newName = normalizeTagName(parsed.data.newName);
+  const newKana = parsed.data.newKana ?? (await generateKana(newName));
 
   // 認証＋認可
   const auth = await authorize("tag:rename");
