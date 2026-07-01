@@ -3,7 +3,7 @@
 import {
   GhostTag,
   scanGhostTagsAction,
-} from "@/feature/ghost-tag/actions/scan";
+} from "@/feature/maintenance/components/ghost-tag/actions/scan";
 import { deleteManyTagsAction } from "@/feature/tag/actions/delete-many";
 import {
   AlertDialog,

@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteManyMediaAction } from "@/feature/ghost-media/actions/delete-many";
+import { deleteManyMediaAction } from "@/feature/maintenance/components/ghost-media/actions/delete-many";
 import { AbortError } from "@/lib/errors/abort-error";
 import {
   GhostMediaItem,

@@ -1,9 +1,9 @@
 "use client";
 
+import { useTagMasterContext } from "@/feature/maintenance/tag-master/providers/tag-master-provider";
+import { TagMasterCardList } from "@/feature/maintenance/tag-master/ui/tag-master-card-list";
+import { TagMasterTable } from "@/feature/maintenance/tag-master/ui/tag-master-table";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
-import { useTagMasterContext } from "@/feature/tag-master/providers/tag-master-provider";
-import { TagMasterCardList } from "@/feature/tag-master/ui/tag-master-card-list";
-import { TagMasterTable } from "@/feature/tag-master/ui/tag-master-table";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,

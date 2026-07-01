@@ -1,5 +1,5 @@
 import { PageBackground } from "@/feature/background/ui/page-background";
-import { Header } from "@/feature/header";
+import { Header } from "@/feature/header/ui";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
 const meta = resolvePageMeta("maintenance");

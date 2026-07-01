@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteManyThumbnailsAction } from "@/feature/ghost-thumbnail/actions/delete-many";
+import { deleteManyThumbnailsAction } from "@/feature/maintenance/components/ghost-thumbnail/actions/delete-many";
 import {
   GhostThumbItem,
   GhostThumbScanEventData,

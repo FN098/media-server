@@ -1,5 +1,5 @@
 import { PageBackground } from "@/feature/background/ui/page-background";
-import { Header } from "@/feature/header";
+import { Header } from "@/feature/header/ui";
 import { HistoryProvider } from "@/feature/history/providers/history-provider";
 import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";
 import { TagEditorProvider } from "@/feature/tag-editor/providers/tag-editor-provider";

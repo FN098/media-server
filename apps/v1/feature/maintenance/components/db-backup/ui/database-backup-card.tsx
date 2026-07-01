@@ -1,8 +1,8 @@
 "use client";
 
-import { useDatabaseBackup } from "@/feature/backup/hooks/use-database-backup-card";
 import { LocalDate } from "@/feature/datetime/ui/local-date";
 import { useLocale } from "@/feature/general/hooks/use-locale";
+import { useDatabaseBackup } from "@/feature/maintenance/db-backup/hooks/use-database-backup-card";
 import { MAX_KEEP_COUNT, MIN_KEEP_COUNT } from "@/lib/db-backup/config";
 import { formatBytes } from "@/lib/utils/bytes";
 import {
