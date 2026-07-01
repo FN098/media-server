@@ -2,7 +2,6 @@
 
 import { AccentColor } from "@/lib/page-meta/types";
 import { cn } from "@/shadcn/lib/utils";
-import { motion } from "framer-motion";
 
 const glowMap: Record<AccentColor, { top: string; bl: string; br: string }> = {
   indigo: {
@@ -62,32 +61,6 @@ const glowMap: Record<AccentColor, { top: string; bl: string; br: string }> = {
   },
 };
 
-const float = (
-  xRange: [number, number],
-  yRange: [number, number],
-  scaleRange: [number, number],
-  opacityRange: [number, number],
-  duration: number
-) => ({
-  animate: {
-    x: [0, xRange[0], xRange[1], 0],
-    y: [0, yRange[0], yRange[1], 0],
-    scale: [1, scaleRange[0], scaleRange[1], 1],
-    opacity: [
-      opacityRange[0],
-      opacityRange[1],
-      opacityRange[0],
-      opacityRange[1],
-    ],
-  },
-  transition: {
-    duration,
-    ease: "easeInOut" as const,
-    repeat: Infinity,
-    repeatType: "mirror" as const,
-  },
-});
-
 interface AmbientBackgroundProps {
   accent: AccentColor;
   className?: string;
@@ -120,28 +93,25 @@ export function AmbientBackground({
       />
 
       {/* グロー top */}
-      <motion.div
+      <div
         className={cn(
           "absolute -top-32 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-3xl",
           glow.top
         )}
-        {...float([-80, 60], [40, -30], [1.15, 0.9], [0.7, 1], 9)}
       />
 
-      <motion.div
+      <div
         className={cn(
           "absolute bottom-0 left-1/4 w-64 h-64 rounded-full blur-3xl",
           glow.bl
         )}
-        {...float([40, -28], [-48, 24], [1.1, 0.85], [0.6, 1], 11)}
       />
 
-      <motion.div
+      <div
         className={cn(
           "absolute bottom-1/4 right-1/4 w-44 h-44 rounded-full blur-3xl",
           glow.br
         )}
-        {...float([-36, 32], [40, -32], [1.2, 0.8], [0.5, 1], 7)}
       />
     </div>
   );
