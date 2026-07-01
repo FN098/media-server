@@ -1,4 +1,4 @@
-import { updateManyUserTagFavoriteAction } from "@/feature/maintenance/tag-master/actions/update-many";
+import { updateManyUserTagFavoriteAction } from "@/feature/pages/maintenance/components/tag-master/actions/update-many";
 import { createManyTagsAction } from "@/feature/tag/actions/create-many";
 import { deleteTagAction } from "@/feature/tag/actions/delete";
 import { getTagsInfiniteAction } from "@/feature/tag/actions/get-infinite";

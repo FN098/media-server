@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/incompatible-library */
 "use client";
 
-import { useTagMasterContext } from "@/feature/maintenance/tag-master/providers/tag-master-provider";
-import { TagDeleteButton } from "@/feature/maintenance/tag-master/ui/tag-delete-button";
-import { TagMediaPreview } from "@/feature/maintenance/tag-master/ui/tag-media-preview";
+import { useTagMasterContext } from "@/feature/pages/maintenance/components/tag-master/providers/tag-master-provider";
+import { TagDeleteButton } from "@/feature/pages/maintenance/components/tag-master/ui/tag-delete-button";
+import { TagMediaPreview } from "@/feature/pages/maintenance/components/tag-master/ui/tag-media-preview";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { Input } from "@/shadcn/components/ui/input";

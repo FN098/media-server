@@ -1,8 +1,8 @@
 import { DbBackupUploadResult } from "@/app/api/db/upload/route";
-import { cleanupOldBackupsAction } from "@/feature/maintenance/db-backup/actions/cleanup";
-import { dumpDatabaseAction } from "@/feature/maintenance/db-backup/actions/dump";
-import { listDbBackupsAction } from "@/feature/maintenance/db-backup/actions/list";
-import { restoreDatabaseAction } from "@/feature/maintenance/db-backup/actions/restore";
+import { cleanupOldBackupsAction } from "@/feature/pages/maintenance/components/db-backup/actions/cleanup";
+import { dumpDatabaseAction } from "@/feature/pages/maintenance/components/db-backup/actions/dump";
+import { listDbBackupsAction } from "@/feature/pages/maintenance/components/db-backup/actions/list";
+import { restoreDatabaseAction } from "@/feature/pages/maintenance/components/db-backup/actions/restore";
 import { DbBackupFile } from "@/lib/db-backup/types";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";

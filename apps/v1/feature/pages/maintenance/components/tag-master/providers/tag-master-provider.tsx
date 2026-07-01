@@ -1,6 +1,6 @@
 "use client";
 
-import { useTagMaster } from "@/feature/maintenance/tag-master/hooks/use-tag-master";
+import { useTagMaster } from "@/feature/pages/maintenance/components/tag-master/hooks/use-tag-master";
 import { createContext, ReactNode, useContext } from "react";
 
 const TagMasterContext = createContext<
