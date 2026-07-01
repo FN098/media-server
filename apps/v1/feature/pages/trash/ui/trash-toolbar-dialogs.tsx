@@ -1,6 +1,6 @@
 import { RatingFilterDialog } from "@/feature/filter/ui/rating-filter-dialog";
 import { TagFilterDialog } from "@/feature/filter/ui/tag-filter-dialog";
-import { useTrashContext } from "@/feature/trash/providers/trash-provider";
+import { useTrashContext } from "@/feature/pages/trash/providers/trash-provider";
 
 export function TrashToolbarDialogs() {
   const { dialogs } = useTrashContext();

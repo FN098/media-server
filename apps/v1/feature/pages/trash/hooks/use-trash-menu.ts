@@ -1,8 +1,8 @@
 import { Fullscreen } from "@/feature/general/hooks/use-fullscreen";
+import { TrashDialogs } from "@/feature/pages/trash/hooks/use-trash-dialogs";
+import { useTrashMenuItems } from "@/feature/pages/trash/hooks/use-trash-menu-items";
+import { TrashNavigation } from "@/feature/pages/trash/hooks/use-trash-navigation";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
-import { TrashDialogs } from "@/feature/trash/hooks/use-trash-dialogs";
-import { useTrashMenuItems } from "@/feature/trash/hooks/use-trash-menu-items";
-import { TrashNavigation } from "@/feature/trash/hooks/use-trash-navigation";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 
 interface UseTrashMenuProps {

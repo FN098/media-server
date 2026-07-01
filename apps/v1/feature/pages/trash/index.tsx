@@ -3,13 +3,13 @@
 import { ScrollLockProvider } from "@/feature/general/providers/scroll-lock-provider";
 import { MenuItemsProvider } from "@/feature/menu-items/providers/menu-items-provider";
 import { FolderNavigation } from "@/feature/navigation/ui/folder-navigation";
+import { useTrashContext } from "@/feature/pages/trash/providers/trash-provider";
+import { TrashDialogs } from "@/feature/pages/trash/ui/trash-dialogs";
+import { TrashToolbar } from "@/feature/pages/trash/ui/trash-toolbar";
+import { TrashToolbarDialogs } from "@/feature/pages/trash/ui/trash-toolbar-dialogs";
 import { SelectionBar } from "@/feature/selection/ui/selection-bar";
 import { TagEditSheetProvider } from "@/feature/tag-editor/providers/tag-edit-sheet-provider";
 import { TagEditSheet } from "@/feature/tag-editor/ui/tag-edit-sheet";
-import { useTrashContext } from "@/feature/trash/providers/trash-provider";
-import { TrashDialogs } from "@/feature/trash/ui/trash-dialogs";
-import { TrashToolbar } from "@/feature/trash/ui/trash-toolbar";
-import { TrashToolbarDialogs } from "@/feature/trash/ui/trash-toolbar-dialogs";
 import { PagingGridView } from "@/feature/view/components/with-paging/components/paging-grid-view";
 import { PagingListView } from "@/feature/view/components/with-paging/components/paging-list-view";
 import { MediaNodePagingViewProvider } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";

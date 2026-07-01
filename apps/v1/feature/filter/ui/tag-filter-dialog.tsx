@@ -22,14 +22,14 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Check,
-  Clock,
-  Link,
-  Loader2,
-  RotateCcw,
-  Search,
-  Star,
-  X,
+  CheckIcon,
+  ClockIcon,
+  LinkIcon,
+  Loader2Icon,
+  RotateCcwIcon,
+  SearchIcon,
+  StarIcon,
+  XIcon,
 } from "lucide-react";
 
 const modeTexts = {
@@ -120,7 +120,7 @@ export function TagFilterDialog({
         {/* 検索ボックス＋サジェスト */}
         <div className="px-6 pb-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               ref={inputRef}
               placeholder="タグを検索して追加..."
@@ -134,7 +134,7 @@ export function TagFilterDialog({
               disabled={isEmptyMode}
             />
             {isLoading ? (
-              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+              <Loader2Icon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
             ) : query ? (
               <button
                 type="button"
@@ -145,7 +145,7 @@ export function TagFilterDialog({
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                <X className="h-4 w-4" />
+                <XIcon className="h-4 w-4" />
               </button>
             ) : null}
 
@@ -183,7 +183,7 @@ export function TagFilterDialog({
                               )}
                             >
                               <span>{tag.name}</span>
-                              <Check
+                              <CheckIcon
                                 size={14}
                                 className={cn(
                                   "text-primary transition-opacity",
@@ -217,7 +217,7 @@ export function TagFilterDialog({
                 onClick={() => toggleTemp(tag)}
               >
                 {tag.name}
-                <X className="h-3 w-3" />
+                <XIcon className="h-3 w-3" />
               </Badge>
             ))}
           </div>
@@ -237,18 +237,18 @@ export function TagFilterDialog({
             <Tabs defaultValue="related" className="h-full flex flex-col">
               <TabsList className="w-full h-9 shrink-0">
                 <TabsTrigger value="related" className="flex-1 gap-1.5 text-xs">
-                  <Link className="size-3.5" />
+                  <LinkIcon className="size-3.5" />
                   関連
                 </TabsTrigger>
                 <TabsTrigger
                   value="favorite"
                   className="flex-1 gap-1.5 text-xs"
                 >
-                  <Star className="size-3.5" />
+                  <StarIcon className="size-3.5" />
                   お気に入り
                 </TabsTrigger>
                 <TabsTrigger value="recent" className="flex-1 gap-1.5 text-xs">
-                  <Clock className="size-3.5" />
+                  <ClockIcon className="size-3.5" />
                   最近使用
                 </TabsTrigger>
               </TabsList>
@@ -301,7 +301,7 @@ export function TagFilterDialog({
             disabled={tempSelectedTags.length === 0}
             className="text-muted-foreground hover:text-destructive hover:bg-destructive/5"
           >
-            <RotateCcw className="mr-2 h-3.5 w-3.5" />
+            <RotateCcwIcon className="mr-2 h-3.5 w-3.5" />
             選択を解除
           </Button>
           <Button
@@ -356,7 +356,7 @@ function TagChipList({
                 : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
             )}
           >
-            {selected && <Check size={11} />}
+            {selected && <CheckIcon size={11} />}
             {tag.name}
           </button>
         );

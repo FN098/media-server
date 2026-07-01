@@ -1,8 +1,8 @@
 import {
   TrashFilterMenuContext,
   useTrashFilterMenuItems,
-} from "@/feature/trash/hooks/use-trash-filter-menu-items";
-import { useTrashContext } from "@/feature/trash/providers/trash-provider";
+} from "@/feature/pages/trash/hooks/use-trash-filter-menu-items";
+import { useTrashContext } from "@/feature/pages/trash/providers/trash-provider";
 import { MediaType } from "@/generated/prisma/enums";
 import { isMedia } from "@/lib/media/detectors";
 import { useCallback, useMemo } from "react";

@@ -2,8 +2,8 @@ import { visitFolderAction } from "@/feature/folder/actions/visit";
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
 import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
+import { TrashFiltering } from "@/feature/pages/trash/hooks/use-trash-filtering";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
-import { TrashFiltering } from "@/feature/trash/hooks/use-trash-filtering";
 import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
 import {
   IndexLike,

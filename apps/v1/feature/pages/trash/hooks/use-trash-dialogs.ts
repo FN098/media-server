@@ -2,8 +2,8 @@ import { useRatingFilterDialog } from "@/feature/filter/hooks/use-rating-filter-
 import { useTagFilterDialog } from "@/feature/filter/hooks/use-tag-filter-dialog";
 import { useDeleteDialog } from "@/feature/node/hooks/use-delete-dialog";
 import { useRestoreDialog } from "@/feature/node/hooks/use-restore-dialog";
+import { TrashFiltering } from "@/feature/pages/trash/hooks/use-trash-filtering";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
-import { TrashFiltering } from "@/feature/trash/hooks/use-trash-filtering";
 import { useMemo } from "react";
 
 interface UseTrashDialogsProps {

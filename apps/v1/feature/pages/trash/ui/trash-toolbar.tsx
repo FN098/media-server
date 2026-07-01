@@ -1,11 +1,11 @@
+import { useTrashActionMenu } from "@/feature/pages/trash/hooks/use-trash-action-menu";
+import { useTrashFilterMenu } from "@/feature/pages/trash/hooks/use-trash-filter-menu";
+import { useTrashSortMenu } from "@/feature/pages/trash/hooks/use-trash-sort-menu";
+import { useTrashContext } from "@/feature/pages/trash/providers/trash-provider";
 import { FilterResultText } from "@/feature/text/ui/filter-result-text";
 import { ActionDropdownMenu } from "@/feature/toolbar-menu/ui/action-dropdown-menu";
 import { FilterDropdownMenu } from "@/feature/toolbar-menu/ui/filter-dropdown-menu";
 import { SortDropdownMenu } from "@/feature/toolbar-menu/ui/sort-dropdown-menu";
-import { useTrashActionMenu } from "@/feature/trash/hooks/use-trash-action-menu";
-import { useTrashFilterMenu } from "@/feature/trash/hooks/use-trash-filter-menu";
-import { useTrashSortMenu } from "@/feature/trash/hooks/use-trash-sort-menu";
-import { useTrashContext } from "@/feature/trash/providers/trash-provider";
 
 export function TrashToolbar() {
   const { filtering, sort } = useTrashContext();

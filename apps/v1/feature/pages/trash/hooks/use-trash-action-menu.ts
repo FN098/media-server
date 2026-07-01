@@ -1,4 +1,4 @@
-import { useTrashContext } from "@/feature/trash/providers/trash-provider";
+import { useTrashContext } from "@/feature/pages/trash/providers/trash-provider";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
