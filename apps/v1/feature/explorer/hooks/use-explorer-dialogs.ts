@@ -2,7 +2,6 @@ import { useExtractDialog } from "@/feature/archive/hooks/use-extract-dialog";
 import { ExplorerFavorites } from "@/feature/explorer/hooks/use-explorer-favorites";
 import { ExplorerFiltering } from "@/feature/explorer/hooks/use-explorer-filtering";
 import { useFavoriteDialog } from "@/feature/favorite/hooks/use-favorite-dialog";
-import { useTextFilePreviewDialog } from "@/feature/file/hooks/use-text-file-preview-dialog";
 import { useRatingFilterDialog } from "@/feature/filter/hooks/use-rating-filter-dialog";
 import { useTagFilterDialog } from "@/feature/filter/hooks/use-tag-filter-dialog";
 import { useCreateFolderDialog } from "@/feature/folder/hooks/use-create-folder-dialog";
@@ -12,6 +11,7 @@ import { useMoveDialog } from "@/feature/node/hooks/use-move-dialog";
 import { useRenameDialog } from "@/feature/node/hooks/use-rename-dialog";
 import { usePreviewDialog } from "@/feature/preview/hooks/use-preview-dialog";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { useTextFilePreviewDialog } from "@/feature/text-file-reader/hooks/use-text-file-preview-dialog";
 import { useMemo } from "react";
 
 interface UseExplorerDialogsProps {

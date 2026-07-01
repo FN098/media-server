@@ -1,11 +1,11 @@
 import { ExplorerDialogs } from "@/feature/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/feature/explorer/hooks/use-explorer-filtering";
-import { readFileAsTextAction } from "@/feature/file/actions/read-as-text";
 import { visitFolderAction } from "@/feature/folder/actions/visit";
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
 import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { readFileAsTextAction } from "@/feature/text-file-reader/actions/read-as-text";
 import { useMediaIndex } from "@/feature/viewer/hooks/use-media-index";
 import {
   IndexLike,

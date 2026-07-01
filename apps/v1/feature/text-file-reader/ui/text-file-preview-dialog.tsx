@@ -1,6 +1,6 @@
 "use client";
 
-import { useTextFilePreviewDialog } from "@/feature/file/hooks/use-text-file-preview-dialog";
+import { useTextFilePreviewDialog } from "@/feature/text-file-reader/hooks/use-text-file-preview-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
