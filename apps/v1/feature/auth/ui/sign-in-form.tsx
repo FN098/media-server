@@ -1,24 +1,67 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 "use client";
 
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import Link from "next/link";
-import { useActionState, useState } from "react";
-
 import { signInAction } from "@/feature/auth/actions/sign-in";
+import { SignInFormSchema, SignInFormValues } from "@/feature/auth/lib/schemas";
+import { SignInResult } from "@/feature/auth/lib/types";
+import { entries } from "@/lib/utils/object";
 import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
+import { Field, FieldLabel } from "@/shadcn/components/ui/field";
 import { Input } from "@/shadcn/components/ui/input";
 import { Label } from "@/shadcn/components/ui/label";
 import { Spinner } from "@/shadcn/components/ui/spinner";
 import { cn } from "@/shadcn/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import Link from "next/link";
+import { useState, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
 
 interface SignInFormProps {
   redirectTo?: string;
 }
 
 export function SignInForm({ redirectTo = "/" }: SignInFormProps) {
-  const [state, action, isPending] = useActionState(signInAction, undefined);
+  const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    handleSubmit,
+    control,
+    setError,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(SignInFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+      redirectTo: redirectTo,
+    },
+  });
+
+  const onSubmit = (data: SignInFormValues) => {
+    startTransition(async () => {
+      const result = await signInAction(data);
+      if (!result.ok) {
+        onError(result);
+      }
+    });
+  };
+
+  const onError = (result: SignInResult) => {
+    setError("form", { message: result.message });
+
+    if (result.errors) {
+      entries(result.errors).forEach(([field, messages]) => {
+        if (!messages || messages.length === 0) return;
+        setError(field, {
+          message: messages[0],
+        });
+      });
+    }
+  };
 
   return (
     <div className="relative w-full max-w-sm mx-4">
@@ -44,135 +87,143 @@ export function SignInForm({ redirectTo = "/" }: SignInFormProps) {
           </div>
         </div>
 
-        <form action={action} className="px-8 pb-8 space-y-5">
-          {/* redirectTo を hidden で渡す（必要な場合） */}
+        <form onSubmit={handleSubmit(onSubmit)} className="px-8 pb-8 space-y-5">
           <input type="hidden" name="redirectTo" value={redirectTo} />
 
           {/* Email */}
-          <div className="space-y-1.5">
-            <Label
-              htmlFor="email"
-              className="text-xs font-medium text-zinc-500 dark:text-zinc-400 tracking-wide uppercase"
-            >
-              Email
-            </Label>
-            <div className="relative">
-              <Mail
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-600 pointer-events-none"
-                aria-hidden
-              />
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                disabled={isPending}
-                required
-                aria-describedby={
-                  state?.errors?.email ? "email-error" : undefined
-                }
-                className={cn(
-                  "pl-9 h-10 text-sm",
-                  "bg-zinc-50 border-zinc-200 dark:bg-white/[0.04] dark:border-white/[0.08]",
-                  "text-zinc-900 placeholder:text-zinc-400 dark:text-zinc-100 dark:placeholder:text-zinc-600",
-                  "focus-visible:ring-1 focus-visible:ring-indigo-500/60 focus-visible:border-indigo-500/60",
-                  "transition-colors",
-                  state?.errors?.email &&
-                    "border-red-400 dark:border-red-500/60"
+          <Controller
+            name="email"
+            control={control}
+            disabled={isPending}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                <div className="relative">
+                  <Mail
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-600 pointer-events-none"
+                    aria-hidden
+                  />
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.value}
+                    onChange={field.onChange}
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    disabled={isPending}
+                    required
+                    className={cn(
+                      "pl-9 h-10 text-sm",
+                      "bg-zinc-50 border-zinc-200 dark:bg-white/[0.04] dark:border-white/[0.08]",
+                      "text-zinc-900 placeholder:text-zinc-400 dark:text-zinc-100 dark:placeholder:text-zinc-600",
+                      "focus-visible:ring-1 focus-visible:ring-indigo-500/60 focus-visible:border-indigo-500/60",
+                      "transition-colors",
+                      fieldState.invalid &&
+                        "border-red-400 dark:border-red-500/60"
+                    )}
+                  />
+                </div>
+                {fieldState.error?.message && (
+                  <p id="email-error" className="text-xs text-red-500 mt-1">
+                    {fieldState.error?.message}
+                  </p>
                 )}
-              />
-            </div>
-            {state?.errors?.email && (
-              <p id="email-error" className="text-xs text-red-500 mt-1">
-                {state.errors.email[0]}
-              </p>
+              </Field>
             )}
-          </div>
+          />
 
           {/* Password */}
-          <div className="space-y-1.5">
-            <Label
-              htmlFor="password"
-              className="text-xs font-medium text-zinc-500 dark:text-zinc-400 tracking-wide uppercase"
-            >
-              Password
-            </Label>
-            <div className="relative">
-              <Lock
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-600 pointer-events-none"
-                aria-hidden
-              />
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                placeholder="••••••••"
-                disabled={isPending}
-                required
-                aria-describedby={
-                  state?.errors?.password ? "password-error" : undefined
-                }
-                className={cn(
-                  "pl-9 pr-10 h-10 text-sm",
-                  "bg-zinc-50 border-zinc-200 dark:bg-white/[0.04] dark:border-white/[0.08]",
-                  "text-zinc-900 placeholder:text-zinc-400 dark:text-zinc-100 dark:placeholder:text-zinc-600",
-                  "focus-visible:ring-1 focus-visible:ring-indigo-500/60 focus-visible:border-indigo-500/60",
-                  "transition-colors",
-                  state?.errors?.password &&
-                    "border-red-400 dark:border-red-500/60"
+          <Controller
+            name="password"
+            control={control}
+            disabled={isPending}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                <div className="relative">
+                  <Lock
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-600 pointer-events-none"
+                    aria-hidden
+                  />
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.value}
+                    onChange={field.onChange}
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    className={cn(
+                      "pl-9 pr-10 h-10 text-sm",
+                      "bg-zinc-50 border-zinc-200 dark:bg-white/[0.04] dark:border-white/[0.08]",
+                      "text-zinc-900 placeholder:text-zinc-400 dark:text-zinc-100 dark:placeholder:text-zinc-600",
+                      "focus-visible:ring-1 focus-visible:ring-indigo-500/60 focus-visible:border-indigo-500/60",
+                      "transition-colors",
+                      fieldState.invalid &&
+                        "border-red-400 dark:border-red-500/60"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-600 dark:hover:text-zinc-400 transition-colors focus-visible:outline-none"
+                    aria-label={
+                      showPassword ? "パスワードを隠す" : "パスワードを表示"
+                    }
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {fieldState.error?.message && (
+                  <p id="email-error" className="text-xs text-red-500 mt-1">
+                    {fieldState.error?.message}
+                  </p>
                 )}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-600 dark:hover:text-zinc-400 transition-colors focus-visible:outline-none"
-                aria-label={
-                  showPassword ? "パスワードを隠す" : "パスワードを表示"
-                }
-                tabIndex={0}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {state?.errors?.password && (
-              <p id="password-error" className="text-xs text-red-500 mt-1">
-                {state.errors.password[0]}
-              </p>
+              </Field>
             )}
-          </div>
+          />
 
           {/* Remember me */}
-          <div className="flex items-center gap-2.5">
-            <Checkbox
-              id="remember-me"
-              name="rememberMe"
-              disabled={isPending}
-              className={cn(
-                "h-4 w-4 rounded border-zinc-300 bg-zinc-50 dark:border-white/[0.15] dark:bg-white/[0.04]",
-                "data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
-              )}
-            />
-            <Label
-              htmlFor="remember-me"
-              className="text-sm text-zinc-500 dark:text-zinc-400 cursor-pointer select-none"
-            >
-              ログイン状態を保持する
-            </Label>
-          </div>
+          <Controller
+            name="rememberMe"
+            control={control}
+            disabled={isPending}
+            render={({ field }) => (
+              <div className="flex items-center gap-2.5">
+                <Checkbox
+                  id={field.name}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={field.disabled}
+                  className={cn(
+                    "h-4 w-4 rounded border-zinc-300 bg-zinc-50 dark:border-white/[0.15] dark:bg-white/[0.04]",
+                    "data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
+                  )}
+                />
+                <Label
+                  htmlFor={field.name}
+                  className="text-sm text-zinc-500 dark:text-zinc-400 cursor-pointer select-none"
+                >
+                  ログイン状態を保持する
+                </Label>
+              </div>
+            )}
+          />
 
           {/* フォームレベルエラー */}
-          {state?.message && (
-            <div className="flex items-start gap-2 rounded-lg border border-red-300/60 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10 px-3 py-2.5 text-sm text-red-600 dark:text-red-400">
-              <span className="mt-px shrink-0 text-red-500">✕</span>
-              <span>{state.message}</span>
-            </div>
-          )}
+          <div id="form-error" aria-live="polite" aria-atomic="true">
+            {errors.form?.message && (
+              <div className="flex items-start gap-2 rounded-lg border border-red-300/60 bg-red-50 dark:border-red-500/20 dark:bg-red-500/10 px-3 py-2.5 text-sm text-red-600 dark:text-red-400">
+                <span className="mt-px shrink-0 text-red-500">✕</span>
+                <span>{errors.form.message}</span>
+              </div>
+            )}
+          </div>
 
           {/* Submit */}
           <Button

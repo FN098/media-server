@@ -1,49 +1,21 @@
 "use server";
 
+import { SignInFormSchema, SignInFormValues } from "@/feature/auth/lib/schemas";
+import { SignInResult } from "@/feature/auth/lib/types";
 import { auth } from "@/lib/auth/better-auth";
 import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";
 import z from "zod";
 
-const SignInFormSchema = z.object({
-  email: z
-    .email({ message: "有効なメールアドレスを入力してください。" })
-    .trim(),
-
-  password: z
-    .string()
-    .min(1, { message: "パスワードを入力してください。" })
-    .trim(),
-
-  rememberMe: z.boolean().optional(),
-
-  redirectTo: z.string().optional().default("/"),
-});
-
-type SignInFormState =
-  | {
-      errors?: {
-        email?: string[];
-        password?: string[];
-      };
-      message?: string;
-    }
-  | undefined;
-
 export async function signInAction(
-  _state: SignInFormState,
-  formData: FormData
-): Promise<SignInFormState> {
+  data: SignInFormValues
+): Promise<SignInResult> {
   // 入力バリデーション
-  const parsed = SignInFormSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    rememberMe: formData.get("rememberMe") === "on",
-    redirectTo: formData.get("redirectTo"),
-  });
+  const parsed = SignInFormSchema.safeParse(data);
 
   if (!parsed.success) {
     return {
+      ok: false,
       errors: z.flattenError(parsed.error).fieldErrors,
       message: "入力エラーがあります。",
     };
@@ -58,7 +30,7 @@ export async function signInAction(
     });
 
     if (!response) {
-      return { message: "サインインに失敗しました。" };
+      return { ok: false, message: "サインインに失敗しました。" };
     }
   } catch (e) {
     logger.error("action:sign-in", e);
@@ -66,7 +38,7 @@ export async function signInAction(
     const message =
       e instanceof Error ? e.message : "予期しないエラーが発生しました。";
 
-    return { message };
+    return { ok: false, message };
   }
 
   redirect(redirectTo);
