@@ -15,15 +15,15 @@ import { HoverPreviewPortal } from "@/feature/preview/ui/hover-preview-portal";
 import { usePathSelectionContext } from "@/feature/selection/providers/path-selection-provider";
 import { MarqueeText } from "@/feature/text/ui/marquee-text";
 import { MediaThumb } from "@/feature/thumbnail/ui/media-thumb";
-import { usePagingGridView } from "@/feature/view/hooks/use-paging-grid-view";
+import { usePagingGridView } from "@/feature/view/components/with-paging/hooks/use-paging-grid-view";
+import { useMediaNodePagingViewContext } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
+import { AverageRatingBadge } from "@/feature/view/components/with-paging/ui/average-rating-badge";
+import { FolderStatusBadge } from "@/feature/view/components/with-paging/ui/folder-status-badge";
+import { PagingControl } from "@/feature/view/components/with-paging/ui/pagination-control";
 import {
   MediaNodeControlProvider,
   useMediaNodeControlContext,
 } from "@/feature/view/providers/media-node-control-provider";
-import { useMediaNodePagingViewContext } from "@/feature/view/providers/media-node-paging-view-provider";
-import { AverageRatingBadge } from "@/feature/view/ui/average-rating-badge";
-import { FolderStatusBadge } from "@/feature/view/ui/folder-status-badge";
-import { PagingControl } from "@/feature/view/ui/pagination-control";
 import { formatBytes } from "@/lib/utils/bytes";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";

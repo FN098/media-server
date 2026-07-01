@@ -3,7 +3,7 @@
 import {
   useMediaNodePagingView,
   UseMediaNodePagingViewProps,
-} from "@/feature/view/hooks/use-media-node-paging-view";
+} from "@/feature/view/components/with-paging/hooks/use-media-node-paging-view";
 import { createContext, useContext } from "react";
 
 const MediaNodePagingViewContext = createContext<

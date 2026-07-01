@@ -18,17 +18,17 @@ import { NodeDropdownMenu } from "@/feature/menu/ui/node-dropdown-menu";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { HoverPreviewPortal } from "@/feature/preview/ui/hover-preview-portal";
 import { MediaThumbIcon } from "@/feature/thumbnail/ui/media-thumb-icons";
-import { usePagingGridView } from "@/feature/view/hooks/use-paging-grid-view";
+import { FavoriteRatingDisplay } from "@/feature/view/components/with-paging/components/paging-list-view/ui/favorite-rating-display";
+import { SizeBar } from "@/feature/view/components/with-paging/components/paging-list-view/ui/size-bar";
+import { usePagingGridView } from "@/feature/view/components/with-paging/hooks/use-paging-grid-view";
+import { useMediaNodePagingViewContext } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
+import { AverageRatingBadge } from "@/feature/view/components/with-paging/ui/average-rating-badge";
+import { FolderStatusBadge } from "@/feature/view/components/with-paging/ui/folder-status-badge";
+import { PagingControl } from "@/feature/view/components/with-paging/ui/pagination-control";
 import {
   MediaNodeControlProvider,
   useMediaNodeControlContext,
 } from "@/feature/view/providers/media-node-control-provider";
-import { useMediaNodePagingViewContext } from "@/feature/view/providers/media-node-paging-view-provider";
-import { AverageRatingBadge } from "@/feature/view/ui/average-rating-badge";
-import { FavoriteRatingDisplay } from "@/feature/view/ui/favorite-rating-display";
-import { FolderStatusBadge } from "@/feature/view/ui/folder-status-badge";
-import { PagingControl } from "@/feature/view/ui/pagination-control";
-import { SizeBar } from "@/feature/view/ui/size-bar";
 import { formatBytes } from "@/lib/utils/bytes";
 import { getExtension } from "@/lib/utils/filename";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";

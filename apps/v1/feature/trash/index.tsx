@@ -10,10 +10,10 @@ import { useTrashContext } from "@/feature/trash/providers/trash-provider";
 import { TrashDialogs } from "@/feature/trash/ui/trash-dialogs";
 import { TrashToolbar } from "@/feature/trash/ui/trash-toolbar";
 import { TrashToolbarDialogs } from "@/feature/trash/ui/trash-toolbar-dialogs";
-import { MediaNodePagingViewProvider } from "@/feature/view/providers/media-node-paging-view-provider";
-import { PagingProvider } from "@/feature/view/providers/paging-provider";
-import { PagingGridView } from "@/feature/view/ui/paging-grid-view";
-import { PagingListView } from "@/feature/view/ui/paging-list-view";
+import { PagingGridView } from "@/feature/view/components/with-paging/components/paging-grid-view";
+import { PagingListView } from "@/feature/view/components/with-paging/components/paging-list-view";
+import { MediaNodePagingViewProvider } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
+import { PagingProvider } from "@/feature/view/components/with-paging/providers/paging-provider";
 import { MediaViewerProvider } from "@/feature/viewer/providers/media-viewer-provider";
 import { MediaViewer } from "@/feature/viewer/ui/media-viewer";
 
