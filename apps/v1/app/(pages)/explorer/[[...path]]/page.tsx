@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
-import { Explorer } from "@/feature/explorer";
 import { ExplorerProvider } from "@/feature/explorer/providers/explorer-provider";
+import { Explorer } from "@/feature/explorer/ui";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
