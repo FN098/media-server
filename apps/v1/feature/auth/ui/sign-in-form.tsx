@@ -13,7 +13,7 @@ import { Label } from "@/shadcn/components/ui/label";
 import { Spinner } from "@/shadcn/components/ui/spinner";
 import { cn } from "@/shadcn/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -22,7 +22,7 @@ interface SignInFormProps {
   redirectTo?: string;
 }
 
-export function SignInForm({ redirectTo = "/" }: SignInFormProps) {
+export function SignInForm({ redirectTo }: SignInFormProps) {
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -99,7 +99,7 @@ export function SignInForm({ redirectTo = "/" }: SignInFormProps) {
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                 <div className="relative">
-                  <Mail
+                  <MailIcon
                     className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-600 pointer-events-none"
                     aria-hidden
                   />
@@ -142,7 +142,7 @@ export function SignInForm({ redirectTo = "/" }: SignInFormProps) {
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={field.name}>Password</FieldLabel>
                 <div className="relative">
-                  <Lock
+                  <LockIcon
                     className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-600 pointer-events-none"
                     aria-hidden
                   />
@@ -173,9 +173,9 @@ export function SignInForm({ redirectTo = "/" }: SignInFormProps) {
                     }
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOffIcon className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <EyeIcon className="h-4 w-4" />
                     )}
                   </button>
                 </div>
