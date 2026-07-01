@@ -61,7 +61,7 @@ export function TagMasterTable() {
         className={cn(
           "grid",
           GRID_COLS,
-          "pr-4 py-2 bg-muted/90 backdrop-blur-sm text-sm font-medium text-muted-foreground border-b sticky top-0 z-30"
+          "pr-4 py-2 bg-muted/90 backdrop-blur-sm text-sm font-medium text-muted-foreground border-b sticky top-0 z-10"
         )}
       >
         <div className="text-center">固定</div>
