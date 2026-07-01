@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
+import { Favorites } from "@/feature/favorites";
 import { FavoritesProvider } from "@/feature/favorites/providers/favorites-provider";
-import { Favorites } from "@/feature/favorites/ui";
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
