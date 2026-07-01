@@ -6,11 +6,11 @@ import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigati
 import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { readFileAsTextAction } from "@/feature/text-file-reader/actions/read-as-text";
-import { useMediaIndex } from "@/feature/viewer/hooks/use-media-index";
+import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
 import {
   IndexLike,
   ViewerNavigation,
-} from "@/feature/viewer/hooks/use-viewer-navigation";
+} from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { isArchiveFile } from "@/lib/archive/guards";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";

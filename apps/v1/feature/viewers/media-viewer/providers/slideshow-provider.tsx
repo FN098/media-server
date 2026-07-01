@@ -1,6 +1,6 @@
 "use client";
 
-import { useSlideshow } from "@/feature/viewer/hooks/use-slideshow";
+import { useSlideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
 import React, { createContext, useContext } from "react";
 
 const SlideshowContext = createContext<

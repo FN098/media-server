@@ -3,7 +3,7 @@ import { Header } from "@/feature/header/ui";
 import { HistoryProvider } from "@/feature/history/providers/history-provider";
 import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";
 import { TagEditorProvider } from "@/feature/tag-editor/providers/tag-editor-provider";
-import { SlideshowProvider } from "@/feature/viewer/providers/slideshow-provider";
+import { SlideshowProvider } from "@/feature/viewers/media-viewer/providers/slideshow-provider";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
 const meta = resolvePageMeta("favorites");

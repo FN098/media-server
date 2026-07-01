@@ -21,8 +21,8 @@ import { useToggleSlideshowMenuItem } from "@/feature/menu-items/hooks/use-toggl
 import { useUpdateThumbMenuItem } from "@/feature/menu-items/hooks/use-update-thumb-menu-item";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
-import { Slideshow } from "@/feature/viewer/hooks/use-slideshow";
-import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer-navigation";
+import { Slideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
+import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { MediaListing } from "@/lib/media/types";
 import { createSeparator } from "@/lib/menu-items/factory";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";

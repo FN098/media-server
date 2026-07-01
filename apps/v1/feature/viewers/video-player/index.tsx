@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@/feature/viewer/ui/loading-spinner";
+import { LoadingSpinner } from "@/feature/viewers/media-viewer/ui/loading-spinner";
 import { resolveMediaUrl } from "@/lib/media/resolvers";
 import { MediaFsNode } from "@/lib/media/types";
 import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";

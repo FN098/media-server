@@ -1,6 +1,6 @@
 "use client";
 
-import { useHeaderPinned } from "@/feature/viewer/hooks/use-header-pinned";
+import { useHeaderPinned } from "@/feature/viewers/media-viewer/hooks/use-header-pinned";
 import { createContext, useContext } from "react";
 
 const headerPinnedContext = createContext<

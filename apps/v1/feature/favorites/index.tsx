@@ -12,8 +12,8 @@ import { PagingGridView } from "@/feature/view/components/with-paging/components
 import { PagingListView } from "@/feature/view/components/with-paging/components/paging-list-view";
 import { MediaNodePagingViewProvider } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
 import { PagingProvider } from "@/feature/view/components/with-paging/providers/paging-provider";
-import { MediaViewerProvider } from "@/feature/viewer/providers/media-viewer-provider";
-import { MediaViewer } from "@/feature/viewer/ui/media-viewer";
+import { MediaViewer } from "@/feature/viewers/media-viewer";
+import { MediaViewerProvider } from "@/feature/viewers/media-viewer/providers/media-viewer-provider";
 
 export function Favorites() {
   const { viewer } = useFavoritesContext();

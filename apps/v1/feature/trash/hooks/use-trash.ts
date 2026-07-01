@@ -13,7 +13,7 @@ import { useTrashNavigation } from "@/feature/trash/hooks/use-trash-navigation";
 import { useTrashSelectionBar } from "@/feature/trash/hooks/use-trash-selection-bar";
 import { useTrashThumbs } from "@/feature/trash/hooks/use-trash-thumbs";
 import { useViewMode } from "@/feature/view/hooks/use-view-mode";
-import { useViewerNavigation } from "@/feature/viewer/hooks/use-viewer-navigation";
+import { useViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { MediaListing } from "@/lib/media/types";
 
 export interface UseTrashProps {

@@ -1,12 +1,12 @@
 // hooks/viewer/use-media-viewer.ts
 import { APP_CONFIG } from "@/app.config";
 import { useDocumentTitle } from "@/feature/general/hooks/use-document-title";
-import { useAudioRepeating } from "@/feature/viewer/hooks/use-audio-repeating";
-import { useMediaViewerFavorite } from "@/feature/viewer/hooks/use-media-viewer-favorite";
-import { useMediaViewerHeader } from "@/feature/viewer/hooks/use-media-viewer-header";
-import { useMediaViewerHotkeys } from "@/feature/viewer/hooks/use-media-viewer-hotkeys";
-import { useMediaViewerNavigation } from "@/feature/viewer/hooks/use-media-viewer-navigation";
-import { useSlideshowContext } from "@/feature/viewer/providers/slideshow-provider";
+import { useAudioRepeating } from "@/feature/viewers/media-viewer/hooks/use-audio-repeating";
+import { useMediaViewerFavorite } from "@/feature/viewers/media-viewer/hooks/use-media-viewer-favorite";
+import { useMediaViewerHeader } from "@/feature/viewers/media-viewer/hooks/use-media-viewer-header";
+import { useMediaViewerHotkeys } from "@/feature/viewers/media-viewer/hooks/use-media-viewer-hotkeys";
+import { useMediaViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-media-viewer-navigation";
+import { useSlideshowContext } from "@/feature/viewers/media-viewer/providers/slideshow-provider";
 import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { useCallback, useEffect } from "react";

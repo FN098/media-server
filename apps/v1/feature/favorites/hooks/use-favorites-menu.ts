@@ -5,8 +5,8 @@ import { FavoritesNavigation } from "@/feature/favorites/hooks/use-favorites-nav
 import { Fullscreen } from "@/feature/general/hooks/use-fullscreen";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
-import { Slideshow } from "@/feature/viewer/hooks/use-slideshow";
-import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer-navigation";
+import { Slideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
+import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 
 interface FavoritesMenuContext {
   filtering: FavoritesFiltering;

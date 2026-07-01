@@ -1,6 +1,6 @@
 import { HistoryProvider } from "@/feature/history/providers/history-provider";
 import { TagEditorProvider } from "@/feature/tag-editor/providers/tag-editor-provider";
-import { SlideshowProvider } from "@/feature/viewer/providers/slideshow-provider";
+import { SlideshowProvider } from "@/feature/viewers/media-viewer/providers/slideshow-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

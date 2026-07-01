@@ -14,8 +14,8 @@ import { useMediaNodeSelection } from "@/feature/selection/hooks/use-media-node-
 import { useSort } from "@/feature/sort/hooks/use-sort";
 import { useTagEditorContext } from "@/feature/tag-editor/providers/tag-editor-provider";
 import { useViewMode } from "@/feature/view/hooks/use-view-mode";
-import { useViewerNavigation } from "@/feature/viewer/hooks/use-viewer-navigation";
-import { useSlideshowContext } from "@/feature/viewer/providers/slideshow-provider";
+import { useViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
+import { useSlideshowContext } from "@/feature/viewers/media-viewer/providers/slideshow-provider";
 import { MediaListing } from "@/lib/media/types";
 
 export interface UseFavoritesProps {

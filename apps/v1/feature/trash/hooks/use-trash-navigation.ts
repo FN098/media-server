@@ -4,11 +4,11 @@ import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigati
 import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { TrashFiltering } from "@/feature/trash/hooks/use-trash-filtering";
-import { useMediaIndex } from "@/feature/viewer/hooks/use-media-index";
+import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
 import {
   IndexLike,
   ViewerNavigation,
-} from "@/feature/viewer/hooks/use-viewer-navigation";
+} from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaListing, MediaNode } from "@/lib/media/types";
 import { useCallback, useEffect } from "react";

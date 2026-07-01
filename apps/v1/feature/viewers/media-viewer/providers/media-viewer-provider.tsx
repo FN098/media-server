@@ -3,7 +3,7 @@
 import {
   useMediaViewer,
   UseMediaViewerProps,
-} from "@/feature/viewer/hooks/use-media-viewer";
+} from "@/feature/viewers/media-viewer/hooks/use-media-viewer";
 import { createContext, useContext } from "react";
 
 const MediaViewerContext = createContext<

@@ -1,4 +1,4 @@
-import { IndexLike } from "@/feature/viewer/hooks/use-viewer-navigation";
+import { IndexLike } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 import { MoveLeftIcon } from "lucide-react";
 import { useMemo } from "react";

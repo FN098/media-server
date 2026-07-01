@@ -8,7 +8,7 @@ import { useToggleFullscreenMenuItem } from "@/feature/menu-items/hooks/use-togg
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { TrashDialogs } from "@/feature/trash/hooks/use-trash-dialogs";
 import { TrashNavigation } from "@/feature/trash/hooks/use-trash-navigation";
-import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer-navigation";
+import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { createSeparator } from "@/lib/menu-items/factory";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
 

@@ -1,5 +1,5 @@
 import { useVisibility } from "@/feature/general/hooks/use-visibility";
-import { useViewerHeaderPinnedContext } from "@/feature/viewer/providers/viewer-header-pinned-provider";
+import { useViewerHeaderPinnedContext } from "@/feature/viewers/media-viewer/providers/viewer-header-pinned-provider";
 import { useCallback, useState } from "react";
 
 export function useMediaViewerHeader() {

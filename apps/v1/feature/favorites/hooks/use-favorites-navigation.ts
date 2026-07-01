@@ -2,8 +2,8 @@ import { FavoritesFiltering } from "@/feature/favorites/hooks/use-favorites-filt
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
-import { useMediaIndex } from "@/feature/viewer/hooks/use-media-index";
-import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer-navigation";
+import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
+import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { isMedia } from "@/lib/media/detectors";
 import { MediaNode } from "@/lib/media/types";
 import { parentpath } from "@/lib/virtual-path/path";

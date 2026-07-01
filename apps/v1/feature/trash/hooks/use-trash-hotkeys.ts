@@ -5,7 +5,7 @@ import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { TrashDialogs } from "@/feature/trash/hooks/use-trash-dialogs";
 import { TrashFiltering } from "@/feature/trash/hooks/use-trash-filtering";
 import { TrashNavigation } from "@/feature/trash/hooks/use-trash-navigation";
-import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer-navigation";
+import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 

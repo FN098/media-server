@@ -3,7 +3,7 @@ import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-sel
 import { TrashDialogs } from "@/feature/trash/hooks/use-trash-dialogs";
 import { useTrashMenuItems } from "@/feature/trash/hooks/use-trash-menu-items";
 import { TrashNavigation } from "@/feature/trash/hooks/use-trash-navigation";
-import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer-navigation";
+import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 
 interface UseTrashMenuProps {
   selection: MediaNodeSelection;
