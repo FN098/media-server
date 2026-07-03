@@ -1,5 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
+import { Trash } from "@/feature/pages/trash";
 import { TrashProvider } from "@/feature/pages/trash/providers/trash-provider";
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
@@ -12,7 +13,6 @@ import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
 import { MediaNode } from "@/lib/media/types";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
-import { Trash } from "lucide-react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
