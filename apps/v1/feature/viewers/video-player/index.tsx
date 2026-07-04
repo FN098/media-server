@@ -3,7 +3,6 @@ import { resolveMediaUrl } from "@/lib/media/resolvers";
 import { MediaFsNode } from "@/lib/media/types";
 import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";
 import { cn } from "@/shadcn/lib/utils";
-import MuxPlayer, { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -19,25 +18,30 @@ export function VideoPlayer({
   active = true,
   onEnded,
 }: VideoPlayerProps) {
-  const playerRef = useRef<MuxPlayerRefAttributes>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
 
   const storageKey = `video-progress:${media.path}`;
 
   // 再生位置を保存
-  const handleTimeUpdate = (e: Event) => {
-    const video = e.target as HTMLVideoElement;
-    if (video.currentTime > 0) {
-      localStorage.setItem(storageKey, video.currentTime.toString());
-    }
+  const handleTimeUpdate = () => {
+    const video = videoRef.current;
+    if (!video || video.currentTime <= 0) return;
+
+    localStorage.setItem(storageKey, video.currentTime.toString());
   };
 
   // メディアが読み込まれた時に保存された位置から復元する
   const handleLoadedData = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
     const savedTime = localStorage.getItem(storageKey);
-    if (savedTime && playerRef.current) {
-      playerRef.current.currentTime = parseFloat(savedTime);
+
+    if (savedTime) {
+      video.currentTime = parseFloat(savedTime);
     }
+
     setIsVideoReady(true);
   };
 
@@ -48,18 +52,18 @@ export function VideoPlayer({
   };
 
   const seek = (amount: number) => {
-    const video = playerRef.current;
-    if (video) {
-      video.currentTime += amount;
-    }
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.currentTime += amount;
   };
 
   const togglePlaying = () => {
-    const video = playerRef.current;
+    const video = videoRef.current;
     if (!video) return;
 
     if (video.paused) {
-      video.play().catch((e) => console.error(e));
+      void video.play();
     } else {
       video.pause();
     }
@@ -71,32 +75,37 @@ export function VideoPlayer({
   useHotkeys(
     "space",
     (e) => {
-      e.preventDefault(); // 親のビューア側などのイベント伝播を阻止
+      e.preventDefault();
       togglePlaying();
     },
-    { scopes: ["viewer", "tag-editor"], enabled: active }
+    {
+      scopes: ["viewer", "tag-editor"],
+      enabled: active,
+    }
   );
 
   // ↑: 10秒進む
   useHotkeys(
     "arrowup",
-    (e) => {
-      // 長押し（連打）を無視
-      if (e.repeat) return;
+    () => {
       seek(10);
     },
-    { scopes: ["viewer", "tag-editor"], enabled: active }
+    {
+      scopes: ["viewer", "tag-editor"],
+      enabled: active,
+    }
   );
 
   // ↓: 10秒戻る
   useHotkeys(
     "arrowdown",
-    (e) => {
-      // 長押し（連打）を無視
-      if (e.repeat) return;
+    () => {
       seek(-10);
     },
-    { scopes: ["viewer", "tag-editor"], enabled: active }
+    {
+      scopes: ["viewer", "tag-editor"],
+      enabled: active,
+    }
   );
 
   // F11: フルスクリーン
@@ -104,22 +113,24 @@ export function VideoPlayer({
     "f11",
     (e) => {
       e.preventDefault();
-      const video = playerRef.current;
-      if (video) {
-        if (video.requestFullscreen) {
-          void video.requestFullscreen();
-        }
+
+      const video = videoRef.current;
+
+      if (video?.requestFullscreen) {
+        void video.requestFullscreen();
       }
     },
-    { scopes: ["viewer", "tag-editor"], enabled: active }
+    {
+      scopes: ["viewer", "tag-editor"],
+      enabled: active,
+    }
   );
 
   return (
     <div
       className={cn(
         "relative w-full h-full min-h-0 overflow-hidden bg-black mx-auto shadow-lg",
-        "flex items-center justify-center",
-        "touch-action-auto"
+        "flex items-center justify-center"
       )}
     >
       {/* サムネイル */}
@@ -137,11 +148,11 @@ export function VideoPlayer({
           priority
           draggable={false}
         />
-        {/* ロード中のみスピナーを表示 */}
+
         {!isVideoReady && <LoadingSpinner />}
       </div>
 
-      {/* 動画本体 */}
+      {/* 動画 */}
       <div
         className={cn(
           "relative w-full h-full flex items-center justify-center",
@@ -149,17 +160,21 @@ export function VideoPlayer({
         )}
       >
         {active && (
-          <MuxPlayer
-            ref={playerRef}
+          <video
+            tabIndex={-1}
+            ref={videoRef}
             src={resolveMediaUrl(media, { absolute: true })}
             autoPlay
-            streamType="on-demand"
-            nohotkeys={true}
+            controls
+            preload="metadata"
             onLoadedData={handleLoadedData}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}
-            className="w-full h-full object-contain swiper-no-swiping"
-            style={{ aspectRatio: "auto" }}
+            onClick={() => {
+              // フォーカスさせない
+              videoRef.current?.blur();
+            }}
+            className="w-full h-full object-contain focus:outline-none"
           />
         )}
       </div>
