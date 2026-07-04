@@ -10,10 +10,10 @@ import { ExplorerToolbarDialogs } from "@/feature/pages/explorer/ui/explorer-too
 import { SelectionBar } from "@/feature/selection/ui/selection-bar";
 import { TagEditSheetProvider } from "@/feature/tag-editor/providers/tag-edit-sheet-provider";
 import { TagEditSheet } from "@/feature/tag-editor/ui/tag-edit-sheet";
-import { PagingGridView } from "@/feature/view/components/with-paging/components/paging-grid-view";
-import { PagingListView } from "@/feature/view/components/with-paging/components/paging-list-view";
 import { MediaNodePagingViewProvider } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
 import { PagingProvider } from "@/feature/view/components/with-paging/providers/paging-provider";
+import { PagingGridView } from "@/feature/view/components/with-paging/ui/paging-grid-view";
+import { PagingListView } from "@/feature/view/components/with-paging/ui/paging-list-view";
 import { MediaViewer } from "@/feature/viewers/media-viewer";
 import { MediaViewerProvider } from "@/feature/viewers/media-viewer/providers/media-viewer-provider";
 

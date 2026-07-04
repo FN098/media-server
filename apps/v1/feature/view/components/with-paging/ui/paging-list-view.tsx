@@ -18,13 +18,13 @@ import { NodeDropdownMenu } from "@/feature/menu/ui/node-dropdown-menu";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { HoverPreviewPortal } from "@/feature/preview/ui/hover-preview-portal";
 import { MediaThumbIcon } from "@/feature/thumbnail/ui/media-thumb-icons";
-import { FavoriteRatingDisplay } from "@/feature/view/components/with-paging/components/paging-list-view/ui/favorite-rating-display";
-import { SizeBar } from "@/feature/view/components/with-paging/components/paging-list-view/ui/size-bar";
 import { usePagingGridView } from "@/feature/view/components/with-paging/hooks/use-paging-grid-view";
 import { useMediaNodePagingViewContext } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
 import { AverageRatingBadge } from "@/feature/view/components/with-paging/ui/average-rating-badge";
+import { FavoriteRatingDisplay } from "@/feature/view/components/with-paging/ui/favorite-rating-display";
 import { FolderStatusBadge } from "@/feature/view/components/with-paging/ui/folder-status-badge";
 import { PagingControl } from "@/feature/view/components/with-paging/ui/pagination-control";
+import { SizeBar } from "@/feature/view/components/with-paging/ui/size-bar";
 import {
   MediaNodeControlProvider,
   useMediaNodeControlContext,
