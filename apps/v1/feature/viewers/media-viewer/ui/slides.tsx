@@ -216,7 +216,6 @@ function ImageSlide({
   onNext,
   delay = 5000,
 }: ImageSlideProps) {
-  console.log({ isSlideshowEnabled });
   useEffect(() => {
     if (!active || !isSlideshowEnabled) return;
 
