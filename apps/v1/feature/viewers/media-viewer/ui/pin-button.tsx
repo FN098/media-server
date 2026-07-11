@@ -11,11 +11,13 @@ import {
 import { cn } from "@/shadcn/lib/utils";
 import { Pin, PinOff } from "lucide-react";
 
-interface ViewerHeaderPinButtonProps extends React.ComponentProps<"button"> {
+interface MediaViewerHeaderPinButtonProps extends React.ComponentProps<"button"> {
   isPinned: boolean;
 }
 
-export function ViewerHeaderPinButton(props: ViewerHeaderPinButtonProps) {
+export function MediaViewerHeaderPinButton(
+  props: MediaViewerHeaderPinButtonProps
+) {
   const isMobile = useDetectMobileContext();
 
   // モバイルなら Tooltip 使わない
@@ -40,7 +42,11 @@ export function ViewerHeaderPinButton(props: ViewerHeaderPinButtonProps) {
   );
 }
 
-function Trigger({ isPinned, className, ...rest }: ViewerHeaderPinButtonProps) {
+function Trigger({
+  isPinned,
+  className,
+  ...rest
+}: MediaViewerHeaderPinButtonProps) {
   return (
     <button
       className={cn(
