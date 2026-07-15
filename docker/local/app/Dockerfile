@@ -25,9 +25,6 @@ RUN npm i -g pnpm
 RUN groupadd --gid 1001 nodejs && \
     useradd --uid 1001 --gid nodejs --shell /bin/bash --create-home nextjs
 
-# ユーザーを root -> nextjs に切り替え
-USER nextjs
-
 # ソース全体をコピー
 COPY --chown=nextjs:nodejs . .
 
@@ -44,5 +41,8 @@ ENV SHADOW_DATABASE_URL dummy
 RUN pnpm prisma generate
 
 EXPOSE 3000
+
+# ユーザーを root -> nextjs に切り替え
+USER nextjs
 
 CMD ["pnpm", "dev"]
