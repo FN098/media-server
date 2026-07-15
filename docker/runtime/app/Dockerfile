@@ -40,8 +40,8 @@ COPY next ./
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # ダミー用の接続文字列（これがないと prisma generate に失敗する）
-ENV DATABASE_URL dummy
-ENV SHADOW_DATABASE_URL dummy
+ENV DATABASE_URL "mysql://user:pass@db:3306/dummy"
+ENV SHADOW_DATABASE_URL "mysql://user:pass@db:3306/dummy"
 
 # Prisma Client 生成
 RUN pnpm prisma generate
