@@ -1,6 +1,8 @@
 # 開発用イメージ（軽量）
 FROM node:25-slim
 
+WORKDIR /app
+
 # パッケージインストール
 # git: ソース管理
 # ffmpeg: 動画サムネイル生成
@@ -27,14 +29,12 @@ RUN npm i -g pnpm
 # ユーザーを root -> nextjs に切り替え
 USER nextjs
 
-# コンテナ内の作業ディレクトリ
-WORKDIR /app/apps/v1
-
 # package*.json と lock と workspace を先にコピー
-COPY --chown=nextjs:nodejs apps/v1/package.json apps/v1/pnpm-lock.yaml apps/v1/pnpm-workspace.yaml ./
+COPY --chown=nextjs:nodejs pnpm-lock.yaml pnpm-workspace.yaml /app
+COPY --chown=nextjs:nodejs next/package.json /app/next
 
 # 依存インストール
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --filter @media-server/next
 
 # ソース全体をコピー
 COPY --chown=nextjs:nodejs . /app
@@ -43,10 +43,11 @@ COPY --chown=nextjs:nodejs . /app
 ENV DATABASE_URL dummy
 ENV SHADOW_DATABASE_URL dummy
 
-# Prisma関連
+WORKDIR /app/next
+
+# Prisma 生成
 RUN pnpm prisma generate
 
 EXPOSE 3000
 
-# 開発モードのコマンドをデフォルトに
 CMD ["pnpm", "dev"]

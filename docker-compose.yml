@@ -10,7 +10,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-      - ./docker/mysql-init:/docker-entrypoint-initdb.d
+      - ./docker/local/db/mysql-init:/docker-entrypoint-initdb.d
     ports:
       - "13306:3306"
 
@@ -23,11 +23,11 @@ services:
     volumes:
       - redis_data:/data
 
-  app-dev:
+  app-local:
     build:
       context: .
-      dockerfile: ./docker/app-dev/Dockerfile
-    container_name: media-server-app-dev
+      dockerfile: ./docker/local/app/Dockerfile
+    container_name: media-server-app-local
     restart: unless-stopped
     command: sleep infinity
     volumes:
@@ -37,13 +37,11 @@ services:
     depends_on:
       - db
       - redis
-    profiles:
-      - dev
 
   app:
     build:
       context: .
-      dockerfile: ./docker/app/Dockerfile
+      dockerfile: ./docker/runtime/app/Dockerfile
       target: runner
     container_name: media-server-app
     restart: unless-stopped
@@ -74,7 +72,7 @@ services:
   worker:
     build:
       context: .
-      dockerfile: ./docker/app/Dockerfile
+      dockerfile: ./docker/runtime/app/Dockerfile
       target: worker
     container_name: media-server-worker
     restart: unless-stopped
@@ -89,7 +87,7 @@ services:
   migration:
     build:
       context: .
-      dockerfile: ./docker/app/Dockerfile
+      dockerfile: ./docker/runtime/app/Dockerfile
       target: migration
     container_name: media-server-migration
     restart: no
