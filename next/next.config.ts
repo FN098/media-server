@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
     ],
   },
   output: "standalone",
+  experimental: {
+    useTypeScriptCli: true,
+  },
 };
 
 export default nextConfig;
