@@ -1,3 +1,5 @@
+packages:
+  - next
 allowBuilds:
   "@prisma/engines": true
   esbuild: true

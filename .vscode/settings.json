@@ -6,7 +6,7 @@
     "source.organizeImports": "explicit",
     "source.fixAll": "explicit"
   },
-  "prettier.prettierPath": "node_modules/prettier",
+  "prettier.prettierPath": "next/node_modules/prettier",
   "eslint.format.enable": false,
   "files.eol": "\n",
   "files.insertFinalNewline": true,
@@ -28,5 +28,5 @@
       "!**/generated/prisma/**"
     ]
   },
-  "js/ts.tsdk.path": "node_modules/typescript/lib"
+  "js/ts.tsdk.path": "next/node_modules/typescript/lib"
 }

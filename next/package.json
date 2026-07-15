@@ -1,5 +1,5 @@
 {
-  "name": "media-server",
+  "name": "@media-server/next",
   "version": "0.1.0",
   "private": true,
   "scripts": {
