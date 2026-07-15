@@ -3,19 +3,22 @@
 FROM node:25-slim AS base
 
 # pnpm をグローバルインストール
-RUN npm i -g pnpm
+FROM base AS base-pnpm
+RUN npm install -g pnpm
 
 # ===============================
 # 1. Deps Stage
 # ===============================
 
-FROM base AS deps
+FROM base-pnpm AS deps
 
 WORKDIR /app
 
 # package.json と lock ファイルのコピー（キャッシュを効かせる）
-COPY --chown=nextjs:nodejs pnpm-lock.yaml pnpm-workspace.yaml /app
-COPY --chown=nextjs:nodejs next/package.json /app/next
+COPY --chown=nextjs:nodejs pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# next パッケージ
+COPY --chown=nextjs:nodejs next/package.json ./next/
 
 # 依存関係インストール
 RUN pnpm install --frozen-lockfile --filter @media-server/next
@@ -24,14 +27,15 @@ RUN pnpm install --frozen-lockfile --filter @media-server/next
 # 2. Builder Stage
 # ===============================
 
-FROM base AS builder
+FROM base-pnpm AS builder
 
-WORKDIR /app
+WORKDIR /app/next
 
-# 依存モジュールとソースコードのコピー
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/next/node_modules ./next/node_modules
-COPY next ./next
+# deps の内容をコピー
+COPY --from=deps /app /app
+
+# アプリケーションをコピー
+COPY next ./
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -39,10 +43,10 @@ ENV NEXT_TELEMETRY_DISABLED 1
 ENV DATABASE_URL dummy
 ENV SHADOW_DATABASE_URL dummy
 
-WORKDIR /app/next
-
-# Prisma 生成 & Next.js ビルド
+# Prisma Client 生成
 RUN pnpm prisma generate
+
+# Next.js ビルド
 RUN pnpm build
 
 # ===============================
@@ -50,8 +54,6 @@ RUN pnpm build
 # ===============================
 
 FROM base AS runner
-
-WORKDIR /app
 
 # 実行に必要な最小限のパッケージ
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -61,28 +63,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /app/next
+
+# 念のために NODE_ENV をセット
+ENV NODE_ENV production
+
+ENV NEXT_TELEMETRY_DISABLED 1
+
 # 非ルートユーザー作成
 RUN addgroup --system --gid 1001 nodejs && \
   adduser --system --uid 1001 --ingroup nodejs nextjs
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
 # 成果物のコピー
 # NOTE: next.config.js で output: 'standalone' を設定している前提
 # NOTE: standalone では実行に必要なファイルのみを .next/standalone にまとめて出力する
-COPY --from=builder /app/next/public ./next/public
-COPY --from=builder --chown=nextjs:nodejs /app/next/.next/standalone ./next/
-COPY --from=builder --chown=nextjs:nodejs /app/next/.next/static ./next/.next/static
-# kuromoji の辞書ファイルを standalone 側の適切な位置にコピー
-COPY --from=builder --chown=nextjs:nodejs /app/next/node_modules/kuromoji/dict ./next/node_modules/kuromoji/dict
+COPY --from=builder /app/next/public /app/next/public
+COPY --from=builder --chown=nextjs:nodejs /app/next/.next/standalone /app
+COPY --from=builder --chown=nextjs:nodejs /app/next/.next/static /app/next/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/next/node_modules/kuromoji/dict /app/next/node_modules/kuromoji/dict
 
 USER nextjs
+
 EXPOSE 3000
 
-WORKDIR /app/next
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 # Standaloneモードの場合は node server.js で起動
 CMD ["node", "server.js"]
@@ -91,9 +96,9 @@ CMD ["node", "server.js"]
 # 4. Worker Stage
 # ===============================
 
-FROM base AS worker
+FROM base-pnpm AS worker
 
-WORKDIR /app
+WORKDIR /app/next
 
 # 実行に必要な最小限のパッケージ
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -106,14 +111,14 @@ RUN addgroup --system --gid 1001 nodejs && \
   adduser --system --uid 1001 --ingroup nodejs nextjs
 
 # 依存モジュールとソースコードのコピー
-COPY --from=deps /app/node_modules ./node_modules
-COPY next ./
+COPY --from=deps /app/node_modules /app/node_modules
+COPY --from=deps /app/next/node_modules /app/next/node_modules
+COPY pnpm-lock.yaml pnpm-workspace.yaml /app/
+COPY next /app/next
 
 USER nextjs
 
-WORKDIR /app/next
-
-CMD ["pnpm", "thumb"]
+CMD ["pnpm", "tsx", "thumb/bootstrap.ts"]
 
 # ===============================
 # 5. Migration Stage
@@ -121,16 +126,14 @@ CMD ["pnpm", "thumb"]
 
 FROM base AS migration
 
-WORKDIR /app
-
-# 依存モジュールをコピー
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/next/node_modules ./next/node_modules
-
-# マイグレーションに必要なファイルをコピー
-COPY next/prisma ./next/prisma
-COPY next/prisma.config.ts ./next/prisma.config.ts
-
 WORKDIR /app/next
 
-CMD ["./node_modules/.bin/prisma", "migrate", "deploy"]
+# 依存モジュールをコピー
+COPY --from=deps /app/node_modules /app/node_modules
+COPY --from=deps /app/next/node_modules /app/next/node_modules
+
+# マイグレーションに必要なファイルをコピー
+COPY next/prisma /app/next/prisma
+COPY next/prisma.config.ts /app/next/prisma.config.ts
+
+CMD ["node_modules/.bin/prisma", "migrate", "deploy"]
