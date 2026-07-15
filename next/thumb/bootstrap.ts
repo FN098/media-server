@@ -1,3 +1,3 @@
-import { startThumbWorker } from "@/workers/thumb/worker";
+import { startThumbWorker } from "@/thumb/worker";
 
 startThumbWorker();
