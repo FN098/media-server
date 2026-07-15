@@ -43,6 +43,6 @@ RUN pnpm prisma generate
 EXPOSE 3000
 
 # ユーザーを root -> nextjs に切り替え
-USER nextjs
+# USER nextjs
 
 CMD ["pnpm", "dev"]
