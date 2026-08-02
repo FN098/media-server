@@ -28,12 +28,14 @@ export function useVisibility({
 
   // 自動非表示
   useEffect(() => {
-    if (autoHide.enabled) {
+    if (!autoHide.enabled) return;
+
+    if (isVisible) {
       debouncedHide();
     } else {
       debouncedHide.cancel();
     }
-  }, [debouncedHide, autoHide.enabled]);
+  }, [debouncedHide, autoHide.enabled, isVisible]);
 
   return {
     isVisible,
