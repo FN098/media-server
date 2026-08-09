@@ -28,9 +28,7 @@ export function useVisibility({
 
   // 自動非表示
   useEffect(() => {
-    if (!autoHide.enabled) return;
-
-    if (isVisible) {
+    if (isVisible && autoHide.enabled) {
       debouncedHide();
     } else {
       debouncedHide.cancel();
