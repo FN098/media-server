@@ -13,6 +13,7 @@
 ```sh
 # .env ファイルコピー
 cp .env.example .env
+cp next/.env.example next/.env
 
 # 必要に応じて .env を編集 (ローカルのメディアフォルダの指定など)
 
