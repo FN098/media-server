@@ -34,8 +34,8 @@ WORKDIR /app/next
 RUN pnpm install --frozen-lockfile
 
 # ダミー用の接続文字列を環境変数に設定（これがないと prisma generate に失敗する）
-ENV DATABASE_URL "mysql://user:pass@db:3306/dummy"
-ENV SHADOW_DATABASE_URL "mysql://user:pass@db:3306/dummy"
+ARG DATABASE_URL "mysql://user:pass@db:3306/dummy"
+ARG SHADOW_DATABASE_URL "mysql://user:pass@db:3306/dummy"
 
 # Prisma 生成
 RUN pnpm prisma generate
