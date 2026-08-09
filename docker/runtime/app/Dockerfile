@@ -37,11 +37,11 @@ COPY --from=deps /app /app
 # アプリケーションをコピー
 COPY next ./
 
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # ダミー用の接続文字列（これがないと prisma generate に失敗する）
-ARG DATABASE_URL "mysql://user:pass@db:3306/dummy"
-ARG SHADOW_DATABASE_URL "mysql://user:pass@db:3306/dummy"
+ARG DATABASE_URL="mysql://user:pass@db:3306/dummy"
+ARG SHADOW_DATABASE_URL="mysql://user:pass@db:3306/dummy"
 
 # Prisma Client 生成
 RUN pnpm prisma generate
@@ -66,9 +66,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app/next
 
 # 念のために NODE_ENV をセット
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # 非ルートユーザー作成
 RUN addgroup --system --gid 1001 nodejs && \
