@@ -117,8 +117,9 @@ export function useExplorerHotkeys({
     "f2",
     (e) => {
       e.preventDefault();
-      if (selection.lastSelectedNode) {
-        dialogs.renameDialog.open(selection.lastSelectedNode);
+      if (selection.selectedNodes.length > 0) {
+        console.log(selection.selectedNodes[0]);
+        dialogs.renameDialog.open(selection.selectedNodes[0]);
       }
     },
     {
@@ -131,7 +132,7 @@ export function useExplorerHotkeys({
     "f7",
     (e) => {
       e.preventDefault();
-      if (selection.lastSelectedNode) {
+      if (selection.selectedNodes.length > 0) {
         dialogs.moveDialog.open(selection.selectedNodes, listing.path);
       }
     },
@@ -145,7 +146,7 @@ export function useExplorerHotkeys({
     "f8",
     (e) => {
       e.preventDefault();
-      if (selection.lastSelectedNode) {
+      if (selection.selectedNodes.length > 0) {
         dialogs.copyDialog.open(selection.selectedNodes, listing.path);
       }
     },
