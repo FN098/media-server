@@ -1,7 +1,6 @@
 services:
   db:
     image: mysql:8.4
-    container_name: media-server-db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -12,14 +11,13 @@ services:
       - db_data:/var/lib/mysql
       - ./docker/local/db/mysql-init:/docker-entrypoint-initdb.d
     ports:
-      - "13306:3306"
+      - ${DB_PORT:-3306}:3306
 
   redis:
     image: redis:latest
-    container_name: media-server-redis
     restart: unless-stopped
     ports:
-      - "16379:6379"
+      - ${REDIS_PORT:-6379}:6379
     volumes:
       - redis_data:/data
 
@@ -27,23 +25,21 @@ services:
     build:
       context: .
       dockerfile: ./docker/local/app/Dockerfile
-    container_name: media-server-app-local
     restart: unless-stopped
     command: sleep infinity
     volumes:
       - ${HOST_MEDIA_ROOT}:/media:rw
     ports:
-      - "13000:3000"
+      - ${APP_LOCAL_PORT:-3000}:3000
     depends_on:
       - db
       - redis
 
-  app:
+  app-runtime:
     build:
       context: .
       dockerfile: ./docker/runtime/app/Dockerfile
       target: runner
-    container_name: media-server-app
     restart: unless-stopped
     environment:
       MYSQL_HOST: ${MYSQL_HOST}
@@ -61,7 +57,7 @@ services:
     volumes:
       - ${HOST_MEDIA_ROOT}:/media:rw
     ports:
-      - "13001:3000"
+      - ${APP_RUNTIME_PORT:-3001}:3000
     depends_on:
       - db
       - redis
@@ -71,7 +67,6 @@ services:
       context: .
       dockerfile: ./docker/runtime/app/Dockerfile
       target: worker
-    container_name: media-server-worker
     restart: unless-stopped
     environment:
       MEDIA_ROOT: ${MEDIA_ROOT}
@@ -86,7 +81,6 @@ services:
       context: .
       dockerfile: ./docker/runtime/app/Dockerfile
       target: migration
-    container_name: media-server-migration
     restart: no
     environment:
       DATABASE_URL: ${DATABASE_URL}
@@ -96,12 +90,11 @@ services:
 
   caddy:
     image: caddy:latest
-    container_name: media-server-caddy
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp" # HTTP/3（QUIC）用
+      - ${CADDY_HTTP_PORT:-80}:80
+      - ${CADDY_HTTPS_PORT:-443}:443
+      - ${CADDY_HTTPS_PORT:-443}:443/udp # HTTP/3（QUIC）用
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data # SSL証明書などを保存
