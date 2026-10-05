@@ -23,56 +23,35 @@ datasource db {
 
 model User {
   id            String    @id
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   name          String    @db.Text
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?   @db.Text
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
   role          String?   @db.Text
   banned        Boolean?  @default(false)
   banReason     String?   @db.Text
   banExpires    DateTime?
 
-  favorites      Favorite[]
   visitedFolders VisitedFolder[]
-  userFavorites  UserTagFavorite[]
+  fileFavorites  UserFileFavorite[]
+  tagFavorites   UserTagFavorite[]
   sessions       Session[]
   accounts       Account[]
 }
 
-model Media {
-  id          String     @id @default(uuid())
-  path        String     @unique
-  dirPath     String
-  previewPath String? // オーディオファイルのジャケ絵や、動画の特定サムネイルなどを保持
-  title       String?
-  fileMtime   DateTime
-  fileSize    BigInt?
-  type        MediaType?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+model VisitedFolder {
+  userId    String
+  folderId  String
+  visitedAt DateTime @default(now())
+  isPinned  Boolean  @default(false)
 
-  mediaTags MediaTag[]
-  favorites Favorite[]
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
-  @@index([dirPath])
-  @@index([fileMtime])
-}
-
-model Tag {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  kana      String?
-  isActive  Boolean  @default(true)
-  isNew     Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  mediaTags     MediaTag[]
-  userFavorites UserTagFavorite[]
-
-  @@index([kana])
+  @@id([userId, folderId])
+  @@index([userId, isPinned, visitedAt])
 }
 
 model UserTagFavorite {
@@ -87,60 +66,92 @@ model UserTagFavorite {
   @@index([userId])
 }
 
-model MediaTag {
-  mediaId   String
-  tagId     String
-  createdAt DateTime @default(now())
-
-  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([mediaId, tagId])
-  @@index([tagId, createdAt])
-}
-
-model Favorite {
+model UserFileFavorite {
   userId    String
-  mediaId   String
-  rating    Int? // 1~5。デフォルトを「未評価」として扱う
+  fileId    String
   createdAt DateTime @default(now())
-
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-
-  @@id([userId, mediaId])
-  @@index([userId])
-  @@index([mediaId])
-}
-
-model VisitedFolder {
-  userId       String
-  dirPath      String
-  lastViewedAt DateTime @updatedAt
-  isPinned     Boolean  @default(false)
+  rating    Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
-  @@id([userId, dirPath])
-  @@index([userId, isPinned, lastViewedAt])
+  @@id([userId, fileId])
+  @@index([userId])
+  @@index([fileId])
 }
 
-model FolderMeta {
-  path        String   @id // FS上の相対パスを一意の識別子にする
-  previewPath String? // フォルダの表紙にする画像のパス
-  title       String? // フォルダに別名をつけたい場合
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  totalSize   BigInt   @default(0)
-  fileCount   Int      @default(0)
+model Folder {
+  id            String   @id @default(uuid())
+  parentId      String?
+  previewFileId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  name          String
+  totalSize     BigInt   @default(0)
+  fileCount     Int      @default(0)
 
-  @@index([path])
+  parent         Folder?         @relation("FolderTree", fields: [parentId], references: [id])
+  children       Folder[]        @relation("FolderTree")
+  files          File[]
+  visitedFolders VisitedFolder[]
+
+  @@unique([parentId, name])
+  @@index([parentId])
 }
 
-enum MediaType {
+model File {
+  id            String    @id @default(uuid())
+  folderId      String
+  previewFileId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  name          String
+  mtime         DateTime
+  size          BigInt
+  type          FileType?
+
+  folder            Folder             @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  fileTags          FileTag[]
+  userFileFavorites UserFileFavorite[]
+
+  @@unique([folderId, name])
+  @@index([folderId])
+  @@index([mtime])
+}
+
+enum FileType {
+  text
+  binary
   video
   audio
   image
+}
+
+model FileTag {
+  fileId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([fileId, tagId])
+  @@index([createdAt])
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  kana      String?
+  isActive  Boolean  @default(true)
+  isNew     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fileTags      FileTag[]
+  userFavorites UserTagFavorite[]
+
+  @@index([kana])
 }
 
 model Session {
