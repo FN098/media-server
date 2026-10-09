@@ -1,4 +1,4 @@
-import { MediaFsNodeType } from "@/lib/media/types";
+import { MediaFsNodeType } from "@/lib/node/types";
 import { cn } from "@/shadcn/lib/utils";
 import {
   FileText,

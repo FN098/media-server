@@ -1,6 +1,6 @@
 import { useTagStates } from "@/feature/tag-editor/hooks/use-tag-states";
 import { useTags } from "@/feature/tag/hooks/use-tags";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { TagEditMode } from "@/lib/tag-editor/types";
 import { SearchTagStrategy, SortTagStrategy } from "@/lib/tag/strategies";
 import { Tag, TagOperator } from "@/lib/tag/types";

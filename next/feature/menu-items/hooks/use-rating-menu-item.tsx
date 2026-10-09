@@ -1,6 +1,6 @@
 import { FavoriteRatingInput } from "@/feature/favorite/ui/favorite-rating-input";
-import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
+import { MediaNode } from "@/lib/node/types";
 import { useMemo } from "react";
 
 interface UseRatingMenuItemProps {

@@ -1,6 +1,6 @@
-import { detectMediaType } from "@/lib/media/detectors";
-import { findGlobalAdjacentFolder } from "@/lib/media/fs-crawler";
-import { MediaFsContext, MediaFsListing, MediaFsNode } from "@/lib/media/types";
+import { detectMediaType } from "@/lib/node/detectors";
+import { findGlobalAdjacentFolder } from "@/lib/node/fs-crawler";
+import { MediaFsContext, MediaFsListing, MediaFsNode } from "@/lib/node/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { existsPath } from "@/lib/utils/fs";

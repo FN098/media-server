@@ -1,4 +1,4 @@
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
 export function useMediaIndex(nodes: MediaNode[]) {

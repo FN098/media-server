@@ -2,8 +2,8 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
-import { detectMediaType } from "@/lib/media/detectors";
-import { MediaType } from "@/lib/media/types";
+import { detectMediaType } from "@/lib/node/detectors";
+import { MediaType } from "@/lib/node/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { isFsNotFoundError, isFsPermissionError } from "@/lib/utils/fs";
 import { sanitize } from "@/lib/virtual-path/guard";

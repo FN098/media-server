@@ -5,9 +5,9 @@ import {
   RatingOperator,
   TagFilterMode,
 } from "@/lib/filter/types";
-import { detectMediaType } from "@/lib/media/detectors";
-import { SortDirection } from "@/lib/media/sort";
-import { MediaNode, MediaType } from "@/lib/media/types";
+import { detectMediaType } from "@/lib/node/detectors";
+import { SortDirection } from "@/lib/node/sort";
+import { MediaNode, MediaType } from "@/lib/node/types";
 import { prisma } from "@/lib/prisma";
 import { normalizeForLike } from "@/lib/utils/japanese";
 import { shuffleArray, shuffleArrayWithSeed } from "@/lib/utils/shuffle";

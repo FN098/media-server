@@ -1,6 +1,6 @@
-import { isMedia } from "@/lib/media/detectors";
-import { sortNodes } from "@/lib/media/sort";
-import type { MediaFsNode, MediaType, PrismaMedia } from "@/lib/media/types";
+import { isMedia } from "@/lib/node/detectors";
+import { sortNodes } from "@/lib/node/sort";
+import type { MediaFsNode, MediaType, PrismaMedia } from "@/lib/node/types";
 import { prisma } from "@/lib/prisma";
 import { getFilenameWithoutExt } from "@/lib/utils/filename";
 

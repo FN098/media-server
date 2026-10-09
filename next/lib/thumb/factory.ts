@@ -1,5 +1,5 @@
 import { createVideoThumb } from "@/lib/child_process/ffmpeg";
-import { MediaFsNode } from "@/lib/media/types";
+import { MediaFsNode } from "@/lib/node/types";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,

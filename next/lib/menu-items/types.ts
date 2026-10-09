@@ -1,4 +1,4 @@
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 
 export type MenuItemVariant = "default" | "destructive";
 

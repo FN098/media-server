@@ -1,5 +1,5 @@
 import { useMediaNodeDndContext } from "@/feature/dnd/providers/media-node-dnd-provider";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { useCallback } from "react";
 

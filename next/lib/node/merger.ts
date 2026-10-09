@@ -3,7 +3,7 @@ import {
   FolderMeta,
   FolderVisitedInfo,
 } from "@/lib/folder/types";
-import { MediaDbNode, MediaFsNode, MediaNode } from "@/lib/media/types";
+import { MediaDbNode, MediaFsNode, MediaNode } from "@/lib/node/types";
 
 export function mergeFsWithDb({
   fsNodes,
@@ -36,7 +36,7 @@ export function mergeFsWithDb({
         ...node,
         id: dbNode?.id,
         title: dbNode?.title ?? null,
-        lastViewedAt: visited?.lastViewedAt ?? null,
+        lastViewedAt: visited?.visitedAt ?? null,
         favoriteCount: fav?.favoriteMediaCount,
         averageRating: fav?.averageRating,
         tags: null,

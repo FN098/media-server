@@ -1,5 +1,5 @@
 import { logger } from "@/lib/logger";
-import { getMimetype } from "@/lib/media/mimetype";
+import { getMimetype } from "@/lib/node/mimetype";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import {
   badRequestResponse,

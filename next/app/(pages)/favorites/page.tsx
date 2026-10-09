@@ -11,8 +11,8 @@ import {
   RatingOperator,
   TagFilterMode,
 } from "@/lib/filter/types";
-import { formatNodes } from "@/lib/media/formatters";
-import { SortDirection } from "@/lib/media/sort";
+import { formatNodes } from "@/lib/node/formatters";
+import { SortDirection } from "@/lib/node/sort";
 import { hashObject } from "@/lib/utils/fnv1a-hash";
 import { Metadata } from "next";
 

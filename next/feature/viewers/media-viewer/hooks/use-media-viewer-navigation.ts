@@ -1,4 +1,4 @@
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { hashObject } from "@/lib/utils/fnv1a-hash";
 import {
   buildMediaViewerSlides,

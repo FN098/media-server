@@ -2,7 +2,7 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
-import { updateMediaFileMtime } from "@/lib/media/repository";
+import { updateMediaFileMtime } from "@/lib/node/repository";
 import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
 

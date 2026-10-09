@@ -1,4 +1,4 @@
-import { MediaFsNodeType } from "@/lib/media/types";
+import { MediaFsNodeType } from "@/lib/node/types";
 
 // ===== 共通フィルターオプション =====
 export type DirectoryPassMode = "always" | "never" | "apply-filter";

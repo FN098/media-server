@@ -2,7 +2,7 @@
 
 import { useMounted } from "@/feature/general/hooks/use-mounted";
 import { MediaThumb } from "@/feature/thumbnail/ui/media-thumb";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";

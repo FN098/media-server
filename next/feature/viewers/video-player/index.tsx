@@ -1,6 +1,6 @@
 import { LoadingSpinner } from "@/feature/viewers/media-viewer/ui/loading-spinner";
-import { resolveMediaUrl } from "@/lib/media/resolvers";
-import { MediaFsNode } from "@/lib/media/types";
+import { resolveMediaUrl } from "@/lib/node/resolvers";
+import { MediaFsNode } from "@/lib/node/types";
 import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";
 import { cn } from "@/shadcn/lib/utils";
 import Image from "next/image";

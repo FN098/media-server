@@ -2,8 +2,8 @@ import { FavoriteRatingInput } from "@/feature/favorite/ui/favorite-rating-input
 import { FavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorites-favorites";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
-import { hasMedia } from "@/lib/media/detectors";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
+import { hasMedia } from "@/lib/node/detectors";
 import { averageBy } from "@/lib/utils/math";
 import { TagIcon } from "lucide-react";
 import { useMemo } from "react";

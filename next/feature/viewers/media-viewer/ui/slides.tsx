@@ -8,7 +8,7 @@ import { AudioPlayer } from "@/feature/viewers/audio-player";
 import { ImageViewer } from "@/feature/viewers/image-viewer";
 import { useMediaViewerContext } from "@/feature/viewers/media-viewer/providers/media-viewer-provider";
 import { VideoPlayer } from "@/feature/viewers/video-player";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { assertNever } from "@/lib/utils/assert";
 import { clamp } from "@/lib/utils/clamp";
 import { ContentSlide, MediaViewerSlide } from "@/lib/viewer/slides";

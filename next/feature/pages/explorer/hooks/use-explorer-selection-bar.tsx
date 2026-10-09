@@ -4,9 +4,9 @@ import { ExplorerFavorites } from "@/feature/pages/explorer/hooks/use-explorer-f
 import { ExplorerThumbs } from "@/feature/pages/explorer/hooks/use-explorer-thumbs";
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
-import { hasMedia } from "@/lib/media/detectors";
-import { MediaListing } from "@/lib/media/types";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
+import { hasMedia } from "@/lib/node/detectors";
+import { MediaListing } from "@/lib/node/types";
 import { averageBy } from "@/lib/utils/math";
 import {
   CopyIcon,

@@ -1,8 +1,8 @@
 import { useExplorerContext } from "@/feature/pages/explorer/providers/explorer-provider";
-import { MediaNode } from "@/lib/media/types";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
+import { MediaNode } from "@/lib/node/types";
 import { CheckCheckIcon, FolderPlusIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useMemo } from "react";
 

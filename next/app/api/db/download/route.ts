@@ -1,7 +1,7 @@
 import { authorize } from "@/lib/authorization/authorize";
 import { DB_BACKUP_DIR } from "@/lib/db-backup/config";
 import { logger } from "@/lib/logger";
-import { getMimetype } from "@/lib/media/mimetype";
+import { getMimetype } from "@/lib/node/mimetype";
 import {
   badRequestResponse,
   forbiddenResponse,

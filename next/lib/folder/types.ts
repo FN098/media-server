@@ -1,6 +1,11 @@
+export type {
+  Folder as DbFolder,
+  VisitedFolder as DbVisitedFolder,
+} from "@/generated/prisma/client";
+
 export type FolderVisitedInfo = {
   path: string;
-  lastViewedAt: Date | null;
+  visitedAt: Date | null;
 };
 
 export type FolderFavoriteInfo = {
@@ -16,5 +21,3 @@ export type FolderMeta = {
   totalSize: number;
   fileCount: number;
 };
-
-export type { VisitedFolder } from "@/generated/prisma/client";

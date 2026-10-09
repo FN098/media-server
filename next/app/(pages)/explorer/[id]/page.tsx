@@ -7,47 +7,43 @@ import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite } from "@/lib/favorite/types";
 import {
   getFolderFavoriteInfo,
-  getFolderMetas,
+  getFolderNameById,
+  getFolderPath,
   getFolderVisitedInfo,
   updateFolderCache,
 } from "@/lib/folder/repository";
-import { formatNodes } from "@/lib/media/formatters";
-import { getFsListing } from "@/lib/media/fs-listing";
-import { mergeFsWithDb } from "@/lib/media/merger";
-import { getMediaDbNodes } from "@/lib/media/repository";
-import { SortDirection, SortKeyOf, sortNodes } from "@/lib/media/sort";
-import { syncMediaDir } from "@/lib/media/sync";
-import { MediaNode } from "@/lib/media/types";
+import { formatNodes } from "@/lib/node/formatters";
+import { getFsListing } from "@/lib/node/fs-listing";
+import { mergeFsWithDb } from "@/lib/node/merger";
+import { getMediaDbNodes } from "@/lib/node/repository";
+import { SortDirection, SortKey, sortNodes } from "@/lib/node/sort";
+import { syncMediaDir } from "@/lib/node/sync";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { basename, extname } from "path";
 
-// 動的ページとしてレンダリング
-export const dynamic = "force-dynamic";
+interface ExplorerPageProps {
+  // パスパラメータ: /explorer/[id]
+  params: Promise<{
+    id?: string;
+  }>;
+  // URLクエリパラメータ: ?sort=name&direction=asc
+  searchParams: Promise<{
+    sort?: SortKey;
+    direction?: SortDirection;
+  }>;
+}
 
 export async function generateMetadata(
   props: ExplorerPageProps
 ): Promise<Metadata> {
-  const { path: pathParts = [] } = await props.params;
+  const { id } = await props.params;
 
-  const lastPart = pathParts[pathParts.length - 1] ?? "HOME";
-  const decodedPart = decodeURIComponent(lastPart);
+  const name = id ? await getFolderNameById(id) : "HOME";
 
   return {
-    title: `${decodedPart} | ${APP_CONFIG.meta.title}`,
+    title: `${name} | ${APP_CONFIG.meta.title}`,
   };
-}
-
-interface ExplorerPageProps {
-  // パスパラメータ: /explorer/[...path]
-  params: Promise<{
-    path?: string[];
-  }>;
-  // URLクエリパラメータ: ?sort=name&direction=asc
-  searchParams: Promise<{
-    sort?: SortKeyOf<MediaNode>;
-    direction?: SortDirection;
-  }>;
 }
 
 export default async function ExplorerPage(props: ExplorerPageProps) {
@@ -56,14 +52,23 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     props.searchParams,
   ]);
 
-  const { path: pathParts = [] } = params;
+  const { id } = params;
   const { sort: sortKey = "name", direction: sortDirection = "asc" } =
     searchParams;
 
-  const currentVirtualPath = pathParts.map(decodeURIComponent).join("/");
+  let folderId = id;
+
+  if (folderId == null) {
+  }
+
+  const folderPath = id ? await getFolderPath(id) : "/";
+
+  if (!folderPath) {
+    notFound();
+  }
 
   // FileSystem からリスト取得
-  const fsListing = await getFsListing(currentVirtualPath);
+  const fsListing = await getFsListing(folderPath);
   if (!fsListing) notFound();
 
   const fsNodes = fsListing.nodes;
@@ -71,12 +76,12 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   const user = await resolveCurrentUserOrThrow();
 
   // DBクエリの前にファイルシステムとDBの同期を取る（新規追加されたメディアをDBに反映）
-  await syncMediaDir(currentVirtualPath, fsNodes);
+  await syncMediaDir(folderPath, fsNodes);
 
   // DB クエリ
   const [dbNodes, folderVisited, folderFavorites, folderMetas] =
     await Promise.all([
-      getMediaDbNodes(currentVirtualPath, user.id),
+      getMediaDbNodes(folderPath, user.id),
       getFolderVisitedInfo(dirPaths, user.id),
       getFolderFavoriteInfo(dirPaths, user.id),
       getFolderMetas(dirPaths),
@@ -84,7 +89,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   // フォルダメタデータ更新
   void updateFolderCache({
-    path: currentVirtualPath,
+    folderId: id,
     directFiles: fsNodes
       .filter((node) => !node.isDirectory)
       .map((n) => ({ fileSize: n.size ?? 0 })), // 現在のフォルダ直下のファイル群

@@ -1,6 +1,6 @@
-import { detectMediaType, isMedia } from "@/lib/media/detectors";
-import { sortNodes } from "@/lib/media/sort";
-import { CachedFsEntry, MediaFsContext } from "@/lib/media/types";
+import { detectMediaType, isMedia } from "@/lib/node/detectors";
+import { sortNodes } from "@/lib/node/sort";
+import { CachedFsEntry, MediaFsContext } from "@/lib/node/types";
 import { isRootPath } from "@/lib/virtual-path/guard";
 import { basename, join, parentpath } from "@/lib/virtual-path/path";
 import { Dirent } from "fs";

@@ -6,7 +6,7 @@ import { ClickToCopy } from "@/feature/text/ui/click-to-copy";
 import { MarqueeText } from "@/feature/text/ui/marquee-text";
 import { useMediaViewerContext } from "@/feature/viewers/media-viewer/providers/media-viewer-provider";
 import { MediaViewerHeaderPinButton } from "@/feature/viewers/media-viewer/ui/pin-button";
-import { isMedia } from "@/lib/media/detectors";
+import { isMedia } from "@/lib/node/detectors";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 

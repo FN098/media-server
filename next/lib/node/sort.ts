@@ -1,12 +1,14 @@
+import { Node } from "@/lib/node/types";
+
+export type SortKey = "name" | "size" | "mtime";
+
 export type SortDirection = "asc" | "desc";
 
-export type SortOptions<T> = {
-  key?: keyof T;
+export type SortOptions = {
+  key?: SortKey;
   direction?: SortDirection;
-  valueMapper?: (node: T, key: keyof T) => unknown;
+  valueMapper?: (node: Node, key: SortKey) => unknown;
 };
-
-export type SortKeyOf<T> = SortOptions<T>["key"];
 
 const collator = new Intl.Collator("ja-JP", {
   numeric: true, // 10 を 2 の後ろにする
@@ -14,28 +16,19 @@ const collator = new Intl.Collator("ja-JP", {
   ignorePunctuation: true, // 記号を無視
 });
 
-export function sortNames(names: string[]): string[] {
-  return [...names].sort((a, b) => collator.compare(a, b));
-}
-
-export function sortNodes<
-  T extends {
-    name: string;
-    isDirectory: boolean;
-  },
->(nodes: T[], options?: SortOptions<T>): T[] {
+export function sortNodes(nodes: Node[], options?: SortOptions): Node[] {
   const { key = "name", direction = "asc", valueMapper } = options ?? {};
 
   // 昇順(asc) or 降順(desc)
   const modifier = direction === "asc" ? 1 : -1;
 
-  const getValue = (node: T, key: keyof T) =>
+  const getValue = (node: Node, key: SortKey) =>
     valueMapper ? valueMapper(node, key) : node[key];
 
   return [...nodes].sort((a, b) => {
     // フォルダ優先
-    if (a.isDirectory !== b.isDirectory) {
-      return a.isDirectory ? -1 : 1;
+    if (a.type !== b.type) {
+      return a.type === "folder" ? -1 : 1;
     }
 
     const valA = getValue(a, key);

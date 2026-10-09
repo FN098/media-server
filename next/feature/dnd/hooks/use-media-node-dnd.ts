@@ -1,5 +1,5 @@
 import { useModifiers } from "@/feature/keyboard/hooks/use-modifiers";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import {
   DragEndEvent,
   DragStartEvent,

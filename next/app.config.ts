@@ -9,4 +9,7 @@ export const APP_CONFIG = {
   favorites: {
     maxPageSize: 1000,
   },
+  recentFolders: {
+    maxLength: 20,
+  },
 } as const;

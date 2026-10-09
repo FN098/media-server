@@ -16,7 +16,7 @@ import { useTagEditorContext } from "@/feature/tag-editor/providers/tag-editor-p
 import { useViewMode } from "@/feature/view/hooks/use-view-mode";
 import { useViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { useSlideshowContext } from "@/feature/viewers/media-viewer/providers/slideshow-provider";
-import { MediaListing } from "@/lib/media/types";
+import { MediaListing } from "@/lib/node/types";
 
 export interface UseExplorerProps {
   listing: MediaListing;

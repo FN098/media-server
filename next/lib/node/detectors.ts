@@ -2,8 +2,8 @@ import {
   audioExtensions,
   imageExtensions,
   videoExtensions,
-} from "@/lib/media/extensions";
-import { MediaType } from "@/lib/media/types";
+} from "@/lib/node/extensions";
+import { MediaType } from "@/lib/node/types";
 
 export const mediaTypes = ["audio", "image", "video"] as const;
 

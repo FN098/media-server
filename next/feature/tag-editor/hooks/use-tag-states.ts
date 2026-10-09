@@ -1,4 +1,4 @@
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { Tag, TagState } from "@/lib/tag/types";
 import { uniqueBy } from "@/lib/utils/array";
 import { useMemo } from "react";

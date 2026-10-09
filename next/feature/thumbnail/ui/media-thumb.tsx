@@ -1,6 +1,6 @@
 import { MediaThumbIcon } from "@/feature/thumbnail/ui/media-thumb-icons";
 import { MediaThumbImage } from "@/feature/thumbnail/ui/media-thumb-image";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { cn } from "@/shadcn/lib/utils";
 
 interface MediaThumbProps {

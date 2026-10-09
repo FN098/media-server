@@ -1,7 +1,7 @@
 "use client";
 
 import { MediaTypeFilterValue } from "@/lib/filter/types";
-import { MediaFsNodeType } from "@/lib/media/types";
+import { MediaFsNodeType } from "@/lib/node/types";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import {

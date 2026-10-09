@@ -2,7 +2,7 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
-import { copyNodeInDb } from "@/lib/media/services";
+import { copyNodeInDb } from "@/lib/node/services";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,

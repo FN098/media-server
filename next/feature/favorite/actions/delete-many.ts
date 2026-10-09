@@ -3,7 +3,7 @@
 import { authorize } from "@/lib/authorization/authorize";
 import { deleteManyFavorites } from "@/lib/favorite/repository";
 import { logger } from "@/lib/logger";
-import { getMediaIdsByPaths } from "@/lib/media/repository";
+import { getMediaIdsByPaths } from "@/lib/node/repository";
 import { unique } from "@/lib/utils/array";
 import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import z from "zod";

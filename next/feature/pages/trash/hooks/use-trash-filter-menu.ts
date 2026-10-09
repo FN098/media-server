@@ -4,7 +4,7 @@ import {
 } from "@/feature/pages/trash/hooks/use-trash-filter-menu-items";
 import { useTrashContext } from "@/feature/pages/trash/providers/trash-provider";
 import { MediaType } from "@/generated/prisma/enums";
-import { isMedia } from "@/lib/media/detectors";
+import { isMedia } from "@/lib/node/detectors";
 import { useCallback, useMemo } from "react";
 
 export function useTrashFilterMenu() {

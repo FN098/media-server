@@ -1,12 +1,12 @@
-import { AuthUser } from "@/lib/auth/auth-user";
 import { resolveCurrentUser } from "@/lib/auth/current-user";
+import { CurrentUser } from "@/lib/auth/current-user-schema";
 import { hasPermissions } from "@/lib/authorization/permission";
 import { Statement } from "@/lib/authorization/statements";
 
 type AuthorizeResult =
   | {
       success: true;
-      user: AuthUser;
+      user: CurrentUser;
     }
   | {
       success: false;

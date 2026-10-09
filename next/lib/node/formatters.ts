@@ -1,4 +1,4 @@
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { getFilenameWithoutExt } from "@/lib/utils/filename";
 
 export function formatNodes(nodes: MediaNode[]): MediaNode[] {

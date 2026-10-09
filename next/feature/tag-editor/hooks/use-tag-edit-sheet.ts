@@ -2,7 +2,7 @@ import { updateManyMediaTagsAction } from "@/feature/tag-editor/actions/update-m
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { useTagEditorHotkeys } from "@/feature/tag-editor/hooks/use-tag-editor-hotkeys";
 import { createManyTagsAction } from "@/feature/tag/actions/create-many";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { EditingMode } from "@/lib/tag-editor/types";
 import { TagOperation } from "@/lib/tag/types";
 import { useRouter } from "next/navigation";

@@ -1,4 +1,4 @@
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { useHotkeys } from "react-hotkeys-hook";
 import { SwiperClass } from "swiper/react";
 

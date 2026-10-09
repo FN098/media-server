@@ -1,4 +1,4 @@
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { useMemo } from "react";
 
 type Pipe = (node: MediaNode) => boolean;

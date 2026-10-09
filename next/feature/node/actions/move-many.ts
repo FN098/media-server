@@ -2,7 +2,7 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
-import { renameNodeInDb } from "@/lib/media/services";
+import { renameNodeInDb } from "@/lib/node/services";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,

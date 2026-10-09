@@ -9,7 +9,7 @@ import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-sel
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { Slideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { MediaListing } from "@/lib/media/types";
+import { MediaListing } from "@/lib/node/types";
 
 interface UseExplorerMenuProps {
   listing: MediaListing;

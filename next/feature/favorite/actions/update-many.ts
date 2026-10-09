@@ -4,7 +4,7 @@ import { authorize } from "@/lib/authorization/authorize";
 import { upsertManyFavorites } from "@/lib/favorite/repository";
 import { RatingInputSchema } from "@/lib/favorite/schemas";
 import { logger } from "@/lib/logger";
-import { getMediaIdsByPaths } from "@/lib/media/repository";
+import { getMediaIdsByPaths } from "@/lib/node/repository";
 import { unique } from "@/lib/utils/array";
 import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import z from "zod";

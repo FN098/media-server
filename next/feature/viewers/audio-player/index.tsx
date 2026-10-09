@@ -1,7 +1,7 @@
 import { MarqueeText } from "@/feature/text/ui/marquee-text";
 import { MediaThumb } from "@/feature/thumbnail/ui/media-thumb";
-import { resolveMediaUrl } from "@/lib/media/resolvers";
-import { MediaNode } from "@/lib/media/types";
+import { resolveMediaUrl } from "@/lib/node/resolvers";
+import { MediaNode } from "@/lib/node/types";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,

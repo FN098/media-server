@@ -1,5 +1,5 @@
-import { getFsNode, listFsNodes } from "@/lib/media/fs-listing";
-import { sortNodes } from "@/lib/media/sort";
+import { getFsNode, listFsNodes } from "@/lib/node/fs-listing";
+import { sortNodes } from "@/lib/node/sort";
 import { redis } from "@/lib/redis";
 import { ThumbJobCompletedEvent, ThumbJobData } from "@/lib/thumb-job/types";
 import { createThumbs } from "@/lib/thumb/factory";

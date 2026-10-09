@@ -3,8 +3,8 @@ import {
   useFavoritesFilterMenuItems,
 } from "@/feature/pages/favorites/hooks/use-favorites-filter-menu-items";
 import { useFavoritesContext } from "@/feature/pages/favorites/providers/favorites-provider";
-import { isMedia } from "@/lib/media/detectors";
-import { MediaType } from "@/lib/media/types";
+import { isMedia } from "@/lib/node/detectors";
+import { MediaType } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
 export function useFavoritesFilterMenu() {

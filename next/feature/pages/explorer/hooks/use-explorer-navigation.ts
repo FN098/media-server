@@ -12,8 +12,8 @@ import {
   ViewerNavigation,
 } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { isArchiveFile } from "@/lib/archive/guards";
-import { isMedia } from "@/lib/media/detectors";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { isMedia } from "@/lib/node/detectors";
+import { MediaListing, MediaNode } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 

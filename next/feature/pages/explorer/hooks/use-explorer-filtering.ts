@@ -14,7 +14,7 @@ import {
   createTagFilter,
   withDirectoryControl,
 } from "@/lib/filter/factory";
-import { MediaListing, MediaNode } from "@/lib/media/types";
+import { MediaListing, MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
 interface UseExplorerFilteringProps {

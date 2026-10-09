@@ -2,7 +2,7 @@ import { enqueueCreateThumbsJobAction } from "@/feature/thumbnail/actions/enque-
 import { useThumbEventObserver } from "@/feature/thumbnail/hooks/use-thumb-event-observer";
 import { FallbackImage } from "@/feature/thumbnail/ui/fallback-image";
 import { MediaThumbIcon } from "@/feature/thumbnail/ui/media-thumb-icons";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { resolveMediaThumbUrl } from "@/lib/thumb/resolvers";
 import { parentpath } from "@/lib/virtual-path/path";
 import { cn } from "@/shadcn/lib/utils";

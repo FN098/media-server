@@ -14,7 +14,7 @@ import { useSort } from "@/feature/sort/hooks/use-sort";
 import { useTagEditorContext } from "@/feature/tag-editor/providers/tag-editor-provider";
 import { useViewMode } from "@/feature/view/hooks/use-view-mode";
 import { useViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { MediaListing } from "@/lib/media/types";
+import { MediaListing } from "@/lib/node/types";
 
 export interface UseTrashProps {
   listing: MediaListing;

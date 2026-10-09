@@ -4,8 +4,8 @@ import { FavoritesFiltering } from "@/feature/pages/favorites/hooks/use-favorite
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { isMedia } from "@/lib/media/detectors";
-import { MediaNode } from "@/lib/media/types";
+import { isMedia } from "@/lib/node/detectors";
+import { MediaNode } from "@/lib/node/types";
 import { parentpath } from "@/lib/virtual-path/path";
 import { useCallback } from "react";
 import { toast } from "sonner";

@@ -1,5 +1,5 @@
 import { useFavoritesControlContext } from "@/feature/favorite/providers/favorites-control-provider";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 

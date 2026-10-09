@@ -3,8 +3,8 @@
 import { useMounted } from "@/feature/general/hooks/use-mounted";
 import { useNodeDropdownMenu } from "@/feature/menu/hooks/use-node-dropdown-menu";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
-import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
+import { MediaNode } from "@/lib/node/types";
 import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
 import {

@@ -1,7 +1,7 @@
 import { touchMediaTimestampAction } from "@/feature/node/actions/touch-timestamp";
 import { updatePreviewAction } from "@/feature/preview/actions/update";
 import { enqueueCreateSingleThumbJobAction } from "@/feature/thumbnail/actions/enque-create-thumb-job";
-import { MediaNode } from "@/lib/media/types";
+import { MediaNode } from "@/lib/node/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";

@@ -6,8 +6,8 @@
  * 使い方：`pnpm tsx ./tools/update-media-types.ts`
  */
 
-import { detectMediaType, mediaTypes } from "@/lib/media/detectors";
-import { MediaType } from "@/lib/media/types";
+import { detectMediaType, mediaTypes } from "@/lib/node/detectors";
+import { MediaType } from "@/lib/node/types";
 import { prisma } from "@/lib/prisma";
 
 export async function bulkUpdateMediaTypes() {

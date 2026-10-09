@@ -1,5 +1,5 @@
-import { MediaNode } from "@/lib/media/types";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
+import { MediaNode } from "@/lib/node/types";
 import { RefreshCwIcon } from "lucide-react";
 import { useMemo } from "react";
 
