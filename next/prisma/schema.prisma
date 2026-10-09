@@ -79,8 +79,6 @@ model UserFileFavorite {
   @@index([fileId])
 }
 
-// NOTE: 論理削除 (deletedAt != null) の場合、同名フォルダ/ファイルの作成を禁止
-// NOTE: ファイル名/フォルダ名の重複はアプリケーション層およびファイルシステム層で防ぐ
 model Folder {
   id            String    @id @default(uuid())
   parentId      String?

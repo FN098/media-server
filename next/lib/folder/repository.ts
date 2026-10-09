@@ -1,20 +1,14 @@
-import {
-  DbFolder,
-  DbVisitedFolder,
-  FolderFavoriteInfo,
-  FolderVisitedInfo,
-} from "@/lib/folder/types";
 import { prisma } from "@/lib/prisma";
 
 // フォルダID -> フォルダ
-export async function getFolderById(id: string): Promise<DbFolder | null> {
+export async function getFolderById(id: string) {
   return await prisma.folder.findUnique({
     where: { id },
   });
 }
 
 // フォルダID -> フォルダ名
-export async function getFolderNameById(id: string): Promise<string | null> {
+export async function getFolderNameById(id: string) {
   const folder = await prisma.folder.findUnique({
     select: { name: true },
     where: { id },
@@ -24,18 +18,24 @@ export async function getFolderNameById(id: string): Promise<string | null> {
 }
 
 // 親フォルダID -> 子フォルダ
-export async function getFolderByParentId(
-  id: string | null
-): Promise<DbFolder[]> {
+export async function getFolderByParentId(id: string | null) {
   return await prisma.folder.findMany({
     where: { parentId: id },
   });
 }
 
 // ルートフォルダ
-export async function getRootFolder(): Promise<DbFolder | null> {
+const ROOT_FOLDER_NAME = "";
+
+export async function getRootFolder() {
   return await prisma.folder.findFirst({
-    where: { parentId: null },
+    where: { parentId: null, name: ROOT_FOLDER_NAME },
+  });
+}
+
+export async function createRootFolder() {
+  return await prisma.folder.create({
+    data: { parentId: null, name: ROOT_FOLDER_NAME },
   });
 }
 
@@ -47,7 +47,7 @@ interface FolderPathRow {
 }
 
 // フォルダID -> フォルダパス
-export async function getFolderPath(folderId: string): Promise<string> {
+export async function getFolderPath(folderId: string) {
   const rows = await prisma.$queryRaw<FolderPathRow[]>`
     WITH RECURSIVE FolderHierarchy AS (
       -- アンカーメンバー
@@ -90,10 +90,7 @@ export async function getFolderPath(folderId: string): Promise<string> {
 }
 
 // 最近訪れたフォルダの一覧取得
-export async function getRecentFolders(
-  userId: string,
-  length: number
-): Promise<DbVisitedFolder[]> {
+export async function getRecentFolders(userId: string, length: number) {
   return await prisma.visitedFolder.findMany({
     where: { userId },
     take: length,
@@ -121,10 +118,7 @@ export async function togglePinVisitedFolder(
 }
 
 // 訪問済みフォルダを更新
-export async function updateVisitedFolder(
-  folderId: string,
-  userId: string
-): Promise<void> {
+export async function updateVisitedFolder(folderId: string, userId: string) {
   await prisma.$transaction(async (tx) => {
     await tx.visitedFolder.upsert({
       where: {
@@ -148,7 +142,7 @@ export async function updateVisitedFolder(
 export async function getFolderVisitedInfo(
   folderIds: string[],
   userId: string
-): Promise<FolderVisitedInfo[]> {
+) {
   // 1. 指定されたいずれかのパスに前方一致するレコードをすべて取得
   const allRelatedFolders = await prisma.visitedFolder.findMany({
     where: {
@@ -196,7 +190,7 @@ export async function getFolderVisitedInfo(
 export async function getFolderFavoriteInfo(
   folderIds: string[],
   userId: string
-): Promise<FolderFavoriteInfo[]> {
+) {
   // 1. 各ディレクトリごとの集計クエリ（Promise）の配列を作成
   const tasks = folderIds.map((d) =>
     prisma.userFileFavorite.aggregate({

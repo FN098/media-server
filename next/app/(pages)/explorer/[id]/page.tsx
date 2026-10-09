@@ -25,7 +25,7 @@ import { basename, extname } from "path";
 interface ExplorerPageProps {
   // パスパラメータ: /explorer/[id]
   params: Promise<{
-    id?: string;
+    id: string;
   }>;
   // URLクエリパラメータ: ?sort=name&direction=asc
   searchParams: Promise<{
@@ -56,20 +56,20 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   const { sort: sortKey = "name", direction: sortDirection = "asc" } =
     searchParams;
 
-  let folderId = id;
-
-  if (folderId == null) {
-  }
-
-  const folderPath = id ? await getFolderPath(id) : "/";
+  const folderPath = await getFolderPath(id);
 
   if (!folderPath) {
     notFound();
   }
 
+  debugger;
+
   // FileSystem からリスト取得
   const fsListing = await getFsListing(folderPath);
-  if (!fsListing) notFound();
+
+  if (!fsListing) {
+    notFound();
+  }
 
   const fsNodes = fsListing.nodes;
   const dirPaths = fsNodes.filter((e) => e.isDirectory).map((e) => e.path);

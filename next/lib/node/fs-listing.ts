@@ -1,11 +1,34 @@
 import { detectMediaType } from "@/lib/node/detectors";
 import { findGlobalAdjacentFolder } from "@/lib/node/fs-crawler";
-import { MediaFsContext, MediaFsListing, MediaFsNode } from "@/lib/node/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
+
+type MediaFsNodeType = "directory" | "file" | "image" | "video" | "audio";
+
+type MediaFsNode = {
+  name: string; // ファイル/フォルダ名
+  path: string; // ルートからの相対パス
+  type: MediaFsNodeType;
+  isDirectory: boolean;
+  size?: number; // ディレクトリなら undefined
+  mtime: Date;
+};
+
+type MediaFsListing = {
+  path: string; // 今見ているディレクトリ
+  nodes: MediaFsNode[];
+  parent: string | null;
+  prev: string | null;
+  next: string | null;
+};
+
+export interface MediaFsContext {
+  resolveRealPath: (virtualPath: string) => string;
+  filterVirtualPath?: (virtualPath: string) => boolean;
+}
 
 const defaultContext: MediaFsContext = {
   resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),
