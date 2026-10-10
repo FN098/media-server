@@ -1,19 +1,27 @@
-import { detectMediaType, isMedia } from "@/lib/node/detectors";
+import { detectMediaType, isMedia } from "@/lib/node/media-types";
 import { sortNodes } from "@/lib/node/sort";
-import { CachedFsEntry, MediaFsContext } from "@/lib/node/types";
 import { isRootPath } from "@/lib/virtual-path/guard";
 import { basename, join, parentpath } from "@/lib/virtual-path/path";
 import { Dirent } from "fs";
 import { readdir } from "fs/promises";
 
-interface MediaFsDfsContext extends MediaFsContext {
-  dirCache?: Map<string, CachedFsEntry[]>;
+type FsNode = {
+  virtualPath: string;
+  name: string;
+  isDirectory: boolean;
+  isMedia: boolean;
+};
+
+interface FsContext {
+  dirCache?: Map<string, FsNode[]>;
+  resolveRealPath: (virtualPath: string) => string;
+  filterVirtualPath?: (virtualPath: string) => boolean;
 }
 
 async function readVirtualDir(
   virtualDirPath: string,
-  context: MediaFsDfsContext
-): Promise<CachedFsEntry[]> {
+  context: FsContext
+): Promise<FsNode[]> {
   if (!context.dirCache) {
     context.dirCache = new Map();
   }
@@ -33,7 +41,7 @@ async function readVirtualDir(
     return [];
   }
 
-  const entries: CachedFsEntry[] = dirents.map((e) => {
+  const entries: FsNode[] = dirents.map((e) => {
     const virtualPath = join(virtualDirPath, e.name);
     const isDirectory = e.isDirectory();
     const _isMedia = isDirectory ? false : isMedia(detectMediaType(e.name));
@@ -52,7 +60,7 @@ async function readVirtualDir(
 // そのディレクトリ「直下」にメディアがあるかチェック
 async function hasDirectMedia(
   virtualDirPath: string,
-  context: MediaFsDfsContext
+  context: FsContext
 ): Promise<boolean> {
   const entries = await readVirtualDir(virtualDirPath, context);
   return entries.some((e) => e.isMedia);
@@ -61,8 +69,8 @@ async function hasDirectMedia(
 // そのディレクトリ直下のサブディレクトリを名前順に取得
 async function getSubDirs(
   virtualDirPath: string,
-  context: MediaFsDfsContext
-): Promise<CachedFsEntry[]> {
+  context: FsContext
+): Promise<FsNode[]> {
   const entries = await readVirtualDir(virtualDirPath, context);
 
   return sortNodes(
@@ -76,7 +84,7 @@ async function getSubDirs(
 async function findDeepestMediaFolder(
   virtualDirPath: string,
   priority: "first" | "last",
-  context: MediaFsDfsContext
+  context: FsContext
 ): Promise<string | null> {
   if (context.filterVirtualPath?.(virtualDirPath) === false) {
     return null;
@@ -116,7 +124,7 @@ async function findDeepestMediaFolder(
 // 次のフォルダを探索
 async function findGlobalNextFolder(
   currentVirtualDirPath: string,
-  context: MediaFsDfsContext
+  context: FsContext
 ): Promise<string | null> {
   // 自分の子からメディアを探す
   const subDirs = await getSubDirs(currentVirtualDirPath, context);
@@ -132,7 +140,7 @@ async function findGlobalNextFolder(
 
 async function findNextStepUpward(
   currentVirtualDirPath: string,
-  context: MediaFsDfsContext
+  context: FsContext
 ): Promise<string | null> {
   // 自分の「次の兄弟」を探す
   const parentPath = parentpath(currentVirtualDirPath);
@@ -156,7 +164,7 @@ async function findNextStepUpward(
 // 前のフォルダを探索
 async function findGlobalPrevFolder(
   currentVirtualDirPath: string,
-  context: MediaFsDfsContext
+  context: FsContext
 ): Promise<string | null> {
   // 自分の「前の兄弟」を探す
   const parentPath = parentpath(currentVirtualDirPath);
@@ -187,7 +195,7 @@ async function findGlobalPrevFolder(
 export async function findGlobalAdjacentFolder(
   currentVirtualPath: string,
   direction: "prev" | "next",
-  context: MediaFsContext
+  context: FsContext
 ): Promise<string | null> {
   if (direction === "next") {
     return findGlobalNextFolder(currentVirtualPath, context);

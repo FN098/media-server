@@ -17,7 +17,7 @@ import { getFsListing } from "@/lib/node/fs-listing";
 import { mergeFsWithDb } from "@/lib/node/merger";
 import { getMediaDbNodes } from "@/lib/node/repository";
 import { SortDirection, SortKey, sortNodes } from "@/lib/node/sort";
-import { syncMediaDir } from "@/lib/node/sync";
+import { syncFsWithDb } from "@/lib/node/sync";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { basename, extname } from "path";
@@ -62,8 +62,6 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     notFound();
   }
 
-  debugger;
-
   // FileSystem からリスト取得
   const fsListing = await getFsListing(folderPath);
 
@@ -76,7 +74,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   const user = await resolveCurrentUserOrThrow();
 
   // DBクエリの前にファイルシステムとDBの同期を取る（新規追加されたメディアをDBに反映）
-  await syncMediaDir(folderPath, fsNodes);
+  await syncFsWithDb(id, fsNodes);
 
   // DB クエリ
   const [dbNodes, folderVisited, folderFavorites, folderMetas] =

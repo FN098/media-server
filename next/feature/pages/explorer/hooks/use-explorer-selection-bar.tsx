@@ -5,7 +5,7 @@ import { ExplorerThumbs } from "@/feature/pages/explorer/hooks/use-explorer-thum
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
-import { hasMedia } from "@/lib/node/detectors";
+import { hasMedia } from "@/lib/node/media-types";
 import { MediaListing } from "@/lib/node/types";
 import { averageBy } from "@/lib/utils/math";
 import {

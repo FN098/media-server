@@ -1,6 +1,4 @@
-export type NodeType = "folder" | "file";
-
-export type FileType = "binary" | "text" | "image" | "video" | "audio";
+export type FileType = "text" | "binary" | "image" | "video" | "audio";
 
 export type FileTag = {
   id: string;
@@ -12,7 +10,8 @@ export type FileNode = {
   parentFolderId: string | null;
   previewFileId: string | null;
   name: string;
-  type: "file";
+  isDirectory: false;
+  type: FileType;
   size: number;
   mtime: Date;
   tags: FileTag[];
@@ -26,7 +25,7 @@ export type FolderNode = {
   parentFolderId: string | null;
   previewFileId: string | null;
   name: string;
-  type: "folder";
+  isDirectory: true;
   size: number | null;
   mtime: Date | null;
   fileCount: number | null;

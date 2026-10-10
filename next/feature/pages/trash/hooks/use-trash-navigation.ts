@@ -9,7 +9,7 @@ import {
   IndexLike,
   ViewerNavigation,
 } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { isMedia } from "@/lib/node/detectors";
+import { isMedia } from "@/lib/node/media-types";
 import { MediaListing, MediaNode } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";

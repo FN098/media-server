@@ -5,7 +5,7 @@ import {
   RatingOperator,
   TagFilterMode,
 } from "@/lib/filter/types";
-import { detectMediaType } from "@/lib/node/detectors";
+import { detectMediaType } from "@/lib/node/media-types";
 import { SortDirection } from "@/lib/node/sort";
 import { MediaNode, MediaType } from "@/lib/node/types";
 import { prisma } from "@/lib/prisma";

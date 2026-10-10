@@ -3,15 +3,18 @@ import {
   imageExtensions,
   videoExtensions,
 } from "@/lib/node/extensions";
-import { MediaType } from "@/lib/node/types";
 
 export const mediaTypes = ["audio", "image", "video"] as const;
 
-export const isMedia = (type: string | null) =>
-  type != null && mediaTypes.includes(type as MediaType);
+export type MediaType = (typeof mediaTypes)[number];
 
-export const hasMedia = (items: { type: string }[]) =>
-  items.some((item) => isMedia(item.type));
+export function isMedia(type: string | null) {
+  return type != null && mediaTypes.includes(type as MediaType);
+}
+
+export function hasMedia(items: { type: string }[]) {
+  return items.some((item) => isMedia(item.type));
+}
 
 export function detectMediaType(fileName: string): MediaType | null {
   const lowerName = fileName.toLowerCase();

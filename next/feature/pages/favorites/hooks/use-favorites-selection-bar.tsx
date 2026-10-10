@@ -3,7 +3,7 @@ import { FavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorite
 import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
-import { hasMedia } from "@/lib/node/detectors";
+import { hasMedia } from "@/lib/node/media-types";
 import { averageBy } from "@/lib/utils/math";
 import { TagIcon } from "lucide-react";
 import { useMemo } from "react";

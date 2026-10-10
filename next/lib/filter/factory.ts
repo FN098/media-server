@@ -6,7 +6,7 @@ import {
   RatingFilterValue,
   TagFilterValue,
 } from "@/lib/filter/types";
-import { isMedia } from "@/lib/node/detectors";
+import { isMedia } from "@/lib/node/media-types";
 import { MediaNode } from "@/lib/node/types";
 import { isMatchJapanese } from "@/lib/utils/japanese";
 

@@ -1,25 +1,25 @@
-import { detectMediaType } from "@/lib/node/detectors";
 import { findGlobalAdjacentFolder } from "@/lib/node/fs-crawler";
+import { detectMediaType } from "@/lib/node/media-types";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
 
-type MediaFsNodeType = "directory" | "file" | "image" | "video" | "audio";
+export type FileType = "image" | "video" | "audio";
 
-type MediaFsNode = {
+export type FsNode = {
   name: string; // ファイル/フォルダ名
   path: string; // ルートからの相対パス
-  type: MediaFsNodeType;
+  fileType: FileType | null;
   isDirectory: boolean;
-  size?: number; // ディレクトリなら undefined
+  size: number | null; // ディレクトリなら undefined
   mtime: Date;
 };
 
-type MediaFsListing = {
+export type FsListing = {
   path: string; // 今見ているディレクトリ
-  nodes: MediaFsNode[];
+  nodes: FsNode[];
   parent: string | null;
   prev: string | null;
   next: string | null;
@@ -38,7 +38,7 @@ const defaultContext: MediaFsContext = {
 export async function listFsNodes(
   virtualDirPath: string,
   context: MediaFsContext = { ...defaultContext }
-): Promise<MediaFsNode[]> {
+): Promise<FsNode[]> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
   const dirents = await fs.readdir(realDirPath, { withFileTypes: true });
 
@@ -51,7 +51,7 @@ export async function listFsNodes(
       : true;
   });
 
-  const nodes: MediaFsNode[] = await Promise.all(
+  const nodes = await Promise.all(
     filtered.map(async (item) => {
       const virtualPath = path
         .join(virtualDirPath, item.name)
@@ -64,12 +64,10 @@ export async function listFsNodes(
         name: item.name,
         path: virtualPath,
         isDirectory: isDirectory,
-        type: isDirectory
-          ? "directory"
-          : (detectMediaType(item.name) ?? "file"),
-        size: isDirectory ? undefined : stat.size,
+        fileType: isDirectory ? null : detectMediaType(item.name),
+        size: isDirectory ? null : stat.size,
         mtime: stat.mtime,
-      };
+      } satisfies FsNode;
     })
   );
 
@@ -79,7 +77,7 @@ export async function listFsNodes(
 export async function getFsNode(
   virtualFilePath: string,
   context: MediaFsContext = { ...defaultContext }
-): Promise<MediaFsNode> {
+): Promise<FsNode> {
   const virtualPath = virtualFilePath.replace(/\\/g, "/");
   const realPath = context.resolveRealPath(virtualPath);
   const stat = await fs.stat(realPath);
@@ -89,9 +87,9 @@ export async function getFsNode(
   return {
     name: fileName,
     path: virtualPath,
-    isDirectory: isDirectory,
-    type: isDirectory ? "directory" : (detectMediaType(fileName) ?? "file"),
-    size: isDirectory ? undefined : stat.size,
+    isDirectory,
+    fileType: isDirectory ? null : detectMediaType(fileName),
+    size: isDirectory ? null : stat.size,
     mtime: stat.mtime,
   };
 }
@@ -99,8 +97,9 @@ export async function getFsNode(
 export async function getFsListing(
   virtualDirPath: string,
   context: MediaFsContext = { ...defaultContext }
-): Promise<MediaFsListing | null> {
+): Promise<FsListing | null> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
+
   if (!(await existsPath(realDirPath))) return null;
 
   // --- 現在のディレクトリのノード取得 ---
@@ -120,7 +119,7 @@ export async function getFsListing(
       ? null
       : virtualDirPath.split("/").slice(0, -1).join("/") || "";
 
-  const listing: MediaFsListing = {
+  const listing: FsListing = {
     path: virtualDirPath,
     nodes,
     parent,

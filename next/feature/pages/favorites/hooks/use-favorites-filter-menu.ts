@@ -3,7 +3,7 @@ import {
   useFavoritesFilterMenuItems,
 } from "@/feature/pages/favorites/hooks/use-favorites-filter-menu-items";
 import { useFavoritesContext } from "@/feature/pages/favorites/providers/favorites-provider";
-import { isMedia } from "@/lib/node/detectors";
+import { isMedia } from "@/lib/node/media-types";
 import { MediaType } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 

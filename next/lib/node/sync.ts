@@ -1,21 +1,22 @@
-import { isMedia } from "@/lib/node/detectors";
+import { File } from "@/generated/prisma/client";
+import { FsNode } from "@/lib/node/fs-listing";
+import { isMedia } from "@/lib/node/media-types";
 import { sortNodes } from "@/lib/node/sort";
-import type { MediaFsNode, MediaType, PrismaMedia } from "@/lib/node/types";
-import { prisma } from "@/lib/prisma";
-import { getFilenameWithoutExt } from "@/lib/utils/filename";
+import { FileType } from "@/lib/node/types";
+import { db } from "@/lib/prisma";
 
-type MediaCreateItem = Pick<
-  PrismaMedia,
-  "path" | "dirPath" | "fileMtime" | "fileSize" | "previewPath" | "type"
+type FileCreateItem = Pick<
+  File,
+  "id" | "folderId" | "previewFileId" | "name" | "mtime" | "size" | "type"
 >;
 
-type MediaUpdateItem = Pick<
-  PrismaMedia,
-  "path" | "fileMtime" | "fileSize" | "previewPath" | "type"
+type FileUpdateItem = Pick<
+  File,
+  "id" | "previewFileId" | "mtime" | "size" | "type"
 >;
 
-export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
-  let mediaOnly = nodes.filter((n) => isMedia(n.type));
+export async function syncFsWithDb(folderId: string, nodes: FsNode[]) {
+  let mediaOnly = nodes.filter((n) => isMedia(n.fileType));
 
   // プレビュー候補は名前順で先頭に近いものを優先する
   mediaOnly = sortNodes(mediaOnly, {
@@ -23,116 +24,143 @@ export async function syncMediaDir(dirPath: string, nodes: MediaFsNode[]) {
     direction: "asc",
   });
 
-  // --- 1. プレビュー候補の抽出 ---
+  // プレビュー候補の抽出
   const firstMedia = mediaOnly.find(
-    (f) => f.type === "image" || f.type === "video"
+    (f) => f.fileType === "image" || f.fileType === "video"
   );
 
+  // ファイル名（拡張子抜き）からファイル名へのマップ作成
   const imageMap = new Map<string, string>();
-
   mediaOnly.forEach((f) => {
-    if (f.type === "image") {
+    if (f.fileType === "image") {
       const baseName = f.name.replace(/\.[^/.]+$/, "");
-      if (!imageMap.has(baseName)) imageMap.set(baseName, f.path);
-    }
-  });
-
-  // --- 2. DB状態の取得 ---
-  // 比較のために早めに取得します
-  const dbMedia = await prisma.media.findMany({
-    where: { dirPath },
-    select: { id: true, path: true, fileMtime: true, previewPath: true },
-  });
-  const dbMap = new Map(dbMedia.map((m) => [m.path, m]));
-
-  const currentFolderMeta = await prisma.folderMeta.findUnique({
-    where: { path: dirPath },
-    select: { previewPath: true },
-  });
-
-  const toInsert: MediaCreateItem[] = [];
-  const toUpdate: MediaUpdateItem[] = [];
-
-  // --- 3. 各ファイルのメタデータ準備 & 比較 ---
-  for (const f of mediaOnly) {
-    const dbMeta = dbMap.get(f.path);
-    const baseName = getFilenameWithoutExt(f.path);
-
-    // A. 既にDBにプレビュー設定があるならそれを維持。なければ計算。
-    let previewPath: string | null = dbMeta?.previewPath ?? null;
-
-    if (previewPath === null) {
-      if (f.type === "audio") {
-        previewPath = imageMap.get(baseName) ?? firstMedia?.path ?? null;
-      } else if (f.type === "video") {
-        previewPath = imageMap.get(baseName) ?? null;
+      if (!imageMap.has(baseName)) {
+        imageMap.set(baseName, f.path);
       }
     }
+  });
+
+  const dbFiles = await db.file.findMany({
+    where: { folderId },
+    select: {
+      id: true,
+      name: true,
+      mtime: true,
+      size: true,
+      previewFileId: true,
+      type: true,
+    },
+  });
+
+  // ファイル名（拡張子抜き）からDBファイルへのマップ作成
+  const dbMap = new Map(dbFiles.map((f) => [f.name, f]));
+
+  // 名前からプレビュー用のファイルIDを引けるようにするため、全ファイルの (name -> id) マップも用意
+  // 新規作成分も含めて事前にUUIDを割り当てる
+  const fileNodesWithId = mediaOnly.map((f) => {
+    const existing = dbMap.get(f.name);
+    return {
+      ...f,
+      id: existing?.id ?? crypto.randomUUID(),
+    };
+  });
+
+  const fileIdMap = new Map(fileNodesWithId.map((f) => [f.name, f.id]));
+
+  const toCreate: FileCreateItem[] = [];
+  const toUpdate: FileUpdateItem[] = [];
+
+  // 各ファイルのメタデータ準備 & 比較
+  for (const f of fileNodesWithId) {
+    const dbMeta = dbMap.get(f.name);
+    const baseName = f.name.replace(/\.[^/.]+$/, "");
+
+    // プレビューファイル名の決定（動画、音楽）
+    let previewFileName: string | null = null;
+    if (f.fileType === "audio") {
+      previewFileName = imageMap.get(baseName) ?? firstMedia?.name ?? null;
+    } else if (f.fileType === "video") {
+      previewFileName = imageMap.get(baseName) ?? null;
+    }
+
+    const previewFileId = previewFileName
+      ? (fileIdMap.get(previewFileName) ?? null)
+      : null;
 
     if (!dbMeta) {
       // 新規挿入
-      toInsert.push({
-        path: f.path,
-        dirPath,
-        fileMtime: f.mtime,
-        fileSize: f.size ? BigInt(f.size) : null,
-        previewPath: previewPath,
-        type: f.type as MediaType,
+      toCreate.push({
+        id: f.id,
+        folderId,
+        name: f.name,
+        mtime: f.mtime,
+        size: BigInt(f.size ?? 0),
+        type: f.fileType as FileType,
+        previewFileId: previewFileId,
       });
     } else {
       // 更新判定
-      const timeChanged = dbMeta.fileMtime.getTime() !== f.mtime.getTime();
-      // DBがnullかつ、計算結果がある場合のみpreviewPathを更新対象にする
+      const timeChanged = dbMeta.mtime.getTime() !== f.mtime.getTime();
       const shouldAutoSetPreview =
-        dbMeta.previewPath === null && previewPath !== null;
+        dbMeta.previewFileId === null && previewFileId !== null;
 
       if (timeChanged || shouldAutoSetPreview) {
         toUpdate.push({
-          path: f.path,
-          fileMtime: f.mtime,
-          fileSize: f.size ? BigInt(f.size) : null,
-          previewPath: shouldAutoSetPreview ? previewPath : dbMeta.previewPath,
-          type: f.type as MediaType,
+          id: dbMeta.id,
+          mtime: f.mtime,
+          size: BigInt(f.size ?? 0),
+          previewFileId: shouldAutoSetPreview
+            ? previewFileId
+            : dbMeta.previewFileId,
+          type: f.fileType,
         });
       }
     }
-  }
 
-  const fsPaths = new Set(mediaOnly.map((f) => f.path));
-  const toDelete = dbMedia
-    .filter((m) => !fsPaths.has(m.path))
-    .map((m) => m.path);
+    // 削除対象の抽出
+    const fsNames = new Set(mediaOnly.map((f) => f.name));
+    const toDeleteIds = dbFiles
+      .filter((m) => !fsNames.has(m.name))
+      .map((m) => m.id);
 
-  // --- 4. トランザクション実行 ---
-  await prisma.$transaction(async (tx) => {
-    // Media 削除・挿入・更新
-    if (toDelete.length > 0) {
-      await tx.media.deleteMany({ where: { path: { in: toDelete } } });
-    }
-    if (toInsert.length > 0) {
-      await tx.media.createMany({ data: toInsert, skipDuplicates: true });
-    }
-    for (const u of toUpdate) {
-      await tx.media.update({
-        where: { path: u.path },
-        data: {
-          fileMtime: u.fileMtime,
-          fileSize: u.fileSize,
-          previewPath: u.previewPath,
-        },
+    // トランザクション実行
+    await db.$transaction(async (tx) => {
+      // 削除
+      if (toDeleteIds.length > 0) {
+        await tx.file.deleteMany({ where: { id: { in: toDeleteIds } } });
+      }
+      // 新規作成
+      if (toCreate.length > 0) {
+        await tx.file.createMany({ data: toCreate, skipDuplicates: true });
+      }
+      // 更新（個別のupdateだが、件数が多い場合はループか、またはケースバイケースで調整）
+      for (const u of toUpdate) {
+        await tx.file.update({
+          where: { id: u.id },
+          data: {
+            mtime: u.mtime,
+            size: u.size,
+            previewFileId: u.previewFileId,
+            type: u.type,
+          },
+        });
+      }
+
+      // フォルダ自体のプレビュー設定（未設定の場合のみ先頭のメディアを自動設定）
+      const folder = await tx.folder.findUnique({
+        where: { id: folderId },
+        select: { previewFileId: true },
       });
-    }
 
-    // FolderMeta の自動設定（null の場合のみ）
-    if (!currentFolderMeta || currentFolderMeta.previewPath === null) {
-      const folderPreview = firstMedia?.path ?? null;
-      if (folderPreview) {
-        await tx.folderMeta.upsert({
-          where: { path: dirPath },
-          update: { previewPath: folderPreview },
-          create: { path: dirPath, previewPath: folderPreview },
-        });
+      if (folder && folder.previewFileId === null && firstMedia) {
+        const folderPreviewId = fileIdMap.get(firstMedia.name);
+        if (folderPreviewId) {
+          await tx.folder.update({
+            where: { id: folderId },
+            data: { previewFileId: folderPreviewId },
+          });
+        }
       }
-    }
-  });
+    });
+  }
 }

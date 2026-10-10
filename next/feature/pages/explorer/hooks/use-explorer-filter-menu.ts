@@ -3,7 +3,7 @@ import {
   useExplorerFilterMenuItems,
 } from "@/feature/pages/explorer/hooks/use-explorer-filter-menu-items";
 import { useExplorerContext } from "@/feature/pages/explorer/providers/explorer-provider";
-import { isMedia } from "@/lib/node/detectors";
+import { isMedia } from "@/lib/node/media-types";
 import { MediaType } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 

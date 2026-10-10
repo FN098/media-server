@@ -2,7 +2,7 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
-import { detectMediaType } from "@/lib/node/detectors";
+import { detectMediaType } from "@/lib/node/media-types";
 import { MediaType } from "@/lib/node/types";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { isFsNotFoundError, isFsPermissionError } from "@/lib/utils/fs";
