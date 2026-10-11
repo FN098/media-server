@@ -5,19 +5,19 @@ import { ExplorerProvider } from "@/feature/pages/explorer/providers/explorer-pr
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite } from "@/lib/favorite/types";
+import { getDbFiles } from "@/lib/file/repository";
 import {
-  getFolderFavoriteInfo,
+  getDbFolders,
   getFolderNameById,
   getFolderPath,
-  getFolderVisitedInfo,
   updateFolderCache,
 } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/node/formatters";
 import { getFsListing } from "@/lib/node/fs-listing";
-import { mergeFsWithDb } from "@/lib/node/merger";
-import { getMediaDbNodes } from "@/lib/node/repository";
+import { mergeDbNodes } from "@/lib/node/merge";
 import { SortDirection, SortKey, sortNodes } from "@/lib/node/sort";
 import { syncFsWithDb } from "@/lib/node/sync";
+import { Node } from "@/lib/node/types";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { basename, extname } from "path";
@@ -29,7 +29,7 @@ interface ExplorerPageProps {
   }>;
   // URLクエリパラメータ: ?sort=name&direction=asc
   searchParams: Promise<{
-    sort?: SortKey;
+    sort?: SortKey<Node>;
     direction?: SortDirection;
   }>;
 }
@@ -52,11 +52,11 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     props.searchParams,
   ]);
 
-  const { id } = params;
+  const { id: folderId } = params;
   const { sort: sortKey = "name", direction: sortDirection = "asc" } =
     searchParams;
 
-  const folderPath = await getFolderPath(id);
+  const folderPath = await getFolderPath(folderId);
 
   if (!folderPath) {
     notFound();
@@ -70,38 +70,22 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   }
 
   const fsNodes = fsListing.nodes;
-  const dirPaths = fsNodes.filter((e) => e.isDirectory).map((e) => e.path);
   const user = await resolveCurrentUserOrThrow();
 
   // DBクエリの前にファイルシステムとDBの同期を取る（新規追加されたメディアをDBに反映）
-  await syncFsWithDb(id, fsNodes);
+  await syncFsWithDb(folderId, fsNodes);
 
   // DB クエリ
-  const [dbNodes, folderVisited, folderFavorites, folderMetas] =
-    await Promise.all([
-      getMediaDbNodes(folderPath, user.id),
-      getFolderVisitedInfo(dirPaths, user.id),
-      getFolderFavoriteInfo(dirPaths, user.id),
-      getFolderMetas(dirPaths),
-    ]);
+  const [dbFiles, dbFolders] = await Promise.all([
+    getDbFiles(folderId, user.id),
+    getDbFolders(folderId, user.id),
+  ]);
 
-  // フォルダメタデータ更新
-  void updateFolderCache({
-    folderId: id,
-    directFiles: fsNodes
-      .filter((node) => !node.isDirectory)
-      .map((n) => ({ fileSize: n.size ?? 0 })), // 現在のフォルダ直下のファイル群
-    subFolderMetas: folderMetas, // 直下の子フォルダたちのメタ情報（すでにお互いの合計を持っている）
-  });
+  // フォルダキャッシュ更新
+  void updateFolderCache(folderId, dbFiles, dbFolders);
 
   // マージ
-  const merged = mergeFsWithDb({
-    fsNodes,
-    dbNodes,
-    folderVisited,
-    folderFavorites,
-    folderMetas,
-  });
+  const merged = mergeDbNodes(dbFiles, dbFolders);
 
   // ソート
   const sorted = sortNodes(merged, {

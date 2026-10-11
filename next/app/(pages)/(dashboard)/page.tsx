@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { Dashboard } from "@/feature/dashboard";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
-import { getRecentFolders } from "@/lib/folder/repository";
+import { getRecentVisitedFolders } from "@/lib/folder/repository";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const user = await resolveCurrentUserOrThrow();
 
-  const folders = await getRecentFolders(
+  const folders = await getRecentVisitedFolders(
     user.id,
     APP_CONFIG.recentFolders.maxLength
   );

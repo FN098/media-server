@@ -2,12 +2,11 @@ import { File } from "@/generated/prisma/client";
 import { FsNode } from "@/lib/node/fs-listing";
 import { isMedia } from "@/lib/node/media-types";
 import { sortNodes } from "@/lib/node/sort";
-import { FileType } from "@/lib/node/types";
 import { db } from "@/lib/prisma";
 
 type FileCreateItem = Pick<
   File,
-  "id" | "folderId" | "previewFileId" | "name" | "mtime" | "size" | "type"
+  "id" | "parentFolderId" | "previewFileId" | "name" | "mtime" | "size" | "type"
 >;
 
 type FileUpdateItem = Pick<
@@ -15,7 +14,7 @@ type FileUpdateItem = Pick<
   "id" | "previewFileId" | "mtime" | "size" | "type"
 >;
 
-export async function syncFsWithDb(folderId: string, nodes: FsNode[]) {
+export async function syncFsWithDb(parentFolderId: string, nodes: FsNode[]) {
   let mediaOnly = nodes.filter((n) => isMedia(n.fileType));
 
   // プレビュー候補は名前順で先頭に近いものを優先する
@@ -41,7 +40,7 @@ export async function syncFsWithDb(folderId: string, nodes: FsNode[]) {
   });
 
   const dbFiles = await db.file.findMany({
-    where: { folderId },
+    where: { parentFolderId },
     select: {
       id: true,
       name: true,
@@ -91,11 +90,11 @@ export async function syncFsWithDb(folderId: string, nodes: FsNode[]) {
       // 新規挿入
       toCreate.push({
         id: f.id,
-        folderId,
+        parentFolderId,
         name: f.name,
         mtime: f.mtime,
         size: BigInt(f.size ?? 0),
-        type: f.fileType as FileType,
+        type: f.fileType,
         previewFileId: previewFileId,
       });
     } else {
@@ -148,7 +147,7 @@ export async function syncFsWithDb(folderId: string, nodes: FsNode[]) {
 
       // フォルダ自体のプレビュー設定（未設定の場合のみ先頭のメディアを自動設定）
       const folder = await tx.folder.findUnique({
-        where: { id: folderId },
+        where: { id: parentFolderId },
         select: { previewFileId: true },
       });
 
@@ -156,7 +155,7 @@ export async function syncFsWithDb(folderId: string, nodes: FsNode[]) {
         const folderPreviewId = fileIdMap.get(firstMedia.name);
         if (folderPreviewId) {
           await tx.folder.update({
-            where: { id: folderId },
+            where: { id: parentFolderId },
             data: { previewFileId: folderPreviewId },
           });
         }

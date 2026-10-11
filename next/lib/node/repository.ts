@@ -1,54 +1,7 @@
-import { MediaDbNode } from "@/lib/node/types";
 import { prisma } from "@/lib/prisma";
 
-// Explorer | Trash ページで対象のディレクトリに存在するファイルの詳細データ取得
-export async function getMediaDbNodes(
-  dirPath: string,
-  userId: string
-): Promise<MediaDbNode[]> {
-  const dbMedia = await prisma.media.findMany({
-    where: { dirPath },
-    select: {
-      id: true,
-      path: true,
-      previewPath: true,
-      title: true,
-      fileMtime: true,
-      fileSize: true,
-      favorites: {
-        where: { userId },
-        select: { rating: true, createdAt: true },
-      },
-      mediaTags: {
-        select: {
-          tag: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  return dbMedia.map((m) => ({
-    id: m.id,
-    path: m.path,
-    previewPath: m.previewPath ?? null,
-    title: m.title ?? null,
-    fileMtime: m.fileMtime,
-    fileSize: Number(m.fileSize),
-    rating: m.favorites[0]?.rating ?? null,
-    favoritedAt: m.favorites[0]?.createdAt,
-    tags: m.mediaTags.map((t) => ({
-      id: t.tag.id,
-      name: t.tag.name,
-    })),
-  }));
-}
-
 // ファイルパスからメディアIDを逆引き
+/** @deprecated */
 export async function getMediaIdByPath(path: string): Promise<string | null> {
   const media = await prisma.media.findFirst({
     where: { path },
@@ -58,6 +11,7 @@ export async function getMediaIdByPath(path: string): Promise<string | null> {
 }
 
 // ファイルパスからメディアIDを逆引き（複数）
+/** @deprecated */
 export async function getMediaIdsByPaths(
   paths: string[]
 ): Promise<Record<string, string>> {
@@ -75,7 +29,7 @@ export async function getMediaIdsByPaths(
 }
 
 // ファイル単体のDBレコード＋タグを複製
-/** @experimental */
+/** @experimental @deprecated*/
 export async function cloneMediaRecord(
   srcVirtualPath: string,
   destVirtualPath: string
@@ -113,7 +67,7 @@ export async function cloneMediaRecord(
 }
 
 // ディレクトリ配下を再帰的に複製
-/** @experimental */
+/** @experimental @deprecated*/
 export async function cloneMediaRecordsUnderDir(
   srcDirVirtualPath: string,
   destDirVirtualPath: string
@@ -163,6 +117,7 @@ export async function cloneMediaRecordsUnderDir(
 }
 
 // ファイル更新日を更新
+/** @deprecated */
 export async function updateMediaFileMtime({
   path,
   mtime = new Date(),

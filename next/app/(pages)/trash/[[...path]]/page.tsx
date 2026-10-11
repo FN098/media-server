@@ -4,13 +4,13 @@ import { Trash } from "@/feature/pages/trash";
 import { TrashProvider } from "@/feature/pages/trash/providers/trash-provider";
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
-import { getFolderVisitedInfo } from "@/lib/folder/repository";
+import { getDbFiles } from "@/lib/file/repository";
+import { getVisitedFolders } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/node/formatters";
 import { getFsListing } from "@/lib/node/fs-listing";
-import { mergeFsWithDb } from "@/lib/node/merger";
-import { getMediaDbNodes } from "@/lib/node/repository";
-import { SortDirection, SortKeyOf, sortNodes } from "@/lib/node/sort";
-import { MediaNode } from "@/lib/node/types";
+import { mergeDbNodes } from "@/lib/node/merge";
+import { SortDirection, SortKey, sortNodes } from "@/lib/node/sort";
+import { Node } from "@/lib/node/types";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/lib/path/protections";
 import { Metadata } from "next";
@@ -39,7 +39,7 @@ interface TrashPageProps {
   }>;
   // URLクエリパラメータ: ?sort=name&direction=asc
   searchParams: Promise<{
-    sort?: SortKeyOf<MediaNode>;
+    sort?: SortKey<Node>;
     direction?: SortDirection;
   }>;
 }
@@ -69,12 +69,12 @@ export default async function TrashPage(props: TrashPageProps) {
 
   // DB クエリ
   const [dbNodes, folderVisited] = await Promise.all([
-    getMediaDbNodes(currentVirtualDirPath, user.id),
-    getFolderVisitedInfo(dirPaths, user.id),
+    getDbFiles(currentVirtualDirPath, user.id),
+    getVisitedFolders(dirPaths, user.id),
   ]);
 
   // マージ
-  const merged = mergeFsWithDb({
+  const merged = mergeDbNodes({
     fsNodes,
     dbNodes,
     folderVisited,

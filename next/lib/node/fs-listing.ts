@@ -6,16 +6,23 @@ import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
 
-export type FileType = "image" | "video" | "audio";
+export type FileType = "text" | "binary" | "image" | "video" | "audio";
 
-export type FsNode = {
-  name: string; // ファイル/フォルダ名
-  path: string; // ルートからの相対パス
-  fileType: FileType | null;
-  isDirectory: boolean;
-  size: number | null; // ディレクトリなら undefined
-  mtime: Date;
-};
+export type FsNode =
+  | {
+      name: string; // ファイル名
+      path: string; // ルートからの相対パス
+      fileType: FileType;
+      isDirectory: false;
+      size: number;
+      mtime: Date;
+    }
+  | {
+      name: string; // フォルダ名
+      path: string; // ルートからの相対パス
+      isDirectory: true;
+      mtime: Date;
+    };
 
 export type FsListing = {
   path: string; // 今見ているディレクトリ
@@ -60,14 +67,21 @@ export async function listFsNodes(
       const stat = await fs.stat(realPath);
       const isDirectory = stat.isDirectory();
 
-      return {
-        name: item.name,
-        path: virtualPath,
-        isDirectory: isDirectory,
-        fileType: isDirectory ? null : detectMediaType(item.name),
-        size: isDirectory ? null : stat.size,
-        mtime: stat.mtime,
-      } satisfies FsNode;
+      return isDirectory
+        ? ({
+            name: item.name,
+            path: virtualPath,
+            isDirectory: isDirectory,
+            mtime: stat.mtime,
+          } satisfies FsNode)
+        : ({
+            name: item.name,
+            path: virtualPath,
+            isDirectory: isDirectory,
+            fileType: detectMediaType(item.name),
+            size: stat.size,
+            mtime: stat.mtime,
+          } satisfies FsNode);
     })
   );
 
@@ -82,16 +96,23 @@ export async function getFsNode(
   const realPath = context.resolveRealPath(virtualPath);
   const stat = await fs.stat(realPath);
   const isDirectory = stat.isDirectory();
-  const fileName = path.basename(virtualPath);
+  const name = path.basename(virtualPath);
 
-  return {
-    name: fileName,
-    path: virtualPath,
-    isDirectory,
-    fileType: isDirectory ? null : detectMediaType(fileName),
-    size: isDirectory ? null : stat.size,
-    mtime: stat.mtime,
-  };
+  return isDirectory
+    ? {
+        name: name,
+        path: virtualPath,
+        isDirectory,
+        mtime: stat.mtime,
+      }
+    : {
+        name: name,
+        path: virtualPath,
+        isDirectory,
+        fileType: detectMediaType(name),
+        size: stat.size,
+        mtime: stat.mtime,
+      };
 }
 
 export async function getFsListing(

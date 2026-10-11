@@ -1,15 +1,16 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 
 // フォルダID -> フォルダ
+/** @deprecated unused */
 export async function getFolderById(id: string) {
-  return await prisma.folder.findUnique({
+  return await db.folder.findUnique({
     where: { id },
   });
 }
 
 // フォルダID -> フォルダ名
 export async function getFolderNameById(id: string) {
-  const folder = await prisma.folder.findUnique({
+  const folder = await db.folder.findUnique({
     select: { name: true },
     where: { id },
   });
@@ -17,43 +18,37 @@ export async function getFolderNameById(id: string) {
   return folder?.name ?? null;
 }
 
-// 親フォルダID -> 子フォルダ
-export async function getFolderByParentId(id: string | null) {
-  return await prisma.folder.findMany({
-    where: { parentId: id },
-  });
-}
-
-// ルートフォルダ
 const ROOT_FOLDER_NAME = "";
 
+// ルートフォルダ取得
 export async function getRootFolder() {
-  return await prisma.folder.findFirst({
-    where: { parentId: null, name: ROOT_FOLDER_NAME },
+  return await db.folder.findFirst({
+    where: { parentFolderId: null, name: ROOT_FOLDER_NAME },
   });
 }
 
+// ルートフォルダ作成
 export async function createRootFolder() {
-  return await prisma.folder.create({
-    data: { parentId: null, name: ROOT_FOLDER_NAME },
+  return await db.folder.create({
+    data: { parentFolderId: null, name: ROOT_FOLDER_NAME, mtime: new Date() },
   });
 }
 
 interface FolderPathRow {
   id: string;
-  parentId: string | null;
+  parentFolderId: string | null;
   name: string;
   depth: number;
 }
 
 // フォルダID -> フォルダパス
 export async function getFolderPath(folderId: string) {
-  const rows = await prisma.$queryRaw<FolderPathRow[]>`
+  const rows = await db.$queryRaw<FolderPathRow[]>`
     WITH RECURSIVE FolderHierarchy AS (
       -- アンカーメンバー
       SELECT 
         id, 
-        parentId, 
+        parentFolderId, 
         name, 
         0 AS depth,
         -- 訪問ログを保持 (例: '/id1/id2/')
@@ -66,16 +61,16 @@ export async function getFolderPath(folderId: string) {
       -- 再帰メンバー
       SELECT 
         f.id, 
-        f.parentId, 
+        f.parentFolderId, 
         f.name, 
         fh.depth + 1,
         CONCAT(fh.path_visited, f.id, '/')
       FROM Folder f
-      INNER JOIN FolderHierarchy fh ON f.id = fh.parentId
+      INNER JOIN FolderHierarchy fh ON f.id = fh.parentFolderId
       -- 訪問済みの ID が含まれていない場合のみ結合を継続（ループ防止）
       WHERE LOCATE(CONCAT('/', f.id, '/'), fh.path_visited) = 0
     )
-    SELECT id, parentId, name, depth
+    SELECT id, parentFolderId, name, depth
     FROM FolderHierarchy
     ORDER BY depth DESC;
   `;
@@ -90,8 +85,8 @@ export async function getFolderPath(folderId: string) {
 }
 
 // 最近訪れたフォルダの一覧取得
-export async function getRecentFolders(userId: string, length: number) {
-  return await prisma.visitedFolder.findMany({
+export async function getRecentVisitedFolders(userId: string, length: number) {
+  return await db.visitedFolder.findMany({
     where: { userId },
     take: length,
     orderBy: [
@@ -107,7 +102,7 @@ export async function togglePinVisitedFolder(
   folderId: string,
   currentPinned: boolean
 ) {
-  return await prisma.visitedFolder.update({
+  return await db.visitedFolder.update({
     where: {
       userId_folderId: { userId, folderId },
     },
@@ -119,7 +114,7 @@ export async function togglePinVisitedFolder(
 
 // 訪問済みフォルダを更新
 export async function updateVisitedFolder(folderId: string, userId: string) {
-  await prisma.$transaction(async (tx) => {
+  await db.$transaction(async (tx) => {
     await tx.visitedFolder.upsert({
       where: {
         userId_folderId: {
@@ -139,122 +134,72 @@ export async function updateVisitedFolder(folderId: string, userId: string) {
 }
 
 // フォルダ訪問履歴取得
-export async function getFolderVisitedInfo(
-  folderIds: string[],
-  userId: string
-) {
-  // 1. 指定されたいずれかのパスに前方一致するレコードをすべて取得
-  const allRelatedFolders = await prisma.visitedFolder.findMany({
+export async function getVisitedFolders(folderIds: string[], userId: string) {
+  return db.visitedFolder.findMany({
     where: {
       userId,
-      OR: folderIds.map((d) => ({
-        folderId: { startsWith: d },
-      })),
+      folderId: { in: folderIds },
     },
     select: {
       folderId: true,
       visitedAt: true,
     },
   });
-
-  // 2. メモリ上で folderIds ごとに集計
-  return folderIds.map((d) => {
-    // このパス (d) で始まるレコードだけをフィルタリング
-    const children = allRelatedFolders.filter((f) => f.folderId.startsWith(d));
-
-    if (children.length === 0) {
-      return {
-        path: d,
-        visitedAt: null,
-      };
-    }
-
-    // フィルタリングされた中から最新の日付を特定
-    const latestViewedAt = children.reduce(
-      (latest, current) => {
-        if (!current.visitedAt) return latest;
-        if (!latest) return current.visitedAt;
-        return current.visitedAt > latest ? current.visitedAt : latest;
-      },
-      null as Date | null
-    );
-
-    return {
-      path: d,
-      visitedAt: latestViewedAt,
-    };
-  });
 }
 
-// 各ディレクトリ内のお気に入り数を再帰的に取得
-export async function getFolderFavoriteInfo(
-  folderIds: string[],
-  userId: string
+// フォルダノード取得
+export async function getDbFolders(parentFolderId: string, userId: string) {
+  const dbFolders = await db.folder.findMany({
+    where: { parentFolderId },
+    select: {
+      id: true,
+      parentFolderId: true,
+      previewFileId: true,
+      name: true,
+      fileCount: true,
+      totalSize: true,
+      isLocked: true,
+      userFolderFavorites: {
+        where: { userId },
+        select: { updatedAt: true },
+      },
+    },
+  });
+
+  return dbFolders.map((f) => ({
+    id: f.id,
+    parentFolderId: f.parentFolderId,
+    previewFileId: f.previewFileId,
+    name: f.name,
+    fileCount: f.fileCount,
+    totalSize: Number(f.totalSize),
+    isLocked: f.isLocked,
+    favoritedAt: f.userFolderFavorites[0]?.updatedAt ?? null,
+  }));
+}
+
+export type DbFolders = Awaited<ReturnType<typeof getDbFolders>>;
+
+// フォルダキャッシュ情報更新
+export async function updateFolderCache(
+  folderId: string,
+  files: { size: number | null }[],
+  folders: { totalSize: number; fileCount: number }[]
 ) {
-  // 1. 各ディレクトリごとの集計クエリ（Promise）の配列を作成
-  const tasks = folderIds.map((d) =>
-    prisma.userFileFavorite.aggregate({
-      where: {
-        userId,
-        media: { path: { startsWith: d + "/" } },
-      },
-      _count: {
-        _all: true, // お気に入り登録されている総数
-      },
-      _avg: {
-        rating: true, // ratingの平均値（nullのレコードは自動で除外されて計算されます）
-      },
-    })
-  );
+  // 1. 直下のファイルを集計
+  const totalFileSize = files.reduce((acc, f) => acc + (f.size ?? 0), 0);
+  const totalFileCount = files.length;
 
-  // 2. トランザクションで一括実行
-  const results = await prisma.$transaction(tasks);
-
-  // 3. 結果をマッピングして返す
-  return folderIds.map((d, index) => {
-    const aggregateResult = results[index];
-
-    return {
-      path: d,
-      favoriteMediaCount: aggregateResult._count._all,
-      averageRating: aggregateResult._avg.rating,
-    };
-  });
-}
-
-// フォルダメタ情報更新
-export async function updateFolderCache({
-  folderId,
-  directFiles,
-  subFolderMetas,
-}: {
-  folderId: string;
-  directFiles: { fileSize: number | null }[];
-  subFolderMetas: { totalSize: number; fileCount: number }[]; // 先ほど取得した子フォルダのメタ情報
-}) {
-  // 1. 直下のファイルサイズを合計
-  const directFilesSize = directFiles.reduce(
-    (acc, f) => acc + (f.fileSize ?? 0),
-    0
-  );
-  const directFilesCount = directFiles.length;
-
-  // 2. 直下の子フォルダたちが持っている「それぞれの配下合計」を合算
-  const subFoldersSize = subFolderMetas.reduce(
-    (acc, m) => acc + m.totalSize,
-    0
-  );
-  const subFoldersCount = subFolderMetas.reduce(
-    (acc, m) => acc + m.fileCount,
-    0
-  );
+  // 2. 直下のフォルダを集計
+  const totalFolderSize = folders.reduce((acc, m) => acc + m.totalSize, 0);
+  const totalFolderCount = folders.reduce((acc, m) => acc + m.fileCount, 0);
 
   // 3. 自分自身の合計値を確定
-  const totalSize = directFilesSize + subFoldersSize;
-  const fileCount = directFilesCount + subFoldersCount;
+  const totalSize = totalFileSize + totalFolderSize;
+  const fileCount = totalFileCount + totalFolderCount;
 
-  // 4. DB の Folder に保存
-  await prisma.folder.update({
+  // 4. DB に保存
+  await db.folder.update({
     where: { id: folderId },
     data: {
       totalSize,

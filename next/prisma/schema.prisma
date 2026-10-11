@@ -34,11 +34,12 @@ model User {
   banReason     String?   @db.Text
   banExpires    DateTime?
 
-  visitedFolders VisitedFolder[]
-  fileFavorites  UserFileFavorite[]
-  tagFavorites   UserTagFavorite[]
-  sessions       Session[]
-  accounts       Account[]
+  visitedFolders  VisitedFolder[]
+  fileFavorites   UserFileFavorite[]
+  tagFavorites    UserTagFavorite[]
+  folderFavorites UserFolderFavorite[]
+  sessions        Session[]
+  accounts        Account[]
 }
 
 model VisitedFolder {
@@ -69,8 +70,7 @@ model UserTagFavorite {
 model UserFileFavorite {
   userId    String
   fileId    String
-  createdAt DateTime @default(now())
-  rating    Int?
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   file File @relation(fields: [fileId], references: [id], onDelete: Cascade)
@@ -79,47 +79,67 @@ model UserFileFavorite {
   @@index([fileId])
 }
 
+model UserFolderFavorite {
+  userId    String
+  folderId  String
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@id([userId, folderId])
+  @@index([folderId])
+}
+
 model Folder {
-  id            String    @id @default(uuid())
-  parentId      String?
-  previewFileId String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
-  name          String
-  totalSize     BigInt    @default(0)
-  fileCount     Int       @default(0)
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  parentFolderId String?
+  previewFileId  String?
+  deletedAt      DateTime?
+  name           String
+  mtime          DateTime
+  totalSize      BigInt    @default(0)
+  fileCount      Int       @default(0)
+  isLocked       Boolean   @default(false)
 
-  parent         Folder?         @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
-  previewFile    File?           @relation("FolderPreviewFile", fields: [previewFileId], references: [id], onDelete: SetNull)
-  folders        Folder[]        @relation("FolderTree")
-  files          File[]
-  visitedFolders VisitedFolder[]
+  parentFolder        Folder?              @relation("FolderTree", fields: [parentFolderId], references: [id], onDelete: Cascade)
+  previewFile         File?                @relation("FolderPreviewFile", fields: [previewFileId], references: [id], onDelete: SetNull)
+  folders             Folder[]             @relation("FolderTree")
+  files               File[]
+  visitedFolders      VisitedFolder[]
+  userFolderFavorites UserFolderFavorite[]
 
-  @@unique([parentId, name])
+  @@unique([parentFolderId, name])
+  @@index([parentFolderId])
+  @@index([name])
   @@index([previewFileId])
 }
 
 model File {
-  id            String    @id @default(uuid())
-  folderId      String
-  previewFileId String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
-  name          String
-  mtime         DateTime
-  size          BigInt
-  type          FileType?
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  parentFolderId String
+  previewFileId  String?
+  deletedAt      DateTime?
+  name           String
+  mtime          DateTime
+  size           BigInt
+  type           FileType
+  isLocked       Boolean   @default(false)
 
-  folder            Folder             @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  parentFolder      Folder             @relation(fields: [parentFolderId], references: [id], onDelete: Cascade)
   fileTags          FileTag[]
   userFileFavorites UserFileFavorite[]
   previewFile       File?              @relation("FilePreviewFile", fields: [previewFileId], references: [id], onDelete: SetNull)
   previewOf         File[]             @relation("FilePreviewFile")
   previewForFolders Folder[]           @relation("FolderPreviewFile")
 
-  @@unique([folderId, name])
+  @@unique([parentFolderId, name])
+  @@index([parentFolderId])
+  @@index([name])
   @@index([previewFileId])
   @@index([mtime])
 }
@@ -141,6 +161,7 @@ model FileTag {
   tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([fileId, tagId])
+  @@index([fileId])
   @@index([tagId])
 }
 
@@ -156,6 +177,7 @@ model Tag {
   fileTags      FileTag[]
   userFavorites UserTagFavorite[]
 
+  @@index([name])
   @@index([kana])
 }
 

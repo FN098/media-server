@@ -25,16 +25,21 @@ export const audioExtensions = [
   ".opus",
 ] as const;
 
+export const textExtensions = [".txt", ".md", ".conf"] as const;
+
 export const mediaExtensions = [
   ...imageExtensions,
   ...videoExtensions,
   ...audioExtensions,
+  ...textExtensions,
 ] as const;
 
 export type ImageExtension = (typeof imageExtensions)[number];
 export type VideoExtension = (typeof videoExtensions)[number];
 export type AudioExtension = (typeof audioExtensions)[number];
-export type MediaExtension = ImageExtension | VideoExtension | AudioExtension;
+export type TextExtension = (typeof textExtensions)[number];
+export type MediaExtension =
+  ImageExtension | VideoExtension | AudioExtension | TextExtension;
 
 function createGuard<const T extends readonly string[]>(values: T) {
   const set = new Set(values);
@@ -46,4 +51,5 @@ function createGuard<const T extends readonly string[]>(values: T) {
 export const isImageExtension = createGuard(imageExtensions);
 export const isVideoExtension = createGuard(videoExtensions);
 export const isAudioExtension = createGuard(audioExtensions);
+export const isTextExtension = createGuard(textExtensions);
 export const isMediaExtension = createGuard(mediaExtensions);

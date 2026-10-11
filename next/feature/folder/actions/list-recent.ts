@@ -1,7 +1,7 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { getRecentFolders } from "@/lib/folder/repository";
+import { getRecentVisitedFolders } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
 import { basename } from "@/lib/virtual-path/path";
 
@@ -29,7 +29,7 @@ export async function listRecentFoldersAction(): Promise<ActionResult> {
   const { user } = auth;
 
   try {
-    const folders = await getRecentFolders(user.id, 10);
+    const folders = await getRecentVisitedFolders(user.id, 10);
 
     return {
       success: true,

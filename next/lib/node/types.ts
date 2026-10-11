@@ -14,8 +14,8 @@ export type FileNode = {
   type: FileType;
   size: number;
   mtime: Date;
+  isLocked: boolean;
   tags: FileTag[];
-  rating: number | null; // 1-5の整数 または 未評価 (null)
   deletedAt: Date | null;
   favoritedAt: Date | null;
 };
@@ -28,6 +28,7 @@ export type FolderNode = {
   isDirectory: true;
   size: number | null;
   mtime: Date | null;
+  isLocked: boolean;
   fileCount: number | null;
   favoriteFileCount: number | null;
   averageFileRating: number | null;
