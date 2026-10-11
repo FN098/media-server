@@ -12,7 +12,7 @@ export type FsNode =
   | {
       name: string; // ファイル名
       path: string; // ルートからの相対パス
-      fileType: FileType;
+      type: FileType | null;
       isDirectory: false;
       size: number;
       mtime: Date;
@@ -78,7 +78,7 @@ export async function listFsNodes(
             name: item.name,
             path: virtualPath,
             isDirectory: isDirectory,
-            fileType: detectMediaType(item.name),
+            type: detectMediaType(item.name),
             size: stat.size,
             mtime: stat.mtime,
           } satisfies FsNode);
@@ -109,7 +109,7 @@ export async function getFsNode(
         name: name,
         path: virtualPath,
         isDirectory,
-        fileType: detectMediaType(name),
+        type: detectMediaType(name),
         size: stat.size,
         mtime: stat.mtime,
       };

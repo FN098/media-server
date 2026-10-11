@@ -1,17 +1,10 @@
 import {
   audioExtensions,
   imageExtensions,
-  textExtensions,
   videoExtensions,
 } from "@/lib/node/extensions";
 
-export const mediaTypes = [
-  "audio",
-  "image",
-  "video",
-  "text",
-  "binary",
-] as const;
+export const mediaTypes = ["audio", "image", "video"] as const;
 
 export type MediaType = (typeof mediaTypes)[number];
 
@@ -23,7 +16,7 @@ export function hasMedia(items: { type: string }[]) {
   return items.some((item) => isMedia(item.type));
 }
 
-export function detectMediaType(fileName: string): MediaType {
+export function detectMediaType(fileName: string): MediaType | null {
   const lowerName = fileName.toLowerCase();
 
   if (imageExtensions.some((ext) => lowerName.endsWith(ext))) {
@@ -38,9 +31,5 @@ export function detectMediaType(fileName: string): MediaType {
     return "audio";
   }
 
-  if (textExtensions.some((ext) => lowerName.endsWith(ext))) {
-    return "text";
-  }
-
-  return "binary";
+  return null;
 }

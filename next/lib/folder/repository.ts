@@ -159,6 +159,7 @@ export async function getDbFolders(parentFolderId: string, userId: string) {
       fileCount: true,
       totalSize: true,
       isLocked: true,
+      deletedAt: true,
       userFolderFavorites: {
         where: { userId },
         select: { updatedAt: true },
@@ -174,6 +175,7 @@ export async function getDbFolders(parentFolderId: string, userId: string) {
     fileCount: f.fileCount,
     totalSize: Number(f.totalSize),
     isLocked: f.isLocked,
+    deletedAt: f.deletedAt,
     favoritedAt: f.userFolderFavorites[0]?.updatedAt ?? null,
   }));
 }
@@ -205,5 +207,22 @@ export async function updateFolderCache(
       totalSize,
       fileCount,
     },
+  });
+}
+
+// お気に入り更新
+export async function upsertFolderFavorite({
+  userId,
+  folderId,
+}: {
+  userId: string;
+  folderId: string;
+}) {
+  await db.userFolderFavorite.upsert({
+    where: {
+      userId_folderId: { userId, folderId },
+    },
+    update: {},
+    create: { userId, folderId },
   });
 }

@@ -30,8 +30,7 @@ export type FolderNode = {
   mtime: Date | null;
   isLocked: boolean;
   fileCount: number | null;
-  favoriteFileCount: number | null;
-  averageFileRating: number | null;
+  favoritedAt: Date | null;
   deletedAt: Date | null;
 };
 

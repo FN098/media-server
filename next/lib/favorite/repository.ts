@@ -1,86 +1,63 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
-export async function upsertFavorite({
+export async function isFavorite({
   userId,
-  mediaId,
-  rating,
+  fileId,
 }: {
   userId: string;
-  mediaId: string;
-  rating: number | null;
-}): Promise<void> {
-  await prisma.favorite.upsert({
+  fileId: string;
+}) {
+  const existing = await prisma.userFileFavorite.findUnique({
     where: {
-      userId_mediaId: { userId, mediaId },
-    },
-    update: { rating },
-    create: { userId, mediaId, rating },
-  });
-}
-
-export async function getFavorite({
-  userId,
-  mediaId,
-}: {
-  userId: string;
-  mediaId: string;
-}): Promise<{ rating: number | null } | null> {
-  return await prisma.favorite.findUnique({
-    where: {
-      userId_mediaId: { userId, mediaId },
+      userId_fileId: { userId, fileId },
     },
     select: {
-      rating: true,
+      updatedAt: true,
     },
   });
+
+  return existing != null;
 }
 
 export async function deleteFavorite({
   userId,
-  mediaId,
+  fileId,
 }: {
   userId: string;
-  mediaId: string;
+  fileId: string;
 }): Promise<void> {
-  // delete はレコードがないとエラーを吐くので deleteMany か
-  // 存在チェック後の delete を推奨
-  await prisma.favorite.deleteMany({
-    where: { userId, mediaId },
+  await prisma.userFileFavorite.deleteMany({
+    where: { userId, fileId },
   });
 }
 
 export async function upsertManyFavorites({
   data,
-  rating,
 }: {
-  data: { userId: string; mediaId: string }[];
-  rating: number | null;
+  data: { userId: string; fileId: string }[];
 }): Promise<void> {
-  // NOTE: SQL一括処理高速化のため、rating はすべて同じ値で更新する
   await prisma.$executeRaw`
-    INSERT INTO Favorite (userId, mediaId, rating)
+    INSERT INTO Favorite (userId, fileId)
     VALUES ${Prisma.join(
-      data.map(
-        ({ userId, mediaId }) => Prisma.sql`(${userId}, ${mediaId}, ${rating})`
-      )
+      data.map(({ userId, fileId }) => Prisma.sql`(${userId}, ${fileId})`)
     )}
-    ON DUPLICATE KEY UPDATE rating = VALUES(rating)
+    ON DUPLICATE KEY DO NOTHING
   `;
 }
 
 export async function getManyFavorites({
   userId,
-  mediaIds,
+  fileIds,
 }: {
   userId: string;
-  mediaIds: string[];
+  fileIds: string[];
 }): Promise<{ path: string; rating: number | null }[]> {
   const favorites = await prisma.favorite.findMany({
     where: {
       userId,
-      mediaId: {
-        in: mediaIds,
+      fileId: {
+        in: fileIds,
       },
     },
     select: {
@@ -101,16 +78,16 @@ export async function getManyFavorites({
 
 export async function deleteManyFavorites({
   userId,
-  mediaIds,
+  fileIds,
 }: {
   userId: string;
-  mediaIds: string[];
+  fileIds: string[];
 }): Promise<{ count: number }> {
   return await prisma.favorite.deleteMany({
     where: {
       userId,
-      mediaId: {
-        in: mediaIds,
+      fileId: {
+        in: fileIds,
       },
     },
   });

@@ -30,23 +30,11 @@ export function mergeDbNodes(dbFiles: DbFiles, dbFolders: DbFolders): Node[] {
       name: f.name,
       isDirectory: true,
       size: f.totalSize,
-      mtime: f.mtime,
       isLocked: f.isLocked,
-      tags: f.tags,
       deletedAt: f.deletedAt,
+      mtime: null,
       favoritedAt: f.favoritedAt,
-
-      // parentFolderId: string | null;
-      // previewFileId: string | null;
-      // name: string;
-      // isDirectory: true;
-      // size: number | null;
-      // mtime: Date | null;
-      // isLocked: boolean;
-      // fileCount: number | null;
-      // favoriteFileCount: number | null;
-      // averageFileRating: number | null;
-      // deletedAt: Date | null;
+      fileCount: f.fileCount,
     } satisfies FolderNode);
   }
 

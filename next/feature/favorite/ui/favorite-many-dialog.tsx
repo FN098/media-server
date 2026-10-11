@@ -18,8 +18,14 @@ interface FavoriteManyDialogProps {
 }
 
 export function FavoriteManyDialog({ dialog }: FavoriteManyDialogProps) {
-  const { isOpen, targets, mode, isPending, close, performFavoriteAction } =
-    dialog;
+  const {
+    isOpen,
+    targets,
+    action: mode,
+    isPending,
+    close,
+    performFavoriteAction,
+  } = dialog;
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>

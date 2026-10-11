@@ -1,5 +1,5 @@
 import { File } from "@/generated/prisma/client";
-import { FsNode } from "@/lib/node/fs-listing";
+import { FileType, FsNode } from "@/lib/node/fs-listing";
 import { isMedia } from "@/lib/node/media-types";
 import { sortNodes } from "@/lib/node/sort";
 import { db } from "@/lib/prisma";
@@ -15,23 +15,26 @@ type FileUpdateItem = Pick<
 >;
 
 export async function syncFsWithDb(parentFolderId: string, nodes: FsNode[]) {
-  let mediaOnly = nodes.filter((n) => isMedia(n.fileType));
+  const mediaOnly = nodes.filter(
+    (n): n is Extract<FsNode, { isDirectory: false }> & { type: FileType } =>
+      !n.isDirectory && n.type !== null && isMedia(n.type)
+  );
 
   // プレビュー候補は名前順で先頭に近いものを優先する
-  mediaOnly = sortNodes(mediaOnly, {
+  const sorted = sortNodes(mediaOnly, {
     key: "name",
     direction: "asc",
   });
 
   // プレビュー候補の抽出
   const firstMedia = mediaOnly.find(
-    (f) => f.fileType === "image" || f.fileType === "video"
+    (f) => f.type === "image" || f.type === "video"
   );
 
   // ファイル名（拡張子抜き）からファイル名へのマップ作成
   const imageMap = new Map<string, string>();
   mediaOnly.forEach((f) => {
-    if (f.fileType === "image") {
+    if (f.type === "image") {
       const baseName = f.name.replace(/\.[^/.]+$/, "");
       if (!imageMap.has(baseName)) {
         imageMap.set(baseName, f.path);
@@ -52,12 +55,12 @@ export async function syncFsWithDb(parentFolderId: string, nodes: FsNode[]) {
   });
 
   // ファイル名（拡張子抜き）からDBファイルへのマップ作成
-  const dbMap = new Map(dbFiles.map((f) => [f.name, f]));
+  const dbFileMap = new Map(dbFiles.map((f) => [f.name, f]));
 
   // 名前からプレビュー用のファイルIDを引けるようにするため、全ファイルの (name -> id) マップも用意
   // 新規作成分も含めて事前にUUIDを割り当てる
-  const fileNodesWithId = mediaOnly.map((f) => {
-    const existing = dbMap.get(f.name);
+  const fileNodesWithId = sorted.map((f) => {
+    const existing = dbFileMap.get(f.name);
     return {
       ...f,
       id: existing?.id ?? crypto.randomUUID(),
@@ -71,14 +74,14 @@ export async function syncFsWithDb(parentFolderId: string, nodes: FsNode[]) {
 
   // 各ファイルのメタデータ準備 & 比較
   for (const f of fileNodesWithId) {
-    const dbMeta = dbMap.get(f.name);
+    const dbMeta = dbFileMap.get(f.name);
     const baseName = f.name.replace(/\.[^/.]+$/, "");
 
     // プレビューファイル名の決定（動画、音楽）
     let previewFileName: string | null = null;
-    if (f.fileType === "audio") {
+    if (f.type === "audio") {
       previewFileName = imageMap.get(baseName) ?? firstMedia?.name ?? null;
-    } else if (f.fileType === "video") {
+    } else if (f.type === "video") {
       previewFileName = imageMap.get(baseName) ?? null;
     }
 
@@ -94,7 +97,7 @@ export async function syncFsWithDb(parentFolderId: string, nodes: FsNode[]) {
         name: f.name,
         mtime: f.mtime,
         size: BigInt(f.size ?? 0),
-        type: f.fileType,
+        type: f.type,
         previewFileId: previewFileId,
       });
     } else {
@@ -111,7 +114,7 @@ export async function syncFsWithDb(parentFolderId: string, nodes: FsNode[]) {
           previewFileId: shouldAutoSetPreview
             ? previewFileId
             : dbMeta.previewFileId,
-          type: f.fileType,
+          type: f.type,
         });
       }
     }
@@ -128,10 +131,12 @@ export async function syncFsWithDb(parentFolderId: string, nodes: FsNode[]) {
       if (toDeleteIds.length > 0) {
         await tx.file.deleteMany({ where: { id: { in: toDeleteIds } } });
       }
+
       // 新規作成
       if (toCreate.length > 0) {
         await tx.file.createMany({ data: toCreate, skipDuplicates: true });
       }
+
       // 更新（個別のupdateだが、件数が多い場合はループか、またはケースバイケースで調整）
       for (const u of toUpdate) {
         await tx.file.update({

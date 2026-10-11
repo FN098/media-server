@@ -1,8 +1,8 @@
 import { db } from "@/lib/prisma";
 
 // フォルダ内のファイル情報取得
-export async function getDbFiles(parentFolderId: string, userId: string) {
-  const dbFiles = await db.file.findMany({
+export async function getFiles(parentFolderId: string, userId: string) {
+  const files = await db.file.findMany({
     where: { parentFolderId },
     select: {
       id: true,
@@ -31,7 +31,7 @@ export async function getDbFiles(parentFolderId: string, userId: string) {
     },
   });
 
-  return dbFiles.map((f) => ({
+  return files.map((f) => ({
     id: f.id,
     parentFolderId: f.parentFolderId,
     previewFileId: f.previewFileId,
@@ -49,4 +49,21 @@ export async function getDbFiles(parentFolderId: string, userId: string) {
   }));
 }
 
-export type DbFiles = Awaited<ReturnType<typeof getDbFiles>>;
+export type DbFiles = Awaited<ReturnType<typeof getFiles>>;
+
+// お気に入り更新
+export async function upsertFileFavorite({
+  userId,
+  fileId,
+}: {
+  userId: string;
+  fileId: string;
+}) {
+  await db.userFileFavorite.upsert({
+    where: {
+      userId_fileId: { userId, fileId },
+    },
+    update: {},
+    create: { userId, fileId },
+  });
+}

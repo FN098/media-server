@@ -4,15 +4,13 @@ import { Explorer } from "@/feature/pages/explorer";
 import { ExplorerProvider } from "@/feature/pages/explorer/providers/explorer-provider";
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
-import { Favorite } from "@/lib/favorite/types";
-import { getDbFiles } from "@/lib/file/repository";
+import { getFiles } from "@/lib/file/repository";
 import {
   getDbFolders,
   getFolderNameById,
   getFolderPath,
   updateFolderCache,
 } from "@/lib/folder/repository";
-import { formatNodes } from "@/lib/node/formatters";
 import { getFsListing } from "@/lib/node/fs-listing";
 import { mergeDbNodes } from "@/lib/node/merge";
 import { SortDirection, SortKey, sortNodes } from "@/lib/node/sort";
@@ -47,6 +45,8 @@ export async function generateMetadata(
 }
 
 export default async function ExplorerPage(props: ExplorerPageProps) {
+  const user = await resolveCurrentUserOrThrow();
+
   const [params, searchParams] = await Promise.all([
     props.params,
     props.searchParams,
@@ -70,14 +70,13 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   }
 
   const fsNodes = fsListing.nodes;
-  const user = await resolveCurrentUserOrThrow();
 
   // DBクエリの前にファイルシステムとDBの同期を取る（新規追加されたメディアをDBに反映）
   await syncFsWithDb(folderId, fsNodes);
 
   // DB クエリ
   const [dbFiles, dbFolders] = await Promise.all([
-    getDbFiles(folderId, user.id),
+    getFiles(folderId, user.id),
     getDbFolders(folderId, user.id),
   ]);
 
@@ -92,42 +91,26 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     key: sortKey,
     direction: sortDirection,
     valueMapper: (node, key) => {
-      if (node.isDirectory && key === "rating") {
-        return node["averageRating"];
-      }
-
       if (key === "name") {
         // 拡張子を除くファイル名で比較
         return basename(node.name, extname(node.name));
-      }
-
-      if (key === "path") {
-        // 拡張子を除くファイル名で比較
-        return basename(node.path, extname(node.path));
       }
 
       return node[key];
     },
   });
 
-  // フォーマット
-  const formatted = formatNodes(sorted);
-
   const listing = {
     ...fsListing,
-    nodes: formatted,
+    nodes: sorted,
   };
 
   const favorites = listing.nodes
     .filter((n) => n.favoritedAt)
-    .map(
-      (n) =>
-        ({
-          path: n.path,
-          rating: n.rating,
-          favoritedAt: n.favoritedAt,
-        }) satisfies Favorite
-    );
+    .map((n) => ({
+      id: n.id,
+      favoritedAt: n.favoritedAt,
+    }));
 
   return (
     <PathSelectionProvider>

@@ -2,11 +2,11 @@ import { useFavoritesControlContext } from "@/feature/favorite/providers/favorit
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-type FavoriteTarget = {
-  path: string;
+type Item = {
+  id: string;
 };
 
-type FavoriteDialogMode = "add" | "remove";
+type Action = "add" | "remove";
 
 interface UseFavoriteDialogProps {
   onSuccess?: () => void;
@@ -14,39 +14,36 @@ interface UseFavoriteDialogProps {
 
 export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [targets, setTargets] = useState<FavoriteTarget[]>([]);
-  const [mode, setMode] = useState<FavoriteDialogMode>("add");
+  const [targets, setTargets] = useState<Item[]>([]);
+  const [action, setAction] = useState<Action>("add");
   const [isPending, setIsPending] = useState(false);
 
   const { updateMultipleFavorites, deleteMultipleFavorites } =
     useFavoritesControlContext();
 
   // 1. ダイアログを開く
-  const open = useCallback(
-    (targets: FavoriteTarget[], currentMode: FavoriteDialogMode) => {
-      setTargets(targets);
-      setMode(currentMode);
-      setIsOpen(true);
-    },
-    []
-  );
+  const open = useCallback((targets: Item[], currentMode: Action) => {
+    setTargets(targets);
+    setAction(currentMode);
+    setIsOpen(true);
+  }, []);
 
   // 2. ダイアログを閉じる
   const close = useCallback(() => {
     setIsOpen(false);
     setTargets([]);
-    setMode("add");
+    setAction("add");
   }, []);
 
   // 3. お気に入り処理（追加 / 解除）の実行
   const performFavoriteAction = useCallback(async () => {
     if (targets.length === 0) return;
 
-    const paths = targets.map((n) => n.path);
+    const paths = targets.map((n) => n.id);
 
     setIsPending(true);
     const result =
-      mode === "add"
+      action === "add"
         ? await updateMultipleFavorites({
             paths,
             skipIfAlreadyFavorite: true,
@@ -56,7 +53,7 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
 
     if (result.success) {
       toast.success(
-        mode === "add"
+        action === "add"
           ? "お気に入りが更新されました。"
           : "お気に入りが解除されました。"
       );
@@ -67,7 +64,7 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
     }
   }, [
     targets,
-    mode,
+    action,
     updateMultipleFavorites,
     deleteMultipleFavorites,
     close,
@@ -77,7 +74,7 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   return {
     isOpen,
     targets,
-    mode,
+    action,
     isPending,
     open,
     close,

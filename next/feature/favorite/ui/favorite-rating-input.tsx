@@ -9,6 +9,7 @@ interface FavoriteRatingInputProps {
   disabled?: boolean;
 }
 
+/** @deprecated */
 export function FavoriteRatingInput({
   value,
   onChange,

@@ -1,16 +1,14 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { upsertFavorite } from "@/lib/favorite/repository";
-import { RatingInputSchema } from "@/lib/favorite/schemas";
+import { upsertFileFavorite } from "@/lib/file/repository";
+import { upsertFolderFavorite } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
-import { getMediaIdByPath } from "@/lib/node/repository";
-import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
 
 const InputSchema = z.object({
-  path: EditableVirtualPathSchema,
-  rating: RatingInputSchema,
+  id: z.uuid(),
+  isDirectory: z.boolean(),
 });
 
 type ActionResult =
@@ -32,7 +30,7 @@ export async function updateFavoriteAction(
     return { success: false, message: parsed.error.issues[0].message };
   }
 
-  const { path, rating } = parsed.data;
+  const { id, isDirectory } = parsed.data;
 
   // 認証＋認可
   const auth = await authorize("favorite:update");
@@ -42,17 +40,18 @@ export async function updateFavoriteAction(
 
   const { user } = auth;
 
-  // メディアID逆引き
-  const mediaId = await getMediaIdByPath(path);
-  if (!mediaId)
-    return { success: false, message: "メディアが見つかりません。" };
-
   try {
-    await upsertFavorite({
-      userId: user.id,
-      mediaId,
-      rating: rating,
-    });
+    if (isDirectory) {
+      await upsertFolderFavorite({
+        userId: user.id,
+        folderId: id,
+      });
+    } else {
+      await upsertFileFavorite({
+        userId: user.id,
+        fileId: id,
+      });
+    }
   } catch (error) {
     logger.error("action:update-favorite", error);
     return { success: false, message: "お気に入りの更新に失敗しました。" };

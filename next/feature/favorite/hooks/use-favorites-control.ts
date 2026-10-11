@@ -4,47 +4,49 @@ import { revalidateFavoriteAction } from "@/feature/favorite/actions/revalidate"
 import { revalidateManyFavoritesAction } from "@/feature/favorite/actions/revalidate-many";
 import { updateFavoriteAction } from "@/feature/favorite/actions/update";
 import { updateManyFavoritesAction } from "@/feature/favorite/actions/update-many";
-import { Favorite } from "@/lib/favorite/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type FavoriteMsg =
-  | { type: "UPDATE"; path: string; rating: number | null }
-  | { type: "DELETE"; path: string }
-  | { type: "UPDATE_MANY"; paths: string[]; rating: number | null }
-  | { type: "DELETE_MANY"; paths: string[] };
+  | { type: "UPDATE"; id: string }
+  | { type: "DELETE"; id: string }
+  | { type: "UPDATE_MANY"; ids: string[] }
+  | { type: "DELETE_MANY"; ids: string[] };
+
+export type Favorite = {
+  id: string;
+  favoritedAt: Date | null;
+};
 
 export interface UseFavoriteControlProps {
   favorites?: Favorite[];
 }
 
 export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
-  const [ratingMap, setRatingMap] = useState(() => {
-    return new Map(
-      favorites
-        ?.filter((f) => !!f.favoritedAt)
-        .map((f) => [f.path, f.rating]) ?? []
-    );
+  const [favoriteSet, setFavoriteSet] = useState(() => {
+    return favorites
+      ? new Set(favorites.filter((f) => f.favoritedAt != null).map((f) => f.id))
+      : new Set();
   });
 
   const { startFlight, finishFlight, isInFlight } = useInFlight();
 
   // タブ間同期
   const { broadcast } = useFavoriteChannel((msg: FavoriteMsg) => {
-    setRatingMap((prev) => {
-      const next = new Map(prev);
+    setFavoriteSet((prev) => {
+      const next = new Set(prev);
 
       switch (msg.type) {
         case "DELETE":
-          next.delete(msg.path);
+          next.delete(msg.id);
           break;
         case "UPDATE":
-          next.set(msg.path, msg.rating);
+          next.add(msg.id);
           break;
         case "UPDATE_MANY":
-          msg.paths.forEach((path) => next.set(path, msg.rating));
+          msg.ids.forEach((id) => next.add(id));
           break;
         case "DELETE_MANY":
-          msg.paths.forEach((path) => next.delete(path));
+          msg.ids.forEach((id) => next.delete(id));
           break;
       }
 
@@ -54,42 +56,39 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
   // 現在の状態を取得
   const getFavorite = useCallback(
-    (path: string) => {
+    (id: string) => {
       return {
-        isFavorite: ratingMap.has(path),
-        rating: ratingMap.get(path) ?? null,
+        isFavorite: favoriteSet.has(id),
       };
     },
-    [ratingMap]
+    [favoriteSet]
   );
 
   // お気に入り状態を更新
   const updateFavorite = useCallback(
-    async (
-      path: string,
-      rating: number | null
-    ): ReturnType<typeof updateFavoriteAction> => {
-      if (isInFlight(path)) return { success: false, message: "処理中です" };
-      startFlight(path);
+    async (id: string): ReturnType<typeof updateFavoriteAction> => {
+      if (isInFlight(id)) return { success: false, message: "処理中です" };
+
+      startFlight(id);
 
       // 楽観的アップデート
-      setRatingMap((m) => new Map(m).set(path, rating));
-      broadcast({ type: "UPDATE", path, rating });
+      setFavoriteSet((s) => new Set(s).add(id));
+      broadcast({ type: "UPDATE", id });
 
       // サーバー処理開始
       try {
-        const result = await updateFavoriteAction({ path, rating });
+        const result = await updateFavoriteAction({ path: id, rating });
         if (!result.success) {
           // 失敗時のロールバック
-          const revalidated = await revalidateFavoriteAction({ path });
+          const revalidated = await revalidateFavoriteAction({ path: id });
           if (revalidated.success) {
             const { favorite } = revalidated;
             setRatingMap((m) => {
               const next = new Map(m);
               if (favorite) {
-                next.set(path, favorite.rating);
+                next.set(id, favorite.rating);
               } else {
-                next.delete(path);
+                next.delete(id);
               }
               return next;
             });
@@ -97,7 +96,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
         }
         return result;
       } finally {
-        finishFlight(path);
+        finishFlight(id);
       }
     },
     [broadcast, finishFlight, isInFlight, startFlight]

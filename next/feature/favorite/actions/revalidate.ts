@@ -1,7 +1,7 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { getFavorite } from "@/lib/favorite/repository";
+import { isFavorite } from "@/lib/favorite/repository";
 import { logger } from "@/lib/logger";
 import { getMediaIdByPath } from "@/lib/node/repository";
 import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
@@ -49,7 +49,7 @@ export async function revalidateFavoriteAction(
   if (!mediaId) return { success: false, message: "メディアが見つかりません" };
 
   try {
-    const favorite = await getFavorite({ userId: user.id, mediaId });
+    const favorite = await isFavorite({ userId: user.id, mediaId });
 
     // お気に入り未登録の場合は成功扱いとする
     if (!favorite) return { success: true, favorite: null };

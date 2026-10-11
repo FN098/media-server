@@ -4,7 +4,7 @@ import { Trash } from "@/feature/pages/trash";
 import { TrashProvider } from "@/feature/pages/trash/providers/trash-provider";
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
-import { getDbFiles } from "@/lib/file/repository";
+import { getFiles } from "@/lib/file/repository";
 import { getVisitedFolders } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/node/formatters";
 import { getFsListing } from "@/lib/node/fs-listing";
@@ -69,7 +69,7 @@ export default async function TrashPage(props: TrashPageProps) {
 
   // DB クエリ
   const [dbNodes, folderVisited] = await Promise.all([
-    getDbFiles(currentVirtualDirPath, user.id),
+    getFiles(currentVirtualDirPath, user.id),
     getVisitedFolders(dirPaths, user.id),
   ]);
 
