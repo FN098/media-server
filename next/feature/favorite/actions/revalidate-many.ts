@@ -1,9 +1,9 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { getManyFavorites } from "@/lib/favorite/repository";
 import { logger } from "@/lib/logger";
 import { getMediaIdsByPaths } from "@/lib/node/repository";
+import { getFavoriteFiles } from "@/lib/user-file-favorite/repository";
 import { unique } from "@/lib/utils/array";
 import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
@@ -60,7 +60,7 @@ export async function revalidateManyFavoritesAction(
   }
 
   try {
-    const favorites = await getManyFavorites({ userId: user.id, mediaIds });
+    const favorites = await getFavoriteFiles({ userId: user.id, mediaIds });
 
     return {
       success: true,

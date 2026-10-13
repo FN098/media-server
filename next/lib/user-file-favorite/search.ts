@@ -1,5 +1,4 @@
 import { Prisma } from "@/generated/prisma/client";
-import { FavoriteSortKey } from "@/lib/favorite/types";
 import {
   RatingFilterMode,
   RatingOperator,

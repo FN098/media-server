@@ -1,10 +1,10 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { upsertManyFavorites } from "@/lib/favorite/repository";
-import { RatingInputSchema } from "@/lib/favorite/schemas";
 import { logger } from "@/lib/logger";
 import { getMediaIdsByPaths } from "@/lib/node/repository";
+import { updateFavoriteFiles } from "@/lib/user-file-favorite/repository";
+import { RatingInputSchema } from "@/lib/user-file-favorite/schemas";
 import { unique } from "@/lib/utils/array";
 import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
@@ -66,7 +66,7 @@ export async function updateManyFavoritesAction(
   }
 
   try {
-    await upsertManyFavorites({
+    await updateFavoriteFiles({
       data: dataToUpsert,
       rating: rating,
     });

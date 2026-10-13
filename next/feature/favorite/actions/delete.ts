@@ -1,9 +1,9 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { deleteFavorite } from "@/lib/favorite/repository";
 import { logger } from "@/lib/logger";
 import { getMediaIdByPath } from "@/lib/node/repository";
+import { removeFavoriteFile } from "@/lib/user-file-favorite/repository";
 import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
 
@@ -45,7 +45,7 @@ export async function deleteFavoriteAction(
   if (!mediaId) return { success: false, message: "メディアが見つかりません" };
 
   try {
-    await deleteFavorite({ userId: user.id, mediaId });
+    await removeFavoriteFile({ userId: user.id, mediaId });
     return { success: true };
   } catch (error) {
     logger.error("action:delete-favorite", error);

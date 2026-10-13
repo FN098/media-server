@@ -1,9 +1,9 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { deleteManyFavorites } from "@/lib/favorite/repository";
 import { logger } from "@/lib/logger";
 import { getMediaIdsByPaths } from "@/lib/node/repository";
+import { removeFavoriteFiles } from "@/lib/user-file-favorite/repository";
 import { unique } from "@/lib/utils/array";
 import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import z from "zod";
@@ -56,7 +56,7 @@ export async function deleteManyFavoritesAction(
   }
 
   try {
-    await deleteManyFavorites({ userId: user.id, mediaIds });
+    await removeFavoriteFiles({ userId: user.id, mediaIds });
     return { success: true };
   } catch (error) {
     logger.error("action:delete-multiple-favorites", error);

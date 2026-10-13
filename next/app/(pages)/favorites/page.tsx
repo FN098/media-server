@@ -4,7 +4,6 @@ import { Favorites } from "@/feature/pages/favorites";
 import { FavoritesProvider } from "@/feature/pages/favorites/providers/favorites-provider";
 import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
-import { searchFavoriteMediaNodes } from "@/lib/favorite/search";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import {
   RatingFilterMode,
@@ -13,6 +12,7 @@ import {
 } from "@/lib/filter/types";
 import { formatNodes } from "@/lib/node/formatters";
 import { SortDirection } from "@/lib/node/sort";
+import { searchFavoriteMediaNodes } from "@/lib/user-file-favorite/search";
 import { hashObject } from "@/lib/utils/fnv1a-hash";
 import { Metadata } from "next";
 
