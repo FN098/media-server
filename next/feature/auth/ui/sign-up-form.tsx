@@ -223,6 +223,8 @@ export function SignUpForm({ hasAdmin, redirectTo }: SignUpFormProps) {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
+                    disabled={isPending}
+                    required
                     className={cn(
                       "pl-9 pr-10 h-10 text-sm",
                       "bg-zinc-50 border-zinc-200 dark:bg-white/[0.04] dark:border-white/[0.08]",
