@@ -1,5 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/prisma";
 
 export async function isFavoriteFile({
   userId,
@@ -8,7 +8,7 @@ export async function isFavoriteFile({
   userId: string;
   fileId: string;
 }) {
-  const existing = await prisma.userFileFavorite.findUnique({
+  const existing = await db.userFileFavorite.findUnique({
     where: {
       userId_fileId: { userId, fileId },
     },
@@ -27,7 +27,7 @@ export async function getFavoriteFiles({
   userId: string;
   fileIds: string[];
 }) {
-  const favorites = await prisma.userFileFavorite.findMany({
+  const favorites = await db.userFileFavorite.findMany({
     where: {
       userId,
       fileId: {
@@ -47,15 +47,33 @@ export async function getFavoriteFiles({
   }));
 }
 
-export async function updateFavoriteFiles({
-  data,
+export async function addFavoriteFile({
+  userId,
+  fileId,
 }: {
-  data: { userId: string; fileId: string }[];
+  userId: string;
+  fileId: string;
 }) {
-  await prisma.$executeRaw`
+  await db.userFileFavorite.upsert({
+    where: {
+      userId_fileId: { userId, fileId },
+    },
+    update: {},
+    create: { userId, fileId },
+  });
+}
+
+export async function addFavoriteFiles({
+  userId,
+  fileIds,
+}: {
+  userId: string;
+  fileIds: string[];
+}) {
+  await db.$executeRaw`
     INSERT IGNORE INTO UserFileFavorite (userId, fileId)
     VALUES ${Prisma.join(
-      data.map(({ userId, fileId }) => Prisma.sql`(${userId}, ${fileId})`)
+      fileIds.map((fileId) => Prisma.sql`(${userId}, ${fileId})`)
     )}
   `;
 }
@@ -67,7 +85,7 @@ export async function removeFavoriteFile({
   userId: string;
   fileId: string;
 }) {
-  await prisma.userFileFavorite.deleteMany({
+  await db.userFileFavorite.deleteMany({
     where: { userId, fileId },
   });
 }
@@ -79,7 +97,7 @@ export async function removeFavoriteFiles({
   userId: string;
   fileIds: string[];
 }) {
-  return await prisma.userFileFavorite.deleteMany({
+  return await db.userFileFavorite.deleteMany({
     where: {
       userId,
       fileId: {

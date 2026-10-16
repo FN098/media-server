@@ -2,22 +2,19 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
-import { getMediaIdByPath } from "@/lib/node/repository";
 import { isFavoriteFile } from "@/lib/user-file-favorite/repository";
-import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
+import { isFavoriteFolder } from "@/lib/user-folder-favorite/repository";
 import z from "zod";
 
 const InputSchema = z.object({
-  path: EditableVirtualPathSchema,
+  id: z.uuid(),
+  isDirectory: z.boolean(),
 });
 
-type RevalidateFavoriteResult =
+type ActionResult =
   | {
       success: true;
-      favorite: {
-        path: string;
-        rating: number | null;
-      } | null;
+      isFavorite: boolean;
     }
   | {
       success: false;
@@ -27,14 +24,14 @@ type RevalidateFavoriteResult =
 // お気に入り再検証
 export async function revalidateFavoriteAction(
   input: z.input<typeof InputSchema>
-): Promise<RevalidateFavoriteResult> {
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
 
-  const { path } = parsed.data;
+  const { id, isDirectory } = parsed.data;
 
   // 認証＋認可
   const auth = await authorize("favorite:revalidate");
@@ -44,23 +41,17 @@ export async function revalidateFavoriteAction(
 
   const { user } = auth;
 
-  // メディアID逆引き
-  const mediaId = await getMediaIdByPath(path);
-  if (!mediaId) return { success: false, message: "メディアが見つかりません" };
-
   try {
-    const favorite = await isFavoriteFile({ userId: user.id, mediaId });
-
-    // お気に入り未登録の場合は成功扱いとする
-    if (!favorite) return { success: true, favorite: null };
-
-    return {
-      success: true,
-      favorite: {
-        path: path,
-        rating: favorite.rating,
-      },
-    };
+    if (isDirectory) {
+      const isFavorite = await isFavoriteFolder({
+        userId: user.id,
+        folderId: id,
+      });
+      return { success: true, isFavorite };
+    } else {
+      const isFavorite = await isFavoriteFile({ userId: user.id, fileId: id });
+      return { success: true, isFavorite };
+    }
   } catch (error) {
     logger.error("action:revalidate-favorite", error);
     return { success: false, message: "お気に入り再検証に失敗しました" };

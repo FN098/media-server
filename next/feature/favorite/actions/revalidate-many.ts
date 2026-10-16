@@ -2,25 +2,29 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
-import { getMediaIdsByPaths } from "@/lib/node/repository";
 import { getFavoriteFiles } from "@/lib/user-file-favorite/repository";
-import { unique } from "@/lib/utils/array";
-import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
+import { getFavoriteFolders } from "@/lib/user-folder-favorite/repository";
 import z from "zod";
 
 const InputSchema = z.object({
-  paths: EditableVirtualPathManySchema.min(
-    1,
-    "ファイルまたはフォルダを1件以上指定してください。"
-  ).transform((paths) => unique(paths)),
+  entries: z.array(
+    z.object({
+      id: z.uuid(),
+      isDirectory: z.boolean(),
+    })
+  ),
 });
 
 type ActionResult =
   | {
       success: true;
-      favorites: {
-        path: string;
-        rating: number | null;
+      favoriteFiles: {
+        fileId: string;
+        isFavorite: boolean;
+      }[];
+      favoriteFolders: {
+        folderId: string;
+        isFavorite: boolean;
       }[];
     }
   | {
@@ -28,7 +32,6 @@ type ActionResult =
       message: string;
     };
 
-// 一括お気に入り再検証
 export async function revalidateManyFavoritesAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
@@ -38,7 +41,7 @@ export async function revalidateManyFavoritesAction(
     return { success: false, message: parsed.error.issues[0].message };
   }
 
-  const { paths } = parsed.data;
+  const { entries } = parsed.data;
 
   // 認証＋認可
   const auth = await authorize("favorite:revalidate-many");
@@ -48,23 +51,28 @@ export async function revalidateManyFavoritesAction(
 
   const { user } = auth;
 
-  // メディアID逆引き
-  const mediaMap = await getMediaIdsByPaths(paths);
+  const fileIds = entries.filter((e) => !e.isDirectory).map((e) => e.id);
 
-  const mediaIds = Object.values(mediaMap);
-  if (mediaIds.length === 0) {
-    return {
-      success: false,
-      message: "お気に入り再検証対象のメディアがありません。",
-    };
-  }
+  const folderIds = entries.filter((e) => e.isDirectory).map((e) => e.id);
 
   try {
-    const favorites = await getFavoriteFiles({ userId: user.id, mediaIds });
+    const favoriteFiles =
+      fileIds.length > 0
+        ? await getFavoriteFiles({ userId: user.id, fileIds })
+        : [];
+
+    const favoriteFolders =
+      folderIds.length > 0
+        ? await getFavoriteFolders({
+            userId: user.id,
+            folderIds,
+          })
+        : [];
 
     return {
       success: true,
-      favorites: favorites.map((f) => ({ path: f.path, rating: f.rating })),
+      favoriteFiles,
+      favoriteFolders,
     };
   } catch (error) {
     logger.error("action:revalidate-many-favorites", error);

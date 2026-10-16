@@ -209,20 +209,3 @@ export async function updateFolderCache(
     },
   });
 }
-
-// お気に入り更新
-export async function upsertFolderFavorite({
-  userId,
-  folderId,
-}: {
-  userId: string;
-  folderId: string;
-}) {
-  await db.userFolderFavorite.upsert({
-    where: {
-      userId_folderId: { userId, folderId },
-    },
-    update: {},
-    create: { userId, folderId },
-  });
-}

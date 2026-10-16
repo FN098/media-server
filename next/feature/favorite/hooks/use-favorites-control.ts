@@ -1,9 +1,9 @@
-import { deleteFavoriteAction } from "@/feature/favorite/actions/delete";
-import { deleteManyFavoritesAction } from "@/feature/favorite/actions/delete-many";
+import { addFavoriteAction } from "@/feature/favorite/actions/add";
+import { addManyFavoritesAction } from "@/feature/favorite/actions/add-many";
+import { removeFavoriteAction } from "@/feature/favorite/actions/remove";
+import { removeManyFavoritesAction } from "@/feature/favorite/actions/remove-many";
 import { revalidateFavoriteAction } from "@/feature/favorite/actions/revalidate";
 import { revalidateManyFavoritesAction } from "@/feature/favorite/actions/revalidate-many";
-import { updateFavoriteAction } from "@/feature/favorite/actions/update";
-import { updateManyFavoritesAction } from "@/feature/favorite/actions/update-many";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type FavoriteMsg =
@@ -12,7 +12,7 @@ type FavoriteMsg =
   | { type: "UPDATE_MANY"; ids: string[] }
   | { type: "DELETE_MANY"; ids: string[] };
 
-export type Favorite = {
+type Favorite = {
   id: string;
   favoritedAt: Date | null;
 };
@@ -66,27 +66,27 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
   // お気に入り状態を更新
   const updateFavorite = useCallback(
-    async (id: string): ReturnType<typeof updateFavoriteAction> => {
+    async (id: string): ReturnType<typeof addFavoriteAction> => {
       if (isInFlight(id)) return { success: false, message: "処理中です" };
 
       startFlight(id);
 
       // 楽観的アップデート
-      setFavoriteSet((s) => new Set(s).add(id));
+      setFavoriteSet((prev) => new Set(prev).add(id));
       broadcast({ type: "UPDATE", id });
 
       // サーバー処理開始
       try {
-        const result = await updateFavoriteAction({ path: id, rating });
+        const result = await addFavoriteAction({ path: id, rating });
         if (!result.success) {
           // 失敗時のロールバック
           const revalidated = await revalidateFavoriteAction({ path: id });
           if (revalidated.success) {
             const { favorite } = revalidated;
-            setRatingMap((m) => {
-              const next = new Map(m);
+            setFavoriteSet((prev) => {
+              const next = new Set(prev);
               if (favorite) {
-                next.set(id, favorite.rating);
+                next.add(id);
               } else {
                 next.delete(id);
               }
@@ -104,7 +104,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
   // お気に入り状態を削除
   const deleteFavorite = useCallback(
-    async (path: string): ReturnType<typeof deleteFavoriteAction> => {
+    async (path: string): ReturnType<typeof removeFavoriteAction> => {
       if (isInFlight(path)) return { success: false, message: "処理中です" };
       startFlight(path);
 
@@ -118,7 +118,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
       // サーバー処理開始
       try {
-        const result = await deleteFavoriteAction({ path });
+        const result = await removeFavoriteAction({ path });
         if (!result.success) {
           // 失敗時のロールバック
           const revalidated = await revalidateFavoriteAction({ path });
@@ -154,7 +154,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
       paths: string[];
       newRating?: number | null;
       skipIfAlreadyFavorite?: boolean;
-    }): ReturnType<typeof updateManyFavoritesAction> => {
+    }): ReturnType<typeof addManyFavoritesAction> => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);
@@ -189,7 +189,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
       // サーバー処理開始
       try {
-        const result = await updateManyFavoritesAction({
+        const result = await addManyFavoritesAction({
           paths: validPaths,
           rating: newRating,
         });
@@ -232,7 +232,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
   // 一括お気に入り解除
   const deleteMultipleFavorites = useCallback(
-    async (paths: string[]): ReturnType<typeof deleteManyFavoritesAction> => {
+    async (paths: string[]): ReturnType<typeof removeManyFavoritesAction> => {
       // 現在の「お気に入り状態」と比較して、処理が必要なものだけ抽出
       const validPaths = paths.filter((path) => {
         const current = getFavorite(path);
@@ -264,7 +264,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
       // サーバー処理開始
       try {
-        const result = await deleteManyFavoritesAction({ paths: validPaths });
+        const result = await removeManyFavoritesAction({ paths: validPaths });
 
         if (!result.success) {
           // 失敗時のロールバック

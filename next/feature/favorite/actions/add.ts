@@ -1,9 +1,9 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
-import { upsertFileFavorite } from "@/lib/file/repository";
-import { upsertFolderFavorite } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
+import { addFavoriteFile } from "@/lib/user-file-favorite/repository";
+import { addFavoriteFolder } from "@/lib/user-folder-favorite/repository";
 import z from "zod";
 
 const InputSchema = z.object({
@@ -20,8 +20,7 @@ type ActionResult =
       message: string;
     };
 
-// お気に入りレーティング更新
-export async function updateFavoriteAction(
+export async function addFavoriteAction(
   input: z.input<typeof InputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
@@ -33,7 +32,7 @@ export async function updateFavoriteAction(
   const { id, isDirectory } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("favorite:update");
+  const auth = await authorize("favorite:add");
   if (!auth.success) {
     return auth;
   }
@@ -42,20 +41,20 @@ export async function updateFavoriteAction(
 
   try {
     if (isDirectory) {
-      await upsertFolderFavorite({
+      await addFavoriteFolder({
         userId: user.id,
         folderId: id,
       });
     } else {
-      await upsertFileFavorite({
+      await addFavoriteFile({
         userId: user.id,
         fileId: id,
       });
     }
+
+    return { success: true };
   } catch (error) {
-    logger.error("action:update-favorite", error);
+    logger.error("action:add-favorite", error);
     return { success: false, message: "お気に入りの更新に失敗しました。" };
   }
-
-  return { success: true };
 }

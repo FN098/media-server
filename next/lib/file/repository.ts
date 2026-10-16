@@ -50,20 +50,3 @@ export async function getFiles(parentFolderId: string, userId: string) {
 }
 
 export type DbFiles = Awaited<ReturnType<typeof getFiles>>;
-
-// お気に入り更新
-export async function upsertFileFavorite({
-  userId,
-  fileId,
-}: {
-  userId: string;
-  fileId: string;
-}) {
-  await db.userFileFavorite.upsert({
-    where: {
-      userId_fileId: { userId, fileId },
-    },
-    update: {},
-    create: { userId, fileId },
-  });
-}

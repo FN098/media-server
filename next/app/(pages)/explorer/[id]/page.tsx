@@ -45,6 +45,7 @@ export async function generateMetadata(
 }
 
 export default async function ExplorerPage(props: ExplorerPageProps) {
+  debugger;
   const user = await resolveCurrentUserOrThrow();
 
   const [params, searchParams] = await Promise.all([
