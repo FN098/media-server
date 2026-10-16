@@ -1,6 +1,6 @@
 import { useSelection } from "@/feature/selection/hooks/use-selection";
 
-export function usePathSelection() {
+export function useNodeSelection() {
   const {
     isSelectionMode,
     enterSelectionMode,
@@ -32,23 +32,23 @@ export function usePathSelection() {
     // 選択操作
     hasSelection,
     selectedCount,
-    selectedPaths: selectedKeys,
-    isSelectedPath: isSelected,
-    togglePath: toggleKey,
-    selectPaths: selectKeys,
+    selectedIds: selectedKeys,
+    isSelectedId: isSelected,
+    toggleId: toggleKey,
+    selectIds: selectKeys,
     clearSelection,
-    selectPath: selectKey,
-    unselectPath: unselectKey,
-    addPaths: addKeys,
-    deletePaths: deleteKeys,
+    selectId: selectKey,
+    unselectId: unselectKey,
+    addIds: addKeys,
+    deleteIds: deleteKeys,
     replaceSelection,
 
     // 範囲選択用
-    lastSelectedPath: lastSelectedKey,
-    setLastSelectedPath: setLastSelectedKey,
-    anchorPath: anchorKey,
-    setAnchorPath: setAnchorKey,
+    lastSelectedId: lastSelectedKey,
+    setLastSelectedId: setLastSelectedKey,
+    anchorId: anchorKey,
+    setAnchorId: setAnchorKey,
   };
 }
 
-export type PathSelection = ReturnType<typeof usePathSelection>;
+export type NodeSelection = ReturnType<typeof useNodeSelection>;

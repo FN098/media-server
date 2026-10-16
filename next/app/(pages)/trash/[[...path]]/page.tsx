@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
 import { Trash } from "@/feature/pages/trash";
 import { TrashProvider } from "@/feature/pages/trash/providers/trash-provider";
-import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
+import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import { getVisitedFolders } from "@/lib/folder/repository";
@@ -98,12 +98,12 @@ export default async function TrashPage(props: TrashPageProps) {
   };
 
   return (
-    <PathSelectionProvider>
+    <NodeSelectionProvider>
       <FavoritesControlProvider favorites={listing.nodes}>
         <TrashProvider listing={listing}>
           <Trash />
         </TrashProvider>
       </FavoritesControlProvider>
-    </PathSelectionProvider>
+    </NodeSelectionProvider>
   );
 }

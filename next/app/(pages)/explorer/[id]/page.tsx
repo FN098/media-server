@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
 import { Explorer } from "@/feature/pages/explorer";
 import { ExplorerProvider } from "@/feature/pages/explorer/providers/explorer-provider";
-import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
+import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import {
@@ -114,12 +114,12 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     }));
 
   return (
-    <PathSelectionProvider>
+    <NodeSelectionProvider>
       <FavoritesControlProvider favorites={favorites}>
         <ExplorerProvider listing={listing}>
           <Explorer />
         </ExplorerProvider>
       </FavoritesControlProvider>
-    </PathSelectionProvider>
+    </NodeSelectionProvider>
   );
 }

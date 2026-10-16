@@ -2,7 +2,7 @@ import { APP_CONFIG } from "@/app.config";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
 import { Favorites } from "@/feature/pages/favorites";
 import { FavoritesProvider } from "@/feature/pages/favorites/providers/favorites-provider";
-import { PathSelectionProvider } from "@/feature/selection/providers/path-selection-provider";
+import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import {
@@ -99,12 +99,12 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const key = hashObject(searchParams);
 
   return (
-    <PathSelectionProvider>
+    <NodeSelectionProvider>
       <FavoritesControlProvider key={key} favorites={favorites}>
         <FavoritesProvider listing={listing}>
           <Favorites />
         </FavoritesProvider>
       </FavoritesControlProvider>
-    </PathSelectionProvider>
+    </NodeSelectionProvider>
   );
 }

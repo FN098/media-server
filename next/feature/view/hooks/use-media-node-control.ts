@@ -2,7 +2,7 @@ import { useFavoritesControlContext } from "@/feature/favorite/providers/favorit
 import { usePercent } from "@/feature/general/hooks/use-percent";
 import { useLongPress } from "@/feature/mobile/hooks/use-long-press";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
-import { usePathSelectionContext } from "@/feature/selection/providers/path-selection-provider";
+import { useNodeSelectionContext } from "@/feature/selection/providers/node-selection-provider";
 import { isMedia } from "@/lib/node/media-types";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo, useState } from "react";
@@ -36,21 +36,21 @@ export function useMediaNodeControl({
   );
 
   const {
-    isSelectedPath,
+    isSelectedId: isSelectedPath,
     replaceSelection,
-    setLastSelectedPath,
-    anchorPath,
-    setAnchorPath,
+    setLastSelectedId: setLastSelectedPath,
+    anchorId: anchorPath,
+    setAnchorId: setAnchorPath,
     enterSelectionMode,
     exitSelectionMode,
-    togglePath,
-    selectPath,
-    unselectPath,
-    selectedPaths,
-    deletePaths,
-    selectPaths,
+    toggleId: togglePath,
+    selectId: selectPath,
+    unselectId: unselectPath,
+    selectedIds: selectedPaths,
+    deleteIds: deletePaths,
+    selectIds: selectPaths,
     isSelectionMode,
-  } = usePathSelectionContext();
+  } = useNodeSelectionContext();
 
   const isSelected = isSelectedPath(node.path);
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);

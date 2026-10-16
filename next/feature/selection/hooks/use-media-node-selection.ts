@@ -1,4 +1,4 @@
-import { usePathSelectionContext } from "@/feature/selection/providers/path-selection-provider";
+import { useNodeSelectionContext } from "@/feature/selection/providers/node-selection-provider";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
@@ -19,14 +19,14 @@ export function useMediaNodeSelection({
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-    selectedPaths,
+    selectedIds: selectedPaths,
     selectedCount,
     replaceSelection,
-    selectPaths,
+    selectIds: selectPaths,
     clearSelection,
     hasSelection,
-    lastSelectedPath,
-  } = usePathSelectionContext();
+    lastSelectedId: lastSelectedPath,
+  } = useNodeSelectionContext();
 
   // path -> node を O(1) で検索するためのマップ
   const nodeMap = useMemo(

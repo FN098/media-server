@@ -12,7 +12,7 @@ import { NodeContextMenu } from "@/feature/menu/ui/node-context-menu";
 import { NodeDropdownMenu } from "@/feature/menu/ui/node-dropdown-menu";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { HoverPreviewPortal } from "@/feature/preview/ui/hover-preview-portal";
-import { usePathSelectionContext } from "@/feature/selection/providers/path-selection-provider";
+import { useNodeSelectionContext } from "@/feature/selection/providers/node-selection-provider";
 import { MarqueeText } from "@/feature/text/ui/marquee-text";
 import { MediaThumb } from "@/feature/thumbnail/ui/media-thumb";
 import { usePagingGridView } from "@/feature/view/components/with-paging/hooks/use-paging-grid-view";
@@ -116,7 +116,7 @@ function Cell() {
     title,
   } = useMediaNodeControlContext();
 
-  const { isSelectionMode } = usePathSelectionContext();
+  const { isSelectionMode } = useNodeSelectionContext();
 
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });
