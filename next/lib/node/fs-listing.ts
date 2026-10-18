@@ -138,7 +138,7 @@ export async function getFsListing(
   const parent =
     virtualDirPath === ""
       ? null
-      : virtualDirPath.split("/").slice(0, -1).join("/") || "";
+      : virtualDirPath.split("/").slice(0, -1).join("/") || null;
 
   const listing: FsListing = {
     path: virtualDirPath,
