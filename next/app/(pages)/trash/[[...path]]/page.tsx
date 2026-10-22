@@ -99,7 +99,7 @@ export default async function TrashPage(props: TrashPageProps) {
 
   return (
     <NodeSelectionProvider>
-      <FavoritesControlProvider favorites={listing.nodes}>
+      <FavoritesControlProvider entries={listing.nodes}>
         <TrashProvider listing={listing}>
           <Trash />
         </TrashProvider>

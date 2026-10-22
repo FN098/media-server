@@ -3,7 +3,7 @@ import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
 import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
 import { TrashFiltering } from "@/feature/pages/trash/hooks/use-trash-filtering";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
 import {
   IndexLike,
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 interface UseTrashNavigationProps {
   listing: MediaListing;
   filtering: TrashFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;

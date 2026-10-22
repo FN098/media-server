@@ -1,6 +1,6 @@
+import { useMediaNodePagingViewContext } from "@/feature/paging-view/providers/media-node-paging-view-provider";
+import { usePagingContext } from "@/feature/paging-view/providers/paging-provider";
 import { useNodeSelectionContext } from "@/feature/selection/providers/node-selection-provider";
-import { useMediaNodePagingViewContext } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
-import { usePagingContext } from "@/feature/view/components/with-paging/providers/paging-provider";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function usePagingGridView() {

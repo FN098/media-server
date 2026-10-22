@@ -5,13 +5,13 @@ import { MenuItemsProvider } from "@/feature/menu-items/providers/menu-items-pro
 import { useFavoritesContext } from "@/feature/pages/favorites/providers/favorites-provider";
 import { FavoritesToolbar } from "@/feature/pages/favorites/ui/favorites-toolbar";
 import { FavoritesToolbarDialogs } from "@/feature/pages/favorites/ui/favorites-toolbar-dialogs";
+import { PagingGridView } from "@/feature/paging-view/components/paging-grid-view";
+import { PagingListView } from "@/feature/paging-view/components/paging-list-view";
+import { MediaNodePagingViewProvider } from "@/feature/paging-view/providers/media-node-paging-view-provider";
+import { PagingProvider } from "@/feature/paging-view/providers/paging-provider";
 import { SelectionBar } from "@/feature/selection/ui/selection-bar";
 import { TagEditSheetProvider } from "@/feature/tag-editor/providers/tag-edit-sheet-provider";
 import { TagEditSheet } from "@/feature/tag-editor/ui/tag-edit-sheet";
-import { MediaNodePagingViewProvider } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
-import { PagingProvider } from "@/feature/view/components/with-paging/providers/paging-provider";
-import { PagingGridView } from "@/feature/view/components/with-paging/ui/paging-grid-view";
-import { PagingListView } from "@/feature/view/components/with-paging/ui/paging-list-view";
 import { MediaViewer } from "@/feature/viewers/media-viewer";
 import { MediaViewerProvider } from "@/feature/viewers/media-viewer/providers/media-viewer-provider";
 

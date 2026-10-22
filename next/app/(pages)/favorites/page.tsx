@@ -100,7 +100,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
 
   return (
     <NodeSelectionProvider>
-      <FavoritesControlProvider key={key} favorites={favorites}>
+      <FavoritesControlProvider key={key} entries={favorites}>
         <FavoritesProvider listing={listing}>
           <Favorites />
         </FavoritesProvider>

@@ -1,6 +1,6 @@
 import { FavoriteRatingInput } from "@/feature/favorite/ui/favorite-rating-input";
 import { FavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorites-favorites";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { hasMedia } from "@/lib/node/media-types";
@@ -63,7 +63,7 @@ function createFavoritesSelectionBarMenu({
 }
 
 interface UseFavoritesSelectionBarProps {
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   tagEditor: TagEditor;
   favorites: FavoritesFavorites;
 }

@@ -9,7 +9,7 @@ import { useToggleSlideshowMenuItem } from "@/feature/menu-items/hooks/use-toggl
 import { FavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorites-favorites";
 import { FavoritesFiltering } from "@/feature/pages/favorites/hooks/use-favorites-filtering";
 import { FavoritesNavigation } from "@/feature/pages/favorites/hooks/use-favorites-navigation";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { Slideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
@@ -24,7 +24,7 @@ export const separators = {
 
 interface UseFavoritesMenuItemsProps {
   filtering: FavoritesFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   tagEditor: TagEditor;
   navigation: FavoritesNavigation;
   viewer: ViewerNavigation;

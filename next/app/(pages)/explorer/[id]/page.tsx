@@ -1,6 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
-import { Explorer } from "@/feature/pages/explorer";
 import { ExplorerProvider } from "@/feature/pages/explorer/providers/explorer-provider";
 import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
@@ -45,7 +44,6 @@ export async function generateMetadata(
 }
 
 export default async function ExplorerPage(props: ExplorerPageProps) {
-  debugger;
   const user = await resolveCurrentUserOrThrow();
 
   const [params, searchParams] = await Promise.all([
@@ -110,14 +108,15 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     .filter((n) => n.favoritedAt)
     .map((n) => ({
       id: n.id,
-      favoritedAt: n.favoritedAt,
+      isFavorite: !!n.favoritedAt,
     }));
 
   return (
     <NodeSelectionProvider>
-      <FavoritesControlProvider favorites={favorites}>
+      <FavoritesControlProvider entries={favorites}>
         <ExplorerProvider listing={listing}>
-          <Explorer />
+          {/* <Explorer /> */}
+          OK
         </ExplorerProvider>
       </FavoritesControlProvider>
     </NodeSelectionProvider>

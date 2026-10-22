@@ -3,14 +3,14 @@ import { FavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorite
 import { FavoritesFiltering } from "@/feature/pages/favorites/hooks/use-favorites-filtering";
 import { useFavoritesMenuItems } from "@/feature/pages/favorites/hooks/use-favorites-menu-items";
 import { FavoritesNavigation } from "@/feature/pages/favorites/hooks/use-favorites-navigation";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { Slideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 
 interface FavoritesMenuContext {
   filtering: FavoritesFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   tagEditor: TagEditor;
   navigation: FavoritesNavigation;
   viewer: ViewerNavigation;

@@ -2,7 +2,7 @@ import { FavoriteRatingInput } from "@/feature/favorite/ui/favorite-rating-input
 import { ExplorerDialogs } from "@/feature/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/feature/pages/explorer/hooks/use-explorer-favorites";
 import { ExplorerThumbs } from "@/feature/pages/explorer/hooks/use-explorer-thumbs";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
 import { hasMedia } from "@/lib/node/media-types";
@@ -21,7 +21,7 @@ import { useMemo } from "react";
 
 interface ExplorerSelectionBarMenuContext {
   listing: MediaListing;
-  selectedNodes: MediaNodeSelection["selectedNodes"];
+  selectedNodes: NodeSelectionControl["selectedNodes"];
   hasSelection: boolean;
   isMediaSelected: boolean;
   tagEditor: TagEditor;
@@ -70,7 +70,7 @@ function createExplorerSelectionBarMenu({
               value={averageRating}
               onChange={(newRating) =>
                 void favorites.update({
-                  targets: nodes,
+                  entries: nodes,
                   newRating,
                   onSuccess: closeMenu,
                 })
@@ -152,7 +152,7 @@ function createExplorerSelectionBarMenu({
 
 interface UseExplorerSelectionBarProps {
   listing: MediaListing;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   dialogs: ExplorerDialogs;
   tagEditor: TagEditor;
   favorites: ExplorerFavorites;

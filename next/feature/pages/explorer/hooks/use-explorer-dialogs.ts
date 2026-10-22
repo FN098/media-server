@@ -1,6 +1,5 @@
 import { useExtractDialog } from "@/feature/archive/hooks/use-extract-dialog";
 import { useFavoriteDialog } from "@/feature/favorite/hooks/use-favorite-dialog";
-import { useRatingFilterDialog } from "@/feature/filter/hooks/use-rating-filter-dialog";
 import { useTagFilterDialog } from "@/feature/filter/hooks/use-tag-filter-dialog";
 import { useCreateFolderDialog } from "@/feature/folder/hooks/use-create-folder-dialog";
 import { useCopyDialog } from "@/feature/node/hooks/use-copy-dialog";
@@ -10,13 +9,13 @@ import { useRenameDialog } from "@/feature/node/hooks/use-rename-dialog";
 import { ExplorerFavorites } from "@/feature/pages/explorer/hooks/use-explorer-favorites";
 import { ExplorerFiltering } from "@/feature/pages/explorer/hooks/use-explorer-filtering";
 import { usePreviewDialog } from "@/feature/preview/hooks/use-preview-dialog";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { useTextFilePreviewDialog } from "@/feature/text-file-reader/hooks/use-text-file-preview-dialog";
 import { useMemo } from "react";
 
 interface UseExplorerDialogsProps {
   filtering: ExplorerFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   favorites: ExplorerFavorites;
 }
 
@@ -27,7 +26,7 @@ export function useExplorerDialogs({
 }: UseExplorerDialogsProps) {
   const renameDialog = useRenameDialog({
     onSuccess: ({ nextPath, prevPath }) =>
-      void favorites.refreshPath(prevPath, nextPath),
+      void favorites.refresh(prevPath, nextPath),
   });
   const moveDialog = useMoveDialog();
   const copyDialog = useCopyDialog();
@@ -39,10 +38,6 @@ export function useExplorerDialogs({
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog();
   const textFilePreviewDialog = useTextFilePreviewDialog();
-
-  const ratingFilterDialog = useRatingFilterDialog({
-    onApply: filtering.controls.rating.apply,
-  });
 
   const tagFilterDialog = useTagFilterDialog({
     onApply: filtering.controls.tag.apply,
@@ -60,7 +55,6 @@ export function useExplorerDialogs({
         extractDialog,
         previewDialog,
         favoriteDialog,
-        ratingFilterDialog,
         tagFilterDialog,
         textFilePreviewDialog,
       }) as const,
@@ -72,7 +66,6 @@ export function useExplorerDialogs({
       favoriteDialog,
       moveDialog,
       previewDialog,
-      ratingFilterDialog,
       renameDialog,
       tagFilterDialog,
       textFilePreviewDialog,

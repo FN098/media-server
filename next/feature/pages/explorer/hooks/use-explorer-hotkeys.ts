@@ -3,7 +3,7 @@ import { ExplorerDialogs } from "@/feature/pages/explorer/hooks/use-explorer-dia
 import { ExplorerFiltering } from "@/feature/pages/explorer/hooks/use-explorer-filtering";
 import { ExplorerNavigation } from "@/feature/pages/explorer/hooks/use-explorer-navigation";
 import { SearchFocus } from "@/feature/search/hooks/use-search-focus";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { MediaListing } from "@/lib/node/types";
@@ -16,7 +16,7 @@ interface UseExplorerHotkeysProps {
   enabled: boolean;
   listing: MediaListing;
   filtering: ExplorerFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   dialogs: ExplorerDialogs;
   tagEditor: TagEditor;
   navigation: ExplorerNavigation;

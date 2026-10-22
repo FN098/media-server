@@ -1,32 +1,29 @@
 import { useFavoritesControlContext } from "@/feature/favorite/providers/favorites-control-provider";
-import { MediaNode } from "@/lib/node/types";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
-type UpdateProps = {
-  targets: MediaNode[];
-  newRating: number | null;
-  onSuccess?: () => void;
-};
-
 export function useExplorerFavorites() {
-  const {
-    getFavorite,
-    updateMultipleFavorites,
-    updateFavorite,
-    deleteFavorite,
-  } = useFavoritesControlContext();
+  const { getFavorite, addManyFavorites, addFavorite, removeFavorite } =
+    useFavoritesControlContext();
+
   const [isPending, setIsPending] = useState(false);
 
   const update = useCallback(
-    async ({ targets, newRating, onSuccess }: UpdateProps) => {
+    async ({
+      entries,
+      onSuccess,
+    }: {
+      entries: {
+        id: string;
+        isDirectory: boolean;
+      }[];
+      onSuccess?: () => void;
+    }) => {
       if (isPending) return;
       setIsPending(true);
 
-      const paths = targets.map((target) => target.path);
-      const result = await updateMultipleFavorites({
-        paths,
-        newRating,
+      const result = await addManyFavorites({
+        entries,
       });
 
       if (result.success) {
@@ -38,24 +35,24 @@ export function useExplorerFavorites() {
 
       setIsPending(false);
     },
-    [isPending, updateMultipleFavorites]
+    [isPending, addManyFavorites]
   );
 
-  const refreshPath = useCallback(
-    async (prevPath: string, nextPath: string) => {
-      const fav = getFavorite(prevPath);
-      if (fav.isFavorite) {
-        await deleteFavorite(prevPath);
-        await updateFavorite(nextPath, fav.rating);
+  const refresh = useCallback(
+    async (id: string, isDirectory: boolean) => {
+      const current = getFavorite(id);
+      if (current.isFavorite) {
+        await removeFavorite(id, isDirectory);
+        await addFavorite(id, isDirectory);
       }
     },
-    [deleteFavorite, getFavorite, updateFavorite]
+    [removeFavorite, getFavorite, addFavorite]
   );
 
   return {
     get: getFavorite,
     update,
-    refreshPath,
+    refresh,
   };
 }
 

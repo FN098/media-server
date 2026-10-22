@@ -10,7 +10,7 @@ import { useFavoritesNavigation } from "@/feature/pages/favorites/hooks/use-favo
 import { useFavoritesSelectionBar } from "@/feature/pages/favorites/hooks/use-favorites-selection-bar";
 import { useFavoritesThumbs } from "@/feature/pages/favorites/hooks/use-favorites-thumbs";
 import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
-import { useMediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { useNodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { useSort } from "@/feature/sort/hooks/use-sort";
 import { useTagEditorContext } from "@/feature/tag-editor/providers/tag-editor-provider";
 import { useViewMode } from "@/feature/view/hooks/use-view-mode";
@@ -26,7 +26,7 @@ export function useFavorites({ listing }: UseFavoritesProps) {
   const searchFocus = useSearchFocusContext();
   const viewMode = useViewMode();
   const filtering = useFavoritesFiltering({ listing });
-  const selection = useMediaNodeSelection({
+  const selection = useNodeSelectionControl({
     allNodes: listing.nodes,
     activeNodes: filtering.filteredNodes,
   });

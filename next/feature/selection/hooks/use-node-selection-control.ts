@@ -1,66 +1,66 @@
 import { useNodeSelectionContext } from "@/feature/selection/providers/node-selection-provider";
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
-export type MediaNodeSelection = ReturnType<typeof useMediaNodeSelection>;
+export type NodeSelectionControl = ReturnType<typeof useNodeSelectionControl>;
 
-interface UseMediaNodeSelectionProps {
-  allNodes: MediaNode[];
-  activeNodes: MediaNode[];
+interface UseNodeSelectionControlProps {
+  allNodes: Node[];
+  activeNodes: Node[];
   enableFolderSelection?: boolean;
 }
 
-export function useMediaNodeSelection({
+export function useNodeSelectionControl({
   allNodes,
   activeNodes,
   enableFolderSelection = true,
-}: UseMediaNodeSelectionProps) {
+}: UseNodeSelectionControlProps) {
   const {
     isSelectionMode,
     enterSelectionMode,
     exitSelectionMode,
-    selectedIds: selectedPaths,
+    selectedIds,
     selectedCount,
     replaceSelection,
-    selectIds: selectPaths,
+    selectIds,
     clearSelection,
     hasSelection,
-    lastSelectedId: lastSelectedPath,
+    lastSelectedId,
   } = useNodeSelectionContext();
 
-  // path -> node を O(1) で検索するためのマップ
+  // id -> node を O(1) で検索するためのマップ
   const nodeMap = useMemo(
-    () => new Map(allNodes.map((n) => [n.path, n])),
+    () => new Map(allNodes.map((n) => [n.id, n])),
     [allNodes]
   );
 
   const lastSelectedNode = useMemo(
-    () => (lastSelectedPath ? nodeMap.get(lastSelectedPath) : null),
-    [lastSelectedPath, nodeMap]
+    () => (lastSelectedId ? nodeMap.get(lastSelectedId) : null),
+    [lastSelectedId, nodeMap]
   );
 
   const selectedNodes = useMemo(() => {
-    return Array.from(selectedPaths)
-      .map((path) => nodeMap.get(path))
+    return Array.from(selectedIds)
+      .map((id) => nodeMap.get(id))
       .filter((node) => node != null)
       .filter((node) => enableFolderSelection || !node.isDirectory); // フォルダ選択無効ならフォルダ除外
-  }, [enableFolderSelection, nodeMap, selectedPaths]);
+  }, [enableFolderSelection, nodeMap, selectedIds]);
 
   const replace = useCallback(
-    (node: MediaNode) => {
-      replaceSelection(node.path);
+    (node: Node) => {
+      replaceSelection(node.id);
     },
     [replaceSelection]
   );
 
   const select = useCallback(
-    (nodes: MediaNode[]) => {
-      const targets = nodes.map((n) => n.path);
-      selectPaths(targets);
+    (nodes: Node[]) => {
+      const targets = nodes.map((n) => n.id);
+      selectIds(targets);
       if (targets.length > 0) enterSelectionMode();
       else exitSelectionMode();
     },
-    [enterSelectionMode, exitSelectionMode, selectPaths]
+    [enterSelectionMode, exitSelectionMode, selectIds]
   );
 
   const selectAll = useCallback(() => {

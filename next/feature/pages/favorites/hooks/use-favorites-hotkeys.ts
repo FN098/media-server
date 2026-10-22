@@ -2,7 +2,7 @@ import { Fullscreen } from "@/feature/general/hooks/use-fullscreen";
 import { FavoritesDialogs } from "@/feature/pages/favorites/hooks/use-favorites-dialogs";
 import { FavoritesFiltering } from "@/feature/pages/favorites/hooks/use-favorites-filtering";
 import { SearchFocus } from "@/feature/search/hooks/use-search-focus";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { useEffect, useMemo } from "react";
@@ -13,7 +13,7 @@ const ALL_SCOPES = ["favorites", "tag-editor", "viewer", "dialog"] as const;
 interface UseFavoritesHotkeysProps {
   enabled: boolean;
   filtering: FavoritesFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   dialogs: FavoritesDialogs;
   tagEditor: TagEditor;
   viewer: ViewerNavigation;

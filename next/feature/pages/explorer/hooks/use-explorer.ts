@@ -10,16 +10,16 @@ import { useExplorerNavigation } from "@/feature/pages/explorer/hooks/use-explor
 import { useExplorerSelectionBar } from "@/feature/pages/explorer/hooks/use-explorer-selection-bar";
 import { useExplorerThumbs } from "@/feature/pages/explorer/hooks/use-explorer-thumbs";
 import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
-import { useMediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { useNodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { useSort } from "@/feature/sort/hooks/use-sort";
 import { useTagEditorContext } from "@/feature/tag-editor/providers/tag-editor-provider";
 import { useViewMode } from "@/feature/view/hooks/use-view-mode";
 import { useViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { useSlideshowContext } from "@/feature/viewers/media-viewer/providers/slideshow-provider";
-import { MediaListing } from "@/lib/node/types";
+import { NodeListing } from "@/lib/node/types";
 
 export interface UseExplorerProps {
-  listing: MediaListing;
+  listing: NodeListing;
 }
 
 export function useExplorer({ listing }: UseExplorerProps) {
@@ -27,8 +27,8 @@ export function useExplorer({ listing }: UseExplorerProps) {
   const viewMode = useViewMode();
 
   const filtering = useExplorerFiltering({ listing });
-  const selection = useMediaNodeSelection({
-    allNodes: listing.nodes,
+  const selection = useNodeSelectionControl({
+    allNodes: listing.children,
     activeNodes: filtering.filteredNodes,
   });
   const sort = useSort();

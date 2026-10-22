@@ -18,8 +18,10 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   const [action, setAction] = useState<Action>("add");
   const [isPending, setIsPending] = useState(false);
 
-  const { updateMultipleFavorites, deleteMultipleFavorites } =
-    useFavoritesControlContext();
+  const {
+    addManyFavorites: updateMultipleFavorites,
+    removeManyFavorites: deleteMultipleFavorites,
+  } = useFavoritesControlContext();
 
   // 1. ダイアログを開く
   const open = useCallback((targets: Item[], currentMode: Action) => {

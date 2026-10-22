@@ -50,7 +50,7 @@ export function useMediaViewerFavorite({
       setIsPending(true);
 
       try {
-        await control.updateFavorite(currentNode.path, rating);
+        await control.addFavorite(currentNode.path, rating);
 
         onChange?.({ isFavorite: true, rating });
       } catch (e) {

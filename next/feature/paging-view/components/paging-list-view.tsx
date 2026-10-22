@@ -7,7 +7,6 @@ import {
   useMediaNodeDndContext,
 } from "@/feature/dnd/providers/media-node-dnd-provider";
 import { FavoriteButton } from "@/feature/favorite/ui/favorite-button";
-import { FavoriteRatingInput } from "@/feature/favorite/ui/favorite-rating-input";
 import {
   LocaleProvider,
   useLocaleContext,
@@ -16,15 +15,15 @@ import { useMenuItemsContext } from "@/feature/menu-items/providers/menu-items-p
 import { NodeContextMenu } from "@/feature/menu/ui/node-context-menu";
 import { NodeDropdownMenu } from "@/feature/menu/ui/node-dropdown-menu";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
+import { AverageRatingBadge } from "@/feature/paging-view/components/average-rating-badge";
+import { FavoriteRatingDisplay } from "@/feature/paging-view/components/favorite-rating-display";
+import { FolderStatusBadge } from "@/feature/paging-view/components/folder-status-badge";
+import { PagingControl } from "@/feature/paging-view/components/pagination-control";
+import { SizeBar } from "@/feature/paging-view/components/size-bar";
+import { usePagingGridView } from "@/feature/paging-view/hooks/use-paging-grid-view";
+import { useMediaNodePagingViewContext } from "@/feature/paging-view/providers/media-node-paging-view-provider";
 import { HoverPreviewPortal } from "@/feature/preview/ui/hover-preview-portal";
 import { MediaThumbIcon } from "@/feature/thumbnail/ui/media-thumb-icons";
-import { usePagingGridView } from "@/feature/view/components/with-paging/hooks/use-paging-grid-view";
-import { useMediaNodePagingViewContext } from "@/feature/view/components/with-paging/providers/media-node-paging-view-provider";
-import { AverageRatingBadge } from "@/feature/view/components/with-paging/ui/average-rating-badge";
-import { FavoriteRatingDisplay } from "@/feature/view/components/with-paging/ui/favorite-rating-display";
-import { FolderStatusBadge } from "@/feature/view/components/with-paging/ui/folder-status-badge";
-import { PagingControl } from "@/feature/view/components/with-paging/ui/pagination-control";
-import { SizeBar } from "@/feature/view/components/with-paging/ui/size-bar";
 import {
   MediaNodeControlProvider,
   useMediaNodeControlContext,
@@ -320,11 +319,11 @@ function RatingCell() {
 
   return (
     <>
-      <FavoriteRatingInput
+      {/* <FavoriteRatingInput
         value={rating}
-        onChange={(rating) => void updateFavorite(node.path, rating)}
+        onChange={(rating) => void updateFavorite(node.path)}
         className="hidden md:flex"
-      />
+      /> */}
       <FavoriteButton
         rating={rating}
         isFavorite={isFavorite}

@@ -7,18 +7,17 @@ import { useTagFilter } from "@/feature/filter/hooks/use-tag-filter";
 import { useSearchParamsControl } from "@/feature/general/hooks/use-search-params-control";
 import {
   createFavoriteFilter,
+  createFileTypeFilter,
   createMediaOnlyFilter,
-  createMediaTypeFilter,
-  createRatingFilter,
   createSearchFilter,
   createTagFilter,
   withDirectoryControl,
 } from "@/lib/filter/factory";
-import { MediaListing, MediaNode } from "@/lib/node/types";
+import { Node, NodeListing } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
 interface UseExplorerFilteringProps {
-  listing: MediaListing;
+  listing: NodeListing;
 }
 
 export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
@@ -29,18 +28,14 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
   const favoriteFilter = useFavoriteFilter();
 
   // フィルターパイプライン
-  const pipeline = useMemo(
+  const filters = useMemo(
     () => [
       withDirectoryControl(
         createSearchFilter(queryFilter.value),
         "apply-filter"
       ),
       withDirectoryControl(
-        createMediaTypeFilter(mediaTypeFilter.value),
-        "apply-filter"
-      ),
-      withDirectoryControl(
-        createRatingFilter(ratingFilter.value),
+        createFileTypeFilter(mediaTypeFilter.value),
         "apply-filter"
       ),
       withDirectoryControl(createTagFilter(tagFilter.value), "always"),
@@ -59,26 +54,29 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
   );
 
   // フィルター結果
-  const { filtered, filteredCount, totalCount, isFiltered } = useFilteredNodes({
-    targets: listing.nodes,
-    pipeline,
-  });
+  const { filteredNodes, filteredCount, totalCount, isFiltered } =
+    useFilteredNodes({
+      nodes: listing.children,
+      filters,
+    });
 
   // 「メディアのみ」のフィルターパイプライン
   const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
 
   // 「メディアのみ」のリスト
-  const { filtered: mediaOnly } = useFilteredNodes({
-    targets: filtered,
-    pipeline: mediaOnlyPipeline,
+  const { filteredNodes: mediaOnly } = useFilteredNodes({
+    nodes: filteredNodes,
+    filters: mediaOnlyPipeline,
   });
 
   // タグをフィルターに追加
   const addTagFilter = useCallback(
-    (targets: MediaNode | MediaNode[]) => {
+    (targets: Node | Node[]) => {
       const nodes = Array.isArray(targets) ? targets : [targets];
 
-      const tags = nodes.flatMap((node) => node.tags ?? []);
+      const tags = nodes
+        .filter((node) => !node.isDirectory)
+        .flatMap((node) => node.tags ?? []);
 
       if (tags.length === 0) return;
 
@@ -90,10 +88,12 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
     [tagFilter]
   );
 
-  const canAddTagFilter = useCallback((targets: MediaNode | MediaNode[]) => {
+  const canAddTagFilter = useCallback((targets: Node | Node[]) => {
     const nodes = Array.isArray(targets) ? targets : [targets];
 
-    return nodes.some((node) => (node.tags?.length ?? 0) > 0);
+    return nodes
+      .filter((node) => !node.isDirectory)
+      .some((node) => (node.tags?.length ?? 0) > 0);
   }, []);
 
   // 検索パラメータリセット用
@@ -102,7 +102,7 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
   });
 
   return {
-    filteredNodes: filtered,
+    filteredNodes,
     filteredCount,
     totalCount,
     isFiltered,

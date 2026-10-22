@@ -7,7 +7,7 @@ import { useRestoreMenuItem } from "@/feature/menu-items/hooks/use-restore-menu-
 import { useToggleFullscreenMenuItem } from "@/feature/menu-items/hooks/use-toggle-fullscreen-menu-item";
 import { TrashDialogs } from "@/feature/pages/trash/hooks/use-trash-dialogs";
 import { TrashNavigation } from "@/feature/pages/trash/hooks/use-trash-navigation";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { createSeparator } from "@/lib/menu-items/factory";
 import { MenuItemDef, NodeContext } from "@/lib/menu-items/types";
@@ -19,7 +19,7 @@ export const separators = {
 } as const;
 
 interface UseTrashMenuItemsProps {
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   dialogs: TrashDialogs;
   navigation: TrashNavigation;
   viewer: ViewerNavigation;

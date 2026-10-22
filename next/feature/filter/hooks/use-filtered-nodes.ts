@@ -1,31 +1,31 @@
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { useMemo } from "react";
 
-type Pipe = (node: MediaNode) => boolean;
+type Filter = (node: Node) => boolean;
 
 interface UseFilteredNodesProps {
-  targets: MediaNode[];
-  pipeline: Pipe[];
+  nodes: Node[];
+  filters: Filter[];
   activated?: boolean;
 }
 
 export function useFilteredNodes({
-  targets,
-  pipeline,
+  nodes,
+  filters,
   activated = true,
 }: UseFilteredNodesProps) {
   // フィルタリング実行
-  const filtered = useMemo(() => {
-    if (!activated) return targets;
+  const filteredNodes = useMemo(() => {
+    if (!activated) return nodes;
 
     // フィルタの適用
-    return targets.filter((node) => pipeline.every((filter) => filter(node)));
-  }, [activated, targets, pipeline]);
+    return nodes.filter((node) => filters.every((filter) => filter(node)));
+  }, [activated, nodes, filters]);
 
   return {
-    filtered,
-    filteredCount: filtered.length,
-    totalCount: targets.length,
-    isFiltered: filtered.length !== targets.length,
+    filteredNodes,
+    filteredCount: filteredNodes.length,
+    totalCount: nodes.length,
+    isFiltered: filteredNodes.length !== nodes.length,
   };
 }

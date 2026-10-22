@@ -12,19 +12,19 @@ type FavoriteMsg =
   | { type: "ADD_MANY"; ids: string[] }
   | { type: "REMOVE_MANY"; ids: string[] };
 
-type Favorite = {
+type Entry = {
   id: string;
-  favoritedAt: Date | null;
+  isFavorite: boolean;
 };
 
 export interface UseFavoriteControlProps {
-  favorites?: Favorite[];
+  entries?: Entry[];
 }
 
-export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
-  const [favoriteIds, setFavoriteIds] = useState(() => {
-    return favorites
-      ? new Set(favorites.filter((f) => f.favoritedAt != null).map((f) => f.id))
+export function useFavoritesControl({ entries }: UseFavoriteControlProps) {
+  const [favoritedIds, setFavoritedIds] = useState(() => {
+    return entries
+      ? new Set(entries.filter((e) => e.isFavorite).map((f) => f.id))
       : new Set();
   });
 
@@ -32,7 +32,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
   // タブ間同期
   const { broadcast } = useFavoriteChannel((msg: FavoriteMsg) => {
-    setFavoriteIds((prev) => {
+    setFavoritedIds((prev) => {
       const next = new Set(prev);
 
       switch (msg.type) {
@@ -58,10 +58,10 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
   const getFavorite = useCallback(
     (id: string) => {
       return {
-        isFavorite: favoriteIds.has(id),
+        isFavorite: favoritedIds.has(id),
       };
     },
-    [favoriteIds]
+    [favoritedIds]
   );
 
   // お気に入り検証
@@ -79,7 +79,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
         });
         if (revalidated.success) {
           const { isFavorite } = revalidated;
-          setFavoriteIds((prev) => {
+          setFavoritedIds((prev) => {
             const next = new Set(prev);
             if (isFavorite) {
               next.add(id);
@@ -104,7 +104,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
       startFlight(id);
 
       // 楽観的アップデート
-      setFavoriteIds((prev) => new Set(prev).add(id));
+      setFavoritedIds((prev) => new Set(prev).add(id));
       broadcast({ type: "ADD", id });
 
       // サーバー処理開始
@@ -130,7 +130,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
       startFlight(id);
 
       // 楽観的アップデート
-      setFavoriteIds((prev) => {
+      setFavoritedIds((prev) => {
         const next = new Set(prev);
         next.delete(id);
         return next;
@@ -179,7 +179,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
         });
 
         if (revalidateResult.success) {
-          setFavoriteIds((prev) => {
+          setFavoritedIds((prev) => {
             const next = new Set(prev);
             const { favoriteFiles, favoriteFolders } = revalidateResult;
 
@@ -216,7 +216,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
         isDirectory: boolean;
       }[];
     }) => {
-      const validids = entries
+      const validIds = entries
         .map((e) => e.id)
         .filter((id) => {
           const current = getFavorite(id);
@@ -234,21 +234,21 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
           return true;
         });
 
-      if (validids.length === 0)
+      if (validIds.length === 0)
         return { success: false, message: "処理するIDがありません" };
 
       // すべてのIDを Flight 状態にする
-      startFlight(...validids);
+      startFlight(...validIds);
 
       // 楽観的アップデート
-      setFavoriteIds((prev) => {
+      setFavoritedIds((prev) => {
         const next = new Set(prev);
-        validids.forEach((id) => next.add(id));
+        validIds.forEach((id) => next.add(id));
         return next;
       });
 
       // タブ間同期 (メッセージ送信)
-      broadcast({ type: "ADD_MANY", ids: validids });
+      broadcast({ type: "ADD_MANY", ids: validIds });
 
       // サーバー処理開始
       try {
@@ -263,7 +263,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
         return result;
       } finally {
-        finishFlight(...validids);
+        finishFlight(...validIds);
       }
     },
     [broadcast, finishFlight, getFavorite, isInFlight, startFlight]
@@ -279,7 +279,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
         isDirectory: boolean;
       }[];
     }) => {
-      const validids = entries
+      const validIds = entries
         .map((e) => e.id)
         .filter((id) => {
           const current = getFavorite(id);
@@ -297,21 +297,21 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
           return true;
         });
 
-      if (validids.length === 0)
+      if (validIds.length === 0)
         return { success: false, message: "処理するIDがありません" };
 
       // すべてのIDを Flight 状態にする
-      startFlight(...validids);
+      startFlight(...validIds);
 
       // 楽観的アップデート
-      setFavoriteIds((prev) => {
+      setFavoritedIds((prev) => {
         const next = new Set(prev);
-        validids.forEach((id) => next.delete(id));
+        validIds.forEach((id) => next.delete(id));
         return next;
       });
 
       // タブ間同期
-      broadcast({ type: "REMOVE_MANY", ids: validids });
+      broadcast({ type: "REMOVE_MANY", ids: validIds });
 
       // サーバー処理開始
       try {
@@ -324,7 +324,7 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
         return result;
       } finally {
-        finishFlight(...validids);
+        finishFlight(...validIds);
       }
     },
     [broadcast, finishFlight, getFavorite, isInFlight, startFlight]
@@ -332,10 +332,10 @@ export function useFavoritesControl({ favorites }: UseFavoriteControlProps) {
 
   return {
     getFavorite,
-    updateFavorite: addFavorite,
-    updateMultipleFavorites: addManyFavorites,
-    deleteFavorite: removeFavorite,
-    deleteMultipleFavorites: removeManyFavorites,
+    addFavorite,
+    addManyFavorites,
+    removeFavorite,
+    removeManyFavorites,
     toggleFavorite,
   };
 }

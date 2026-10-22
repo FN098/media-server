@@ -5,7 +5,7 @@ import { ExplorerFiltering } from "@/feature/pages/explorer/hooks/use-explorer-f
 import { useExplorerMenuItems } from "@/feature/pages/explorer/hooks/use-explorer-menu-items";
 import { ExplorerNavigation } from "@/feature/pages/explorer/hooks/use-explorer-navigation";
 import { ExplorerThumbs } from "@/feature/pages/explorer/hooks/use-explorer-thumbs";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { Slideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
@@ -14,7 +14,7 @@ import { MediaListing } from "@/lib/node/types";
 interface UseExplorerMenuProps {
   listing: MediaListing;
   filtering: ExplorerFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   dialogs: ExplorerDialogs;
   tagEditor: TagEditor;
   navigation: ExplorerNavigation;

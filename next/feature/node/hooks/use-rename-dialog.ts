@@ -9,7 +9,7 @@ type RenameTarget = {
 };
 
 interface UseRenameDialogProps {
-  onSuccess?: (data: { prevPath: string; nextPath: string }) => void;
+  onSuccess?: (props: { id: string; isDirectory: boolean }) => void;
 }
 
 export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {

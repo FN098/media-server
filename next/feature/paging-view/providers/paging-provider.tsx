@@ -3,7 +3,7 @@
 import {
   usePaging,
   UsePagingProps,
-} from "@/feature/view/components/with-paging/hooks/use-paging";
+} from "@/feature/paging-view/hooks/use-paging";
 import { createContext, ReactNode, useContext } from "react";
 
 const PagingContext = createContext<ReturnType<typeof usePaging> | undefined>(

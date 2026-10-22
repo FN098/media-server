@@ -27,8 +27,11 @@ export function useMediaNodeControl({
   const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
   const isMobile = useDetectMobileContext();
 
-  const { getFavorite, toggleFavorite, updateFavorite } =
-    useFavoritesControlContext();
+  const {
+    getFavorite,
+    toggleFavorite,
+    addFavorite: updateFavorite,
+  } = useFavoritesControlContext();
 
   const { isFavorite, rating } = useMemo(
     () => getFavorite(node.path),

@@ -5,8 +5,8 @@ import { useRatingFilter } from "@/feature/filter/hooks/use-rating-filter";
 import { useTagFilter } from "@/feature/filter/hooks/use-tag-filter";
 import { useSearchParamsControl } from "@/feature/general/hooks/use-search-params-control";
 import {
+  createFileTypeFilter,
   createMediaOnlyFilter,
-  createMediaTypeFilter,
   createRatingFilter,
   createSearchFilter,
   createTagFilter,
@@ -33,7 +33,7 @@ export function useFavoritesFiltering({ listing }: UseFavoritesFilteringProps) {
         "apply-filter"
       ),
       withDirectoryControl(
-        createMediaTypeFilter(mediaTypeFilter.value),
+        createFileTypeFilter(mediaTypeFilter.value),
         "apply-filter"
       ),
       withDirectoryControl(
@@ -51,18 +51,23 @@ export function useFavoritesFiltering({ listing }: UseFavoritesFilteringProps) {
   );
 
   // フィルター結果
-  const { filtered, filteredCount, totalCount, isFiltered } = useFilteredNodes({
-    targets: listing.nodes,
-    pipeline,
+  const {
+    filteredNodes: filtered,
+    filteredCount,
+    totalCount,
+    isFiltered,
+  } = useFilteredNodes({
+    nodes: listing.nodes,
+    filters: pipeline,
   });
 
   // 「メディアのみ」のフィルターパイプライン
   const mediaOnlyPipeline = useMemo(() => [createMediaOnlyFilter()], []);
 
   // 「メディアのみ」のリスト
-  const { filtered: mediaOnly } = useFilteredNodes({
-    targets: filtered,
-    pipeline: mediaOnlyPipeline,
+  const { filteredNodes: mediaOnly } = useFilteredNodes({
+    nodes: filtered,
+    filters: mediaOnlyPipeline,
   });
 
   // タグをフィルターに追加

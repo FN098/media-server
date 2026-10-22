@@ -10,7 +10,8 @@ type UpdateProps = {
 };
 
 export function useFavoritesFavorites() {
-  const { getFavorite, updateMultipleFavorites } = useFavoritesControlContext();
+  const { getFavorite, addManyFavorites: updateMultipleFavorites } =
+    useFavoritesControlContext();
   const [isPending, setIsPending] = useState(false);
 
   const update = useCallback(

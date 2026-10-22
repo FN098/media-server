@@ -3,7 +3,7 @@ import { TrashDialogs } from "@/feature/pages/trash/hooks/use-trash-dialogs";
 import { TrashFiltering } from "@/feature/pages/trash/hooks/use-trash-filtering";
 import { TrashNavigation } from "@/feature/pages/trash/hooks/use-trash-navigation";
 import { SearchFocus } from "@/feature/search/hooks/use-search-focus";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { useEffect, useMemo } from "react";
@@ -14,7 +14,7 @@ const ALL_SCOPES = ["trash", "tag-editor", "viewer", "dialog"] as const;
 interface UseTrashHotkeysProps {
   enabled: boolean;
   filtering: TrashFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   dialogs: TrashDialogs;
   tagEditor: TagEditor;
   navigation: TrashNavigation;

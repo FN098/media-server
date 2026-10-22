@@ -1,11 +1,11 @@
-import { MediaTypeFilterValue } from "@/lib/filter/types";
+import { FileTypeFilterValue } from "@/lib/filter/types";
 import { MediaFsNodeType } from "@/lib/node/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 // --- URL parse helpers ---
 
-function parseMediaTypeFilterValues(raw: string | null): MediaTypeFilterValue {
+function parseMediaTypeFilterValues(raw: string | null): FileTypeFilterValue {
   if (!raw) return { types: [] };
 
   const valid = ["directory", "image", "video", "audio", "file"];
@@ -21,7 +21,7 @@ function parseMediaTypeFilterValues(raw: string | null): MediaTypeFilterValue {
 
 // --- URL serialize helpers ---
 
-function serializeMediaTypeFilterValue(value: MediaTypeFilterValue) {
+function serializeMediaTypeFilterValue(value: FileTypeFilterValue) {
   return {
     mediaType: value.types.join(","),
   };
@@ -29,7 +29,7 @@ function serializeMediaTypeFilterValue(value: MediaTypeFilterValue) {
 
 function buildParams(
   params: URLSearchParams,
-  next: MediaTypeFilterValue,
+  next: FileTypeFilterValue,
   keys: { mediaTypeKey: string }
 ): void {
   const { mediaTypeKey } = keys;
@@ -55,7 +55,7 @@ export function useMediaTypeFilter({
   const searchParams = useSearchParams();
 
   // 現在選択されている値の配列
-  const value = useMemo<MediaTypeFilterValue>(() => {
+  const value = useMemo<FileTypeFilterValue>(() => {
     const raw = searchParams.get(mediaTypeKey);
     if (!raw) return { types: [] };
 
@@ -63,7 +63,7 @@ export function useMediaTypeFilter({
   }, [searchParams, mediaTypeKey]);
 
   const apply = useCallback(
-    (next: MediaTypeFilterValue) => {
+    (next: FileTypeFilterValue) => {
       const params = new URLSearchParams(searchParams.toString());
       buildParams(params, next, {
         mediaTypeKey,

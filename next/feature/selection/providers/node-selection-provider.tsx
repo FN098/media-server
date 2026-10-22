@@ -1,6 +1,6 @@
 "use client";
 
-import { useNodeSelection } from "@/feature/selection/hooks/use-path-selection";
+import { useNodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import React, { createContext, useContext } from "react";
 
 const NodeSelectionContext = createContext<

@@ -4,7 +4,7 @@ import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigati
 import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
 import { ExplorerDialogs } from "@/feature/pages/explorer/hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/feature/pages/explorer/hooks/use-explorer-filtering";
-import { MediaNodeSelection } from "@/feature/selection/hooks/use-media-node-selection";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { readFileAsTextAction } from "@/feature/text-file-reader/actions/read-as-text";
 import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
 import {
@@ -20,7 +20,7 @@ import { toast } from "sonner";
 interface UseExplorerNavigationProps {
   listing: MediaListing;
   filtering: ExplorerFiltering;
-  selection: MediaNodeSelection;
+  selection: NodeSelectionControl;
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;

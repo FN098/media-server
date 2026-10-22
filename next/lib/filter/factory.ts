@@ -1,21 +1,20 @@
 import {
   DirectoryPassMode,
   FavoriteFilterValue,
-  MediaTypeFilterValue,
+  FileTypeFilterValue,
   QueryFilterValue,
-  RatingFilterValue,
   TagFilterValue,
 } from "@/lib/filter/types";
 import { isMedia } from "@/lib/node/media-types";
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { isMatchJapanese } from "@/lib/utils/japanese";
 
-type MediaNodeFilter = (node: MediaNode) => boolean;
+type NodeFilter = (node: Node) => boolean;
 
 export function withDirectoryControl(
-  filter: MediaNodeFilter,
+  filter: NodeFilter,
   mode: DirectoryPassMode = "always"
-): MediaNodeFilter {
+): NodeFilter {
   return (node) => {
     if (node.isDirectory) {
       if (mode === "always") return true;
@@ -25,13 +24,15 @@ export function withDirectoryControl(
   };
 }
 
-export function createSearchFilter(value: QueryFilterValue): MediaNodeFilter {
+export function createSearchFilter(value: QueryFilterValue): NodeFilter {
   const trimmed = value.query?.trim();
   return (node) => !trimmed || isMatchJapanese(node.name, trimmed);
 }
 
-export function createTagFilter(value: TagFilterValue): MediaNodeFilter {
+export function createTagFilter(value: TagFilterValue): NodeFilter {
   return (node) => {
+    if (node.isDirectory) return false;
+
     const nodeTagNames = node.tags?.map((t) => t.name) || [];
 
     switch (value.mode) {
@@ -53,49 +54,15 @@ export function createTagFilter(value: TagFilterValue): MediaNodeFilter {
   };
 }
 
-export function createRatingFilter(value: RatingFilterValue): MediaNodeFilter {
-  return (node: MediaNode) => {
-    const rating = node.isDirectory ? node.averageRating : node.rating;
-
-    switch (value.mode) {
-      case "all":
-        return true;
-
-      case "unrated":
-        return rating == null;
-
-      case "rated": {
-        if (rating == null) return false;
-
-        const c = value.condition;
-
-        switch (c.operator) {
-          case "gte":
-            return rating >= c.value;
-          case "lte":
-            return rating <= c.value;
-          case "eq":
-            return rating === c.value;
-          case "between":
-            return rating >= c.min && rating <= c.max;
-        }
-      }
-    }
-  };
-}
-
-export function createMediaTypeFilter(
-  value: MediaTypeFilterValue
-): MediaNodeFilter {
+export function createFileTypeFilter(value: FileTypeFilterValue): NodeFilter {
   return (node) => {
     if (value.types.length === 0) return true;
+    if (node.isDirectory) return false;
     return value.types.includes(node.type);
   };
 }
 
-export function createFavoriteFilter(
-  value: FavoriteFilterValue
-): MediaNodeFilter {
+export function createFavoriteFilter(value: FavoriteFilterValue): NodeFilter {
   return (node) => {
     switch (value.mode) {
       case "only_favorites":
@@ -112,8 +79,9 @@ export function createFavoriteFilter(
   };
 }
 
-export function createMediaOnlyFilter(): MediaNodeFilter {
+export function createMediaOnlyFilter(): NodeFilter {
   return (node) => {
+    if (node.isDirectory) return false;
     return isMedia(node.type);
   };
 }
