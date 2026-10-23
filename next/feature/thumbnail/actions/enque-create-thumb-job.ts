@@ -16,17 +16,13 @@ const InputSchema = z.object({
 type ActionResult = { success: true } | { success: false; message: string };
 
 // サムネ生成ジョブ登録（ファイル単位）
-export async function enqueueCreateSingleThumbJobAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { filePath, force: forceCreate } = parsed.data;
-
+export async function enqueueCreateSingleThumbJobAction({
+  fileId,
+  forceCreate,
+}: {
+  fileId: string;
+  forceCreate?: boolean;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("thumbnail:create");
   if (!auth.success) {
@@ -34,7 +30,7 @@ export async function enqueueCreateSingleThumbJobAction(
   }
 
   try {
-    const lockKey = `thumb-lock:file:${sha1Hash(filePath)}`;
+    const lockKey = `thumb-lock:file:${sha1Hash(fileId)}`;
     const isLocked = await acquireLock(lockKey);
 
     if (!isLocked) {
@@ -45,7 +41,7 @@ export async function enqueueCreateSingleThumbJobAction(
       "create-thumb-single",
       {
         type: "file",
-        path: filePath,
+        id: fileId,
         createdAt: Date.now(),
         lockKey,
         forceCreate: forceCreate,

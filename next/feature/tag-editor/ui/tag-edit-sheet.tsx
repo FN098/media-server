@@ -209,7 +209,7 @@ export function TagEditSheet() {
                         </div>
                       </Tabs>
                       <SheetFooter
-                        onReset={tagEditor.resetChanges}
+                        onReset={tagEditor.discardChanges}
                         onApply={() => void handleApply()}
                         hasChanges={tagEditor.hasChanges}
                         isLoading={isLoading}
@@ -257,7 +257,7 @@ export function TagEditSheet() {
                         opacity={opacity}
                       />
                       <SheetFooter
-                        onReset={tagEditor.resetChanges}
+                        onReset={tagEditor.discardChanges}
                         onApply={() => void handleApply()}
                         hasChanges={tagEditor.hasChanges}
                         isLoading={isLoading}

@@ -1,27 +1,19 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
+import { getFilePath } from "@/lib/file/repository";
+import { getFolderPath } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
 import { getServerMediaTrashPath } from "@/lib/path/helpers";
-import { unique } from "@/lib/utils/array";
-import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import { rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import z from "zod";
-
-const InputSchema = z.object({
-  sourcePaths: EditableVirtualPathManySchema.min(
-    1,
-    "ファイルまたはフォルダを1件以上指定してください。"
-  ).transform((paths) => unique(paths)),
-});
 
 type ActionResult =
   | {
       success: true;
-      completed: { path: string }[];
-      failed: { path: string; message: string }[];
-      skipped: { path: string; message: string }[];
+      completed: { id: string }[];
+      failed: { id: string; message: string }[];
+      skipped: { id: string; message: string }[];
     }
   | {
       success: false;
@@ -31,17 +23,14 @@ type ActionResult =
 type Success = Extract<ActionResult, { success: true }>;
 
 // 完全に削除
-export async function deleteManyNodesPermanentlyAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { sourcePaths } = parsed.data;
-
+export async function deleteManyNodesPermanentlyAction({
+  nodes,
+}: {
+  nodes: {
+    id: string;
+    isDirectory: boolean;
+  }[];
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize(
     "file:delete-many-permanently",
@@ -55,7 +44,11 @@ export async function deleteManyNodesPermanentlyAction(
   const failed: Success["failed"] = [];
   const skipped: Success["skipped"] = [];
 
-  for (const srcVirtualPath of sourcePaths) {
+  for (const node of nodes) {
+    const srcVirtualPath = node.isDirectory
+      ? await getFolderPath(node.id)
+      : await getFilePath(node.id);
+
     // 仮想パス→物理パス
     const srcRealPath = getServerMediaTrashPath(srcVirtualPath);
 
@@ -65,14 +58,15 @@ export async function deleteManyNodesPermanentlyAction(
     } catch (error) {
       logger.error("action:delete-many-nodes-permamently", error);
       failed.push({
-        path: srcVirtualPath,
+        id: node.id,
         message: "ファイルまたはフォルダの削除に失敗しました。",
       });
       continue;
     }
 
-    // DB更新不要
-    completed.push({ path: srcVirtualPath });
+    // TODO: DB更新
+
+    completed.push({ id: node.id });
   }
 
   // キャッシュの更新

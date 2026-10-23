@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 type DeleteTarget = {
-  path: string;
+  id: string;
 };
 
 interface UseDeleteDialogProps {
@@ -38,12 +38,12 @@ export function useDeleteDialog({ onSuccess }: UseDeleteDialogProps = {}) {
   const performDelete = useCallback(async () => {
     if (targets.length === 0) return;
 
-    const paths = targets.map((n) => n.path);
+    const ids = targets.map((n) => n.id);
 
     setIsPending(true);
     const result = permanent
-      ? await deleteManyNodesPermanentlyAction({ sourcePaths: paths })
-      : await deleteManyNodesAction({ sourcePaths: paths });
+      ? await deleteManyNodesPermanentlyAction({ sourcePaths: ids })
+      : await deleteManyNodesAction({ sourcePaths: ids });
     setIsPending(false);
 
     if (result.success) {

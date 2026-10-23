@@ -38,7 +38,7 @@ export function useTagEditSheet({
     addPendingNewTag,
     hasChanges,
     editModeTags,
-    resetChanges,
+    discardChanges: resetChanges,
     invalidateTags,
     close,
     setTargetNodes,

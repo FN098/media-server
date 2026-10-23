@@ -70,3 +70,17 @@ export async function getFilePath(fileId: string) {
 
   return `${folderPath}/${file.name}`;
 }
+
+// ファイルタイムスタンプ更新
+export async function updateFileTimestamp({
+  id,
+  mtime = new Date(),
+}: {
+  id: string;
+  mtime?: Date;
+}) {
+  await db.file.update({
+    where: { id },
+    data: { mtime },
+  });
+}

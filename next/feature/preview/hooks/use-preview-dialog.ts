@@ -1,6 +1,6 @@
 import { listSubFoldersAction } from "@/feature/folder/actions/list-subfolders";
 import { listMediaAction } from "@/feature/node/actions/list";
-import { updatePreviewAction } from "@/feature/preview/actions/update";
+import { updatePreviewFileAction } from "@/feature/preview/actions/update";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { dirname } from "@/lib/virtual-path/path";
 import { useCallback, useState } from "react";
@@ -85,7 +85,7 @@ export function usePreviewDialog({ onSuccess }: UsePreviewDialogProps = {}) {
 
     setIsPending(true);
     try {
-      const result = await updatePreviewAction({
+      const result = await updatePreviewFileAction({
         targetPath: selectedTargetPath,
         previewResourcePath: previewPath,
       });

@@ -6,7 +6,7 @@ import { SearchFocus } from "@/feature/search/hooks/use-search-focus";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { MediaListing } from "@/lib/node/types";
+import { NodeListing } from "@/lib/node/types";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";
 
@@ -14,7 +14,7 @@ const ALL_SCOPES = ["explorer", "tag-editor", "viewer", "dialog"] as const;
 
 interface UseExplorerHotkeysProps {
   enabled: boolean;
-  listing: MediaListing;
+  listing: NodeListing;
   filtering: ExplorerFiltering;
   selection: NodeSelectionControl;
   dialogs: ExplorerDialogs;

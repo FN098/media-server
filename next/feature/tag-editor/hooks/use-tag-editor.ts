@@ -1,6 +1,6 @@
 import { useTagStates } from "@/feature/tag-editor/hooks/use-tag-states";
 import { useTags } from "@/feature/tag/hooks/use-tags";
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { TagEditMode } from "@/lib/tag-editor/types";
 import { SearchTagStrategy, SortTagStrategy } from "@/lib/tag/strategies";
 import { Tag, TagOperator } from "@/lib/tag/types";
@@ -13,7 +13,7 @@ type PendingChanges = Record<string, TagOperator>;
 
 export function useTagEditor() {
   const [isOpen, setIsOpen] = useState(false);
-  const [targetNodes, setTargetNodes] = useState<MediaNode[]>([]);
+  const [targetNodes, setTargetNodes] = useState<Node[]>([]);
   const [newTagName, setNewTagName] = useState("");
   const [pendingNewTags, setPendingNewTags] = useState<Tag[]>([]);
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
@@ -34,9 +34,9 @@ export function useTagEditor() {
     [pendingChanges, pendingNewTags.length]
   );
 
-  // targetNodesからパスを抽出（APIコールや状態計算に利用）
-  const targetPaths = useMemo(
-    () => targetNodes.map((n) => n.path),
+  // targetNodesからIDを抽出（APIコールや状態計算に利用）
+  const targetFileIds = useMemo(
+    () => targetNodes.map((n) => n.id),
     [targetNodes]
   );
 
@@ -61,7 +61,7 @@ export function useTagEditor() {
     invalidate: invalidateTags,
     isLoading: isLoadingBase,
   } = useTags({
-    paths: targetPaths,
+    fileIds: targetFileIds,
     strategy: searchStrategy,
     triggered: activated,
   });
@@ -197,7 +197,7 @@ export function useTagEditor() {
   }, []);
 
   // すべての変更をリセット
-  const resetChanges = useCallback(() => {
+  const discardChanges = useCallback(() => {
     setPendingChanges({});
     setPendingNewTags([]);
   }, []);
@@ -244,7 +244,7 @@ export function useTagEditor() {
     setTagChange,
     selectSuggestion,
     addPendingNewTag,
-    resetChanges,
+    discardChanges,
 
     // 検索・表示
     opacity,

@@ -1,14 +1,14 @@
-import { touchMediaTimestampAction } from "@/feature/node/actions/touch-timestamp";
-import { updatePreviewAction } from "@/feature/preview/actions/update";
+import { touchTimestampAction } from "@/feature/node/actions/touch-timestamp";
+import { updatePreviewFileAction } from "@/feature/preview/actions/update";
 import { enqueueCreateSingleThumbJobAction } from "@/feature/thumbnail/actions/enque-create-thumb-job";
 import { enqueueCreateThumbsJobAction } from "@/feature/thumbnail/actions/enque-create-thumbs-job";
-import { MediaListing, MediaNode } from "@/lib/node/types";
+import { Node, NodeListing } from "@/lib/node/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface UseExplorerThumbsProps {
-  listing: MediaListing;
+  listing: NodeListing;
   autoCreateThumbs?: boolean;
 }
 
@@ -22,16 +22,16 @@ export function useExplorerThumbs({
   // 排他制御
   const updatingRef = useRef(false);
 
-  const currentDir = listing.path;
+  const folderId = listing.folderId;
 
   // サムネイル自動作成
   useEffect(() => {
-    if (!currentDir || !autoCreateThumbs) return;
-    void enqueueCreateThumbsJobAction({ dirPath: currentDir });
-  }, [autoCreateThumbs, currentDir]);
+    if (!folderId || !autoCreateThumbs) return;
+    void enqueueCreateThumbsJobAction({ folderId });
+  }, [autoCreateThumbs, folderId]);
 
   const update = useCallback(
-    async (node: MediaNode) => {
+    async (node: Node) => {
       if (updatingRef.current) return;
       updatingRef.current = true;
 
@@ -48,7 +48,7 @@ export function useExplorerThumbs({
   );
 
   const updateParallel = useCallback(
-    async (nodes: MediaNode[]) => {
+    async (nodes: Node[]) => {
       if (updatingRef.current) return;
       updatingRef.current = true;
 
@@ -71,21 +71,22 @@ export function useExplorerThumbs({
   };
 }
 
-const updateThumb = async (node: MediaNode) => {
+const updateThumb = async (node: Node) => {
   // サムネイル再生成ジョブ投入
   const enqueResult = await enqueueCreateSingleThumbJobAction({
-    filePath: node.path,
-    force: true,
+    fileId: node.id,
+    forceCreate: true,
   });
   if (!enqueResult.success) {
     toast.error(enqueResult.message);
     return;
   }
 
-  // DB timestamp 更新
+  // タイムスタンプ更新
   if (!node.isDirectory) {
-    const touchResult = await touchMediaTimestampAction({
-      sourcePath: node.path,
+    const touchResult = await touchTimestampAction({
+      id: node.id,
+      isDirectory: node.isDirectory,
     });
     if (!touchResult.success) {
       toast.error(touchResult.message);
@@ -93,10 +94,11 @@ const updateThumb = async (node: MediaNode) => {
     }
   }
 
-  // preview リセット
-  const previewResult = await updatePreviewAction({
-    targetPath: node.path,
-    previewResourcePath: null,
+  // プレビュー画像リセット
+  const previewResult = await updatePreviewFileAction({
+    id: node.id,
+    isDirectory: node.isDirectory,
+    previewFileId: null,
   });
   if (!previewResult.success) {
     toast.error(previewResult.message);

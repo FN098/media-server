@@ -277,3 +277,17 @@ export async function updateFolderCache(
     },
   });
 }
+
+// フォルダタイムスタンプ更新
+export async function updateFolderTimestamp({
+  id,
+  mtime = new Date(),
+}: {
+  id: string;
+  mtime?: Date;
+}) {
+  await db.folder.update({
+    where: { id },
+    data: { mtime },
+  });
+}

@@ -1,42 +1,35 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
+import { updateFileTimestamp } from "@/lib/file/repository";
+import { updateFolderTimestamp } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
-import { updateMediaFileMtime } from "@/lib/node/repository";
-import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
-import z from "zod";
-
-const InputSchema = z.object({
-  sourcePath: EditableVirtualPathSchema,
-});
 
 type ActionResult = { success: true } | { success: false; message: string };
 
 // タイムスタンプ更新
-export async function touchMediaTimestampAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { sourcePath } = parsed.data;
-
+export async function touchTimestampAction({
+  id,
+  isDirectory,
+}: {
+  id: string;
+  isDirectory: boolean;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("file:touch-timestamp");
   if (!auth.success) {
     return auth;
   }
 
-  const srcVirtualPath = sourcePath;
-
   // FS 更新不要：タイムスタンプは utime や open->close では更新されないため
 
   // DB 更新
   try {
-    await updateMediaFileMtime({ path: srcVirtualPath });
+    if (isDirectory) {
+      await updateFolderTimestamp({ id });
+    } else {
+      await updateFileTimestamp({ id });
+    }
   } catch (e) {
     logger.error("action:touch-timestamp", e);
     return {

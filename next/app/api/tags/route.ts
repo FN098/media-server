@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
 async function process({
   ids,
-  paths,
+  fileIds: paths,
   limit,
   query,
   strategy,

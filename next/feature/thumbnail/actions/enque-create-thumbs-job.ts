@@ -5,28 +5,17 @@ import { logger } from "@/lib/logger";
 import { acquireLock } from "@/lib/redis/lock";
 import { thumbQueue } from "@/lib/thumb-job/queue";
 import { sha1Hash } from "@/lib/utils/sha1-hash";
-import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
-import z from "zod";
-
-const InputSchema = z.object({
-  dirPath: EditableVirtualPathSchema,
-  force: z.boolean().optional().default(false),
-});
 
 type ActionResult = { success: true } | { success: false; message: string };
 
 // サムネ生成ジョブ登録（ディレクトリ単位）
-export async function enqueueCreateThumbsJobAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { dirPath, force: forceCreate } = parsed.data;
-
+export async function enqueueCreateThumbsJobAction({
+  folderId,
+  forceCreate,
+}: {
+  folderId: string;
+  forceCreate?: boolean;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("thumbnail:create");
   if (!auth.success) {
@@ -34,7 +23,7 @@ export async function enqueueCreateThumbsJobAction(
   }
 
   try {
-    const lockKey = `thumb-lock:dir:${sha1Hash(dirPath)}`;
+    const lockKey = `thumb-lock:folder:${sha1Hash(folderId)}`;
     const locked = await acquireLock(lockKey);
 
     if (!locked) {
@@ -44,8 +33,8 @@ export async function enqueueCreateThumbsJobAction(
     await thumbQueue.add(
       "create-thumbs",
       {
-        type: "directory",
-        path: dirPath,
+        type: "folder",
+        id: folderId,
         createdAt: Date.now(),
         lockKey,
         forceCreate: forceCreate,

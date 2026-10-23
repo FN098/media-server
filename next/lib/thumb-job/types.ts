@@ -1,6 +1,6 @@
 export interface ThumbJobData {
-  type: "file" | "directory";
-  path: string;
+  type: "file" | "folder";
+  id: string;
   createdAt: number; // ジョブのタイムスタンプ
   lockKey: string;
   forceCreate?: boolean;
@@ -8,7 +8,7 @@ export interface ThumbJobData {
 
 export type ThumbJobCompletedEvent =
   | {
-      type: "directory";
+      type: "folder";
       path: string;
     }
   | {

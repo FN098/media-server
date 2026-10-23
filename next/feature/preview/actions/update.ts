@@ -1,35 +1,26 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
+import { getFilePath } from "@/lib/file/repository";
+import { getFolderPath } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { prisma } from "@/lib/prisma";
 import { getPathInfo } from "@/lib/utils/fs";
-import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import { revalidatePath } from "next/cache";
-import z from "zod";
 
-const InputSchema = z.object({
-  targetPath: EditableVirtualPathSchema,
-  previewResourcePath: EditableVirtualPathSchema.nullable(), // null ならプレビュー解除
-});
-
-type UpdatePreviewActionResult =
-  | { success: true }
-  | { success: false; message: string };
+type ActionResult = { success: true } | { success: false; message: string };
 
 // プレビュー更新
-export async function updatePreviewAction(
-  input: z.input<typeof InputSchema>
-): Promise<UpdatePreviewActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { targetPath, previewResourcePath } = parsed.data;
-
+export async function updatePreviewFileAction({
+  id,
+  isDirectory,
+  previewFileId,
+}: {
+  id: string;
+  isDirectory: boolean;
+  previewFileId: string | null;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("file:update-preview", "folder:update-preview");
   if (!auth.success) {
@@ -37,6 +28,10 @@ export async function updatePreviewAction(
   }
 
   try {
+    const targetPath = isDirectory
+      ? await getFolderPath(id)
+      : await getFilePath(id);
+
     // 仮想パス→物理パス
     const realTargetPath = getServerMediaPath(targetPath);
 
@@ -58,19 +53,15 @@ export async function updatePreviewAction(
 
     if (targetPathInfo.isDirectory) {
       // フォルダデータの更新
-      await prisma.folderMeta.upsert({
-        where: { path: targetPath },
-        update: { previewPath: previewResourcePath },
-        create: {
-          path: targetPath,
-          previewPath: previewResourcePath,
-        },
+      await prisma.folder.update({
+        where: { id },
+        data: { previewFileId },
       });
     } else {
       // ファイルデータの更新
-      await prisma.media.update({
-        where: { path: targetPath },
-        data: { previewPath: previewResourcePath },
+      await prisma.file.update({
+        where: { id },
+        data: { previewFileId },
       });
     }
 
