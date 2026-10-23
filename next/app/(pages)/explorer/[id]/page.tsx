@@ -6,14 +6,14 @@ import { NodeSelectionProvider } from "@/feature/selection/providers/node-select
 import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import {
+  createFolders,
   getDbFolders,
-  getFolderId,
+  getFolder,
   getFolderName,
   getFolderPath,
-  getParentFolderId,
   updateFolderCache,
 } from "@/lib/folder/repository";
-import { getFsListing, getFsNode } from "@/lib/node/fs-listing";
+import { getFsListing } from "@/lib/node/fs-listing";
 import { mergeDbNodes } from "@/lib/node/merge";
 import { SortDirection, SortKey, sortNodes } from "@/lib/node/sort";
 import { syncFsWithDb } from "@/lib/node/sync";
@@ -102,36 +102,37 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     },
   });
 
-  const parentFolderId = await getParentFolderId(folderId);
+  const currentFolder = await getFolder(folderId, user.id);
 
-  const nextFolderNode = fsListing.nextPath
-    ? await getFsNode(fsListing.nextPath)
+  if (!currentFolder) {
+    notFound();
+  }
+
+  const parentFolder = currentFolder.parentFolderId
+    ? await getFolder(currentFolder.parentFolderId, user.id)
     : null;
 
   const nextFolderId = fsListing.nextPath
-    ? await getFolderId(fsListing.nextPath, {
-        create: true,
-        mtime: nextFolderNode?.mtime,
-      })
+    ? await createFolders(fsListing.nextPath)
     : null;
 
-  const prevFolderNode = fsListing.prevPath
-    ? await getFsNode(fsListing.prevPath)
+  const nextFolder = nextFolderId
+    ? await getFolder(nextFolderId, user.id)
     : null;
 
   const prevFolderId = fsListing.prevPath
-    ? await getFolderId(fsListing.prevPath, {
-        create: true,
-        mtime: prevFolderNode?.mtime,
-      })
+    ? await createFolders(fsListing.prevPath)
+    : null;
+
+  const prevFolder = prevFolderId
+    ? await getFolder(prevFolderId, user.id)
     : null;
 
   const listing: NodeListing = {
-    folderId,
-    parentFolderId,
-    nextFolderId,
-    prevFolderId,
-    name: basename(fsListing.path) || "HOME",
+    currentFolder,
+    parentFolder,
+    nextFolder,
+    prevFolder,
     children: sorted,
   };
 

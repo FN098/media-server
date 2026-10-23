@@ -115,5 +115,7 @@ function TrashOverlays() {
 function TrashFolderNavigation() {
   const { listing } = useTrashContext();
 
-  return <FolderNavigation prevPath={listing.prev} nextPath={listing.next} />;
+  return (
+    <FolderNavigation prevFolder={listing.prev} nextFolder={listing.next} />
+  );
 }

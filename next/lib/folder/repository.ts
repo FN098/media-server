@@ -1,4 +1,86 @@
 import { db } from "@/lib/prisma";
+import { omit } from "@/lib/utils/object";
+import { cache } from "react";
+
+const ROOT_FOLDER_NAME = "";
+
+async function _getRootFolder() {
+  return await db.folder.findFirst({
+    where: { parentFolderId: null, name: ROOT_FOLDER_NAME },
+  });
+}
+
+export const getRootFolder = cache(_getRootFolder);
+
+export async function createRootFolder() {
+  return await db.folder.create({
+    data: { parentFolderId: null, name: ROOT_FOLDER_NAME, mtime: new Date() },
+  });
+}
+
+export async function getFolder(id: string, userId: string) {
+  const folder = await db.folder.findUnique({
+    where: { id },
+    include: {
+      userFolderFavorites: {
+        where: { userId },
+      },
+    },
+  });
+
+  if (!folder) return null;
+
+  return {
+    ...omit(folder, "userFolderFavorites"),
+    size: Number(folder.totalSize),
+    favoritedAt: folder.userFolderFavorites[0].updatedAt,
+    isDirectory: true as const,
+  };
+}
+
+export async function createFolders(path: string) {
+  const segments = path.split("/").filter(Boolean);
+
+  const root = await getRootFolder();
+
+  if (!root) {
+    throw new Error("Root not found");
+  }
+
+  let parentFolderId: string = root.id;
+  let folderId: string | null = null;
+
+  for (const name of segments) {
+    let folder = await db.folder.findFirst({
+      where: {
+        parentFolderId,
+        name,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!folder) {
+      folder = await db.folder.create({
+        data: {
+          parentFolderId,
+          name,
+          mtime: new Date(),
+        },
+        select: {
+          id: true,
+        },
+      });
+    }
+
+    folderId = folder.id;
+    parentFolderId = folder.id;
+  }
+
+  return folderId!!;
+}
 
 // フォルダID -> フォルダ名
 export async function getFolderName(id: string) {
@@ -18,30 +100,6 @@ export async function getParentFolderId(id: string) {
   });
 
   return folder?.parentFolderId ?? null;
-}
-
-const ROOT_FOLDER_NAME = "";
-
-// ルートフォルダ取得
-export async function getRootFolder() {
-  return await db.folder.findFirst({
-    where: { parentFolderId: null, name: ROOT_FOLDER_NAME },
-  });
-}
-
-export async function getRootFolderId() {
-  const root = await db.folder.findFirst({
-    select: { id: true },
-    where: { parentFolderId: null, name: ROOT_FOLDER_NAME },
-  });
-  return root?.id;
-}
-
-// ルートフォルダ作成
-export async function createRootFolder() {
-  return await db.folder.create({
-    data: { parentFolderId: null, name: ROOT_FOLDER_NAME, mtime: new Date() },
-  });
 }
 
 interface FolderPathRow {
@@ -94,74 +152,28 @@ export async function getFolderPath(folderId: string) {
   return "/" + pathSegments.join("/");
 }
 
-// フォルダパス -> フォルダID
-export async function getFolderId(
-  path: string,
-  options: { create?: boolean; mtime?: Date } = {}
-) {
-  const { create = false, mtime = new Date() } = options;
-  const segments = path.split("/").filter(Boolean);
-
-  const rootId = await getRootFolderId();
-
-  if (!rootId) {
-    throw new Error("Root not found");
-  }
-
-  let parentFolderId: string = rootId;
-  let folderId: string | null = null;
-
-  for (const name of segments) {
-    let folder = await db.folder.findFirst({
-      where: {
-        parentFolderId,
-        name,
-        deletedAt: null,
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    // フォルダがなければ作成
-    if (!folder) {
-      if (!create) {
-        throw new Error("Folder not found");
-      }
-
-      folder = await db.folder.create({
-        data: {
-          parentFolderId,
-          name,
-          mtime,
-        },
-        select: {
-          id: true,
-        },
-      });
-    }
-
-    folderId = folder.id;
-    parentFolderId = folder.id;
-  }
-
-  if (!folderId) {
-    throw new Error("Folder not found");
-  }
-
-  return folderId;
-}
-
 // 最近訪れたフォルダの一覧取得
 export async function getRecentVisitedFolders(userId: string, length: number) {
-  return await db.visitedFolder.findMany({
+  const folders = await db.visitedFolder.findMany({
     where: { userId },
     take: length,
     orderBy: [
       { isPinned: "desc" }, // 1. ピン留めされているものを上へ
       { visitedAt: "desc" }, // 2. その中で新しい順
     ],
+    include: {
+      folder: {
+        select: {
+          name: true,
+        },
+      },
+    },
   });
+
+  return folders.map((f) => ({
+    ...omit(f, "folder"),
+    name: f.folder.name,
+  }));
 }
 
 // 訪問済みフォルダのピン留めトグル

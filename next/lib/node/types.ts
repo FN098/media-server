@@ -38,10 +38,9 @@ export type FolderNode = {
 export type Node = FileNode | FolderNode;
 
 export type NodeListing = {
-  folderId: string;
-  parentFolderId: string | null;
-  prevFolderId: string | null;
-  nextFolderId: string | null;
-  name: string;
+  currentFolder: FolderNode;
+  parentFolder: FolderNode | null;
+  prevFolder: FolderNode | null;
+  nextFolder: FolderNode | null;
   children: Node[];
 };

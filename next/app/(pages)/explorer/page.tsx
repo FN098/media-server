@@ -1,13 +1,12 @@
-import { createRootFolder, getRootFolderId } from "@/lib/folder/repository";
+import { createRootFolder, getRootFolder } from "@/lib/folder/repository";
 import { redirect } from "next/navigation";
 
 export default async function ExplorerRootPage() {
-  let rootId = await getRootFolderId();
+  let root = await getRootFolder();
 
-  if (!rootId) {
-    const root = await createRootFolder();
-    rootId = root.id;
+  if (!root) {
+    root = await createRootFolder();
   }
 
-  redirect(`/explorer/${rootId}`);
+  redirect(`/explorer/${root.id}`);
 }

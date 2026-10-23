@@ -3,14 +3,7 @@
 import { authorize } from "@/lib/authorization/authorize";
 import { togglePinVisitedFolder } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
-import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import { revalidatePath } from "next/cache";
-import z from "zod";
-
-const InputSchema = z.object({
-  dirPath: EditableVirtualPathSchema,
-  currentPinned: z.boolean(),
-});
 
 type ActionResult =
   | {
@@ -22,17 +15,13 @@ type ActionResult =
     };
 
 // フォルダ訪問履歴ピン留めトグル
-export async function togglePinVisitedFolderAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { dirPath, currentPinned } = parsed.data;
-
+export async function togglePinVisitedFolderAction({
+  folderId,
+  currentPinned,
+}: {
+  folderId: string;
+  currentPinned: boolean;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("folder:pin-visited");
   if (!auth.success) {
@@ -41,7 +30,7 @@ export async function togglePinVisitedFolderAction(
   const { user } = auth;
 
   try {
-    await togglePinVisitedFolder(user.id, dirPath, currentPinned);
+    await togglePinVisitedFolder(user.id, folderId, currentPinned);
   } catch (error) {
     logger.error("action:toggle-pin-visited-folder", error);
     return {

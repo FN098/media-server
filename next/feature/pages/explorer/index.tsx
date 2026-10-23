@@ -23,8 +23,8 @@ export function Explorer() {
   return (
     <div className="flex flex-col focus:outline-none">
       {!viewer.isOpen && <ExplorerToolbar />}
-      <ExplorerContent />
-      <ExplorerOverlays />
+      {/* <ExplorerContent /> */}
+      {/* <ExplorerOverlays /> */}
       {!viewer.isOpen && <ExplorerFolderNavigation />}
     </div>
   );
@@ -133,5 +133,10 @@ function ExplorerOverlays() {
 function ExplorerFolderNavigation() {
   const { listing } = useExplorerContext();
 
-  return <FolderNavigation prevPath={listing.prev} nextPath={listing.next} />;
+  return (
+    <FolderNavigation
+      prevFolder={listing.prevFolder}
+      nextFolder={listing.nextFolder}
+    />
+  );
 }

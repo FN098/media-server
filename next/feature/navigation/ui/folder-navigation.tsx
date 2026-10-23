@@ -1,46 +1,40 @@
-import { resolveClientPath } from "@/lib/path/resolvers";
+import { FolderNode } from "@/lib/node/types";
 import { Button } from "@/shadcn/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { basename } from "path";
 
 interface FolderNavigationProps {
-  prevPath?: string | null;
-  nextPath?: string | null;
-  mode?: "explorer" | "trash";
+  prevFolder?: FolderNode | null;
+  nextFolder?: FolderNode | null;
+  baseUrl?: string;
 }
 
 export function FolderNavigation({
-  prevPath,
-  nextPath,
-  mode = "explorer",
+  prevFolder,
+  nextFolder,
+  baseUrl = "/explorer",
 }: FolderNavigationProps) {
-  const isDeleted = mode === "trash";
-
   const searchParams = useSearchParams();
-  const params = new URLSearchParams(searchParams);
 
-  // 不要なパラメータを削除
-  params.delete("page");
-  params.delete("q");
+  const buildUrl = (folderId: string) => {
+    const params = new URLSearchParams(searchParams);
 
-  const withParams = (path: string) =>
-    params.toString() ? `${path}?${params.toString()}` : path;
+    params.delete("page");
+    params.delete("q");
+
+    return params.toString()
+      ? `${baseUrl}/${folderId}?${params.toString()}`
+      : `${baseUrl}/${folderId}`;
+  };
 
   // 前のフォルダ
-  const prevHref = prevPath
-    ? withParams(resolveClientPath(prevPath, { isDeleted }))
-    : null;
-
-  const prevTitle = basename(prevPath ?? "");
+  const prevHref = prevFolder ? buildUrl(prevFolder.id) : null;
+  const prevTitle = prevFolder?.name ?? "no name";
 
   // 次のフォルダ
-  const nextHref = nextPath
-    ? withParams(resolveClientPath(nextPath, { isDeleted }))
-    : null;
-
-  const nextTitle = basename(nextPath ?? "");
+  const nextHref = nextFolder ? buildUrl(nextFolder.id) : null;
+  const nextTitle = nextFolder?.name ?? "no name";
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4">

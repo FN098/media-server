@@ -1,3 +1,4 @@
+/** @deprecated unused */
 export function splitDirPath(dirPath: string) {
   const parts = dirPath.split(/[/\\]/);
 
