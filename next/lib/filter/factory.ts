@@ -5,7 +5,7 @@ import {
   QueryFilterValue,
   TagFilterValue,
 } from "@/lib/filter/types";
-import { isMedia } from "@/lib/node/media-types";
+import { isMediaFile } from "@/lib/node/media-types";
 import { Node } from "@/lib/node/types";
 import { isMatchJapanese } from "@/lib/utils/japanese";
 
@@ -82,6 +82,6 @@ export function createFavoriteFilter(value: FavoriteFilterValue): NodeFilter {
 export function createMediaOnlyFilter(): NodeFilter {
   return (node) => {
     if (node.isDirectory) return false;
-    return isMedia(node.type);
+    return isMediaFile(node.type);
   };
 }

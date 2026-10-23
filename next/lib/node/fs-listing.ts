@@ -27,24 +27,24 @@ export type FsNode =
 export type FsListing = {
   path: string; // 今見ているディレクトリ
   nodes: FsNode[];
-  parent: string | null;
-  prev: string | null;
-  next: string | null;
+  parentPath: string | null;
+  prevPath: string | null;
+  nextPath: string | null;
 };
 
-export interface MediaFsContext {
+export interface FsContext {
   resolveRealPath: (virtualPath: string) => string;
   filterVirtualPath?: (virtualPath: string) => boolean;
 }
 
-const defaultContext: MediaFsContext = {
+const defaultFsContext: FsContext = {
   resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),
   filterVirtualPath: (virtualPath) => !isSystemHiddenVirtualPath(virtualPath),
 };
 
 export async function listFsNodes(
   virtualDirPath: string,
-  context: MediaFsContext = { ...defaultContext }
+  context: FsContext = { ...defaultFsContext }
 ): Promise<FsNode[]> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
   const dirents = await fs.readdir(realDirPath, { withFileTypes: true });
@@ -89,25 +89,25 @@ export async function listFsNodes(
 }
 
 export async function getFsNode(
-  virtualFilePath: string,
-  context: MediaFsContext = { ...defaultContext }
+  virtualPath: string,
+  context: FsContext = { ...defaultFsContext }
 ): Promise<FsNode> {
-  const virtualPath = virtualFilePath.replace(/\\/g, "/");
-  const realPath = context.resolveRealPath(virtualPath);
+  const vPath = virtualPath.replace(/\\/g, "/");
+  const realPath = context.resolveRealPath(vPath);
   const stat = await fs.stat(realPath);
   const isDirectory = stat.isDirectory();
-  const name = path.basename(virtualPath);
+  const name = path.basename(vPath);
 
   return isDirectory
     ? {
         name: name,
-        path: virtualPath,
+        path: vPath,
         isDirectory,
         mtime: stat.mtime,
       }
     : {
         name: name,
-        path: virtualPath,
+        path: vPath,
         isDirectory,
         type: detectMediaType(name),
         size: stat.size,
@@ -117,7 +117,7 @@ export async function getFsNode(
 
 export async function getFsListing(
   virtualDirPath: string,
-  context: MediaFsContext = { ...defaultContext }
+  context: FsContext = { ...defaultFsContext }
 ): Promise<FsListing | null> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
 
@@ -127,15 +127,15 @@ export async function getFsListing(
   const nodes = await listFsNodes(virtualDirPath, context);
 
   // --- 前後のディレクトリパスを取得 ---
-  let prev: string | null = null;
-  let next: string | null = null;
+  let prevPath: string | null = null;
+  let nextPath: string | null = null;
 
   if (virtualDirPath !== "") {
-    prev = await findGlobalAdjacentFolder(virtualDirPath, "prev", context);
-    next = await findGlobalAdjacentFolder(virtualDirPath, "next", context);
+    prevPath = await findGlobalAdjacentFolder(virtualDirPath, "prev", context);
+    nextPath = await findGlobalAdjacentFolder(virtualDirPath, "next", context);
   }
 
-  const parent =
+  const parentPath =
     virtualDirPath === ""
       ? null
       : virtualDirPath.split("/").slice(0, -1).join("/") || null;
@@ -143,9 +143,9 @@ export async function getFsListing(
   const listing: FsListing = {
     path: virtualDirPath,
     nodes,
-    parent,
-    prev,
-    next,
+    parentPath,
+    prevPath,
+    nextPath,
   };
 
   return listing;

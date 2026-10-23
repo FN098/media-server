@@ -1,21 +1,23 @@
 import { db } from "@/lib/prisma";
 
-// フォルダID -> フォルダ
-/** @deprecated unused */
-export async function getFolderById(id: string) {
-  return await db.folder.findUnique({
-    where: { id },
-  });
-}
-
 // フォルダID -> フォルダ名
-export async function getFolderNameById(id: string) {
+export async function getFolderName(id: string) {
   const folder = await db.folder.findUnique({
     select: { name: true },
     where: { id },
   });
 
   return folder?.name ?? null;
+}
+
+// フォルダID -> 親フォルダID
+export async function getParentFolderId(id: string) {
+  const folder = await db.folder.findUnique({
+    select: { parentFolderId: true },
+    where: { id },
+  });
+
+  return folder?.parentFolderId ?? null;
 }
 
 const ROOT_FOLDER_NAME = "";
@@ -25,6 +27,14 @@ export async function getRootFolder() {
   return await db.folder.findFirst({
     where: { parentFolderId: null, name: ROOT_FOLDER_NAME },
   });
+}
+
+export async function getRootFolderId() {
+  const root = await db.folder.findFirst({
+    select: { id: true },
+    where: { parentFolderId: null, name: ROOT_FOLDER_NAME },
+  });
+  return root?.id;
 }
 
 // ルートフォルダ作成
@@ -82,6 +92,64 @@ export async function getFolderPath(folderId: string) {
   // 例: ["documents", "work", "projects"] -> "/documents/work/projects"
   const pathSegments = rows.map((row) => row.name);
   return "/" + pathSegments.join("/");
+}
+
+// フォルダパス -> フォルダID
+export async function getFolderId(
+  path: string,
+  options: { create?: boolean; mtime?: Date } = {}
+) {
+  const { create = false, mtime = new Date() } = options;
+  const segments = path.split("/").filter(Boolean);
+
+  const rootId = await getRootFolderId();
+
+  if (!rootId) {
+    throw new Error("Root not found");
+  }
+
+  let parentFolderId: string = rootId;
+  let folderId: string | null = null;
+
+  for (const name of segments) {
+    let folder = await db.folder.findFirst({
+      where: {
+        parentFolderId,
+        name,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    // フォルダがなければ作成
+    if (!folder) {
+      if (!create) {
+        throw new Error("Folder not found");
+      }
+
+      folder = await db.folder.create({
+        data: {
+          parentFolderId,
+          name,
+          mtime,
+        },
+        select: {
+          id: true,
+        },
+      });
+    }
+
+    folderId = folder.id;
+    parentFolderId = folder.id;
+  }
+
+  if (!folderId) {
+    throw new Error("Folder not found");
+  }
+
+  return folderId;
 }
 
 // 最近訪れたフォルダの一覧取得

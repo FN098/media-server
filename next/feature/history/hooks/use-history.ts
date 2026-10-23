@@ -1,8 +1,8 @@
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { useState } from "react";
 
 type HistoryItem = {
-  path: string;
+  key: string;
   type: "file" | "directory";
 };
 
@@ -16,7 +16,7 @@ export function useHistory({ maxLength = 10 }: UseHistoryProps = {}) {
   const push = (item: HistoryItem) => {
     setItems((prev) => {
       const last = prev.at(-1);
-      if (last?.path === item.path && last.type === item.type) {
+      if (last?.key === item.key && last.type === item.type) {
         return prev; // 同じなら無視
       }
       return [...prev, item].slice(-maxLength);
@@ -40,7 +40,6 @@ export function useHistory({ maxLength = 10 }: UseHistoryProps = {}) {
 
   return {
     items,
-    set: setItems,
     push,
     replaceLast,
     pop,
@@ -50,7 +49,7 @@ export function useHistory({ maxLength = 10 }: UseHistoryProps = {}) {
 
 export type History = ReturnType<typeof useHistory>;
 
-export const toHistoryItem = (media: MediaNode): HistoryItem => ({
-  path: media.path,
-  type: media.isDirectory ? "directory" : "file",
+export const toHistoryItem = (node: Node): HistoryItem => ({
+  key: node.id,
+  type: node.isDirectory ? "directory" : "file",
 });

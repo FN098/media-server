@@ -1,20 +1,15 @@
 "use server";
 
 import { authorize } from "@/lib/authorization/authorize";
+import { getFilePath } from "@/lib/file/repository";
 import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { getPathInfo } from "@/lib/utils/fs";
-import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import fs from "fs/promises";
 import iconv from "iconv-lite";
 import jschardet from "jschardet";
-import z from "zod";
 
 const MAX_READ_SIZE = 100 * 1024; // 100KB
-
-const InputSchema = z.object({
-  path: EditableVirtualPathSchema,
-});
 
 type ActionResult =
   | {
@@ -30,22 +25,18 @@ type ActionResult =
     };
 
 // テキストデータ取得
-export async function readFileAsTextAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { path } = parsed.data;
-
+export async function readFileAsTextAction({
+  fileId,
+}: {
+  fileId: string;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("file:read-as-text");
   if (!auth.success) {
     return auth;
   }
+
+  const path = await getFilePath(fileId);
 
   const realPath = getServerMediaPath(path);
 

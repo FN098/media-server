@@ -6,19 +6,19 @@ import { ExplorerDialogs } from "@/feature/pages/explorer/hooks/use-explorer-dia
 import { ExplorerFiltering } from "@/feature/pages/explorer/hooks/use-explorer-filtering";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { readFileAsTextAction } from "@/feature/text-file-reader/actions/read-as-text";
-import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
+import { useNodeIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
 import {
   IndexLike,
   ViewerNavigation,
 } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { isArchiveFile } from "@/lib/archive/guards";
-import { isMedia } from "@/lib/node/media-types";
-import { MediaListing, MediaNode } from "@/lib/node/types";
+import { isArchiveFile } from "@/lib/archive/archive-types";
+import { isMediaFile } from "@/lib/node/media-types";
+import { Node, NodeListing } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
 interface UseExplorerNavigationProps {
-  listing: MediaListing;
+  listing: NodeListing;
   filtering: ExplorerFiltering;
   selection: NodeSelectionControl;
   viewer: ViewerNavigation;
@@ -36,12 +36,12 @@ export function useExplorerNavigation({
   folder,
   dialogs,
 }: UseExplorerNavigationProps) {
-  const { path: currentDir, next: nextDir, prev: prevDir } = listing;
+  const { folderId, prevFolderId, nextFolderId } = listing;
   const { mediaOnly } = filtering;
 
   // 初回マウント時に訪問履歴にプッシュ
   useEffect(() => {
-    history.push({ path: currentDir, type: "directory" });
+    history.push({ key: folderId, type: "directory" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -52,10 +52,10 @@ export function useExplorerNavigation({
 
   // フォルダ訪問履歴自動更新
   useEffect(() => {
-    if (currentDir) {
-      void visitFolderAction({ dirPath: currentDir });
+    if (folderId) {
+      void visitFolderAction({ folderId });
     }
-  }, [currentDir]);
+  }, [folderId]);
 
   // ビューアスライド移動時の処理
   const onIndexChange = useCallback(
@@ -75,33 +75,33 @@ export function useExplorerNavigation({
   );
 
   // インデックス計算
-  const { getMediaIndex } = useMediaIndex(mediaOnly);
+  const { getNodeIndex } = useNodeIndex(mediaOnly);
 
   // ファイル/フォルダオープン
   const open = useCallback(
-    async (node: MediaNode) => {
+    async (node: Node) => {
       // フォルダ
       if (node.isDirectory) {
-        folder.navigate({ path: node.path, resetPage: true });
+        folder.navigate({ folderId, resetPage: true });
         return;
       }
 
       // ファイル（動画・画像・オーディオ）
-      if (isMedia(node.type)) {
-        const index = getMediaIndex(node.path);
+      if (isMediaFile(node.type)) {
+        const index = getNodeIndex(node.id);
         if (index == null) return;
         viewer.open({ at: index });
         return;
       }
 
       // ファイル（アーカイブ）
-      if (isArchiveFile(node.path)) {
-        dialogs.extractDialog.open([node]);
+      if (isArchiveFile(node.type)) {
+        dialogs.extractDialog.open([{ fileId: node.id, name: node.name }]);
         return;
       }
 
       // ファイル（テキスト）
-      const text = await readFileAsTextAction({ path: node.path });
+      const text = await readFileAsTextAction({ fileId: node.id });
       if (!text.success) {
         toast.error(text.message);
         return;
@@ -118,21 +118,21 @@ export function useExplorerNavigation({
       dialogs.extractDialog,
       dialogs.textFilePreviewDialog,
       folder,
-      getMediaIndex,
+      getNodeIndex,
       viewer,
     ]
   );
 
   // 新しいタブで開く
   const openInNewTab = useCallback(
-    (node: MediaNode) => {
+    (node: Node) => {
       if (node.isDirectory) {
-        folder.navigate({ path: node.path, newTab: true });
+        folder.navigate({ folderId: node.id, newTab: true });
         return;
       }
 
-      if (isMedia(node.type)) {
-        const index = getMediaIndex(node.path);
+      if (isMediaFile(node.type)) {
+        const index = getNodeIndex(node.id);
         if (index == null) return;
         viewer.open({ at: index, newTab: true });
         return;
@@ -140,27 +140,27 @@ export function useExplorerNavigation({
 
       toast.warning("このファイル形式は対応していません");
     },
-    [folder, getMediaIndex, viewer]
+    [folder, getNodeIndex, viewer]
   );
 
   // 前のフォルダを開く
   const openPrevFolder = useCallback(
     (at: IndexLike = "last") => {
-      if (prevDir) {
-        folder.navigate({ path: prevDir, at });
+      if (prevFolderId) {
+        folder.navigate({ folderId: prevFolderId, at });
       }
     },
-    [folder, prevDir]
+    [folder, prevFolderId]
   );
 
   // 次のフォルダを開く
   const openNextFolder = useCallback(
     (at: IndexLike = "first") => {
-      if (nextDir) {
-        folder.navigate({ path: nextDir, at });
+      if (nextFolderId) {
+        folder.navigate({ folderId: nextFolderId, at });
       }
     },
-    [folder, nextDir]
+    [folder, nextFolderId]
   );
 
   // 一つ上のフォルダを開く

@@ -4,7 +4,7 @@ import {
 } from "@/feature/pages/trash/hooks/use-trash-filter-menu-items";
 import { useTrashContext } from "@/feature/pages/trash/providers/trash-provider";
 import { MediaType } from "@/generated/prisma/enums";
-import { isMedia } from "@/lib/node/media-types";
+import { isMediaFile } from "@/lib/node/media-types";
 import { useCallback, useMemo } from "react";
 
 export function useTrashFilterMenu() {
@@ -23,7 +23,9 @@ export function useTrashFilterMenu() {
 
   const mediaTypes = useMemo(
     () =>
-      mediaType.value.types.filter((type): type is MediaType => isMedia(type)),
+      mediaType.value.types.filter((type): type is MediaType =>
+        isMediaFile(type)
+      ),
     [mediaType.value.types]
   );
 

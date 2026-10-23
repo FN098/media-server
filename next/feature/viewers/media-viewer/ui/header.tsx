@@ -6,7 +6,7 @@ import { ClickToCopy } from "@/feature/text/ui/click-to-copy";
 import { MarqueeText } from "@/feature/text/ui/marquee-text";
 import { useMediaViewerContext } from "@/feature/viewers/media-viewer/providers/media-viewer-provider";
 import { MediaViewerHeaderPinButton } from "@/feature/viewers/media-viewer/ui/pin-button";
-import { isMedia } from "@/lib/node/media-types";
+import { isMediaFile } from "@/lib/node/media-types";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 
@@ -85,7 +85,7 @@ export function MediaViewerHeader() {
               onClick={pinned.toggle}
             />
 
-            {!!currentNode && isMedia(currentNode.type) && (
+            {!!currentNode && isMediaFile(currentNode.type) && (
               <FavoriteButton
                 size="large"
                 rating={rating}

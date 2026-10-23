@@ -1,4 +1,5 @@
-export type FileType = "text" | "binary" | "image" | "video" | "audio";
+export type FileType =
+  "text" | "binary" | "image" | "video" | "audio" | "archive";
 
 export type FileTag = {
   id: string;
@@ -37,10 +38,10 @@ export type FolderNode = {
 export type Node = FileNode | FolderNode;
 
 export type NodeListing = {
-  title: string;
-  url: string;
+  folderId: string;
+  parentFolderId: string | null;
+  prevFolderId: string | null;
+  nextFolderId: string | null;
+  name: string;
   children: Node[];
-  parentUrl: string | null;
-  prevUrl: string | null;
-  nextUrl: string | null;
 };

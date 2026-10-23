@@ -62,7 +62,7 @@ function FavoritesListingView() {
   return (
     <MediaNodePagingViewProvider
       allNodes={filtering.filteredNodes}
-      initialScrollPath={history.last?.path}
+      initialScrollPath={history.last?.key}
       onScrollRestored={navigation.onScrollRestored}
       onThumbError={(node) => void thumbs.update(node)}
       onOpen={(node) => void navigation.open(node)}

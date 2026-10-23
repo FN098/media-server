@@ -35,6 +35,7 @@ export function getServerMediaPath(virtualPath: string): string {
   return joinUrlPath(PATHS.server.media.root, virtualPath);
 }
 
+/** @deprecated */
 export function getServerMediaThumbPath(
   virtualPath: string,
   isDirectory?: boolean
@@ -61,9 +62,6 @@ export function getClientTrashPath(virtualPath: string): string {
   return joinUrlPath(PATHS.client.trash.root, virtualPath);
 }
 
-/**
- * サムネイルの絶対パスから、DB上の mediaPath を復元する
- */
 export function getMediaPathFromThumbPath(realThumbPath: string): string {
   // 1. ルートディレクトリ部分を削除
   let virtualPath = realThumbPath.replace(PATHS.server.media.thumb.root, "");

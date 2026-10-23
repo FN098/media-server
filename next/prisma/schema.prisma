@@ -150,6 +150,7 @@ enum FileType {
   video
   audio
   image
+  archive
 }
 
 model FileTag {

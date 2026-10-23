@@ -1,3 +1,4 @@
+import { getFolderPath } from "@/lib/folder/repository";
 import { db } from "@/lib/prisma";
 
 // フォルダ内のファイル情報取得
@@ -50,3 +51,22 @@ export async function getFiles(parentFolderId: string, userId: string) {
 }
 
 export type DbFiles = Awaited<ReturnType<typeof getFiles>>;
+
+// ファイルID -> ファイルパス
+export async function getFilePath(fileId: string) {
+  const file = await db.file.findUnique({
+    where: { id: fileId },
+    select: {
+      name: true,
+      folderId: true,
+    },
+  });
+
+  if (!file) {
+    throw new Error("File not found");
+  }
+
+  const folderPath = await getFolderPath(file.folderId);
+
+  return `${folderPath}/${file.name}`;
+}

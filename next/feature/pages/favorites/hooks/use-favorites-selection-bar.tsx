@@ -3,7 +3,7 @@ import { FavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorite
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
-import { hasMedia } from "@/lib/node/media-types";
+import { hasMediaFile } from "@/lib/node/media-types";
 import { averageBy } from "@/lib/utils/math";
 import { TagIcon } from "lucide-react";
 import { useMemo } from "react";
@@ -76,7 +76,7 @@ export function useFavoritesSelectionBar({
   const { selectedNodes } = selection;
 
   const isMediaSelected = useMemo(
-    () => hasMedia(selectedNodes),
+    () => hasMediaFile(selectedNodes),
     [selectedNodes]
   );
 

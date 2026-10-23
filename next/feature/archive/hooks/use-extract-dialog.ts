@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 type ExtractTarget = {
-  path: string;
+  fileId: string;
   name: string;
 };
 
@@ -29,11 +29,11 @@ export function useExtractDialog({ onSuccess }: UseExtractDialogProps = {}) {
   const performExtract = useCallback(async () => {
     if (targets.length === 0) return;
 
-    const paths = targets.map((t) => t.path);
+    const fileIds = targets.map((t) => t.fileId);
 
     setIsPending(true);
     try {
-      const result = await extractManyArchivesAction({ paths });
+      const result = await extractManyArchivesAction({ fileIds });
       if (result.success) {
         if (result.completed.length > 0) {
           toast.success(`${result.completed.length} 件の解凍が完了しました`);

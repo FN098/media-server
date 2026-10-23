@@ -5,7 +5,7 @@ import { ExplorerThumbs } from "@/feature/pages/explorer/hooks/use-explorer-thum
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
-import { hasMedia } from "@/lib/node/media-types";
+import { hasMediaFile } from "@/lib/node/media-types";
 import { MediaListing } from "@/lib/node/types";
 import { averageBy } from "@/lib/utils/math";
 import {
@@ -171,7 +171,7 @@ export function useExplorerSelectionBar({
   const { favoriteDialog, deleteDialog, copyDialog, moveDialog } = dialogs;
 
   const isMediaSelected = useMemo(
-    () => hasMedia(selectedNodes),
+    () => hasMediaFile(selectedNodes),
     [selectedNodes]
   );
 

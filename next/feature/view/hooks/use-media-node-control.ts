@@ -3,7 +3,7 @@ import { usePercent } from "@/feature/general/hooks/use-percent";
 import { useLongPress } from "@/feature/mobile/hooks/use-long-press";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { useNodeSelectionContext } from "@/feature/selection/providers/node-selection-provider";
-import { isMedia } from "@/lib/node/media-types";
+import { isMediaFile } from "@/lib/node/media-types";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo, useState } from "react";
 
@@ -24,7 +24,7 @@ export function useMediaNodeControl({
   onSelectionChange,
   onOpen,
 }: UseMediaNodeControlProps) {
-  const isMediaNode = useMemo(() => isMedia(node.type), [node.type]);
+  const isMediaNode = useMemo(() => isMediaFile(node.type), [node.type]);
   const isMobile = useDetectMobileContext();
 
   const {

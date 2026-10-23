@@ -1,22 +1,22 @@
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
-export function useMediaIndex(nodes: MediaNode[]) {
-  // path -> index
+export function useNodeIndex(nodes: Node[]) {
+  // id -> index
   const indexMap: Map<string, number> = useMemo(
-    () => new Map(nodes.map((n, index) => [n.path, index])),
+    () => new Map(nodes.map((n, index) => [n.id, index])),
     [nodes]
   );
 
-  const getMediaIndex = useCallback(
-    (path: string) => {
-      if (indexMap.has(path)) return indexMap.get(path)!;
+  const getNodeIndex = useCallback(
+    (id: string) => {
+      if (indexMap.has(id)) return indexMap.get(id)!;
       return null;
     },
     [indexMap]
   );
 
   return {
-    getMediaIndex,
+    getNodeIndex,
   };
 }

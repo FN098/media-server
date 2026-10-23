@@ -4,12 +4,12 @@ import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigati
 import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
 import { TrashFiltering } from "@/feature/pages/trash/hooks/use-trash-filtering";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { useMediaIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
+import { useNodeIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
 import {
   IndexLike,
   ViewerNavigation,
 } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { isMedia } from "@/lib/node/media-types";
+import { isMediaFile } from "@/lib/node/media-types";
 import { MediaListing, MediaNode } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
@@ -36,7 +36,7 @@ export function useTrashNavigation({
 
   // 初回マウント時に訪問履歴にプッシュ
   useEffect(() => {
-    history.push({ path: currentDir, type: "directory" });
+    history.push({ key: currentDir, type: "directory" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -70,17 +70,21 @@ export function useTrashNavigation({
   );
 
   // インデックス計算
-  const { getMediaIndex } = useMediaIndex(mediaOnly);
+  const { getNodeIndex: getMediaIndex } = useNodeIndex(mediaOnly);
 
   // ファイル/フォルダオープン
   const open = useCallback(
     (node: MediaNode) => {
       if (node.isDirectory) {
-        folder.navigate({ path: node.path, resetPage: true, deleted: true });
+        folder.navigate({
+          folderId: node.path,
+          resetPage: true,
+          deleted: true,
+        });
         return;
       }
 
-      if (isMedia(node.type)) {
+      if (isMediaFile(node.type)) {
         const index = getMediaIndex(node.path);
         if (index == null) return;
         viewer.open({ at: index });
@@ -96,11 +100,11 @@ export function useTrashNavigation({
   const openInNewTab = useCallback(
     (node: MediaNode) => {
       if (node.isDirectory) {
-        folder.navigate({ path: node.path, newTab: true, deleted: true });
+        folder.navigate({ folderId: node.path, newTab: true, deleted: true });
         return;
       }
 
-      if (isMedia(node.type)) {
+      if (isMediaFile(node.type)) {
         const index = getMediaIndex(node.path);
         if (index == null) return;
         viewer.open({ at: index, newTab: true });
@@ -116,7 +120,7 @@ export function useTrashNavigation({
   const openPrevFolder = useCallback(
     (at: IndexLike = "last") => {
       if (prevDir) {
-        folder.navigate({ path: prevDir, at, deleted: true });
+        folder.navigate({ folderId: prevDir, at, deleted: true });
       }
     },
     [folder, prevDir]
@@ -126,7 +130,7 @@ export function useTrashNavigation({
   const openNextFolder = useCallback(
     (at: IndexLike = "first") => {
       if (nextDir) {
-        folder.navigate({ path: nextDir, at, deleted: true });
+        folder.navigate({ folderId: nextDir, at, deleted: true });
       }
     },
     [folder, nextDir]

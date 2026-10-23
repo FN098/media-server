@@ -3,7 +3,7 @@ import {
   useExplorerFilterMenuItems,
 } from "@/feature/pages/explorer/hooks/use-explorer-filter-menu-items";
 import { useExplorerContext } from "@/feature/pages/explorer/providers/explorer-provider";
-import { isMedia } from "@/lib/node/media-types";
+import { isMediaFile } from "@/lib/node/media-types";
 import { MediaType } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
@@ -23,7 +23,9 @@ export function useExplorerFilterMenu() {
 
   const mediaTypes = useMemo(
     () =>
-      mediaType.value.types.filter((type): type is MediaType => isMedia(type)),
+      mediaType.value.types.filter((type): type is MediaType =>
+        isMediaFile(type)
+      ),
     [mediaType.value.types]
   );
 

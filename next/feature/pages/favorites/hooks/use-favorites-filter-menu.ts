@@ -3,7 +3,7 @@ import {
   useFavoritesFilterMenuItems,
 } from "@/feature/pages/favorites/hooks/use-favorites-filter-menu-items";
 import { useFavoritesContext } from "@/feature/pages/favorites/providers/favorites-provider";
-import { isMedia } from "@/lib/node/media-types";
+import { isMediaFile } from "@/lib/node/media-types";
 import { MediaType } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
@@ -18,7 +18,9 @@ export function useFavoritesFilterMenu() {
 
   const mediaTypes = useMemo(
     () =>
-      mediaType.value.types.filter((type): type is MediaType => isMedia(type)),
+      mediaType.value.types.filter((type): type is MediaType =>
+        isMediaFile(type)
+      ),
     [mediaType.value.types]
   );
 

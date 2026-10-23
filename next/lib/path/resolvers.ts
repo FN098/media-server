@@ -5,6 +5,7 @@ type Options = {
   isDeleted?: boolean;
 };
 
+/** @deprecated */
 export function resolveClientPath(virtualPath: string, options?: Options) {
   const encoded = encodePath(virtualPath);
 

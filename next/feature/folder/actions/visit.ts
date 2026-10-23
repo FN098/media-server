@@ -3,13 +3,7 @@
 import { authorize } from "@/lib/authorization/authorize";
 import { updateVisitedFolder } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
-import { EditableVirtualPathSchema } from "@/lib/virtual-path/schemas";
 import { revalidatePath } from "next/cache";
-import z from "zod";
-
-const InputSchema = z.object({
-  dirPath: EditableVirtualPathSchema,
-});
 
 type ActionResult =
   | {
@@ -21,17 +15,11 @@ type ActionResult =
     };
 
 // フォルダ訪問履歴更新
-export async function visitFolderAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { dirPath } = parsed.data;
-
+export async function visitFolderAction({
+  folderId,
+}: {
+  folderId: string;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("folder:update-visited");
   if (!auth.success) {
@@ -41,7 +29,7 @@ export async function visitFolderAction(
   const { user } = auth;
 
   try {
-    await updateVisitedFolder(dirPath, user.id);
+    await updateVisitedFolder(folderId, user.id);
   } catch (error) {
     logger.error("action:update-folder-history", error);
     return {

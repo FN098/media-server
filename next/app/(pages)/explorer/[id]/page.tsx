@@ -6,15 +6,17 @@ import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import {
   getDbFolders,
-  getFolderNameById,
+  getFolderId,
+  getFolderName,
   getFolderPath,
+  getParentFolderId,
   updateFolderCache,
 } from "@/lib/folder/repository";
-import { getFsListing } from "@/lib/node/fs-listing";
+import { getFsListing, getFsNode } from "@/lib/node/fs-listing";
 import { mergeDbNodes } from "@/lib/node/merge";
 import { SortDirection, SortKey, sortNodes } from "@/lib/node/sort";
 import { syncFsWithDb } from "@/lib/node/sync";
-import { Node } from "@/lib/node/types";
+import { Node, NodeListing } from "@/lib/node/types";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { basename, extname } from "path";
@@ -36,7 +38,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { id } = await props.params;
 
-  const name = id ? await getFolderNameById(id) : "HOME";
+  const name = id ? await getFolderName(id) : "HOME";
 
   return {
     title: `${name} | ${APP_CONFIG.meta.title}`,
@@ -80,7 +82,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   ]);
 
   // フォルダキャッシュ更新
-  void updateFolderCache(folderId, dbFiles, dbFolders);
+  await updateFolderCache(folderId, dbFiles, dbFolders);
 
   // マージ
   const merged = mergeDbNodes(dbFiles, dbFolders);
@@ -99,12 +101,40 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     },
   });
 
-  const listing = {
-    ...fsListing,
-    nodes: sorted,
+  const parentFolderId = await getParentFolderId(folderId);
+
+  const nextFolderNode = fsListing.nextPath
+    ? await getFsNode(fsListing.nextPath)
+    : null;
+
+  const nextFolderId = fsListing.nextPath
+    ? await getFolderId(fsListing.nextPath, {
+        create: true,
+        mtime: nextFolderNode?.mtime,
+      })
+    : null;
+
+  const prevFolderNode = fsListing.prevPath
+    ? await getFsNode(fsListing.prevPath)
+    : null;
+
+  const prevFolderId = fsListing.prevPath
+    ? await getFolderId(fsListing.prevPath, {
+        create: true,
+        mtime: prevFolderNode?.mtime,
+      })
+    : null;
+
+  const listing: NodeListing = {
+    folderId,
+    parentFolderId,
+    nextFolderId,
+    prevFolderId,
+    name: basename(fsListing.path) || "HOME",
+    children: sorted,
   };
 
-  const favorites = listing.nodes
+  const favorites = listing.children
     .filter((n) => n.favoritedAt)
     .map((n) => ({
       id: n.id,

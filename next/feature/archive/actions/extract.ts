@@ -1,31 +1,15 @@
 "use server";
 
-import { isArchiveFile } from "@/lib/archive/guards";
 import { authorize } from "@/lib/authorization/authorize";
 import { extractArchive } from "@/lib/child_process/7z";
+import { getFilePath } from "@/lib/file/repository";
 import { logger } from "@/lib/logger";
 import { getServerMediaPath } from "@/lib/path/helpers";
 import { existsPath, getPathInfo } from "@/lib/utils/fs";
 import { sanitize } from "@/lib/virtual-path/guard";
 import { basename, dirname, extname, join } from "@/lib/virtual-path/path";
-import { EditableVirtualPathManySchema } from "@/lib/virtual-path/schemas";
 import { mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import z from "zod";
-
-const InputSchema = z.object({
-  paths: EditableVirtualPathManySchema.superRefine((paths, ctx) => {
-    paths.forEach((path, index) => {
-      if (!isArchiveFile(path)) {
-        ctx.addIssue({
-          code: "custom",
-          path: [index],
-          message: "有効なアーカイブファイルではありません。",
-        });
-      }
-    });
-  }),
-});
 
 type ActionResult =
   | {
@@ -41,17 +25,11 @@ type ActionResult =
 
 type Success = Extract<ActionResult, { success: true }>;
 
-export async function extractManyArchivesAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { paths } = parsed.data;
-
+export async function extractManyArchivesAction({
+  fileIds,
+}: {
+  fileIds: string[];
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("archive:extract-many");
   if (!auth.success) {
@@ -63,7 +41,9 @@ export async function extractManyArchivesAction(
   const skipped: Success["skipped"] = [];
 
   // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を使う)
-  for (const sourcePath of paths) {
+  for (const id of fileIds) {
+    const sourcePath = await getFilePath(id);
+
     // 仮想パス→物理パス
     const srcVirtualPath = sourcePath;
     const srcRealPath = getServerMediaPath(srcVirtualPath);

@@ -1,4 +1,4 @@
-import { detectMediaType, isMedia } from "@/lib/node/media-types";
+import { detectMediaType, isMediaFile } from "@/lib/node/media-types";
 import { sortNodes } from "@/lib/node/sort";
 import { isRootPath } from "@/lib/virtual-path/guard";
 import { basename, join, parentpath } from "@/lib/virtual-path/path";
@@ -44,7 +44,10 @@ async function readVirtualDir(
   const entries: FsNode[] = dirents.map((e) => {
     const virtualPath = join(virtualDirPath, e.name);
     const isDirectory = e.isDirectory();
-    const _isMedia = isDirectory ? false : isMedia(detectMediaType(e.name));
+    const _isMedia = isDirectory
+      ? false
+      : isMediaFile(detectMediaType(e.name) ?? "");
+
     return {
       virtualPath,
       name: e.name,

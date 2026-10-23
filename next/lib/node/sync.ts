@@ -1,6 +1,6 @@
 import { File, Folder } from "@/generated/prisma/client";
 import { FileType, FsNode } from "@/lib/node/fs-listing";
-import { isMedia } from "@/lib/node/media-types";
+import { isMediaFile } from "@/lib/node/media-types";
 import { sortNodes } from "@/lib/node/sort";
 import { db } from "@/lib/prisma";
 
@@ -79,7 +79,7 @@ export async function syncFsWithDb(parentFolderId: string, nodes: FsNode[]) {
   // プレビュー候補（画像・動画）の抽出
   const mediaOnly = fileNodes.filter(
     (n): n is Extract<FsNode, { isDirectory: false }> & { type: FileType } =>
-      n.type !== null && isMedia(n.type)
+      n.type !== null && isMediaFile(n.type)
   );
   const firstMedia = mediaOnly.find(
     (f) => f.type === "image" || f.type === "video"
