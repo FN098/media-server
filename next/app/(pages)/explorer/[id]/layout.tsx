@@ -22,6 +22,12 @@ export default async function Layout(props: ExplorerLayoutProps) {
 
   const tree = await getFolderPathTree(id);
 
+  const breadcrumbs = tree.map((n, i) => ({
+    key: i === 0 ? "home" : n.id,
+    href: `/explorer/${n.id}`,
+    label: n.name || "HOME",
+  }));
+
   return (
     <SearchFocusProvider>
       <div className="relative w-full h-screen flex flex-col">
@@ -32,9 +38,8 @@ export default async function Layout(props: ExplorerLayoutProps) {
         <Header
           title={meta.title}
           icon={meta.icon}
-          baseUrl={meta.url}
           accent={meta.accent}
-          tree={tree}
+          breadcrumbs={breadcrumbs}
         />
         <main>{children}</main>
       </div>

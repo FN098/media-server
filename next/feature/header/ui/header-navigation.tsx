@@ -8,24 +8,16 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-type FolderSegment = {
-  id: string;
-  name: string;
-};
-
 export function HeaderNavigation({
-  baseUrl,
-  tree = [],
+  breadcrumbs = [],
 }: {
-  baseUrl?: string;
-  tree?: FolderSegment[];
+  breadcrumbs?: {
+    key: string;
+    href: string;
+    label: string;
+  }[];
 }) {
   const searchParams = useSearchParams();
-  const breadcrumbs = tree.map((n, i) => ({
-    key: i === 0 ? "home" : n.id,
-    href: `${baseUrl}/${n.id}`,
-    label: n.name || "HOME",
-  }));
   const isMobile = useDetectMobileContext();
   const current = breadcrumbs.at(-1);
   const backHref = breadcrumbs.at(-2)?.href ?? null;
