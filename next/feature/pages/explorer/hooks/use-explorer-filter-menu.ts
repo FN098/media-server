@@ -65,20 +65,16 @@ export function useExplorerFilterMenu() {
     return {
       favoriteFilterMode,
       mediaTypes,
-      hasRatingFilter,
       hasTagFilter,
       toggleFavoriteOnly,
       toggleNonFavoriteOnly,
       toggleMediaType,
-      openRatingFilter,
       openTagFilter,
     } satisfies ExplorerFilterMenuContext;
   }, [
     favoriteFilterMode,
     mediaTypes,
-    openRatingFilter,
     openTagFilter,
-    hasRatingFilter,
     hasTagFilter,
     toggleFavoriteOnly,
     toggleMediaType,

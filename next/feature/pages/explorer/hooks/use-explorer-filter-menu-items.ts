@@ -7,10 +7,6 @@ import {
   fileTypeFilterMenuItems,
 } from "@/lib/filter-menu-items/file-type-filter-menu-items";
 import {
-  RatingFilterMenuContext,
-  ratingFilterMenuItems,
-} from "@/lib/filter-menu-items/rating-filter-menu-items";
-import {
   TagFilterMenuContext,
   tagFilterMenuItems,
 } from "@/lib/filter-menu-items/tag-filter-menu-items";
@@ -23,13 +19,11 @@ export interface ExplorerFilterMenuContext
   extends
     FavoriteFilterMenuContext,
     FileTypeFilterMenuContext,
-    RatingFilterMenuContext,
     TagFilterMenuContext {}
 
 const items: FilterMenuItem<ExplorerFilterMenuContext>[] = [
   ...favoriteFilterMenuItems,
   ...fileTypeFilterMenuItems,
-  ...ratingFilterMenuItems,
   ...tagFilterMenuItems,
 ];
 

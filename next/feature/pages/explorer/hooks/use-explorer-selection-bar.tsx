@@ -4,7 +4,7 @@ import { ExplorerFavorites } from "@/feature/pages/explorer/hooks/use-explorer-f
 import { ExplorerThumbs } from "@/feature/pages/explorer/hooks/use-explorer-thumbs";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
-import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
+import { ManyNodesContext, MenuItemDef } from "@/lib/menu-items/types";
 import { hasMediaFile } from "@/lib/node/media-types";
 import { MediaListing } from "@/lib/node/types";
 import { averageBy } from "@/lib/utils/math";
@@ -46,7 +46,7 @@ function createExplorerSelectionBarMenu({
   copyDialog,
   moveDialog,
 }: ExplorerSelectionBarMenuContext) {
-  const inlineItems: MenuItemDef<MultipleNodesContext>[] = [
+  const inlineItems: MenuItemDef<ManyNodesContext>[] = [
     {
       key: "editTags",
       type: "action",
@@ -142,7 +142,7 @@ function createExplorerSelectionBarMenu({
       onClick: () => deleteDialog.open(selectedNodes),
       disabled: () => !hasSelection,
     },
-  ] satisfies MenuItemDef<MultipleNodesContext>[];
+  ] satisfies MenuItemDef<ManyNodesContext>[];
 
   return {
     items,

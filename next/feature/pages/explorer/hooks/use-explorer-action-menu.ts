@@ -2,7 +2,7 @@ import { useExplorerContext } from "@/feature/pages/explorer/providers/explorer-
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
 import { MenuItemDef } from "@/lib/menu-items/types";
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { CheckCheckIcon, FolderPlusIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useMemo } from "react";
 
@@ -54,8 +54,7 @@ export function useExplorerActionMenu() {
   } = useExplorerContext();
 
   const isNonFavoriteFile = useCallback(
-    (node: MediaNode) =>
-      !node.isDirectory && !getFavorite(node.path).isFavorite,
+    (node: Node) => !node.isDirectory && !getFavorite(node.path).isFavorite,
     [getFavorite]
   );
 

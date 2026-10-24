@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 type Item = {
   id: string;
+  isDirectory: boolean;
 };
 
 type Action = "add" | "remove";
@@ -18,10 +19,8 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   const [action, setAction] = useState<Action>("add");
   const [isPending, setIsPending] = useState(false);
 
-  const {
-    addManyFavorites: updateMultipleFavorites,
-    removeManyFavorites: deleteMultipleFavorites,
-  } = useFavoritesControlContext();
+  const { addManyFavorites, removeManyFavorites } =
+    useFavoritesControlContext();
 
   // 1. ダイアログを開く
   const open = useCallback((targets: Item[], currentMode: Action) => {
@@ -46,11 +45,10 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
     setIsPending(true);
     const result =
       action === "add"
-        ? await updateMultipleFavorites({
-            paths,
-            skipIfAlreadyFavorite: true,
+        ? await addManyFavorites({
+            entries: targets,
           })
-        : await deleteMultipleFavorites(paths);
+        : await removeManyFavorites({ entries: targets });
     setIsPending(false);
 
     if (result.success) {
@@ -67,8 +65,8 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   }, [
     targets,
     action,
-    updateMultipleFavorites,
-    deleteMultipleFavorites,
+    addManyFavorites,
+    removeManyFavorites,
     close,
     onSuccess,
   ]);

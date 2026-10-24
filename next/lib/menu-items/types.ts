@@ -1,6 +1,4 @@
-import { MediaNode } from "@/lib/node/types";
-
-export type MenuItemVariant = "default" | "destructive";
+import { Node } from "@/lib/node/types";
 
 export interface BaseMenuItem<TContext> {
   key: string;
@@ -14,7 +12,7 @@ export interface ActionMenuItem<TContext> extends BaseMenuItem<TContext> {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   onClick: (context: TContext) => void | Promise<void>;
-  variant?: MenuItemVariant;
+  variant?: "default" | "destructive";
   kbd?: string | string[];
 }
 
@@ -44,12 +42,12 @@ export type MenuItemDef<TContext> =
   | GroupMenuItem<TContext>;
 
 export type NodeContext = {
-  node: MediaNode;
+  node: Node;
   closeMenu?: () => void;
 };
 
-export type MultipleNodesContext = {
-  nodes: MediaNode[];
+export type ManyNodesContext = {
+  nodes: Node[];
   closeMenu?: () => void;
 };
 

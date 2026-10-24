@@ -6,7 +6,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 
 type RelatedNode = {
-  path: string;
+  id: string;
   tags?: Tag[] | null;
 };
 

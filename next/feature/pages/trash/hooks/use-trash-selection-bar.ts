@@ -1,7 +1,7 @@
 import { TrashDialogs } from "@/feature/pages/trash/hooks/use-trash-dialogs";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
-import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
+import { ManyNodesContext, MenuItemDef } from "@/lib/menu-items/types";
 import { RotateCcwIcon, TagIcon, Trash2Icon } from "lucide-react";
 import { useMemo } from "react";
 
@@ -20,7 +20,7 @@ function createTrashSelectionBarMenu({
   restoreDialog,
   deleteDialog,
 }: TrashSelectionBarMenuContext) {
-  const inlineItems: MenuItemDef<MultipleNodesContext>[] = [
+  const inlineItems: MenuItemDef<ManyNodesContext>[] = [
     {
       key: "editTags",
       type: "action",
@@ -48,7 +48,7 @@ function createTrashSelectionBarMenu({
       onClick: () => deleteDialog.open(selectedNodes, { isPermanent: true }),
       disabled: () => !hasSelection,
     },
-  ] satisfies MenuItemDef<MultipleNodesContext>[];
+  ] satisfies MenuItemDef<ManyNodesContext>[];
 
   return {
     items,

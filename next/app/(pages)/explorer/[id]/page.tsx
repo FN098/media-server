@@ -1,7 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
 import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
-import { Explorer } from "@/feature/pages/explorer";
-import { ExplorerProvider } from "@/feature/pages/explorer/providers/explorer-provider";
 import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
@@ -146,9 +144,8 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   return (
     <NodeSelectionProvider>
       <FavoritesControlProvider entries={favorites}>
-        <ExplorerProvider listing={listing}>
-          <Explorer />
-        </ExplorerProvider>
+        {/* <ExplorerProvider listing={listing}> */}
+        {/* <Explorer /> */}a{/* </ExplorerProvider> */}
       </FavoritesControlProvider>
     </NodeSelectionProvider>
   );

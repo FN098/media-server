@@ -2,7 +2,7 @@ import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provid
 import { AnimatedCheckCircle } from "@/feature/selection/ui/animated-check-circle";
 import { defaultFilters } from "@/lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
-import { MenuItemDef, MultipleNodesContext } from "@/lib/menu-items/types";
+import { ManyNodesContext, MenuItemDef } from "@/lib/menu-items/types";
 import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -22,8 +22,8 @@ import { MoreVertical, X } from "lucide-react";
 import { Fragment } from "react/jsx-runtime";
 
 const transformer = createRecursiveTransformer<
-  MenuItemDef<MultipleNodesContext>,
-  MultipleNodesContext
+  MenuItemDef<ManyNodesContext>,
+  ManyNodesContext
 >(defaultFilters);
 
 interface SelectionBarProps {
@@ -32,9 +32,9 @@ interface SelectionBarProps {
   totalCount: number;
   onSelectAll: () => void;
   onClose: () => void;
-  context: MultipleNodesContext;
-  inlineMenuItems?: MenuItemDef<MultipleNodesContext>[];
-  menuItems?: MenuItemDef<MultipleNodesContext>[];
+  context: ManyNodesContext;
+  inlineMenuItems?: MenuItemDef<ManyNodesContext>[];
+  menuItems?: MenuItemDef<ManyNodesContext>[];
   className?: string;
 }
 
@@ -151,8 +151,8 @@ export function SelectionBar({
 }
 
 interface SelectionBarInlineMenuItemProps {
-  item: MenuItemDef<MultipleNodesContext>;
-  context: MultipleNodesContext;
+  item: MenuItemDef<ManyNodesContext>;
+  context: ManyNodesContext;
 }
 
 function SelectionBarInlineMenuItem({
@@ -192,8 +192,8 @@ function SelectionBarInlineMenuItem({
 }
 
 interface SelectionBarMenuItemProps {
-  item: MenuItemDef<MultipleNodesContext>;
-  context: MultipleNodesContext;
+  item: MenuItemDef<ManyNodesContext>;
+  context: ManyNodesContext;
   isMobile: boolean;
 }
 

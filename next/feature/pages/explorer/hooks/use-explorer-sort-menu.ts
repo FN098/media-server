@@ -3,7 +3,6 @@ import {
   CalendarIcon,
   ClockIcon,
   FileStackIcon,
-  StarsIcon,
   WeightIcon,
 } from "lucide-react";
 
@@ -32,11 +31,6 @@ const sortMenuItems = [
     sort: "lastViewed",
     label: "訪問日",
     icon: ClockIcon,
-  },
-  {
-    sort: "rating",
-    label: "評価",
-    icon: StarsIcon,
   },
 ] as const;
 

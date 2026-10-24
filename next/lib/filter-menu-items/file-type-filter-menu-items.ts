@@ -1,5 +1,5 @@
-import { MediaType } from "@/generated/prisma/enums";
 import { FilterMenuItem } from "@/lib/menu-items/types";
+import { MediaType } from "@/lib/node/media-types";
 import { FileTypeIcon, ImageIcon, MusicIcon, VideoIcon } from "lucide-react";
 
 export interface FileTypeFilterMenuContext {

@@ -1,6 +1,3 @@
-"use client";
-
-import { useFavoriteDialog } from "@/feature/favorite/hooks/use-favorite-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,31 +11,34 @@ import {
 import { Loader2 } from "lucide-react";
 
 interface FavoriteManyDialogProps {
-  dialog: ReturnType<typeof useFavoriteDialog>;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  targets: { id: string }[];
+  action: "add" | "remove";
+  isPending: boolean;
+  onConfirm: () => void;
 }
 
-export function FavoriteManyDialog({ dialog }: FavoriteManyDialogProps) {
-  const {
-    isOpen,
-    targets,
-    action: mode,
-    isPending,
-    close,
-    performFavoriteAction,
-  } = dialog;
-
+export function FavoriteManyDialog({
+  isOpen,
+  onOpenChange,
+  targets,
+  action,
+  isPending,
+  onConfirm,
+}: FavoriteManyDialogProps) {
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>
+    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent
         onEscapeKeyDown={(e) => e.stopPropagation()}
         className="focus:outline-none"
       >
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {mode === "add" ? "お気に入りに追加" : "お気に入りの解除"}
+            {action === "add" ? "お気に入りに追加" : "お気に入りの解除"}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {mode === "add" ? (
+            {action === "add" ? (
               <>
                 選択された {targets.length}{" "}
                 件のアイテムをお気に入りに追加しますか？
@@ -61,17 +61,17 @@ export function FavoriteManyDialog({ dialog }: FavoriteManyDialogProps) {
             onClick={(e) => {
               // Shadcnのデフォルトで閉じる挙動をガード
               e.preventDefault();
-              void performFavoriteAction();
+              onConfirm();
             }}
             disabled={isPending}
           >
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {mode === "add" ? "追加中..." : "解除中..."}
+                {action === "add" ? "追加中..." : "解除中..."}
               </>
             ) : (
-              <>{mode === "add" ? "追加する" : "解除する"}</>
+              <>{action === "add" ? "追加する" : "解除する"}</>
             )}
           </AlertDialogAction>
         </AlertDialogFooter>
