@@ -1,4 +1,4 @@
-import { PageBackground } from "@/feature/background/ui/page-background";
+import { PageBackground } from "@/app/(pages)/_components/background/page-background";
 import { Header } from "@/feature/header/ui";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 

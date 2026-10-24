@@ -1,0 +1,180 @@
+import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
+import { ExplorerFavorites } from "@/app/(pages)/explorer/_hooks/use-explorer-favorites";
+import { ExplorerThumbs } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbs";
+import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
+import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
+import { ManyNodesContext, MenuItemDef } from "@/lib/menu-items/types";
+import { hasMediaFile } from "@/lib/node/media-types";
+import { MediaListing } from "@/lib/node/types";
+import {
+  CopyIcon,
+  FolderInputIcon,
+  RefreshCwIcon,
+  StarIcon,
+  StarOffIcon,
+  TagIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { useMemo } from "react";
+
+interface ExplorerSelectionBarMenuContext {
+  listing: MediaListing;
+  selectedNodes: NodeSelectionControl["selectedNodes"];
+  hasSelection: boolean;
+  isMediaSelected: boolean;
+  tagEditor: TagEditor;
+  favorites: ExplorerFavorites;
+  thumbs: ExplorerThumbs;
+  favoriteDialog: ExplorerDialogs["favoriteDialog"];
+  deleteDialog: ExplorerDialogs["deleteDialog"];
+  copyDialog: ExplorerDialogs["copyDialog"];
+  moveDialog: ExplorerDialogs["moveDialog"];
+}
+
+function createExplorerSelectionBarMenu({
+  listing,
+  selectedNodes,
+  hasSelection,
+  isMediaSelected,
+  tagEditor,
+  thumbs,
+  favoriteDialog,
+  deleteDialog,
+  copyDialog,
+  moveDialog,
+}: ExplorerSelectionBarMenuContext) {
+  const inlineItems: MenuItemDef<ManyNodesContext>[] = [
+    {
+      key: "editTags",
+      type: "action",
+      icon: TagIcon,
+      label: "タグ編集",
+      onClick: tagEditor.open,
+    },
+  ];
+
+  const items = [
+    {
+      key: "add-favorites",
+      type: "action",
+      icon: StarIcon,
+      label: "お気に入り登録",
+      onClick: () => favoriteDialog.open(selectedNodes, "add"),
+      disabled: () => !isMediaSelected,
+    },
+    {
+      key: "remove-favorites",
+      type: "action",
+      icon: StarOffIcon,
+      label: "お気に入り解除",
+      onClick: () => favoriteDialog.open(selectedNodes, "remove"),
+      disabled: () => !isMediaSelected,
+    },
+    {
+      key: "separator-fs-operation",
+      type: "separator",
+    },
+    {
+      key: "move",
+      type: "action",
+      icon: FolderInputIcon,
+      label: "移動",
+      onClick: () => moveDialog.open(selectedNodes, listing.path),
+      disabled: () => !hasSelection,
+    },
+    {
+      key: "copy",
+      type: "action",
+      icon: CopyIcon,
+      label: "コピー",
+      onClick: () => copyDialog.open(selectedNodes, listing.path),
+      disabled: () => !hasSelection,
+    },
+    {
+      key: "update-thumb",
+      type: "action",
+      icon: RefreshCwIcon,
+      label: "サムネイル更新",
+      onClick: () => void thumbs.updateParallel(selectedNodes),
+      disabled: () => !hasSelection,
+    },
+    {
+      key: "separator-delete",
+      type: "separator",
+    },
+    {
+      key: "delete",
+      type: "action",
+      variant: "destructive",
+      icon: Trash2Icon,
+      label: "削除",
+      onClick: () => deleteDialog.open(selectedNodes),
+      disabled: () => !hasSelection,
+    },
+  ] satisfies MenuItemDef<ManyNodesContext>[];
+
+  return {
+    items,
+    inlineItems,
+  };
+}
+
+interface UseExplorerSelectionBarProps {
+  listing: MediaListing;
+  selection: NodeSelectionControl;
+  dialogs: ExplorerDialogs;
+  tagEditor: TagEditor;
+  favorites: ExplorerFavorites;
+  thumbs: ExplorerThumbs;
+}
+
+export function useExplorerSelectionBar({
+  listing,
+  selection,
+  dialogs,
+  tagEditor,
+  favorites,
+  thumbs,
+}: UseExplorerSelectionBarProps) {
+  const { hasSelection, selectedNodes } = selection;
+  const { favoriteDialog, deleteDialog, copyDialog, moveDialog } = dialogs;
+
+  const isMediaSelected = useMemo(
+    () => hasMediaFile(selectedNodes),
+    [selectedNodes]
+  );
+
+  const menu = useMemo(
+    () =>
+      createExplorerSelectionBarMenu({
+        listing,
+        selectedNodes,
+        hasSelection,
+        isMediaSelected,
+        tagEditor,
+        favorites,
+        thumbs,
+        favoriteDialog,
+        deleteDialog,
+        copyDialog,
+        moveDialog,
+      }),
+    [
+      copyDialog,
+      deleteDialog,
+      favoriteDialog,
+      favorites,
+      hasSelection,
+      isMediaSelected,
+      listing,
+      moveDialog,
+      selectedNodes,
+      tagEditor,
+      thumbs,
+    ]
+  );
+
+  return {
+    menu,
+  };
+}

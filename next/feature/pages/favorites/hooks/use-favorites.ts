@@ -1,5 +1,5 @@
+import { useHistoryContext } from "@/app/(pages)/explorer/_providers/history-provider";
 import { useFullscreen } from "@/feature/general/hooks/use-fullscreen";
-import { useHistoryContext } from "@/feature/history/providers/history-provider";
 import { useFolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
 import { useFavoritesDialogs } from "@/feature/pages/favorites/hooks/use-favorites-dialogs";
 import { useFavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorites-favorites";

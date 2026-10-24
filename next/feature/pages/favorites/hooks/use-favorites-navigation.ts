@@ -1,4 +1,7 @@
-import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
+import {
+  History,
+  toHistoryItem,
+} from "@/app/(pages)/explorer/_hooks/use-history";
 import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
 import { FavoritesFiltering } from "@/feature/pages/favorites/hooks/use-favorites-filtering";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";

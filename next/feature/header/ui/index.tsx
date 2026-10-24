@@ -55,11 +55,11 @@ const accentIconMap: Record<AccentColor, string> = {
 export function Header({
   title,
   icon: Icon,
-  features,
+  features = {},
   accent,
   breadcrumbs,
 }: HeaderProps) {
-  const { navigation = true, search = true, viewMode = true } = features || {};
+  const { navigation = true, search = true, viewMode = true } = features;
 
   return (
     <header

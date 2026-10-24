@@ -1,5 +1,8 @@
+import {
+  History,
+  toHistoryItem,
+} from "@/app/(pages)/explorer/_hooks/use-history";
 import { visitFolderAction } from "@/feature/folder/actions/visit";
-import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
 import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
 import { TrashFiltering } from "@/feature/pages/trash/hooks/use-trash-filtering";

@@ -1,8 +1,9 @@
-import { PageMetaRaw } from "@/lib/page-meta/types";
+import { AccentColor, BackgroundType } from "@/lib/page-meta/types";
 import { PATHS } from "@/lib/path/paths";
 import {
   FolderSearchIcon,
   LayoutDashboardIcon,
+  LucideIcon,
   PackageOpenIcon,
   SettingsIcon,
   StarIcon,
@@ -10,6 +11,20 @@ import {
   UserIcon,
   WrenchIcon,
 } from "lucide-react";
+
+export type PageMetaRaw = {
+  key: string;
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  accent: AccentColor;
+  hidden?: boolean;
+  developmentOnly?: boolean;
+  backgroundType?: {
+    light: BackgroundType;
+    dark: BackgroundType;
+  };
+};
 
 export const pageMetas = [
   {
@@ -113,6 +128,6 @@ export const pageMetas = [
       dark: "default",
     },
   },
-] as const satisfies readonly PageMetaRaw[];
+] as const satisfies PageMetaRaw[];
 
 export type PageMetaKey = (typeof pageMetas)[number]["key"];

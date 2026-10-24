@@ -1,6 +1,6 @@
 "use client";
 
-import { SignOutButton } from "@/feature/auth/ui/sign-out-button";
+import { SignOutButton } from "@/app/(pages)/(auth)/sign-out/_components/sign-out-button";
 import { ThemeSelect } from "@/feature/theme/ui/theme-select";
 import { resolvePageMetas } from "@/lib/page-meta/resolvers";
 import { Button } from "@/shadcn/components/ui/button";
