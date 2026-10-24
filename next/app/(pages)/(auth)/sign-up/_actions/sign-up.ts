@@ -1,7 +1,10 @@
 "use server";
 
+import {
+  SignUpFormSchema,
+  SignUpFormValues,
+} from "@/app/(pages)/(auth)/sign-up/_lib/schemas";
 import { SignUpResult } from "@/app/(pages)/(auth)/sign-up/_lib/types";
-import { SignUpFormSchema, SignUpFormValues } from "@/feature/auth/lib/schemas";
 import { auth } from "@/lib/auth/better-auth";
 import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";

@@ -2,8 +2,11 @@
 "use client";
 
 import { signUpAction } from "@/app/(pages)/(auth)/sign-up/_actions/sign-up";
+import {
+  SignUpFormSchema,
+  SignUpFormValues,
+} from "@/app/(pages)/(auth)/sign-up/_lib/schemas";
 import { SignUpResult } from "@/app/(pages)/(auth)/sign-up/_lib/types";
-import { SignUpFormSchema, SignUpFormValues } from "@/feature/auth/lib/schemas";
 import { entries } from "@/lib/utils/object";
 import { Button } from "@/shadcn/components/ui/button";
 import { Field, FieldLabel } from "@/shadcn/components/ui/field";

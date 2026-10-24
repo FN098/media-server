@@ -1,7 +1,10 @@
 "use server";
 
+import {
+  SignInFormSchema,
+  SignInFormValues,
+} from "@/app/(pages)/(auth)/sign-in/_lib/schemas";
 import { SignInResult } from "@/app/(pages)/(auth)/sign-in/_lib/types";
-import { SignInFormSchema, SignInFormValues } from "@/feature/auth/lib/schemas";
 import { auth } from "@/lib/auth/better-auth";
 import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";

@@ -2,8 +2,11 @@
 "use client";
 
 import { signInAction } from "@/app/(pages)/(auth)/sign-in/_actions/sign-in";
+import {
+  SignInFormSchema,
+  SignInFormValues,
+} from "@/app/(pages)/(auth)/sign-in/_lib/schemas";
 import { SignInResult } from "@/app/(pages)/(auth)/sign-in/_lib/types";
-import { SignInFormSchema, SignInFormValues } from "@/feature/auth/lib/schemas";
 import { entries } from "@/lib/utils/object";
 import { Button } from "@/shadcn/components/ui/button";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
