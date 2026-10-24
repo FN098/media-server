@@ -1,8 +1,8 @@
 "use client";
 
 import { SignOutButton } from "@/app/(pages)/(auth)/sign-out/_components/sign-out-button";
+import { getPageMeta } from "@/app/(pages)/_lib/page-meta";
 import { ThemeSelect } from "@/feature/theme/ui/theme-select";
-import { resolvePageMetas } from "@/lib/page-meta/resolvers";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Sidebar,
@@ -22,15 +22,17 @@ import { LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback } from "react";
 
-const menuItems = resolvePageMetas([
+const menus = [
   "dashboard",
   "explorer",
   "favorites",
   "trash",
-  "settings",
-  "sandbox",
   "maintenance",
-]);
+] as const;
+
+const menuItems = menus
+  .map((key) => getPageMeta(key))
+  .filter((m) => m !== null);
 
 export function AppMenuSidebar() {
   const { setOpen, setOpenMobile } = useSidebar();

@@ -1,17 +1,14 @@
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
-import { resolvePageMeta } from "@/lib/page-meta/resolvers";
+import { getPageMeta } from "@/app/(pages)/_lib/page-meta";
 
-const meta = resolvePageMeta("sign-up");
+const meta = getPageMeta("sign-up");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   if (!meta) return;
 
   return (
     <div className="relative w-full h-screen flex flex-col">
-      <PageBackground
-        accent={meta.accent}
-        backgroundType={meta.backgroundType}
-      />
+      <PageBackground accent={meta.accent} />
       <main className="h-full">{children}</main>
     </div>
   );

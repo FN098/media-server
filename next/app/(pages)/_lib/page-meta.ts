@@ -1,10 +1,9 @@
-import { AccentColor, BackgroundType } from "@/lib/page-meta/types";
+import { AccentColor } from "@/app/(pages)/_lib/accent-color";
 import { PATHS } from "@/lib/path/paths";
 import {
   FolderSearchIcon,
   LayoutDashboardIcon,
   LucideIcon,
-  PackageOpenIcon,
   SettingsIcon,
   StarIcon,
   Trash2Icon,
@@ -12,18 +11,12 @@ import {
   WrenchIcon,
 } from "lucide-react";
 
-export type PageMetaRaw = {
+export type PageMeta = {
   key: string;
   title: string;
   url: string;
   icon: LucideIcon;
   accent: AccentColor;
-  hidden?: boolean;
-  developmentOnly?: boolean;
-  backgroundType?: {
-    light: BackgroundType;
-    dark: BackgroundType;
-  };
 };
 
 export const pageMetas = [
@@ -33,10 +26,6 @@ export const pageMetas = [
     url: PATHS.client.dashboard.root,
     icon: LayoutDashboardIcon,
     accent: "indigo",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
   },
   {
     key: "explorer",
@@ -44,10 +33,6 @@ export const pageMetas = [
     url: PATHS.client.explorer.root,
     icon: FolderSearchIcon,
     accent: "sky",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
   },
   {
     key: "favorites",
@@ -55,10 +40,6 @@ export const pageMetas = [
     url: PATHS.client.favorites.root,
     icon: StarIcon,
     accent: "amber",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
   },
   {
     key: "trash",
@@ -66,34 +47,13 @@ export const pageMetas = [
     url: PATHS.client.trash.root,
     icon: Trash2Icon,
     accent: "red",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
   },
   {
     key: "settings",
     title: "Settings",
     url: PATHS.client.settings.root,
     icon: SettingsIcon,
-    hidden: true,
     accent: "orange",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
-  },
-  {
-    key: "sandbox",
-    title: "Sandbox",
-    url: PATHS.client.sandbox.root,
-    icon: PackageOpenIcon,
-    developmentOnly: true,
-    accent: "teal",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
   },
   {
     key: "maintenance",
@@ -101,10 +61,6 @@ export const pageMetas = [
     url: PATHS.client.maintenance.root,
     icon: WrenchIcon,
     accent: "zinc",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
   },
   {
     key: "sign-in",
@@ -112,10 +68,6 @@ export const pageMetas = [
     url: PATHS.client.signIn.root,
     icon: UserIcon,
     accent: "indigo",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
   },
   {
     key: "sign-up",
@@ -123,11 +75,13 @@ export const pageMetas = [
     url: PATHS.client.signUp.root,
     icon: UserIcon,
     accent: "violet",
-    backgroundType: {
-      light: "default",
-      dark: "default",
-    },
   },
-] as const satisfies PageMetaRaw[];
+] as const satisfies PageMeta[];
+
+const pageMetaMap = new Map(pageMetas.map((meta) => [meta.key, meta]));
+
+export function getPageMeta(key: PageMetaKey): PageMeta | null {
+  return pageMetaMap.get(key) ?? null;
+}
 
 export type PageMetaKey = (typeof pageMetas)[number]["key"];

@@ -1,9 +1,9 @@
 "use client";
 
-import { AccentColor } from "@/lib/page-meta/types";
 import { cn } from "@/shadcn/lib/utils";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
+import { AccentColor } from "../../_lib/accent-color";
 
 // accentカラー → 宇宙風HSLパレット
 const accentPalette: Record<AccentColor, { h: number; s: number }> = {

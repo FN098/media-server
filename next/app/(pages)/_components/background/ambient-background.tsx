@@ -1,7 +1,7 @@
 "use client";
 
-import { AccentColor } from "@/lib/page-meta/types";
 import { cn } from "@/shadcn/lib/utils";
+import { AccentColor } from "../../_lib/accent-color";
 
 const glowMap: Record<AccentColor, { top: string; bl: string; br: string }> = {
   indigo: {

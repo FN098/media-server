@@ -1,6 +1,6 @@
 import { DashboardHeader } from "@/app/(pages)/(dashboard)/_components/header";
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
-import { resolvePageMeta } from "@/lib/page-meta/resolvers";
+import { resolvePageMeta } from "@/app/(pages)/_lib/page-meta/resolvers";
 
 const meta = resolvePageMeta("sandbox");
 

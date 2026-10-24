@@ -1,8 +1,8 @@
 import { DashboardHeader } from "@/app/(pages)/(dashboard)/_components/header";
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
+import { resolvePageMeta } from "@/app/(pages)/_lib/page-meta/resolvers";
 import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";
 import { getFolderPathTree } from "@/lib/folder/repository";
-import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
 interface ExplorerLayoutProps {
   // パスパラメータ: /explorer/[id]

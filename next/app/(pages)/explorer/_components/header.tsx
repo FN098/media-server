@@ -2,9 +2,9 @@ import { HeaderNavigation } from "@/app/(pages)/_components/header-navigation";
 import { Search } from "@/app/(pages)/_components/search";
 import { ViewModeSwitchClient } from "@/app/(pages)/_components/view-mode-switch-client";
 import { AppSidebarOpenButton } from "@/feature/sidebar/ui/app-menu-sidebar";
-import { AccentColor } from "@/lib/page-meta/types";
 import { cn } from "@/shadcn/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { AccentColor } from "../../_lib/accent-color";
 
 type HeaderFeatures = {
   navigation?: boolean;
