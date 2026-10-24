@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
 import { Dashboard } from "@/feature/dashboard";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
+import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getRecentVisitedFolders } from "@/lib/folder/repository";
 import { Metadata } from "next";
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
-  const user = await resolveCurrentUserOrThrow();
+  const user = await getCurrentUserOrThrow();
 
   const folders = await getRecentVisitedFolders(
     user.id,

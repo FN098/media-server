@@ -3,17 +3,16 @@ import {
   useExplorerFilterMenuItems,
 } from "@/feature/pages/explorer/hooks/use-explorer-filter-menu-items";
 import { useExplorerContext } from "@/feature/pages/explorer/providers/explorer-provider";
-import { isMediaFile } from "@/lib/node/media-types";
-import { MediaType } from "@/lib/node/types";
+import { isMediaFile, MediaType } from "@/lib/node/media-types";
 import { useCallback, useMemo } from "react";
 
 export function useExplorerFilterMenu() {
   const {
     listing,
     filtering: {
-      controls: { favorite, mediaType, rating, tag },
+      controls: { favorite, mediaType, tag },
     },
-    dialogs: { ratingFilterDialog, tagFilterDialog },
+    dialogs: { tagFilterDialog },
   } = useExplorerContext();
 
   const favoriteFilterMode = useMemo(
@@ -27,11 +26,6 @@ export function useExplorerFilterMenu() {
         isMediaFile(type)
       ),
     [mediaType.value.types]
-  );
-
-  const hasRatingFilter = useMemo(
-    () => rating.value.mode !== "all",
-    [rating.value.mode]
   );
 
   const hasTagFilter = useMemo(
@@ -62,14 +56,9 @@ export function useExplorerFilterMenu() {
     [mediaType, mediaTypes]
   );
 
-  const openRatingFilter = useCallback(
-    () => ratingFilterDialog.open(rating.value),
-    [rating.value, ratingFilterDialog]
-  );
-
   const openTagFilter = useCallback(
-    () => tagFilterDialog.open(tag.value, listing.nodes),
-    [listing.nodes, tag.value, tagFilterDialog]
+    () => tagFilterDialog.open(tag.value, listing.children),
+    [listing.children, tag.value, tagFilterDialog]
   );
 
   const context = useMemo(() => {

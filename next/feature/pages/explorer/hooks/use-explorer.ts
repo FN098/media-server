@@ -1,21 +1,11 @@
-import { useFullscreen } from "@/feature/general/hooks/use-fullscreen";
-import { useHistoryContext } from "@/feature/history/providers/history-provider";
-import { useFolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
 import { useExplorerDialogs } from "@/feature/pages/explorer/hooks/use-explorer-dialogs";
 import { useExplorerFavorites } from "@/feature/pages/explorer/hooks/use-explorer-favorites";
 import { useExplorerFiltering } from "@/feature/pages/explorer/hooks/use-explorer-filtering";
-import { useExplorerHotkeys } from "@/feature/pages/explorer/hooks/use-explorer-hotkeys";
-import { useExplorerMenu } from "@/feature/pages/explorer/hooks/use-explorer-menu";
-import { useExplorerNavigation } from "@/feature/pages/explorer/hooks/use-explorer-navigation";
-import { useExplorerSelectionBar } from "@/feature/pages/explorer/hooks/use-explorer-selection-bar";
-import { useExplorerThumbs } from "@/feature/pages/explorer/hooks/use-explorer-thumbs";
 import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
 import { useNodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { useSort } from "@/feature/sort/hooks/use-sort";
-import { useTagEditorContext } from "@/feature/tag-editor/providers/tag-editor-provider";
 import { useViewMode } from "@/feature/view/hooks/use-view-mode";
 import { useViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { useSlideshowContext } from "@/feature/viewers/media-viewer/providers/slideshow-provider";
 import { NodeListing } from "@/lib/node/types";
 
 export interface UseExplorerProps {
@@ -24,73 +14,79 @@ export interface UseExplorerProps {
 
 export function useExplorer({ listing }: UseExplorerProps) {
   const searchFocus = useSearchFocusContext();
+
   const viewMode = useViewMode();
 
   const filtering = useExplorerFiltering({ listing });
+
   const selection = useNodeSelectionControl({
     allNodes: listing.children,
     activeNodes: filtering.filteredNodes,
   });
+
   const sort = useSort();
 
   const favorites = useExplorerFavorites();
+
   const dialogs = useExplorerDialogs({ filtering, selection, favorites });
+
   const viewer = useViewerNavigation({ nodes: filtering.mediaOnly });
-  const folder = useFolderNavigation();
-  const history = useHistoryContext();
 
-  const navigation = useExplorerNavigation({
-    listing,
-    filtering,
-    selection,
-    viewer,
-    history,
-    folder,
-    dialogs,
-  });
+  // const folder = useFolderNavigation();
+  // const history = useHistoryContext();
 
-  const tagEditor = useTagEditorContext();
+  // const navigation = useExplorerNavigation({
+  //   listing,
+  //   filtering,
+  //   selection,
+  //   viewer,
+  //   history,
+  //   folder,
+  //   dialogs,
+  // });
 
-  const thumbs = useExplorerThumbs({ listing });
-  const fullscreen = useFullscreen();
+  // const tagEditor = useTagEditorContext();
 
-  useExplorerHotkeys({
-    enabled: true,
-    listing,
-    filtering,
-    selection,
-    dialogs,
-    tagEditor,
-    navigation,
-    viewer,
-    fullscreen,
-    searchFocus,
-  });
+  // const thumbs = useExplorerThumbs({ listing });
+  // const fullscreen = useFullscreen();
 
-  const slideshow = useSlideshowContext();
+  // useExplorerHotkeys({
+  //   enabled: true,
+  //   listing,
+  //   filtering,
+  //   selection,
+  //   dialogs,
+  //   tagEditor,
+  //   navigation,
+  //   viewer,
+  //   fullscreen,
+  //   searchFocus,
+  // });
 
-  const menu = useExplorerMenu({
-    listing,
-    filtering,
-    selection,
-    dialogs,
-    tagEditor,
-    navigation,
-    viewer,
-    fullscreen,
-    favorites,
-    thumbs,
-    slideshow,
-  });
+  // const slideshow = useSlideshowContext();
 
-  const selectionbar = useExplorerSelectionBar({
-    listing,
-    selection,
-    dialogs,
-    tagEditor,
-    favorites,
-    thumbs,
-  });
+  // const menu = useExplorerMenu({
+  //   listing,
+  //   filtering,
+  //   selection,
+  //   dialogs,
+  //   tagEditor,
+  //   navigation,
+  //   viewer,
+  //   fullscreen,
+  //   favorites,
+  //   thumbs,
+  //   slideshow,
+  // });
+
+  // const selectionbar = useExplorerSelectionBar({
+  //   listing,
+  //   selection,
+  //   dialogs,
+  //   tagEditor,
+  //   favorites,
+  //   thumbs,
+  // });
 
   return {
     listing,
@@ -101,14 +97,14 @@ export function useExplorer({ listing }: UseExplorerProps) {
     sort,
     dialogs,
     viewer,
-    folder,
-    history,
-    favorites,
-    navigation,
-    tagEditor,
-    thumbs,
-    fullscreen,
-    menu,
-    selectionbar,
+    // folder,
+    // history,
+    // favorites,
+    // navigation,
+    // tagEditor,
+    // thumbs,
+    // fullscreen,
+    // menu,
+    // selectionbar,
   };
 }

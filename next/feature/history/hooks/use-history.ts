@@ -3,7 +3,7 @@ import { useState } from "react";
 
 type HistoryItem = {
   key: string;
-  type: "file" | "directory";
+  type: "file" | "folder";
 };
 
 export interface UseHistoryProps {
@@ -51,5 +51,5 @@ export type History = ReturnType<typeof useHistory>;
 
 export const toHistoryItem = (node: Node): HistoryItem => ({
   key: node.id,
-  type: node.isDirectory ? "directory" : "file",
+  type: node.isDirectory ? "folder" : "file",
 });

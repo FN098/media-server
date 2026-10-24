@@ -24,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Header
                 title={meta.title}
                 icon={meta.icon}
-                basePath={meta.url}
+                baseUrl={meta.url}
                 features={{
                   navigation: false,
                 }}

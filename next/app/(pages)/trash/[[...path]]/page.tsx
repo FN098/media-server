@@ -3,7 +3,7 @@ import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites
 import { Trash } from "@/feature/pages/trash";
 import { TrashProvider } from "@/feature/pages/trash/providers/trash-provider";
 import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
+import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import { getVisitedFolders } from "@/lib/folder/repository";
 import { formatNodes } from "@/lib/node/formatters";
@@ -65,7 +65,7 @@ export default async function TrashPage(props: TrashPageProps) {
 
   const fsNodes = fsListing.nodes;
   const dirPaths = fsNodes.filter((e) => e.isDirectory).map((e) => e.path);
-  const user = await resolveCurrentUserOrThrow();
+  const user = await getCurrentUserOrThrow();
 
   // DB クエリ
   const [dbNodes, folderVisited] = await Promise.all([

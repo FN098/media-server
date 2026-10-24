@@ -3,7 +3,7 @@ import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites
 import { Explorer } from "@/feature/pages/explorer";
 import { ExplorerProvider } from "@/feature/pages/explorer/providers/explorer-provider";
 import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
+import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import {
   createFolders,
@@ -47,7 +47,7 @@ export async function generateMetadata(
 }
 
 export default async function ExplorerPage(props: ExplorerPageProps) {
-  const user = await resolveCurrentUserOrThrow();
+  const user = await getCurrentUserOrThrow();
 
   const [params, searchParams] = await Promise.all([
     props.params,

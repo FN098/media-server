@@ -2,7 +2,6 @@ import { useFavoriteFilter } from "@/feature/filter/hooks/use-favorite-filter";
 import { useFilteredNodes } from "@/feature/filter/hooks/use-filtered-nodes";
 import { useMediaTypeFilter } from "@/feature/filter/hooks/use-media-type-filter";
 import { useQueryFilter } from "@/feature/filter/hooks/use-query-filter";
-import { useRatingFilter } from "@/feature/filter/hooks/use-rating-filter";
 import { useTagFilter } from "@/feature/filter/hooks/use-tag-filter";
 import { useSearchParamsControl } from "@/feature/general/hooks/use-search-params-control";
 import {
@@ -23,7 +22,6 @@ interface UseExplorerFilteringProps {
 export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
   const queryFilter = useQueryFilter();
   const mediaTypeFilter = useMediaTypeFilter();
-  const ratingFilter = useRatingFilter();
   const tagFilter = useTagFilter();
   const favoriteFilter = useFavoriteFilter();
 
@@ -47,7 +45,6 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
     [
       queryFilter.value,
       mediaTypeFilter.value,
-      ratingFilter.value,
       tagFilter.value,
       favoriteFilter.value,
     ]
@@ -114,7 +111,6 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
     controls: {
       query: queryFilter,
       mediaType: mediaTypeFilter,
-      rating: ratingFilter,
       tag: tagFilter,
       favorite: favoriteFilter,
     },

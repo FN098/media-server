@@ -3,7 +3,7 @@ import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites
 import { Favorites } from "@/feature/pages/favorites";
 import { FavoritesProvider } from "@/feature/pages/favorites/providers/favorites-provider";
 import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
-import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
+import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import {
   RatingFilterMode,
@@ -56,7 +56,7 @@ export default async function FavoritePage(props: FavoritePageProps) {
     tagIds,
   } = searchParams;
 
-  const user = await resolveCurrentUserOrThrow();
+  const user = await getCurrentUserOrThrow();
 
   // 検索
   const { nodes: searched, total } = await searchFavoriteMediaNodes({

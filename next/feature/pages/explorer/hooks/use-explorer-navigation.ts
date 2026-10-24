@@ -36,12 +36,12 @@ export function useExplorerNavigation({
   folder,
   dialogs,
 }: UseExplorerNavigationProps) {
-  const { folderId, prevFolderId, nextFolderId } = listing;
+  const { currentFolder, prevFolder, nextFolder } = listing;
   const { mediaOnly } = filtering;
 
   // 初回マウント時に訪問履歴にプッシュ
   useEffect(() => {
-    history.push({ key: folderId, type: "directory" });
+    history.push({ key: currentFolder.id, type: "folder" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -52,10 +52,10 @@ export function useExplorerNavigation({
 
   // フォルダ訪問履歴自動更新
   useEffect(() => {
-    if (folderId) {
-      void visitFolderAction({ folderId });
+    if (currentFolder) {
+      void visitFolderAction({ folderId: currentFolder.id });
     }
-  }, [folderId]);
+  }, [currentFolder]);
 
   // ビューアスライド移動時の処理
   const onIndexChange = useCallback(
@@ -82,7 +82,7 @@ export function useExplorerNavigation({
     async (node: Node) => {
       // フォルダ
       if (node.isDirectory) {
-        folder.navigate({ folderId, resetPage: true });
+        folder.navigate({ folderId: currentFolder.id, resetPage: true });
         return;
       }
 
@@ -146,21 +146,21 @@ export function useExplorerNavigation({
   // 前のフォルダを開く
   const openPrevFolder = useCallback(
     (at: IndexLike = "last") => {
-      if (prevFolderId) {
-        folder.navigate({ folderId: prevFolderId, at });
+      if (prevFolder) {
+        folder.navigate({ folderId: prevFolder.id, at });
       }
     },
-    [folder, prevFolderId]
+    [folder, prevFolder]
   );
 
   // 次のフォルダを開く
   const openNextFolder = useCallback(
     (at: IndexLike = "first") => {
-      if (nextFolderId) {
-        folder.navigate({ folderId: nextFolderId, at });
+      if (nextFolder) {
+        folder.navigate({ folderId: nextFolder.id, at });
       }
     },
-    [folder, nextFolderId]
+    [folder, nextFolder]
   );
 
   // 一つ上のフォルダを開く

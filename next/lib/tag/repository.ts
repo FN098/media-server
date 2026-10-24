@@ -1,4 +1,4 @@
-import { resolveCurrentUserOrThrow } from "@/lib/auth/current-user";
+import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
 import { Tag } from "@/lib/tag/types";
 
@@ -45,7 +45,7 @@ export async function getRelatedTags(
 export async function getFavoriteTags(options?: {
   limit?: number;
 }): Promise<Tag[]> {
-  const { id: userId } = await resolveCurrentUserOrThrow();
+  const { id: userId } = await getCurrentUserOrThrow();
 
   const favorites = await prisma.userTagFavorite.findMany({
     where: { userId },

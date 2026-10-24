@@ -4,7 +4,7 @@ import { buildSignInUrl } from "@/lib/auth/sign-in-url";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function resolveCurrentUser(): Promise<CurrentUser | null> {
+export async function getCurrentUser(): Promise<CurrentUser | null> {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -14,7 +14,7 @@ export async function resolveCurrentUser(): Promise<CurrentUser | null> {
   return currentUserSchema.safeParse(session.user).data ?? null;
 }
 
-export async function resolveCurrentUserOrThrow(): Promise<CurrentUser> {
+export async function getCurrentUserOrThrow(): Promise<CurrentUser> {
   const h = await headers();
 
   const session = await auth.api.getSession({

@@ -33,7 +33,7 @@ export async function getFolder(id: string, userId: string) {
   return {
     ...omit(folder, "userFolderFavorites"),
     size: Number(folder.totalSize),
-    favoritedAt: folder.userFolderFavorites[0].updatedAt,
+    favoritedAt: folder.userFolderFavorites[0]?.updatedAt ?? null,
     isDirectory: true as const,
   };
 }
@@ -110,7 +110,7 @@ interface FolderPathRow {
 }
 
 // フォルダID -> フォルダパス
-export async function getFolderPath(folderId: string) {
+export async function getFolderPathTree(folderId: string) {
   const rows = await db.$queryRaw<FolderPathRow[]>`
     WITH RECURSIVE FolderHierarchy AS (
       -- アンカーメンバー
@@ -146,6 +146,12 @@ export async function getFolderPath(folderId: string) {
   if (rows.length === 0) {
     throw new Error("Folder not found");
   }
+
+  return rows;
+}
+
+export async function getFolderPath(folderId: string) {
+  const rows = await getFolderPathTree(folderId);
 
   // 例: ["documents", "work", "projects"] -> "/documents/work/projects"
   const pathSegments = rows.map((row) => row.name);

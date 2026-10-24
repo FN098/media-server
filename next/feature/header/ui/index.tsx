@@ -12,12 +12,18 @@ type HeaderFeatures = {
   viewMode?: boolean;
 };
 
+type FolderSegment = {
+  id: string;
+  name: string;
+};
+
 interface HeaderProps {
   title: string;
   icon?: LucideIcon;
-  basePath?: string;
+  baseUrl?: string;
   features?: HeaderFeatures;
   accent?: AccentColor;
+  tree?: FolderSegment[];
 }
 
 const accentBorderMap: Record<AccentColor, string> = {
@@ -51,9 +57,10 @@ const accentIconMap: Record<AccentColor, string> = {
 export function Header({
   title,
   icon: Icon,
-  basePath,
+  baseUrl,
   features,
   accent,
+  tree,
 }: HeaderProps) {
   const { navigation = true, search = true, viewMode = true } = features || {};
 
@@ -93,7 +100,7 @@ export function Header({
 
         {/* パンくず */}
         <div className="min-w-0">
-          {navigation && <HeaderNavigation basePath={basePath} />}
+          {navigation && <HeaderNavigation baseUrl={baseUrl} tree={tree} />}
         </div>
 
         {/* 検索＋ビューモード */}

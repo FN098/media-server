@@ -1,6 +1,5 @@
 "use client";
 
-import { useBreadcrumbs } from "@/feature/header/hooks/use-breadcrumbs";
 import { DynamicBreadcrumbs } from "@/feature/header/ui/dynamic-breadcrumbs";
 import { useDetectMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { ClickToCopy } from "@/feature/text/ui/click-to-copy";
@@ -9,9 +8,24 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-export function HeaderNavigation({ basePath }: { basePath?: string }) {
+type FolderSegment = {
+  id: string;
+  name: string;
+};
+
+export function HeaderNavigation({
+  baseUrl,
+  tree = [],
+}: {
+  baseUrl?: string;
+  tree?: FolderSegment[];
+}) {
   const searchParams = useSearchParams();
-  const breadcrumbs = useBreadcrumbs(basePath ?? "");
+  const breadcrumbs = tree.map((n, i) => ({
+    key: i === 0 ? "home" : n.id,
+    href: `${baseUrl}/${n.id}`,
+    label: n.name || "HOME",
+  }));
   const isMobile = useDetectMobileContext();
   const current = breadcrumbs.at(-1);
   const backHref = breadcrumbs.at(-2)?.href ?? null;
