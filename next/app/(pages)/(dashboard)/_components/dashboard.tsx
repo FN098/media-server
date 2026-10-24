@@ -1,10 +1,10 @@
-import { RecentFolders } from "@/feature/dashboard/ui/recent-folders";
-import { VisitedFolderInfo } from "@/lib/folder/types";
+import { RecentFolders } from "@/app/(pages)/(dashboard)/_components/recent-folders";
+import { RecentFolder } from "@/app/(pages)/(dashboard)/_lib/types";
 import { Button } from "@/shadcn/components/ui/button";
 import { ArrowRight, FolderSearch2, HistoryIcon } from "lucide-react";
 import Link from "next/link";
 
-export function Dashboard({ folders }: { folders: VisitedFolderInfo[] }) {
+export function Dashboard({ folders }: { folders: RecentFolder[] }) {
   return (
     <div className="w-full min-h-full flex items-center justify-center">
       <div className="flex flex-col w-full max-w-lg mx-6 gap-8">

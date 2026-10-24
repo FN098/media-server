@@ -1,6 +1,6 @@
 "use client";
 
-import { createAppQueryClient } from "@/app/(pages)/_lib/cache/_lib/factory";
+import { createAppQueryClient } from "@/app/(pages)/_lib/app-query-client-factory";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 

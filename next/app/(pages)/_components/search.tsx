@@ -8,7 +8,7 @@ import { Kbd } from "@/shadcn/components/ui/kbd";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 
-export function HeaderSearch() {
+export function Search() {
   const {
     input,
     focused,

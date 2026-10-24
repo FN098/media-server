@@ -1,9 +1,9 @@
 "use client";
 
+import { RecentFolder } from "@/app/(pages)/(dashboard)/_lib/types";
 import { LocalRecentDate } from "@/feature/datetime/ui/local-recent-date";
 import { togglePinVisitedFolderAction } from "@/feature/folder/actions/toggle-pin-visited";
 import { useCanHoverContext } from "@/feature/general/providers/can-hover-provider";
-import { VisitedFolderInfo } from "@/lib/folder/types";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { Clock, Folder, History, Pin } from "lucide-react";
@@ -12,7 +12,7 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 interface RecentFoldersProps {
-  folders: VisitedFolderInfo[];
+  folders: RecentFolder[];
   baseUrl?: string;
 }
 
@@ -25,7 +25,7 @@ export function RecentFolders({
 
   const buildUrl = (folderId: string) => `${baseUrl}/${folderId}`;
 
-  const handleTogglePin = useCallback(async (folder: VisitedFolderInfo) => {
+  const handleTogglePin = useCallback(async (folder: RecentFolder) => {
     setIsPending(true);
     try {
       const result = await togglePinVisitedFolderAction({

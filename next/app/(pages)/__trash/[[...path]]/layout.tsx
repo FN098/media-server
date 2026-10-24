@@ -1,5 +1,5 @@
+import { DashboardHeader } from "@/app/(pages)/(dashboard)/_components/header";
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
-import { Header } from "@/feature/header/ui";
 import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
 
@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           accent={meta.accent}
           backgroundType={meta.backgroundType}
         />
-        <Header
+        <DashboardHeader
           title={meta.title}
           icon={meta.icon}
           baseUrl={meta.url}

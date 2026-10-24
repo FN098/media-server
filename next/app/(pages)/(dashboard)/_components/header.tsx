@@ -1,27 +1,11 @@
-import { HeaderNavigation } from "@/feature/header/ui/header-navigation";
-import { HeaderSearch } from "@/feature/header/ui/header-search";
-import { HeaderViewModeSwitch } from "@/feature/header/ui/header-view-mode-switch";
 import { AppSidebarOpenButton } from "@/feature/sidebar/ui/app-menu-sidebar";
 import { AccentColor } from "@/lib/page-meta/types";
 import { cn } from "@/shadcn/lib/utils";
-import { LucideIcon } from "lucide-react";
-
-type HeaderFeatures = {
-  navigation?: boolean;
-  search?: boolean;
-  viewMode?: boolean;
-};
+import { LayoutDashboardIcon } from "lucide-react";
 
 interface HeaderProps {
   title: string;
-  icon?: LucideIcon;
-  features?: HeaderFeatures;
   accent?: AccentColor;
-  breadcrumbs?: {
-    key: string;
-    href: string;
-    label: string;
-  }[];
 }
 
 const accentBorderMap: Record<AccentColor, string> = {
@@ -52,15 +36,7 @@ const accentIconMap: Record<AccentColor, string> = {
   zinc: "text-zinc-500   dark:text-zinc-400",
 };
 
-export function Header({
-  title,
-  icon: Icon,
-  features = {},
-  accent,
-  breadcrumbs,
-}: HeaderProps) {
-  const { navigation = true, search = true, viewMode = true } = features;
-
+export function DashboardHeader({ title, accent }: HeaderProps) {
   return (
     <header
       className={cn(
@@ -80,30 +56,17 @@ export function Header({
 
         {/* アイコン＋タイトル */}
         <div className="flex items-center gap-2 mx-2">
-          {Icon && (
-            <Icon
-              className={cn(
-                "w-5 h-5 flex-shrink-0",
-                accent
-                  ? accentIconMap[accent]
-                  : "text-zinc-500 dark:text-zinc-400"
-              )}
-            />
-          )}
+          <LayoutDashboardIcon
+            className={cn(
+              "w-5 h-5 flex-shrink-0",
+              accent
+                ? accentIconMap[accent]
+                : "text-zinc-500 dark:text-zinc-400"
+            )}
+          />
           <span className="text-lg font-semibold hidden md:block text-zinc-800 dark:text-zinc-100">
             {title}
           </span>
-        </div>
-
-        {/* パンくず */}
-        <div className="min-w-0">
-          {navigation && <HeaderNavigation breadcrumbs={breadcrumbs} />}
-        </div>
-
-        {/* 検索＋ビューモード */}
-        <div className="flex items-center gap-2">
-          {search && <HeaderSearch />}
-          {viewMode && <HeaderViewModeSwitch />}
         </div>
       </div>
     </header>

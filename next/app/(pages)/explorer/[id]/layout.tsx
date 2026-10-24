@@ -1,5 +1,5 @@
+import { DashboardHeader } from "@/app/(pages)/(dashboard)/_components/header";
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
-import { Header } from "@/feature/header/ui";
 import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";
 import { getFolderPathTree } from "@/lib/folder/repository";
 import { resolvePageMeta } from "@/lib/page-meta/resolvers";
@@ -35,7 +35,7 @@ export default async function Layout(props: ExplorerLayoutProps) {
           accent={meta.accent}
           backgroundType={meta.backgroundType}
         />
-        <Header
+        <DashboardHeader
           title={meta.title}
           icon={meta.icon}
           accent={meta.accent}

@@ -1,8 +1,6 @@
 import { BreadcrumbLinkItem } from "@/feature/navigation/types";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
-type DisplayMode = "full" | "first-last" | "ellipsis-last";
-
 const PADDING = 32;
 const ICON_WIDTH = 32;
 const ELLIPSIS_WIDTH = 32;
@@ -43,7 +41,7 @@ export function useDynamicBreadcrumbs({ items }: UseDynamicBreadcrumbsProps) {
   );
 
   // 表示モードの判定
-  const displayMode = useMemo<DisplayMode>(() => {
+  const displayMode = useMemo(() => {
     if (containerWidth === 0) return "full";
 
     if (totalFullWidth <= containerWidth) {
@@ -58,5 +56,5 @@ export function useDynamicBreadcrumbs({ items }: UseDynamicBreadcrumbsProps) {
     }
   }, [containerWidth, firstWidth, lastWidth, totalFullWidth]);
 
-  return { items, containerRef, displayMode, first, middle, last };
+  return { containerRef, displayMode, first, middle, last };
 }
