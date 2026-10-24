@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { AppQueryClientProvider } from "@/feature/cache/providers/app-query-client-provider";
+import { AppQueryClientProvider } from "@/app/(pages)/_lib/cache/_providers/app-query-client-provider";
 import { CanHoverProvider } from "@/feature/general/providers/can-hover-provider";
 import { HotkeysClientProvider } from "@/feature/hotkey/providers/hotkeys-client-provider";
 import { DetectMobileProvider } from "@/feature/mobile/providers/mobile-provider";
