@@ -1,6 +1,6 @@
 import { DashboardHeader } from "@/app/(pages)/(dashboard)/_components/header";
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
-import { getPageMeta } from "@/app/(pages)/_lib/page-meta";
+import { getPageMeta } from "@/feature/page-meta/lib/page-meta";
 
 const meta = getPageMeta("dashboard");
 

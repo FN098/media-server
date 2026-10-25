@@ -1,0 +1,47 @@
+import { QueryFilterValue } from "@/__lib/filter/types";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
+
+interface UseQueryFilterProps {
+  queryKey?: string;
+}
+
+export function useQueryFilter(props?: UseQueryFilterProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // キー名とデフォルト値の設定
+  const { queryKey = "q" } = props || {};
+
+  // 現在の値をURLから取得
+  const query = searchParams.get(queryKey);
+
+  // value: 現在の状態
+  const value = useMemo<QueryFilterValue>(() => ({ query }), [query]);
+
+  // apply: URLを更新して状態を変更
+  const apply = useCallback(
+    (next: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (next == null || next.trim() === "") {
+        params.delete(queryKey);
+      } else {
+        params.set(queryKey, next);
+      }
+
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams, queryKey]
+  );
+
+  // reset: デフォルトの状態に戻す
+  const reset = useCallback(() => apply(null), [apply]);
+
+  return {
+    value,
+    apply,
+    reset,
+  };
+}

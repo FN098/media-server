@@ -1,7 +1,7 @@
-import { auth } from "@/lib/auth/better-auth";
-import { logger } from "@/lib/logger";
-import { isBlockedClientPath } from "@/lib/path/protections";
-import { isPublicRoute } from "@/lib/routing/public-routes";
+import { auth } from "@/__lib/auth/better-auth";
+import { logger } from "@/__lib/logger";
+import { isBlockedClientPath } from "@/__lib/path/protections";
+import { isPublicRoute } from "@/__lib/routing/public-routes";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function proxy(req: NextRequest) {

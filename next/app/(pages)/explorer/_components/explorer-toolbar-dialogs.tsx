@@ -1,6 +1,6 @@
+import { RatingFilterDialog } from "@/__feature/filter/ui/rating-filter-dialog";
+import { TagFilterDialog } from "@/__feature/filter/ui/tag-filter-dialog";
 import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
-import { RatingFilterDialog } from "@/feature/filter/ui/rating-filter-dialog";
-import { TagFilterDialog } from "@/feature/filter/ui/tag-filter-dialog";
 
 export function ExplorerToolbarDialogs() {
   const { dialogs } = useExplorerContext();

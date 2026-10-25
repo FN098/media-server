@@ -1,0 +1,84 @@
+import { Node } from "@/lib/node/types";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
+
+export type IndexLike = number | "first" | "last";
+
+function parseIndexLike(at: IndexLike, total: number) {
+  if (at === "first") return 0;
+  if (at === "last") return total - 1;
+
+  // 数字かもしれない場合
+  const index = Number(at);
+  if (Number.isNaN(index)) return 0;
+
+  return index;
+}
+
+type OpenOptions = {
+  at?: IndexLike;
+  newTab?: boolean;
+};
+
+export interface UseViewerProps {
+  nodes: Node[];
+  atKey?: string;
+  modalKey?: string;
+}
+
+export function useViewer({
+  nodes,
+  atKey = "at",
+  modalKey = "modal",
+}: UseViewerProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // 現在の値をURLから取得
+  const at = searchParams.get(atKey) as IndexLike;
+  const modal = searchParams.get(modalKey);
+
+  // number に正規化されたインデックス
+  const index = useMemo(
+    () => parseIndexLike(at, nodes.length),
+    [at, nodes.length]
+  );
+
+  // ビューアを起動
+  const open = useCallback(
+    (options?: OpenOptions) => {
+      const { at = 0, newTab = false } = options ?? {};
+      const params = new URLSearchParams(searchParams.toString());
+
+      params.set(modalKey, "true");
+      params.set(atKey, String(at));
+
+      if (newTab) {
+        window.open(`${pathname}?${params.toString()}`, "_blank", "noreferrer");
+      } else {
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      }
+    },
+    [atKey, modalKey, pathname, router, searchParams]
+  );
+
+  // ビューアを閉じる
+  const close = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.delete(modalKey);
+    params.delete(atKey);
+
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [atKey, modalKey, pathname, router, searchParams]);
+
+  return {
+    index,
+    isOpen: !!modal,
+    open,
+    close,
+  };
+}
+
+export type ViewerNavigation = ReturnType<typeof useViewer>;

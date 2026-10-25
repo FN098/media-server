@@ -1,15 +1,15 @@
-import { authorize } from "@/lib/authorization/authorize";
-import { DB_BACKUP_DIR } from "@/lib/db-backup/config";
-import { logger } from "@/lib/logger";
-import { getMimetype } from "@/lib/node/mimetype";
+import { authorize } from "@/__lib/authorization/authorize";
+import { DB_BACKUP_DIR } from "@/__lib/db-backup/config";
+import { logger } from "@/__lib/logger";
+import { getMimetype } from "@/__lib/node/mimetype";
 import {
   badRequestResponse,
   forbiddenResponse,
   internalServerErrorResponse,
   notFoundResponse,
-} from "@/lib/response/errors";
-import { existsPath } from "@/lib/utils/fs";
-import { FileNameSchema } from "@/lib/virtual-path/schemas";
+} from "@/__lib/response/errors";
+import { existsPath } from "@/__lib/utils/fs";
+import { FileNameSchema } from "@/__lib/virtual-path/schemas";
 import fs from "fs";
 import { NextRequest } from "next/server";
 import path from "path";

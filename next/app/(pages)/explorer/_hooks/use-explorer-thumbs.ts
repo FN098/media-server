@@ -1,5 +1,5 @@
-import { touchTimestampAction } from "@/feature/node/actions/touch-timestamp";
-import { updatePreviewFileAction } from "@/feature/preview/actions/update";
+import { touchTimestampAction } from "@/__feature/node/actions/touch-timestamp";
+import { updatePreviewFileAction } from "@/__feature/preview/actions/update";
 import { enqueueCreateSingleThumbJobAction } from "@/feature/thumbnail/actions/enque-create-thumb-job";
 import { enqueueCreateThumbsJobAction } from "@/feature/thumbnail/actions/enque-create-thumbs-job";
 import { Node, NodeListing } from "@/lib/node/types";

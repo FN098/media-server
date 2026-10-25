@@ -6,8 +6,8 @@
  * 使い方：`pnpm tsx ./tools/fix-and-fill-tag-kana.ts`
  */
 
-import { prisma } from "@/lib/prisma";
-import { generateKana } from "@/lib/utils/kana";
+import { prisma } from "@/__lib/prisma";
+import { generateKana } from "@/__lib/utils/kana";
 
 /**
  * ひらがなをカタカナに変換する補助関数

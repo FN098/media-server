@@ -14,6 +14,7 @@ interface ExplorerProviderProps extends UseExplorerProps {
   children: React.ReactNode;
 }
 
+/** @deprecated */
 export function ExplorerProvider({ children, ...rest }: ExplorerProviderProps) {
   const value = useExplorer(rest);
 

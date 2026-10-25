@@ -1,9 +1,7 @@
-import { APP_CONFIG } from "@/app.config";
-import { ExplorerProvider } from "@/app/(pages)/explorer/_providers/explorer-provider";
-import { FavoritesControlProvider } from "@/feature/favorite/providers/favorites-control-provider";
-import { NodeSelectionProvider } from "@/feature/selection/providers/node-selection-provider";
-import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
-import { getFiles } from "@/lib/file/repository";
+import { FavoritesControlProvider } from "@/__feature/favorite/providers/favorites-control-provider";
+import { NodeSelectionProvider } from "@/__feature/selection/providers/node-selection-provider";
+import { getCurrentUserOrThrow } from "@/__lib/auth/current-user";
+import { getFiles } from "@/__lib/file/repository";
 import {
   createFolders,
   getDbFolders,
@@ -11,11 +9,13 @@ import {
   getFolderName,
   getFolderPath,
   updateFolderCache,
-} from "@/lib/folder/repository";
-import { getFsListing } from "@/lib/node/fs-listing";
-import { mergeDbNodes } from "@/lib/node/merge";
-import { SortDirection, SortKey, sortNodes } from "@/lib/node/sort";
-import { syncFsWithDb } from "@/lib/node/sync";
+} from "@/__lib/folder/repository";
+import { getFsListing } from "@/__lib/node/fs-listing";
+import { mergeDbNodes } from "@/__lib/node/merge";
+import { SortDirection, SortKey, sortNodes } from "@/__lib/node/sort";
+import { syncFsWithDb } from "@/__lib/node/sync";
+import { APP_CONFIG } from "@/app.config";
+import { ExplorerProvider } from "@/app/(pages)/explorer/_providers/explorer-provider";
 import { Node, NodeListing } from "@/lib/node/types";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";

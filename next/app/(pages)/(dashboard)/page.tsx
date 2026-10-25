@@ -1,7 +1,7 @@
+import { getCurrentUserOrThrow } from "@/__lib/auth/current-user";
+import { getRecentVisitedFolders } from "@/__lib/folder/repository";
 import { APP_CONFIG } from "@/app.config";
 import { Dashboard } from "@/app/(pages)/(dashboard)/_components/dashboard";
-import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
-import { getRecentVisitedFolders } from "@/lib/folder/repository";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";

@@ -1,9 +1,9 @@
-import { useFavoriteFilter } from "@/feature/filter/hooks/use-favorite-filter";
-import { useFilteredNodes } from "@/feature/filter/hooks/use-filtered-nodes";
-import { useMediaTypeFilter } from "@/feature/filter/hooks/use-media-type-filter";
-import { useQueryFilter } from "@/feature/filter/hooks/use-query-filter";
-import { useTagFilter } from "@/feature/filter/hooks/use-tag-filter";
-import { useSearchParamsControl } from "@/feature/general/hooks/use-search-params-control";
+import { useFavoriteFilter } from "@/__feature/filter/hooks/use-favorite-filter";
+import { useFilteredNodes } from "@/__feature/filter/hooks/use-filtered-nodes";
+import { useMediaTypeFilter } from "@/__feature/filter/hooks/use-media-type-filter";
+import { useQueryFilter } from "@/__feature/filter/hooks/use-query-filter";
+import { useTagFilter } from "@/__feature/filter/hooks/use-tag-filter";
+import { useSearchParamsControl } from "@/__feature/general/hooks/use-search-params-control";
 import {
   createFavoriteFilter,
   createFileTypeFilter,
@@ -11,7 +11,7 @@ import {
   createSearchFilter,
   createTagFilter,
   withDirectoryControl,
-} from "@/lib/filter/factory";
+} from "@/__lib/filter/factory";
 import { Node, NodeListing } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 

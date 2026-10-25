@@ -4,6 +4,7 @@ export interface UseExplorerProps {
   listing: NodeListing;
 }
 
+/** @deprecated */
 export function useExplorer({ listing }: UseExplorerProps) {
   // const searchFocus = useSearchFocusContext();
 

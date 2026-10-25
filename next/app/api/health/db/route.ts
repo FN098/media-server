@@ -1,6 +1,6 @@
-import { logger } from "@/lib/logger";
-import { prisma } from "@/lib/prisma";
-import { internalServerErrorResponse } from "@/lib/response/errors";
+import { logger } from "@/__lib/logger";
+import { prisma } from "@/__lib/prisma";
+import { internalServerErrorResponse } from "@/__lib/response/errors";
 import { z } from "zod";
 
 const RowSchema = z.array(z.record(z.string(), z.bigint()));

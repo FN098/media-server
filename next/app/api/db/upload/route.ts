@@ -1,17 +1,17 @@
-import { authorize } from "@/lib/authorization/authorize";
+import { authorize } from "@/__lib/authorization/authorize";
 import {
   MAX_UPLOAD_FILE_SIZE,
   TEMP_DB_BACKUP_DIR,
-} from "@/lib/db-backup/config";
-import { buildDbUploadFileName } from "@/lib/db-backup/filename";
-import { DbBackupFile } from "@/lib/db-backup/types";
-import { logger } from "@/lib/logger";
+} from "@/__lib/db-backup/config";
+import { buildDbUploadFileName } from "@/__lib/db-backup/filename";
+import { DbBackupFile } from "@/__lib/db-backup/types";
+import { logger } from "@/__lib/logger";
 import {
   badRequestResponse,
   forbiddenResponse,
   internalServerErrorResponse,
-} from "@/lib/response/errors";
-import { formatBytes } from "@/lib/utils/bytes";
+} from "@/__lib/response/errors";
+import { formatBytes } from "@/__lib/utils/bytes";
 import fs from "fs/promises";
 import { NextRequest } from "next/server";
 import path from "path";

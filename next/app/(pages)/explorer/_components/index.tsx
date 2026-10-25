@@ -1,16 +1,17 @@
 "use client";
 
-import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
+import { ExplorerFolderNavigation } from "@/app/(pages)/explorer/_components/explorer-navigation";
+import { useViewerContext } from "@/feature/viewer/providers/viewer-provider";
 
 export function Explorer() {
-  const { viewer } = useExplorerContext();
+  const viewer = useViewerContext();
 
   return (
     <div className="flex flex-col focus:outline-none">
       {/* {!viewer.isOpen && <ExplorerToolbar />} */}
       {/* <ExplorerContent /> */}
       {/* <ExplorerOverlays /> */}
-      {/* {!viewer.isOpen && <ExplorerFolderNavigation />} */}
+      {!viewer.isOpen && <ExplorerFolderNavigation />}
     </div>
   );
 }

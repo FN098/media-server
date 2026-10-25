@@ -1,7 +1,7 @@
+import { PagingGridView } from "@/__feature/paging-view/components/paging-grid-view";
+import { PagingListView } from "@/__feature/paging-view/components/paging-list-view";
+import { MediaNodePagingViewProvider } from "@/__feature/paging-view/providers/media-node-paging-view-provider";
 import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
-import { PagingGridView } from "@/feature/paging-view/components/paging-grid-view";
-import { PagingListView } from "@/feature/paging-view/components/paging-list-view";
-import { MediaNodePagingViewProvider } from "@/feature/paging-view/providers/media-node-paging-view-provider";
 
 export function ExplorerListingView() {
   const {

@@ -1,7 +1,7 @@
-import { AppSidebarOpenButton } from "@/feature/sidebar/ui/app-menu-sidebar";
+import { AppSidebarOpenButton } from "@/__feature/sidebar/ui/app-menu-sidebar";
 import { cn } from "@/shadcn/lib/utils";
 import { LayoutDashboardIcon } from "lucide-react";
-import { AccentColor } from "../../_lib/accent-color";
+import { AccentColor } from "../../../../feature/theme/lib/accent-color";
 
 interface HeaderProps {
   title: string;

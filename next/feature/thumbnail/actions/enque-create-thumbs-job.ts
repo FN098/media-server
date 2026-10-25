@@ -1,10 +1,10 @@
 "use server";
 
-import { authorize } from "@/lib/authorization/authorize";
-import { logger } from "@/lib/logger";
-import { acquireLock } from "@/lib/redis/lock";
-import { thumbQueue } from "@/lib/thumb-job/queue";
-import { sha1Hash } from "@/lib/utils/sha1-hash";
+import { authorize } from "@/__lib/authorization/authorize";
+import { logger } from "@/__lib/logger";
+import { acquireLock } from "@/__lib/redis/lock";
+import { sha1Hash } from "@/__lib/utils/sha1-hash";
+import { thumbQueue } from "@/feature/thumbnail/lib/queue";
 
 type ActionResult = { success: true } | { success: false; message: string };
 

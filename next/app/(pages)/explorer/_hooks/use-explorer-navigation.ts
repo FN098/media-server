@@ -1,21 +1,15 @@
+import { visitFolderAction } from "@/__feature/folder/actions/visit";
+import { FolderNavigation } from "@/__feature/navigation/hooks/use-folder-navigation";
+import { useParentPathname } from "@/__feature/navigation/hooks/use-parent-pathname";
+import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
+import { readFileAsTextAction } from "@/__feature/text-file-reader/actions/read-as-text";
+import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
+import { isArchiveFile } from "@/__lib/archive/archive-types";
+import { isMediaFile } from "@/__lib/node/media-types";
 import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
-import {
-  History,
-  toHistoryItem,
-} from "@/app/(pages)/explorer/_hooks/use-history";
-import { visitFolderAction } from "@/feature/folder/actions/visit";
-import { FolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
-import { useParentPathname } from "@/feature/navigation/hooks/use-parent-pathname";
-import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { readFileAsTextAction } from "@/feature/text-file-reader/actions/read-as-text";
-import { useNodeIndex } from "@/feature/viewers/media-viewer/hooks/use-media-index";
-import {
-  IndexLike,
-  ViewerNavigation,
-} from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
-import { isArchiveFile } from "@/lib/archive/archive-types";
-import { isMediaFile } from "@/lib/node/media-types";
+import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
+import { IndexLike, ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 import { Node, NodeListing } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";

@@ -1,18 +1,18 @@
 import {
   FavoriteFilterMenuContext,
   favoriteFilterMenuItems,
-} from "@/lib/filter-menu-items/favorite-filter-menu-items";
+} from "@/__lib/filter-menu-items/favorite-filter-menu-items";
 import {
   FileTypeFilterMenuContext,
   fileTypeFilterMenuItems,
-} from "@/lib/filter-menu-items/file-type-filter-menu-items";
+} from "@/__lib/filter-menu-items/file-type-filter-menu-items";
 import {
   TagFilterMenuContext,
   tagFilterMenuItems,
-} from "@/lib/filter-menu-items/tag-filter-menu-items";
-import { defaultFilters } from "@/lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/lib/menu-items/transformer";
-import { FilterMenuItem, MenuItemDef } from "@/lib/menu-items/types";
+} from "@/__lib/filter-menu-items/tag-filter-menu-items";
+import { defaultFilters } from "@/__lib/menu-items/filters";
+import { createRecursiveTransformer } from "@/__lib/menu-items/transformer";
+import { FilterMenuItem, MenuItemDef } from "@/__lib/menu-items/types";
 import { useMemo } from "react";
 
 export interface ExplorerFilterMenuContext

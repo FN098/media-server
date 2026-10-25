@@ -1,14 +1,14 @@
-import { logger } from "@/lib/logger";
-import { getMimetype } from "@/lib/node/mimetype";
-import { getServerMediaPath } from "@/lib/path/helpers";
+import { logger } from "@/__lib/logger";
+import { getMimetype } from "@/__lib/node/mimetype";
+import { getServerMediaPath } from "@/__lib/path/helpers";
 import {
   badRequestResponse,
   forbiddenResponse,
   internalServerErrorResponse,
   notFoundResponse,
-} from "@/lib/response/errors";
-import { getPathInfo } from "@/lib/utils/fs";
-import { VirtualPathSchema } from "@/lib/virtual-path/schemas";
+} from "@/__lib/response/errors";
+import { getPathInfo } from "@/__lib/utils/fs";
+import { VirtualPathSchema } from "@/__lib/virtual-path/schemas";
 import { createReadStream } from "fs";
 import { Readable } from "stream";
 import z from "zod";

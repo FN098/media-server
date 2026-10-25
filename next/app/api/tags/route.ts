@@ -1,22 +1,22 @@
-import { authorize } from "@/lib/authorization/authorize";
-import { logger } from "@/lib/logger";
+import { authorize } from "@/__lib/authorization/authorize";
+import { logger } from "@/__lib/logger";
 import {
   badRequestResponse,
   forbiddenResponse,
   internalServerErrorResponse,
-} from "@/lib/response/errors";
+} from "@/__lib/response/errors";
 import {
   getFavoriteTags,
   getRelatedTags,
   getTagsByIds,
-} from "@/lib/tag/repository";
+} from "@/__lib/tag/repository";
 import {
   SearchTagsRequestParams,
   SearchTagsRequestParamsSchema,
-} from "@/lib/tag/schemas";
-import { searchTags } from "@/lib/tag/search";
-import { uniqueBy } from "@/lib/utils/array";
-import { safeParseRequestJson } from "@/lib/utils/request";
+} from "@/__lib/tag/schemas";
+import { searchTags } from "@/__lib/tag/search";
+import { uniqueBy } from "@/__lib/utils/array";
+import { safeParseRequestJson } from "@/__lib/utils/request";
 import { NextRequest } from "next/server";
 
 // タグ検索
