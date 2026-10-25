@@ -1,8 +1,8 @@
 import { FolderNavigation } from "@/__feature/navigation/ui/folder-navigation";
-import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
+import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
 
 export function ExplorerFolderNavigation() {
-  const { listing } = useExplorerContext();
+  const listing = useNodeListingContext();
 
   return (
     <FolderNavigation

@@ -25,6 +25,7 @@ export function ExplorerProvider({ children, ...rest }: ExplorerProviderProps) {
   );
 }
 
+/** @deprecated */
 export function useExplorerContext() {
   const context = useContext(ExplorerContext);
   if (context === undefined) {

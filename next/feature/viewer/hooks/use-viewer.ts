@@ -15,11 +15,6 @@ function parseIndexLike(at: IndexLike, total: number) {
   return index;
 }
 
-type OpenOptions = {
-  at?: IndexLike;
-  newTab?: boolean;
-};
-
 export interface UseViewerProps {
   mediaNodes: MediaFileNode[];
   atKey?: string;
@@ -47,7 +42,7 @@ export function useViewer({
 
   // ビューアを起動
   const open = useCallback(
-    (options?: OpenOptions) => {
+    (options?: { at?: IndexLike; newTab?: boolean }) => {
       const { at = 0, newTab = false } = options ?? {};
       const params = new URLSearchParams(searchParams.toString());
 
