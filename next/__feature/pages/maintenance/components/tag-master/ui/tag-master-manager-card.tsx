@@ -1,9 +1,9 @@
 "use client";
 
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { useTagMasterContext } from "@/__feature/pages/maintenance/components/tag-master/providers/tag-master-provider";
 import { TagMasterCardList } from "@/__feature/pages/maintenance/components/tag-master/ui/tag-master-card-list";
 import { TagMasterTable } from "@/__feature/pages/maintenance/components/tag-master/ui/tag-master-table";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Card,
@@ -35,7 +35,7 @@ export function TagMasterManagerCard() {
     markAsRead,
   } = useTagMasterContext();
 
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   return (
     <Card className="shadow-md border-muted/60">

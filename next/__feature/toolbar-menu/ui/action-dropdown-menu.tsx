@@ -1,6 +1,6 @@
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { MenuItemDef } from "@/__lib/menu-items/types";
 import { castArray } from "@/__lib/utils/array";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,
@@ -27,7 +27,7 @@ export function ActionDropdownMenu<T>({
   items,
   context,
 }: ActionDropdownMenuProps<T>) {
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   return (
     <DropdownMenu>

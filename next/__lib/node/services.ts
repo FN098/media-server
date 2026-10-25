@@ -1,6 +1,6 @@
-import { prisma } from "@/__lib/prisma";
 import { dirname } from "@/__lib/virtual-path/path";
 import { Favorite, Media, MediaTag } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { randomUUID } from "crypto";
 
 // ==========================================

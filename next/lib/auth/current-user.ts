@@ -1,9 +1,5 @@
-import { auth } from "@/__lib/auth/better-auth";
-import {
-  CurrentUser,
-  currentUserSchema,
-} from "@/__lib/auth/current-user-schema";
-import { buildSignInUrl } from "@/__lib/auth/sign-in-url";
+import { auth } from "@/lib/auth/better-auth";
+import { CurrentUser, currentUserSchema } from "@/lib/auth/current-user-schema";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -25,10 +21,7 @@ export async function getCurrentUserOrThrow(): Promise<CurrentUser> {
   });
 
   if (session == null) {
-    const url = buildSignInUrl({
-      headers: h,
-    });
-    redirect(url);
+    redirect("/sign-in");
   }
 
   return currentUserSchema.parse(session.user);

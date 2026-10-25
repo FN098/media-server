@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@/__lib/auth/better-auth";
+import { auth } from "@/lib/auth/better-auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

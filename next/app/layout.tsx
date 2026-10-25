@@ -1,6 +1,13 @@
+import { HotkeysClientProvider } from "@/__feature/hotkey/providers/hotkeys-client-provider";
+import { ThumbEventProvider } from "@/__feature/thumbnail/providers/thumb-event-provider";
 import { APP_CONFIG } from "@/app.config";
+import { AppQueryClientProvider } from "@/feature/cache/providers/app-query-client-provider";
+import { CanHoverProvider } from "@/feature/hover/providers/can-hover-provider";
+import { MobileProvider } from "@/feature/mobile/providers/mobile-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
+import { TooltipProvider } from "@/shadcn/components/ui/tooltip";
 import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -21,16 +28,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        {/* <AppQueryClientProvider>
+        <AppQueryClientProvider>
           <TooltipProvider>
             <ThemeProvider
               attribute="class"
@@ -39,15 +45,15 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <HotkeysClientProvider>
-                <DetectMobileProvider>
+                <MobileProvider>
                   <CanHoverProvider>
                     <ThumbEventProvider>{children}</ThumbEventProvider>
                   </CanHoverProvider>
-                </DetectMobileProvider>
+                </MobileProvider>
               </HotkeysClientProvider>
             </ThemeProvider>
           </TooltipProvider>
-        </AppQueryClientProvider> */}
+        </AppQueryClientProvider>
         <Toaster position="bottom-center" />
       </body>
     </html>

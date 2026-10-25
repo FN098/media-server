@@ -5,9 +5,9 @@ import { restoreDatabaseFromFile } from "@/__lib/child_process/mysql";
 import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/__lib/db-backup/config";
 import { parseDatabaseURL } from "@/__lib/db/url-parser";
 import { getDatabaseUrlOrThrow } from "@/__lib/env/env-server";
-import { logger } from "@/__lib/logger";
 import { isFsNotFoundError } from "@/__lib/utils/fs";
 import { FileNameSchema } from "@/__lib/virtual-path/schemas";
+import { logger } from "@/lib/logger";
 import path from "path";
 import z from "zod";
 

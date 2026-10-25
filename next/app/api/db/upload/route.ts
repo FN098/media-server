@@ -5,13 +5,13 @@ import {
 } from "@/__lib/db-backup/config";
 import { buildDbUploadFileName } from "@/__lib/db-backup/filename";
 import { DbBackupFile } from "@/__lib/db-backup/types";
-import { logger } from "@/__lib/logger";
 import {
   badRequestResponse,
   forbiddenResponse,
   internalServerErrorResponse,
 } from "@/__lib/response/errors";
 import { formatBytes } from "@/__lib/utils/bytes";
+import { logger } from "@/lib/logger";
 import fs from "fs/promises";
 import { NextRequest } from "next/server";
 import path from "path";

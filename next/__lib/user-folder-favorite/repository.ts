@@ -1,5 +1,5 @@
-import { db } from "@/__lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
+import { db } from "@/lib/prisma";
 
 export async function isFavoriteFolder({
   userId,

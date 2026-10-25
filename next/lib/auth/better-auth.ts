@@ -1,5 +1,5 @@
-import { db } from "@/__lib/prisma";
 import { parseCsvEnv } from "@/__lib/utils/env";
+import { db } from "@/lib/prisma";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth/minimal";
 import { nextCookies } from "better-auth/next-js";

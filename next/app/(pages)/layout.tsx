@@ -3,7 +3,6 @@ import { ViewerHeaderPinnedProvider } from "@/feature/viewer/providers/viewer-he
 import { SidebarProvider } from "@/shadcn/components/ui/sidebar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  debugger;
   return (
     <ViewerHeaderPinnedProvider>
       <SidebarProvider defaultOpen={false}>

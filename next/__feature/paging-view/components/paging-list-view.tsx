@@ -14,7 +14,6 @@ import {
 import { useMenuItemsContext } from "@/__feature/menu-items/providers/menu-items-provider";
 import { NodeContextMenu } from "@/__feature/menu/ui/node-context-menu";
 import { NodeDropdownMenu } from "@/__feature/menu/ui/node-dropdown-menu";
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { AverageRatingBadge } from "@/__feature/paging-view/components/average-rating-badge";
 import { FavoriteRatingDisplay } from "@/__feature/paging-view/components/favorite-rating-display";
 import { FolderStatusBadge } from "@/__feature/paging-view/components/folder-status-badge";
@@ -30,6 +29,7 @@ import {
 } from "@/__feature/view/providers/media-node-control-provider";
 import { formatBytes } from "@/__lib/utils/bytes";
 import { getExtension } from "@/__lib/utils/filename";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
@@ -150,7 +150,7 @@ function DataRow() {
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });
 
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   const { locale } = useLocaleContext();
 

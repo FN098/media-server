@@ -1,7 +1,7 @@
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { EditingMode, TagEditMode } from "@/__lib/tag-editor/types";
 import { normalizeTagName } from "@/__lib/tag/normalize";
 import { Tag, TagOperator, TagState } from "@/__lib/tag/types";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { useTagEditSheetContext } from "@/feature/tag-editor/_providers/tag-edit-sheet-provider";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
@@ -49,7 +49,7 @@ export function TagEditSheet() {
   } = useTagEditSheetContext();
 
   const controls = useDragControls();
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   return (
     <AnimatePresence>

@@ -4,10 +4,10 @@ import {
   GhostThumbScanEventData,
 } from "@/__lib/ghost-thumb/types";
 import { getMediaPathFromThumbPath } from "@/__lib/path/helpers";
-import { db } from "@/__lib/prisma";
 import { sanitize } from "@/__lib/virtual-path/guard";
 import { APP_CONFIG } from "@/app.config";
 import { PATHS } from "@/feature/paths";
+import { db } from "@/lib/prisma";
 import { glob } from "glob/raw";
 import path from "path";
 

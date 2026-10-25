@@ -1,7 +1,7 @@
 "use client";
 
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { useMounted } from "@/feature/etc/hooks/use-mounted";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { SearchInput } from "@/feature/search/components/search-input";
 import { useSearch } from "@/feature/search/hooks/use-search";
 import { Kbd } from "@/shadcn/components/ui/kbd";
@@ -20,7 +20,7 @@ export function Search() {
     handleKeyDown,
   } = useSearch();
 
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
   const mounted = useMounted();
 
   const placeholder = isMobile ? "" : undefined;

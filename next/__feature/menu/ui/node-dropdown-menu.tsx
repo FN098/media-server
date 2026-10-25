@@ -1,10 +1,10 @@
 "use client";
 
 import { useNodeDropdownMenu } from "@/__feature/menu/hooks/use-node-dropdown-menu";
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
 import { castArray } from "@/__lib/utils/array";
 import { useMounted } from "@/feature/etc/hooks/use-mounted";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { MediaNode } from "@/lib/node/types";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -43,7 +43,7 @@ export function NodeDropdownMenu({
   hidden,
   variant = "default",
 }: NodeDropdownMenuProps) {
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
   const mounted = useMounted();
 
   const [internalOpen, setInternalOpen] = useState(false);

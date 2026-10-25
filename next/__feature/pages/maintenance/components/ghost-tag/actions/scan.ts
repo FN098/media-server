@@ -1,8 +1,8 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
-import { prisma } from "@/__lib/prisma";
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 
 export type GhostTag = {
   id: string;

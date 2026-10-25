@@ -1,7 +1,6 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
 import { copyNodeInDb } from "@/__lib/node/services";
 import {
   getServerMediaPath,
@@ -14,6 +13,7 @@ import {
   EditableVirtualPathManySchema,
   EditableVirtualPathSchema,
 } from "@/__lib/virtual-path/schemas";
+import { logger } from "@/lib/logger";
 import { cp, readdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import z from "zod";

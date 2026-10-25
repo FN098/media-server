@@ -1,6 +1,6 @@
 "use client";
 
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
   Tooltip,
@@ -18,7 +18,7 @@ interface MediaViewerHeaderPinButtonProps extends React.ComponentProps<"button">
 export function MediaViewerHeaderPinButton(
   props: MediaViewerHeaderPinButtonProps
 ) {
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   // モバイルなら Tooltip 使わない
   if (isMobile) {

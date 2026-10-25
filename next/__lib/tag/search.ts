@@ -1,7 +1,7 @@
-import { prisma } from "@/__lib/prisma";
 import { SearchTagStrategy } from "@/__lib/tag/strategies";
 import { Tag } from "@/__lib/tag/types";
 import { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 
 type SearchTagsOptions = {
   excludeIds?: string[];

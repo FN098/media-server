@@ -1,7 +1,6 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
 import {
   getServerMediaPath,
   getServerMediaTrashPath,
@@ -10,6 +9,7 @@ import { unique } from "@/__lib/utils/array";
 import { recursiveMergeMove } from "@/__lib/utils/fs";
 import { dirname } from "@/__lib/virtual-path/path";
 import { EditableVirtualPathManySchema } from "@/__lib/virtual-path/schemas";
+import { logger } from "@/lib/logger";
 import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import z from "zod";

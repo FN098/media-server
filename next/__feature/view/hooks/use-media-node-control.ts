@@ -1,8 +1,8 @@
 import { useFavoritesControlContext } from "@/__feature/favorite/providers/favorites-control-provider";
 import { usePercent } from "@/__feature/general/hooks/use-percent";
-import { useLongPress } from "@/__feature/mobile/hooks/use-long-press";
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { useNodeSelectionContext } from "@/__feature/selection/providers/node-selection-provider";
+import { useLongPress } from "@/feature/long-press/hooks/use-long-press";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { isMediaFile } from "@/lib/file/media-types";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo, useState } from "react";
@@ -25,7 +25,7 @@ export function useMediaNodeControl({
   onOpen,
 }: UseMediaNodeControlProps) {
   const isMediaNode = useMemo(() => isMediaFile(node.type), [node.type]);
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   const {
     getFavorite,

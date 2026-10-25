@@ -1,6 +1,6 @@
 "use client";
 
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { Button } from "@/shadcn/components/ui/button";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
@@ -20,7 +20,7 @@ interface FavoriteButtonProps extends React.ComponentProps<"button"> {
 }
 
 export function FavoriteButton(props: FavoriteButtonProps) {
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   // モバイルなら Tooltip 使わない
   if (isMobile) {

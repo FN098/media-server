@@ -6,7 +6,7 @@ import { DB_BACKUP_DIR } from "@/__lib/db-backup/config";
 import { buildDbBackupFileName } from "@/__lib/db-backup/filename";
 import { parseDatabaseURL } from "@/__lib/db/url-parser";
 import { getDatabaseUrlOrThrow } from "@/__lib/env/env-server";
-import { logger } from "@/__lib/logger";
+import { logger } from "@/lib/logger";
 import fs from "fs/promises";
 import path from "path";
 

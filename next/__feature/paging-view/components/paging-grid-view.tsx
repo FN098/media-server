@@ -9,7 +9,6 @@ import { FavoriteButton } from "@/__feature/favorite/ui/favorite-button";
 import { useMenuItemsContext } from "@/__feature/menu-items/providers/menu-items-provider";
 import { NodeContextMenu } from "@/__feature/menu/ui/node-context-menu";
 import { NodeDropdownMenu } from "@/__feature/menu/ui/node-dropdown-menu";
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { AverageRatingBadge } from "@/__feature/paging-view/components/average-rating-badge";
 import { FolderStatusBadge } from "@/__feature/paging-view/components/folder-status-badge";
 import { PagingControl } from "@/__feature/paging-view/components/pagination-control";
@@ -25,6 +24,7 @@ import {
 } from "@/__feature/view/providers/media-node-control-provider";
 import { formatBytes } from "@/__lib/utils/bytes";
 import { useCanHoverContext } from "@/feature/hover/providers/can-hover-provider";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
@@ -45,7 +45,7 @@ export function PagingGridView() {
     handleKeyDown,
   } = usePagingGridView();
 
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   return (
     <MediaNodeDndProvider onDragEnd={onDragEnd}>
@@ -121,7 +121,7 @@ function Cell() {
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });
 
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
   const canHover = useCanHoverContext();
 
   return (

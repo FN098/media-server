@@ -1,8 +1,8 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
-import { prisma } from "@/__lib/prisma";
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 import z from "zod";
 
 const InputSchema = z.object({

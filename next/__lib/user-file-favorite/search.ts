@@ -4,12 +4,12 @@ import {
   TagFilterMode,
 } from "@/__lib/filter/types";
 import { SortDirection } from "@/__lib/node/sort";
-import { prisma } from "@/__lib/prisma";
 import { normalizeForLike } from "@/__lib/utils/japanese";
 import { shuffleArray, shuffleArrayWithSeed } from "@/__lib/utils/shuffle";
 import { Prisma } from "@/generated/prisma/client";
 import { detectMediaType } from "@/lib/file/media-types";
 import { MediaNode, MediaType } from "@/lib/node/types";
+import { prisma } from "@/lib/prisma";
 import path, { basename } from "path";
 
 type SearchFavoriteParams = {

@@ -1,7 +1,6 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
 import { getServerMediaPath } from "@/__lib/path/helpers";
 import { existsPath } from "@/__lib/utils/fs";
 import { sanitize } from "@/__lib/virtual-path/guard";
@@ -10,6 +9,7 @@ import {
   EditableVirtualPathSchema,
   FileOrFolderNameSchema,
 } from "@/__lib/virtual-path/schemas";
+import { logger } from "@/lib/logger";
 import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import z from "zod";

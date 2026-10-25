@@ -1,4 +1,4 @@
-import { prisma } from "@/__lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 // ファイルパスからメディアIDを逆引き
 /** @deprecated */

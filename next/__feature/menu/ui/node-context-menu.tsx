@@ -1,10 +1,10 @@
 "use client";
 
 import { useNodeContextMenu } from "@/__feature/menu/hooks/use-node-context-menu";
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
 import { castArray } from "@/__lib/utils/array";
 import { useMounted } from "@/feature/etc/hooks/use-mounted";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { MediaNode } from "@/lib/node/types";
 import {
   ContextMenu,
@@ -35,7 +35,7 @@ export function NodeContextMenu({
   onOpenChange,
   disabled,
 }: NodeContextMenuProps) {
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
   const mounted = useMounted();
   const { context, items } = useNodeContextMenu({ node, menuItems });
 

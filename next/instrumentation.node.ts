@@ -1,7 +1,7 @@
 // Node 環境でのみ実行可能な初期化処理
 // Edge 環境で呼び出すとエラーになるので注意
 
-import { prisma } from "@/__lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export function registerNodeOnly() {
   // 重複登録防止（型安全なチェック）

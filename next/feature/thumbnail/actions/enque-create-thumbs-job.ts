@@ -1,10 +1,10 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
 import { acquireLock } from "@/__lib/redis/lock";
 import { sha1Hash } from "@/__lib/utils/sha1-hash";
 import { thumbQueue } from "@/feature/thumbnail/lib/queue";
+import { logger } from "@/lib/logger";
 
 type ActionResult = { success: true } | { success: false; message: string };
 

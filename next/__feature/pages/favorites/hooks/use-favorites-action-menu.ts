@@ -1,7 +1,7 @@
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { defaultFilters } from "@/__lib/menu-items/filters";
 import { createRecursiveTransformer } from "@/__lib/menu-items/transformer";
 import { MenuItemDef } from "@/__lib/menu-items/types";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { useMemo } from "react";
 
 interface FavoritesActionMenuContext {
@@ -18,7 +18,7 @@ const transformer = createRecursiveTransformer<
 >(defaultFilters);
 
 export function useFavoritesActionMenu() {
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
 
   const context = useMemo(() => {
     return {

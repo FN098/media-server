@@ -1,7 +1,6 @@
-import { auth } from "@/__lib/auth/better-auth";
-import { logger } from "@/__lib/logger";
-import { isBlockedClientPath } from "@/__lib/path/protections";
-import { isPublicRoute } from "@/__lib/routing/public-routes";
+import { auth } from "@/lib/auth/better-auth";
+import { logger } from "@/lib/logger";
+import { isPublicRoute } from "@/lib/routing/public-routes";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function proxy(req: NextRequest) {
@@ -44,12 +43,6 @@ export async function proxy(req: NextRequest) {
   }
 
   // ====== 認可 =======
-
-  // アクセス禁止パス保護
-  const isBlocked = isBlockedClientPath(pathname);
-  if (isBlocked) {
-    return NextResponse.rewrite(new URL("/404", req.url));
-  }
 
   return NextResponse.next(); // 認可OK
 }

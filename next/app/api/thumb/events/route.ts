@@ -1,10 +1,10 @@
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
 import { redis } from "@/__lib/redis";
 import {
   forbiddenResponse,
   internalServerErrorResponse,
 } from "@/__lib/response/errors";
+import { logger } from "@/lib/logger";
 
 // サムネイルイベント購読
 export async function GET(req: Request) {

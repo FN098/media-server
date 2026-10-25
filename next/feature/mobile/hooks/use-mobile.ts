@@ -16,7 +16,7 @@ function detectMobile() {
   return isMobileUA || (isTouchDevice && isNarrowScreen);
 }
 
-export function useDetectMobile() {
+export function useMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {

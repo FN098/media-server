@@ -1,8 +1,8 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
-import { db } from "@/__lib/prisma";
+import { logger } from "@/lib/logger";
+import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 type ActionResult =

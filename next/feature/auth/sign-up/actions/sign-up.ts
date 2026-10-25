@@ -1,12 +1,12 @@
 "use server";
 
-import { auth } from "@/__lib/auth/better-auth";
-import { logger } from "@/__lib/logger";
 import {
   SignUpFormSchema,
   SignUpFormValues,
 } from "@/feature/auth/sign-up/lib/schemas";
 import { SignUpResult } from "@/feature/auth/sign-up/lib/types";
+import { auth } from "@/lib/auth/better-auth";
+import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";
 import z from "zod";
 

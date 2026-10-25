@@ -1,5 +1,5 @@
-import { db } from "@/__lib/prisma";
 import { omit } from "@/__lib/utils/object";
+import { db } from "@/lib/prisma";
 import { cache } from "react";
 
 // #region root folder

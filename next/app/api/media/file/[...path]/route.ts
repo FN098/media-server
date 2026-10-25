@@ -1,4 +1,3 @@
-import { logger } from "@/__lib/logger";
 import { getMimetype } from "@/__lib/node/mimetype";
 import { getServerMediaPath } from "@/__lib/path/helpers";
 import {
@@ -9,6 +8,7 @@ import {
 } from "@/__lib/response/errors";
 import { getPathInfo } from "@/__lib/utils/fs";
 import { VirtualPathSchema } from "@/__lib/virtual-path/schemas";
+import { logger } from "@/lib/logger";
 import { createReadStream } from "fs";
 import { Readable } from "stream";
 import z from "zod";

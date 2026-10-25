@@ -6,8 +6,8 @@
  * 使い方：`pnpm tsx ./tools/fill-missing-tag-kana.ts`
  */
 
-import { prisma } from "@/__lib/prisma";
 import { generateKana } from "@/__lib/utils/kana";
+import { prisma } from "@/lib/prisma";
 
 export async function fillMissingTagKana() {
   try {

@@ -1,9 +1,9 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { logger } from "@/__lib/logger";
 import { addFavoriteFiles } from "@/__lib/user-file-favorite/repository";
 import { addFavoriteFolders } from "@/__lib/user-folder-favorite/repository";
+import { logger } from "@/lib/logger";
 import z from "zod";
 
 const InputSchema = z.object({

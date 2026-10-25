@@ -1,9 +1,9 @@
 "use client";
 
-import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { ClickToCopy } from "@/__feature/text/ui/click-to-copy";
 import { DynamicBreadcrumbs } from "@/feature/breadcrumbs/components/dynamic-breadcrumbs";
 import { useDynamicBreadcrumbsContext } from "@/feature/breadcrumbs/providers/dynamic-breadcrumbs-provider";
+import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -11,7 +11,7 @@ import { useCallback } from "react";
 
 export function ExplorerNavigation() {
   const searchParams = useSearchParams();
-  const isMobile = useDetectMobileContext();
+  const isMobile = useMobileContext();
   const breadcrumbs = useDynamicBreadcrumbsContext();
   const current = breadcrumbs.items.at(-1);
   const backHref = breadcrumbs.items.at(-2)?.href ?? null;
