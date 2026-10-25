@@ -4,13 +4,13 @@ import "swiper/css";
 import "swiper/css/virtual";
 import "swiper/css/zoom";
 
-import { AudioPlayer } from "@/__feature/viewers/audio-player";
-import { ImageViewer } from "@/__feature/viewers/image-viewer";
 import { useMediaViewerContext } from "@/__feature/viewers/media-viewer/providers/media-viewer-provider";
-import { VideoPlayer } from "@/__feature/viewers/video-player";
 import { assertNever } from "@/__lib/utils/assert";
 import { clamp } from "@/__lib/utils/clamp";
 import { ContentSlide, MediaViewerSlide } from "@/__lib/viewer/slides";
+import { AudioPlayer } from "@/feature/viewer/components/audio-player";
+import { ImageViewer } from "@/feature/viewer/components/image-viewer";
+import { VideoPlayer } from "@/feature/viewer/components/video-player";
 import { MediaNode } from "@/lib/node/types";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect } from "react";

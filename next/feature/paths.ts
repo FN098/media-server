@@ -7,17 +7,9 @@ export const PATHS = {
       thumb: {
         root: `${MEDIA_ROOT}/.thumb`,
       },
-      trash: {
-        root: `${MEDIA_ROOT}/.trash`,
-      },
       db: {
         root: `${MEDIA_ROOT}/.db`,
       },
-    },
-  },
-  virtual: {
-    trash: {
-      root: ".trash",
     },
   },
   client: {

@@ -2,8 +2,8 @@
 
 import { authorize } from "@/__lib/authorization/authorize";
 import { logger } from "@/__lib/logger";
-import { PATHS } from "@/__lib/path/paths";
 import { chunk, unique } from "@/__lib/utils/array";
+import { PATHS } from "@/feature/paths";
 import { rm } from "fs/promises";
 import path from "path";
 import z from "zod";

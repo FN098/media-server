@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchFocus } from "@/__feature/search/hooks/use-search-focus";
+import { useSearchFocus } from "@/feature/search/hooks/use-search-focus";
 import { createContext, useContext } from "react";
 
 const SearchFocusContext = createContext<

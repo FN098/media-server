@@ -1,8 +1,8 @@
-import { SearchFocusProvider } from "@/__feature/search/providers/search-focus-provider";
 import { PageBackground } from "@/feature/background/components/page-background";
 import { DynamicBreadcrumbsProvider } from "@/feature/breadcrumbs/providers/dynamic-breadcrumbs-provider";
 import { ExplorerHeader } from "@/feature/header/components/explorer-header";
 import { getPageMeta } from "@/feature/page-meta/lib/page-meta";
+import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";
 import { getFolderPathTree } from "@/lib/folder/repository";
 
 interface ExplorerLayoutProps {

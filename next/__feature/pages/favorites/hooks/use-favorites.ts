@@ -8,12 +8,12 @@ import { useFavoritesMenu } from "@/__feature/pages/favorites/hooks/use-favorite
 import { useFavoritesNavigation } from "@/__feature/pages/favorites/hooks/use-favorites-navigation";
 import { useFavoritesSelectionBar } from "@/__feature/pages/favorites/hooks/use-favorites-selection-bar";
 import { useFavoritesThumbs } from "@/__feature/pages/favorites/hooks/use-favorites-thumbs";
-import { useSearchFocusContext } from "@/__feature/search/providers/search-focus-provider";
 import { useNodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { useSort } from "@/__feature/sort/hooks/use-sort";
 import { useViewMode } from "@/__feature/view/hooks/use-view-mode";
 import { useSlideshowContext } from "@/__feature/viewers/media-viewer/providers/slideshow-provider";
 import { useHistoryContext } from "@/feature/history/providers/history-provider";
+import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
 import { useTagEditorContext } from "@/feature/tag-editor/_providers/tag-editor-provider";
 import { useViewer } from "@/feature/viewer/hooks/use-viewer";
 import { MediaListing } from "@/lib/node/types";

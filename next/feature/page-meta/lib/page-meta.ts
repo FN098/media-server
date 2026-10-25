@@ -1,4 +1,4 @@
-import { PATHS } from "@/__lib/path/paths";
+import { PATHS } from "@/feature/paths";
 import { AccentColor } from "@/feature/theme/lib/accent-color";
 import {
   FolderSearchIcon,

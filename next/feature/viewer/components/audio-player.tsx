@@ -1,6 +1,6 @@
 import { MarqueeText } from "@/__feature/text/ui/marquee-text";
 import { MediaThumb } from "@/__feature/thumbnail/ui/media-thumb";
-import { resolveMediaUrl } from "@/__lib/node/resolvers";
+import { getAudioUrl } from "@/feature/viewer/lib/audio-url";
 import { FileNode } from "@/lib/node/types";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
@@ -275,7 +275,7 @@ export function AudioPlayer({
         {active && (
           <audio
             ref={playerRef}
-            src={resolveMediaUrl(node)}
+            src={getAudioUrl(node)}
             autoPlay
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}

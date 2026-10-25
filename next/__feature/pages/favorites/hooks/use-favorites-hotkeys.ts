@@ -1,8 +1,8 @@
 import { Fullscreen } from "@/__feature/general/hooks/use-fullscreen";
 import { FavoritesDialogs } from "@/__feature/pages/favorites/hooks/use-favorites-dialogs";
 import { FavoritesFiltering } from "@/__feature/pages/favorites/hooks/use-favorites-filtering";
-import { SearchFocus } from "@/__feature/search/hooks/use-search-focus";
 import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
+import { SearchFocus } from "@/feature/search/hooks/use-search-focus";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 import { useEffect, useMemo } from "react";

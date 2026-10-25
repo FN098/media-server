@@ -1,9 +1,9 @@
 "use client";
 
 import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
-import { useSearch } from "@/__feature/search/hooks/use-search";
-import { SearchInput } from "@/__feature/search/ui/search-input";
 import { useMounted } from "@/feature/etc/hooks/use-mounted";
+import { SearchInput } from "@/feature/search/components/search-input";
+import { useSearch } from "@/feature/search/hooks/use-search";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";

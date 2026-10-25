@@ -5,7 +5,7 @@ import { mergeDbNodes } from "@/__lib/node/merge";
 import { SortDirection, SortKey, sortNodes } from "@/__lib/node/sort";
 import { syncFsWithDb } from "@/__lib/node/sync";
 import { APP_CONFIG } from "@/app.config";
-import { ExplorerProvider } from "@/app/(pages)/explorer/_providers/explorer-provider";
+import { Explorer } from "@/app/(pages)/explorer/_components";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import {
@@ -145,9 +145,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   return (
     <NodeSelectionProvider>
       <FavoritesControlProvider entries={favorites}>
-        <ExplorerProvider listing={listing}>
-          {/* <Explorer /> */}a
-        </ExplorerProvider>
+        <Explorer />
       </FavoritesControlProvider>
     </NodeSelectionProvider>
   );
