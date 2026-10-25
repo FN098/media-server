@@ -13,6 +13,8 @@ interface UseDynamicBreadcrumbsProps {
   items: BreadcrumbLinkItem[];
 }
 
+type DisplayMode = "full" | "first-last" | "ellipsis-last";
+
 export function useDynamicBreadcrumbs({ items }: UseDynamicBreadcrumbsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -41,7 +43,7 @@ export function useDynamicBreadcrumbs({ items }: UseDynamicBreadcrumbsProps) {
   );
 
   // 表示モードの判定
-  const displayMode = useMemo(() => {
+  const displayMode: DisplayMode = useMemo(() => {
     if (containerWidth === 0) return "full";
 
     if (totalFullWidth <= containerWidth) {
@@ -56,5 +58,5 @@ export function useDynamicBreadcrumbs({ items }: UseDynamicBreadcrumbsProps) {
     }
   }, [containerWidth, firstWidth, lastWidth, totalFullWidth]);
 
-  return { containerRef, displayMode, first, middle, last };
+  return { items, containerRef, displayMode, first, middle, last };
 }

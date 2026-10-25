@@ -1,7 +1,8 @@
 import { SearchFocusProvider } from "@/__feature/search/providers/search-focus-provider";
-import { PageBackground } from "@/app/(pages)/_components/background/page-background";
-import { resolvePageMeta } from "@/app/(pages)/_lib/page-meta/resolvers";
-import { DashboardHeader } from "@/feature/header/components/dashboard-header";
+import { PageBackground } from "@/feature/background/components/page-background";
+import { DynamicBreadcrumbsProvider } from "@/feature/breadcrumbs/providers/dynamic-breadcrumbs-provider";
+import { ExplorerHeader } from "@/feature/header/components/explorer-header";
+import { getPageMeta } from "@/feature/page-meta/lib/page-meta";
 import { getFolderPathTree } from "@/lib/folder/repository";
 
 interface ExplorerLayoutProps {
@@ -12,7 +13,7 @@ interface ExplorerLayoutProps {
   children: React.ReactNode;
 }
 
-const meta = resolvePageMeta("explorer");
+const meta = getPageMeta("explorer");
 
 export default async function Layout(props: ExplorerLayoutProps) {
   if (!meta) return;
@@ -30,19 +31,13 @@ export default async function Layout(props: ExplorerLayoutProps) {
 
   return (
     <SearchFocusProvider>
-      <div className="relative w-full h-screen flex flex-col">
-        <PageBackground
-          accent={meta.accent}
-          backgroundType={meta.backgroundType}
-        />
-        <DashboardHeader
-          title={meta.title}
-          icon={meta.icon}
-          accent={meta.accent}
-          breadcrumbs={breadcrumbs}
-        />
-        <main>{children}</main>
-      </div>
+      <DynamicBreadcrumbsProvider items={breadcrumbs}>
+        <div className="relative w-full h-screen flex flex-col">
+          <PageBackground accent={meta.accent} />
+          <ExplorerHeader title={meta.title} accent={meta.accent} />
+          <main>{children}</main>
+        </div>
+      </DynamicBreadcrumbsProvider>
     </SearchFocusProvider>
   );
 }

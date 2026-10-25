@@ -2,25 +2,19 @@
 
 import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { ClickToCopy } from "@/__feature/text/ui/click-to-copy";
-import { DynamicBreadcrumbsLast } from "@/feature/breadcrumbs/components/dynamic-breadcrumbs";
+import { DynamicBreadcrumbs } from "@/feature/breadcrumbs/components/dynamic-breadcrumbs";
+import { useDynamicBreadcrumbsContext } from "@/feature/breadcrumbs/providers/dynamic-breadcrumbs-provider";
 import { ArrowUp } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-export function HeaderNavigation({
-  breadcrumbs = [],
-}: {
-  breadcrumbs?: {
-    key: string;
-    href: string;
-    label: string;
-  }[];
-}) {
+export function ExplorerNavigation() {
   const searchParams = useSearchParams();
   const isMobile = useDetectMobileContext();
-  const current = breadcrumbs.at(-1);
-  const backHref = breadcrumbs.at(-2)?.href ?? null;
+  const breadcrumbs = useDynamicBreadcrumbsContext();
+  const current = breadcrumbs.items.at(-1);
+  const backHref = breadcrumbs.items.at(-2)?.href ?? null;
 
   const buildUrl = useCallback(
     (baseUrl: string) => {
@@ -58,12 +52,7 @@ export function HeaderNavigation({
         </div>
       ) : (
         <div className="min-w-0 flex-1">
-          <DynamicBreadcrumbsLast
-            items={breadcrumbs.map((b) => ({
-              ...b,
-              href: buildUrl(b.href),
-            }))}
-          />
+          <DynamicBreadcrumbs />
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-import { HeaderNavigation } from "@/app/(pages)/explorer/_components/header-navigation";
+import { ExplorerNavigation } from "@/feature/navigation/components/explorer-navigation";
 import { Search } from "@/feature/search/components/search";
 import { AppSidebarOpenButton } from "@/feature/sidebar/components/app-menu-sidebar";
 import { AccentColor } from "@/feature/theme/lib/accent-color";
@@ -6,61 +6,45 @@ import { ViewModeSwitchClient } from "@/feature/view-mode/components/view-mode-s
 import { cn } from "@/shadcn/lib/utils";
 import { LucideIcon } from "lucide-react";
 
-type HeaderFeatures = {
-  navigation?: boolean;
-  search?: boolean;
-  viewMode?: boolean;
-};
-
-interface HeaderProps {
-  title: string;
-  icon?: LucideIcon;
-  features?: HeaderFeatures;
-  accent?: AccentColor;
-  breadcrumbs?: {
-    key: string;
-    href: string;
-    label: string;
-  }[];
-}
-
 const accentBorderMap: Record<AccentColor, string> = {
   indigo: "border-indigo-500/30 dark:border-indigo-500/20",
   violet: "border-violet-500/30 dark:border-violet-500/20",
-  sky: "border-sky-500/30    dark:border-sky-500/20",
-  cyan: "border-cyan-500/30   dark:border-cyan-500/20",
-  teal: "border-teal-500/30   dark:border-teal-500/20",
+  sky: "border-sky-500/30 dark:border-sky-500/20",
+  cyan: "border-cyan-500/30 dark:border-cyan-500/20",
+  teal: "border-teal-500/30 dark:border-teal-500/20",
   emerald: "border-emerald-500/30 dark:border-emerald-500/20",
-  red: "border-red-500/30    dark:border-red-500/20",
-  rose: "border-rose-500/30   dark:border-rose-500/20",
+  red: "border-red-500/30 dark:border-red-500/20",
+  rose: "border-rose-500/30 dark:border-rose-500/20",
   orange: "border-orange-500/30 dark:border-orange-500/20",
-  amber: "border-amber-500/30  dark:border-amber-500/20",
-  zinc: "border-zinc-400/30   dark:border-zinc-500/20",
+  amber: "border-amber-500/30 dark:border-amber-500/20",
+  zinc: "border-zinc-400/30 dark:border-zinc-500/20",
 };
 
 const accentIconMap: Record<AccentColor, string> = {
   indigo: "text-indigo-500 dark:text-indigo-400",
   violet: "text-violet-500 dark:text-violet-400",
-  sky: "text-sky-500    dark:text-sky-400",
-  cyan: "text-cyan-500   dark:text-cyan-400",
-  teal: "text-teal-500   dark:text-teal-400",
+  sky: "text-sky-500 dark:text-sky-400",
+  cyan: "text-cyan-500 dark:text-cyan-400",
+  teal: "text-teal-500 dark:text-teal-400",
   emerald: "text-emerald-500 dark:text-emerald-400",
-  red: "text-red-500    dark:text-red-400",
-  rose: "text-rose-500   dark:text-rose-400",
+  red: "text-red-500 dark:text-red-400",
+  rose: "text-rose-500 dark:text-rose-400",
   orange: "text-orange-500 dark:text-orange-400",
-  amber: "text-amber-500  dark:text-amber-400",
-  zinc: "text-zinc-500   dark:text-zinc-400",
+  amber: "text-amber-500 dark:text-amber-400",
+  zinc: "text-zinc-500 dark:text-zinc-400",
 };
 
-export function Header({
+interface ExplorerHeaderProps {
+  title: string;
+  icon?: LucideIcon;
+  accent?: AccentColor;
+}
+
+export function ExplorerHeader({
   title,
   icon: Icon,
-  features = {},
   accent,
-  breadcrumbs,
-}: HeaderProps) {
-  const { navigation = true, search = true, viewMode = true } = features;
-
+}: ExplorerHeaderProps) {
   return (
     <header
       className={cn(
@@ -97,13 +81,13 @@ export function Header({
 
         {/* パンくず */}
         <div className="min-w-0">
-          {navigation && <HeaderNavigation breadcrumbs={breadcrumbs} />}
+          <ExplorerNavigation />
         </div>
 
         {/* 検索＋ビューモード */}
         <div className="flex items-center gap-2">
-          {search && <Search />}
-          {viewMode && <ViewModeSwitchClient />}
+          <Search />
+          <ViewModeSwitchClient />
         </div>
       </div>
     </header>

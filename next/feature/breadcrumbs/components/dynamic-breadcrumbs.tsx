@@ -1,4 +1,5 @@
 import { BreadcrumbLinkItem } from "@/feature/breadcrumbs/lib/types";
+import { useDynamicBreadcrumbsContext } from "@/feature/breadcrumbs/providers/dynamic-breadcrumbs-provider";
 import {
   Breadcrumb,
   BreadcrumbEllipsis,
@@ -18,15 +19,38 @@ import { HomeIcon } from "lucide-react";
 import Link from "next/link";
 import React, { RefObject } from "react";
 
-// 親の幅に合わせて動的に表示内容を変更するパンくず
+export function DynamicBreadcrumbs() {
+  const breadcrumbs = useDynamicBreadcrumbsContext();
+
+  return breadcrumbs.displayMode === "full" ? (
+    <DynamicBreadcrumbsFull
+      items={breadcrumbs.items}
+      containerRef={breadcrumbs.containerRef}
+    />
+  ) : breadcrumbs.displayMode === "ellipsis-last" ? (
+    <DynamicBreadcrumbsFirstLast
+      first={breadcrumbs.first}
+      middle={breadcrumbs.middle}
+      last={breadcrumbs.last}
+      containerRef={breadcrumbs.containerRef}
+    />
+  ) : (
+    <DynamicBreadcrumbsEllipsisLast
+      first={breadcrumbs.first}
+      middle={breadcrumbs.middle}
+      last={breadcrumbs.last}
+      containerRef={breadcrumbs.containerRef}
+    />
+  );
+}
 
 /** 全部表示 */
-export function DynamicBreadcrumbsFull({
+function DynamicBreadcrumbsFull({
   items,
   containerRef,
 }: {
   items: BreadcrumbLinkItem[];
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
 }) {
   return (
     <Breadcrumb ref={containerRef} className="w-full">
@@ -64,8 +88,8 @@ export function DynamicBreadcrumbsFull({
   );
 }
 
-/** 先頭と末尾 */
-export function DynamicBreadcrumbsFirstLast({
+/** 先頭 ... 末尾 */
+function DynamicBreadcrumbsFirstLast({
   first,
   middle,
   last,
@@ -74,7 +98,7 @@ export function DynamicBreadcrumbsFirstLast({
   first: BreadcrumbLinkItem;
   middle: BreadcrumbLinkItem[];
   last: BreadcrumbLinkItem;
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
 }) {
   return (
     <Breadcrumb ref={containerRef} className="w-full">
@@ -116,8 +140,8 @@ export function DynamicBreadcrumbsFirstLast({
   );
 }
 
-/** 末尾のみ */
-export function DynamicBreadcrumbsLast({
+/** ... 末尾 */
+function DynamicBreadcrumbsEllipsisLast({
   first,
   middle,
   last,
@@ -126,7 +150,7 @@ export function DynamicBreadcrumbsLast({
   first: BreadcrumbLinkItem;
   middle: BreadcrumbLinkItem[];
   last: BreadcrumbLinkItem;
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
 }) {
   return (
     <Breadcrumb ref={containerRef} className="w-full">
