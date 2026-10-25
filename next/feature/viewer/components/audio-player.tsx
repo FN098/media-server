@@ -275,7 +275,7 @@ export function AudioPlayer({
         {active && (
           <audio
             ref={playerRef}
-            src={getAudioUrl(node)}
+            src={getAudioUrl(node.id)}
             autoPlay
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}

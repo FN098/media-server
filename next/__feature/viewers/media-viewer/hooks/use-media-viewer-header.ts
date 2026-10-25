@@ -10,7 +10,7 @@ export function useMediaViewerHeader() {
 
   const visibility = useVisibility({
     autoHide: {
-      enabled: !(isHovered || isMenuOpen || pinned.enabled),
+      enabled: !(isHovered || isMenuOpen || pinned.isPinned),
       duration: 2000,
     },
   });

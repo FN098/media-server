@@ -1,21 +1,17 @@
 import { PATHS } from "@/feature/paths";
 import path from "path";
 
-type Node = {
-  id: string;
-};
-
 type Options = {
   version?: number;
 };
 
-export function getAudioUrl(node: Node, option: Options = {}) {
+export function getAudioUrl(fileId: string, option: Options = {}) {
   const { version } = option;
 
   const baseUrl = path.join(
     window.location.origin,
     PATHS.api.media.file.root,
-    node.id
+    fileId
   );
 
   const params = new URLSearchParams();

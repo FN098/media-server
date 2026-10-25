@@ -1,27 +1,27 @@
-import { LoadingSpinner } from "@/__feature/viewers/media-viewer/ui/loading-spinner";
-import { resolveMediaThumbUrl } from "@/__lib/thumb/resolvers";
-import { resolveMediaUrl } from "@/feature/node/lib/url-resolver";
-import { MediaFsNode } from "@/lib/node/types";
+import { LoadingSpinner } from "@/feature/spinner/loading-spinner";
+import { getThumbnailUrl } from "@/feature/viewer/lib/thumbnail-url";
+import { getVideoUrl } from "@/feature/viewer/lib/video-url";
+import { Node } from "@/lib/node/types";
 import { cn } from "@/shadcn/lib/utils";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 type VideoPlayerProps = {
-  media: MediaFsNode;
+  node: Node;
   active?: boolean;
   onEnded?: () => void;
 };
 
 export function VideoPlayer({
-  media,
+  node,
   active = true,
   onEnded,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
 
-  const storageKey = `video-progress:${media.path}`;
+  const storageKey = `video-progress:${node.id}`;
 
   // 再生位置を保存
   const handleTimeUpdate = () => {
@@ -141,8 +141,8 @@ export function VideoPlayer({
         )}
       >
         <Image
-          src={resolveMediaThumbUrl(media)}
-          alt={media.name}
+          src={getThumbnailUrl(node.previewFileId ?? node.id)}
+          alt={node.name}
           fill
           className="object-contain select-none"
           priority
@@ -163,7 +163,7 @@ export function VideoPlayer({
           <video
             tabIndex={-1}
             ref={videoRef}
-            src={resolveMediaUrl(media, { absolute: true })}
+            src={getVideoUrl(node)}
             autoPlay
             controls
             preload="metadata"

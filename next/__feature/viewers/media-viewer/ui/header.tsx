@@ -81,7 +81,7 @@ export function MediaViewerHeader() {
 
           <div className="flex items-center gap-4">
             <MediaViewerHeaderPinButton
-              isPinned={pinned.enabled}
+              isPinned={pinned.isPinned}
               onClick={pinned.toggle}
             />
 

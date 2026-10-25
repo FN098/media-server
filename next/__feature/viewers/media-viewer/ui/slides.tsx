@@ -174,7 +174,7 @@ function MediaViewerSlideRenderer({
         case "video":
           return (
             <VideoPlayer
-              media={slide.node}
+              node={slide.node}
               active={active}
               onEnded={isSlideshowEnabled ? onNext : undefined}
             />
@@ -223,5 +223,5 @@ function ImageSlide({
     return () => clearTimeout(timer);
   }, [active, delay, isSlideshowEnabled, onNext]);
 
-  return <ImageViewer media={media} active={active} />;
+  return <ImageViewer node={media} active={active} />;
 }

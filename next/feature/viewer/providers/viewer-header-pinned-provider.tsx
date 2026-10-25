@@ -1,10 +1,10 @@
 "use client";
 
-import { useHeaderPinned } from "@/feature/viewer/hooks/use-header-pinned";
+import { useViewerHeaderPinned } from "@/feature/viewer/hooks/use-viewer-header-pinned";
 import { createContext, useContext } from "react";
 
-const headerPinnedContext = createContext<
-  ReturnType<typeof useHeaderPinned> | undefined
+const HeaderPinnedContext = createContext<
+  ReturnType<typeof useViewerHeaderPinned> | undefined
 >(undefined);
 
 export function ViewerHeaderPinnedProvider({
@@ -12,17 +12,17 @@ export function ViewerHeaderPinnedProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const value = useHeaderPinned();
+  const value = useViewerHeaderPinned();
 
   return (
-    <headerPinnedContext.Provider value={value}>
+    <HeaderPinnedContext.Provider value={value}>
       {children}
-    </headerPinnedContext.Provider>
+    </HeaderPinnedContext.Provider>
   );
 }
 
 export function useViewerHeaderPinnedContext() {
-  const context = useContext(headerPinnedContext);
+  const context = useContext(HeaderPinnedContext);
   if (context === undefined) {
     throw new Error(
       "useViewerHeaderPinnedContext must be used within ViewerHeaderPinnedProvider"

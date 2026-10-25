@@ -92,7 +92,7 @@ export function useMediaViewer({
     enabled: hotkeysEnabled,
     swiperRef: navigation.swiperRef,
     currentNode,
-    isHeaderPinned: header.pinned.enabled,
+    isHeaderPinned: header.pinned.isPinned,
     toggleHeaderVisibility: header.visibility.toggle,
     toggleIsHeaderPinned: header.pinned.toggle,
     interactHeader: header.interact,
