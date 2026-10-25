@@ -1,5 +1,5 @@
-import { DbFiles } from "@/__lib/file/repository";
-import { DbFolders } from "@/__lib/folder/repository";
+import { DbFiles } from "@/lib/file/repository";
+import { DbFolders } from "@/lib/folder/repository";
 import { FileNode, FolderNode, Node } from "@/lib/node/types";
 
 export function mergeDbNodes(dbFiles: DbFiles, dbFolders: DbFolders): Node[] {

@@ -1,8 +1,8 @@
 import { SearchFocusProvider } from "@/__feature/search/providers/search-focus-provider";
 import { SlideshowProvider } from "@/__feature/viewers/media-viewer/providers/slideshow-provider";
-import { DashboardHeader } from "@/app/(pages)/(dashboard)/_components/header";
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
 import { resolvePageMeta } from "@/app/(pages)/_lib/page-meta/resolvers";
+import { DashboardHeader } from "@/feature/header/components/dashboard-header";
 import { HistoryProvider } from "@/feature/history/providers/history-provider";
 import { TagEditorProvider } from "@/feature/tag-editor/_providers/tag-editor-provider";
 

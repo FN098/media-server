@@ -1,7 +1,7 @@
-import { getCurrentUser } from "@/__lib/auth/current-user";
 import { CurrentUser } from "@/__lib/auth/current-user-schema";
 import { hasPermissions } from "@/__lib/authorization/permission";
 import { Statement } from "@/__lib/authorization/statements";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 type AuthorizeResult =
   | {

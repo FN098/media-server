@@ -2,6 +2,8 @@ import { db } from "@/__lib/prisma";
 import { omit } from "@/__lib/utils/object";
 import { cache } from "react";
 
+// #region root folder
+
 const ROOT_FOLDER_NAME = "";
 
 async function _getRootFolder() {
@@ -17,6 +19,8 @@ export async function createRootFolder() {
     data: { parentFolderId: null, name: ROOT_FOLDER_NAME, mtime: new Date() },
   });
 }
+
+// #endregion
 
 export async function getFolder(id: string, userId: string) {
   const folder = await db.folder.findUnique({
@@ -39,47 +43,61 @@ export async function getFolder(id: string, userId: string) {
 }
 
 export async function createFolders(path: string) {
-  const segments = path.split("/").filter(Boolean);
+  return db.$transaction(async (tx) => {
+    const segments = path.split("/").filter(Boolean);
 
-  const root = await getRootFolder();
-
-  if (!root) {
-    throw new Error("Root not found");
-  }
-
-  let parentFolderId: string = root.id;
-  let folderId: string | null = null;
-
-  for (const name of segments) {
-    let folder = await db.folder.findFirst({
+    const root = await tx.folder.findFirst({
       where: {
-        parentFolderId,
-        name,
-        deletedAt: null,
+        parentFolderId: null,
+        name: ROOT_FOLDER_NAME,
       },
       select: {
         id: true,
       },
     });
 
-    if (!folder) {
-      folder = await db.folder.create({
-        data: {
+    if (!root) {
+      throw new Error("Root not found");
+    }
+
+    let parentFolderId = root.id;
+    let folderId: string | null = null;
+
+    for (const name of segments) {
+      let folder = await tx.folder.findFirst({
+        where: {
           parentFolderId,
           name,
-          mtime: new Date(),
+          deletedAt: null,
         },
         select: {
           id: true,
         },
       });
+
+      if (!folder) {
+        folder = await tx.folder.create({
+          data: {
+            parentFolderId,
+            name,
+            mtime: new Date(),
+          },
+          select: {
+            id: true,
+          },
+        });
+      }
+
+      folderId = folder.id;
+      parentFolderId = folder.id;
     }
 
-    folderId = folder.id;
-    parentFolderId = folder.id;
-  }
+    if (!folderId) {
+      throw new Error("Path must not be empty");
+    }
 
-  return folderId!!;
+    return folderId;
+  });
 }
 
 // フォルダID -> フォルダ名

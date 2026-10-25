@@ -1,5 +1,5 @@
-import { DashboardHeader } from "@/app/(pages)/(dashboard)/_components/header";
-import { PageBackground } from "@/app/(pages)/_components/background/page-background";
+import { PageBackground } from "@/feature/background/components/page-background";
+import { DashboardHeader } from "@/feature/header/components/dashboard-header";
 import { getPageMeta } from "@/feature/page-meta/lib/page-meta";
 
 const meta = getPageMeta("dashboard");

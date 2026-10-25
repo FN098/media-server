@@ -1,10 +1,10 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { getFilePath } from "@/__lib/file/repository";
-import { getFolderPath } from "@/__lib/folder/repository";
 import { logger } from "@/__lib/logger";
 import { getServerMediaTrashPath } from "@/__lib/path/helpers";
+import { getFilePath } from "@/lib/file/repository";
+import { getFolderPath } from "@/lib/folder/repository";
 import { rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 

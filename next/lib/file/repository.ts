@@ -1,5 +1,5 @@
-import { getFolderPath } from "@/__lib/folder/repository";
 import { db } from "@/__lib/prisma";
+import { getFolderPath } from "@/lib/folder/repository";
 
 // フォルダ内のファイル情報取得
 export async function getFiles(parentFolderId: string, userId: string) {

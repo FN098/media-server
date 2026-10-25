@@ -1,8 +1,8 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { updateVisitedFolder } from "@/__lib/folder/repository";
 import { logger } from "@/__lib/logger";
+import { updateVisitedFolder } from "@/lib/folder/repository";
 import { revalidatePath } from "next/cache";
 
 type ActionResult =

@@ -1,4 +1,4 @@
-import { PageBackground } from "@/app/(pages)/_components/background/page-background";
+import { PageBackground } from "@/feature/background/components/page-background";
 import { getPageMeta } from "@/feature/page-meta/lib/page-meta";
 
 const meta = getPageMeta("sign-up");

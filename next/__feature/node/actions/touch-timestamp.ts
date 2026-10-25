@@ -1,9 +1,9 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { updateFileTimestamp } from "@/__lib/file/repository";
-import { updateFolderTimestamp } from "@/__lib/folder/repository";
 import { logger } from "@/__lib/logger";
+import { updateFileTimestamp } from "@/lib/file/repository";
+import { updateFolderTimestamp } from "@/lib/folder/repository";
 
 type ActionResult = { success: true } | { success: false; message: string };
 

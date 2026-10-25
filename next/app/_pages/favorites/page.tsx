@@ -2,7 +2,6 @@ import { FavoritesControlProvider } from "@/__feature/favorite/providers/favorit
 import { Favorites } from "@/__feature/pages/favorites";
 import { FavoritesProvider } from "@/__feature/pages/favorites/providers/favorites-provider";
 import { NodeSelectionProvider } from "@/__feature/selection/providers/node-selection-provider";
-import { getCurrentUserOrThrow } from "@/__lib/auth/current-user";
 import {
   RatingFilterMode,
   RatingOperator,
@@ -12,6 +11,7 @@ import { SortDirection } from "@/__lib/node/sort";
 import { searchFavoriteMediaNodes } from "@/__lib/user-file-favorite/search";
 import { hashObject } from "@/__lib/utils/fnv1a-hash";
 import { APP_CONFIG } from "@/app.config";
+import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/node/formatters";
 import { Metadata } from "next";

@@ -1,6 +1,6 @@
-import { AppSidebarOpenButton } from "@/__feature/sidebar/ui/app-menu-sidebar";
 import { HeaderNavigation } from "@/app/(pages)/explorer/_components/header-navigation";
 import { Search } from "@/feature/search/components/search";
+import { AppSidebarOpenButton } from "@/feature/sidebar/components/app-menu-sidebar";
 import { AccentColor } from "@/feature/theme/lib/accent-color";
 import { ViewModeSwitchClient } from "@/feature/view-mode/components/view-mode-switch-client";
 import { cn } from "@/shadcn/lib/utils";

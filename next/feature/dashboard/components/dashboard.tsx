@@ -1,5 +1,5 @@
-import { RecentFolders } from "@/app/(pages)/(dashboard)/_components/recent-folders";
-import { RecentFolder } from "@/app/(pages)/(dashboard)/_lib/types";
+import { RecentFolders } from "@/feature/recent-folders/components/recent-folders";
+import { RecentFolder } from "@/feature/recent-folders/lib/types";
 import { Button } from "@/shadcn/components/ui/button";
 import { ArrowRight, FolderSearch2, HistoryIcon } from "lucide-react";
 import Link from "next/link";

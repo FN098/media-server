@@ -1,9 +1,9 @@
 "use server";
 
 import { authorize } from "@/__lib/authorization/authorize";
-import { getRecentVisitedFolders } from "@/__lib/folder/repository";
 import { logger } from "@/__lib/logger";
 import { basename } from "@/__lib/virtual-path/path";
+import { getRecentVisitedFolders } from "@/lib/folder/repository";
 
 type ActionResult =
   | {

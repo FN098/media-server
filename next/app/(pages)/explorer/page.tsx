@@ -1,4 +1,4 @@
-import { createRootFolder, getRootFolder } from "@/__lib/folder/repository";
+import { createRootFolder, getRootFolder } from "@/lib/folder/repository";
 import { redirect } from "next/navigation";
 
 export default async function ExplorerRootPage() {
