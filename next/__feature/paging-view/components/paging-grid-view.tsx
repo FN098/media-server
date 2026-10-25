@@ -6,7 +6,6 @@ import {
   useMediaNodeDndContext,
 } from "@/__feature/dnd/providers/media-node-dnd-provider";
 import { FavoriteButton } from "@/__feature/favorite/ui/favorite-button";
-import { useCanHoverContext } from "@/__feature/general/providers/can-hover-provider";
 import { useMenuItemsContext } from "@/__feature/menu-items/providers/menu-items-provider";
 import { NodeContextMenu } from "@/__feature/menu/ui/node-context-menu";
 import { NodeDropdownMenu } from "@/__feature/menu/ui/node-dropdown-menu";
@@ -25,6 +24,7 @@ import {
   useMediaNodeControlContext,
 } from "@/__feature/view/providers/media-node-control-provider";
 import { formatBytes } from "@/__lib/utils/bytes";
+import { useCanHoverContext } from "@/feature/hover/providers/can-hover-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";

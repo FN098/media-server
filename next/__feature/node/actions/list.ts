@@ -2,12 +2,12 @@
 
 import { authorize } from "@/__lib/authorization/authorize";
 import { logger } from "@/__lib/logger";
-import { detectMediaType } from "@/__lib/node/media-types";
 import { getServerMediaPath } from "@/__lib/path/helpers";
 import { isFsNotFoundError, isFsPermissionError } from "@/__lib/utils/fs";
 import { sanitize } from "@/__lib/virtual-path/guard";
 import { join } from "@/__lib/virtual-path/path";
 import { EditableVirtualPathSchema } from "@/__lib/virtual-path/schemas";
+import { detectMediaType } from "@/lib/file/media-types";
 import { MediaType } from "@/lib/node/types";
 import { readdir } from "fs/promises";
 import z from "zod";

@@ -5,8 +5,8 @@ import {
   QueryFilterValue,
   TagFilterValue,
 } from "@/__lib/filter/types";
-import { isMediaFile } from "@/__lib/node/media-types";
 import { isMatchJapanese } from "@/__lib/utils/japanese";
+import { isMediaFile } from "@/lib/file/media-types";
 import { Node } from "@/lib/node/types";
 
 type NodeFilter = (node: Node) => boolean;

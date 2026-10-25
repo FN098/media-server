@@ -5,6 +5,7 @@ import { getPageMeta } from "@/feature/page-meta/lib/page-meta";
 const meta = getPageMeta("dashboard");
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  debugger;
   if (!meta) return;
 
   return (

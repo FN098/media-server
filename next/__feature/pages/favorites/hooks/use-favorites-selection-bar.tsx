@@ -1,10 +1,10 @@
 import { FavoritesFavorites } from "@/__feature/pages/favorites/hooks/use-favorites-favorites";
 import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { ManyNodesContext, MenuItemDef } from "@/__lib/menu-items/types";
-import { hasMediaFile } from "@/__lib/node/media-types";
 import { averageBy } from "@/__lib/utils/math";
 import { FavoriteRatingInput } from "@/feature/favorite/ui/favorite-rating-input";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
+import { hasMediaFile } from "@/lib/file/media-types";
 import { TagIcon } from "lucide-react";
 import { useMemo } from "react";
 

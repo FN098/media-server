@@ -1,8 +1,8 @@
 import { FileType, FsNode } from "@/__lib/node/fs-listing";
-import { isMediaFile } from "@/__lib/node/media-types";
 import { sortNodes } from "@/__lib/node/sort";
 import { db } from "@/__lib/prisma";
 import { File, Folder } from "@/generated/prisma/client";
+import { isMediaFile } from "@/lib/file/media-types";
 
 type FileCreateItem = Pick<
   File,

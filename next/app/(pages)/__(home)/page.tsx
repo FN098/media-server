@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
+  debugger;
   const user = await getCurrentUserOrThrow();
 
   const folders = await getRecentVisitedFolders(

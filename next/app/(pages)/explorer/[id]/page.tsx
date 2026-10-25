@@ -6,7 +6,9 @@ import { SortDirection, SortKey, sortNodes } from "@/__lib/node/sort";
 import { syncFsWithDb } from "@/__lib/node/sync";
 import { APP_CONFIG } from "@/app.config";
 import { Explorer } from "@/app/(pages)/explorer/_components";
+import { ViewerProvider } from "@/feature/viewer/providers/viewer-provider";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
+import { isMediaFile } from "@/lib/file/media-types";
 import { getFiles } from "@/lib/file/repository";
 import {
   createFolders,
@@ -16,7 +18,7 @@ import {
   getFolderPath,
   updateFolderCache,
 } from "@/lib/folder/repository";
-import { Node, NodeListing } from "@/lib/node/types";
+import { MediaFileNode, Node, NodeListing } from "@/lib/node/types";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { basename, extname } from "path";
@@ -142,10 +144,16 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
       isFavorite: !!n.favoritedAt,
     }));
 
+  const mediaNodes = listing.children
+    .filter((n) => !n.isDirectory)
+    .filter((n): n is MediaFileNode => isMediaFile(n.type));
+
   return (
     <NodeSelectionProvider>
       <FavoritesControlProvider entries={favorites}>
-        <Explorer />
+        <ViewerProvider mediaNodes={mediaNodes}>
+          <Explorer />
+        </ViewerProvider>
       </FavoritesControlProvider>
     </NodeSelectionProvider>
   );

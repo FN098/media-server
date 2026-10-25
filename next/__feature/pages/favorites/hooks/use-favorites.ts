@@ -32,7 +32,7 @@ export function useFavorites({ listing }: UseFavoritesProps) {
   });
   const sort = useSort();
 
-  const viewer = useViewer({ nodes: filtering.mediaOnly });
+  const viewer = useViewer({ mediaNodes: filtering.mediaOnly });
   const folder = useFolderNavigation({});
   const history = useHistoryContext();
   const navigation = useFavoritesNavigation({

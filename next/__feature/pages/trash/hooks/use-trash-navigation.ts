@@ -4,9 +4,9 @@ import { useParentPathname } from "@/__feature/navigation/hooks/use-parent-pathn
 import { TrashFiltering } from "@/__feature/pages/trash/hooks/use-trash-filtering";
 import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
-import { isMediaFile } from "@/__lib/node/media-types";
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { IndexLike, ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
+import { isMediaFile } from "@/lib/file/media-types";
 import { MediaListing, MediaNode } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";

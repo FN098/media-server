@@ -3,8 +3,8 @@ import {
   useTrashFilterMenuItems,
 } from "@/__feature/pages/trash/hooks/use-trash-filter-menu-items";
 import { useTrashContext } from "@/__feature/pages/trash/providers/trash-provider";
-import { isMediaFile } from "@/__lib/node/media-types";
 import { MediaType } from "@/generated/prisma/enums";
+import { isMediaFile } from "@/lib/file/media-types";
 import { useCallback, useMemo } from "react";
 
 export function useTrashFilterMenu() {

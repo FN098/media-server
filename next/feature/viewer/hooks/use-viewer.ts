@@ -1,4 +1,4 @@
-import { Node } from "@/lib/node/types";
+import { MediaFileNode } from "@/lib/node/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
@@ -21,13 +21,13 @@ type OpenOptions = {
 };
 
 export interface UseViewerProps {
-  nodes: Node[];
+  mediaNodes: MediaFileNode[];
   atKey?: string;
   modalKey?: string;
 }
 
 export function useViewer({
-  nodes,
+  mediaNodes,
   atKey = "at",
   modalKey = "modal",
 }: UseViewerProps) {
@@ -41,8 +41,8 @@ export function useViewer({
 
   // number に正規化されたインデックス
   const index = useMemo(
-    () => parseIndexLike(at, nodes.length),
-    [at, nodes.length]
+    () => parseIndexLike(at, mediaNodes.length),
+    [at, mediaNodes.length]
   );
 
   // ビューアを起動

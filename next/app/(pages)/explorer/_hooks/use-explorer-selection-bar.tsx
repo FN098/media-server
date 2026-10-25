@@ -1,10 +1,10 @@
 import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { ManyNodesContext, MenuItemDef } from "@/__lib/menu-items/types";
-import { hasMediaFile } from "@/__lib/node/media-types";
 import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/app/(pages)/explorer/_hooks/use-explorer-favorites";
 import { ExplorerThumbs } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbs";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
+import { hasMediaFile } from "@/lib/file/media-types";
 import { MediaListing } from "@/lib/node/types";
 import {
   CopyIcon,

@@ -3,7 +3,7 @@ import { usePercent } from "@/__feature/general/hooks/use-percent";
 import { useLongPress } from "@/__feature/mobile/hooks/use-long-press";
 import { useDetectMobileContext } from "@/__feature/mobile/providers/mobile-provider";
 import { useNodeSelectionContext } from "@/__feature/selection/providers/node-selection-provider";
-import { isMediaFile } from "@/__lib/node/media-types";
+import { isMediaFile } from "@/lib/file/media-types";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo, useState } from "react";
 

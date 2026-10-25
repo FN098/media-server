@@ -1,7 +1,7 @@
-import { detectMediaType, isMediaFile } from "@/__lib/node/media-types";
 import { sortNodes } from "@/__lib/node/sort";
 import { isRootPath } from "@/__lib/virtual-path/guard";
 import { basename, join, parentpath } from "@/__lib/virtual-path/path";
+import { detectMediaType, isMediaFile } from "@/lib/file/media-types";
 import { Dirent } from "fs";
 import { readdir } from "fs/promises";
 

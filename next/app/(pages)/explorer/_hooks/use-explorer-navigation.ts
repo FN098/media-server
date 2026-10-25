@@ -5,11 +5,11 @@ import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selec
 import { readFileAsTextAction } from "@/__feature/text-file-reader/actions/read-as-text";
 import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
 import { isArchiveFile } from "@/__lib/archive/archive-types";
-import { isMediaFile } from "@/__lib/node/media-types";
 import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { IndexLike, ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
+import { isMediaFile } from "@/lib/file/media-types";
 import { Node, NodeListing } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";

@@ -1,8 +1,8 @@
 import { findGlobalAdjacentFolder } from "@/__lib/node/fs-crawler";
-import { detectMediaType } from "@/__lib/node/media-types";
 import { getServerMediaPath } from "@/__lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/__lib/path/protections";
 import { existsPath } from "@/__lib/utils/fs";
+import { detectMediaType } from "@/lib/file/media-types";
 import fs from "fs/promises";
 import path from "path";
 

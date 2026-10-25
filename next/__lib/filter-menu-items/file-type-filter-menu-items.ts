@@ -1,5 +1,5 @@
 import { FilterMenuItem } from "@/__lib/menu-items/types";
-import { MediaType } from "@/__lib/node/media-types";
+import { MediaType } from "@/lib/file/media-types";
 import { FileTypeIcon, ImageIcon, MusicIcon, VideoIcon } from "lucide-react";
 
 export interface FileTypeFilterMenuContext {
