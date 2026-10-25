@@ -1,3 +1,4 @@
+import { TagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
 import { Fullscreen } from "@/feature/general/hooks/use-fullscreen";
 import { useAddTagFilterMenuItem } from "@/feature/menu-items/hooks/use-add-tag-filter-menu-item";
 import { useEditTagsMenuItem } from "@/feature/menu-items/hooks/use-edit-tags-menu-item";
@@ -10,7 +11,6 @@ import { FavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorite
 import { FavoritesFiltering } from "@/feature/pages/favorites/hooks/use-favorites-filtering";
 import { FavoritesNavigation } from "@/feature/pages/favorites/hooks/use-favorites-navigation";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { Slideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { createSeparator } from "@/lib/menu-items/factory";

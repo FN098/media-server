@@ -1,8 +1,8 @@
+import { TagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
 import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExplorerFavorites } from "@/app/(pages)/explorer/_hooks/use-explorer-favorites";
 import { ExplorerThumbs } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbs";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ManyNodesContext, MenuItemDef } from "@/lib/menu-items/types";
 import { hasMediaFile } from "@/lib/node/media-types";
 import { MediaListing } from "@/lib/node/types";

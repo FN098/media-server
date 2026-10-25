@@ -1,3 +1,4 @@
+import { useTagEditorContext } from "@/app/(pages)/(tag-editor)/_providers/tag-editor-provider";
 import { useHistoryContext } from "@/app/(pages)/explorer/_providers/history-provider";
 import { useFullscreen } from "@/feature/general/hooks/use-fullscreen";
 import { useFolderNavigation } from "@/feature/navigation/hooks/use-folder-navigation";
@@ -12,7 +13,6 @@ import { useFavoritesThumbs } from "@/feature/pages/favorites/hooks/use-favorite
 import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
 import { useNodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
 import { useSort } from "@/feature/sort/hooks/use-sort";
-import { useTagEditorContext } from "@/feature/tag-editor/providers/tag-editor-provider";
 import { useViewMode } from "@/feature/view/hooks/use-view-mode";
 import { useViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { useSlideshowContext } from "@/feature/viewers/media-viewer/providers/slideshow-provider";

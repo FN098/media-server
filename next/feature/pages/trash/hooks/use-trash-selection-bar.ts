@@ -1,6 +1,6 @@
+import { TagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
 import { TrashDialogs } from "@/feature/pages/trash/hooks/use-trash-dialogs";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ManyNodesContext, MenuItemDef } from "@/lib/menu-items/types";
 import { RotateCcwIcon, TagIcon, Trash2Icon } from "lucide-react";
 import { useMemo } from "react";

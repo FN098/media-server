@@ -1,9 +1,9 @@
 import { DashboardHeader } from "@/app/(pages)/(dashboard)/_components/header";
+import { TagEditorProvider } from "@/app/(pages)/(tag-editor)/_providers/tag-editor-provider";
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
 import { resolvePageMeta } from "@/app/(pages)/_lib/page-meta/resolvers";
 import { HistoryProvider } from "@/app/(pages)/explorer/_providers/history-provider";
 import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";
-import { TagEditorProvider } from "@/feature/tag-editor/providers/tag-editor-provider";
 import { SlideshowProvider } from "@/feature/viewers/media-viewer/providers/slideshow-provider";
 
 const meta = resolvePageMeta("favorites");

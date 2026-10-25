@@ -1,6 +1,6 @@
 "use client";
 
-import { useTagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
+import { useTagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
 import { createContext, ReactNode, useContext } from "react";
 
 const TagEditorContext = createContext<

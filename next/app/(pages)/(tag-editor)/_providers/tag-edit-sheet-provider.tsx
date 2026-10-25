@@ -3,7 +3,7 @@
 import {
   useTagEditSheet,
   UseTagEditSheetProps,
-} from "@/feature/tag-editor/hooks/use-tag-edit-sheet";
+} from "@/app/(pages)/(tag-editor)/_hooks/use-tag-edit-sheet";
 import { createContext, ReactNode, useContext } from "react";
 
 const TagEditSheetContext = createContext<

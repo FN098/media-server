@@ -1,8 +1,8 @@
-import { updateManyMediaTagsAction } from "@/feature/tag-editor/actions/update-many";
-import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
-import { useTagEditorHotkeys } from "@/feature/tag-editor/hooks/use-tag-editor-hotkeys";
+import { updateManyMediaTagsAction } from "@/app/(pages)/(tag-editor)/_actions/update-many";
+import { TagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
+import { useTagEditorHotkeys } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor-hotkeys";
 import { createManyTagsAction } from "@/feature/tag/actions/create-many";
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { EditingMode } from "@/lib/tag-editor/types";
 import { TagOperation } from "@/lib/tag/types";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ const initialEditingMode: EditingMode = "view";
 
 export interface UseTagEditSheetProps {
   tagEditor: TagEditor;
-  targetNodes: MediaNode[];
+  targetNodes: Node[];
   mode?: EditingMode;
   onModeChange?: (mode: EditingMode) => void;
   autoBlur?: boolean; // 編集モード切り替え時に自動で背景ブラーを有効化
@@ -158,7 +158,7 @@ export function useTagEditSheet({
 
       // 紐づけ実行
       const result = await updateManyMediaTagsAction({
-        mediaPaths: targetNodes.map((n) => n.path),
+        fileIds: targetNodes.map((n) => n.id),
         operations,
       });
 

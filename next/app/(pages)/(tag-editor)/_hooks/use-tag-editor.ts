@@ -1,4 +1,4 @@
-import { useTagStates } from "@/feature/tag-editor/hooks/use-tag-states";
+import { useTagStates } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-states";
 import { useTags } from "@/feature/tag/hooks/use-tags";
 import { Node } from "@/lib/node/types";
 import { TagEditMode } from "@/lib/tag-editor/types";

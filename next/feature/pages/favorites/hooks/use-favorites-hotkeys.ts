@@ -1,9 +1,9 @@
+import { TagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
 import { Fullscreen } from "@/feature/general/hooks/use-fullscreen";
 import { FavoritesDialogs } from "@/feature/pages/favorites/hooks/use-favorites-dialogs";
 import { FavoritesFiltering } from "@/feature/pages/favorites/hooks/use-favorites-filtering";
 import { SearchFocus } from "@/feature/search/hooks/use-search-focus";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";

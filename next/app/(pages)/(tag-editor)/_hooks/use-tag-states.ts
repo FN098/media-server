@@ -1,4 +1,4 @@
-import { MediaNode } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { Tag, TagState } from "@/lib/tag/types";
 import { uniqueBy } from "@/lib/utils/array";
 import { useMemo } from "react";
@@ -6,15 +6,13 @@ import { useMemo } from "react";
 type TagStates = Record<string, TagState>;
 type TagCounts = Record<string, number>;
 
-export function useTagStates(
-  selectedNodes: MediaNode[],
-  allTags: Tag[]
-): TagStates {
+export function useTagStates(selectedNodes: Node[], allTags: Tag[]): TagStates {
   const tagCounts = useMemo(() => {
     const result: TagCounts = {};
 
     // 選択ノードのタグを集計
     selectedNodes
+      .filter((node) => !node.isDirectory)
       .filter((node) => !!node.tags)
       .forEach((node) => {
         const uniqueTags = uniqueBy(node.tags!, "name");

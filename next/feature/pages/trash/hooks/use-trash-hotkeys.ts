@@ -1,10 +1,10 @@
+import { TagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
 import { Fullscreen } from "@/feature/general/hooks/use-fullscreen";
 import { TrashDialogs } from "@/feature/pages/trash/hooks/use-trash-dialogs";
 import { TrashFiltering } from "@/feature/pages/trash/hooks/use-trash-filtering";
 import { TrashNavigation } from "@/feature/pages/trash/hooks/use-trash-navigation";
 import { SearchFocus } from "@/feature/search/hooks/use-search-focus";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";

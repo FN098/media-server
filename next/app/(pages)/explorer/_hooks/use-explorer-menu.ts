@@ -1,3 +1,4 @@
+import { TagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
 import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
 import { ExplorerNavigation } from "@/app/(pages)/explorer/_hooks/use-explorer-navigation";
@@ -18,7 +19,6 @@ import { useToggleFullscreenMenuItem } from "@/feature/menu-items/hooks/use-togg
 import { useToggleSlideshowMenuItem } from "@/feature/menu-items/hooks/use-toggle-slideshow-menu-item";
 import { useUpdateThumbMenuItem } from "@/feature/menu-items/hooks/use-update-thumb-menu-item";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { Slideshow } from "@/feature/viewers/media-viewer/hooks/use-slideshow";
 import { ViewerNavigation } from "@/feature/viewers/media-viewer/hooks/use-viewer-navigation";
 import { SeparatorMenuItem } from "@/lib/menu-items/types";

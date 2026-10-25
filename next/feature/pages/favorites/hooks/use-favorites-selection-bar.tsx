@@ -1,7 +1,7 @@
+import { TagEditor } from "@/app/(pages)/(tag-editor)/_hooks/use-tag-editor";
 import { FavoriteRatingInput } from "@/feature/favorite/ui/favorite-rating-input";
 import { FavoritesFavorites } from "@/feature/pages/favorites/hooks/use-favorites-favorites";
 import { NodeSelectionControl } from "@/feature/selection/hooks/use-node-selection-control";
-import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ManyNodesContext, MenuItemDef } from "@/lib/menu-items/types";
 import { hasMediaFile } from "@/lib/node/media-types";
 import { averageBy } from "@/lib/utils/math";

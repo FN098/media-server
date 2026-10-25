@@ -1,5 +1,7 @@
 "use client";
 
+import { TagEditSheet } from "@/app/(pages)/(tag-editor)/_components/tag-edit-sheet";
+import { TagEditSheetProvider } from "@/app/(pages)/(tag-editor)/_providers/tag-edit-sheet-provider";
 import { ScrollLockProvider } from "@/feature/general/providers/scroll-lock-provider";
 import { MenuItemsProvider } from "@/feature/menu-items/providers/menu-items-provider";
 import { FolderNavigation } from "@/feature/navigation/ui/folder-navigation";
@@ -12,8 +14,6 @@ import { PagingListView } from "@/feature/paging-view/components/paging-list-vie
 import { MediaNodePagingViewProvider } from "@/feature/paging-view/providers/media-node-paging-view-provider";
 import { PagingProvider } from "@/feature/paging-view/providers/paging-provider";
 import { SelectionBar } from "@/feature/selection/ui/selection-bar";
-import { TagEditSheetProvider } from "@/feature/tag-editor/providers/tag-edit-sheet-provider";
-import { TagEditSheet } from "@/feature/tag-editor/ui/tag-edit-sheet";
 import { MediaViewer } from "@/feature/viewers/media-viewer";
 import { MediaViewerProvider } from "@/feature/viewers/media-viewer/providers/media-viewer-provider";
 
