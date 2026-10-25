@@ -2,15 +2,15 @@ import { FavoritesControlProvider } from "@/__feature/favorite/providers/favorit
 import { Trash } from "@/__feature/pages/trash";
 import { TrashProvider } from "@/__feature/pages/trash/providers/trash-provider";
 import { NodeSelectionProvider } from "@/__feature/selection/providers/node-selection-provider";
-import { getFsListing } from "@/__lib/node/fs-listing";
 import { mergeDbNodes } from "@/__lib/node/merge";
-import { SortDirection, SortKey, sortNodes } from "@/__lib/node/sort";
 import { getServerMediaTrashPath } from "@/__lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/__lib/path/protections";
 import { APP_CONFIG } from "@/app.config";
+import { SortDirection, SortKey, sortNodes } from "@/feature/sort/sort-nodes";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import { getVisitedFolders } from "@/lib/folder/repository";
+import { getFsListing } from "@/lib/fs/fs-listing";
 import { formatNodes } from "@/lib/node/formatters";
 import { Node } from "@/lib/node/types";
 import { Metadata } from "next";

@@ -1,10 +1,9 @@
-import { omit } from "@/__lib/utils/object";
+import { ROOT_FOLDER_NAME } from "@/lib/fs/root";
 import { db } from "@/lib/prisma";
+import { omit } from "@/lib/utils/object";
 import { cache } from "react";
 
 // #region root folder
-
-const ROOT_FOLDER_NAME = "";
 
 async function _getRootFolder() {
   return await db.folder.findFirst({

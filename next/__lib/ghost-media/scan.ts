@@ -4,8 +4,8 @@ import {
   GhostMediaScanEventData,
 } from "@/__lib/ghost-media/types";
 import { getServerMediaPath } from "@/__lib/path/helpers";
-import { isFsNotFoundError } from "@/__lib/utils/fs";
 import { db } from "@/lib/prisma";
+import { isFsNotFoundError } from "@/lib/utils/fs";
 import { access, constants } from "fs/promises";
 
 const MAX_SCAN_ITEMS = 10000;

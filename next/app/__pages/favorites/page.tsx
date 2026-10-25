@@ -7,10 +7,10 @@ import {
   RatingOperator,
   TagFilterMode,
 } from "@/__lib/filter/types";
-import { SortDirection } from "@/__lib/node/sort";
 import { searchFavoriteMediaNodes } from "@/__lib/user-file-favorite/search";
 import { hashObject } from "@/__lib/utils/fnv1a-hash";
 import { APP_CONFIG } from "@/app.config";
+import { SortDirection } from "@/feature/sort/sort-nodes";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/node/formatters";

@@ -2,11 +2,11 @@ import { FolderNavigation } from "@/__feature/navigation/hooks/use-folder-naviga
 import { FavoritesFiltering } from "@/__feature/pages/favorites/hooks/use-favorites-filtering";
 import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
-import { parentpath } from "@/__lib/virtual-path/path";
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 import { isMediaFile } from "@/lib/file/media-types";
 import { MediaNode } from "@/lib/node/types";
+import { getParentPath } from "@/lib/virtual-path";
 import { useCallback } from "react";
 import { toast } from "sonner";
 
@@ -94,7 +94,7 @@ export function useFavoritesNavigation({
 
   // 親フォルダを開く
   const openParentFolder = (node: MediaNode) => {
-    const parent = parentpath(node.path);
+    const parent = getParentPath(node.path);
     if (parent !== null) {
       folder.navigate({ folderId: parent, at: null });
     }

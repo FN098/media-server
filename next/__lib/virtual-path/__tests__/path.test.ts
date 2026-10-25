@@ -1,4 +1,4 @@
-import { basename, dirname, extname, join } from "@/__lib/virtual-path/path";
+import { basename, dirname, extname, join } from "@/lib/virtual-path";
 
 describe("join", () => {
   it("joins paths with posix separators", () => {

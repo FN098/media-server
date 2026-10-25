@@ -6,13 +6,13 @@ import {
   getServerMediaPath,
   getServerMediaThumbPath,
 } from "@/__lib/path/helpers";
-import { getPathInfo, isFsNotFoundError } from "@/__lib/utils/fs";
-import { dirname, join } from "@/__lib/virtual-path/path";
 import {
   EditableVirtualPathSchema,
   FileOrFolderNameSchema,
 } from "@/__lib/virtual-path/schemas";
 import { logger } from "@/lib/logger";
+import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";
+import { dirname, join } from "@/lib/virtual-path";
 import { rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import z from "zod";

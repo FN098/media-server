@@ -3,11 +3,11 @@
 import { authorize } from "@/__lib/authorization/authorize";
 import { getServerMediaPath } from "@/__lib/path/helpers";
 import { isBlockedVirtualPath } from "@/__lib/path/protections";
-import { isFsNotFoundError, isFsPermissionError } from "@/__lib/utils/fs";
 import { isRootPath, sanitize } from "@/__lib/virtual-path/guard";
-import { join } from "@/__lib/virtual-path/path";
 import { EditableVirtualPathSchema } from "@/__lib/virtual-path/schemas";
 import { logger } from "@/lib/logger";
+import { isFsNotFoundError, isFsPermissionError } from "@/lib/utils/fs";
+import { join } from "@/lib/virtual-path";
 import { readdir } from "fs/promises";
 import z from "zod";
 

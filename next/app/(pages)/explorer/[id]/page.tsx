@@ -1,11 +1,10 @@
 import { FavoritesControlProvider } from "@/__feature/favorite/providers/favorites-control-provider";
 import { NodeSelectionProvider } from "@/__feature/selection/providers/node-selection-provider";
-import { getFsListing } from "@/__lib/node/fs-listing";
 import { mergeDbNodes } from "@/__lib/node/merge";
-import { SortDirection, SortKey, sortNodes } from "@/__lib/node/sort";
 import { syncFsWithDb } from "@/__lib/node/sync";
 import { APP_CONFIG } from "@/app.config";
 import { Explorer } from "@/app/(pages)/explorer/_components";
+import { SortDirection, SortKey, sortNodes } from "@/feature/sort/sort-nodes";
 import { ViewerProvider } from "@/feature/viewer/providers/viewer-provider";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { isMediaFile } from "@/lib/file/media-types";
@@ -18,6 +17,7 @@ import {
   getFolderPath,
   updateFolderCache,
 } from "@/lib/folder/repository";
+import { defaultFsContext, getFsListing } from "@/lib/fs/fs-listing";
 import { MediaFileNode, Node, NodeListing } from "@/lib/node/types";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -66,7 +66,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
   }
 
   // FileSystem からリスト取得
-  const fsListing = await getFsListing(folderPath);
+  const fsListing = await getFsListing(folderPath, defaultFsContext);
 
   if (!fsListing) {
     notFound();

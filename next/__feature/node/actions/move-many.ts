@@ -7,13 +7,13 @@ import {
   getServerMediaThumbPath,
 } from "@/__lib/path/helpers";
 import { unique } from "@/__lib/utils/array";
-import { getPathInfo, isFsNotFoundError } from "@/__lib/utils/fs";
-import { basename, dirname, extname, join } from "@/__lib/virtual-path/path";
 import {
   EditableVirtualPathManySchema,
   EditableVirtualPathSchema,
 } from "@/__lib/virtual-path/schemas";
 import { logger } from "@/lib/logger";
+import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";
+import { basename, dirname, extname, join } from "@/lib/virtual-path";
 import { readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import z from "zod";

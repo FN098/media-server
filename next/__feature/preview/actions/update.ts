@@ -2,11 +2,11 @@
 
 import { authorize } from "@/__lib/authorization/authorize";
 import { getServerMediaPath } from "@/__lib/path/helpers";
-import { getPathInfo } from "@/__lib/utils/fs";
 import { getFilePath } from "@/lib/file/repository";
 import { getFolderPath } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { getPathInfo } from "@/lib/utils/fs";
 import { revalidatePath } from "next/cache";
 
 type ActionResult = { success: true } | { success: false; message: string };

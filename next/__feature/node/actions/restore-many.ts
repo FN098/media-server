@@ -6,10 +6,10 @@ import {
   getServerMediaTrashPath,
 } from "@/__lib/path/helpers";
 import { unique } from "@/__lib/utils/array";
-import { recursiveMergeMove } from "@/__lib/utils/fs";
-import { dirname } from "@/__lib/virtual-path/path";
 import { EditableVirtualPathManySchema } from "@/__lib/virtual-path/schemas";
 import { logger } from "@/lib/logger";
+import { recursiveMergeMove } from "@/lib/utils/fs";
+import { dirname } from "@/lib/virtual-path";
 import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import z from "zod";

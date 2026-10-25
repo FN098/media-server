@@ -3,11 +3,11 @@
 import { authorize } from "@/__lib/authorization/authorize";
 import { extractArchive } from "@/__lib/child_process/7z";
 import { getServerMediaPath } from "@/__lib/path/helpers";
-import { existsPath, getPathInfo } from "@/__lib/utils/fs";
 import { sanitize } from "@/__lib/virtual-path/guard";
-import { basename, dirname, extname, join } from "@/__lib/virtual-path/path";
 import { getFilePath } from "@/lib/file/repository";
 import { logger } from "@/lib/logger";
+import { existsPath, getPathInfo } from "@/lib/utils/fs";
+import { basename, dirname, extname, join } from "@/lib/virtual-path";
 import { mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 

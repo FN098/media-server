@@ -1,8 +1,8 @@
-import { findGlobalAdjacentFolder } from "@/__lib/node/fs-crawler";
-import { getServerMediaPath } from "@/__lib/path/helpers";
-import { isSystemHiddenVirtualPath } from "@/__lib/path/protections";
-import { existsPath } from "@/__lib/utils/fs";
+import { isSystemPath } from "@/feature/system/system-paths";
 import { detectMediaType } from "@/lib/file/media-types";
+import { findGlobalAdjacentFolder } from "@/lib/fs/fs-crawler";
+import { resolveRealPath } from "@/lib/fs/real-path";
+import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
 
@@ -37,14 +37,14 @@ export interface FsContext {
   filterVirtualPath?: (virtualPath: string) => boolean;
 }
 
-const defaultFsContext: FsContext = {
-  resolveRealPath: (virtualPath) => getServerMediaPath(virtualPath),
-  filterVirtualPath: (virtualPath) => !isSystemHiddenVirtualPath(virtualPath),
+export const defaultFsContext: FsContext = {
+  resolveRealPath: (virtualPath) => resolveRealPath(virtualPath),
+  filterVirtualPath: (virtualPath) => !isSystemPath(virtualPath),
 };
 
 export async function listFsNodes(
   virtualDirPath: string,
-  context: FsContext = { ...defaultFsContext }
+  context: FsContext
 ): Promise<FsNode[]> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
   const dirents = await fs.readdir(realDirPath, { withFileTypes: true });
@@ -117,7 +117,7 @@ export async function getFsNode(
 
 export async function getFsListing(
   virtualDirPath: string,
-  context: FsContext = { ...defaultFsContext }
+  context: FsContext
 ): Promise<FsListing | null> {
   const realDirPath = context.resolveRealPath(virtualDirPath);
 

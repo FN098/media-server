@@ -1,7 +1,7 @@
-import { sortNodes } from "@/__lib/node/sort";
-import { isRootPath } from "@/__lib/virtual-path/guard";
-import { basename, join, parentpath } from "@/__lib/virtual-path/path";
+import { sortNodes } from "@/feature/sort/sort-nodes";
 import { detectMediaType, isMediaFile } from "@/lib/file/media-types";
+import { isRootFolder } from "@/lib/fs/root";
+import { basename, join, parentpath } from "@/lib/virtual-path";
 import { Dirent } from "fs";
 import { readdir } from "fs/promises";
 
@@ -146,10 +146,10 @@ async function findNextStepUpward(
   context: FsContext
 ): Promise<string | null> {
   // 自分の「次の兄弟」を探す
-  const parentPath = parentpath(currentVirtualDirPath);
-  if (parentPath === null) return null;
+  const parent = parentpath(currentVirtualDirPath);
+  if (parent === null) return null;
 
-  const siblings = await getSubDirs(parentPath, context);
+  const siblings = await getSubDirs(parent, context);
   const currentDirName = basename(currentVirtualDirPath);
   const currentIndex = siblings.findIndex((e) => e.name === currentDirName);
 
@@ -161,7 +161,7 @@ async function findNextStepUpward(
   }
 
   // 次の兄弟から見つからなければ、さらに親の階層へ
-  return findNextStepUpward(parentPath, context);
+  return findNextStepUpward(parent, context);
 }
 
 // 前のフォルダを探索
@@ -170,10 +170,10 @@ async function findGlobalPrevFolder(
   context: FsContext
 ): Promise<string | null> {
   // 自分の「前の兄弟」を探す
-  const parentPath = parentpath(currentVirtualDirPath);
-  if (parentPath === null) return null;
+  const parent = parentpath(currentVirtualDirPath);
+  if (parent === null) return null;
 
-  const siblings = await getSubDirs(parentPath, context);
+  const siblings = await getSubDirs(parent, context);
   const currentDirName = basename(currentVirtualDirPath);
   const currentIndex = siblings.findIndex((e) => e.name === currentDirName);
 
@@ -185,12 +185,12 @@ async function findGlobalPrevFolder(
   }
 
   // 前の兄弟から見つからなければ、「親自身」がメディアを持っているか確認
-  if (!isRootPath(parentPath) && (await hasDirectMedia(parentPath, context))) {
-    return parentPath;
+  if (!isRootFolder(parent) && (await hasDirectMedia(parent, context))) {
+    return parent;
   }
 
   // 親もダメなら、さらに親の階層へ
-  return findGlobalPrevFolder(parentPath, context);
+  return findGlobalPrevFolder(parent, context);
 }
 
 // 指定されたフォルダの「次」または「前」にある、メディアを持つフォルダを

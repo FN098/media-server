@@ -2,9 +2,9 @@ import { useThumbEventObserver } from "@/__feature/thumbnail/hooks/use-thumb-eve
 import { FallbackImage } from "@/__feature/thumbnail/ui/fallback-image";
 import { MediaThumbIcon } from "@/__feature/thumbnail/ui/media-thumb-icons";
 import { resolveMediaThumbUrl } from "@/__lib/thumb/resolvers";
-import { parentpath } from "@/__lib/virtual-path/path";
 import { enqueueCreateThumbsJobAction } from "@/feature/thumbnail/actions/enque-create-thumbs-job";
 import { MediaNode } from "@/lib/node/types";
+import { getParentPath } from "@/lib/virtual-path";
 import { cn } from "@/shadcn/lib/utils";
 import { useCallback, useRef, useState } from "react";
 
@@ -55,7 +55,7 @@ export function MediaThumbImage({
       update();
     } else if (
       event.type === "directory" &&
-      event.path === parentpath(displayPath)
+      event.path === getParentPath(displayPath)
     ) {
       console.log("update directory", event);
       setTimeout(update, 300);
@@ -82,8 +82,8 @@ export function MediaThumbImage({
       try {
         // サムネイルを作成するディレクトリを enqueue
         const parent = previewPath
-          ? parentpath(previewPath)
-          : parentpath(node.path);
+          ? getParentPath(previewPath)
+          : getParentPath(node.path);
 
         if (parent !== null) {
           void enqueueCreateThumbsJobAction({ dirPath: parent });
