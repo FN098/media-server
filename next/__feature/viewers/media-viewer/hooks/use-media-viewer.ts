@@ -6,8 +6,8 @@ import { useMediaViewerHeader } from "@/__feature/viewers/media-viewer/hooks/use
 import { useMediaViewerHotkeys } from "@/__feature/viewers/media-viewer/hooks/use-media-viewer-hotkeys";
 import { useMediaViewerNavigation } from "@/__feature/viewers/media-viewer/hooks/use-media-viewer-navigation";
 import { useSlideshowContext } from "@/__feature/viewers/media-viewer/providers/slideshow-provider";
-import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
 import { APP_CONFIG } from "@/app.config";
+import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 

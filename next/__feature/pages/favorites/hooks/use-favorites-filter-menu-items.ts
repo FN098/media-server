@@ -6,9 +6,9 @@ import {
   TagFilterMenuContext,
   tagFilterMenuItems,
 } from "@/__lib/filter-menu-items/tag-filter-menu-items";
-import { defaultFilters } from "@/__lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/__lib/menu-items/transformer";
-import { FilterMenuItem, MenuItemDef } from "@/__lib/menu-items/types";
+import { defaultFilters } from "@/feature/menu-items/lib/filters";
+import { createRecursiveTransformer } from "@/feature/menu-items/lib/transformers";
+import { FilterMenuItem, MenuItemDef } from "@/feature/menu-items/lib/types";
 import {
   RatingFilterMenuContext,
   ratingFilterMenuItems,

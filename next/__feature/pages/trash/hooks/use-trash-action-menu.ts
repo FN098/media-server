@@ -1,7 +1,7 @@
 import { useTrashContext } from "@/__feature/pages/trash/providers/trash-provider";
-import { defaultFilters } from "@/__lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/__lib/menu-items/transformer";
-import { MenuItemDef } from "@/__lib/menu-items/types";
+import { defaultFilters } from "@/feature/menu-items/lib/filters";
+import { createRecursiveTransformer } from "@/feature/menu-items/lib/transformers";
+import { MenuItemDef } from "@/feature/menu-items/lib/types";
 import { Trash2Icon } from "lucide-react";
 import { useMemo } from "react";
 

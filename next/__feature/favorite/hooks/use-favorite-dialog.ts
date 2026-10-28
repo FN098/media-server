@@ -1,4 +1,4 @@
-import { useFavoritesControlContext } from "@/__feature/favorite/providers/favorites-control-provider";
+import { useNodeFavoriteContext } from "@/__feature/favorite/providers/favorites-control-provider";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
@@ -19,8 +19,7 @@ export function useFavoriteDialog({ onSuccess }: UseFavoriteDialogProps = {}) {
   const [action, setAction] = useState<Action>("add");
   const [isPending, setIsPending] = useState(false);
 
-  const { addManyFavorites, removeManyFavorites } =
-    useFavoritesControlContext();
+  const { addManyFavorites, removeManyFavorites } = useNodeFavoriteContext();
 
   // 1. ダイアログを開く
   const open = useCallback((targets: Item[], currentMode: Action) => {

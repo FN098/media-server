@@ -1,6 +1,6 @@
-import { defaultFilters } from "@/__lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/__lib/menu-items/transformer";
-import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
+import { defaultFilters } from "@/feature/menu-items/lib/filters";
+import { createRecursiveTransformer } from "@/feature/menu-items/lib/transformers";
+import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
 import { MediaNode } from "@/lib/node/types";
 import { useMemo } from "react";
 

@@ -1,20 +1,18 @@
-import { useNodeSelectionContext } from "@/__feature/selection/providers/node-selection-provider";
+import { useSelectionContext } from "@/feature/selection/providers/selection-provider";
 import { Node } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
-export type NodeSelectionControl = ReturnType<typeof useNodeSelectionControl>;
-
-interface UseNodeSelectionControlProps {
+interface UseNodeSelectionProps {
   allNodes: Node[];
   activeNodes: Node[];
   enableFolderSelection?: boolean;
 }
 
-export function useNodeSelectionControl({
+export function useNodeSelection({
   allNodes,
   activeNodes,
   enableFolderSelection = true,
-}: UseNodeSelectionControlProps) {
+}: UseNodeSelectionProps) {
   const {
     isSelectionMode,
     enterSelectionMode,
@@ -26,7 +24,7 @@ export function useNodeSelectionControl({
     clearSelection,
     hasSelection,
     lastSelectedId,
-  } = useNodeSelectionContext();
+  } = useSelectionContext();
 
   // id -> node を O(1) で検索するためのマップ
   const nodeMap = useMemo(
@@ -84,3 +82,5 @@ export function useNodeSelectionControl({
     reset,
   };
 }
+
+export type NodeSelection = ReturnType<typeof useNodeSelection>;

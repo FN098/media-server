@@ -1,8 +1,8 @@
-import { useFavoritesControlContext } from "@/__feature/favorite/providers/favorites-control-provider";
+import { useNodeFavoriteContext } from "@/__feature/favorite/providers/favorites-control-provider";
 import { usePercent } from "@/__feature/general/hooks/use-percent";
-import { useNodeSelectionContext } from "@/__feature/selection/providers/node-selection-provider";
 import { useLongPress } from "@/feature/long-press/hooks/use-long-press";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
+import { useSelectionContext } from "@/feature/selection/providers/selection-provider";
 import { isMediaFile } from "@/lib/file/media-types";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo, useState } from "react";
@@ -31,7 +31,7 @@ export function useMediaNodeControl({
     getFavorite,
     toggleFavorite,
     addFavorite: updateFavorite,
-  } = useFavoritesControlContext();
+  } = useNodeFavoriteContext();
 
   const { isFavorite, rating } = useMemo(
     () => getFavorite(node.path),
@@ -53,7 +53,7 @@ export function useMediaNodeControl({
     deleteIds: deletePaths,
     selectIds: selectPaths,
     isSelectionMode,
-  } = useNodeSelectionContext();
+  } = useSelectionContext();
 
   const isSelected = isSelectedPath(node.path);
   const [dropdownMenuOpen, setDropdownMenuOpen] = useState(false);

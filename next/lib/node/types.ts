@@ -44,7 +44,3 @@ export type NodeListing = {
   nextFolder: FolderNode | null;
   children: Node[];
 };
-
-export type MediaFileNode = Omit<FileNode, "type"> & {
-  type: "image" | "video" | "audio";
-};

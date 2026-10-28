@@ -9,9 +9,9 @@ import { PagingGridView } from "@/__feature/paging-view/components/paging-grid-v
 import { PagingListView } from "@/__feature/paging-view/components/paging-list-view";
 import { MediaNodePagingViewProvider } from "@/__feature/paging-view/providers/media-node-paging-view-provider";
 import { PagingProvider } from "@/__feature/paging-view/providers/paging-provider";
-import { SelectionBar } from "@/__feature/selection/ui/selection-bar";
 import { MediaViewer } from "@/__feature/viewers/media-viewer";
 import { MediaViewerProvider } from "@/__feature/viewers/media-viewer/providers/media-viewer-provider";
+import { SelectionBar } from "@/feature/selection/ui/selection-bar";
 import { TagEditSheet } from "@/feature/tag-editor/_components/tag-edit-sheet";
 import { TagEditSheetProvider } from "@/feature/tag-editor/_providers/tag-edit-sheet-provider";
 

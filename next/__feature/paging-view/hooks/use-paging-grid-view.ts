@@ -1,6 +1,6 @@
 import { useMediaNodePagingViewContext } from "@/__feature/paging-view/providers/media-node-paging-view-provider";
 import { usePagingContext } from "@/__feature/paging-view/providers/paging-provider";
-import { useNodeSelectionContext } from "@/__feature/selection/providers/node-selection-provider";
+import { useSelectionContext } from "@/feature/selection/providers/selection-provider";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function usePagingGridView() {
@@ -29,7 +29,7 @@ export function usePagingGridView() {
     setAnchorId: setAnchorPath,
     enterSelectionMode,
     selectIds: selectPaths,
-  } = useNodeSelectionContext();
+  } = useSelectionContext();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);

@@ -1,4 +1,4 @@
-import { useFavoritesControlContext } from "@/__feature/favorite/providers/favorites-control-provider";
+import { useNodeFavoriteContext } from "@/__feature/favorite/providers/favorites-control-provider";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -11,7 +11,7 @@ type UpdateProps = {
 
 export function useFavoritesFavorites() {
   const { getFavorite, addManyFavorites: updateMultipleFavorites } =
-    useFavoritesControlContext();
+    useNodeFavoriteContext();
   const [isPending, setIsPending] = useState(false);
 
   const update = useCallback(

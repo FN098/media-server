@@ -12,19 +12,19 @@ type FavoriteMsg =
   | { type: "ADD_MANY"; ids: string[] }
   | { type: "REMOVE_MANY"; ids: string[] };
 
-type Entry = {
+type Node = {
   id: string;
   isFavorite: boolean;
 };
 
-export interface UseFavoriteControlProps {
-  entries?: Entry[];
+export interface UseNodeFavoriteProps {
+  nodes?: Node[];
 }
 
-export function useFavoritesControl({ entries }: UseFavoriteControlProps) {
+export function useNodeFavorite({ nodes }: UseNodeFavoriteProps) {
   const [favoritedIds, setFavoritedIds] = useState(() => {
-    return entries
-      ? new Set(entries.filter((e) => e.isFavorite).map((f) => f.id))
+    return nodes
+      ? new Set(nodes.filter((e) => e.isFavorite).map((f) => f.id))
       : new Set();
   });
 

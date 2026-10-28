@@ -1,9 +1,9 @@
-import { AnimatedCheckCircle } from "@/__feature/selection/ui/animated-check-circle";
-import { defaultFilters } from "@/__lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/__lib/menu-items/transformer";
-import { ManyNodesContext, MenuItemDef } from "@/__lib/menu-items/types";
-import { castArray } from "@/__lib/utils/array";
+import { AnimatedCheckCircle } from "@/feature/etc/ui/animated-check-circle";
+import { defaultFilters } from "@/feature/menu-items/lib/filters";
+import { createRecursiveTransformer } from "@/feature/menu-items/lib/transformers";
+import { ManyNodesContext, MenuItemDef } from "@/feature/menu-items/lib/types";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
+import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,

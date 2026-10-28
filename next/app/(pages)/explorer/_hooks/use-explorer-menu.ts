@@ -13,13 +13,13 @@ import { useSetAsPreviewMenuItem } from "@/__feature/menu-items/hooks/use-set-as
 import { useToggleFullscreenMenuItem } from "@/__feature/menu-items/hooks/use-toggle-fullscreen-menu-item";
 import { useToggleSlideshowMenuItem } from "@/__feature/menu-items/hooks/use-toggle-slideshow-menu-item";
 import { useUpdateThumbMenuItem } from "@/__feature/menu-items/hooks/use-update-thumb-menu-item";
-import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { Slideshow } from "@/__feature/viewers/media-viewer/hooks/use-slideshow";
-import { SeparatorMenuItem } from "@/__lib/menu-items/types";
 import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
 import { ExplorerNavigation } from "@/app/(pages)/explorer/_hooks/use-explorer-navigation";
 import { ExplorerThumbs } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbs";
+import { SeparatorMenuItem } from "@/feature/menu-items/lib/types";
+import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 import { NodeListing } from "@/lib/node/types";
@@ -39,7 +39,7 @@ const separators = {
 interface UseExplorerMenuProps {
   listing: NodeListing;
   filtering: ExplorerFiltering;
-  selection: NodeSelectionControl;
+  selection: NodeSelection;
   dialogs: ExplorerDialogs;
   tagEditor: TagEditor;
   navigation: ExplorerNavigation;

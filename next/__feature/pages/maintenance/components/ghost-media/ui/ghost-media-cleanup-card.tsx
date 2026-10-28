@@ -6,7 +6,7 @@ import {
   GhostMediaItem,
   GhostMediaScanEventData,
 } from "@/__lib/ghost-media/types";
-import { chunk } from "@/__lib/utils/array";
+import { chunk } from "@/lib/utils/array";
 import {
   AlertDialog,
   AlertDialogAction,

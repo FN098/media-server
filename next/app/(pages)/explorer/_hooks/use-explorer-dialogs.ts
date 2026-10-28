@@ -7,15 +7,15 @@ import { useDeleteDialog } from "@/__feature/node/hooks/use-delete-dialog";
 import { useMoveDialog } from "@/__feature/node/hooks/use-move-dialog";
 import { useRenameDialog } from "@/__feature/node/hooks/use-rename-dialog";
 import { usePreviewDialog } from "@/__feature/preview/hooks/use-preview-dialog";
-import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { useTextFilePreviewDialog } from "@/__feature/text-file-reader/hooks/use-text-file-preview-dialog";
 import { ExplorerFavorites } from "@/app/(pages)/explorer/_hooks/use-explorer-favorites";
 import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
+import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { useMemo } from "react";
 
 interface UseExplorerDialogsProps {
   filtering: ExplorerFiltering;
-  selection: NodeSelectionControl;
+  selection: NodeSelection;
   favorites: ExplorerFavorites;
 }
 

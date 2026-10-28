@@ -7,9 +7,9 @@ import { useRestoreMenuItem } from "@/__feature/menu-items/hooks/use-restore-men
 import { useToggleFullscreenMenuItem } from "@/__feature/menu-items/hooks/use-toggle-fullscreen-menu-item";
 import { TrashDialogs } from "@/__feature/pages/trash/hooks/use-trash-dialogs";
 import { TrashNavigation } from "@/__feature/pages/trash/hooks/use-trash-navigation";
-import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
-import { createSeparator } from "@/__lib/menu-items/factory";
-import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
+import { createSeparator } from "@/feature/menu-items/lib/separator";
+import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
+import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 
 export const separators = {
@@ -19,7 +19,7 @@ export const separators = {
 } as const;
 
 interface UseTrashMenuItemsProps {
-  selection: NodeSelectionControl;
+  selection: NodeSelection;
   dialogs: TrashDialogs;
   navigation: TrashNavigation;
   viewer: ViewerNavigation;

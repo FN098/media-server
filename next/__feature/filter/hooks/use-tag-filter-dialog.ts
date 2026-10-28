@@ -1,7 +1,7 @@
 import { useTags } from "@/__feature/tag/hooks/use-tags";
 import { TagFilterMode, TagFilterValue } from "@/__lib/filter/types";
 import { Tag } from "@/__lib/tag/types";
-import { uniqueBy } from "@/__lib/utils/array";
+import { uniqueBy } from "@/lib/utils/array";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 

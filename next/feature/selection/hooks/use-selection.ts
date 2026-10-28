@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-export function useNodeSelection() {
+export function useSelection() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const [selectedIds, setSelectedKeys] = useState<Set<string>>(() => new Set());
@@ -115,4 +115,4 @@ export function useNodeSelection() {
   };
 }
 
-export type NodeSelection = ReturnType<typeof useNodeSelection>;
+export type Selection = ReturnType<typeof useSelection>;

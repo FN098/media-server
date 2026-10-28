@@ -1,6 +1,6 @@
-import { MenuItemDef } from "@/__lib/menu-items/types";
-import { castArray } from "@/__lib/utils/array";
+import { MenuItemDef } from "@/feature/menu-items/lib/types";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
+import { castArray } from "@/lib/utils/array";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   DropdownMenu,

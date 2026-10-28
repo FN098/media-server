@@ -1,13 +1,13 @@
 import { visitFolderAction } from "@/__feature/folder/actions/visit";
 import { FolderNavigation } from "@/__feature/navigation/hooks/use-folder-navigation";
 import { useParentPathname } from "@/__feature/navigation/hooks/use-parent-pathname";
-import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { readFileAsTextAction } from "@/__feature/text-file-reader/actions/read-as-text";
 import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
 import { isArchiveFile } from "@/__lib/archive/archive-types";
 import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
+import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { IndexLike, ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 import { isMediaFile } from "@/lib/file/media-types";
 import { Node, NodeListing } from "@/lib/node/types";
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 interface UseExplorerNavigationProps {
   listing: NodeListing;
   filtering: ExplorerFiltering;
-  selection: NodeSelectionControl;
+  selection: NodeSelection;
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;

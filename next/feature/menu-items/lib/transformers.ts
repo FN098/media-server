@@ -1,5 +1,5 @@
-import { isGroupMenuItem } from "@/__lib/menu-items/guard";
-import { MenuItemDef } from "@/__lib/menu-items/types";
+import { isGroupMenuItem } from "@/feature/menu-items/lib/group";
+import { MenuItemDef } from "@/feature/menu-items/lib/types";
 
 export type Transform<TItem, TContext> = (
   items: TItem[],

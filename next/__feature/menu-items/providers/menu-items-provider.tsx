@@ -1,6 +1,6 @@
 "use client";
 
-import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
+import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
 import { createContext, ReactNode, useContext } from "react";
 
 type MenuItems = {

@@ -1,12 +1,12 @@
 import { TrashDialogs } from "@/__feature/pages/trash/hooks/use-trash-dialogs";
-import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
-import { ManyNodesContext, MenuItemDef } from "@/__lib/menu-items/types";
+import { ManyNodesContext, MenuItemDef } from "@/feature/menu-items/lib/types";
+import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
 import { RotateCcwIcon, TagIcon, Trash2Icon } from "lucide-react";
 import { useMemo } from "react";
 
 interface TrashSelectionBarMenuContext {
-  selectedNodes: NodeSelectionControl["selectedNodes"];
+  selectedNodes: NodeSelection["selectedNodes"];
   hasSelection: boolean;
   tagEditor: TagEditor;
   restoreDialog: TrashDialogs["restoreDialog"];
@@ -57,7 +57,7 @@ function createTrashSelectionBarMenu({
 }
 
 interface UseTrashSelectionBarProps {
-  selection: NodeSelectionControl;
+  selection: NodeSelection;
   dialogs: TrashDialogs;
   tagEditor: TagEditor;
 }

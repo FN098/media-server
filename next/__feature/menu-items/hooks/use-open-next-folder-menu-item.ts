@@ -1,4 +1,4 @@
-import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
+import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
 import { IndexLike } from "@/feature/viewer/hooks/use-viewer";
 import { MoveRightIcon } from "lucide-react";
 import { useMemo } from "react";

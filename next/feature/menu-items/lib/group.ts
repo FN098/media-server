@@ -1,4 +1,4 @@
-import { GroupMenuItem, MenuItemDef } from "@/__lib/menu-items/types";
+import { GroupMenuItem, MenuItemDef } from "@/feature/menu-items/lib/types";
 
 export function isGroupMenuItem<TContext>(
   item: MenuItemDef<TContext>

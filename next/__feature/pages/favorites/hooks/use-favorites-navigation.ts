@@ -1,8 +1,8 @@
 import { FolderNavigation } from "@/__feature/navigation/hooks/use-folder-navigation";
 import { FavoritesFiltering } from "@/__feature/pages/favorites/hooks/use-favorites-filtering";
-import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
+import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 import { isMediaFile } from "@/lib/file/media-types";
 import { MediaNode } from "@/lib/node/types";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 interface UseFavoritesNavigationProps {
   filtering: FavoritesFiltering;
-  selection: NodeSelectionControl;
+  selection: NodeSelection;
   viewer: ViewerNavigation;
   history: History;
   folder: FolderNavigation;

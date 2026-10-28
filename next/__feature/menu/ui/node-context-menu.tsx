@@ -1,11 +1,11 @@
 "use client";
 
 import { useNodeContextMenu } from "@/__feature/menu/hooks/use-node-context-menu";
-import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
-import { castArray } from "@/__lib/utils/array";
 import { useMounted } from "@/feature/etc/hooks/use-mounted";
+import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { MediaNode } from "@/lib/node/types";
+import { castArray } from "@/lib/utils/array";
 import {
   ContextMenu,
   ContextMenuContent,

@@ -1,4 +1,4 @@
-import { useFavoritesControlContext } from "@/__feature/favorite/providers/favorites-control-provider";
+import { useNodeFavoriteContext } from "@/__feature/favorite/providers/favorites-control-provider";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ export function useMediaViewerFavorite({
   currentNode,
   onChange,
 }: UseMediaViewerFavoriteProps) {
-  const control = useFavoritesControlContext();
+  const control = useNodeFavoriteContext();
   const [isPending, setIsPending] = useState(false);
 
   const favoriteState = useMemo(() => {

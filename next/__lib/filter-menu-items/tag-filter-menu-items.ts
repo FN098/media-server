@@ -1,4 +1,4 @@
-import { FilterMenuItem } from "@/__lib/menu-items/types";
+import { FilterMenuItem } from "@/feature/menu-items/lib/types";
 import { TagIcon } from "lucide-react";
 
 export interface TagFilterMenuContext {

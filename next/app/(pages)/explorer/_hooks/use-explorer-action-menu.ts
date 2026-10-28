@@ -1,7 +1,7 @@
-import { defaultFilters } from "@/__lib/menu-items/filters";
-import { createRecursiveTransformer } from "@/__lib/menu-items/transformer";
-import { MenuItemDef } from "@/__lib/menu-items/types";
 import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
+import { defaultFilters } from "@/feature/menu-items/lib/filters";
+import { createRecursiveTransformer } from "@/feature/menu-items/lib/transformers";
+import { MenuItemDef } from "@/feature/menu-items/lib/types";
 import { Node } from "@/lib/node/types";
 import { CheckCheckIcon, FolderPlusIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useMemo } from "react";

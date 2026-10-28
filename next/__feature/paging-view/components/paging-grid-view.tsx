@@ -15,7 +15,6 @@ import { PagingControl } from "@/__feature/paging-view/components/pagination-con
 import { usePagingGridView } from "@/__feature/paging-view/hooks/use-paging-grid-view";
 import { useMediaNodePagingViewContext } from "@/__feature/paging-view/providers/media-node-paging-view-provider";
 import { HoverPreviewPortal } from "@/__feature/preview/ui/hover-preview-portal";
-import { useNodeSelectionContext } from "@/__feature/selection/providers/node-selection-provider";
 import { MarqueeText } from "@/__feature/text/ui/marquee-text";
 import { MediaThumb } from "@/__feature/thumbnail/ui/media-thumb";
 import {
@@ -25,6 +24,7 @@ import {
 import { formatBytes } from "@/__lib/utils/bytes";
 import { useCanHoverContext } from "@/feature/hover/providers/can-hover-provider";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
+import { useSelectionContext } from "@/feature/selection/providers/selection-provider";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
@@ -116,7 +116,7 @@ function Cell() {
     title,
   } = useMediaNodeControlContext();
 
-  const { isSelectionMode } = useNodeSelectionContext();
+  const { isSelectionMode } = useSelectionContext();
 
   const { attributes, listeners, isDragging, isOver, setDndRef } =
     useMediaNodeDndItem({ node });

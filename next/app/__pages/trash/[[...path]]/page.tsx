@@ -1,11 +1,11 @@
-import { FavoritesControlProvider } from "@/__feature/favorite/providers/favorites-control-provider";
+import { NodeFavoriteProviderProps } from "@/__feature/favorite/providers/favorites-control-provider";
 import { Trash } from "@/__feature/pages/trash";
 import { TrashProvider } from "@/__feature/pages/trash/providers/trash-provider";
-import { NodeSelectionProvider } from "@/__feature/selection/providers/node-selection-provider";
 import { mergeDbNodes } from "@/__lib/node/merge";
 import { getServerMediaTrashPath } from "@/__lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/__lib/path/protections";
 import { APP_CONFIG } from "@/app.config";
+import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
 import { SortDirection, SortKey, sortNodes } from "@/feature/sort/sort-nodes";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
@@ -98,12 +98,12 @@ export default async function TrashPage(props: TrashPageProps) {
   };
 
   return (
-    <NodeSelectionProvider>
-      <FavoritesControlProvider entries={listing.nodes}>
+    <SelectionProvider>
+      <NodeFavoriteProviderProps nodes={listing.nodes}>
         <TrashProvider listing={listing}>
           <Trash />
         </TrashProvider>
-      </FavoritesControlProvider>
-    </NodeSelectionProvider>
+      </NodeFavoriteProviderProps>
+    </SelectionProvider>
   );
 }

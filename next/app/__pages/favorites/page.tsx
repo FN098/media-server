@@ -1,7 +1,6 @@
-import { FavoritesControlProvider } from "@/__feature/favorite/providers/favorites-control-provider";
+import { NodeFavoriteProviderProps } from "@/__feature/favorite/providers/favorites-control-provider";
 import { Favorites } from "@/__feature/pages/favorites";
 import { FavoritesProvider } from "@/__feature/pages/favorites/providers/favorites-provider";
-import { NodeSelectionProvider } from "@/__feature/selection/providers/node-selection-provider";
 import {
   RatingFilterMode,
   RatingOperator,
@@ -10,6 +9,7 @@ import {
 import { searchFavoriteMediaNodes } from "@/__lib/user-file-favorite/search";
 import { hashObject } from "@/__lib/utils/fnv1a-hash";
 import { APP_CONFIG } from "@/app.config";
+import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
 import { SortDirection } from "@/feature/sort/sort-nodes";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
@@ -99,12 +99,12 @@ export default async function FavoritePage(props: FavoritePageProps) {
   const key = hashObject(searchParams);
 
   return (
-    <NodeSelectionProvider>
-      <FavoritesControlProvider key={key} entries={favorites}>
+    <SelectionProvider>
+      <NodeFavoriteProviderProps key={key} nodes={favorites}>
         <FavoritesProvider listing={listing}>
           <Favorites />
         </FavoritesProvider>
-      </FavoritesControlProvider>
-    </NodeSelectionProvider>
+      </NodeFavoriteProviderProps>
+    </SelectionProvider>
   );
 }

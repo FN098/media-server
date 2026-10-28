@@ -1,37 +1,37 @@
 "use client";
 
 import {
-  UseFavoriteControlProps,
-  useFavoritesControl,
-} from "@/__feature/favorite/hooks/use-favorites-control";
+  UseNodeFavoriteProps,
+  useNodeFavorite,
+} from "@/__feature/favorite/hooks/use-node-favorite";
 import { createContext, useContext } from "react";
 
-const FavoritesControlContext = createContext<
-  ReturnType<typeof useFavoritesControl> | undefined
+const NodeFavoriteContext = createContext<
+  ReturnType<typeof useNodeFavorite> | undefined
 >(undefined);
 
-interface FavoritesControlProvider extends UseFavoriteControlProps {
+interface NodeFavoriteProviderProps extends UseNodeFavoriteProps {
   children: React.ReactNode;
 }
 
-export function FavoritesControlProvider({
+export function NodeFavoriteProvider({
   children,
   ...rest
-}: FavoritesControlProvider) {
-  const value = useFavoritesControl(rest);
+}: NodeFavoriteProviderProps) {
+  const value = useNodeFavorite(rest);
 
   return (
-    <FavoritesControlContext.Provider value={value}>
+    <NodeFavoriteContext.Provider value={value}>
       {children}
-    </FavoritesControlContext.Provider>
+    </NodeFavoriteContext.Provider>
   );
 }
 
-export function useFavoritesControlContext() {
-  const context = useContext(FavoritesControlContext);
+export function useNodeFavoriteContext() {
+  const context = useContext(NodeFavoriteContext);
   if (context === undefined) {
     throw new Error(
-      "useFavoritesControlContext must be used within FavoritesControlProvider"
+      "useNodeFavoriteContext must be used within NodeFavoriteProvider"
     );
   }
   return context;

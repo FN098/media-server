@@ -1,10 +1,10 @@
-import { useFavoritesControlContext } from "@/__feature/favorite/providers/favorites-control-provider";
+import { useNodeFavoriteContext } from "@/__feature/favorite/providers/favorites-control-provider";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 export function useExplorerFavorites() {
   const { getFavorite, addManyFavorites, addFavorite, removeFavorite } =
-    useFavoritesControlContext();
+    useNodeFavoriteContext();
 
   const [isPending, setIsPending] = useState(false);
 

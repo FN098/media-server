@@ -2,13 +2,13 @@ import { useTagFilterDialog } from "@/__feature/filter/hooks/use-tag-filter-dial
 import { useDeleteDialog } from "@/__feature/node/hooks/use-delete-dialog";
 import { useRestoreDialog } from "@/__feature/node/hooks/use-restore-dialog";
 import { TrashFiltering } from "@/__feature/pages/trash/hooks/use-trash-filtering";
-import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { useRatingFilterDialog } from "@/feature/filter/hooks/use-rating-filter-dialog";
+import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { useMemo } from "react";
 
 interface UseTrashDialogsProps {
   filtering: TrashFiltering;
-  selection: NodeSelectionControl;
+  selection: NodeSelection;
 }
 
 export function useTrashDialogs({

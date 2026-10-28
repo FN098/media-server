@@ -7,11 +7,11 @@ import { useTrashMenu } from "@/__feature/pages/trash/hooks/use-trash-menu";
 import { useTrashNavigation } from "@/__feature/pages/trash/hooks/use-trash-navigation";
 import { useTrashSelectionBar } from "@/__feature/pages/trash/hooks/use-trash-selection-bar";
 import { useTrashThumbs } from "@/__feature/pages/trash/hooks/use-trash-thumbs";
-import { useNodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { useSort } from "@/__feature/sort/hooks/use-sort";
 import { useViewMode } from "@/__feature/view/hooks/use-view-mode";
 import { useHistoryContext } from "@/feature/history/providers/history-provider";
 import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
+import { useNodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { useTagEditorContext } from "@/feature/tag-editor/_providers/tag-editor-provider";
 import { useViewer } from "@/feature/viewer/hooks/use-viewer";
 import { MediaListing } from "@/lib/node/types";
@@ -25,7 +25,7 @@ export function useTrash({ listing }: UseTrashProps) {
   const viewMode = useViewMode();
 
   const filtering = useTrashFiltering({ listing });
-  const selection = useNodeSelectionControl({
+  const selection = useNodeSelection({
     allNodes: listing.nodes,
     activeNodes: filtering.filteredNodes,
   });

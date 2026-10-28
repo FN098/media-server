@@ -1,10 +1,13 @@
-import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
+import { ExplorerListingView } from "@/app/(pages)/explorer/_components/explorer-listing-view";
+import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
+import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
+import { useViewerContext } from "@/feature/viewer/providers/viewer-provider";
 
 export function ExplorerContent() {
-  // const { viewer, filtering, navigation, menu, dialogs } = useExplorerContext();
-  const { filtering, menu } = useExplorerContext();
+  const listing = useNodeListingContext();
+  const viewer = useViewerContext();
 
-  console.log({ filtering, menu });
+  // const { viewer, filtering, navigation, menu, dialogs } = useExplorerContext();
 
   // if (viewer.isOpen) {
   //   return (
@@ -26,11 +29,12 @@ export function ExplorerContent() {
   // }
 
   return (
-    // <MenuItemsProvider items={menu.items}>
-    // <PagingProvider totalCount={filtering.filteredCount}>
-    // {/* <ExplorerListingView /> */}
-    <>aaa</>
-    // </PagingProvider>
-    // </MenuItemsProvider>
+    <SelectionProvider>
+      {/*  <MenuItemsProvider items={menu.items}> */}
+      {/*  <PagingProvider totalCount={filtering.filteredCount}> */}
+      <ExplorerListingView />
+      {/*  </PagingProvider> */}
+      {/*  </MenuItemsProvider> */}
+    </SelectionProvider>
   );
 }

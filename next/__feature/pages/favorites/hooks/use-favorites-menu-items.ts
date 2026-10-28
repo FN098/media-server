@@ -8,11 +8,11 @@ import { useToggleSlideshowMenuItem } from "@/__feature/menu-items/hooks/use-tog
 import { FavoritesFavorites } from "@/__feature/pages/favorites/hooks/use-favorites-favorites";
 import { FavoritesFiltering } from "@/__feature/pages/favorites/hooks/use-favorites-filtering";
 import { FavoritesNavigation } from "@/__feature/pages/favorites/hooks/use-favorites-navigation";
-import { NodeSelectionControl } from "@/__feature/selection/hooks/use-node-selection-control";
 import { Slideshow } from "@/__feature/viewers/media-viewer/hooks/use-slideshow";
-import { createSeparator } from "@/__lib/menu-items/factory";
-import { MenuItemDef, NodeContext } from "@/__lib/menu-items/types";
 import { useRatingMenuItem } from "@/feature/menu-items/hooks/use-rating-menu-item";
+import { createSeparator } from "@/feature/menu-items/lib/separator";
+import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
+import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 
@@ -24,7 +24,7 @@ export const separators = {
 
 interface UseFavoritesMenuItemsProps {
   filtering: FavoritesFiltering;
-  selection: NodeSelectionControl;
+  selection: NodeSelection;
   tagEditor: TagEditor;
   navigation: FavoritesNavigation;
   viewer: ViewerNavigation;

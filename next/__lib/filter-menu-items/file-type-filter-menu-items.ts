@@ -1,4 +1,4 @@
-import { FilterMenuItem } from "@/__lib/menu-items/types";
+import { FilterMenuItem } from "@/feature/menu-items/lib/types";
 import { MediaType } from "@/lib/file/media-types";
 import { FileTypeIcon, ImageIcon, MusicIcon, VideoIcon } from "lucide-react";
 

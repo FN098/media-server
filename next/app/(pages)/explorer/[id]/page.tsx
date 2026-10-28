@@ -1,10 +1,11 @@
-import { FavoritesControlProvider } from "@/__feature/favorite/providers/favorites-control-provider";
-import { NodeSelectionProvider } from "@/__feature/selection/providers/node-selection-provider";
+import { NodeFavoriteProvider } from "@/__feature/favorite/providers/favorites-control-provider";
 import { mergeDbNodes } from "@/__lib/node/merge";
 import { syncFsWithDb } from "@/__lib/node/sync";
 import { APP_CONFIG } from "@/app.config";
 import { Explorer } from "@/app/(pages)/explorer/_components";
 import { NodeListingProvider } from "@/feature/listing/providers/node-listing-provider";
+import { MediaNode } from "@/feature/media-node/lib/types";
+import { MediaNodesProvider } from "@/feature/media-node/providers/media-nodes-provider";
 import { SortDirection, SortKey, sortNodes } from "@/feature/sort/sort-nodes";
 import { ViewerProvider } from "@/feature/viewer/providers/viewer-provider";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
@@ -19,7 +20,7 @@ import {
   updateFolderCache,
 } from "@/lib/folder/repository";
 import { defaultFsContext, getFsListing } from "@/lib/fs/fs-listing";
-import { MediaFileNode, Node, NodeListing } from "@/lib/node/types";
+import { Node, NodeListing } from "@/lib/node/types";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { basename, extname } from "path";
@@ -138,7 +139,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     children: sorted,
   };
 
-  const favorites = listing.children
+  const favoriteNodes = listing.children
     .filter((n) => n.favoritedAt)
     .map((n) => ({
       id: n.id,
@@ -147,17 +148,17 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   const mediaNodes = listing.children
     .filter((n) => !n.isDirectory)
-    .filter((n): n is MediaFileNode => isMediaFile(n.type));
+    .filter((n): n is MediaNode => isMediaFile(n.type));
 
   return (
-    <NodeSelectionProvider>
-      <FavoritesControlProvider entries={favorites}>
-        <ViewerProvider mediaNodes={mediaNodes}>
-          <NodeListingProvider listing={listing}>
+    <NodeListingProvider listing={listing}>
+      <NodeFavoriteProvider nodes={favoriteNodes}>
+        <ViewerProvider total={mediaNodes.length}>
+          <MediaNodesProvider nodes={mediaNodes}>
             <Explorer />
-          </NodeListingProvider>
+          </MediaNodesProvider>
         </ViewerProvider>
-      </FavoritesControlProvider>
-    </NodeSelectionProvider>
+      </NodeFavoriteProvider>
+    </NodeListingProvider>
   );
 }
