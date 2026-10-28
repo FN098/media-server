@@ -3,13 +3,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type RenameTarget = {
+  id: string;
   isDirectory: boolean;
-  path: string;
   name: string;
 };
 
 interface UseRenameDialogProps {
-  onSuccess?: (props: { id: string; isDirectory: boolean }) => void;
+  onSuccess?: (target: {
+    id: string;
+    isDirectory: boolean;
+    newName: string;
+    oldName: string;
+  }) => void;
 }
 
 export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
@@ -79,14 +84,17 @@ export function useRenameDialog({ onSuccess }: UseRenameDialogProps = {}) {
     setIsPending(true);
     try {
       const result = await renameNodeAction({
-        sourcePath: target.path,
+        id: target.id,
+        isDirectory: target.isDirectory,
         newName: fullNewName,
       });
       if (result.success) {
         toast.success("リネームしました");
         onSuccess?.({
-          prevPath: result.from,
-          nextPath: result.to,
+          id: target.id,
+          isDirectory: target.isDirectory,
+          oldName: result.from,
+          newName: result.to,
         });
         close();
       } else if (result.hasConflictName) {

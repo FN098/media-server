@@ -1,6 +1,5 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import { copyNodeInDb } from "@/__lib/node/services";
 import {
   getServerMediaPath,
@@ -10,6 +9,7 @@ import {
   EditableVirtualPathManySchema,
   EditableVirtualPathSchema,
 } from "@/__lib/virtual-path/schemas";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { unique } from "@/lib/utils/array";
 import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";

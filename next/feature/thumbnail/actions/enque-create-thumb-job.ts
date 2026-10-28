@@ -1,10 +1,10 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import { acquireLock } from "@/__lib/redis/lock";
 import { sha1Hash } from "@/__lib/utils/sha1-hash";
 import { EditableVirtualPathSchema } from "@/__lib/virtual-path/schemas";
 import { thumbQueue } from "@/feature/thumbnail/lib/queue";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import z from "zod";
 

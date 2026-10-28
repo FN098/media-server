@@ -1,11 +1,11 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import {
   getServerMediaPath,
   getServerMediaTrashPath,
 } from "@/__lib/path/helpers";
 import { EditableVirtualPathManySchema } from "@/__lib/virtual-path/schemas";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { unique } from "@/lib/utils/array";
 import { recursiveMergeMove } from "@/lib/utils/fs";

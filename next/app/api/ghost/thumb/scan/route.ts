@@ -1,7 +1,7 @@
-import { authorize } from "@/__lib/authorization/authorize";
 import { scanGhostThumb } from "@/__lib/ghost-thumb/scan";
 import { GhostThumbScanEventData } from "@/__lib/ghost-thumb/types";
 import { badRequestResponse, forbiddenResponse } from "@/__lib/response/errors";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { NextRequest } from "next/server";
 import z from "zod";

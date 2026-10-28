@@ -84,3 +84,17 @@ export async function updateFileTimestamp({
     data: { mtime },
   });
 }
+
+// リネーム
+export async function renameFile({
+  id,
+  newName,
+}: {
+  id: string;
+  newName: string;
+}) {
+  await db.file.update({
+    where: { id },
+    data: { name: newName },
+  });
+}

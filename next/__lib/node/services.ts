@@ -16,6 +16,7 @@ interface RenameNodeInDbParams {
   isDirectory: boolean;
 }
 
+/** @deprecated */
 export async function renameNodeInDb({
   srcVirtualPath,
   destVirtualPath,
@@ -158,6 +159,7 @@ interface CopyNodeInDbParams {
   userId: string;
 }
 
+/** @deprecated */
 export async function copyNodeInDb({
   srcVirtualPath,
   destVirtualPath,

@@ -1,6 +1,6 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
+import { authorize } from "@/lib/authorization/authorize";
 import { updateFileTimestamp } from "@/lib/file/repository";
 import { updateFolderTimestamp } from "@/lib/folder/repository";
 import { logger } from "@/lib/logger";

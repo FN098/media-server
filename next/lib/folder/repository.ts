@@ -3,24 +3,23 @@ import { db } from "@/lib/prisma";
 import { omit } from "@/lib/utils/object";
 import { cache } from "react";
 
-// #region root folder
-
 async function _getRootFolder() {
   return await db.folder.findFirst({
     where: { parentFolderId: null, name: ROOT_FOLDER_NAME },
   });
 }
 
+// ルートフォルダ取得
 export const getRootFolder = cache(_getRootFolder);
 
+// ルートフォルダ作成
 export async function createRootFolder() {
   return await db.folder.create({
     data: { parentFolderId: null, name: ROOT_FOLDER_NAME, mtime: new Date() },
   });
 }
 
-// #endregion
-
+// フォルダ取得
 export async function getFolder(id: string, userId: string) {
   const folder = await db.folder.findUnique({
     where: { id },
@@ -41,7 +40,8 @@ export async function getFolder(id: string, userId: string) {
   };
 }
 
-export async function createFolders(path: string) {
+// フォルダ再帰作成
+export async function createFoldersRecursively(path: string) {
   return db.$transaction(async (tx) => {
     const segments = path.split("/").filter(Boolean);
 
@@ -324,5 +324,19 @@ export async function updateFolderTimestamp({
   await db.folder.update({
     where: { id },
     data: { mtime },
+  });
+}
+
+// リネーム
+export async function renameFolder({
+  id,
+  newName,
+}: {
+  id: string;
+  newName: string;
+}) {
+  await db.folder.update({
+    where: { id },
+    data: { name: newName },
   });
 }

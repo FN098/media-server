@@ -1,4 +1,3 @@
-import { authorize } from "@/__lib/authorization/authorize";
 import {
   MAX_UPLOAD_FILE_SIZE,
   TEMP_DB_BACKUP_DIR,
@@ -11,6 +10,7 @@ import {
   internalServerErrorResponse,
 } from "@/__lib/response/errors";
 import { formatBytes } from "@/__lib/utils/bytes";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import fs from "fs/promises";
 import { NextRequest } from "next/server";

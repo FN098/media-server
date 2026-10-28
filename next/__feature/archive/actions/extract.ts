@@ -1,13 +1,13 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
-import { extractArchive } from "@/__lib/child_process/7z";
-import { getServerMediaPath } from "@/__lib/path/helpers";
-import { sanitize } from "@/__lib/virtual-path/guard";
+import { authorize } from "@/lib/authorization/authorize";
+import { extractArchive } from "@/lib/child_process/7z";
 import { getFilePath } from "@/lib/file/repository";
+import { resolveRealPath } from "@/lib/fs/real-path";
 import { logger } from "@/lib/logger";
 import { existsPath, getPathInfo } from "@/lib/utils/fs";
 import { basename, dirname, extname, join } from "@/lib/virtual-path";
+import { sanitizeVirtualPath } from "@/lib/virtual-path/sanitize";
 import { mkdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 
@@ -46,7 +46,7 @@ export async function extractManyArchivesAction({
 
     // 仮想パス→物理パス
     const srcVirtualPath = sourcePath;
-    const srcRealPath = getServerMediaPath(srcVirtualPath);
+    const srcRealPath = resolveRealPath(srcVirtualPath);
 
     // 移動元の存在・ファイル確認
     const srcPathInfo = await getPathInfo(srcRealPath);
@@ -69,15 +69,15 @@ export async function extractManyArchivesAction({
 
     // 仮想パス→物理パス
     let destVirtualDir = join(parentVirtualDir, fileBaseName);
-    let destRealPath = getServerMediaPath(destVirtualDir);
+    let destRealPath = resolveRealPath(destVirtualDir);
 
     // 同名フォルダの衝突回避
     let counter = 2;
     while (await existsPath(destRealPath)) {
-      destVirtualDir = sanitize(
+      destVirtualDir = sanitizeVirtualPath(
         join(parentVirtualDir, `${fileBaseName} (${counter})`)
       );
-      destRealPath = getServerMediaPath(destVirtualDir);
+      destRealPath = resolveRealPath(destVirtualDir);
       counter++;
     }
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";

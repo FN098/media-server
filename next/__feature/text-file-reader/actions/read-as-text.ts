@@ -1,7 +1,7 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import { getServerMediaPath } from "@/__lib/path/helpers";
+import { authorize } from "@/lib/authorization/authorize";
 import { getFilePath } from "@/lib/file/repository";
 import { logger } from "@/lib/logger";
 import { getPathInfo } from "@/lib/utils/fs";

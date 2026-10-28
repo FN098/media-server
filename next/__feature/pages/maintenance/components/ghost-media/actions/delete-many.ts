@@ -1,6 +1,6 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import z from "zod";

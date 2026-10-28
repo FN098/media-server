@@ -12,7 +12,7 @@ import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { isMediaFile } from "@/lib/file/media-types";
 import { getFiles } from "@/lib/file/repository";
 import {
-  createFolders,
+  createFoldersRecursively,
   getDbFolders,
   getFolder,
   getFolderName,
@@ -116,7 +116,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     : null;
 
   const nextFolderId = fsListing.nextPath
-    ? await createFolders(fsListing.nextPath)
+    ? await createFoldersRecursively(fsListing.nextPath)
     : null;
 
   const nextFolder = nextFolderId
@@ -124,7 +124,7 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     : null;
 
   const prevFolderId = fsListing.prevPath
-    ? await createFolders(fsListing.prevPath)
+    ? await createFoldersRecursively(fsListing.prevPath)
     : null;
 
   const prevFolder = prevFolderId

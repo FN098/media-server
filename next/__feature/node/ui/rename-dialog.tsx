@@ -1,6 +1,5 @@
 "use client";
 
-import { useRenameDialog } from "@/__feature/node/hooks/use-rename-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
@@ -10,25 +9,31 @@ import {
   DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { Input } from "@/shadcn/components/ui/input";
+import { Ref } from "react";
 
 interface RenameDialogProps {
-  dialog: ReturnType<typeof useRenameDialog>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  newName: string;
+  setNewName: (name: string) => void;
+  extension: string;
+  inputRef: Ref<HTMLInputElement>;
+  isPending: boolean;
+  onConfirm: () => void;
 }
 
-export function RenameDialog({ dialog }: RenameDialogProps) {
-  const {
-    isOpen,
-    newName,
-    extension,
-    isPending,
-    inputRef,
-    setNewName,
-    close,
-    performRename,
-  } = dialog;
-
+export function RenameDialog({
+  open,
+  onOpenChange,
+  newName,
+  setNewName,
+  extension,
+  inputRef,
+  isPending,
+  onConfirm,
+}: RenameDialogProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-[425px]"
         onPointerDownOutside={(e) => e.preventDefault()}
@@ -48,7 +53,7 @@ export function RenameDialog({ dialog }: RenameDialogProps) {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !isPending) {
                   e.preventDefault();
-                  void performRename();
+                  onConfirm();
                 }
               }}
               disabled={isPending}
@@ -66,10 +71,7 @@ export function RenameDialog({ dialog }: RenameDialogProps) {
           <Button variant="outline" onClick={close} disabled={isPending}>
             キャンセル
           </Button>
-          <Button
-            onClick={() => void performRename()}
-            disabled={isPending || !newName.trim()}
-          >
+          <Button onClick={onConfirm} disabled={isPending || !newName.trim()}>
             {isPending ? "実行中..." : "保存"}
           </Button>
         </DialogFooter>

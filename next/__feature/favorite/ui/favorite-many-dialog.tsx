@@ -11,24 +11,24 @@ import {
 import { Loader2 } from "lucide-react";
 
 interface FavoriteManyDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
-  targets: { id: string }[];
+  items: { id: string }[];
   action: "add" | "remove";
   isPending: boolean;
   onConfirm: () => void;
 }
 
 export function FavoriteManyDialog({
-  isOpen,
+  open,
   onOpenChange,
-  targets,
+  items,
   action,
   isPending,
   onConfirm,
 }: FavoriteManyDialogProps) {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
         onEscapeKeyDown={(e) => e.stopPropagation()}
         className="focus:outline-none"
@@ -40,12 +40,12 @@ export function FavoriteManyDialog({
           <AlertDialogDescription>
             {action === "add" ? (
               <>
-                選択された {targets.length}{" "}
+                選択された {items.length}{" "}
                 件のアイテムをお気に入りに追加しますか？
               </>
             ) : (
               <>
-                選択された {targets.length}{" "}
+                選択された {items.length}{" "}
                 件のアイテムのお気に入りを解除しますか？
               </>
             )}

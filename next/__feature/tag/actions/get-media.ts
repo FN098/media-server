@@ -1,7 +1,7 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import { getClientExplorerPath } from "@/__lib/path/helpers";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { basename } from "path";

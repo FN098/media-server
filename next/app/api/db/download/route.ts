@@ -1,4 +1,3 @@
-import { authorize } from "@/__lib/authorization/authorize";
 import { DB_BACKUP_DIR } from "@/__lib/db-backup/config";
 import { getMimetype } from "@/__lib/node/mimetype";
 import {
@@ -8,6 +7,7 @@ import {
   notFoundResponse,
 } from "@/__lib/response/errors";
 import { FileNameSchema } from "@/__lib/virtual-path/schemas";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs";

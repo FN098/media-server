@@ -1,6 +1,5 @@
 "use client";
 
-import { useExtractDialog } from "@/__feature/archive/hooks/use-extract-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,14 +13,22 @@ import {
 import { Loader2 } from "lucide-react";
 
 interface ExtractDialogProps {
-  dialog: ReturnType<typeof useExtractDialog>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  items: { name: string }[];
+  isPending: boolean;
+  onConfirm: () => void;
 }
 
-export function ExtractDialog({ dialog }: ExtractDialogProps) {
-  const { isOpen, targets, isPending, close, performExtract } = dialog;
-
+export function ExtractDialog({
+  open,
+  onOpenChange,
+  items,
+  isPending,
+  onConfirm,
+}: ExtractDialogProps) {
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && close()}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
         onEscapeKeyDown={(e) => e.stopPropagation()}
         className="focus:outline-none"
@@ -29,9 +36,9 @@ export function ExtractDialog({ dialog }: ExtractDialogProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>アーカイブの解凍</AlertDialogTitle>
           <AlertDialogDescription>
-            {targets.length === 1
-              ? `「${targets[0].name}」を現在のディレクトリに解凍します。`
-              : `${targets.length} 件を現在のディレクトリに解凍します。`}
+            {items.length === 1
+              ? `「${items[0].name}」を現在のディレクトリに解凍します。`
+              : `${items.length} 件を現在のディレクトリに解凍します。`}
             <br />
             同名のフォルダがある場合は、自動的に連番（ (1)
             など）が付与されます。
@@ -47,7 +54,7 @@ export function ExtractDialog({ dialog }: ExtractDialogProps) {
             onClick={(e) => {
               // ShadcnのAlertDialogActionが勝手にダイアログを閉じるデフォルト挙動をガード
               e.preventDefault();
-              void performExtract();
+              onConfirm();
             }}
             disabled={isPending}
             className="bg-primary text-primary-foreground hover:bg-primary/90"

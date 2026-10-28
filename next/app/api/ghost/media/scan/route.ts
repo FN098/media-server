@@ -1,7 +1,7 @@
-import { authorize } from "@/__lib/authorization/authorize";
 import { scanGhostMedia } from "@/__lib/ghost-media/scan";
 import { GhostMediaScanEventData } from "@/__lib/ghost-media/types";
 import { badRequestResponse, forbiddenResponse } from "@/__lib/response/errors";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { NextRequest } from "next/server";
 import z from "zod";

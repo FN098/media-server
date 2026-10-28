@@ -1,29 +1,30 @@
-import { ChildProcessExitStatus } from "@/__lib/child_process/types";
 import { ParsedDatabaseURL } from "@/__lib/db/url-parser";
+import { ChildProcessExitStatus } from "@/lib/child_process/types";
 import { spawn } from "child_process";
-import { createReadStream } from "fs";
+import { createWriteStream } from "fs";
+import { unlink } from "fs/promises";
 import { pipeline } from "stream/promises";
 
-type RestoreDatabaseResult = {
+type DumpDatabaseResult = {
   ok: boolean;
   exitStatus: ChildProcessExitStatus;
   error?: string;
 };
 
-export async function restoreDatabaseFromFile(
+export async function dumpDatabaseToFile(
   db: ParsedDatabaseURL,
   filePath: string
-): Promise<RestoreDatabaseResult> {
+): Promise<DumpDatabaseResult> {
   if (db.protocol !== "mysql" && db.protocol !== "mariadb") {
     throw new Error("Target database must be MySQL or MariaDB");
   }
 
-  // 読み込み用ファイルストリームを生成
-  const readStream = createReadStream(filePath);
+  // 書き込み用ファイルストリームを生成
+  const writeStream = createWriteStream(filePath);
 
-  // バックグラウンドプロセスで mysql コマンドを起動
+  // バックグラウンドプロセスで mysqldump を起動
   const childProcess = spawn(
-    "mysql",
+    "mysqldump",
     ["-h", db.host, "-P", db.port, "-u", db.user, db.database],
     {
       env: {
@@ -33,7 +34,7 @@ export async function restoreDatabaseFromFile(
     }
   );
 
-  // mysql の出力バッファ
+  // mysqldump の標準エラー出力バッファ
   let stderr = "";
 
   childProcess.stderr.on("data", (data: Buffer) => {
@@ -50,8 +51,8 @@ export async function restoreDatabaseFromFile(
   });
 
   try {
-    // ファイルのストリームを mysql の標準入力へパイプラインで流し込む
-    await pipeline(readStream, childProcess.stdin);
+    // mysqldump の標準出力をダンプファイルへパイプラインで流し込む
+    await pipeline(childProcess.stdout, writeStream);
 
     // プロセスの終了を待機して終了ステータスを取得
     const exitStatus = (await exitPromise) as ChildProcessExitStatus;
@@ -62,8 +63,16 @@ export async function restoreDatabaseFromFile(
       error: stderr || undefined,
     };
   } catch (error) {
-    readStream.destroy();
+    writeStream.destroy();
     childProcess.kill("SIGTERM");
+
+    // 中途半端に残ったダンプファイルを削除
+    try {
+      await unlink(filePath);
+    } catch {
+      // ファイルが存在しないなどのエラーは無視
+    }
+
     throw error;
   }
 }

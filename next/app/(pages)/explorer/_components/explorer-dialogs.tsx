@@ -7,22 +7,53 @@ import { MoveDialog } from "@/__feature/node/ui/move-dialog";
 import { RenameDialog } from "@/__feature/node/ui/rename-dialog";
 import { PreviewDialog } from "@/__feature/preview/ui/preview-dialog";
 import { TextFilePreviewDialog } from "@/__feature/text-file-reader/ui/text-file-preview-dialog";
-import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
+import { useExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 
 export function ExplorerDialogs() {
-  const { dialogs } = useExplorerContext();
+  const {
+    extractDialog,
+    renameDialog,
+    createFolderDialog,
+    moveDialog,
+    copyDialog,
+    deleteDialog,
+    previewDialog,
+    favoriteDialog,
+    textFilePreviewDialog,
+  } = useExplorerDialogs();
 
   return (
     <>
-      <ExtractDialog dialog={dialogs.extractDialog} />
-      <RenameDialog dialog={dialogs.renameDialog} />
-      <CreateFolderDialog dialog={dialogs.createFolderDialog} />
-      <MoveDialog dialog={dialogs.moveDialog} />
-      <CopyDialog dialog={dialogs.copyDialog} />
-      <DeleteDialog dialog={dialogs.deleteDialog} />
-      <PreviewDialog dialog={dialogs.previewDialog} />
-      <FavoriteManyDialog dialog={dialogs.favoriteDialog} />
-      <TextFilePreviewDialog dialog={dialogs.textFilePreviewDialog} />
+      <ExtractDialog
+        open={extractDialog.isOpen}
+        onOpenChange={(open) => {
+          if (!open) extractDialog.close();
+        }}
+        isPending={extractDialog.isPending}
+        items={extractDialog.targets}
+        onConfirm={extractDialog.performExtract}
+      />
+
+      <RenameDialog
+        open={renameDialog.isOpen}
+        onOpenChange={(open) => {
+          if (!open) renameDialog.close();
+        }}
+        newName={renameDialog.newName}
+        setNewName={renameDialog.setNewName}
+        extension={renameDialog.extension}
+        inputRef={renameDialog.inputRef}
+        isPending={renameDialog.isPending}
+        onConfirm={renameDialog.performRename}
+      />
+
+      <CreateFolderDialog dialog={createFolderDialog} />
+      <MoveDialog dialog={moveDialog} />
+      <CopyDialog dialog={copyDialog} />
+      <DeleteDialog dialog={deleteDialog} />
+      <PreviewDialog dialog={previewDialog} />
+      <FavoriteManyDialog dialog={favoriteDialog} />
+      <TextFilePreviewDialog dialog={textFilePreviewDialog} />
     </>
   );
 }

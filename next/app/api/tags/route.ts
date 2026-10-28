@@ -1,4 +1,3 @@
-import { authorize } from "@/__lib/authorization/authorize";
 import {
   badRequestResponse,
   forbiddenResponse,
@@ -15,6 +14,7 @@ import {
 } from "@/__lib/tag/schemas";
 import { searchTags } from "@/__lib/tag/search";
 import { safeParseRequestJson } from "@/__lib/utils/request";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { uniqueBy } from "@/lib/utils/array";
 import { NextRequest } from "next/server";

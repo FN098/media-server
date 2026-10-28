@@ -1,8 +1,8 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import { addFavoriteFile } from "@/__lib/user-file-favorite/repository";
 import { addFavoriteFolder } from "@/__lib/user-folder-favorite/repository";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import z from "zod";
 

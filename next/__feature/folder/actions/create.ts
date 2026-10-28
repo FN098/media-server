@@ -1,12 +1,12 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import { getServerMediaPath } from "@/__lib/path/helpers";
 import { sanitize } from "@/__lib/virtual-path/guard";
 import {
   EditableVirtualPathSchema,
   FileOrFolderNameSchema,
 } from "@/__lib/virtual-path/schemas";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { existsPath } from "@/lib/utils/fs";
 import { join } from "@/lib/virtual-path";

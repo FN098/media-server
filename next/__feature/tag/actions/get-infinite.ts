@@ -1,8 +1,8 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import { TagMasterItem } from "@/__lib/tag/types";
 import { Prisma } from "@/generated/prisma/client";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import z from "zod";

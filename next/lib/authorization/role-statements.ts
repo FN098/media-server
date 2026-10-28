@@ -1,5 +1,5 @@
-import { Statement, statements } from "@/__lib/authorization/statements";
 import { Role } from "@/__lib/user/roles";
+import { Statement, statements } from "@/lib/authorization/statements";
 
 export const roleStatements = {
   admin: [

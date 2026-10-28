@@ -1,9 +1,9 @@
-import { createVideoThumb } from "@/__lib/child_process/ffmpeg";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
 } from "@/__lib/path/helpers";
 import { createImageThumb } from "@/__lib/thumb/sharp";
+import { createVideoThumb } from "@/lib/child_process/ffmpeg";
 import { MediaFsNode } from "@/lib/node/types";
 import { existsPath } from "@/lib/utils/fs";
 import { mkdir } from "fs/promises";

@@ -1,9 +1,9 @@
 "use server";
 
-import { authorize } from "@/__lib/authorization/authorize";
 import { normalizeTagName } from "@/__lib/tag/normalize";
 import { Tag } from "@/__lib/tag/types";
 import { generateKana } from "@/__lib/utils/kana";
+import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { unique } from "@/lib/utils/array";
