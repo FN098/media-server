@@ -1,8 +1,8 @@
 import { visitFolderAction } from "@/__feature/folder/actions/visit";
-import { FolderNavigation } from "@/__feature/navigation/hooks/use-folder-navigation";
 import { useParentPathname } from "@/__feature/navigation/hooks/use-parent-pathname";
 import { TrashFiltering } from "@/__feature/pages/trash/hooks/use-trash-filtering";
 import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
+import { FolderNavigation } from "@/feature/folder-navigation/hooks/use-folder-navigation";
 import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
 import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { IndexLike, ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";

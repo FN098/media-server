@@ -1,5 +1,4 @@
 import { useFullscreen } from "@/__feature/general/hooks/use-fullscreen";
-import { useFolderNavigation } from "@/__feature/navigation/hooks/use-folder-navigation";
 import { useFavoritesDialogs } from "@/__feature/pages/favorites/hooks/use-favorites-dialogs";
 import { useFavoritesFavorites } from "@/__feature/pages/favorites/hooks/use-favorites-favorites";
 import { useFavoritesFiltering } from "@/__feature/pages/favorites/hooks/use-favorites-filtering";
@@ -11,6 +10,7 @@ import { useFavoritesThumbs } from "@/__feature/pages/favorites/hooks/use-favori
 import { useSort } from "@/__feature/sort/hooks/use-sort";
 import { useViewMode } from "@/__feature/view/hooks/use-view-mode";
 import { useSlideshowContext } from "@/__feature/viewers/media-viewer/providers/slideshow-provider";
+import { useFolderNavigation } from "@/feature/folder-navigation/hooks/use-folder-navigation";
 import { useHistoryContext } from "@/feature/history/providers/history-provider";
 import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
 import { useNodeSelection } from "@/feature/selection/hooks/use-node-selection";

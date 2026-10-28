@@ -2,7 +2,6 @@
 
 import { ScrollLockProvider } from "@/__feature/general/providers/scroll-lock-provider";
 import { MenuItemsProvider } from "@/__feature/menu-items/providers/menu-items-provider";
-import { FolderNavigation } from "@/__feature/navigation/ui/folder-navigation";
 import { useTrashContext } from "@/__feature/pages/trash/providers/trash-provider";
 import { TrashDialogs } from "@/__feature/pages/trash/ui/trash-dialogs";
 import { TrashToolbar } from "@/__feature/pages/trash/ui/trash-toolbar";
@@ -13,6 +12,7 @@ import { MediaNodePagingViewProvider } from "@/__feature/paging-view/providers/m
 import { PagingProvider } from "@/__feature/paging-view/providers/paging-provider";
 import { MediaViewer } from "@/__feature/viewers/media-viewer";
 import { MediaViewerProvider } from "@/__feature/viewers/media-viewer/providers/media-viewer-provider";
+import { FolderNavigation } from "@/feature/folder-navigation/ui/folder-navigation";
 import { SelectionBar } from "@/feature/selection/ui/selection-bar";
 import { TagEditSheet } from "@/feature/tag-editor/_components/tag-edit-sheet";
 import { TagEditSheetProvider } from "@/feature/tag-editor/_providers/tag-edit-sheet-provider";

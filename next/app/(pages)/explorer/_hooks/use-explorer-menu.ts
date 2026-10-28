@@ -17,7 +17,7 @@ import { Slideshow } from "@/__feature/viewers/media-viewer/hooks/use-slideshow"
 import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
 import { ExplorerNavigation } from "@/app/(pages)/explorer/_hooks/use-explorer-navigation";
-import { ExplorerThumbs } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbs";
+import { ExplorerThumbs } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbnails";
 import { SeparatorMenuItem } from "@/feature/menu-items/lib/types";
 import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";

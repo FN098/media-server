@@ -8,39 +8,36 @@ import { useMoveDialog } from "@/__feature/node/hooks/use-move-dialog";
 import { useRenameDialog } from "@/__feature/node/hooks/use-rename-dialog";
 import { usePreviewDialog } from "@/__feature/preview/hooks/use-preview-dialog";
 import { useTextFilePreviewDialog } from "@/__feature/text-file-reader/hooks/use-text-file-preview-dialog";
-import { ExplorerFavorites } from "@/app/(pages)/explorer/_hooks/use-explorer-favorites";
-import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
-import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
+import { useExplorerFavorites } from "@/app/(pages)/explorer/_hooks/use-explorer-favorites";
+import { useExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
+import { useExplorerSelection } from "@/app/(pages)/explorer/_hooks/use-explorer-selection";
 import { useMemo } from "react";
 
-interface UseExplorerDialogsProps {
-  filtering: ExplorerFiltering;
-  selection: NodeSelection;
-  favorites: ExplorerFavorites;
-}
+export function useExplorerDialogs() {
+  const {
+    controls: {
+      tag: { apply: applyTagFilter },
+    },
+  } = useExplorerFiltering();
+  const { reset: resetSelection } = useExplorerSelection();
+  const { refresh: refreshFavorite } = useExplorerFavorites();
 
-export function useExplorerDialogs({
-  filtering,
-  selection,
-  favorites,
-}: UseExplorerDialogsProps) {
+  // Dialogs
   const renameDialog = useRenameDialog({
-    onSuccess: ({ nextPath, prevPath }) =>
-      void favorites.refresh(prevPath, nextPath),
+    onSuccess: ({ id, isDirectory }) => void refreshFavorite(id, isDirectory),
   });
   const moveDialog = useMoveDialog();
   const copyDialog = useCopyDialog();
   const createFolderDialog = useCreateFolderDialog();
   const deleteDialog = useDeleteDialog({
-    onSuccess: selection.reset,
+    onSuccess: resetSelection,
   });
   const extractDialog = useExtractDialog();
   const previewDialog = usePreviewDialog();
   const favoriteDialog = useFavoriteDialog();
   const textFilePreviewDialog = useTextFilePreviewDialog();
-
   const tagFilterDialog = useTagFilterDialog({
-    onApply: filtering.controls.tag.apply,
+    onApply: applyTagFilter,
     autoFocusInput: true,
   });
 

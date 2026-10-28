@@ -1,4 +1,4 @@
-import { FolderNavigation } from "@/__feature/navigation/ui/folder-navigation";
+import { FolderNavigation } from "@/feature/folder-navigation/ui/folder-navigation";
 import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
 
 export function ExplorerFolderNavigation() {

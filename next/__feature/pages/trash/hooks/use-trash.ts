@@ -1,5 +1,4 @@
 import { useFullscreen } from "@/__feature/general/hooks/use-fullscreen";
-import { useFolderNavigation } from "@/__feature/navigation/hooks/use-folder-navigation";
 import { useTrashDialogs } from "@/__feature/pages/trash/hooks/use-trash-dialogs";
 import { useTrashFiltering } from "@/__feature/pages/trash/hooks/use-trash-filtering";
 import { useTrashHotkeys } from "@/__feature/pages/trash/hooks/use-trash-hotkeys";
@@ -9,6 +8,7 @@ import { useTrashSelectionBar } from "@/__feature/pages/trash/hooks/use-trash-se
 import { useTrashThumbs } from "@/__feature/pages/trash/hooks/use-trash-thumbs";
 import { useSort } from "@/__feature/sort/hooks/use-sort";
 import { useViewMode } from "@/__feature/view/hooks/use-view-mode";
+import { useFolderNavigation } from "@/feature/folder-navigation/hooks/use-folder-navigation";
 import { useHistoryContext } from "@/feature/history/providers/history-provider";
 import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
 import { useNodeSelection } from "@/feature/selection/hooks/use-node-selection";

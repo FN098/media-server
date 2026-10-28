@@ -1,6 +1,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
+/** @deprecated */
 export function useParentPathname() {
   const pathname = usePathname();
   const searchParams = useSearchParams();

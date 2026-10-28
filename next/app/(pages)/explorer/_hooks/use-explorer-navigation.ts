@@ -1,40 +1,30 @@
 import { visitFolderAction } from "@/__feature/folder/actions/visit";
-import { FolderNavigation } from "@/__feature/navigation/hooks/use-folder-navigation";
 import { useParentPathname } from "@/__feature/navigation/hooks/use-parent-pathname";
 import { readFileAsTextAction } from "@/__feature/text-file-reader/actions/read-as-text";
 import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
 import { isArchiveFile } from "@/__lib/archive/archive-types";
-import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
-import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
-import { History, toHistoryItem } from "@/feature/history/hooks/use-history";
-import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
-import { IndexLike, ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
+import { useExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
+import { useExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
+import { useExplorerSelection } from "@/app/(pages)/explorer/_hooks/use-explorer-selection";
+import { useFolderNavigation } from "@/feature/folder-navigation/hooks/use-folder-navigation";
+import { toHistoryItem } from "@/feature/history/hooks/use-history";
+import { useHistoryContext } from "@/feature/history/providers/history-provider";
+import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
+import { IndexLike } from "@/feature/viewer/hooks/use-viewer";
+import { useViewerContext } from "@/feature/viewer/providers/viewer-provider";
 import { isMediaFile } from "@/lib/file/media-types";
-import { Node, NodeListing } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
-interface UseExplorerNavigationProps {
-  listing: NodeListing;
-  filtering: ExplorerFiltering;
-  selection: NodeSelection;
-  viewer: ViewerNavigation;
-  history: History;
-  folder: FolderNavigation;
-  dialogs: ExplorerDialogs;
-}
-
-export function useExplorerNavigation({
-  listing,
-  filtering,
-  selection,
-  viewer,
-  history,
-  folder,
-  dialogs,
-}: UseExplorerNavigationProps) {
-  const { currentFolder, prevFolder, nextFolder } = listing;
-  const { mediaOnly } = filtering;
+export function useExplorerNavigation() {
+  const { currentFolder, prevFolder, nextFolder } = useNodeListingContext();
+  const { mediaOnly } = useExplorerFiltering();
+  const { open: openViewer } = useViewerContext();
+  const { navigate: openFolder } = useFolderNavigation();
+  const { replace: replaceSelection } = useExplorerSelection();
+  const { extractDialog, textFilePreviewDialog } = useExplorerDialogs();
+  const history = useHistoryContext();
 
   // 初回マウント時に訪問履歴にプッシュ
   useEffect(() => {
@@ -60,7 +50,7 @@ export function useExplorerNavigation({
       const media = mediaOnly[index];
       if (!media) return;
 
-      selection.replace(media);
+      replaceSelection(media);
 
       if (history.last?.type === "file") {
         history.replaceLast(toHistoryItem(media));
@@ -68,7 +58,7 @@ export function useExplorerNavigation({
         history.push(toHistoryItem(media));
       }
     },
-    [history, mediaOnly, selection]
+    [history, mediaOnly, replaceSelection]
   );
 
   // インデックス計算
@@ -79,7 +69,7 @@ export function useExplorerNavigation({
     async (node: Node) => {
       // フォルダ
       if (node.isDirectory) {
-        folder.navigate({ folderId: currentFolder.id, resetPage: true });
+        openFolder({ folderId: currentFolder.id, resetPage: true });
         return;
       }
 
@@ -87,13 +77,13 @@ export function useExplorerNavigation({
       if (isMediaFile(node.type)) {
         const index = getNodeIndex(node.id);
         if (index == null) return;
-        viewer.open({ at: index });
+        openViewer({ at: index });
         return;
       }
 
       // ファイル（アーカイブ）
       if (isArchiveFile(node.type)) {
-        dialogs.extractDialog.open([{ fileId: node.id, name: node.name }]);
+        extractDialog.open([{ fileId: node.id, name: node.name }]);
         return;
       }
 
@@ -104,60 +94,54 @@ export function useExplorerNavigation({
         return;
       }
 
-      dialogs.textFilePreviewDialog.open({
+      textFilePreviewDialog.open({
         title: node.name,
         content: text.content,
         encoding: text.encoding,
         isTruncated: text.isTruncated,
       });
     },
-    [
-      dialogs.extractDialog,
-      dialogs.textFilePreviewDialog,
-      folder,
-      getNodeIndex,
-      viewer,
-    ]
+    [extractDialog, textFilePreviewDialog, openFolder, getNodeIndex, openViewer]
   );
 
   // 新しいタブで開く
   const openInNewTab = useCallback(
     (node: Node) => {
       if (node.isDirectory) {
-        folder.navigate({ folderId: node.id, newTab: true });
+        openFolder({ folderId: node.id, newTab: true });
         return;
       }
 
       if (isMediaFile(node.type)) {
         const index = getNodeIndex(node.id);
         if (index == null) return;
-        viewer.open({ at: index, newTab: true });
+        openViewer({ at: index, newTab: true });
         return;
       }
 
       toast.warning("このファイル形式は対応していません");
     },
-    [folder, getNodeIndex, viewer]
+    [openFolder, getNodeIndex, openViewer]
   );
 
   // 前のフォルダを開く
   const openPrevFolder = useCallback(
     (at: IndexLike = "last") => {
       if (prevFolder) {
-        folder.navigate({ folderId: prevFolder.id, at });
+        openFolder({ folderId: prevFolder.id, at });
       }
     },
-    [folder, prevFolder]
+    [openFolder, prevFolder]
   );
 
   // 次のフォルダを開く
   const openNextFolder = useCallback(
     (at: IndexLike = "first") => {
       if (nextFolder) {
-        folder.navigate({ folderId: nextFolder.id, at });
+        openFolder({ folderId: nextFolder.id, at });
       }
     },
-    [folder, nextFolder]
+    [openFolder, nextFolder]
   );
 
   // 一つ上のフォルダを開く

@@ -1,68 +1,56 @@
 import { touchTimestampAction } from "@/__feature/node/actions/touch-timestamp";
 import { updatePreviewFileAction } from "@/__feature/preview/actions/update";
+import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
 import { enqueueCreateSingleThumbJobAction } from "@/feature/thumbnail/actions/enque-create-thumb-job";
 import { enqueueCreateThumbsJobAction } from "@/feature/thumbnail/actions/enque-create-thumbs-job";
-import { Node, NodeListing } from "@/lib/node/types";
+import { Node } from "@/lib/node/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-interface UseExplorerThumbsProps {
-  listing: NodeListing;
-  autoCreateThumbs?: boolean;
-}
-
-export function useExplorerThumbs({
-  listing,
-  autoCreateThumbs = true,
-}: UseExplorerThumbsProps) {
+export function useExplorerThumbnails() {
+  const { currentFolder } = useNodeListingContext();
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { refresh } = useRouter();
 
   // 排他制御
   const updatingRef = useRef(false);
 
-  const folderId = listing.folderId;
+  const folderId = currentFolder.id;
 
   // サムネイル自動作成
   useEffect(() => {
-    if (!folderId || !autoCreateThumbs) return;
+    if (!folderId) return;
     void enqueueCreateThumbsJobAction({ folderId });
-  }, [autoCreateThumbs, folderId]);
+  }, [folderId]);
 
-  const update = useCallback(
-    async (node: Node) => {
-      if (updatingRef.current) return;
-      updatingRef.current = true;
+  const update = useCallback(async (node: Node) => {
+    if (updatingRef.current) return;
+    updatingRef.current = true;
 
-      setIsLoading(true);
-      try {
-        await updateThumb(node);
-        router.refresh();
-      } finally {
-        updatingRef.current = false;
-        setIsLoading(false);
-      }
-    },
-    [router]
-  );
+    setIsLoading(true);
+    try {
+      await updateThumb(node);
+      refresh();
+    } finally {
+      updatingRef.current = false;
+      setIsLoading(false);
+    }
+  }, []);
 
-  const updateParallel = useCallback(
-    async (nodes: Node[]) => {
-      if (updatingRef.current) return;
-      updatingRef.current = true;
+  const updateParallel = useCallback(async (nodes: Node[]) => {
+    if (updatingRef.current) return;
+    updatingRef.current = true;
 
-      setIsLoading(true);
-      try {
-        await Promise.all(nodes.map(updateThumb));
-        router.refresh();
-      } finally {
-        updatingRef.current = false;
-        setIsLoading(false);
-      }
-    },
-    [router]
-  );
+    setIsLoading(true);
+    try {
+      await Promise.all(nodes.map(updateThumb));
+      refresh();
+    } finally {
+      updatingRef.current = false;
+      setIsLoading(false);
+    }
+  }, []);
 
   return {
     isLoading,
@@ -106,4 +94,4 @@ const updateThumb = async (node: Node) => {
   }
 };
 
-export type ExplorerThumbs = ReturnType<typeof useExplorerThumbs>;
+export type ExplorerThumbs = ReturnType<typeof useExplorerThumbnails>;

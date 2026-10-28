@@ -12,14 +12,12 @@ import {
   createTagFilter,
   withDirectoryControl,
 } from "@/__lib/filter/factory";
-import { Node, NodeListing } from "@/lib/node/types";
+import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
+import { Node } from "@/lib/node/types";
 import { useCallback, useMemo } from "react";
 
-interface UseExplorerFilteringProps {
-  listing: NodeListing;
-}
-
-export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
+export function useExplorerFiltering() {
+  const { children: nodes } = useNodeListingContext();
   const queryFilter = useQueryFilter();
   const mediaTypeFilter = useMediaTypeFilter();
   const tagFilter = useTagFilter();
@@ -53,7 +51,7 @@ export function useExplorerFiltering({ listing }: UseExplorerFilteringProps) {
   // フィルター結果
   const { filteredNodes, filteredCount, totalCount, isFiltered } =
     useFilteredNodes({
-      nodes: listing.children,
+      nodes,
       filters,
     });
 
