@@ -46,7 +46,10 @@ export function ExtractDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={close} disabled={isPending}>
+          <AlertDialogCancel
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
             キャンセル
           </AlertDialogCancel>
           <AlertDialogAction

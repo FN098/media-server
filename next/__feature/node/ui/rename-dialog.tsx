@@ -68,7 +68,11 @@ export function RenameDialog({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={close} disabled={isPending}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
             キャンセル
           </Button>
           <Button onClick={onConfirm} disabled={isPending || !newName.trim()}>

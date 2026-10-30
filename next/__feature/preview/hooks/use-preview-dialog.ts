@@ -1,7 +1,7 @@
-import { listSubFoldersAction } from "@/__feature/folder/actions/list-subfolders";
 import { listMediaAction } from "@/__feature/node/actions/list";
 import { updatePreviewFileAction } from "@/__feature/preview/actions/update";
 import { sanitize } from "@/__lib/virtual-path/guard";
+import { listSubFoldersAction } from "@/feature/sub-folders/actions/list-sub-folders";
 import { dirname } from "@/lib/virtual-path";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";

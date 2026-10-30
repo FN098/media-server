@@ -1,13 +1,7 @@
 import { ExtractDialog } from "@/__feature/archive/ui/extract-dialog";
-import { FavoriteManyDialog } from "@/__feature/favorite/ui/favorite-many-dialog";
-import { CreateFolderDialog } from "@/__feature/folder/ui/create-folder-dialog";
-import { CopyDialog } from "@/__feature/node/ui/copy-dialog";
-import { DeleteDialog } from "@/__feature/node/ui/delete-dialog";
-import { MoveDialog } from "@/__feature/node/ui/move-dialog";
 import { RenameDialog } from "@/__feature/node/ui/rename-dialog";
-import { PreviewDialog } from "@/__feature/preview/ui/preview-dialog";
-import { TextFilePreviewDialog } from "@/__feature/text-file-reader/ui/text-file-preview-dialog";
 import { useExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
+import { CreateFolderDialog } from "@/feature/create-folder/ui/create-folder-dialog";
 
 export function ExplorerDialogs() {
   const {
@@ -47,13 +41,43 @@ export function ExplorerDialogs() {
         onConfirm={renameDialog.performRename}
       />
 
-      <CreateFolderDialog dialog={createFolderDialog} />
-      <MoveDialog dialog={moveDialog} />
-      <CopyDialog dialog={copyDialog} />
+      <CreateFolderDialog
+        open={createFolderDialog.isOpen}
+        onOpenChange={(open) => {
+          if (!open) createFolderDialog.close();
+        }}
+        newFolderName={createFolderDialog.newFolderName}
+        setNewFolderName={createFolderDialog.setNewFolderName}
+        isPending={createFolderDialog.isPending}
+        onConfirm={createFolderDialog.performCreate}
+      />
+
+      {/* <MoveDialog
+        open={moveDialog.isOpen}
+        onOpenChange={(open) => {
+          if (!open) moveDialog.close();
+        }}
+        currentFolder={moveDialog.currentDir}
+        setNewFolderName={moveDialog.setNewFolderName}
+        isPending={moveDialog.isPending}
+        onConfirm={moveDialog.performCreate}
+
+        // currentFolder,
+        // folders,
+        // recentFolders,
+        // isLoading,
+        // isPending,
+        // onOpenFolder,
+        // onOpenParentFolder,
+        // onTogglePin,
+        // onConfirm,
+      /> */}
+
+      {/* <CopyDialog dialog={copyDialog} />
       <DeleteDialog dialog={deleteDialog} />
       <PreviewDialog dialog={previewDialog} />
       <FavoriteManyDialog dialog={favoriteDialog} />
-      <TextFilePreviewDialog dialog={textFilePreviewDialog} />
+      <TextFilePreviewDialog dialog={textFilePreviewDialog} /> */}
     </>
   );
 }

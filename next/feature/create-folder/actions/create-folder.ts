@@ -1,23 +1,13 @@
 "use server";
 
-import { getServerMediaPath } from "@/__lib/path/helpers";
-import { sanitize } from "@/__lib/virtual-path/guard";
-import {
-  EditableVirtualPathSchema,
-  FileOrFolderNameSchema,
-} from "@/__lib/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
+import { getFolderPath } from "@/lib/folder/repository";
+import { resolveMediaPath } from "@/lib/fs/resolvers";
 import { logger } from "@/lib/logger";
 import { existsPath } from "@/lib/utils/fs";
-import { join } from "@/lib/virtual-path";
 import { mkdir } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import z from "zod";
-
-const InputSchema = z.object({
-  parentPath: EditableVirtualPathSchema,
-  folderName: FileOrFolderNameSchema,
-});
+import { join } from "path";
 
 type ActionResult =
   | { success: true }
@@ -27,26 +17,33 @@ type ActionResult =
     };
 
 // フォルダ作成
-export async function createFolderAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { parentPath, folderName } = parsed.data;
-
+export async function createFolderAction({
+  parentFolderId,
+  newFolderName,
+}: {
+  parentFolderId: string;
+  newFolderName: string;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("folder:create");
   if (!auth.success) {
     return auth;
   }
 
+  let parentFolderPath: string;
+  try {
+    parentFolderPath = await getFolderPath(parentFolderId);
+  } catch (error) {
+    logger.error("create-folder-action:get-parent-folder-path", error);
+    return {
+      success: false,
+      message: "フォルダが見つかりません。",
+    };
+  }
+
   // 仮想パス→物理パス
-  const newVirtualPath = sanitize(join(parentPath, folderName));
-  const newRealPath = getServerMediaPath(newVirtualPath);
+  const newVirtualPath = join(parentFolderPath, newFolderName);
+  const newRealPath = resolveMediaPath(newVirtualPath);
 
   if (await existsPath(newRealPath)) {
     return {
@@ -58,7 +55,7 @@ export async function createFolderAction(
   try {
     await mkdir(newRealPath, { recursive: true });
   } catch (error) {
-    logger.error("action:create-folder", error);
+    logger.error("create-folder-action:make-directories", error);
     return {
       success: false,
       message: "フォルダの作成に失敗しました。",

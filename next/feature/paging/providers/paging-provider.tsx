@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  usePaging,
-  UsePagingProps,
-} from "@/__feature/paging-view/hooks/use-paging";
+import { usePaging, UsePagingProps } from "@/feature/paging/hooks/use-paging";
 import { createContext, ReactNode, useContext } from "react";
 
 const PagingContext = createContext<ReturnType<typeof usePaging> | undefined>(

@@ -1,5 +1,5 @@
 import { useMediaNodePagingViewContext } from "@/__feature/paging-view/providers/media-node-paging-view-provider";
-import { usePagingContext } from "@/__feature/paging-view/providers/paging-provider";
+import { usePagingContext } from "@/feature/paging/providers/paging-provider";
 import { useSelectionContext } from "@/feature/selection/providers/selection-provider";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 

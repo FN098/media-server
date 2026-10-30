@@ -5,11 +5,11 @@ import {
 } from "@/__lib/filter/types";
 import { normalizeForLike } from "@/__lib/utils/japanese";
 import { shuffleArray, shuffleArrayWithSeed } from "@/__lib/utils/shuffle";
-import { SortDirection } from "@/feature/sort/sort-nodes";
 import { Prisma } from "@/generated/prisma/client";
 import { detectMediaType } from "@/lib/file/media-types";
 import { MediaNode, MediaType } from "@/lib/node/types";
 import { prisma } from "@/lib/prisma";
+import { SortDirection } from "@/lib/sort/sort-nodes";
 import path, { basename } from "path";
 
 type SearchFavoriteParams = {

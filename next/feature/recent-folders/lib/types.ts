@@ -1,5 +1,6 @@
-import { VisitedFolder } from "@/__lib/folder/types";
-
-export type RecentFolder = VisitedFolder & {
+export type RecentFolder = {
+  folderId: string;
   name: string;
+  isPinned: boolean;
+  visitedAt: Date;
 };

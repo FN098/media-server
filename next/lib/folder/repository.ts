@@ -40,6 +40,42 @@ export async function getFolder(id: string, userId: string) {
   };
 }
 
+// フォルダ作成
+export async function createFoldersOrSkip(
+  parentFolderId: string,
+  newFolderNames: string[]
+) {
+  const now = new Date();
+  const result = await db.folder.createMany({
+    data: newFolderNames.map((name) => ({
+      parentFolderId,
+      name,
+      mtime: now,
+    })),
+    skipDuplicates: true,
+  });
+
+  return result.count;
+}
+
+// フォルダ削除
+export async function deleteFoldersNotExists(
+  parentFolderId: string,
+  existingFolderNames: string[]
+) {
+  // folder の削除時に file も Cascade 削除される
+  const result = await db.folder.deleteMany({
+    where: {
+      parentFolderId,
+      name: {
+        notIn: existingFolderNames,
+      },
+    },
+  });
+
+  return result.count;
+}
+
 // フォルダ再帰作成
 export async function createFoldersRecursively(path: string) {
   return db.$transaction(async (tx) => {
@@ -184,7 +220,10 @@ export async function getRecentVisitedFolders(userId: string, length: number) {
       { isPinned: "desc" }, // 1. ピン留めされているものを上へ
       { visitedAt: "desc" }, // 2. その中で新しい順
     ],
-    include: {
+    select: {
+      folderId: true,
+      isPinned: true,
+      visitedAt: true,
       folder: {
         select: {
           name: true,

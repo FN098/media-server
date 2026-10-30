@@ -6,7 +6,6 @@ import { Explorer } from "@/app/(pages)/explorer/_components";
 import { NodeListingProvider } from "@/feature/listing/providers/node-listing-provider";
 import { MediaNode } from "@/feature/media-node/lib/types";
 import { MediaNodesProvider } from "@/feature/media-node/providers/media-nodes-provider";
-import { SortDirection, SortKey, sortNodes } from "@/feature/sort/sort-nodes";
 import { ViewerProvider } from "@/feature/viewer/providers/viewer-provider";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { isMediaFile } from "@/lib/file/media-types";
@@ -21,6 +20,7 @@ import {
 } from "@/lib/folder/repository";
 import { defaultFsContext, getFsListing } from "@/lib/fs/fs-listing";
 import { Node, NodeListing } from "@/lib/node/types";
+import { SortDirection, SortKey, sortNodes } from "@/lib/sort/sort-nodes";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { basename, extname } from "path";

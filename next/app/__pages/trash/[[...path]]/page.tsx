@@ -6,13 +6,13 @@ import { getServerMediaTrashPath } from "@/__lib/path/helpers";
 import { isSystemHiddenVirtualPath } from "@/__lib/path/protections";
 import { APP_CONFIG } from "@/app.config";
 import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
-import { SortDirection, SortKey, sortNodes } from "@/feature/sort/sort-nodes";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import { getVisitedFolders } from "@/lib/folder/repository";
 import { getFsListing } from "@/lib/fs/fs-listing";
 import { formatNodes } from "@/lib/node/formatters";
 import { Node } from "@/lib/node/types";
+import { SortDirection, SortKey, sortNodes } from "@/lib/sort/sort-nodes";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 

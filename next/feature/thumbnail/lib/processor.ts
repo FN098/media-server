@@ -1,11 +1,11 @@
 import { redis } from "@/__lib/redis";
 import { createThumbs } from "@/__lib/thumb/factory";
-import { sortNodes } from "@/feature/sort/sort-nodes";
 import {
   ThumbJobCompletedEvent,
   ThumbJobData,
 } from "@/feature/thumbnail/lib/types";
 import { getFsNode, listFsNodes } from "@/lib/fs/fs-listing";
+import { sortNodes } from "@/lib/sort/sort-nodes";
 import { chunk } from "@/lib/utils/array";
 import { Job } from "bullmq";
 import path from "node:path";

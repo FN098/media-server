@@ -1,6 +1,5 @@
 "use client";
 
-import { useMoveDialog } from "@/__feature/node/hooks/use-move-dialog";
 import { TextWithTooltip } from "@/__feature/text/ui/text-with-tooltip";
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -28,28 +27,36 @@ import {
 import { useState } from "react";
 
 interface MoveDialogProps {
-  dialog: ReturnType<typeof useMoveDialog>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  currentFolder: { id: string; name: string };
+  folders: { id: string; name: string }[];
+  recentFolders: { id: string; name: string; pinned: boolean }[];
+  isLoading: boolean;
+  isPending: boolean;
+  onOpenFolder: (folderId: string) => void;
+  onOpenParentFolder: () => void;
+  onTogglePin: (folderId: string, currentPinned: boolean) => void;
+  onConfirm: () => void;
 }
 
-export function MoveDialog({ dialog }: MoveDialogProps) {
-  const {
-    isOpen,
-    currentDir,
-    dirs,
-    recentDirs,
-    isLoading,
-    isPending,
-    close,
-    changeDir,
-    goBackParent,
-    togglePin,
-    performMove,
-  } = dialog;
-
+export function MoveDialog({
+  open,
+  onOpenChange,
+  currentFolder,
+  folders,
+  recentFolders,
+  isLoading,
+  isPending,
+  onOpenFolder,
+  onOpenParentFolder,
+  onTogglePin,
+  onConfirm,
+}: MoveDialogProps) {
   const [activeTab, setActiveTab] = useState<string>("browse");
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-[425px] h-[540px] flex flex-col"
         onEscapeKeyDown={(e) => e.stopPropagation()}
@@ -58,7 +65,7 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
           <DialogTitle>移動先を選択</DialogTitle>
           <div className="flex items-center gap-2 text-sm text-muted-foreground break-all bg-muted p-2 rounded">
             <Folder className="h-4 w-4 shrink-0" />
-            {currentDir}
+            {currentFolder.name}
           </div>
         </DialogHeader>
 
@@ -79,11 +86,11 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
             value="browse"
             className="flex-1 min-h-0 m-0 data-[state=active]:flex data-[state=active]:flex-col gap-2"
           >
-            {currentDir !== "" && (
+            {currentFolder.name !== "" && (
               <Button
                 variant="ghost"
                 className="w-full justify-start text-primary shrink-0"
-                onClick={goBackParent}
+                onClick={onOpenParentFolder}
                 disabled={isLoading}
               >
                 <ChevronLeft className="mr-2 h-4 w-4" />
@@ -99,23 +106,23 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
               )}
 
               <div className="flex flex-col gap-1 w-full min-w-0">
-                {dirs.length === 0 ? (
+                {folders.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground text-sm">
                     このフォルダにサブフォルダはありません
                   </div>
                 ) : (
-                  dirs.map((dir) => (
+                  folders.map((folder) => (
                     <Button
-                      key={dir.path}
+                      key={folder.id}
                       variant="ghost"
                       className="w-full min-w-0 justify-between hover:bg-primary/10 group gap-2"
-                      onClick={() => changeDir(dir.path)}
+                      onClick={() => onOpenFolder(folder.id)}
                       disabled={isLoading}
                     >
                       <div className="flex items-center min-w-0 text-left">
                         <Folder className="mr-2 h-4 w-4 text-blue-500 shrink-0" />
                         <TextWithTooltip
-                          text={dir.name}
+                          text={folder.name}
                           className="max-w-full truncate"
                         />
                       </div>
@@ -140,14 +147,14 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
               )}
 
               <div className="flex flex-col gap-1 w-full min-w-0">
-                {recentDirs.length === 0 ? (
+                {recentFolders.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground text-sm">
                     最近訪問したフォルダはありません
                   </div>
                 ) : (
-                  recentDirs.map((dir) => (
+                  recentFolders.map((folder) => (
                     <div
-                      key={dir.path}
+                      key={folder.id}
                       className="flex items-center justify-between w-full group gap-1"
                     >
                       {/* フォルダボタン */}
@@ -155,7 +162,7 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
                         variant="ghost"
                         className="flex-1 min-w-0 justify-start hover:bg-primary/10 py-6"
                         onClick={() => {
-                          changeDir(dir.path);
+                          onOpenFolder(folder.id);
                           setActiveTab("browse");
                         }}
                         disabled={isLoading}
@@ -164,13 +171,13 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
                           <Folder className="mr-2 h-4 w-4 text-amber-500 shrink-0" />
                           <div className="flex flex-col items-start min-w-0 text-left w-full">
                             <TextWithTooltip
-                              text={dir.name}
+                              text={folder.name}
                               className="max-w-full truncate"
                             />
-                            <TextWithTooltip
-                              text={dir.path}
+                            {/* <TextWithTooltip
+                              text={folder.path}
                               className="text-xs text-muted-foreground max-w-full truncate"
-                            />
+                            /> */}
                           </div>
                         </div>
                       </Button>
@@ -182,19 +189,19 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
                         disabled={isLoading}
                         className={cn(
                           "h-8 w-8 text-muted-foreground/50 hover:text-primary transition-opacity shrink-0",
-                          !dir.pinned &&
+                          !folder.pinned &&
                             "opacity-0 group-hover:opacity-100 focus:opacity-100"
                         )}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          void togglePin(dir.path, dir.pinned);
+                          onTogglePin(folder.id, folder.pinned);
                         }}
                       >
                         <Pin
                           className={cn(
                             "w-3.5 h-3.5 transition-transform duration-200",
-                            dir.pinned
+                            folder.pinned
                               ? "fill-primary text-primary"
                               : "rotate-45"
                           )}
@@ -211,15 +218,12 @@ export function MoveDialog({ dialog }: MoveDialogProps) {
         <DialogFooter className="gap-2 pt-2 border-t">
           <Button
             variant="outline"
-            onClick={close}
+            onClick={() => onOpenChange(false)}
             disabled={isLoading || isPending}
           >
             キャンセル
           </Button>
-          <Button
-            onClick={() => void performMove()}
-            disabled={isLoading || isPending}
-          >
+          <Button onClick={() => onConfirm()} disabled={isLoading || isPending}>
             {isPending ? (
               "移動中..."
             ) : (

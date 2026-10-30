@@ -56,10 +56,10 @@ export function useExtractDialog({ onSuccess }: UseExtractDialogProps = {}) {
 
   return {
     isOpen,
-    targets,
-    isPending,
     open,
     close,
+    targets,
     performExtract,
+    isPending,
   };
 }

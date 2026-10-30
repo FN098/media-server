@@ -1,6 +1,6 @@
-import { sortNodes } from "@/feature/sort/sort-nodes";
 import { detectMediaType, isMediaFile } from "@/lib/file/media-types";
 import { isRootFolder } from "@/lib/fs/root";
+import { sortNodes } from "@/lib/sort/sort-nodes";
 import { basename, join, parentpath } from "@/lib/virtual-path";
 import { Dirent } from "fs";
 import { readdir } from "fs/promises";

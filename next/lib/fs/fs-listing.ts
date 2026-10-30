@@ -1,7 +1,7 @@
 import { isSystemPath } from "@/feature/system/system-paths";
 import { detectMediaType } from "@/lib/file/media-types";
 import { findGlobalAdjacentFolder } from "@/lib/fs/fs-crawler";
-import { resolveRealPath } from "@/lib/fs/real-path";
+import { resolveMediaPath } from "@/lib/fs/resolvers";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
@@ -38,7 +38,7 @@ export interface FsContext {
 }
 
 export const defaultFsContext: FsContext = {
-  resolveRealPath: (virtualPath) => resolveRealPath(virtualPath),
+  resolveRealPath: (virtualPath) => resolveMediaPath(virtualPath),
   filterVirtualPath: (virtualPath) => !isSystemPath(virtualPath),
 };
 

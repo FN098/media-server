@@ -1,6 +1,5 @@
 "use client";
 
-import { useCreateFolderDialog } from "@/__feature/folder/hooks/use-create-folder-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
   Dialog,
@@ -12,15 +11,24 @@ import {
 import { Input } from "@/shadcn/components/ui/input";
 
 interface CreateFolderDialogProps {
-  dialog: ReturnType<typeof useCreateFolderDialog>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  newFolderName: string;
+  setNewFolderName: (name: string) => void;
+  isPending: boolean;
+  onConfirm: () => void;
 }
 
-export function CreateFolderDialog({ dialog }: CreateFolderDialogProps) {
-  const { isOpen, folderName, isPending, setFolderName, close, performCreate } =
-    dialog;
-
+export function CreateFolderDialog({
+  open,
+  onOpenChange,
+  newFolderName,
+  setNewFolderName,
+  isPending,
+  onConfirm,
+}: CreateFolderDialogProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-[425px]"
         onPointerDownOutside={(e) => e.preventDefault()}
@@ -32,13 +40,13 @@ export function CreateFolderDialog({ dialog }: CreateFolderDialogProps) {
 
         <div className="py-4">
           <Input
-            value={folderName}
-            onChange={(e) => setFolderName(e.target.value)}
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
             placeholder="新しいフォルダ名を入力"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !isPending) {
                 e.preventDefault();
-                void performCreate();
+                onConfirm();
               }
             }}
             disabled={isPending}
@@ -48,12 +56,16 @@ export function CreateFolderDialog({ dialog }: CreateFolderDialogProps) {
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={close} disabled={isPending}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
             キャンセル
           </Button>
           <Button
-            onClick={() => void performCreate()}
-            disabled={isPending || !folderName.trim()}
+            onClick={() => onConfirm()}
+            disabled={isPending || !newFolderName.trim()}
           >
             {isPending ? "作成中..." : "作成"}
           </Button>

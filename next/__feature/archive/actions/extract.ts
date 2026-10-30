@@ -3,7 +3,7 @@
 import { authorize } from "@/lib/authorization/authorize";
 import { extractArchive } from "@/lib/child_process/7z";
 import { getFilePath } from "@/lib/file/repository";
-import { resolveRealPath } from "@/lib/fs/real-path";
+import { resolveMediaPath } from "@/lib/fs/resolvers";
 import { logger } from "@/lib/logger";
 import { existsPath, getPathInfo } from "@/lib/utils/fs";
 import { basename, dirname, extname, join } from "@/lib/virtual-path";
@@ -14,9 +14,9 @@ import { revalidatePath } from "next/cache";
 type ActionResult =
   | {
       success: true;
-      completed: { sourcePath: string }[];
-      failed: { sourcePath: string; message: string }[];
-      skipped: { sourcePath: string; message: string }[];
+      completed: { fileId: string }[];
+      failed: { fileId: string; message: string }[];
+      skipped: { fileId: string; message: string }[];
     }
   | {
       success: false;
@@ -41,25 +41,34 @@ export async function extractManyArchivesAction({
   const skipped: Success["skipped"] = [];
 
   // 各パスを順番に処理 (並列実行でディスクI/Oが詰まるのを防ぐため for...of を使う)
-  for (const id of fileIds) {
-    const sourcePath = await getFilePath(id);
+  for (const fileId of fileIds) {
+    let sourcePath: string;
+    try {
+      sourcePath = await getFilePath(fileId);
+    } catch (error) {
+      failed.push({ fileId, message: "対象ファイルがDB上で見つかりません。" });
+      continue;
+    }
 
     // 仮想パス→物理パス
     const srcVirtualPath = sourcePath;
-    const srcRealPath = resolveRealPath(srcVirtualPath);
+    const srcRealPath = resolveMediaPath(srcVirtualPath);
 
     // 移動元の存在・ファイル確認
     const srcPathInfo = await getPathInfo(srcRealPath);
     if (srcPathInfo.exists && srcPathInfo.isDirectory) {
-      skipped.push({ sourcePath, message: "ディレクトリは解凍できません。" });
+      skipped.push({ fileId, message: "ディレクトリは解凍できません。" });
       continue;
     }
     if (!srcPathInfo.exists) {
       if (srcPathInfo.error === "not-found") {
-        failed.push({ sourcePath, message: "対象ファイルが見つかりません。" });
+        failed.push({
+          fileId,
+          message: "対象ファイルがFS上で見つかりません。",
+        });
         continue;
       }
-      failed.push({ sourcePath, message: "対象パスにアクセスできません。" });
+      failed.push({ fileId, message: "対象パスにアクセスできません。" });
       continue;
     }
 
@@ -69,7 +78,7 @@ export async function extractManyArchivesAction({
 
     // 仮想パス→物理パス
     let destVirtualDir = join(parentVirtualDir, fileBaseName);
-    let destRealPath = resolveRealPath(destVirtualDir);
+    let destRealPath = resolveMediaPath(destVirtualDir);
 
     // 同名フォルダの衝突回避
     let counter = 2;
@@ -77,7 +86,7 @@ export async function extractManyArchivesAction({
       destVirtualDir = sanitizeVirtualPath(
         join(parentVirtualDir, `${fileBaseName} (${counter})`)
       );
-      destRealPath = resolveRealPath(destVirtualDir);
+      destRealPath = resolveMediaPath(destVirtualDir);
       counter++;
     }
 
@@ -91,7 +100,7 @@ export async function extractManyArchivesAction({
       // 7-Zipを実行して解凍
       await extractArchive(srcRealPath, destRealPath);
 
-      completed.push({ sourcePath });
+      completed.push({ fileId });
     } catch (e) {
       logger.error("action:extract-archives", e, {
         sourcePath,
@@ -111,7 +120,7 @@ export async function extractManyArchivesAction({
           ? e.message
           : "解凍処理中に不明なエラーが発生しました。";
 
-      failed.push({ sourcePath, message: errorMessage });
+      failed.push({ fileId, message: errorMessage });
     }
   }
 

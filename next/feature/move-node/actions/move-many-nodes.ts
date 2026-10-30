@@ -5,63 +5,22 @@ import {
   getServerMediaPath,
   getServerMediaThumbPath,
 } from "@/__lib/path/helpers";
-import {
-  EditableVirtualPathManySchema,
-  EditableVirtualPathSchema,
-} from "@/__lib/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
+import { getFolderPath } from "@/lib/folder/repository";
+import { resolveMediaPath, resolveMediaThumbnailPath } from "@/lib/fs/resolvers";
 import { logger } from "@/lib/logger";
-import { unique } from "@/lib/utils/array";
-import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";
-import { basename, dirname, extname, join } from "@/lib/virtual-path";
+import { isFsNotFoundError } from "@/lib/utils/fs";
+import { basename, extname, join } from "@/lib/virtual-path";
+import { resolve } from "dns";
 import { readdir, rename, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
-import z from "zod";
-
-const InputSchema = z
-  .object({
-    sourcePaths: EditableVirtualPathManySchema.min(
-      1,
-      "ファイルまたはフォルダを1件以上指定してください。"
-    ).transform((paths) => unique(paths)),
-
-    destDirPath: EditableVirtualPathSchema,
-  })
-  .superRefine(({ sourcePaths, destDirPath }, ctx) => {
-    for (const sourcePath of sourcePaths) {
-      const currentDir = dirname(sourcePath);
-
-      if (destDirPath === currentDir) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["destDirPath"],
-          message: "移動先が現在のフォルダと同じです。",
-        });
-
-        return;
-      }
-
-      if (
-        destDirPath === sourcePath ||
-        destDirPath.startsWith(sourcePath + "/")
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["destDirPath"],
-          message: "移動先に自分自身またはそのサブフォルダは指定できません。",
-        });
-
-        return;
-      }
-    }
-  });
 
 type ActionResult =
   | {
       success: true;
-      completed: { path: string }[];
-      failed: { path: string; message: string }[];
-      skipped: { path: string; message: string }[];
+      completed: { id: string }[];
+      failed: { id: string; message: string }[];
+      skipped: { id: string; message: string }[];
     }
   | {
       success: false;
@@ -70,34 +29,46 @@ type ActionResult =
 
 type Success = Extract<ActionResult, { success: true }>;
 
+// TODO: fix (サムネイルをファイルIDと1:1で管理)
 // 移動
-export async function moveManyNodesAction(
-  input: z.input<typeof InputSchema>
-): Promise<ActionResult> {
-  // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: parsed.error.issues[0].message };
-  }
-
-  const { sourcePaths, destDirPath } = parsed.data;
-
+export async function moveManyNodesAction({
+  nodes,
+  destFolderId,
+}: {
+  nodes: {
+    id: string;
+    name: string;
+    isDirectory: boolean;
+  }[];
+  destFolderId: string;
+}): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize("file:move-many", "folder:move-many");
   if (!auth.success) {
     return auth;
   }
 
+  let virtualDestDirPath: string;
+  try {
+    virtualDestDirPath = await getFolderPath(destFolderId);
+  } catch (error) {
+    logger.error("move-many-nodes-action:get-dest-folder-path", error);
+    return {
+      success: false,
+      message: "ファイルまたはフォルダの移動に失敗しました。",
+    };
+  }
+
   // 仮想パス→物理パス
-  const realDestDirPath = getServerMediaPath(destDirPath);
+  const realDestDirPath = resolveMediaPath(virtualDestDirPath);
 
   // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
   const existingNames = new Set<string>();
   try {
     const entries = await readdir(realDestDirPath);
     entries.forEach((name) => existingNames.add(name));
-  } catch (e) {
-    logger.error("action:move:read-directory", e);
+  } catch (error) {
+    logger.error("move-many-nodes-action:read-dest-directory", error);
     return {
       success: false,
       message: "ファイルまたはフォルダの移動に失敗しました。",
@@ -108,53 +79,28 @@ export async function moveManyNodesAction(
   const failed: Success["failed"] = [];
   const skipped: Success["skipped"] = [];
 
-  for (const srcVirtualPath of sourcePaths) {
-    // 仮想パス→物理パス
-    const srcRealPath = getServerMediaPath(srcVirtualPath);
-
-    // ディレクトリ判定
-    const srcPathInfo = await getPathInfo(srcRealPath);
-    if (!srcPathInfo.exists) {
-      if (srcPathInfo.error === "not-found") {
-        failed.push({
-          path: srcVirtualPath,
-          message: "ファイルまたはフォルダが存在しません。",
-        });
-        continue;
-      } else {
-        failed.push({
-          path: srcVirtualPath,
-          message: "ファイルまたはフォルダへのアクセスが拒否されました。",
-        });
-        continue;
-      }
-    }
-    const isDirectory = srcPathInfo.isDirectory;
-
-    const srcName = basename(srcVirtualPath);
-
+  for (const node of nodes) {
     // 新しい名前を確定（名前衝突があれば (2), (3), ... などの連番を付与）
-    let currentSrcName = srcName;
+    let newName = node.name;
     let counter = 2;
-    while (existingNames.has(currentSrcName)) {
-      if (isDirectory) {
+    while (existingNames.has(newName)) {
+      if (node.isDirectory) {
         // フォルダの場合: 「フォルダ名 (2)」
-        currentSrcName = `${srcName} (${counter})`;
+        newName = `${node.name} (${counter})`;
       } else {
         // ファイルの場合: 「ファイル名 (2).ext」
-        const ext = extname(srcName);
-        const base = basename(srcName, ext);
-        currentSrcName = `${base} (${counter})${ext}`;
+        const ext = extname(node.name);
+        const base = basename(node.name, ext);
+        newName = `${base} (${counter})${ext}`;
       }
       counter++;
     }
 
     // 最終的なパスを決定
-    const destVirtualPath = join(destDirPath, currentSrcName);
-    const destRealPath = getServerMediaPath(destVirtualPath);
+    const destRealPath = join(realDestDirPath, newName)
 
-    const srcThumbPath = getServerMediaThumbPath(srcVirtualPath, isDirectory);
-    const destThumbPath = getServerMediaThumbPath(destVirtualPath, isDirectory);
+    const srcThumbPath = resolveMediaThumbnailPath(virtual, isDirectory);
+    const destThumbPath = resolve getServerMediaThumbPath(destVirtualPath, isDirectory);
 
     // サムネイル移動前処理
     try {
@@ -239,7 +185,7 @@ export async function moveManyNodesAction(
     completed.push({ path: srcVirtualPath });
 
     // 次のループのファイルがこれと衝突するのを防ぐため、確定した名前を Set に予約登録
-    existingNames.add(currentSrcName);
+    existingNames.add(newName);
   }
 
   // キャッシュの更新

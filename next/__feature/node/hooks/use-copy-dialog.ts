@@ -1,7 +1,7 @@
-import { listRecentFoldersAction } from "@/__feature/folder/actions/list-recent";
-import { listSubFoldersAction } from "@/__feature/folder/actions/list-subfolders";
 import { togglePinVisitedFolderAction } from "@/__feature/folder/actions/toggle-pin-visited";
 import { copyManyNodesAction } from "@/__feature/node/actions/copy-many";
+import { listRecentFoldersAction } from "@/feature/recent-folders/actions/list-recent-folders";
+import { listSubFoldersAction } from "@/feature/sub-folders/actions/list-sub-folders";
 import { dirname } from "path";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -64,7 +64,7 @@ export function useCopyDialog({ onSuccess }: UseCopyDialogProps = {}) {
     try {
       const result = await listRecentFoldersAction();
       if (result.success) {
-        const filtered = (result.data ?? []).filter(
+        const filtered = (result.folders ?? []).filter(
           (d: RecentDirectoryInfo) =>
             !targets.some(
               (sn) => d.path === sn.path || d.path.startsWith(sn.path + "/")

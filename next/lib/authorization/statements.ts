@@ -1,4 +1,11 @@
-export const statements = [
+import { assertUnique } from "@/lib/utils/assert-unique";
+
+export const statements = assertUnique([
+  "list-sub-folders",
+  "refresh-sub-folders",
+  "list-recent-folders",
+
+  // 以下、deprecated
   "archive:extract-many",
   "favorite:add",
   "favorite:add-many",
@@ -68,6 +75,6 @@ export const statements = [
   "db-backup:download",
   "ghost-media:scan",
   "ghost-thumbnail:scan",
-] as const;
+] as const);
 
 export type Statement = (typeof statements)[number];

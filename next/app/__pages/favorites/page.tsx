@@ -10,10 +10,10 @@ import { searchFavoriteMediaNodes } from "@/__lib/user-file-favorite/search";
 import { hashObject } from "@/__lib/utils/fnv1a-hash";
 import { APP_CONFIG } from "@/app.config";
 import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
-import { SortDirection } from "@/feature/sort/sort-nodes";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/node/formatters";
+import { SortDirection } from "@/lib/sort/sort-nodes";
 import { Metadata } from "next";
 
 // 動的ページとしてレンダリング
