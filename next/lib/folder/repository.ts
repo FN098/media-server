@@ -3,14 +3,12 @@ import { db } from "@/lib/prisma";
 import { omit } from "@/lib/utils/object";
 import { cache } from "react";
 
-async function _getRootFolder() {
+// ルートフォルダ取得
+export const getRootFolder = cache(async function   a() {
   return await db.folder.findFirst({
     where: { parentFolderId: null, name: ROOT_FOLDER_NAME },
   });
-}
-
-// ルートフォルダ取得
-export const getRootFolder = cache(_getRootFolder);
+});
 
 // ルートフォルダ作成
 export async function createRootFolder() {
@@ -41,7 +39,7 @@ export async function getFolder(id: string, userId: string) {
 }
 
 // フォルダ作成
-export async function createFoldersOrSkip(
+export async function createFoldersIfNotExist(
   parentFolderId: string,
   newFolderNames: string[]
 ) {

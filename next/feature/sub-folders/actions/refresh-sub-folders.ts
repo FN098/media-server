@@ -2,7 +2,7 @@
 
 import { authorize } from "@/lib/authorization/authorize";
 import {
-  createFoldersOrSkip,
+  createFoldersIfNotExist,
   deleteFoldersNotExists,
   getFolderPath,
 } from "@/lib/folder/repository";
@@ -53,7 +53,7 @@ export async function refreshSubFoldersAction({
     const folderNames = dirents.map((dir) => dir.name);
 
     // すでに存在するフォルダは作成しない
-    const createdCount = await createFoldersOrSkip(parentFolderId, folderNames);
+    const createdCount = await createFoldersIfNotExist(parentFolderId, folderNames);
 
     // 存在しないフォルダ・ファイルを削除
     const deletedCount = await deleteFoldersNotExists(
