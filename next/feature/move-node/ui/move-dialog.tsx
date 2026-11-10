@@ -1,28 +1,28 @@
 "use client";
 
-import { TextWithTooltip } from "@/__feature/text/ui/text-with-tooltip";
+import { TextWithTooltip } from "@/feature/_old/text/ui/text-with-tooltip";
 import { Button } from "@/shadcn/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
 } from "@/shadcn/components/ui/tabs";
 import { cn } from "@/shadcn/lib/utils";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Folder,
-  FolderInput,
-  Pin,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    Folder,
+    FolderInput,
+    Pin,
 } from "lucide-react";
 import { useState } from "react";
 

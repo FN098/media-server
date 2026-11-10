@@ -1,4 +1,4 @@
-import { useNodeFavoriteContext } from "@/__feature/favorite/providers/favorites-control-provider";
+import { useNodeFavoriteContext } from "@/feature/_old/favorite/providers/favorites-control-provider";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 

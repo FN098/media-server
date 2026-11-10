@@ -1,9 +1,9 @@
-import { useFavoriteFilter } from "@/__feature/filter/hooks/use-favorite-filter";
-import { useFilteredNodes } from "@/__feature/filter/hooks/use-filtered-nodes";
-import { useMediaTypeFilter } from "@/__feature/filter/hooks/use-media-type-filter";
-import { useQueryFilter } from "@/__feature/filter/hooks/use-query-filter";
-import { useTagFilter } from "@/__feature/filter/hooks/use-tag-filter";
-import { useSearchParamsControl } from "@/__feature/general/hooks/use-search-params-control";
+import { useFavoriteFilter } from "@/feature/_old/filter/hooks/use-favorite-filter";
+import { useFilteredNodes } from "@/feature/_old/filter/hooks/use-filtered-nodes";
+import { useMediaTypeFilter } from "@/feature/_old/filter/hooks/use-media-type-filter";
+import { useQueryFilter } from "@/feature/_old/filter/hooks/use-query-filter";
+import { useTagFilter } from "@/feature/_old/filter/hooks/use-tag-filter";
+import { useSearchParamsControl } from "@/feature/_old/general/hooks/use-search-params-control";
 import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
 import {
     createFavoriteFilter,

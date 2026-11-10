@@ -1,6 +1,6 @@
-import { SlideshowProvider } from "@/__feature/viewers/media-viewer/providers/slideshow-provider";
 import { PageBackground } from "@/app/(pages)/_components/background/page-background";
 import { resolvePageMeta } from "@/app/(pages)/_lib/page-meta/resolvers";
+import { SlideshowProvider } from "@/feature/_old/viewers/media-viewer/providers/slideshow-provider";
 import { DashboardHeader } from "@/feature/header/components/dashboard-header";
 import { HistoryProvider } from "@/feature/history/providers/history-provider";
 import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";

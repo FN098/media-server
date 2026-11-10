@@ -1,4 +1,4 @@
-import { SlideshowProvider } from "@/__feature/viewers/media-viewer/providers/slideshow-provider";
+import { SlideshowProvider } from "@/feature/_old/viewers/media-viewer/providers/slideshow-provider";
 import { HistoryProvider } from "@/feature/history/providers/history-provider";
 import { TagEditorProvider } from "@/feature/tag-editor/_providers/tag-editor-provider";
 

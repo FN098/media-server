@@ -1,4 +1,4 @@
-import { togglePinVisitedFolderAction } from "@/__feature/folder/actions/toggle-pin-visited";
+import { togglePinVisitedFolderAction } from "@/feature/_old/folder/actions/toggle-pin-visited";
 import { getParentFolderAction } from "@/feature/move-node/actions/get-parent-folder";
 import { moveManyNodesAction } from "@/feature/move-node/actions/move-many-nodes";
 import { listRecentFoldersAction } from "@/feature/recent-folders/actions/list-recent-folders";

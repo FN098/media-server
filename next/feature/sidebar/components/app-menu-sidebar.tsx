@@ -1,21 +1,21 @@
 "use client";
 
-import { ThemeSelect } from "@/__feature/theme/ui/theme-select";
+import { ThemeSelect } from "@/feature/_old/theme/ui/theme-select";
 import { SignOutButton } from "@/feature/auth/sign-out/components/sign-out-button";
 import { getPageMeta } from "@/feature/page-meta/lib/page-meta";
 import { Button } from "@/shadcn/components/ui/button";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    useSidebar,
 } from "@/shadcn/components/ui/sidebar";
 import { cn } from "@/shadcn/lib/utils";
 import { LucideIcon, MenuIcon, SidebarIcon } from "lucide-react";

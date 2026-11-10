@@ -1,4 +1,4 @@
-import { createManyTagsAction } from "@/__feature/tag/actions/create-many";
+import { createManyTagsAction } from "@/feature/_old/tag/actions/create-many";
 import { updateManyMediaTagsAction } from "@/feature/tag-editor/_actions/update-many";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
 import { useTagEditorHotkeys } from "@/feature/tag-editor/_hooks/use-tag-editor-hotkeys";

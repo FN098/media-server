@@ -1,6 +1,6 @@
 "use client";
 
-import { ClickToCopy } from "@/__feature/text/ui/click-to-copy";
+import { ClickToCopy } from "@/feature/_old/text/ui/click-to-copy";
 import { DynamicBreadcrumbs } from "@/feature/breadcrumbs/components/dynamic-breadcrumbs";
 import { useDynamicBreadcrumbsContext } from "@/feature/breadcrumbs/providers/dynamic-breadcrumbs-provider";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";

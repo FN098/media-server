@@ -1,7 +1,7 @@
 "use client";
 
-import { LocalRecentDate } from "@/__feature/datetime/ui/local-recent-date";
-import { togglePinVisitedFolderAction } from "@/__feature/folder/actions/toggle-pin-visited";
+import { LocalRecentDate } from "@/feature/_old/datetime/ui/local-recent-date";
+import { togglePinVisitedFolderAction } from "@/feature/_old/folder/actions/toggle-pin-visited";
 import { useCanHoverContext } from "@/feature/hover/providers/can-hover-provider";
 import { RecentFolder } from "@/feature/recent-folders/lib/types";
 import { Button } from "@/shadcn/components/ui/button";

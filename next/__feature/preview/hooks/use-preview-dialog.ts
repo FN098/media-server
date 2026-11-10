@@ -1,5 +1,5 @@
-import { listMediaAction } from "@/__feature/node/actions/list";
-import { updatePreviewFileAction } from "@/__feature/preview/actions/update";
+import { listMediaAction } from "@/feature/_old/node/actions/list";
+import { updatePreviewFileAction } from "@/feature/_old/preview/actions/update";
 import { listSubFoldersAction } from "@/feature/sub-folders/actions/list-sub-folders";
 import { sanitize } from "@/lib/_old/virtual-path/guard";
 import { dirname } from "@/lib/virtual-path";

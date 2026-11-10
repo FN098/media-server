@@ -1,11 +1,11 @@
-import { useQueryFilter } from "@/__feature/filter/hooks/use-query-filter";
+import { useQueryFilter } from "@/feature/_old/filter/hooks/use-query-filter";
 import { useSearchFocusContext } from "@/feature/search/providers/search-focus-provider";
 import {
-  startTransition,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
+    startTransition,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from "react";
 
 export function useSearch() {

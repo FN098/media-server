@@ -1,6 +1,6 @@
 "use client";
 
-import { useViewMode } from "@/__feature/view/hooks/use-view-mode";
+import { useViewMode } from "@/feature/_old/view/hooks/use-view-mode";
 import { ViewModeSwitch } from "@/feature/view-mode/components/view-mode-switch";
 
 export function ViewModeSwitchClient() {

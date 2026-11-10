@@ -1,11 +1,11 @@
-import { FilterResultText } from "@/__feature/text/ui/filter-result-text";
-import { ActionDropdownMenu } from "@/__feature/toolbar-menu/ui/action-dropdown-menu";
-import { FilterDropdownMenu } from "@/__feature/toolbar-menu/ui/filter-dropdown-menu";
-import { SortDropdownMenu } from "@/__feature/toolbar-menu/ui/sort-dropdown-menu";
 import { useExplorerActionMenu } from "@/app/(pages)/explorer/_hooks/use-explorer-action-menu";
 import { useExplorerFilterMenu } from "@/app/(pages)/explorer/_hooks/use-explorer-filter-menu";
 import { useExplorerSortMenu } from "@/app/(pages)/explorer/_hooks/use-explorer-sort-menu";
 import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
+import { FilterResultText } from "@/feature/_old/text/ui/filter-result-text";
+import { ActionDropdownMenu } from "@/feature/_old/toolbar-menu/ui/action-dropdown-menu";
+import { FilterDropdownMenu } from "@/feature/_old/toolbar-menu/ui/filter-dropdown-menu";
+import { SortDropdownMenu } from "@/feature/_old/toolbar-menu/ui/sort-dropdown-menu";
 
 export function ExplorerToolbar() {
   const { filtering, sort } = useExplorerContext();

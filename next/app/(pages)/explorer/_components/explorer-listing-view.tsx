@@ -1,12 +1,12 @@
-import { PagingGridView } from "@/__feature/paging-view/components/paging-grid-view";
-import { PagingListView } from "@/__feature/paging-view/components/paging-list-view";
-import { MediaNodePagingViewProvider } from "@/__feature/paging-view/providers/media-node-paging-view-provider";
-import { useViewMode } from "@/__feature/view/hooks/use-view-mode";
 import { useExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { useExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
 import { useExplorerNavigation } from "@/app/(pages)/explorer/_hooks/use-explorer-navigation";
 import { useExplorerSelection } from "@/app/(pages)/explorer/_hooks/use-explorer-selection";
 import { useExplorerThumbnails } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbnails";
+import { PagingGridView } from "@/feature/_old/paging-view/components/paging-grid-view";
+import { PagingListView } from "@/feature/_old/paging-view/components/paging-list-view";
+import { MediaNodePagingViewProvider } from "@/feature/_old/paging-view/providers/media-node-paging-view-provider";
+import { useViewMode } from "@/feature/_old/view/hooks/use-view-mode";
 import { useHistoryContext } from "@/feature/history/providers/history-provider";
 
 export function ExplorerListingView() {

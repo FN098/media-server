@@ -1,6 +1,6 @@
-import { HotkeysClientProvider } from "@/__feature/hotkey/providers/hotkeys-client-provider";
-import { ThumbEventProvider } from "@/__feature/thumbnail/providers/thumb-event-provider";
 import { APP_CONFIG } from "@/app.config";
+import { HotkeysClientProvider } from "@/feature/_old/hotkey/providers/hotkeys-client-provider";
+import { ThumbEventProvider } from "@/feature/_old/thumbnail/providers/thumb-event-provider";
 import { AppQueryClientProvider } from "@/feature/cache/providers/app-query-client-provider";
 import { CanHoverProvider } from "@/feature/hover/providers/can-hover-provider";
 import { MobileProvider } from "@/feature/mobile/providers/mobile-provider";

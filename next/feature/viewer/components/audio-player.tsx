@@ -1,21 +1,21 @@
-import { MarqueeText } from "@/__feature/text/ui/marquee-text";
-import { MediaThumb } from "@/__feature/thumbnail/ui/media-thumb";
+import { MarqueeText } from "@/feature/_old/text/ui/marquee-text";
+import { MediaThumb } from "@/feature/_old/thumbnail/ui/media-thumb";
 import { getAudioUrl } from "@/feature/viewer/lib/audio-url";
 import { FileNode } from "@/lib/node/types";
 import { Kbd } from "@/shadcn/components/ui/kbd";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
 } from "@/shadcn/components/ui/tooltip";
 import {
-  Music,
-  Pause,
-  Play,
-  Repeat,
-  Repeat1,
-  RotateCcw,
-  RotateCw,
+    Music,
+    Pause,
+    Play,
+    Repeat,
+    Repeat1,
+    RotateCcw,
+    RotateCw,
 } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
