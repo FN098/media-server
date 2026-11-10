@@ -1,9 +1,9 @@
 "use server";
 
-import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/__lib/db-backup/config";
-import { parseDatabaseURL } from "@/__lib/db/url-parser";
-import { getDatabaseUrlOrThrow } from "@/__lib/env/env-server";
-import { FileNameSchema } from "@/__lib/virtual-path/schemas";
+import { DB_BACKUP_DIR, TEMP_DB_BACKUP_DIR } from "@/lib/_old/db-backup/config";
+import { parseDatabaseURL } from "@/lib/_old/db/url-parser";
+import { getDatabaseUrlOrThrow } from "@/lib/_old/env/env-server";
+import { FileNameSchema } from "@/lib/_old/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
 import { restoreDatabaseFromFile } from "@/lib/child_process/mysql";
 import { logger } from "@/lib/logger";

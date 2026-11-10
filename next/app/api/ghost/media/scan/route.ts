@@ -1,6 +1,6 @@
-import { scanGhostMedia } from "@/__lib/ghost-media/scan";
-import { GhostMediaScanEventData } from "@/__lib/ghost-media/types";
-import { badRequestResponse, forbiddenResponse } from "@/__lib/response/errors";
+import { scanGhostMedia } from "@/lib/_old/ghost-media/scan";
+import { GhostMediaScanEventData } from "@/lib/_old/ghost-media/types";
+import { badRequestResponse, forbiddenResponse } from "@/lib/_old/response/errors";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { NextRequest } from "next/server";

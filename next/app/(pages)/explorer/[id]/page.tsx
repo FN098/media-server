@@ -1,12 +1,12 @@
 import { NodeFavoriteProvider } from "@/__feature/favorite/providers/favorites-control-provider";
-import { mergeDbNodes } from "@/__lib/node/merge";
-import { syncFsWithDb } from "@/__lib/node/sync";
 import { APP_CONFIG } from "@/app.config";
 import { Explorer } from "@/app/(pages)/explorer/_components";
 import { NodeListingProvider } from "@/feature/listing/providers/node-listing-provider";
 import { MediaNode } from "@/feature/media-node/lib/types";
 import { MediaNodesProvider } from "@/feature/media-node/providers/media-nodes-provider";
 import { ViewerProvider } from "@/feature/viewer/providers/viewer-provider";
+import { mergeDbNodes } from "@/lib/_old/node/merge";
+import { syncFsWithDb } from "@/lib/_old/node/sync";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { isMediaFile } from "@/lib/file/media-types";
 import { getFiles } from "@/lib/file/repository";

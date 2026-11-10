@@ -2,8 +2,8 @@ import { cleanupOldBackupsAction } from "@/__feature/pages/maintenance/component
 import { dumpDatabaseAction } from "@/__feature/pages/maintenance/components/db-backup/actions/dump";
 import { listDbBackupsAction } from "@/__feature/pages/maintenance/components/db-backup/actions/list";
 import { restoreDatabaseAction } from "@/__feature/pages/maintenance/components/db-backup/actions/restore";
-import { DbBackupFile } from "@/__lib/db-backup/types";
 import { DbBackupUploadResult } from "@/app/api/db/upload/route";
+import { DbBackupFile } from "@/lib/_old/db-backup/types";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 

@@ -1,9 +1,9 @@
 import { createManyTagsAction } from "@/__feature/tag/actions/create-many";
-import { EditingMode } from "@/__lib/tag-editor/types";
-import { TagOperation } from "@/__lib/tag/types";
 import { updateManyMediaTagsAction } from "@/feature/tag-editor/_actions/update-many";
 import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
 import { useTagEditorHotkeys } from "@/feature/tag-editor/_hooks/use-tag-editor-hotkeys";
+import { EditingMode } from "@/lib/_old/tag-editor/types";
+import { TagOperation } from "@/lib/_old/tag/types";
 import { Node } from "@/lib/node/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";

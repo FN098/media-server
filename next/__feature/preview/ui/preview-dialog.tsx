@@ -1,23 +1,23 @@
 "use client";
 
 import { usePreviewDialog } from "@/__feature/preview/hooks/use-preview-dialog";
-import { getBasename, getFilenameWithoutExt } from "@/__lib/utils/filename";
+import { getBasename, getFilenameWithoutExt } from "@/lib/_old/utils/filename";
 import { Button } from "@/shadcn/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { ScrollArea } from "@/shadcn/components/ui/scroll-area";
 import {
-  ChevronLeft,
-  ChevronRight,
-  FileBox,
-  Folder,
-  ImageIcon,
-  Save,
+    ChevronLeft,
+    ChevronRight,
+    FileBox,
+    Folder,
+    ImageIcon,
+    Save,
 } from "lucide-react";
 
 interface PreviewDialogProps {

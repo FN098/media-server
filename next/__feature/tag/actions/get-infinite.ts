@@ -1,7 +1,7 @@
 "use server";
 
-import { TagMasterItem } from "@/__lib/tag/types";
 import { Prisma } from "@/generated/prisma/client";
+import { TagMasterItem } from "@/lib/_old/tag/types";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";

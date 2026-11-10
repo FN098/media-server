@@ -1,19 +1,19 @@
 import {
-  badRequestResponse,
-  forbiddenResponse,
-  internalServerErrorResponse,
-} from "@/__lib/response/errors";
+    badRequestResponse,
+    forbiddenResponse,
+    internalServerErrorResponse,
+} from "@/lib/_old/response/errors";
 import {
-  getFavoriteTags,
-  getRelatedTags,
-  getTagsByIds,
-} from "@/__lib/tag/repository";
+    getFavoriteTags,
+    getRelatedTags,
+    getTagsByIds,
+} from "@/lib/_old/tag/repository";
 import {
-  SearchTagsRequestParams,
-  SearchTagsRequestParamsSchema,
-} from "@/__lib/tag/schemas";
-import { searchTags } from "@/__lib/tag/search";
-import { safeParseRequestJson } from "@/__lib/utils/request";
+    SearchTagsRequestParams,
+    SearchTagsRequestParamsSchema,
+} from "@/lib/_old/tag/schemas";
+import { searchTags } from "@/lib/_old/tag/search";
+import { safeParseRequestJson } from "@/lib/_old/utils/request";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { uniqueBy } from "@/lib/utils/array";

@@ -1,4 +1,4 @@
-import { clamp } from "@/__lib/utils/clamp";
+import { clamp } from "@/lib/_old/utils/clamp";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 

@@ -1,4 +1,4 @@
-import { detectLocale } from "@/__lib/utils/locale";
+import { detectLocale } from "@/lib/_old/utils/locale";
 import { useState } from "react";
 
 export function useLocale() {

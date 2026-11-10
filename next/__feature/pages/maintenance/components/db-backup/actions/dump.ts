@@ -1,9 +1,9 @@
 "use server";
 
-import { DB_BACKUP_DIR } from "@/__lib/db-backup/config";
-import { buildDbBackupFileName } from "@/__lib/db-backup/filename";
-import { parseDatabaseURL } from "@/__lib/db/url-parser";
-import { getDatabaseUrlOrThrow } from "@/__lib/env/env-server";
+import { DB_BACKUP_DIR } from "@/lib/_old/db-backup/config";
+import { buildDbBackupFileName } from "@/lib/_old/db-backup/filename";
+import { parseDatabaseURL } from "@/lib/_old/db/url-parser";
+import { getDatabaseUrlOrThrow } from "@/lib/_old/env/env-server";
 import { authorize } from "@/lib/authorization/authorize";
 import { dumpDatabaseToFile } from "@/lib/child_process/mysqldump";
 import { logger } from "@/lib/logger";

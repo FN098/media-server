@@ -1,8 +1,8 @@
 import { useTags } from "@/__feature/tag/hooks/use-tags";
-import { TagEditMode } from "@/__lib/tag-editor/types";
-import { SearchTagStrategy, SortTagStrategy } from "@/__lib/tag/strategies";
-import { Tag, TagOperator } from "@/__lib/tag/types";
 import { useTagStates } from "@/feature/tag-editor/_hooks/use-tag-states";
+import { TagEditMode } from "@/lib/_old/tag-editor/types";
+import { SearchTagStrategy, SortTagStrategy } from "@/lib/_old/tag/strategies";
+import { Tag, TagOperator } from "@/lib/_old/tag/types";
 import { Node } from "@/lib/node/types";
 import { uniqueBy } from "@/lib/utils/array";
 import { useCallback, useMemo, useState } from "react";

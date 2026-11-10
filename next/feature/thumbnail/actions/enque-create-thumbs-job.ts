@@ -1,8 +1,8 @@
 "use server";
 
-import { acquireLock } from "@/__lib/redis/lock";
-import { sha1Hash } from "@/__lib/utils/sha1-hash";
 import { thumbQueue } from "@/feature/thumbnail/lib/queue";
+import { acquireLock } from "@/lib/_old/redis/lock";
+import { sha1Hash } from "@/lib/_old/utils/sha1-hash";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 

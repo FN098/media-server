@@ -1,5 +1,5 @@
-import { redis } from "@/__lib/redis";
 import { ThumbJobData } from "@/feature/thumbnail/lib/types";
+import { redis } from "@/lib/_old/redis";
 import { Queue } from "bullmq";
 
 // 開発サーバー用シングルトン

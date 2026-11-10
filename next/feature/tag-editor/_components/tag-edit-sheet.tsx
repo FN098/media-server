@@ -1,31 +1,31 @@
-import { EditingMode, TagEditMode } from "@/__lib/tag-editor/types";
-import { normalizeTagName } from "@/__lib/tag/normalize";
-import { Tag, TagOperator, TagState } from "@/__lib/tag/types";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { useTagEditSheetContext } from "@/feature/tag-editor/_providers/tag-edit-sheet-provider";
+import { EditingMode, TagEditMode } from "@/lib/_old/tag-editor/types";
+import { normalizeTagName } from "@/lib/_old/tag/normalize";
+import { Tag, TagOperator, TagState } from "@/lib/_old/tag/types";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { Label } from "@/shadcn/components/ui/label";
 import { Switch } from "@/shadcn/components/ui/switch";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
 } from "@/shadcn/components/ui/tabs";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import {
-  Check,
-  Clock,
-  Eye,
-  EyeOff,
-  Plus,
-  RotateCcw,
-  Save,
-  Star,
-  TagIcon,
-  X,
+    Check,
+    Clock,
+    Eye,
+    EyeOff,
+    Plus,
+    RotateCcw,
+    Save,
+    Star,
+    TagIcon,
+    X,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 

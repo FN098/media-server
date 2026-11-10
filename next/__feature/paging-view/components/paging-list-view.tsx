@@ -3,13 +3,13 @@
 import { LocalDate } from "@/__feature/datetime/ui/local-date";
 import { useMediaNodeDndItem } from "@/__feature/dnd/hooks/use-media-node-dnd-item";
 import {
-  MediaNodeDndProvider,
-  useMediaNodeDndContext,
+    MediaNodeDndProvider,
+    useMediaNodeDndContext,
 } from "@/__feature/dnd/providers/media-node-dnd-provider";
 import { FavoriteButton } from "@/__feature/favorite/ui/favorite-button";
 import {
-  LocaleProvider,
-  useLocaleContext,
+    LocaleProvider,
+    useLocaleContext,
 } from "@/__feature/general/providers/locale-provider";
 import { useMenuItemsContext } from "@/__feature/menu-items/providers/menu-items-provider";
 import { NodeContextMenu } from "@/__feature/menu/ui/node-context-menu";
@@ -24,12 +24,12 @@ import { useMediaNodePagingViewContext } from "@/__feature/paging-view/providers
 import { HoverPreviewPortal } from "@/__feature/preview/ui/hover-preview-portal";
 import { MediaThumbIcon } from "@/__feature/thumbnail/ui/media-thumb-icons";
 import {
-  MediaNodeControlProvider,
-  useMediaNodeControlContext,
+    MediaNodeControlProvider,
+    useMediaNodeControlContext,
 } from "@/__feature/view/providers/media-node-control-provider";
-import { formatBytes } from "@/__lib/utils/bytes";
-import { getExtension } from "@/__lib/utils/filename";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
+import { formatBytes } from "@/lib/_old/utils/bytes";
+import { getExtension } from "@/lib/_old/utils/filename";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";

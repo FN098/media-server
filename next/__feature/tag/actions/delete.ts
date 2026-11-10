@@ -1,6 +1,6 @@
 "use server";
 
-import { Tag } from "@/__lib/tag/types";
+import { Tag } from "@/lib/_old/tag/types";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";

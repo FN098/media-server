@@ -1,4 +1,4 @@
-import { ParsedDatabaseURL } from "@/__lib/db/url-parser";
+import { ParsedDatabaseURL } from "@/lib/_old/db/url-parser";
 import { ChildProcessExitStatus } from "@/lib/child_process/types";
 import { spawn } from "child_process";
 import { createReadStream } from "fs";

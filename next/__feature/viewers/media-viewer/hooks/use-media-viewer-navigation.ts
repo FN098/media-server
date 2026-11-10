@@ -1,9 +1,9 @@
-import { hashObject } from "@/__lib/utils/fnv1a-hash";
+import { hashObject } from "@/lib/_old/utils/fnv1a-hash";
 import {
-  buildMediaViewerSlides,
-  getMediaIndex,
-  getSlideIndex,
-} from "@/__lib/viewer/slides";
+    buildMediaViewerSlides,
+    getMediaIndex,
+    getSlideIndex,
+} from "@/lib/_old/viewer/slides";
 import { MediaNode } from "@/lib/node/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SwiperClass } from "swiper/react";

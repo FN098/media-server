@@ -1,15 +1,15 @@
 import { NodeFavoriteProviderProps } from "@/__feature/favorite/providers/favorites-control-provider";
 import { Favorites } from "@/__feature/pages/favorites";
 import { FavoritesProvider } from "@/__feature/pages/favorites/providers/favorites-provider";
-import {
-  RatingFilterMode,
-  RatingOperator,
-  TagFilterMode,
-} from "@/__lib/filter/types";
-import { searchFavoriteMediaNodes } from "@/__lib/user-file-favorite/search";
-import { hashObject } from "@/__lib/utils/fnv1a-hash";
 import { APP_CONFIG } from "@/app.config";
 import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
+import {
+    RatingFilterMode,
+    RatingOperator,
+    TagFilterMode,
+} from "@/lib/_old/filter/types";
+import { searchFavoriteMediaNodes } from "@/lib/_old/user-file-favorite/search";
+import { hashObject } from "@/lib/_old/utils/fnv1a-hash";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { Favorite, FavoriteSortKey } from "@/lib/favorite/types";
 import { formatNodes } from "@/lib/node/formatters";

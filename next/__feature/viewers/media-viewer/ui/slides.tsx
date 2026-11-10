@@ -5,12 +5,12 @@ import "swiper/css/virtual";
 import "swiper/css/zoom";
 
 import { useMediaViewerContext } from "@/__feature/viewers/media-viewer/providers/media-viewer-provider";
-import { assertNever } from "@/__lib/utils/assert";
-import { clamp } from "@/__lib/utils/clamp";
-import { ContentSlide, MediaViewerSlide } from "@/__lib/viewer/slides";
 import { AudioPlayer } from "@/feature/viewer/components/audio-player";
 import { ImageViewer } from "@/feature/viewer/components/image-viewer";
 import { VideoPlayer } from "@/feature/viewer/components/video-player";
+import { assertNever } from "@/lib/_old/utils/assert";
+import { clamp } from "@/lib/_old/utils/clamp";
+import { ContentSlide, MediaViewerSlide } from "@/lib/_old/viewer/slides";
 import { MediaNode } from "@/lib/node/types";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect } from "react";

@@ -1,41 +1,41 @@
 "use client";
 
 import { deleteManyMediaAction } from "@/__feature/pages/maintenance/components/ghost-media/actions/delete-many";
-import { AbortError } from "@/__lib/errors/abort-error";
+import { AbortError } from "@/lib/_old/errors/abort-error";
 import {
-  GhostMediaItem,
-  GhostMediaScanEventData,
-} from "@/__lib/ghost-media/types";
+    GhostMediaItem,
+    GhostMediaScanEventData,
+} from "@/lib/_old/ghost-media/types";
 import { chunk } from "@/lib/utils/array";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/shadcn/components/ui/alert-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/shadcn/components/ui/card";
 import { Label } from "@/shadcn/components/ui/label";
 import { Progress } from "@/shadcn/components/ui/progress";
 import { Switch } from "@/shadcn/components/ui/switch";
 import {
-  AlertCircle,
-  BrushCleaning,
-  CheckCircle2,
-  Loader2,
-  Search,
-  Trash2,
+    AlertCircle,
+    BrushCleaning,
+    CheckCircle2,
+    Loader2,
+    Search,
+    Trash2,
 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";

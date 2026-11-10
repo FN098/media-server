@@ -1,4 +1,4 @@
-import { internalServerErrorResponse } from "@/__lib/response/errors";
+import { internalServerErrorResponse } from "@/lib/_old/response/errors";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";

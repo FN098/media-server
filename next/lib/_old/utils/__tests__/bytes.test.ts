@@ -1,4 +1,4 @@
-import { formatBytes } from "@/__lib/utils/bytes";
+import { formatBytes } from "@/lib/_old/utils/bytes";
 import { describe, expect, it } from "vitest";
 
 describe("formatBytes", () => {

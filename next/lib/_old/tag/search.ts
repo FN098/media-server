@@ -1,6 +1,6 @@
-import { SearchTagStrategy } from "@/__lib/tag/strategies";
-import { Tag } from "@/__lib/tag/types";
 import { Prisma } from "@/generated/prisma/client";
+import { SearchTagStrategy } from "@/lib/_old/tag/strategies";
+import { Tag } from "@/lib/_old/tag/types";
 import { prisma } from "@/lib/prisma";
 
 type SearchTagsOptions = {

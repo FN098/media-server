@@ -1,8 +1,8 @@
 "use server";
 
-import { DB_BACKUP_DIR } from "@/__lib/db-backup/config";
-import { listSqlFiles } from "@/__lib/db-backup/fs";
-import { DbBackupFile } from "@/__lib/db-backup/types";
+import { DB_BACKUP_DIR } from "@/lib/_old/db-backup/config";
+import { listSqlFiles } from "@/lib/_old/db-backup/fs";
+import { DbBackupFile } from "@/lib/_old/db-backup/types";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import fs from "fs/promises";

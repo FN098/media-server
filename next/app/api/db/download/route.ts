@@ -1,12 +1,12 @@
-import { DB_BACKUP_DIR } from "@/__lib/db-backup/config";
-import { getMimetype } from "@/__lib/node/mimetype";
+import { DB_BACKUP_DIR } from "@/lib/_old/db-backup/config";
+import { getMimetype } from "@/lib/_old/node/mimetype";
 import {
-  badRequestResponse,
-  forbiddenResponse,
-  internalServerErrorResponse,
-  notFoundResponse,
-} from "@/__lib/response/errors";
-import { FileNameSchema } from "@/__lib/virtual-path/schemas";
+    badRequestResponse,
+    forbiddenResponse,
+    internalServerErrorResponse,
+    notFoundResponse,
+} from "@/lib/_old/response/errors";
+import { FileNameSchema } from "@/lib/_old/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { existsPath } from "@/lib/utils/fs";

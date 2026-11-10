@@ -1,8 +1,8 @@
 "use server";
 
-import { getServerMediaPath } from "@/__lib/path/helpers";
-import { sanitize } from "@/__lib/virtual-path/guard";
-import { EditableVirtualPathSchema } from "@/__lib/virtual-path/schemas";
+import { getServerMediaPath } from "@/lib/_old/path/helpers";
+import { sanitize } from "@/lib/_old/virtual-path/guard";
+import { EditableVirtualPathSchema } from "@/lib/_old/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
 import { detectMediaType } from "@/lib/file/media-types";
 import { logger } from "@/lib/logger";

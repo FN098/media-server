@@ -1,7 +1,7 @@
 import {
-  VirtualPathSchema,
-  VirtualPathSegmentSchema,
-} from "@/__lib/virtual-path/schemas";
+    VirtualPathSchema,
+    VirtualPathSegmentSchema,
+} from "@/lib/_old/virtual-path/schemas";
 
 const RESERVED_NAMES = [
   "CON",

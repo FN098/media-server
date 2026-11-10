@@ -2,38 +2,38 @@
 
 import { deleteManyThumbnailsAction } from "@/__feature/pages/maintenance/components/ghost-thumbnail/actions/delete-many";
 import {
-  GhostThumbItem,
-  GhostThumbScanEventData,
-} from "@/__lib/ghost-thumb/types";
+    GhostThumbItem,
+    GhostThumbScanEventData,
+} from "@/lib/_old/ghost-thumb/types";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/shadcn/components/ui/alert-dialog";
 import { Button } from "@/shadcn/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/shadcn/components/ui/card";
 import { Label } from "@/shadcn/components/ui/label";
 import { Progress } from "@/shadcn/components/ui/progress";
 import { Switch } from "@/shadcn/components/ui/switch";
 import {
-  AlertCircle,
-  CheckCircle2,
-  FileImage,
-  Loader2,
-  Search,
-  Trash2,
+    AlertCircle,
+    CheckCircle2,
+    FileImage,
+    Loader2,
+    Search,
+    Trash2,
 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";

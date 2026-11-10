@@ -1,8 +1,8 @@
-import { redis } from "@/__lib/redis";
+import { redis } from "@/lib/_old/redis";
 import {
-  forbiddenResponse,
-  internalServerErrorResponse,
-} from "@/__lib/response/errors";
+    forbiddenResponse,
+    internalServerErrorResponse,
+} from "@/lib/_old/response/errors";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 

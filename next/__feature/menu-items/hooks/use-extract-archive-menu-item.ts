@@ -1,5 +1,5 @@
-import { isArchiveFile } from "@/__lib/archive/archive-types";
 import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
+import { isArchiveFile } from "@/lib/_old/archive/archive-types";
 import { MediaNode } from "@/lib/node/types";
 import { PackageOpenIcon } from "lucide-react";
 import { useMemo } from "react";

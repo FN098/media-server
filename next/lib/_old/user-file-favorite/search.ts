@@ -1,11 +1,11 @@
-import {
-  RatingFilterMode,
-  RatingOperator,
-  TagFilterMode,
-} from "@/__lib/filter/types";
-import { normalizeForLike } from "@/__lib/utils/japanese";
-import { shuffleArray, shuffleArrayWithSeed } from "@/__lib/utils/shuffle";
 import { Prisma } from "@/generated/prisma/client";
+import {
+    RatingFilterMode,
+    RatingOperator,
+    TagFilterMode,
+} from "@/lib/_old/filter/types";
+import { normalizeForLike } from "@/lib/_old/utils/japanese";
+import { shuffleArray, shuffleArrayWithSeed } from "@/lib/_old/utils/shuffle";
 import { detectMediaType } from "@/lib/file/media-types";
 import { MediaNode, MediaType } from "@/lib/node/types";
 import { prisma } from "@/lib/prisma";

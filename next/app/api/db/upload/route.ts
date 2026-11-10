@@ -1,15 +1,15 @@
 import {
-  MAX_UPLOAD_FILE_SIZE,
-  TEMP_DB_BACKUP_DIR,
-} from "@/__lib/db-backup/config";
-import { buildDbUploadFileName } from "@/__lib/db-backup/filename";
-import { DbBackupFile } from "@/__lib/db-backup/types";
+    MAX_UPLOAD_FILE_SIZE,
+    TEMP_DB_BACKUP_DIR,
+} from "@/lib/_old/db-backup/config";
+import { buildDbUploadFileName } from "@/lib/_old/db-backup/filename";
+import { DbBackupFile } from "@/lib/_old/db-backup/types";
 import {
-  badRequestResponse,
-  forbiddenResponse,
-  internalServerErrorResponse,
-} from "@/__lib/response/errors";
-import { formatBytes } from "@/__lib/utils/bytes";
+    badRequestResponse,
+    forbiddenResponse,
+    internalServerErrorResponse,
+} from "@/lib/_old/response/errors";
+import { formatBytes } from "@/lib/_old/utils/bytes";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import fs from "fs/promises";

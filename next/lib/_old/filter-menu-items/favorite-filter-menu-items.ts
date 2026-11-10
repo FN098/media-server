@@ -1,5 +1,5 @@
-import { FavoriteFilterMode } from "@/__lib/filter/types";
 import { FilterMenuItem } from "@/feature/menu-items/lib/types";
+import { FavoriteFilterMode } from "@/lib/_old/filter/types";
 import { StarIcon } from "lucide-react";
 
 export interface FavoriteFilterMenuContext {

@@ -1,4 +1,4 @@
-import { Tag, TagState } from "@/__lib/tag/types";
+import { Tag, TagState } from "@/lib/_old/tag/types";
 import { Node } from "@/lib/node/types";
 import { uniqueBy } from "@/lib/utils/array";
 import { useMemo } from "react";

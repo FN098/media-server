@@ -1,7 +1,7 @@
 "use server";
 
-import { getFavoriteFiles } from "@/__lib/user-file-favorite/repository";
-import { getFavoriteFolders } from "@/__lib/user-folder-favorite/repository";
+import { getFavoriteFiles } from "@/lib/_old/user-file-favorite/repository";
+import { getFavoriteFolders } from "@/lib/_old/user-folder-favorite/repository";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import z from "zod";

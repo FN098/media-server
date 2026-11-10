@@ -1,6 +1,6 @@
 // このファイルはクライアント専用
 
-import { NextPublicEnvSchema } from "@/__lib/env/schemas";
+import { NextPublicEnvSchema } from "@/lib/_old/env/schemas";
 
 const publicEnv = NextPublicEnvSchema.parse(process.env);
 

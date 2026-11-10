@@ -1,6 +1,6 @@
 "use server";
 
-import { getServerMediaTrashPath } from "@/__lib/path/helpers";
+import { getServerMediaTrashPath } from "@/lib/_old/path/helpers";
 import { authorize } from "@/lib/authorization/authorize";
 import { getFilePath } from "@/lib/file/repository";
 import { getFolderPath } from "@/lib/folder/repository";

@@ -1,4 +1,4 @@
-import { Role } from "@/__lib/user/roles";
+import { Role } from "@/lib/_old/user/roles";
 import { Statement, statements } from "@/lib/authorization/statements";
 
 export const roleStatements = {

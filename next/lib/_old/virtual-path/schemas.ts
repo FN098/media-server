@@ -1,9 +1,9 @@
-import { isSystemHiddenVirtualPath } from "@/__lib/path/protections";
-import { isRootPath } from "@/__lib/virtual-path/guard";
+import { isSystemHiddenVirtualPath } from "@/lib/_old/path/protections";
+import { isRootPath } from "@/lib/_old/virtual-path/guard";
 import {
-  WINDOWS_INVALID_CHARS,
-  WINDOWS_RESERVED_NAMES,
-} from "@/__lib/virtual-path/windows-os";
+    WINDOWS_INVALID_CHARS,
+    WINDOWS_RESERVED_NAMES,
+} from "@/lib/_old/virtual-path/windows-os";
 import { z } from "zod";
 
 export const VirtualPathSegmentSchema = z

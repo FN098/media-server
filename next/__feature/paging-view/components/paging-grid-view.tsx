@@ -2,8 +2,8 @@
 
 import { useMediaNodeDndItem } from "@/__feature/dnd/hooks/use-media-node-dnd-item";
 import {
-  MediaNodeDndProvider,
-  useMediaNodeDndContext,
+    MediaNodeDndProvider,
+    useMediaNodeDndContext,
 } from "@/__feature/dnd/providers/media-node-dnd-provider";
 import { FavoriteButton } from "@/__feature/favorite/ui/favorite-button";
 import { useMenuItemsContext } from "@/__feature/menu-items/providers/menu-items-provider";
@@ -18,13 +18,13 @@ import { HoverPreviewPortal } from "@/__feature/preview/ui/hover-preview-portal"
 import { MarqueeText } from "@/__feature/text/ui/marquee-text";
 import { MediaThumb } from "@/__feature/thumbnail/ui/media-thumb";
 import {
-  MediaNodeControlProvider,
-  useMediaNodeControlContext,
+    MediaNodeControlProvider,
+    useMediaNodeControlContext,
 } from "@/__feature/view/providers/media-node-control-provider";
-import { formatBytes } from "@/__lib/utils/bytes";
 import { useCanHoverContext } from "@/feature/hover/providers/can-hover-provider";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
 import { useSelectionContext } from "@/feature/selection/providers/selection-provider";
+import { formatBytes } from "@/lib/_old/utils/bytes";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";

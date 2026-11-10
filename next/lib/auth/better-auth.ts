@@ -1,4 +1,4 @@
-import { parseCsvEnv } from "@/__lib/utils/env";
+import { parseCsvEnv } from "@/lib/_old/utils/env";
 import { db } from "@/lib/prisma";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth/minimal";

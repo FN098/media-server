@@ -1,8 +1,8 @@
 import {
-  getServerMediaPath,
-  getServerMediaThumbPath,
-} from "@/__lib/path/helpers";
-import { createImageThumb } from "@/__lib/thumb/sharp";
+    getServerMediaPath,
+    getServerMediaThumbPath,
+} from "@/lib/_old/path/helpers";
+import { createImageThumb } from "@/lib/_old/thumb/sharp";
 import { createVideoThumb } from "@/lib/child_process/ffmpeg";
 import { MediaFsNode } from "@/lib/node/types";
 import { existsPath } from "@/lib/utils/fs";

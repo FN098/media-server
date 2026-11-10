@@ -1,7 +1,7 @@
 import {
-  getClientExplorerPath,
-  getServerMediaPath,
-} from "@/__lib/path/helpers";
+    getClientExplorerPath,
+    getServerMediaPath,
+} from "@/lib/_old/path/helpers";
 
 // この Media Server アプリ内で使用する隠しフォルダ（ユーザーが直接アクセスできないように）
 const SYSTEM_HIDDEN_PATHS = [".thumb", ".db", ".trash"] as const;

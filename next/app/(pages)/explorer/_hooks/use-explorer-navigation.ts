@@ -2,7 +2,6 @@ import { visitFolderAction } from "@/__feature/folder/actions/visit";
 import { useParentPathname } from "@/__feature/navigation/hooks/use-parent-pathname";
 import { readFileAsTextAction } from "@/__feature/text-file-reader/actions/read-as-text";
 import { useNodeIndex } from "@/__feature/viewers/media-viewer/hooks/use-media-index";
-import { isArchiveFile } from "@/__lib/archive/archive-types";
 import { useExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { useExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
 import { useExplorerSelection } from "@/app/(pages)/explorer/_hooks/use-explorer-selection";
@@ -12,6 +11,7 @@ import { useHistoryContext } from "@/feature/history/providers/history-provider"
 import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
 import { IndexLike } from "@/feature/viewer/hooks/use-viewer";
 import { useViewerContext } from "@/feature/viewer/providers/viewer-provider";
+import { isArchiveFile } from "@/lib/_old/archive/archive-types";
 import { isMediaFile } from "@/lib/file/media-types";
 import { Node } from "@/lib/node/types";
 import { useCallback, useEffect } from "react";

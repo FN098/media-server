@@ -1,12 +1,12 @@
-import { getMimetype } from "@/__lib/node/mimetype";
-import { getServerMediaPath } from "@/__lib/path/helpers";
+import { getMimetype } from "@/lib/_old/node/mimetype";
+import { getServerMediaPath } from "@/lib/_old/path/helpers";
 import {
-  badRequestResponse,
-  forbiddenResponse,
-  internalServerErrorResponse,
-  notFoundResponse,
-} from "@/__lib/response/errors";
-import { VirtualPathSchema } from "@/__lib/virtual-path/schemas";
+    badRequestResponse,
+    forbiddenResponse,
+    internalServerErrorResponse,
+    notFoundResponse,
+} from "@/lib/_old/response/errors";
+import { VirtualPathSchema } from "@/lib/_old/virtual-path/schemas";
 import { logger } from "@/lib/logger";
 import { getPathInfo } from "@/lib/utils/fs";
 import { createReadStream } from "fs";

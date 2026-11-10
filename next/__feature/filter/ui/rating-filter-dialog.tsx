@@ -1,18 +1,18 @@
 "use client";
 
-import {
-  RatingFilterMode,
-  RatingOperator,
-  RatingValue,
-} from "@/__lib/filter/types";
 import { useRatingFilterDialog } from "@/feature/filter/hooks/use-rating-filter-dialog";
+import {
+    RatingFilterMode,
+    RatingOperator,
+    RatingValue,
+} from "@/lib/_old/filter/types";
 import { Button } from "@/shadcn/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/shadcn/components/ui/dialog";
 import { cn } from "@/shadcn/lib/utils";
 import { RotateCcw, Star } from "lucide-react";

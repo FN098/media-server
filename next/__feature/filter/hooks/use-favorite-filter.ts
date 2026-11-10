@@ -1,4 +1,4 @@
-import { FavoriteFilterMode, FavoriteFilterValue } from "@/__lib/filter/types";
+import { FavoriteFilterMode, FavoriteFilterValue } from "@/lib/_old/filter/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 

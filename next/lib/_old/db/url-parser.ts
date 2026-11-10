@@ -1,4 +1,4 @@
-import { defaultPorts } from "@/__lib/db/ports";
+import { defaultPorts } from "@/lib/_old/db/ports";
 import { URL } from "url";
 
 export type ParsedDatabaseURL = {

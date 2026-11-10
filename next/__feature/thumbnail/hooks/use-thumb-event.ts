@@ -1,5 +1,5 @@
-import { getApiThumbEventsPath } from "@/__lib/path/helpers";
 import { ThumbJobCompletedEvent } from "@/feature/thumbnail/lib/types";
+import { getApiThumbEventsPath } from "@/lib/_old/path/helpers";
 import { useCallback, useEffect, useRef } from "react";
 
 type Listener = (e: ThumbJobCompletedEvent) => void;

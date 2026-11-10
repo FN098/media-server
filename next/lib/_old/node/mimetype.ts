@@ -1,5 +1,5 @@
-import { MediaExtension } from "@/__lib/node/extensions";
-import { getExtension } from "@/__lib/utils/filename";
+import { MediaExtension } from "@/lib/_old/node/extensions";
+import { getExtension } from "@/lib/_old/utils/filename";
 
 export const MIME_MAP: Record<MediaExtension, string> = {
   // images

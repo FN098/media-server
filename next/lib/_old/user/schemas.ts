@@ -1,4 +1,4 @@
-import { roles } from "@/__lib/user/roles";
+import { roles } from "@/lib/_old/user/roles";
 import z from "zod";
 
 export const UserSchema = z.object({

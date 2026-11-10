@@ -1,9 +1,9 @@
-import { redis } from "@/__lib/redis";
-import { createThumbs } from "@/__lib/thumb/factory";
 import {
-  ThumbJobCompletedEvent,
-  ThumbJobData,
+    ThumbJobCompletedEvent,
+    ThumbJobData,
 } from "@/feature/thumbnail/lib/types";
+import { redis } from "@/lib/_old/redis";
+import { createThumbs } from "@/lib/_old/thumb/factory";
 import { getFsNode, listFsNodes } from "@/lib/fs/fs-listing";
 import { sortNodes } from "@/lib/sort/sort-nodes";
 import { chunk } from "@/lib/utils/array";

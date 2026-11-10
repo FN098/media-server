@@ -1,4 +1,4 @@
-import { archiveExtensions } from "@/__lib/archive/extensions";
+import { archiveExtensions } from "@/lib/_old/archive/extensions";
 
 export type ArchiveType = "archive";
 

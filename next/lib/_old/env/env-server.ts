@@ -1,6 +1,6 @@
 // このファイルはサーバー専用
 
-import { ServerOnlyEnvSchema } from "@/__lib/env/schemas";
+import { ServerOnlyEnvSchema } from "@/lib/_old/env/schemas";
 
 const serverEnv = ServerOnlyEnvSchema.parse(process.env);
 

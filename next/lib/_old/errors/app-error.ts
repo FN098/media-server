@@ -1,4 +1,4 @@
-import { AppErrorCode } from "@/__lib/errors/app-error-codes";
+import { AppErrorCode } from "@/lib/_old/errors/app-error-codes";
 
 type AppErrorOptions = ErrorOptions & Record<string, unknown>;
 

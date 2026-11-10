@@ -1,4 +1,4 @@
-import { sanitize } from "@/__lib/virtual-path/guard";
+import { sanitize } from "@/lib/_old/virtual-path/guard";
 
 describe("sanitize", () => {
   it("converts backslashes to slashes", () => {

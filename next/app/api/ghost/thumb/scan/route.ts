@@ -1,6 +1,6 @@
-import { scanGhostThumb } from "@/__lib/ghost-thumb/scan";
-import { GhostThumbScanEventData } from "@/__lib/ghost-thumb/types";
-import { badRequestResponse, forbiddenResponse } from "@/__lib/response/errors";
+import { scanGhostThumb } from "@/lib/_old/ghost-thumb/scan";
+import { GhostThumbScanEventData } from "@/lib/_old/ghost-thumb/types";
+import { badRequestResponse, forbiddenResponse } from "@/lib/_old/response/errors";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { NextRequest } from "next/server";

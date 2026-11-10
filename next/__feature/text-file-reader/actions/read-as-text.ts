@@ -1,6 +1,6 @@
 "use server";
 
-import { getServerMediaPath } from "@/__lib/path/helpers";
+import { getServerMediaPath } from "@/lib/_old/path/helpers";
 import { authorize } from "@/lib/authorization/authorize";
 import { getFilePath } from "@/lib/file/repository";
 import { logger } from "@/lib/logger";

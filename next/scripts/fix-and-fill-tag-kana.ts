@@ -6,7 +6,7 @@
  * 使い方：`pnpm tsx ./tools/fix-and-fill-tag-kana.ts`
  */
 
-import { generateKana } from "@/__lib/utils/kana";
+import { generateKana } from "@/lib/_old/utils/kana";
 import { prisma } from "@/lib/prisma";
 
 /**

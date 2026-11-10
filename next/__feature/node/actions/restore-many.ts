@@ -1,10 +1,10 @@
 "use server";
 
 import {
-  getServerMediaPath,
-  getServerMediaTrashPath,
-} from "@/__lib/path/helpers";
-import { EditableVirtualPathManySchema } from "@/__lib/virtual-path/schemas";
+    getServerMediaPath,
+    getServerMediaTrashPath,
+} from "@/lib/_old/path/helpers";
+import { EditableVirtualPathManySchema } from "@/lib/_old/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { unique } from "@/lib/utils/array";

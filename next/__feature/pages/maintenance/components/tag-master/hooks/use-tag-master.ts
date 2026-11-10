@@ -4,11 +4,11 @@ import { deleteTagAction } from "@/__feature/tag/actions/delete";
 import { getTagsInfiniteAction } from "@/__feature/tag/actions/get-infinite";
 import { markTagsAsReadAction } from "@/__feature/tag/actions/mark-as-read";
 import { renameTagAction } from "@/__feature/tag/actions/rename";
-import { TagMasterItem } from "@/__lib/tag/types";
+import { TagMasterItem } from "@/lib/_old/tag/types";
 import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
+    useInfiniteQuery,
+    useMutation,
+    useQueryClient,
 } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 import { toast } from "sonner";

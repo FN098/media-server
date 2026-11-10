@@ -1,11 +1,11 @@
 import { NodeFavoriteProviderProps } from "@/__feature/favorite/providers/favorites-control-provider";
 import { Trash } from "@/__feature/pages/trash";
 import { TrashProvider } from "@/__feature/pages/trash/providers/trash-provider";
-import { mergeDbNodes } from "@/__lib/node/merge";
-import { getServerMediaTrashPath } from "@/__lib/path/helpers";
-import { isSystemHiddenVirtualPath } from "@/__lib/path/protections";
 import { APP_CONFIG } from "@/app.config";
 import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
+import { mergeDbNodes } from "@/lib/_old/node/merge";
+import { getServerMediaTrashPath } from "@/lib/_old/path/helpers";
+import { isSystemHiddenVirtualPath } from "@/lib/_old/path/protections";
 import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { getFiles } from "@/lib/file/repository";
 import { getVisitedFolders } from "@/lib/folder/repository";

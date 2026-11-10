@@ -1,10 +1,10 @@
 "use server";
 
-import { renameNodeInDb } from "@/__lib/node/services";
+import { renameNodeInDb } from "@/lib/_old/node/services";
 import {
   getServerMediaPath,
   getServerMediaThumbPath,
-} from "@/__lib/path/helpers";
+} from "@/lib/_old/path/helpers";
 import { authorize } from "@/lib/authorization/authorize";
 import { getFolderPath } from "@/lib/folder/repository";
 import { resolveMediaPath, resolveMediaThumbnailPath } from "@/lib/fs/resolvers";

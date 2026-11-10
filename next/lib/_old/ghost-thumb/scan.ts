@@ -1,12 +1,12 @@
-import { AbortError, isAbortError } from "@/__lib/errors/abort-error";
-import {
-  GhostThumbItem,
-  GhostThumbScanEventData,
-} from "@/__lib/ghost-thumb/types";
-import { getMediaPathFromThumbPath } from "@/__lib/path/helpers";
-import { sanitize } from "@/__lib/virtual-path/guard";
 import { APP_CONFIG } from "@/app.config";
 import { PATHS } from "@/feature/paths";
+import { AbortError, isAbortError } from "@/lib/_old/errors/abort-error";
+import {
+    GhostThumbItem,
+    GhostThumbScanEventData,
+} from "@/lib/_old/ghost-thumb/types";
+import { getMediaPathFromThumbPath } from "@/lib/_old/path/helpers";
+import { sanitize } from "@/lib/_old/virtual-path/guard";
 import { db } from "@/lib/prisma";
 import { glob } from "glob/raw";
 import path from "path";

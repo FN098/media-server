@@ -1,7 +1,7 @@
 "use server";
 
-import { DB_BACKUP_DIR } from "@/__lib/db-backup/config";
-import { FileNameSchema } from "@/__lib/virtual-path/schemas";
+import { DB_BACKUP_DIR } from "@/lib/_old/db-backup/config";
+import { FileNameSchema } from "@/lib/_old/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { isFsNotFoundError } from "@/lib/utils/fs";

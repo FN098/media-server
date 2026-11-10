@@ -1,9 +1,9 @@
-import { AbortError, isAbortError } from "@/__lib/errors/abort-error";
+import { AbortError, isAbortError } from "@/lib/_old/errors/abort-error";
 import {
-  GhostMediaItem,
-  GhostMediaScanEventData,
-} from "@/__lib/ghost-media/types";
-import { getServerMediaPath } from "@/__lib/path/helpers";
+    GhostMediaItem,
+    GhostMediaScanEventData,
+} from "@/lib/_old/ghost-media/types";
+import { getServerMediaPath } from "@/lib/_old/path/helpers";
 import { db } from "@/lib/prisma";
 import { isFsNotFoundError } from "@/lib/utils/fs";
 import { access, constants } from "fs/promises";
