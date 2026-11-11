@@ -16,7 +16,7 @@ export async function GET() {
 
     return Response.json({ ok: isOk });
   } catch (error) {
-    logger.error("api:db-health-check", error);
+    logger.error("db-health-check-api", error);
     return internalServerErrorResponse();
   }
 }
