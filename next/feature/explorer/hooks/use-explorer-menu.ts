@@ -1,7 +1,3 @@
-import { ExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
-import { ExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
-import { ExplorerNavigation } from "@/app/(pages)/explorer/_hooks/use-explorer-navigation";
-import { ExplorerThumbs } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbnails";
 import { Fullscreen } from "@/feature/_old/general/hooks/use-fullscreen";
 import { useAddTagFilterMenuItem } from "@/feature/_old/menu-items/hooks/use-add-tag-filter-menu-item";
 import { useCopyMenuItem } from "@/feature/_old/menu-items/hooks/use-copy-menu-item";
@@ -18,6 +14,10 @@ import { useToggleFullscreenMenuItem } from "@/feature/_old/menu-items/hooks/use
 import { useToggleSlideshowMenuItem } from "@/feature/_old/menu-items/hooks/use-toggle-slideshow-menu-item";
 import { useUpdateThumbMenuItem } from "@/feature/_old/menu-items/hooks/use-update-thumb-menu-item";
 import { Slideshow } from "@/feature/_old/viewers/media-viewer/hooks/use-slideshow";
+import { ExplorerDialogs } from "@/feature/explorer/_hooks/use-explorer-dialogs";
+import { ExplorerFiltering } from "@/feature/explorer/_hooks/use-explorer-filtering";
+import { ExplorerNavigation } from "@/feature/explorer/_hooks/use-explorer-navigation";
+import { ExplorerThumbs } from "@/feature/explorer/_hooks/use-explorer-thumbnails";
 import { SeparatorMenuItem } from "@/feature/menu-items/lib/types";
 import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";

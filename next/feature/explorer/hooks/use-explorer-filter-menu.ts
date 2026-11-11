@@ -1,8 +1,8 @@
-import {
-  ExplorerFilterMenuContext,
-  useExplorerFilterMenuItems,
-} from "@/app/(pages)/explorer/_hooks/use-explorer-filter-menu-items";
 import { useExplorerContext } from "@/app/(pages)/explorer/_providers/explorer-provider";
+import {
+    ExplorerFilterMenuContext,
+    useExplorerFilterMenuItems,
+} from "@/feature/explorer/_hooks/use-explorer-filter-menu-items";
 import { isMediaFile, MediaType } from "@/lib/file/media-types";
 import { useCallback, useMemo } from "react";
 

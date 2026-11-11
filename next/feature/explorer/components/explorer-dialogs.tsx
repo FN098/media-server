@@ -1,7 +1,7 @@
-import { useExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
 import { ExtractDialog } from "@/feature/_old/archive/ui/extract-dialog";
 import { CreateFolderDialog } from "@/feature/_old/create-folder/ui/create-folder-dialog";
 import { RenameDialog } from "@/feature/_old/node/ui/rename-dialog";
+import { useExplorerDialogs } from "@/feature/explorer/_hooks/use-explorer-dialogs";
 
 export function ExplorerDialogs() {
   const {
@@ -78,6 +78,9 @@ export function ExplorerDialogs() {
       <PreviewDialog dialog={previewDialog} />
       <FavoriteManyDialog dialog={favoriteDialog} />
       <TextFilePreviewDialog dialog={textFilePreviewDialog} /> */}
+
+      {/* <RatingFilterDialog dialog={dialogs.ratingFilterDialog} /> */}
+      {/* <TagFilterDialog dialog={dialogs.tagFilterDialog} /> */}
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { ExplorerListingView } from "@/app/(pages)/explorer/_components/explorer-listing-view";
+import { ExplorerListingView } from "@/feature/explorer/components/explorer-listing-view";
 import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
 import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
 import { useViewerContext } from "@/feature/viewer/providers/viewer-provider";

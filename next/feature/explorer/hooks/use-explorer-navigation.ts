@@ -1,10 +1,10 @@
-import { useExplorerDialogs } from "@/app/(pages)/explorer/_hooks/use-explorer-dialogs";
-import { useExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
-import { useExplorerSelection } from "@/app/(pages)/explorer/_hooks/use-explorer-selection";
 import { visitFolderAction } from "@/feature/_old/folder/actions/visit";
 import { useParentPathname } from "@/feature/_old/navigation/hooks/use-parent-pathname";
 import { readFileAsTextAction } from "@/feature/_old/text-file-reader/actions/read-as-text";
 import { useNodeIndex } from "@/feature/_old/viewers/media-viewer/hooks/use-media-index";
+import { useExplorerDialogs } from "@/feature/explorer/_hooks/use-explorer-dialogs";
+import { useExplorerFiltering } from "@/feature/explorer/_hooks/use-explorer-filtering";
+import { useExplorerSelection } from "@/feature/explorer/_hooks/use-explorer-selection";
 import { useFolderNavigation } from "@/feature/folder-navigation/hooks/use-folder-navigation";
 import { toHistoryItem } from "@/feature/history/hooks/use-history";
 import { useHistoryContext } from "@/feature/history/providers/history-provider";

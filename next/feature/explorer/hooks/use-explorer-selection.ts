@@ -1,4 +1,4 @@
-import { useExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
+import { useExplorerFiltering } from "@/feature/explorer/_hooks/use-explorer-filtering";
 import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
 import { useNodeSelection } from "@/feature/selection/hooks/use-node-selection";
 
