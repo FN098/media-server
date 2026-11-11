@@ -1,31 +1,33 @@
 import { getMimetype } from "@/lib/_old/node/mimetype";
-import { getServerMediaPath } from "@/lib/_old/path/helpers";
 import {
-    badRequestResponse,
-    forbiddenResponse,
-    internalServerErrorResponse,
-    notFoundResponse,
+  badRequestResponse,
+  forbiddenResponse,
+  internalServerErrorResponse,
+  notFoundResponse,
 } from "@/lib/_old/response/errors";
-import { VirtualPathSchema } from "@/lib/_old/virtual-path/schemas";
+import { authorize } from "@/lib/authorization/authorize";
+import { getFilePath } from "@/lib/file/repository";
+import { resolveMediaPath } from "@/lib/fs/resolvers";
 import { logger } from "@/lib/logger";
 import { getPathInfo } from "@/lib/utils/fs";
 import { createReadStream } from "fs";
 import { Readable } from "stream";
 import z from "zod";
 
-const InputSchema = z.object({
-  path: VirtualPathSchema,
+const requestSchema = z.object({
+  id: z.uuid(),
 });
 
-// パスパラメータで指定された仮想パスから実際のファイルデータを取得して返す
+// ファイルダウンロード
 export async function GET(
   req: Request,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   // 入力バリデーション＋正規化
-  const { path: pathRaw } = await context.params;
-  const parsed = InputSchema.safeParse({
-    path: pathRaw.join("/"),
+  const { id } = await context.params;
+
+  const parsed = requestSchema.safeParse({
+    id,
   });
 
   if (!parsed.success) {
@@ -35,16 +37,17 @@ export async function GET(
     });
   }
 
-  const { path } = parsed.data;
+  const { id: fileId } = parsed.data;
 
   // 認証＋認可
-  // const auth = await authorize("file:download");
-  // if (!auth.success) {
-  //   return forbiddenResponse();
-  // }
+  const auth = await authorize("download-file");
+  if (!auth.success) {
+    return forbiddenResponse();
+  }
 
-  // 仮想パス→物理パス
-  const filePath = getServerMediaPath(path);
+  // ファイルID → 物理パス
+  const virtualPath = await getFilePath(fileId);
+  const filePath = resolveMediaPath(virtualPath);
 
   const fileInfo = await getPathInfo(filePath);
   if (!fileInfo.exists) {
@@ -139,7 +142,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    logger.error("api:download-file", error);
+    logger.error("download-file-api", error);
     return internalServerErrorResponse();
   }
 }
