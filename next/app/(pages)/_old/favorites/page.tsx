@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { NodeFavoriteProviderProps } from "@/feature/_old/favorite/providers/favorites-control-provider";
-import { Favorites } from "@/feature/_old/pages/favorites";
-import { FavoritesProvider } from "@/feature/_old/pages/favorites/providers/favorites-provider";
+import { Favorites } from "@/feature/_old/favorites";
+import { FavoritesProvider } from "@/feature/_old/favorites/providers/favorites-provider";
 import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
 import {
     RatingFilterMode,

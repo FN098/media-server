@@ -1,4 +1,4 @@
-import { Maintenance } from "@/feature/_old/pages/maintenance";
+import { Maintenance } from "@/feature/_old/maintenance";
 
 export default function MaintenancePage() {
   return (

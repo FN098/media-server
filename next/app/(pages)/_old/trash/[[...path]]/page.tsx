@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "@/app.config";
 import { NodeFavoriteProviderProps } from "@/feature/_old/favorite/providers/favorites-control-provider";
-import { Trash } from "@/feature/_old/pages/trash";
-import { TrashProvider } from "@/feature/_old/pages/trash/providers/trash-provider";
+import { Trash } from "@/feature/_old/trash";
+import { TrashProvider } from "@/feature/_old/trash/providers/trash-provider";
 import { SelectionProvider } from "@/feature/selection/providers/selection-provider";
 import { mergeDbNodes } from "@/lib/_old/node/merge";
 import { getServerMediaTrashPath } from "@/lib/_old/path/helpers";
