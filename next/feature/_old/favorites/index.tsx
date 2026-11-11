@@ -12,8 +12,8 @@ import { MediaViewer } from "@/feature/_old/viewers/media-viewer";
 import { MediaViewerProvider } from "@/feature/_old/viewers/media-viewer/providers/media-viewer-provider";
 import { PagingProvider } from "@/feature/paging/providers/paging-provider";
 import { SelectionBar } from "@/feature/selection/ui/selection-bar";
-import { TagEditSheet } from "@/feature/tag-editor/_components/tag-edit-sheet";
-import { TagEditSheetProvider } from "@/feature/tag-editor/_providers/tag-edit-sheet-provider";
+import { TagEditSheet } from "@/feature/tag-editor/components/tag-edit-sheet";
+import { TagEditSheetProvider } from "@/feature/tag-editor/providers/tag-edit-sheet-provider";
 
 export function Favorites() {
   const { viewer } = useFavoritesContext();

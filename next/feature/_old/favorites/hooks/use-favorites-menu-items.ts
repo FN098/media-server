@@ -13,7 +13,7 @@ import { useRatingMenuItem } from "@/feature/menu-items/hooks/use-rating-menu-it
 import { createSeparator } from "@/feature/menu-items/lib/separator";
 import { MenuItemDef, NodeContext } from "@/feature/menu-items/lib/types";
 import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
-import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
+import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 
 export const separators = {

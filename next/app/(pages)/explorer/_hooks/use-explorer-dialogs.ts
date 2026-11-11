@@ -2,6 +2,7 @@ import { useExplorerFavorites } from "@/app/(pages)/explorer/_hooks/use-explorer
 import { useExplorerFiltering } from "@/app/(pages)/explorer/_hooks/use-explorer-filtering";
 import { useExplorerSelection } from "@/app/(pages)/explorer/_hooks/use-explorer-selection";
 import { useExtractDialog } from "@/feature/_old/archive/hooks/use-extract-dialog";
+import { useCreateFolderDialog } from "@/feature/_old/create-folder/hooks/use-create-folder-dialog";
 import { useFavoriteDialog } from "@/feature/_old/favorite/hooks/use-favorite-dialog";
 import { useTagFilterDialog } from "@/feature/_old/filter/hooks/use-tag-filter-dialog";
 import { useCopyDialog } from "@/feature/_old/node/hooks/use-copy-dialog";
@@ -9,7 +10,6 @@ import { useDeleteDialog } from "@/feature/_old/node/hooks/use-delete-dialog";
 import { useRenameDialog } from "@/feature/_old/node/hooks/use-rename-dialog";
 import { usePreviewDialog } from "@/feature/_old/preview/hooks/use-preview-dialog";
 import { useTextFilePreviewDialog } from "@/feature/_old/text-file-reader/hooks/use-text-file-preview-dialog";
-import { useCreateFolderDialog } from "@/feature/create-folder/hooks/use-create-folder-dialog";
 import { useMoveDialog } from "@/feature/move-node/hooks/use-move-dialog";
 import { useMemo } from "react";
 

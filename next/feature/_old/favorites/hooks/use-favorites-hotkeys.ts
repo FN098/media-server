@@ -3,7 +3,7 @@ import { FavoritesFiltering } from "@/feature/_old/favorites/hooks/use-favorites
 import { Fullscreen } from "@/feature/_old/general/hooks/use-fullscreen";
 import { SearchFocus } from "@/feature/search/hooks/use-search-focus";
 import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
-import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
+import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { ViewerNavigation } from "@/feature/viewer/hooks/use-viewer";
 import { useEffect, useMemo } from "react";
 import { useHotkeys, useHotkeysContext } from "react-hotkeys-hook";

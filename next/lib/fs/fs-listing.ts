@@ -1,7 +1,7 @@
-import { isSystemPath } from "@/feature/system/system-paths";
 import { detectMediaType } from "@/lib/file/media-types";
 import { findGlobalAdjacentFolder } from "@/lib/fs/fs-crawler";
 import { resolveMediaPath } from "@/lib/fs/resolvers";
+import { isSystemPath } from "@/lib/system-path";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";

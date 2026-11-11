@@ -1,5 +1,5 @@
 import { useTags } from "@/feature/_old/tag/hooks/use-tags";
-import { useTagStates } from "@/feature/tag-editor/_hooks/use-tag-states";
+import { useTagStates } from "@/feature/tag-editor/hooks/use-tag-states";
 import { TagEditMode } from "@/lib/_old/tag-editor/types";
 import { SearchTagStrategy, SortTagStrategy } from "@/lib/_old/tag/strategies";
 import { Tag, TagOperator } from "@/lib/_old/tag/types";

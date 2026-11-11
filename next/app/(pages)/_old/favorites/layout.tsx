@@ -4,7 +4,7 @@ import { SlideshowProvider } from "@/feature/_old/viewers/media-viewer/providers
 import { DashboardHeader } from "@/feature/header/components/dashboard-header";
 import { HistoryProvider } from "@/feature/history/providers/history-provider";
 import { SearchFocusProvider } from "@/feature/search/providers/search-focus-provider";
-import { TagEditorProvider } from "@/feature/tag-editor/_providers/tag-editor-provider";
+import { TagEditorProvider } from "@/feature/tag-editor/providers/tag-editor-provider";
 
 const meta = resolvePageMeta("favorites");
 

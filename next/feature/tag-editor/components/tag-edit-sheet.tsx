@@ -1,5 +1,5 @@
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
-import { useTagEditSheetContext } from "@/feature/tag-editor/_providers/tag-edit-sheet-provider";
+import { useTagEditSheetContext } from "@/feature/tag-editor/providers/tag-edit-sheet-provider";
 import { EditingMode, TagEditMode } from "@/lib/_old/tag-editor/types";
 import { normalizeTagName } from "@/lib/_old/tag/normalize";
 import { Tag, TagOperator, TagState } from "@/lib/_old/tag/types";

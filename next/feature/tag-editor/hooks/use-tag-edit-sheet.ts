@@ -1,7 +1,7 @@
 import { createManyTagsAction } from "@/feature/_old/tag/actions/create-many";
-import { updateManyMediaTagsAction } from "@/feature/tag-editor/_actions/update-many";
-import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
-import { useTagEditorHotkeys } from "@/feature/tag-editor/_hooks/use-tag-editor-hotkeys";
+import { updateManyMediaTagsAction } from "@/feature/tag-editor/actions/update-many";
+import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
+import { useTagEditorHotkeys } from "@/feature/tag-editor/hooks/use-tag-editor-hotkeys";
 import { EditingMode } from "@/lib/_old/tag-editor/types";
 import { TagOperation } from "@/lib/_old/tag/types";
 import { Node } from "@/lib/node/types";

@@ -14,8 +14,8 @@ import { MediaViewerProvider } from "@/feature/_old/viewers/media-viewer/provide
 import { FolderNavigation } from "@/feature/folder-navigation/ui/folder-navigation";
 import { PagingProvider } from "@/feature/paging/providers/paging-provider";
 import { SelectionBar } from "@/feature/selection/ui/selection-bar";
-import { TagEditSheet } from "@/feature/tag-editor/_components/tag-edit-sheet";
-import { TagEditSheetProvider } from "@/feature/tag-editor/_providers/tag-edit-sheet-provider";
+import { TagEditSheet } from "@/feature/tag-editor/components/tag-edit-sheet";
+import { TagEditSheetProvider } from "@/feature/tag-editor/providers/tag-edit-sheet-provider";
 
 export function Trash() {
   const { viewer } = useTrashContext();

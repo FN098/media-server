@@ -3,17 +3,17 @@ import { ExplorerFavorites } from "@/app/(pages)/explorer/_hooks/use-explorer-fa
 import { ExplorerThumbs } from "@/app/(pages)/explorer/_hooks/use-explorer-thumbnails";
 import { ManyNodesContext, MenuItemDef } from "@/feature/menu-items/lib/types";
 import { NodeSelection } from "@/feature/selection/hooks/use-node-selection";
-import { TagEditor } from "@/feature/tag-editor/_hooks/use-tag-editor";
+import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { hasMediaFile } from "@/lib/file/media-types";
 import { MediaListing } from "@/lib/node/types";
 import {
-  CopyIcon,
-  FolderInputIcon,
-  RefreshCwIcon,
-  StarIcon,
-  StarOffIcon,
-  TagIcon,
-  Trash2Icon,
+    CopyIcon,
+    FolderInputIcon,
+    RefreshCwIcon,
+    StarIcon,
+    StarOffIcon,
+    TagIcon,
+    Trash2Icon,
 } from "lucide-react";
 import { useMemo } from "react";
 
