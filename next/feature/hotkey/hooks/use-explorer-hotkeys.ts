@@ -6,6 +6,7 @@ const ALL_SCOPES = ["explorer", "tag-editor", "viewer", "dialog"] as const;
 
 type Scope = (typeof ALL_SCOPES)[number];
 
+// TODO: fix
 export function useExplorerHotkeys({ enabled }: { enabled: boolean }) {
   // スコープ切り替えフック
   const { enableScope, disableScope } = useHotkeysContext();

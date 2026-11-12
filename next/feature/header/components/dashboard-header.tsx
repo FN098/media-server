@@ -1,12 +1,7 @@
 import { AppSidebarOpenButton } from "@/feature/sidebar/components/app-menu-sidebar";
+import { AccentColor } from "@/feature/theme/lib/accent-color";
 import { cn } from "@/shadcn/lib/utils";
 import { LayoutDashboardIcon } from "lucide-react";
-import { AccentColor } from "../../theme/lib/accent-color";
-
-interface HeaderProps {
-  title: string;
-  accent?: AccentColor;
-}
 
 const accentBorderMap: Record<AccentColor, string> = {
   indigo: "border-indigo-500/30 dark:border-indigo-500/20",
@@ -36,7 +31,12 @@ const accentIconMap: Record<AccentColor, string> = {
   zinc: "text-zinc-500   dark:text-zinc-400",
 };
 
-export function DashboardHeader({ title, accent }: HeaderProps) {
+interface DashboardHeaderProps {
+  title: string;
+  accent?: AccentColor;
+}
+
+export function DashboardHeader({ title, accent }: DashboardHeaderProps) {
   return (
     <header
       className={cn(

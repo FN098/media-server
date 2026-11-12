@@ -5,6 +5,7 @@ export const statements = assertUnique([
   "refresh-sub-folders",
   "list-recent-folders",
   "download-file",
+  "move-many-files-or-folders",
 
   // 以下、deprecated
   "archive:extract-many",
@@ -16,7 +17,6 @@ export const statements = assertUnique([
   "favorite:revalidate-many",
   "file:rename",
   "file:move",
-  "file:move-many",
   "file:copy",
   "file:copy-many",
   "file:delete",
@@ -31,7 +31,6 @@ export const statements = assertUnique([
   "file:read-as-text",
   "folder:rename",
   "folder:move",
-  "folder:move-many",
   "folder:copy",
   "folder:copy-many",
   "folder:delete",

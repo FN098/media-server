@@ -1,18 +1,12 @@
 "use server";
 
-import { renameNodeInDb } from "@/lib/_old/node/services";
-import {
-  getServerMediaPath,
-  getServerMediaThumbPath,
-} from "@/lib/_old/path/helpers";
 import { authorize } from "@/lib/authorization/authorize";
-import { getFolderPath } from "@/lib/folder/repository";
-import { resolveMediaPath, resolveMediaThumbnailPath } from "@/lib/fs/resolvers";
+import { renameFile } from "@/lib/file/repository";
+import { getFolderPath, renameFolder } from "@/lib/folder/repository";
+import { resolveMediaPath } from "@/lib/fs/resolvers";
 import { logger } from "@/lib/logger";
-import { isFsNotFoundError } from "@/lib/utils/fs";
 import { basename, extname, join } from "@/lib/virtual-path";
-import { resolve } from "dns";
-import { readdir, rename, rm } from "fs/promises";
+import { readdir, rename } from "fs/promises";
 import { revalidatePath } from "next/cache";
 
 type ActionResult =
@@ -29,10 +23,10 @@ type ActionResult =
 
 type Success = Extract<ActionResult, { success: true }>;
 
-// TODO: fix (サムネイルをファイルIDと1:1で管理)
 // 移動
 export async function moveManyNodesAction({
   nodes,
+  srcFolderId,
   destFolderId,
 }: {
   nodes: {
@@ -40,19 +34,22 @@ export async function moveManyNodesAction({
     name: string;
     isDirectory: boolean;
   }[];
+  srcFolderId: string;
   destFolderId: string;
 }): Promise<ActionResult> {
   // 認証＋認可
-  const auth = await authorize("file:move-many", "folder:move-many");
+  const auth = await authorize("move-many-files-or-folders");
   if (!auth.success) {
     return auth;
   }
 
-  let virtualDestDirPath: string;
+  let srcVirtualDirPath: string;
+  let destVirtualDirPath: string;
   try {
-    virtualDestDirPath = await getFolderPath(destFolderId);
+    srcVirtualDirPath = await getFolderPath(srcFolderId);
+    destVirtualDirPath = await getFolderPath(destFolderId);
   } catch (error) {
-    logger.error("move-many-nodes-action:get-dest-folder-path", error);
+    logger.error("move-many-nodes-action", error);
     return {
       success: false,
       message: "ファイルまたはフォルダの移動に失敗しました。",
@@ -60,15 +57,16 @@ export async function moveManyNodesAction({
   }
 
   // 仮想パス→物理パス
-  const realDestDirPath = resolveMediaPath(virtualDestDirPath);
+  const srcRealDirPath = resolveMediaPath(srcVirtualDirPath);
+  const destRealDirPath = resolveMediaPath(destVirtualDirPath);
 
   // ディレクトリ内のエントリ名一覧を取得（後続の自動連番で使う）
   const existingNames = new Set<string>();
   try {
-    const entries = await readdir(realDestDirPath);
+    const entries = await readdir(destRealDirPath);
     entries.forEach((name) => existingNames.add(name));
   } catch (error) {
-    logger.error("move-many-nodes-action:read-dest-directory", error);
+    logger.error("move-many-nodes-action", error);
     return {
       success: false,
       message: "ファイルまたはフォルダの移動に失敗しました。",
@@ -97,57 +95,17 @@ export async function moveManyNodesAction({
     }
 
     // 最終的なパスを決定
-    const destRealPath = join(realDestDirPath, newName)
-
-    const srcThumbPath = resolveMediaThumbnailPath(virtual, isDirectory);
-    const destThumbPath = resolve getServerMediaThumbPath(destVirtualPath, isDirectory);
-
-    // サムネイル移動前処理
-    try {
-      await rm(destThumbPath, { recursive: true, force: true });
-    } catch (e) {
-      logger.error("action:move:thumb-preprocess", e);
-      failed.push({
-        path: srcVirtualPath,
-        message: "ファイルまたはフォルダの移動に失敗しました。",
-      });
-      continue;
-    }
-
-    // サムネイル移動
-    let thumbMoved = false;
-    try {
-      await rename(srcThumbPath, destThumbPath);
-      thumbMoved = true;
-    } catch (e) {
-      // not found （未作成）の場合は処理継続、それ以外は失敗
-      if (!isFsNotFoundError(e)) {
-        logger.error("action:move:thumb", e);
-        failed.push({
-          path: srcVirtualPath,
-          message: "ファイルまたはフォルダの移動に失敗しました。",
-        });
-        continue;
-      }
-    }
+    const srcRealPath = join(srcRealDirPath, node.name);
+    const destRealPath = join(destRealDirPath, newName);
 
     // FS移動
     try {
       await rename(srcRealPath, destRealPath);
-    } catch (e) {
-      logger.error("action:move:fs", e);
-
-      // サムネイルロールバック
-      if (thumbMoved) {
-        try {
-          await rename(destThumbPath, srcThumbPath);
-        } catch (e) {
-          logger.error("action:move:fs:thumb-rollback", e);
-        }
-      }
+    } catch (error) {
+      logger.error("move-many-node-action", error);
 
       failed.push({
-        path: srcVirtualPath,
+        id: node.id,
         message: "ファイルまたはフォルダの移動に失敗しました。",
       });
       continue;
@@ -155,34 +113,29 @@ export async function moveManyNodesAction({
 
     // DB更新
     try {
-      await renameNodeInDb({ srcVirtualPath, destVirtualPath, isDirectory });
-    } catch (e) {
-      logger.error("action:move:db", e);
+      if (node.isDirectory) {
+        await renameFolder({ id: node.id, newName });
+      } else {
+        await renameFile({ id: node.id, newName });
+      }
+    } catch (error) {
+      logger.error("move-many-node-action", error);
 
       // FSロールバック
       try {
         await rename(destRealPath, srcRealPath);
-      } catch (e) {
-        logger.error("action:move:db:fs-rollback", e);
-      }
-
-      // サムネイルロールバック
-      if (thumbMoved) {
-        try {
-          await rename(destThumbPath, srcThumbPath);
-        } catch (e) {
-          logger.error("action:move:db:thumb-rollback", e);
-        }
+      } catch (error) {
+        logger.error("move-many-node-action", error);
       }
 
       failed.push({
-        path: srcVirtualPath,
+        id: node.id,
         message: "ファイルまたはフォルダの移動に失敗しました。",
       });
       continue;
     }
 
-    completed.push({ path: srcVirtualPath });
+    completed.push({ id: node.id });
 
     // 次のループのファイルがこれと衝突するのを防ぐため、確定した名前を Set に予約登録
     existingNames.add(newName);

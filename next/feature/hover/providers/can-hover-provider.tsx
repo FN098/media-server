@@ -1,6 +1,6 @@
 "use client";
 
-import { useCanHover } from "@/feature/_old/general/hooks/use-can-hover";
+import { useCanHover } from "@/feature/hover/hooks/use-can-hover";
 import { createContext, useContext } from "react";
 
 const CanHoverContext = createContext<

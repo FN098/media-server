@@ -1,5 +1,3 @@
-"use client";
-
 import { AccentColor } from "@/feature/theme/lib/accent-color";
 import { cn } from "@/shadcn/lib/utils";
 
