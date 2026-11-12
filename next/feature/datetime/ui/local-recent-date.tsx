@@ -1,7 +1,7 @@
 "use client";
 
 import { useMounted } from "@/feature/etc/hooks/use-mounted";
-import { formatRecentDate } from "@/lib/_old/utils/date";
+import { formatRecentDate } from "@/lib/utils/date";
 import { useMemo } from "react";
 
 interface LocalRecentDateProps {

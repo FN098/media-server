@@ -23,16 +23,19 @@ export async function togglePinVisitedFolderAction({
   currentPinned: boolean;
 }): Promise<ActionResult> {
   // 認証＋認可
-  const auth = await authorize("folder:pin-visited");
+  const auth = await authorize("toggle-pin-visited-folder");
   if (!auth.success) {
-    return auth;
+    return {
+      success: false,
+      message: auth.message,
+    };
   }
   const { user } = auth;
 
   try {
     await togglePinVisitedFolder(user.id, folderId, currentPinned);
   } catch (error) {
-    logger.error("action:toggle-pin-visited-folder", error);
+    logger.error("toggle-pin-visited-folder-action", error);
     return {
       success: false,
       message: "フォルダ訪問履歴ピン留め更新に失敗しました。",

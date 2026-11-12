@@ -6,6 +6,8 @@ export const statements = assertUnique([
   "list-recent-folders",
   "download-file",
   "move-many-files-or-folders",
+  "toggle-pin-visited-folder",
+  "visit-folder",
 
   // 以下、deprecated
   "archive:extract-many",
@@ -38,12 +40,10 @@ export const statements = assertUnique([
   "folder:delete-many-permanently",
   "folder:restore",
   "folder:restore-many",
-  "folder:update-visited",
   "folder:list",
   "folder:list-media",
   "folder:list-subfolders",
   "folder:list-visited",
-  "folder:pin-visited",
   "folder:create",
   "folder:update-preview",
   "thumbnail:create",

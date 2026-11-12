@@ -21,9 +21,12 @@ export async function visitFolderAction({
   folderId: string;
 }): Promise<ActionResult> {
   // 認証＋認可
-  const auth = await authorize("folder:update-visited");
+  const auth = await authorize("visit-folder");
   if (!auth.success) {
-    return auth;
+    return {
+      success: false,
+      message: auth.message,
+    };
   }
 
   const { user } = auth;
@@ -31,7 +34,7 @@ export async function visitFolderAction({
   try {
     await updateVisitedFolder(folderId, user.id);
   } catch (error) {
-    logger.error("action:update-folder-history", error);
+    logger.error("visit-folder-action", error);
     return {
       success: false,
       message: "訪問済みフォルダの更新に失敗しました。",

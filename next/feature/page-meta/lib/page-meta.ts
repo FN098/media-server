@@ -1,5 +1,5 @@
-import { PATHS } from "@/feature/paths";
 import { AccentColor } from "@/feature/theme/lib/accent-color";
+import { PATHS } from "@/lib/paths";
 import {
   FolderSearchIcon,
   LayoutDashboardIcon,

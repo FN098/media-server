@@ -1,4 +1,4 @@
-import { PATHS } from "@/feature/paths";
+import { PATHS } from "@/lib/paths";
 import path from "path";
 
 type Options = {

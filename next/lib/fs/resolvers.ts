@@ -1,5 +1,5 @@
 import { APP_CONFIG } from "@/app.config";
-import { PATHS } from "@/feature/paths";
+import { PATHS } from "@/lib/paths";
 import path from "path";
 
 export function resolveMediaPath(virtualPath: string): string {
