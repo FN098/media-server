@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@/app.config";
-import { Explorer } from "@/app/(pages)/explorer/_components";
 import { NodeFavoriteProvider } from "@/feature/_old/favorite/providers/favorites-control-provider";
+import { Explorer } from "@/feature/explorer/components/explorer";
 import { NodeListingProvider } from "@/feature/listing/providers/node-listing-provider";
 import { MediaNode } from "@/feature/media-node/lib/types";
 import { MediaNodesProvider } from "@/feature/media-node/providers/media-nodes-provider";

@@ -9,7 +9,7 @@ export function ExplorerContent() {
 
   // const { viewer, filtering, navigation, menu, dialogs } = useExplorerContext();
 
-  // if (viewer.isOpen) {
+  if (viewer.isOpen) {
   //   return (
   //     <ScrollLockProvider>
   //       <MediaViewerProvider
@@ -26,7 +26,7 @@ export function ExplorerContent() {
   //       </MediaViewerProvider>
   //     </ScrollLockProvider>
   //   );
-  // }
+  }
 
   return (
     <SelectionProvider>

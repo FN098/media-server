@@ -1,7 +1,7 @@
 "use client";
 
-import { ExplorerContent } from "@/app/(pages)/explorer/_components/explorer-content";
-import { ExplorerFolderNavigation } from "@/app/(pages)/explorer/_components/explorer-navigation";
+import { ExplorerContent } from "@/feature/explorer/components/explorer-content";
+import { ExplorerFolderNavigation } from "@/feature/explorer/components/explorer-navigation";
 import { useViewerContext } from "@/feature/viewer/providers/viewer-provider";
 
 export function Explorer() {

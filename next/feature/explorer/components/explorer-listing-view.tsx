@@ -2,11 +2,11 @@ import { PagingGridView } from "@/feature/_old/paging-view/components/paging-gri
 import { PagingListView } from "@/feature/_old/paging-view/components/paging-list-view";
 import { MediaNodePagingViewProvider } from "@/feature/_old/paging-view/providers/media-node-paging-view-provider";
 import { useViewMode } from "@/feature/_old/view/hooks/use-view-mode";
-import { useExplorerDialogs } from "@/feature/explorer/_hooks/use-explorer-dialogs";
-import { useExplorerFiltering } from "@/feature/explorer/_hooks/use-explorer-filtering";
-import { useExplorerNavigation } from "@/feature/explorer/_hooks/use-explorer-navigation";
-import { useExplorerSelection } from "@/feature/explorer/_hooks/use-explorer-selection";
-import { useExplorerThumbnails } from "@/feature/explorer/_hooks/use-explorer-thumbnails";
+import { useExplorerDialogs } from "@/feature/explorer/hooks/use-explorer-dialogs";
+import { useExplorerFiltering } from "@/feature/explorer/hooks/use-explorer-filtering";
+import { useExplorerNavigation } from "@/feature/explorer/hooks/use-explorer-navigation";
+import { useExplorerSelection } from "@/feature/explorer/hooks/use-explorer-selection";
+import { useExplorerThumbnails } from "@/feature/explorer/hooks/use-explorer-thumbnails";
 import { useHistoryContext } from "@/feature/history/providers/history-provider";
 
 export function ExplorerListingView() {
