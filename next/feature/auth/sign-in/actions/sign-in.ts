@@ -1,14 +1,22 @@
 "use server";
 
 import {
-    SignInFormSchema,
-    SignInFormValues,
+  SignInFormSchema,
+  SignInFormValues,
 } from "@/feature/auth/sign-in/lib/schemas";
-import { SignInResult } from "@/feature/auth/sign-in/lib/types";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";
 import z from "zod";
+
+export type SignInResult = {
+  ok: false;
+  errors?: {
+    email?: string[];
+    password?: string[];
+  };
+  message: string;
+};
 
 export async function signInAction(
   data: SignInFormValues
