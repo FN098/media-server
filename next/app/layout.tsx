@@ -1,9 +1,9 @@
 import { APP_CONFIG } from "@/app.config";
-import { HotkeysClientProvider } from "@/feature/_old/hotkey/providers/hotkeys-client-provider";
-import { ThumbEventProvider } from "@/feature/_old/thumbnail/providers/thumb-event-provider";
 import { AppQueryClientProvider } from "@/feature/cache/providers/app-query-client-provider";
+import { HotkeysClientProvider } from "@/feature/hotkey/providers/hotkeys-client-provider";
 import { CanHoverProvider } from "@/feature/hover/providers/can-hover-provider";
 import { MobileProvider } from "@/feature/mobile/providers/mobile-provider";
+import { ThumbEventProvider } from "@/feature/thumbnail/providers/thumb-event-provider";
 import { Toaster } from "@/shadcn/components/ui/sonner";
 import { TooltipProvider } from "@/shadcn/components/ui/tooltip";
 import type { Metadata } from "next";

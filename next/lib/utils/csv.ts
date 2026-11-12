@@ -1,6 +1,6 @@
 import { parse } from "csv-parse/sync";
 
-export function parseCsvEnv(value?: string): string[] {
+export function parseCsv(value?: string): string[] {
   if (!value) return [];
 
   return parse(value, {

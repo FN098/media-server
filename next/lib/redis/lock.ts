@@ -1,4 +1,4 @@
-import { redis } from "@/lib/_old/redis";
+import { redis } from "@/lib/redis";
 
 // ジョブの有効期限
 export const DEFAULT_LOCK_TTL_MS = 1000 * 60 * 10; // 10分

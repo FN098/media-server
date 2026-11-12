@@ -1,5 +1,5 @@
-import { parseCsvEnv } from "@/lib/_old/utils/env";
 import { db } from "@/lib/prisma";
+import { parseCsv } from "@/lib/utils/csv";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth/minimal";
 import { nextCookies } from "better-auth/next-js";
@@ -7,7 +7,7 @@ import { admin } from "better-auth/plugins";
 
 // @see https://better-auth.com/docs/installation
 
-const allowedOrigins = parseCsvEnv(process.env.ALLOWED_ORIGINS);
+const allowedOrigins = parseCsv(process.env.ALLOWED_ORIGINS);
 
 export const auth = betterAuth({
   trustedOrigins: allowedOrigins,
