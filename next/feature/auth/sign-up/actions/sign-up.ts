@@ -1,11 +1,11 @@
 "use server";
 
 import {
-  SignUpFormSchema,
-  SignUpFormValues,
+    SignUpFormSchema,
+    SignUpFormValues,
 } from "@/feature/auth/sign-up/lib/schemas";
 import { SignUpResult } from "@/feature/auth/sign-up/lib/types";
-import { auth } from "@/lib/auth/better-auth";
+import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";
 import z from "zod";

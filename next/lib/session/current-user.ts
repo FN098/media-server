@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth/better-auth";
-import { CurrentUser, currentUserSchema } from "@/lib/auth/current-user-schema";
+import { auth } from "@/lib/auth";
+import { CurrentUser, currentUserSchema } from "@/lib/session/current-user-schema";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

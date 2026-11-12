@@ -7,19 +7,19 @@ import { MediaNodesProvider } from "@/feature/media-node/providers/media-nodes-p
 import { ViewerProvider } from "@/feature/viewer/providers/viewer-provider";
 import { mergeDbNodes } from "@/lib/_old/node/merge";
 import { syncFsWithDb } from "@/lib/_old/node/sync";
-import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { isMediaFile } from "@/lib/file/media-types";
 import { getFiles } from "@/lib/file/repository";
 import {
-  createFoldersRecursively,
-  getDbFolders,
-  getFolder,
-  getFolderName,
-  getFolderPath,
-  updateFolderCache,
+    createFoldersRecursively,
+    getDbFolders,
+    getFolder,
+    getFolderName,
+    getFolderPath,
+    updateFolderCache,
 } from "@/lib/folder/repository";
 import { defaultFsContext, getFsListing } from "@/lib/fs/fs-listing";
 import { Node, NodeListing } from "@/lib/node/types";
+import { getCurrentUserOrThrow } from "@/lib/session/current-user";
 import { SortDirection, SortKey, sortNodes } from "@/lib/sort/sort-nodes";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";

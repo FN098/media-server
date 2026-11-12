@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth/better-auth";
+import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { isPublicRoute } from "@/lib/routing/public-routes";
 import { NextRequest, NextResponse } from "next/server";

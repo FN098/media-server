@@ -1,7 +1,7 @@
 import { Role } from "@/lib/_old/user/roles";
-import { CurrentUser } from "@/lib/auth/current-user-schema";
 import { roleStatements } from "@/lib/authorization/role-statements";
 import { Statement } from "@/lib/authorization/statements";
+import { CurrentUser } from "@/lib/session/current-user-schema";
 
 // O(1) 検索用
 const roleStatementSet: Record<Role, ReadonlySet<Statement>> = {
