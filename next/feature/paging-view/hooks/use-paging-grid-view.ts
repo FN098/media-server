@@ -1,4 +1,4 @@
-import { useMediaNodePagingViewContext } from "@/feature/_old/paging-view/providers/media-node-paging-view-provider";
+import { usePagingViewContext } from "@/feature/paging-view/providers/paging-view-provider";
 import { usePagingContext } from "@/feature/paging/providers/paging-provider";
 import { useSelectionContext } from "@/feature/selection/providers/selection-provider";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -6,12 +6,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 export function usePagingGridView() {
   const {
     allNodes,
-    initialScrollPath,
+    initialScrollId,
     focusOnPageChange = false,
     onPageChange,
     onScrollRestored,
     onOpen,
-  } = useMediaNodePagingViewContext();
+  } = usePagingViewContext();
 
   const {
     page: currentPage,
@@ -22,13 +22,13 @@ export function usePagingGridView() {
   } = usePagingContext();
 
   const {
-    lastSelectedId: lastSelectedPath,
-    setLastSelectedId: setLastSelectedPath,
+    lastSelectedId,
+    setLastSelectedId,
     replaceSelection,
-    anchorId: anchorPath,
-    setAnchorId: setAnchorPath,
+    anchorId,
+    setAnchorId,
     enterSelectionMode,
-    selectIds: selectPaths,
+    selectIds,
   } = useSelectionContext();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -38,13 +38,12 @@ export function usePagingGridView() {
 
   const currentNodes = useMemo(() => paginate(allNodes), [allNodes, paginate]);
 
-  // path -> index
   const indexMap = useMemo(
-    () => new Map(allNodes.map((n, i) => [n.path, i])),
+    () => new Map(allNodes.map((n, i) => [n.id, i])),
     [allNodes]
   );
   const getIndex = useCallback(
-    (path: string) => indexMap.get(path) ?? -1,
+    (id: string) => indexMap.get(id) ?? -1,
     [indexMap]
   );
 
@@ -53,26 +52,26 @@ export function usePagingGridView() {
   }, [allNodes]);
 
   const initialScrollTargetIndex = useMemo(() => {
-    if (!initialScrollPath) return null;
-    const index = getIndex(initialScrollPath);
+    if (!initialScrollId) return null;
+    const index = getIndex(initialScrollId);
     return index !== -1 ? index : null;
-  }, [getIndex, initialScrollPath]);
+  }, [getIndex, initialScrollId]);
 
   const [activeIndex, setActiveIndex] = useState(initialScrollTargetIndex ?? 0);
 
   // 初期スクロール対象に関する初期化処理
   useEffect(() => {
     if (initialScrollTargetIndex === null) return;
-    const targetPath = allNodes[initialScrollTargetIndex].path;
-    setAnchorPath(targetPath);
-    replaceSelection(targetPath);
-    setLastSelectedPath(targetPath);
+    const targetId = allNodes[initialScrollTargetIndex].id;
+    setAnchorId(targetId);
+    replaceSelection(targetId);
+    setLastSelectedId(targetId);
   }, [
     initialScrollTargetIndex,
     allNodes,
-    setAnchorPath,
+    setAnchorId,
     replaceSelection,
-    setLastSelectedPath,
+    setLastSelectedId,
   ]);
 
   const initialScrollTargetPage = useMemo(() => {
@@ -156,10 +155,10 @@ export function usePagingGridView() {
 
       e.preventDefault();
 
-      const currentPath = lastSelectedPath;
-      const currentIndex = currentPath ? getIndex(currentPath) : -1;
+      const currentId = lastSelectedId;
+      const currentIndex = currentId ? getIndex(currentId) : -1;
 
-      if (e.key === "Enter" && currentPath) {
+      if (e.key === "Enter" && currentId) {
         const node = allNodes[currentIndex];
         if (node) onOpen?.(node);
         return;
@@ -169,9 +168,9 @@ export function usePagingGridView() {
         const fallbackIndex = Math.max(0, activeIndex - 1);
         const fallback = allNodes[fallbackIndex];
         if (fallback) {
-          replaceSelection(fallback.path);
-          setLastSelectedPath(fallback.path);
-          setAnchorPath(fallback.path);
+          replaceSelection(fallback.id);
+          setLastSelectedId(fallback.id);
+          setAnchorId(fallback.id);
         }
         return;
       }
@@ -187,20 +186,20 @@ export function usePagingGridView() {
       const nextNode = allNodes[nextIndex];
 
       if (e.shiftKey) {
-        const path = anchorPath ?? currentPath;
-        const anchorIndex = path ? getIndex(path) : 0;
+        const id = anchorId ?? currentId;
+        const anchorIndex = id ? getIndex(id) : 0;
         const start = Math.min(anchorIndex, nextIndex);
         const end = Math.max(anchorIndex, nextIndex);
-        const paths = allNodes.slice(start, end + 1).map((n) => n.path);
+        const ids = allNodes.slice(start, end + 1).map((n) => n.id);
 
         enterSelectionMode();
-        selectPaths(paths);
+        selectIds(ids);
       } else {
-        replaceSelection(nextNode.path);
-        setAnchorPath(nextNode.path);
+        replaceSelection(nextNode.id);
+        setAnchorId(nextNode.id);
       }
 
-      setLastSelectedPath(nextNode.path);
+      setLastSelectedId(nextNode.id);
       setActiveIndex(nextIndex);
 
       const nextPage = Math.floor(nextIndex / pageSize) + 1;
@@ -214,20 +213,20 @@ export function usePagingGridView() {
       });
     },
     [
-      lastSelectedPath,
+      lastSelectedId,
       columnCount,
       allNodes,
-      setLastSelectedPath,
+      setLastSelectedId,
       pageSize,
       currentPage,
       onOpen,
       activeIndex,
       replaceSelection,
-      setAnchorPath,
-      anchorPath,
+      setAnchorId,
+      anchorId,
       getIndex,
       enterSelectionMode,
-      selectPaths,
+      selectIds,
       setPage,
     ]
   );
@@ -238,17 +237,17 @@ export function usePagingGridView() {
       containerRef.current?.focus({ preventScroll: true });
     }
 
-    const currentPath = lastSelectedPath;
-    if (!currentPath) return;
+    const currentId = lastSelectedId;
+    if (!currentId) return;
 
-    const currentIndex = getIndex(currentPath);
+    const currentIndex = getIndex(currentId);
     if (currentIndex === -1) return;
 
     requestAnimationFrame(() => {
       const el = document.getElementById(`media-item-${currentIndex}`);
       el?.scrollIntoView({ behavior: "instant", block: "nearest" });
     });
-  }, [currentPage, focusOnPageChange, allNodes, lastSelectedPath, getIndex]);
+  }, [currentPage, focusOnPageChange, allNodes, lastSelectedId, getIndex]);
 
   return {
     containerRef,

@@ -1,6 +1,6 @@
-import { touchTimestampAction } from "@/feature/_old/node/actions/touch-timestamp";
-import { updatePreviewFileAction } from "@/feature/_old/preview/actions/update";
 import { useNodeListingContext } from "@/feature/listing/providers/node-listing-provider";
+import { touchTimestampAction } from "@/feature/node/actions/touch-timestamp";
+import { updatePreviewFileAction } from "@/feature/preview/actions/update";
 import { enqueueCreateSingleThumbJobAction } from "@/feature/thumbnail/actions/enque-create-thumb-job";
 import { enqueueCreateThumbsJobAction } from "@/feature/thumbnail/actions/enque-create-thumbs-job";
 import { Node } from "@/lib/node/types";

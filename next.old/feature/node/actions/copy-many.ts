@@ -1,19 +1,19 @@
 "use server";
 
-import { copyNodeInDb } from "@/lib/_old/node/services";
-import {
-    getServerMediaPath,
-    getServerMediaThumbPath,
-} from "@/lib/_old/path/helpers";
-import {
-    EditableVirtualPathManySchema,
-    EditableVirtualPathSchema,
-} from "@/lib/_old/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
+import { copyNodeInDb } from "@/lib/node/services";
+import {
+  getServerMediaPath,
+  getServerMediaThumbPath,
+} from "@/lib/path/helpers";
 import { unique } from "@/lib/utils/array";
 import { getPathInfo, isFsNotFoundError } from "@/lib/utils/fs";
 import { basename, extname } from "@/lib/virtual-path";
+import {
+  EditableVirtualPathManySchema,
+  EditableVirtualPathSchema,
+} from "@/lib/virtual-path/schemas";
 import { cp, readdir, rm } from "fs/promises";
 import { revalidatePath } from "next/cache";
 import z from "zod";

@@ -1,35 +1,35 @@
 "use client";
 
-import { LocalDate } from "@/feature/_old/datetime/ui/local-date";
-import { useMediaNodeDndItem } from "@/feature/_old/dnd/hooks/use-media-node-dnd-item";
+import { LocalDate } from "@/feature/datetime/ui/local-date";
+import { useMediaNodeDndItem } from "@/feature/dnd/hooks/use-media-node-dnd-item";
 import {
-    MediaNodeDndProvider,
-    useMediaNodeDndContext,
-} from "@/feature/_old/dnd/providers/media-node-dnd-provider";
-import { FavoriteButton } from "@/feature/_old/favorite/ui/favorite-button";
+  MediaNodeDndProvider,
+  useMediaNodeDndContext,
+} from "@/feature/dnd/providers/media-node-dnd-provider";
+import { FavoriteButton } from "@/feature/favorite/ui/favorite-button";
 import {
-    LocaleProvider,
-    useLocaleContext,
-} from "@/feature/_old/general/providers/locale-provider";
-import { useMenuItemsContext } from "@/feature/_old/menu-items/providers/menu-items-provider";
-import { NodeContextMenu } from "@/feature/_old/menu/ui/node-context-menu";
-import { NodeDropdownMenu } from "@/feature/_old/menu/ui/node-dropdown-menu";
-import { AverageRatingBadge } from "@/feature/_old/paging-view/components/average-rating-badge";
-import { FavoriteRatingDisplay } from "@/feature/_old/paging-view/components/favorite-rating-display";
-import { FolderStatusBadge } from "@/feature/_old/paging-view/components/folder-status-badge";
-import { PagingControl } from "@/feature/_old/paging-view/components/pagination-control";
-import { SizeBar } from "@/feature/_old/paging-view/components/size-bar";
-import { usePagingGridView } from "@/feature/_old/paging-view/hooks/use-paging-grid-view";
-import { useMediaNodePagingViewContext } from "@/feature/_old/paging-view/providers/media-node-paging-view-provider";
-import { HoverPreviewPortal } from "@/feature/_old/preview/ui/hover-preview-portal";
-import { MediaThumbIcon } from "@/feature/_old/thumbnail/ui/media-thumb-icons";
-import {
-    MediaNodeControlProvider,
-    useMediaNodeControlContext,
-} from "@/feature/_old/view/providers/media-node-control-provider";
+  LocaleProvider,
+  useLocaleContext,
+} from "@/feature/general/providers/locale-provider";
+import { useMenuItemsContext } from "@/feature/menu-items/providers/menu-items-provider";
+import { NodeContextMenu } from "@/feature/menu/ui/node-context-menu";
+import { NodeDropdownMenu } from "@/feature/menu/ui/node-dropdown-menu";
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
-import { formatBytes } from "@/lib/_old/utils/bytes";
-import { getExtension } from "@/lib/_old/utils/filename";
+import { AverageRatingBadge } from "@/feature/paging-view/components/average-rating-badge";
+import { FavoriteRatingDisplay } from "@/feature/paging-view/components/favorite-rating-display";
+import { FolderStatusBadge } from "@/feature/paging-view/components/folder-status-badge";
+import { PagingControl } from "@/feature/paging-view/components/pagination-control";
+import { SizeBar } from "@/feature/paging-view/components/size-bar";
+import { usePagingGridView } from "@/feature/paging-view/hooks/use-paging-grid-view";
+import { useMediaNodePagingViewContext } from "@/feature/paging-view/providers/media-node-paging-view-provider";
+import { HoverPreviewPortal } from "@/feature/preview/ui/hover-preview-portal";
+import { MediaThumbIcon } from "@/feature/thumbnail/ui/media-thumb-icons";
+import {
+  MediaNodeControlProvider,
+  useMediaNodeControlContext,
+} from "@/feature/view/providers/media-node-control-provider";
+import { formatBytes } from "@/lib/utils/bytes";
+import { getExtension } from "@/lib/utils/filename";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { cn } from "@/shadcn/lib/utils";
 import { DragOverlay } from "@dnd-kit/core";
