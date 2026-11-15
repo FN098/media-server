@@ -1,9 +1,9 @@
 "use client";
 
 import {
-    UseNodeFavoriteProps,
-    useNodeFavorite,
-} from "@/feature/_old/favorite/hooks/use-node-favorite";
+  UseNodeFavoriteProps,
+  useNodeFavorite,
+} from "@/feature/node-favorite/hooks/use-node-favorite";
 import { createContext, useContext } from "react";
 
 const NodeFavoriteContext = createContext<

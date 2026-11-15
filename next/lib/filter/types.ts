@@ -1,14 +1,11 @@
 import { FileType } from "@/lib/node/types";
 
-// ===== 共通フィルターオプション =====
-export type DirectoryPassMode = "always" | "never" | "apply-filter";
-
 // ===== クエリフィルター =====
 export type QueryFilterValue = {
   query?: string | null;
 };
 
-// ===== 種別フィルター =====
+// ===== ファイル種別フィルター =====
 export type FileTypeFilterValue = {
   types: FileType[];
 };

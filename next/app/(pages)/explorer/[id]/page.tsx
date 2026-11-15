@@ -1,23 +1,23 @@
 import { APP_CONFIG } from "@/app.config";
-import { NodeFavoriteProvider } from "@/feature/_old/favorite/providers/favorites-control-provider";
 import { Explorer } from "@/feature/explorer/components/explorer";
 import { NodeListingProvider } from "@/feature/listing/providers/node-listing-provider";
-import { MediaNode } from "@/feature/media-node/lib/types";
-import { MediaNodesProvider } from "@/feature/media-node/providers/media-nodes-provider";
+import { MediaFileNode } from "@/feature/media-file-node/lib/types";
+import { MediaFileNodesProvider } from "@/feature/media-file-node/providers/media-file-nodes-provider";
+import { NodeFavoriteProvider } from "@/feature/node-favorite/providers/node-favorite-provider";
 import { ViewerProvider } from "@/feature/viewer/providers/viewer-provider";
-import { mergeDbNodes } from "@/lib/_old/node/merge";
-import { syncFsWithDb } from "@/lib/_old/node/sync";
 import { isMediaFile } from "@/lib/file/media-types";
 import { getFiles } from "@/lib/file/repository";
 import {
-    createFoldersRecursively,
-    getDbFolders,
-    getFolder,
-    getFolderName,
-    getFolderPath,
-    updateFolderCache,
+  createFoldersRecursively,
+  getDbFolders,
+  getFolder,
+  getFolderName,
+  getFolderPath,
+  updateFolderCache,
 } from "@/lib/folder/repository";
 import { defaultFsContext, getFsListing } from "@/lib/fs/fs-listing";
+import { mergeDbNodes } from "@/lib/node/merge";
+import { syncFsWithDb } from "@/lib/node/sync";
 import { Node, NodeListing } from "@/lib/node/types";
 import { getCurrentUserOrThrow } from "@/lib/session/current-user";
 import { SortDirection, SortKey, sortNodes } from "@/lib/sort/sort-nodes";
@@ -148,15 +148,15 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
 
   const mediaNodes = listing.children
     .filter((n) => !n.isDirectory)
-    .filter((n): n is MediaNode => isMediaFile(n.type));
+    .filter((n): n is MediaFileNode => isMediaFile(n.type));
 
   return (
     <NodeListingProvider listing={listing}>
       <NodeFavoriteProvider nodes={favoriteNodes}>
         <ViewerProvider total={mediaNodes.length}>
-          <MediaNodesProvider nodes={mediaNodes}>
+          <MediaFileNodesProvider nodes={mediaNodes}>
             <Explorer />
-          </MediaNodesProvider>
+          </MediaFileNodesProvider>
         </ViewerProvider>
       </NodeFavoriteProvider>
     </NodeListingProvider>

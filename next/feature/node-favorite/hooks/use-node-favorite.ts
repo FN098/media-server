@@ -1,9 +1,9 @@
-import { addFavoriteAction } from "@/feature/_old/favorite/actions/add";
-import { addManyFavoritesAction } from "@/feature/_old/favorite/actions/add-many";
-import { removeFavoriteAction } from "@/feature/_old/favorite/actions/remove";
-import { removeManyFavoritesAction } from "@/feature/_old/favorite/actions/remove-many";
-import { revalidateFavoriteAction } from "@/feature/_old/favorite/actions/revalidate";
-import { revalidateManyFavoritesAction } from "@/feature/_old/favorite/actions/revalidate-many";
+import { addFavoriteAction } from "@/feature/node-favorite/actions/add";
+import { addManyFavoritesAction } from "@/feature/node-favorite/actions/add-many";
+import { removeFavoriteAction } from "@/feature/node-favorite/actions/remove";
+import { removeManyFavoritesAction } from "@/feature/node-favorite/actions/remove-many";
+import { revalidateFavoriteAction } from "@/feature/node-favorite/actions/revalidate";
+import { revalidateManyFavoritesAction } from "@/feature/node-favorite/actions/revalidate-many";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type FavoriteMsg =
@@ -24,7 +24,7 @@ export interface UseNodeFavoriteProps {
 export function useNodeFavorite({ nodes }: UseNodeFavoriteProps) {
   const [favoritedIds, setFavoritedIds] = useState(() => {
     return nodes
-      ? new Set(nodes.filter((e) => e.isFavorite).map((f) => f.id))
+      ? new Set(nodes.filter((e) => e.isFavorite).map((e) => e.id))
       : new Set();
   });
 

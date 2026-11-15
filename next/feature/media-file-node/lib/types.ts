@@ -1,5 +1,5 @@
 import { FileNode } from "@/lib/node/types";
 
-export type MediaNode = Omit<FileNode, "type"> & {
+export type MediaFileNode = Omit<FileNode, "type"> & {
   type: "image" | "video" | "audio";
 };

@@ -1,8 +1,8 @@
 import {
-    audioExtensions,
-    imageExtensions,
-    videoExtensions,
-} from "@/lib/_old/node/extensions";
+  audioExtensions,
+  imageExtensions,
+  videoExtensions,
+} from "@/lib/file/extensions";
 
 export const mediaTypes = ["audio", "image", "video"] as const;
 
@@ -12,8 +12,8 @@ export function isMediaFile(type: string): type is MediaType {
   return mediaTypes.includes(type as MediaType);
 }
 
-export function hasMediaFile(items: { type: string }[]) {
-  return items.some((item) => isMediaFile(item.type));
+export function hasMediaFile(files: { type: string }[]) {
+  return files.some((file) => isMediaFile(file.type));
 }
 
 export function detectMediaType(fileName: string): MediaType | null {

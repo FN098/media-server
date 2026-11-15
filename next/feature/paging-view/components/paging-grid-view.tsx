@@ -5,7 +5,7 @@ import {
   MediaNodeDndProvider,
   useMediaNodeDndContext,
 } from "@/feature/dnd/providers/media-node-dnd-provider";
-import { FavoriteButton } from "@/feature/favorite/ui/favorite-button";
+import { FavoriteButton } from "@/feature/file-favorite/ui/favorite-button";
 import { useCanHoverContext } from "@/feature/hover/providers/can-hover-provider";
 import { useMenuItemsContext } from "@/feature/menu-items/providers/menu-items-provider";
 import { NodeContextMenu } from "@/feature/menu/ui/node-context-menu";

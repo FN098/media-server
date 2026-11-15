@@ -1,21 +1,21 @@
 "use client";
 
-import { MediaNode } from "@/feature/media-node/lib/types";
+import { MediaFileNode } from "@/feature/media-file-node/lib/types";
 import { Modifiers } from "@dnd-kit/core";
 import { createContext, useContext } from "react";
 
 interface PagingViewProps {
-  allNodes: MediaNode[];
+  allNodes: MediaFileNode[];
   initialScrollId?: string | null;
   focusOnPageChange?: boolean;
   onPageChange?: (page: number) => void;
   onScrollRestored?: () => void;
   onSelectionChange?: () => void;
-  onOpen?: (node: MediaNode) => void;
-  onThumbError?: (node: MediaNode) => void;
+  onOpen?: (node: MediaFileNode) => void;
+  onThumbError?: (node: MediaFileNode) => void;
   onDragEnd?: (ctx: {
-    activeNode: MediaNode;
-    overNode: MediaNode;
+    activeNode: MediaFileNode;
+    overNode: MediaFileNode;
     modifiers: Modifiers;
   }) => void;
 }
