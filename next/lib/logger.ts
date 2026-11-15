@@ -1,4 +1,4 @@
-import { isAppError } from "@/lib/_old/errors/app-error";
+import { isAppError } from "@/lib/app-error";
 
 export interface LoggerInstance {
   warn: (context: string, message: string, metadata?: unknown) => void;

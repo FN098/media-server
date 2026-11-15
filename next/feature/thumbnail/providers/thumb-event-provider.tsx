@@ -1,6 +1,6 @@
 "use client";
 
-import { useThumbEvent } from "@/feature/_old/thumbnail/hooks/use-thumb-event";
+import { useThumbEvent } from "@/feature/thumbnail/hooks/use-thumb-event";
 import { createContext, useContext } from "react";
 
 const ThumbEventContext = createContext<

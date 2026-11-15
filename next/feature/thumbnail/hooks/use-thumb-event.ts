@@ -1,5 +1,5 @@
 import { ThumbJobCompletedEvent } from "@/feature/thumbnail/lib/types";
-import { getApiThumbEventsPath } from "@/lib/_old/path/helpers";
+import { PATHS } from "@/lib/paths";
 import { useCallback, useEffect, useRef } from "react";
 
 type Listener = (e: ThumbJobCompletedEvent) => void;
@@ -8,7 +8,7 @@ export function useThumbEvent() {
   const listeners = useRef(new Set<Listener>());
 
   useEffect(() => {
-    const eventSource = new EventSource(getApiThumbEventsPath());
+    const eventSource = new EventSource(PATHS.api.thumb.events.root);
 
     eventSource.onmessage = (e: MessageEvent<string>) => {
       const event = JSON.parse(e.data) as ThumbJobCompletedEvent;
