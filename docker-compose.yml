@@ -41,19 +41,7 @@ services:
       dockerfile: ./docker/runtime/app/Dockerfile
       target: runner
     restart: unless-stopped
-    environment:
-      MYSQL_HOST: ${MYSQL_HOST}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MEDIA_ROOT: ${MEDIA_ROOT}
-      REDIS_URL: ${REDIS_URL}
-      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY}
-      NEXT_PUBLIC_WEB_UI_URL: ${NEXT_PUBLIC_WEB_UI_URL}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+    env_file: ./next/.env
     volumes:
       - ${HOST_MEDIA_ROOT}:/media:rw
     ports:
@@ -82,9 +70,7 @@ services:
       dockerfile: ./docker/runtime/app/Dockerfile
       target: migration
     restart: no
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-      SHADOW_DATABASE_URL: ${SHADOW_DATABASE_URL}
+    env_file: ./next/.env
     depends_on:
       - db
 
