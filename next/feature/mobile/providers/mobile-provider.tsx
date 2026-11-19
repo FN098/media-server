@@ -1,14 +1,14 @@
 "use client";
 
-import { useMobile } from "@/feature/mobile/hooks/use-mobile";
+import { useIsMobile } from "@/feature/mobile/hooks/use-mobile";
 import { createContext, ReactNode, useContext } from "react";
 
-const MobileContext = createContext<ReturnType<typeof useMobile> | undefined>(
+const MobileContext = createContext<ReturnType<typeof useIsMobile> | undefined>(
   undefined
 );
 
 export function MobileProvider({ children }: { children: ReactNode }) {
-  const value = useMobile();
+  const value = useIsMobile();
   return (
     <MobileContext.Provider value={value}>{children}</MobileContext.Provider>
   );
