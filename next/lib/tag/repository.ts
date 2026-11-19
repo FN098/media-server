@@ -1,6 +1,6 @@
-import { Tag } from "@/lib/_old/tag/types";
-import { getCurrentUserOrThrow } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserOrThrow } from "@/lib/session/current-user";
+import { Tag } from "@/lib/tag/types";
 
 export async function getTagsByIds(
   ids: string[],

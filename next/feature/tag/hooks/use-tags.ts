@@ -1,9 +1,9 @@
-import { SearchTagsRequestParamsInput } from "@/lib/_old/tag/schemas";
-import { Tag } from "@/lib/_old/tag/types";
+import { SearchTagsRequestParamsInput } from "@/lib/tag/schemas";
+import { Tag } from "@/lib/tag/types";
 import {
-    keepPreviousData,
-    useQuery,
-    useQueryClient,
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 

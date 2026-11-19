@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 type ActionResult = { success: true } | { success: false; message: string };
 
 // タグ紐づけ・クリーンアップ
-export async function updateManyMediaTagsAction({
+export async function updateManyFileTagsAction({
   fileIds,
   operations,
 }: {
@@ -19,9 +19,9 @@ export async function updateManyMediaTagsAction({
 }): Promise<ActionResult> {
   // 認証＋認可
   const auth = await authorize(
-    "media-tag:create-many",
-    "media-tag:delete-many",
-    "tag:delete-unused"
+    "create-many-file-tags",
+    "delete-many-file-tags",
+    "delete-unused-tags"
   );
   if (!auth.success) {
     return auth;
@@ -77,7 +77,7 @@ export async function updateManyMediaTagsAction({
 
     return { success: true };
   } catch (error) {
-    logger.error("action:update-many-media-tags", error);
+    logger.error("update-many-file-tags-action", error);
     return { success: false, message: "タグの更新に失敗しました" };
   }
 }

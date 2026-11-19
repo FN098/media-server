@@ -1,4 +1,4 @@
-import { searchTagStrategies } from "@/lib/_old/tag/strategies";
+import { searchTagStrategies } from "@/lib/tag/strategies";
 import z from "zod";
 
 const MAX_FILES_TO_PROCESS = 500;

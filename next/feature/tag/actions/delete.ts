@@ -1,9 +1,9 @@
 "use server";
 
-import { Tag } from "@/lib/_old/tag/types";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { Tag } from "@/lib/tag/types";
 import z from "zod";
 
 const InputSchema = z.object({
@@ -26,7 +26,7 @@ export async function deleteTagAction(
   const { id } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("tag:delete");
+  const auth = await authorize("delete-tag");
   if (!auth.success) {
     return auth;
   }
@@ -40,7 +40,7 @@ export async function deleteTagAction(
 
     return { success: true, tag };
   } catch (error) {
-    logger.error("action:delete-tag", error);
+    logger.error("delete-tag-action", error);
     return { success: false, message: "タグの削除に失敗しました。" };
   }
 }

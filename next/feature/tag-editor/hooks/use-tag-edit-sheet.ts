@@ -1,24 +1,26 @@
-import { createManyTagsAction } from "@/feature/_old/tag/actions/create-many";
-import { updateManyMediaTagsAction } from "@/feature/tag-editor/actions/update-many";
+import { updateManyFileTagsAction } from "@/feature/tag-editor/actions/update-many";
 import { TagEditor } from "@/feature/tag-editor/hooks/use-tag-editor";
 import { useTagEditorHotkeys } from "@/feature/tag-editor/hooks/use-tag-editor-hotkeys";
-import { EditingMode } from "@/lib/_old/tag-editor/types";
-import { TagOperation } from "@/lib/_old/tag/types";
+import { TagEditingMode } from "@/feature/tag-editor/lib/types";
+import { createManyTagsAction } from "@/feature/tag/actions/create-many";
 import { Node } from "@/lib/node/types";
+import { TagOperation } from "@/lib/tag/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const initialEditingMode: EditingMode = "view";
+const initialEditingMode: TagEditingMode = "view";
 
+/** @deprecated */
 export interface UseTagEditSheetProps {
   tagEditor: TagEditor;
   targetNodes: Node[];
-  mode?: EditingMode;
-  onModeChange?: (mode: EditingMode) => void;
+  mode?: TagEditingMode;
+  onModeChange?: (mode: TagEditingMode) => void;
   autoBlur?: boolean; // 編集モード切り替え時に自動で背景ブラーを有効化
 }
 
+/** @deprecated */
 export function useTagEditSheet({
   tagEditor,
   targetNodes,
@@ -49,7 +51,7 @@ export function useTagEditSheet({
   const [isLoading, setIsLoading] = useState(false);
 
   const [internalEditingMode, setInternalEditingMode] =
-    useState<EditingMode>(initialEditingMode);
+    useState<TagEditingMode>(initialEditingMode);
   const editingMode = controlledMode ?? internalEditingMode;
   const setEditingMode = onControlledModeChange ?? setInternalEditingMode;
 
@@ -84,7 +86,7 @@ export function useTagEditSheet({
 
   // 編集モード切り替え
   const handleModeChange = useCallback(
-    (next: EditingMode) => {
+    (next: TagEditingMode) => {
       setEditingMode(next);
       if (autoBlur) {
         handleOpacityChange(next === "view" ? 0 : 100);
@@ -157,7 +159,7 @@ export function useTagEditSheet({
       if (operations.length === 0) return;
 
       // 紐づけ実行
-      const result = await updateManyMediaTagsAction({
+      const result = await updateManyFileTagsAction({
         fileIds: targetNodes.map((n) => n.id),
         operations,
       });

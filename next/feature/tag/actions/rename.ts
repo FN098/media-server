@@ -1,14 +1,14 @@
 "use server";
 
-import { normalizeTagName } from "@/lib/_old/tag/normalize";
-import { Tag } from "@/lib/_old/tag/types";
-import { generateKana } from "@/lib/_old/utils/kana";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { normalizeTagName } from "@/lib/tag/normalize";
+import { Tag } from "@/lib/tag/types";
+import { generateKana } from "@/lib/utils/kana";
 import z from "zod";
 
-const InputSchema = z.object({
+const inputSchema = z.object({
   id: z.uuid(),
   newName: z.string(),
   newKana: z.string().optional(),
@@ -19,10 +19,10 @@ type ActionResult =
 
 // タグリネーム
 export async function renameTagAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
@@ -33,7 +33,7 @@ export async function renameTagAction(
   const newKana = parsed.data.newKana ?? (await generateKana(newName));
 
   // 認証＋認可
-  const auth = await authorize("tag:rename");
+  const auth = await authorize("rename-tag");
   if (!auth.success) {
     return auth;
   }
@@ -48,7 +48,7 @@ export async function renameTagAction(
     });
     return { success: true, tag };
   } catch (error) {
-    logger.error("action:rename-tag", error);
+    logger.error("rename-tag-action", error);
     return { success: false, message: "タグのリネームに失敗しました。" };
   }
 }

@@ -1,13 +1,42 @@
 "use server";
 
 import { Prisma } from "@/generated/prisma/client";
-import { TagMasterItem } from "@/lib/_old/tag/types";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { TagMasterItem } from "@/lib/tag/types";
 import z from "zod";
 
-const InputSchema = z.object({
+const buildTagWhere = ({
+  query,
+  onlyFavorites,
+  onlyNew,
+  userId,
+}: z.infer<typeof inputSchema> & {
+  userId: string;
+}) => {
+  const where: Prisma.TagWhereInput = {
+    isActive: true,
+  };
+
+  if (query) {
+    where.OR = [{ kana: { contains: query } }, { name: { contains: query } }];
+  }
+
+  if (onlyFavorites) {
+    where.userFavorites = {
+      some: { userId: userId },
+    };
+  }
+
+  if (onlyNew) {
+    where.isNew = true;
+  }
+
+  return where;
+};
+
+const inputSchema = z.object({
   cursor: z.string().optional(),
   query: z.string().optional(),
   limit: z.number().int().min(1).max(100).optional().default(50),
@@ -21,10 +50,10 @@ type ActionResult =
 
 // タグ一覧無限スクロール
 export async function getTagsInfiniteAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
@@ -32,7 +61,7 @@ export async function getTagsInfiniteAction(
   const { cursor, limit } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("tag:get-infinite");
+  const auth = await authorize("get-tags-infinite");
   if (!auth.success) {
     return auth;
   }
@@ -57,7 +86,7 @@ export async function getTagsInfiniteAction(
         name: true,
         kana: true,
         isNew: true,
-        _count: { select: { mediaTags: true } },
+        _count: { select: { fileTags: true } },
         userFavorites: {
           where: { userId: user.id },
           select: { userId: true },
@@ -69,7 +98,7 @@ export async function getTagsInfiniteAction(
       return {
         ...rest,
         isFavorite: userFavorites.length > 0,
-        relatedMediaCount: _count.mediaTags,
+        relatedMediaCount: _count.fileTags,
       } satisfies TagMasterItem;
     });
 
@@ -78,36 +107,7 @@ export async function getTagsInfiniteAction(
 
     return { success: true, tags, nextCursor };
   } catch (error) {
-    logger.error("action:get-tags-infinite", error);
+    logger.error("get-tags-infinite-action", error);
     return { success: false, message: "タグの取得に失敗しました。" };
   }
 }
-
-const buildTagWhere = ({
-  query,
-  onlyFavorites,
-  onlyNew,
-  userId,
-}: z.infer<typeof InputSchema> & {
-  userId: string;
-}) => {
-  const where: Prisma.TagWhereInput = {
-    isActive: true,
-  };
-
-  if (query) {
-    where.OR = [{ kana: { contains: query } }, { name: { contains: query } }];
-  }
-
-  if (onlyFavorites) {
-    where.userFavorites = {
-      some: { userId: userId },
-    };
-  }
-
-  if (onlyNew) {
-    where.isNew = true;
-  }
-
-  return where;
-};

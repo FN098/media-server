@@ -1,15 +1,23 @@
 "use server";
 
-import { normalizeTagName } from "@/lib/_old/tag/normalize";
-import { Tag } from "@/lib/_old/tag/types";
-import { generateKana } from "@/lib/_old/utils/kana";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { normalizeTagName } from "@/lib/tag/normalize";
+import { Tag } from "@/lib/tag/types";
 import { unique } from "@/lib/utils/array";
+import { generateKana } from "@/lib/utils/kana";
 import z from "zod";
 
-const NormalizedNamesSchema = z
+async function getExistingTagNames(names: string[]): Promise<string[]> {
+  const existingTags = await prisma.tag.findMany({
+    where: { name: { in: names } },
+  });
+
+  return existingTags.map((t) => t.name);
+}
+
+const normalizedNamesSchema = z
   .array(z.string())
   .transform((names) =>
     names.map(normalizeTagName).filter((n): n is string => !!n)
@@ -17,8 +25,8 @@ const NormalizedNamesSchema = z
   .transform((names) => unique(names))
   .pipe(z.array(z.string()).min(1, "タグを1件以上指定してください。"));
 
-const InputSchema = z.object({
-  names: NormalizedNamesSchema,
+const inputSchema = z.object({
+  names: normalizedNamesSchema,
 });
 
 type ActionResult =
@@ -26,10 +34,10 @@ type ActionResult =
 
 // タグ一括作成
 export async function createManyTagsAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
@@ -37,7 +45,7 @@ export async function createManyTagsAction(
   const { names } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("tag:create-many");
+  const auth = await authorize("create-many-tags");
   if (!auth.success) {
     return auth;
   }
@@ -70,15 +78,7 @@ export async function createManyTagsAction(
 
     return { success: true, tags };
   } catch (error) {
-    logger.error("action:create-many-tags", error);
+    logger.error("create-many-tags-action", error);
     return { success: false, message: "タグの一括作成に失敗しました" };
   }
-}
-
-async function getExistingTagNames(names: string[]): Promise<string[]> {
-  const existingTags = await prisma.tag.findMany({
-    where: { name: { in: names } },
-  });
-
-  return existingTags.map((t) => t.name);
 }

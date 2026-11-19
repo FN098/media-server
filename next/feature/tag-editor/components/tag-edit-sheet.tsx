@@ -1,31 +1,31 @@
 import { useMobileContext } from "@/feature/mobile/providers/mobile-provider";
+import { TagEditingMode, TagEditorType } from "@/feature/tag-editor/lib/types";
 import { useTagEditSheetContext } from "@/feature/tag-editor/providers/tag-edit-sheet-provider";
-import { EditingMode, TagEditMode } from "@/lib/_old/tag-editor/types";
-import { normalizeTagName } from "@/lib/_old/tag/normalize";
-import { Tag, TagOperator, TagState } from "@/lib/_old/tag/types";
+import { normalizeTagName } from "@/lib/tag/normalize";
+import { Tag, TagOperator, TagState } from "@/lib/tag/types";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
 import { Label } from "@/shadcn/components/ui/label";
 import { Switch } from "@/shadcn/components/ui/switch";
 import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from "@/shadcn/components/ui/tabs";
 import { cn } from "@/shadcn/lib/utils";
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import {
-    Check,
-    Clock,
-    Eye,
-    EyeOff,
-    Plus,
-    RotateCcw,
-    Save,
-    Star,
-    TagIcon,
-    X,
+  Check,
+  Clock,
+  Eye,
+  EyeOff,
+  Plus,
+  RotateCcw,
+  Save,
+  Star,
+  TagIcon,
+  X,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
@@ -62,7 +62,7 @@ export function TagEditSheet() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-black/40"
+              className="fixed inset-0 z-60 bg-black/40"
               onClick={handleReset}
             />
           )}
@@ -93,15 +93,15 @@ export function TagEditSheet() {
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className={cn(
-              "fixed bottom-0 left-1/2 -translate-x-1/2 z-[70]",
+              "fixed bottom-0 left-1/2 -translate-x-1/2 z-70",
               "w-full max-w-md",
               "pointer-events-auto select-none",
-              "rounded-t-[24px] pb-safe overflow-visible"
+              "rounded-t-3xl pb-safe overflow-visible"
             )}
           >
             {/* 背景レイヤー */}
             <div
-              className="absolute inset-0 -bottom-[300px] -z-10 rounded-t-[24px] bg-background border border-b-0 border-border"
+              className="absolute inset-0 -bottom-75 -z-10 rounded-t-3xl bg-background border border-b-0 border-border"
               style={{
                 backgroundColor: `color-mix(in oklch, var(--background), transparent)`,
                 backdropFilter:
@@ -109,7 +109,7 @@ export function TagEditSheet() {
               }}
             />
 
-            <div className="relative rounded-t-[24px] pb-safe">
+            <div className="relative rounded-t-3xl pb-safe">
               {/* ハンドル（つまみ） */}
               <div
                 className="w-full pt-4 pb-2 cursor-grab active:cursor-grabbing touch-none"
@@ -133,7 +133,7 @@ export function TagEditSheet() {
                       className="space-y-4"
                     >
                       <SheetHeader
-                        mode={tagEditor.mode}
+                        type={tagEditor.mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
@@ -163,7 +163,7 @@ export function TagEditSheet() {
                       className="space-y-4"
                     >
                       <SheetHeader
-                        mode={tagEditor.mode}
+                        type={tagEditor.mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
@@ -192,7 +192,7 @@ export function TagEditSheet() {
                           </TabsTrigger>
                         </TabsList>
 
-                        <div className="mt-2 min-h-[150px] max-h-[150px] overflow-auto">
+                        <div className="mt-2 min-h-37.5 max-h-37.5 overflow-auto">
                           <TabsContent
                             value="recent"
                             className="mt-0 outline-none"
@@ -242,7 +242,7 @@ export function TagEditSheet() {
                       className="space-y-4"
                     >
                       <SheetHeader
-                        mode={tagEditor.mode}
+                        type={tagEditor.mode}
                         count={targetNodes.length}
                         editingMode={editingMode}
                         onModeChange={handleModeChange}
@@ -290,17 +290,17 @@ export function TagEditSheet() {
 }
 
 interface SheetHeaderProps {
-  mode: TagEditMode;
-  onModeChange: (mode: EditingMode) => void;
+  type: TagEditorType;
+  onModeChange: (mode: TagEditingMode) => void;
   count: number;
-  editingMode: EditingMode;
+  editingMode: TagEditingMode;
   opacity: number;
   onOpacityChange: (val: number) => void;
   onClose: () => void;
 }
 
 function SheetHeader({
-  mode,
+  type,
   onModeChange,
   count,
   editingMode,
@@ -327,8 +327,8 @@ function SheetHeader({
   } as const;
 
   const title =
-    textMap[mode][editingMode !== "view" ? "edit-title" : "view-title"];
-  const selection = textMap[mode]["selection"];
+    textMap[type][editingMode !== "view" ? "edit-title" : "view-title"];
+  const selection = textMap[type]["selection"];
 
   const isBlur = opacity > 50;
 
@@ -455,7 +455,7 @@ function SheetFooter({
       </Button>
       <Button
         className={cn(
-          "flex-[2] h-12 rounded-xl gap-2 shadow-lg shadow-primary/25"
+          "flex-2 h-12 rounded-xl gap-2 shadow-lg shadow-primary/25"
         )}
         onClick={onApply}
         disabled={!hasChanges || isLoading}
@@ -498,7 +498,7 @@ function TagList({
           "flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto py-1 pr-1",
           "[&::-webkit-scrollbar]:w-1.5",
           "[&::-webkit-scrollbar-track]:bg-transparent",
-          "[&::-webkit-scrollbar-thumb]:bg-[var(--scrollbar-color)]",
+          "[&::-webkit-scrollbar-thumb]:bg-(--scrollbar-color)",
           "[&::-webkit-scrollbar-thumb]:rounded-full"
         )}
       >
@@ -566,7 +566,7 @@ function TagList({
         "flex flex-wrap gap-2 max-h-[40vh] overflow-y-auto p-2",
         "[&::-webkit-scrollbar]:w-1.5",
         "[&::-webkit-scrollbar-track]:bg-transparent",
-        "[&::-webkit-scrollbar-thumb]:bg-[var(--scrollbar-color)]",
+        "[&::-webkit-scrollbar-thumb]:bg-(--scrollbar-color)",
         "[&::-webkit-scrollbar-thumb]:rounded-full"
       )}
     >
@@ -788,9 +788,9 @@ function TagInput({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute z-[80] left-0 right-0 mt-1 bg-popover border rounded-xl shadow-xl overflow-hidden"
+            className="absolute z-80 left-0 right-0 mt-1 bg-popover border rounded-xl shadow-xl overflow-hidden"
           >
-            <div className="max-h-[200px] overflow-y-auto p-1">
+            <div className="max-h-50 overflow-y-auto p-1">
               <p className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 既存のタグから選択
               </p>

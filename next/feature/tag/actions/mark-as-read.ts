@@ -24,7 +24,7 @@ export async function markTagsAsReadAction(
   const { ids } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("tag:mark-as-read");
+  const auth = await authorize("mark-tag-as-read");
   if (!auth.success) {
     return auth;
   }
@@ -43,7 +43,7 @@ export async function markTagsAsReadAction(
 
     return { success: true };
   } catch (error) {
-    logger.error("action:mark-tag-as-read", error);
-    return { success: false, message: "タグの更新に失敗しました。" };
+    logger.error("mark-tag-as-read-action", error);
+    return { success: false, message: "タグの既読更新に失敗しました。" };
   }
 }

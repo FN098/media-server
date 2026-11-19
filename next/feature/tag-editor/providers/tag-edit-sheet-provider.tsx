@@ -1,8 +1,8 @@
 "use client";
 
 import {
-    useTagEditSheet,
-    UseTagEditSheetProps,
+  useTagEditSheet,
+  UseTagEditSheetProps,
 } from "@/feature/tag-editor/hooks/use-tag-edit-sheet";
 import { createContext, ReactNode, useContext } from "react";
 
@@ -14,6 +14,7 @@ interface TagEditSheetProvider extends UseTagEditSheetProps {
   children: ReactNode;
 }
 
+/** @deprecated */
 export function TagEditSheetProvider({
   children,
   ...props
@@ -27,6 +28,7 @@ export function TagEditSheetProvider({
   );
 }
 
+/** @deprecated */
 export function useTagEditSheetContext() {
   const context = useContext(TagEditSheetContext);
   if (context === undefined) {

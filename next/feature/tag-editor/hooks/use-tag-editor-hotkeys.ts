@@ -1,10 +1,10 @@
-import { EditingMode } from "@/lib/_old/tag-editor/types";
+import { TagEditingMode } from "@/feature/tag-editor/lib/types";
 import { useHotkeys } from "react-hotkeys-hook";
 
 interface UseTagEditorHotkeysProps {
   isOpen: boolean;
   handleModeChangeDown: () => void;
-  handleModeChange: (mode: EditingMode) => void;
+  handleModeChange: (mode: TagEditingMode) => void;
   toggleOpacity: () => void;
 }
 

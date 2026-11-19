@@ -25,7 +25,7 @@ export async function deleteManyTagsAction(
   const { ids } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("tag:delete-many");
+  const auth = await authorize("delete-many-tags");
   if (!auth.success) {
     return auth;
   }
@@ -42,7 +42,7 @@ export async function deleteManyTagsAction(
       deletedCount: result.count,
     };
   } catch (error) {
-    logger.error("action:delete-many-tags", error);
+    logger.error("delete-many-tags-action", error);
     return { success: false, message: "タグの一括削除に失敗しました。" };
   }
 }

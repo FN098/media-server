@@ -1,13 +1,24 @@
 import { Prisma } from "@/generated/prisma/client";
-import { SearchTagStrategy } from "@/lib/_old/tag/strategies";
-import { Tag } from "@/lib/_old/tag/types";
 import { prisma } from "@/lib/prisma";
+import { Tag } from "@/lib/tag/types";
+
+export const tagSearchStrategies = [
+  "default",
+  "most-related",
+  "recently-created",
+  "recently-used",
+  "related-only",
+  "favorite-only",
+  "ids-only",
+] as const;
+
+export type TagSearchStrategy = (typeof tagSearchStrategies)[number];
 
 type SearchTagsOptions = {
   excludeIds?: string[];
   limit?: number;
   query?: string;
-  strategy?: SearchTagStrategy;
+  strategy?: TagSearchStrategy;
 };
 
 export async function searchTags(options: SearchTagsOptions): Promise<Tag[]> {
@@ -53,7 +64,7 @@ async function searchMostRelatedTags({
   return prisma.tag.findMany({
     where: tagWhere,
     orderBy: {
-      mediaTags: { _count: "desc" },
+      fileTags: { _count: "desc" },
     },
     take: limit,
     select: { id: true, name: true },
@@ -107,7 +118,7 @@ async function searchRecentlyUsedTags({
   };
 
   // 1. 履歴あり: 最近使用順
-  const rows = await prisma.mediaTag.groupBy({
+  const rows = await prisma.fileTag.groupBy({
     by: ["tagId"],
     _max: { createdAt: true },
     orderBy: { _max: { createdAt: "desc" } },

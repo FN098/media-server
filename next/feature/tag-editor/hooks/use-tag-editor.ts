@@ -1,9 +1,10 @@
-import { useTags } from "@/feature/_old/tag/hooks/use-tags";
 import { useTagStates } from "@/feature/tag-editor/hooks/use-tag-states";
-import { TagEditMode } from "@/lib/_old/tag-editor/types";
-import { SearchTagStrategy, SortTagStrategy } from "@/lib/_old/tag/strategies";
-import { Tag, TagOperator } from "@/lib/_old/tag/types";
+import { TagEditorType } from "@/feature/tag-editor/lib/types";
+import { useTags } from "@/feature/tag/hooks/use-tags";
 import { Node } from "@/lib/node/types";
+import { TagSearchStrategy } from "@/lib/tag/search";
+import { TagSortStrategy } from "@/lib/tag/sort";
+import { Tag, TagOperator } from "@/lib/tag/types";
 import { uniqueBy } from "@/lib/utils/array";
 import { useCallback, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
@@ -19,8 +20,8 @@ export function useTagEditor() {
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
   const [pendingChangeTags, setPendingChangeTags] = useState<Tag[]>([]);
   const [searchStrategy, setSearchStrategy] =
-    useState<SearchTagStrategy>("default");
-  const [sortStrategy, setSortStrategy] = useState<SortTagStrategy>("default");
+    useState<TagSearchStrategy>("default");
+  const [sortStrategy, setSortStrategy] = useState<TagSortStrategy>("default");
   const [opacity, setOpacity] = useState<number>(0);
 
   const [activated, setActivated] = useState(false);
@@ -40,7 +41,7 @@ export function useTagEditor() {
     [targetNodes]
   );
 
-  const mode: TagEditMode = targetNodes.length === 1 ? "single" : "default";
+  const mode: TagEditorType = targetNodes.length === 1 ? "single" : "default";
 
   const open = useCallback(() => {
     setIsOpen(true);
