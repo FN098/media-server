@@ -1,15 +1,14 @@
 "use server";
 
 import { thumbQueue } from "@/feature/thumbnail/lib/queue";
-import { acquireLock } from "@/lib/_old/redis/lock";
-import { sha1Hash } from "@/lib/_old/utils/sha1-hash";
-import { EditableVirtualPathSchema } from "@/lib/_old/virtual-path/schemas";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
+import { acquireLock } from "@/lib/redis/lock";
+import { sha1Hash } from "@/lib/utils/sha1-hash";
 import z from "zod";
 
-const InputSchema = z.object({
-  filePath: EditableVirtualPathSchema,
+const inputSchema = z.object({
+  fileId: z.uuid(),
   force: z.boolean().optional().default(false),
 });
 
@@ -24,7 +23,7 @@ export async function enqueueCreateSingleThumbJobAction({
   forceCreate?: boolean;
 }): Promise<ActionResult> {
   // 認証＋認可
-  const auth = await authorize("thumbnail:create");
+  const auth = await authorize("create-thumbnail");
   if (!auth.success) {
     return auth;
   }
@@ -55,7 +54,7 @@ export async function enqueueCreateSingleThumbJobAction({
 
     return { success: true };
   } catch (error) {
-    logger.error("action:enque-create-single-thumb-job", error);
+    logger.error("enque-create-single-thumb-job-action", error);
     return { success: false, message: "サムネ作成ジョブ登録に失敗しました。" };
   }
 }

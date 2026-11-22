@@ -1,12 +1,12 @@
 "use server";
 
-import { isFavoriteFile } from "@/lib/_old/user-file-favorite/repository";
-import { isFavoriteFolder } from "@/lib/_old/user-folder-favorite/repository";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
+import { isFavoriteFile } from "@/lib/user-file-favorite/repository";
+import { isFavoriteFolder } from "@/lib/user-folder-favorite/repository";
 import z from "zod";
 
-const InputSchema = z.object({
+const inputSchema = z.object({
   id: z.uuid(),
   isDirectory: z.boolean(),
 });
@@ -23,10 +23,10 @@ type ActionResult =
 
 // お気に入り再検証
 export async function revalidateFavoriteAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
@@ -34,7 +34,7 @@ export async function revalidateFavoriteAction(
   const { id, isDirectory } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("favorite:revalidate");
+  const auth = await authorize("revalidate-favorite");
   if (!auth.success) {
     return auth;
   }
@@ -53,7 +53,7 @@ export async function revalidateFavoriteAction(
       return { success: true, isFavorite };
     }
   } catch (error) {
-    logger.error("action:revalidate-favorite", error);
+    logger.error("revalidate-favorite-action", error);
     return { success: false, message: "お気に入り再検証に失敗しました" };
   }
 }

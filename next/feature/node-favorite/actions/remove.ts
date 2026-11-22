@@ -1,17 +1,17 @@
 "use server";
 
-import { removeFavoriteFile } from "@/lib/_old/user-file-favorite/repository";
-import { removeFavoriteFolder } from "@/lib/_old/user-folder-favorite/repository";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
+import { removeFavoriteFile } from "@/lib/user-file-favorite/repository";
+import { removeFavoriteFolder } from "@/lib/user-folder-favorite/repository";
 import z from "zod";
 
-const InputSchema = z.object({
+const inputSchema = z.object({
   id: z.uuid(),
   isDirectory: z.boolean(),
 });
 
-type RemoveFavoriteResult =
+type ActionResult =
   | {
       success: true;
     }
@@ -21,10 +21,10 @@ type RemoveFavoriteResult =
     };
 
 export async function removeFavoriteAction(
-  input: z.input<typeof InputSchema>
-): Promise<RemoveFavoriteResult> {
+  input: z.input<typeof inputSchema>
+): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
@@ -32,7 +32,7 @@ export async function removeFavoriteAction(
   const { id, isDirectory } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("favorite:remove");
+  const auth = await authorize("remove-favorite");
   if (!auth.success) {
     return auth;
   }
@@ -54,7 +54,7 @@ export async function removeFavoriteAction(
 
     return { success: true };
   } catch (error) {
-    logger.error("action:remove-favorite", error);
+    logger.error("remove-favorite-action", error);
     return { success: false, message: "お気に入り解除に失敗しました" };
   }
 }

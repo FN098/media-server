@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Tag } from "@/lib/tag/types";
 import z from "zod";
 
-const InputSchema = z.object({
+const inputSchema = z.object({
   id: z.uuid(),
 });
 
@@ -15,10 +15,10 @@ type ActionResult =
 
 // タグ削除
 export async function deleteTagAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }

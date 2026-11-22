@@ -1,12 +1,12 @@
 "use server";
 
-import { getFavoriteFiles } from "@/lib/_old/user-file-favorite/repository";
-import { getFavoriteFolders } from "@/lib/_old/user-folder-favorite/repository";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
+import { getFavoriteFiles } from "@/lib/user-file-favorite/repository";
+import { getFavoriteFolders } from "@/lib/user-folder-favorite/repository";
 import z from "zod";
 
-const InputSchema = z.object({
+const inputSchema = z.object({
   entries: z.array(
     z.object({
       id: z.uuid(),
@@ -33,10 +33,10 @@ type ActionResult =
     };
 
 export async function revalidateManyFavoritesAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
@@ -44,7 +44,7 @@ export async function revalidateManyFavoritesAction(
   const { entries } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("favorite:revalidate-many");
+  const auth = await authorize("revalidate-many-favorites");
   if (!auth.success) {
     return auth;
   }
@@ -52,7 +52,6 @@ export async function revalidateManyFavoritesAction(
   const { user } = auth;
 
   const fileIds = entries.filter((e) => !e.isDirectory).map((e) => e.id);
-
   const folderIds = entries.filter((e) => e.isDirectory).map((e) => e.id);
 
   try {
@@ -75,7 +74,7 @@ export async function revalidateManyFavoritesAction(
       favoriteFolders,
     };
   } catch (error) {
-    logger.error("action:revalidate-many-favorites", error);
+    logger.error("revalidate-many-favorites-action", error);
     return { success: false, message: "お気に入り一括再検証に失敗しました" };
   }
 }

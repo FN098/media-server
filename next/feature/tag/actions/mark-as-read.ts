@@ -5,7 +5,7 @@ import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import z from "zod";
 
-const InputSchema = z.object({
+const inputSchema = z.object({
   ids: z.array(z.uuid()).min(1, "タグを1件以上指定してください。"),
 });
 
@@ -13,10 +13,10 @@ type ActionResult = { success: true } | { success: false; message: string };
 
 // タグ既読チェック
 export async function markTagsAsReadAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }

@@ -18,6 +18,14 @@ export const statements = assertUnique([
   "create-many-file-tags",
   "delete-many-file-tags",
   "delete-unused-tags",
+  "add-many-favorites",
+  "add-favorite",
+  "remove-many-favorites",
+  "remove-favorite",
+  "revalidate-many-favorites",
+  "revalidate-favorite",
+  "create-thumbnail",
+  "create-many-thumbnails",
 ] as const);
 
 export type Statement = (typeof statements)[number];

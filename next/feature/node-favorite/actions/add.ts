@@ -6,7 +6,7 @@ import { addFavoriteFile } from "@/lib/user-file-favorite/repository";
 import { addFavoriteFolder } from "@/lib/user-folder-favorite/repository";
 import z from "zod";
 
-const InputSchema = z.object({
+const inputSchema = z.object({
   id: z.uuid(),
   isDirectory: z.boolean(),
 });
@@ -21,10 +21,10 @@ type ActionResult =
     };
 
 export async function addFavoriteAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
@@ -32,7 +32,7 @@ export async function addFavoriteAction(
   const { id, isDirectory } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("favorite:add");
+  const auth = await authorize("add-favorite");
   if (!auth.success) {
     return auth;
   }

@@ -1,12 +1,12 @@
 "use server";
 
-import { addFavoriteFiles } from "@/lib/_old/user-file-favorite/repository";
-import { addFavoriteFolders } from "@/lib/_old/user-folder-favorite/repository";
 import { authorize } from "@/lib/authorization/authorize";
 import { logger } from "@/lib/logger";
+import { addFavoriteFiles } from "@/lib/user-file-favorite/repository";
+import { addFavoriteFolders } from "@/lib/user-folder-favorite/repository";
 import z from "zod";
 
-const InputSchema = z.object({
+const inputSchema = z.object({
   entries: z.array(
     z.object({
       id: z.uuid(),
@@ -25,10 +25,10 @@ type ActionResult =
     };
 
 export async function addManyFavoritesAction(
-  input: z.input<typeof InputSchema>
+  input: z.input<typeof inputSchema>
 ): Promise<ActionResult> {
   // 入力バリデーション＋正規化
-  const parsed = InputSchema.safeParse(input);
+  const parsed = inputSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: parsed.error.issues[0].message };
   }
@@ -36,7 +36,7 @@ export async function addManyFavoritesAction(
   const { entries } = parsed.data;
 
   // 認証＋認可
-  const auth = await authorize("favorite:add-many");
+  const auth = await authorize("add-many-favorites");
   if (!auth.success) {
     return auth;
   }
@@ -63,7 +63,7 @@ export async function addManyFavoritesAction(
 
     return { success: true };
   } catch (error) {
-    logger.error("action:add-many-favorites", error);
+    logger.error("add-many-favorites-action", error);
     return { success: false, message: "お気に入り一括更新に失敗しました" };
   }
 }
