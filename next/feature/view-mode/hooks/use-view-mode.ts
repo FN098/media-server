@@ -1,7 +1,6 @@
+import { ViewMode } from "@/feature/view-mode/lib/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-
-export type ViewMode = "list" | "grid";
 
 type UseViewModeProps = {
   viewModeKey?: string;

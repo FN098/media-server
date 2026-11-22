@@ -1,7 +1,7 @@
-import { ViewMode } from "@/feature/_old/view/hooks/use-view-mode";
 import { Button } from "@/shadcn/components/ui/button";
 import { cn } from "@/shadcn/lib/utils";
 import { GridIcon, ListIcon } from "lucide-react";
+import { ViewMode } from "../lib/types";
 
 export function ViewModeSwitch({
   viewMode,
