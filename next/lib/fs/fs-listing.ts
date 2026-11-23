@@ -1,36 +1,11 @@
 import { detectMediaType } from "@/lib/file/media-types";
 import { findGlobalAdjacentFolder } from "@/lib/fs/fs-crawler";
 import { resolveMediaPath } from "@/lib/fs/resolvers";
+import { FsListing, FsNode } from "@/lib/fs/types";
 import { isSystemPath } from "@/lib/system-path";
 import { existsPath } from "@/lib/utils/fs";
 import fs from "fs/promises";
 import path from "path";
-
-export type FileType = "text" | "binary" | "image" | "video" | "audio";
-
-export type FsNode =
-  | {
-      name: string; // ファイル名
-      path: string; // ルートからの相対パス
-      type: FileType | null;
-      isDirectory: false;
-      size: number;
-      mtime: Date;
-    }
-  | {
-      name: string; // フォルダ名
-      path: string; // ルートからの相対パス
-      isDirectory: true;
-      mtime: Date;
-    };
-
-export type FsListing = {
-  path: string; // 今見ているディレクトリ
-  nodes: FsNode[];
-  parentPath: string | null;
-  prevPath: string | null;
-  nextPath: string | null;
-};
 
 export interface FsContext {
   resolveRealPath: (virtualPath: string) => string;

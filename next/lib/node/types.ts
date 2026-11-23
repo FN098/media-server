@@ -1,5 +1,4 @@
-export type FileType =
-  "text" | "binary" | "image" | "video" | "audio" | "archive";
+import { FileType } from "@/lib/file/file-types";
 
 export type FileTag = {
   id: string;
@@ -44,3 +43,5 @@ export type NodeListing = {
   nextFolder: FolderNode | null;
   children: Node[];
 };
+
+export type NodeFilter = (node: Node) => boolean;

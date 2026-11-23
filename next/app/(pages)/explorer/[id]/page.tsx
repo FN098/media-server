@@ -1,8 +1,9 @@
 import { APP_CONFIG } from "@/app.config";
+import { Explorer } from "@/feature/explorer-page/components/explorer";
+import { FavoriteProvider } from "@/feature/favorite/providers/node-favorite-provider";
 import { NodeListingProvider } from "@/feature/listing/providers/node-listing-provider";
 import { MediaFileNode } from "@/feature/media-file-node/lib/types";
 import { MediaFileNodesProvider } from "@/feature/media-file-node/providers/media-file-nodes-provider";
-import { NodeFavoriteProvider } from "@/feature/node-favorite/providers/node-favorite-provider";
 import { ViewerProvider } from "@/feature/viewer/providers/viewer-provider";
 import { isMediaFile } from "@/lib/file/media-types";
 import { getFiles } from "@/lib/file/repository";
@@ -149,18 +150,15 @@ export default async function ExplorerPage(props: ExplorerPageProps) {
     .filter((n) => !n.isDirectory)
     .filter((n): n is MediaFileNode => isMediaFile(n.type));
 
-  console.log({ listing, favoriteNodes, mediaFileNodes });
-
   return (
     <NodeListingProvider listing={listing}>
-      <NodeFavoriteProvider nodes={favoriteNodes}>
+      <FavoriteProvider nodes={favoriteNodes}>
         <ViewerProvider total={mediaFileNodes.length}>
           <MediaFileNodesProvider nodes={mediaFileNodes}>
-            {/* <Explorer /> */}
-            <>OK</>
+            <Explorer />
           </MediaFileNodesProvider>
         </ViewerProvider>
-      </NodeFavoriteProvider>
+      </FavoriteProvider>
     </NodeListingProvider>
   );
 }

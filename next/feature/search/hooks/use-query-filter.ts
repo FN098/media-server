@@ -1,4 +1,4 @@
-import { QueryFilterValue } from "@/lib/filter/types";
+import { QueryFilterValue } from "@/feature/search/lib/filter";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
