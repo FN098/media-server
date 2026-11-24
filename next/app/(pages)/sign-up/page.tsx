@@ -1,4 +1,4 @@
-import { SignUpForm } from "@/feature/auth/sign-up/components/sign-up-form";
+import { SignUpForm } from "@/feature/sign-up/components/sign-up-form";
 import { existsAdminUser } from "@/lib/user/repository";
 
 export const dynamic = "force-dynamic";

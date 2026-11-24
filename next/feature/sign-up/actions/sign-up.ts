@@ -3,7 +3,7 @@
 import {
   SignUpFormSchema,
   SignUpFormValues,
-} from "@/feature/auth/sign-up/lib/schemas";
+} from "@/feature/sign-up/lib/schemas";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";

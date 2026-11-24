@@ -3,7 +3,7 @@
 import {
   SignInFormSchema,
   SignInFormValues,
-} from "@/feature/auth/sign-in/lib/schemas";
+} from "@/feature/sign-in/lib/schemas";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { redirect } from "next/navigation";

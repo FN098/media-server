@@ -1,7 +1,7 @@
 import { ExplorerDialogs } from "@/feature/explorer-page/components/explorer-dialogs";
 import { useFiltering } from "@/feature/explorer-page/hooks/use-filtering";
+import { SelectionBar } from "@/feature/selection/components/selection-bar";
 import { useSelectionContext } from "@/feature/selection/providers/selection-provider";
-import { SelectionBar } from "@/feature/selection/ui/selection-bar";
 import { TagEditSheet } from "@/feature/tag-editor/components/tag-edit-sheet";
 import { useTagEditorContext } from "@/feature/tag-editor/providers/tag-editor-provider";
 import { useViewerContext } from "@/feature/viewer/providers/viewer-provider";
@@ -11,8 +11,20 @@ export function ExplorerOverlays() {
   const tagEditor = useTagEditorContext();
   const viewer = useViewerContext();
   const filtering = useFiltering();
-  // const { filtering, selection, tagEditor, selectionbar, viewer } =
-  //   useExplorerContext();
+
+  const filteredNodeMap = new Map(
+    filtering.filteredNodes.map((n) => [n.id, n])
+  );
+
+  const selectAll = () => {
+    selection.selectIds(filteredNodeMap.keys());
+  };
+
+  const selectedNodes = selection.selectedIds
+    .values()
+    .map((id) => filteredNodeMap.get(id))
+    .filter((node) => node != null)
+    .toArray();
 
   return (
     <>
@@ -20,10 +32,10 @@ export function ExplorerOverlays() {
         open={selection.isSelectionMode && !tagEditor.isOpen}
         count={selection.selectedCount}
         totalCount={filtering.filteredCount}
-        onSelectAll={selection.selectAll}
-        onClose={selection.reset}
-        className="z-40" // DropdownMenu より小さくする
-        context={{ nodes: selection.selectedNodes }}
+        onSelectAll={selectAll}
+        onClose={selection.clearSelection}
+        className="z-40"
+        context={{ nodes: selectedNodes }}
         menuItems={selectionbar.menu.items}
         inlineMenuItems={selectionbar.menu.inlineItems}
       />

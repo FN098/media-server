@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@/feature/spinner/loading-spinner";
+import { LoadingSpinner } from "@/feature/loading/components/loading-spinner";
 import { getThumbnailUrl } from "@/feature/viewer/lib/thumbnail-url";
 import { getVideoUrl } from "@/feature/viewer/lib/video-url";
 import { Node } from "@/lib/node/types";

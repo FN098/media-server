@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 "use client";
 
-import { signUpAction, SignUpResult } from "@/feature/auth/sign-up/actions/sign-up";
+import { signUpAction, SignUpResult } from "@/feature/sign-up/actions/sign-up";
 import {
   SignUpFormSchema,
   SignUpFormValues,
-} from "@/feature/auth/sign-up/lib/schemas";
+} from "@/feature/sign-up/lib/schemas";
 import { entries } from "@/lib/utils/object";
 import { Button } from "@/shadcn/components/ui/button";
 import { Field, FieldLabel } from "@/shadcn/components/ui/field";

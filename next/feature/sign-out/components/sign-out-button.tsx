@@ -1,4 +1,4 @@
-import { signOutAction } from "@/feature/auth/sign-out/actions/sign-out";
+import { signOutAction } from "@/feature/sign-out/actions/sign-out";
 import { LogOutIcon } from "lucide-react";
 
 export function SignOutButton() {
