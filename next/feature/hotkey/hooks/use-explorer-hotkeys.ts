@@ -39,7 +39,6 @@ export function useExplorerHotkeys({ enabled }: { enabled: boolean }) {
   useHotkeys(
     "ctrl+k",
     (e) => {
-      debugger;
       e.preventDefault();
       searchFocus.trigger();
     },
